@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Micro-sprint 2P-Fix - Coach-Facing Summary Boundary. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -127,6 +127,10 @@ import {
   propagateFullMatchFatigue,
   type FullMatchFatiguePropagationResult,
 } from "./fullMatch/fullMatchFatiguePropagation";
+import {
+  createFullMatchSegmentInfluence,
+  type FullMatchSegmentInfluence,
+} from "./fullMatch/fullMatchSegmentInfluence";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -139,6 +143,7 @@ interface FullMatchSegmentResult {
   readonly config: FullMatchSegmentConfig;
   readonly miniMatch: MiniMatchResult;
   readonly stateBeforeSegment: FullMatchSegmentState;
+  readonly segmentInfluence?: FullMatchSegmentInfluence;
   readonly fatiguePropagation: FullMatchFatiguePropagationResult;
 }
 
@@ -380,11 +385,13 @@ export function runFullMatch(input: MatchInput): MatchReport {
 
   for (const [index, config] of FULL_MATCH_SEGMENTS.entries()) {
     const sequenceCount = sequenceCountForSegment(config, segmentState);
+    const segmentInfluence = index === 0 ? undefined : createFullMatchSegmentInfluence(segmentState);
     const miniMatch = runMiniMatch({
       ...adapter.miniMatchInput,
       numberOfSequences: sequenceCount,
       startTick: index * 100,
       ...miniMatchSeedInput((adapter.miniMatchInput.seed ?? 0) + segmentState.home.momentum + segmentState.away.defensiveStress, index),
+      ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
     });
     const rawSegmentEvents = timelineFromMiniMatch({
         matchInput: input,
@@ -400,6 +407,7 @@ export function runFullMatch(input: MatchInput): MatchReport {
           period: config.period,
           includeKickoff: index === 0,
           segmentState,
+          ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -431,6 +439,7 @@ export function runFullMatch(input: MatchInput): MatchReport {
       config,
       miniMatch,
       stateBeforeSegment: segmentState,
+      ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
       fatiguePropagation: propagation,
     });
     timelineSegments.push([...segmentEvents]);
@@ -560,6 +569,140 @@ export function teamStateForId(state: FullMatchSegmentState, teamId: TeamId): Fu
 
 export function opponentTeamStateForId(state: FullMatchSegmentState, teamId: TeamId): FullMatchTeamSegmentState {
   return state.home.teamId === teamId ? state.away : state.home;
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchSegmentInfluence.ts
+
+```ts
+import type { TeamId } from "../../core/ids";
+import type { ScoreState } from "../../models/match";
+import type {
+  FullMatchSegmentState,
+  FullMatchTeamSegmentState,
+} from "./fullMatchSegmentState";
+
+export type FullMatchScoreStateLabel =
+  | "level"
+  | "close"
+  | "home_leading"
+  | "away_leading"
+  | "lopsided";
+
+export type FullMatchTeamSegmentInfluence = {
+  readonly teamId: TeamId;
+  readonly conditionModifier: number;
+  readonly mentalFreshnessModifier: number;
+  readonly momentumModifier: number;
+  readonly pressureLoadModifier: number;
+  readonly defensiveStressModifier: number;
+  readonly scoringConfidenceModifier: number;
+  readonly routeRiskModifier: number;
+  readonly supportStabilityModifier: number;
+  readonly finalActionComposureModifier: number;
+};
+
+export type FullMatchSegmentInfluence = {
+  readonly segmentIndex: number;
+  readonly scoreState: FullMatchScoreStateLabel;
+  readonly home: FullMatchTeamSegmentInfluence;
+  readonly away: FullMatchTeamSegmentInfluence;
+  readonly global: {
+    readonly repeatedPatternPressure: number;
+    readonly matchTempoAdjustment: number;
+    readonly conversionVolatilityAdjustment: number;
+  };
+};
+
+const MODIFIER_LIMIT = 5;
+
+function boundedModifier(value: number): number {
+  return Math.max(-MODIFIER_LIMIT, Math.min(MODIFIER_LIMIT, Math.round(value)));
+}
+
+function scoreState(score: ScoreState): FullMatchScoreStateLabel {
+  const difference = Math.abs(score.home - score.away);
+
+  if (difference >= 21) {
+    return "lopsided";
+  }
+
+  if (score.home === score.away) {
+    return "level";
+  }
+
+  if (difference <= 7) {
+    return "close";
+  }
+
+  return score.home > score.away ? "home_leading" : "away_leading";
+}
+
+function lowRatingPenalty(value: number, neutral = 85): number {
+  return boundedModifier((value - neutral) / 8);
+}
+
+function highRatingPressure(value: number, neutral = 55): number {
+  return boundedModifier((value - neutral) / 10);
+}
+
+function teamInfluence(team: FullMatchTeamSegmentState): FullMatchTeamSegmentInfluence {
+  const condition = lowRatingPenalty(team.condition);
+  const mental = lowRatingPenalty(team.mentalFreshness);
+  const momentum = boundedModifier((team.momentum - 50) / 10);
+  const pressureLoad = highRatingPressure(team.pressureLoad);
+  const defensiveStress = highRatingPressure(team.defensiveStress);
+  const scoringConfidence = boundedModifier((team.scoringConfidence - 50) / 12);
+
+  return {
+    teamId: team.teamId,
+    conditionModifier: condition,
+    mentalFreshnessModifier: mental,
+    momentumModifier: momentum,
+    pressureLoadModifier: pressureLoad,
+    defensiveStressModifier: defensiveStress,
+    scoringConfidenceModifier: scoringConfidence,
+    routeRiskModifier: boundedModifier(momentum + scoringConfidence - pressureLoad - defensiveStress),
+    supportStabilityModifier: boundedModifier(condition + mental + momentum - Math.max(0, defensiveStress)),
+    finalActionComposureModifier: boundedModifier(mental + scoringConfidence - Math.max(0, pressureLoad)),
+  };
+}
+
+export function createFullMatchSegmentInfluence(state: FullMatchSegmentState): FullMatchSegmentInfluence {
+  return {
+    segmentIndex: state.segmentIndex,
+    scoreState: scoreState(state.score),
+    home: teamInfluence(state.home),
+    away: teamInfluence(state.away),
+    global: {
+      repeatedPatternPressure: boundedModifier(state.repeatedPatternCount * 2),
+      matchTempoAdjustment: boundedModifier((state.home.momentum + state.away.momentum - 100) / 14),
+      conversionVolatilityAdjustment: boundedModifier(
+        (state.home.scoringConfidence + state.away.scoringConfidence - 100) / 16,
+      ),
+    },
+  };
+}
+
+export function allSegmentInfluenceModifiers(input: FullMatchSegmentInfluence): readonly number[] {
+  const teamValues = [input.home, input.away].flatMap((team) => [
+    team.conditionModifier,
+    team.mentalFreshnessModifier,
+    team.momentumModifier,
+    team.pressureLoadModifier,
+    team.defensiveStressModifier,
+    team.scoringConfidenceModifier,
+    team.routeRiskModifier,
+    team.supportStabilityModifier,
+    team.finalActionComposureModifier,
+  ]);
+
+  return [
+    ...teamValues,
+    input.global.repeatedPatternPressure,
+    input.global.matchTempoAdjustment,
+    input.global.conversionVolatilityAdjustment,
+  ];
 }
 ```
 
@@ -830,6 +973,91 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchSegmentInfluence.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import {
+  allSegmentInfluenceModifiers,
+  createFullMatchSegmentInfluence,
+} from "./fullMatchSegmentInfluence";
+import { createInitialFullMatchSegmentState } from "./fullMatchSegmentState";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchSegmentInfluence(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const initialState = createInitialFullMatchSegmentState(input);
+  const stressedState = {
+    ...initialState,
+    segmentIndex: 4,
+    score: {
+      home: 9,
+      away: 3,
+    },
+    repeatedPatternCount: 3,
+    home: {
+      ...initialState.home,
+      condition: 78,
+      mentalFreshness: 74,
+      momentum: 63,
+      pressureLoad: 70,
+      defensiveStress: 66,
+      scoringConfidence: 58,
+    },
+    away: {
+      ...initialState.away,
+      condition: 82,
+      mentalFreshness: 80,
+      momentum: 41,
+      pressureLoad: 76,
+      defensiveStress: 72,
+      scoringConfidence: 42,
+    },
+  };
+  const influence = createFullMatchSegmentInfluence(stressedState);
+  const repeatedInfluence = createFullMatchSegmentInfluence(stressedState);
+  const modifiers = allSegmentInfluenceModifiers(influence);
+
+  assertTest(JSON.stringify(influence) === JSON.stringify(repeatedInfluence), "segment influence must be deterministic.");
+  assertTest(influence.segmentIndex === 4, "segment influence must preserve segment index.");
+  assertTest(influence.scoreState === "close", `expected close score state, received ${influence.scoreState}.`);
+  assertTest(
+    modifiers.every((modifier) => modifier >= -5 && modifier <= 5),
+    `segment influence modifiers must remain bounded: ${modifiers.join(", ")}.`,
+  );
+  assertTest(
+    influence.home.supportStabilityModifier < influence.home.momentumModifier,
+    "fatigue and stress must temper support stability even when momentum is positive.",
+  );
+  assertTest(
+    influence.global.repeatedPatternPressure > 0,
+    "repeated pattern pressure must expose accumulated segment repetition.",
+  );
+
+  return [
+    "segment influence is deterministic",
+    "segment influence modifiers are bounded",
+    "score state is derived from previous segment score",
+    "fatigue and stress temper support stability",
+    "repeated pattern pressure is exposed",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchSegmentInfluence();
+
+  console.log("fullMatchSegmentInfluence tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/adapters/matchReportBuilder.ts
 
 ```ts
@@ -866,6 +1094,7 @@ import {
   teamStateForId,
   type FullMatchSegmentState,
 } from "../fullMatch/fullMatchSegmentState";
+import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInfluence";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -877,6 +1106,7 @@ export interface MiniMatchTimelineSegment {
   readonly period: MatchEvent["timestamp"]["period"];
   readonly includeKickoff: boolean;
   readonly segmentState?: FullMatchSegmentState;
+  readonly segmentInfluence?: FullMatchSegmentInfluence;
 }
 
 export interface MatchReportBuilderInput {
@@ -898,6 +1128,33 @@ function clampRating(value: number): Rating {
 
 function opponentTeamId(teamId: TeamId, homeTeamId: TeamId, awayTeamId: TeamId): TeamId {
   return teamId === homeTeamId ? awayTeamId : homeTeamId;
+}
+
+function segmentInfluenceTags(influence: FullMatchSegmentInfluence | undefined): readonly string[] {
+  if (influence === undefined) {
+    return [];
+  }
+
+  const teamValues = [influence.home, influence.away];
+  const tags = ["segment_influence_active"];
+
+  if (teamValues.some((team) => team.conditionModifier !== 0 || team.mentalFreshnessModifier !== 0)) {
+    tags.push("segment_influence_fatigue");
+  }
+
+  if (teamValues.some((team) => team.momentumModifier !== 0 || team.scoringConfidenceModifier !== 0)) {
+    tags.push("segment_influence_momentum");
+  }
+
+  if (teamValues.some((team) => team.pressureLoadModifier !== 0 || team.defensiveStressModifier !== 0)) {
+    tags.push("segment_influence_defensive_stress");
+  }
+
+  if (influence.global.repeatedPatternPressure !== 0) {
+    tags.push("segment_influence_pattern_pressure");
+  }
+
+  return tags;
 }
 
 export function primaryReportZone(input: MatchInput): ZoneId {
@@ -1010,6 +1267,7 @@ function sequenceRecordToMatchEvent(input: {
     ...sequenceRecordTags(input.record),
     ...input.influence.tags,
     ...segmentStateTags,
+    ...segmentInfluenceTags(input.segment.segmentInfluence),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -1124,6 +1382,7 @@ function scoringEventToMatchEvent(input: {
       `scoring_type_${input.event.scoringType}`,
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
+      ...segmentInfluenceTags(input.segment.segmentInfluence),
     ],
     narrativeWeight: 70,
   };
@@ -2154,6 +2413,39 @@ function momentumShiftFact(input: {
   };
 }
 
+function segmentStateInfluenceFact(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+}): MatchReportEvidenceFact | null {
+  const influenceEvents = input.timeline.filter((event) => event.tags.includes("segment_influence_active"));
+  const event = firstEvidenceEvent(influenceEvents);
+
+  if (event === undefined) {
+    return null;
+  }
+
+  return {
+    factId: `${input.matchInput.matchId}-segment-state-influence`,
+    matchId: input.matchInput.matchId,
+    teamId: event.teamId,
+    opponentTeamId: event.opponentTeamId,
+    category: "MOMENTUM_SHIFT",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: influenceEvents.slice(0, 6).map((candidate) => candidate.eventId),
+    affectedZones: topZones(influenceEvents, 3),
+    summary:
+      "L'etat accumule du match commence a peser sur la stabilite, la pression et la fraicheur mentale des sequences suivantes, sans forcer directement le score.",
+    confidence: "low",
+    strength: Math.min(100, 35 + influenceEvents.length * 4),
+    coachVisible: true,
+    internalTags: [
+      "segment_state_influence",
+      "segment_influence_active",
+      "bounded_full_match_segment_context",
+    ],
+  };
+}
+
 export function buildCanonicalMatchReportEvidenceFacts(input: {
   readonly matchInput: MatchInput;
   readonly timeline: readonly MatchEvent[];
@@ -2168,6 +2460,7 @@ export function buildCanonicalMatchReportEvidenceFacts(input: {
     tacticalPlanFact(input),
     fatigueLoadFact(input),
     momentumShiftFact(input),
+    segmentStateInfluenceFact(input),
   ].filter((fact): fact is MatchReportEvidenceFact => fact !== null);
 
   return [...baseFacts, ...supplementalFacts];
@@ -4551,6 +4844,8 @@ export interface SegmentDiversityDiagnostic {
   readonly zonePattern: string;
   readonly fatigueDelta: number;
   readonly momentumDelta: number;
+  readonly segmentInfluenceActive: boolean;
+  readonly segmentInfluenceTagCount: number;
 }
 
 export type SegmentDiversityWarning =
@@ -4562,7 +4857,8 @@ export type SegmentDiversityWarning =
   | "ZERO_SCORING_EVENTS_FOR_ONE_TEAM"
   | "SAME_TEAM_SCORES_IN_MOST_SEGMENTS"
   | "HIGH_LOAD_NO_SCORING_PAYOFF"
-  | "SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT";
+  | "SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT"
+  | "SEGMENT_INFLUENCE_INACTIVE_AFTER_FIRST_SEGMENT";
 
 export interface SegmentDiversitySummary extends SegmentDiversityDiagnostic {
   readonly scoringPattern: string;
@@ -4574,6 +4870,7 @@ export type SegmentDiversityReport = {
   readonly repeatedScoringPatternCount: number;
   readonly repeatedZonePatternCount: number;
   readonly repeatedEventTypePatternCount: number;
+  readonly segmentInfluenceActiveSegmentCount: number;
   readonly segmentSummaries: readonly SegmentDiversitySummary[];
   readonly warnings: readonly SegmentDiversityWarning[];
   readonly dominanceSummary: string;
@@ -4616,6 +4913,10 @@ function momentumDelta(events: readonly MatchEvent[]): number {
     .reduce((total, consequence) => total + Math.abs(consequence.value ?? 0), 0);
 }
 
+function segmentInfluenceTagCount(events: readonly MatchEvent[]): number {
+  return events.filter((event) => event.tags.includes("segment_influence_active")).length;
+}
+
 export function createSegmentDiversityDiagnostics(report: MatchReport): readonly SegmentDiversityDiagnostic[] {
   const eventsBySegment = new Map<string, MatchEvent[]>();
 
@@ -4638,6 +4939,8 @@ export function createSegmentDiversityDiagnostics(report: MatchReport): readonly
       zonePattern: events.map((event) => event.zone).join(">"),
       fatigueDelta: fatigueDelta(events),
       momentumDelta: momentumDelta(events),
+      segmentInfluenceActive: segmentInfluenceTagCount(events) > 0,
+      segmentInfluenceTagCount: segmentInfluenceTagCount(events),
     }));
 }
 
@@ -4665,6 +4968,7 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
   const repeatedScoringPatternCount = repeatedPatternCount(segmentSummaries.map((summary) => summary.scoringPattern));
   const repeatedZonePatternCount = repeatedPatternCount(segmentSummaries.map((summary) => summary.zonePattern));
   const repeatedEventTypePatternCount = repeatedPatternCount(segmentSummaries.map((summary) => summary.eventFamilyPattern));
+  const segmentInfluenceActiveSegmentCount = segmentSummaries.filter((summary) => summary.segmentInfluenceActive).length;
   const warnings = new Set<SegmentDiversityWarning>();
 
   if (repeatedScoringPatternCount > 0) {
@@ -4717,6 +5021,10 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     warnings.add("SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT");
   }
 
+  if (segmentSummaries.length > 1 && segmentInfluenceActiveSegmentCount < segmentSummaries.length - 1) {
+    warnings.add("SEGMENT_INFLUENCE_INACTIVE_AFTER_FIRST_SEGMENT");
+  }
+
   const dominanceSummary = dominantEntry === undefined
     ? "No scoring dominance pattern was detected in the segment stream."
     : `${dominantEntry[0]} dominated the single-run scoring stream across ${dominantEntry[1]} segment(s). ${zeroScoringTeams.length === 0 ? "Both teams had scoring payoff." : `${zeroScoringTeams.join(", ")} produced no scoring payoff.`} Treat this as a harness plausibility warning, not a scoring-economy verdict.`;
@@ -4726,6 +5034,7 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     repeatedScoringPatternCount,
     repeatedZonePatternCount,
     repeatedEventTypePatternCount,
+    segmentInfluenceActiveSegmentCount,
     segmentSummaries,
     warnings: [...warnings],
     dominanceSummary,
@@ -5297,6 +5606,32 @@ export interface MiniMatchInput {
   readonly numberOfSequences: number;
   readonly startTick?: TacticalTick;
   readonly seed?: number;
+  readonly segmentInfluence?: MiniMatchSegmentInfluence;
+}
+
+export interface MiniMatchTeamSegmentInfluence {
+  readonly teamId: TeamId;
+  readonly conditionModifier: number;
+  readonly mentalFreshnessModifier: number;
+  readonly momentumModifier: number;
+  readonly pressureLoadModifier: number;
+  readonly defensiveStressModifier: number;
+  readonly scoringConfidenceModifier: number;
+  readonly routeRiskModifier: number;
+  readonly supportStabilityModifier: number;
+  readonly finalActionComposureModifier: number;
+}
+
+export interface MiniMatchSegmentInfluence {
+  readonly segmentIndex: number;
+  readonly scoreState: "level" | "close" | "home_leading" | "away_leading" | "lopsided";
+  readonly home: MiniMatchTeamSegmentInfluence;
+  readonly away: MiniMatchTeamSegmentInfluence;
+  readonly global: {
+    readonly repeatedPatternPressure: number;
+    readonly matchTempoAdjustment: number;
+    readonly conversionVolatilityAdjustment: number;
+  };
 }
 
 export interface MiniMatchScore {
@@ -5402,6 +5737,7 @@ export interface MiniMatchContext {
   readonly startTick: TacticalTick;
   readonly seed: number;
   readonly attackingDirections: readonly TeamDirectionAssignment[];
+  readonly segmentInfluence?: MiniMatchSegmentInfluence;
 }
 
 export interface MiniMatchContinuityState {
@@ -5468,6 +5804,681 @@ export interface MiniMatchResult {
 }
 ```
 
+## File: src/simulation/miniMatch/createMiniMatchContext.ts
+
+```ts
+import type { ZoneId } from "../../core/zones";
+import { createZoneId, LateralCorridor, LongitudinalZone } from "../../core/zones";
+import { PrototypeTeamId, type PrototypeTeamDefinition } from "../../data/prototypeTeams";
+import {
+  BLITZ_ROSTER,
+  CONTROL_ROSTER,
+  createBlitzPlayerStates,
+  createControlPlayerStates,
+  validateBlitzRoster,
+  validateControlRoster,
+} from "../../data/teams";
+import { PlayerRole, type PlayerAttributes, type PlayerState } from "../../models/player";
+import { deriveTeamProfileFromRoster } from "../../systems/teams";
+import type { SpatialTeamContext } from "../../systems/spatial";
+import { assignMiniMatchAttackingDirections } from "../../systems/spatial/intention";
+import { createTacticalMemory } from "../../systems/tacticalMemory";
+import { createInitialRecoverySaturation, type RecoverySaturationState } from "../../systems/structure";
+import { createInitialOffensiveMomentum, type OffensiveMomentumState } from "../../systems/offense/momentum";
+import { DEFAULT_SIMULATION_CONFIG } from "../../systems/matchLoop";
+import type {
+  MiniMatchContext,
+  MiniMatchInput,
+  MiniMatchSegmentInfluence,
+  MiniMatchTeamSegmentInfluence,
+  MiniMatchState,
+} from "./types";
+
+const STANDARD_ROLES: readonly PlayerRole[] = [
+  PlayerRole.LeftAnchor,
+  PlayerRole.RightAnchor,
+  PlayerRole.HookLink,
+  PlayerRole.MobileLock,
+  PlayerRole.ForwardLeader,
+  PlayerRole.TempoHalf,
+  PlayerRole.Playmaker,
+  PlayerRole.PowerRunner,
+  PlayerRole.SpaceHunter,
+  PlayerRole.FreeSafety,
+];
+
+function clampRating(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function influenceForTeam(
+  influence: MiniMatchSegmentInfluence | undefined,
+  team: PrototypeTeamDefinition,
+): MiniMatchTeamSegmentInfluence | undefined {
+  if (influence === undefined) {
+    return undefined;
+  }
+
+  if (influence.home.teamId === team.id) {
+    return influence.home;
+  }
+
+  if (influence.away.teamId === team.id) {
+    return influence.away;
+  }
+
+  return undefined;
+}
+
+function createAttributes(base: number): PlayerAttributes {
+  return {
+    speed: base,
+    agility: base,
+    endurance: base,
+    power: base,
+    handPlay: base,
+    footPlayDribble: base,
+    footPlayPassingShooting: base,
+    intelligence: base,
+    mental: base,
+  };
+}
+
+function getRoleAttributeBase(team: PrototypeTeamDefinition, role: PlayerRole): number {
+  if (team.id === PrototypeTeamId.Control && (role === PlayerRole.TempoHalf || role === PlayerRole.HookLink)) {
+    return 95;
+  }
+
+  if (team.id === PrototypeTeamId.Control && (role === PlayerRole.FreeSafety || role === PlayerRole.Playmaker)) {
+    return 88;
+  }
+
+  if (
+    team.id === PrototypeTeamId.Blitz &&
+    (role === PlayerRole.MobileLock || role === PlayerRole.SpaceHunter || role === PlayerRole.PowerRunner)
+  ) {
+    return 84;
+  }
+
+  if (role === PlayerRole.FreeSafety || role === PlayerRole.Playmaker) {
+    return 74;
+  }
+
+  return 68;
+}
+
+function getBaseFreshness(team: PrototypeTeamDefinition): number {
+  if (team.id === PrototypeTeamId.Blitz) {
+    return 72;
+  }
+
+  if (team.id === PrototypeTeamId.ChaosHunters) {
+    return 76;
+  }
+
+  return 90;
+}
+
+function createPrototypePlayers(
+  team: PrototypeTeamDefinition,
+  zones: readonly ZoneId[],
+  sequenceIndex: number,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): readonly PlayerState[] {
+  if (team.id === PrototypeTeamId.Control) {
+    return createControlPlayerStates({ zones, sequenceIndex }).map((player) => applyPlayerInfluence(player, influence));
+  }
+
+  if (team.id === PrototypeTeamId.Blitz) {
+    return createBlitzPlayerStates({ zones, sequenceIndex }).map((player) => applyPlayerInfluence(player, influence));
+  }
+
+  const fallbackZone = createZoneId(LongitudinalZone.Midfield, LateralCorridor.CentralAxis);
+  const sequenceFreshnessAdjustment = sequenceIndex * 2;
+  const freshness = clampRating(getBaseFreshness(team) - sequenceFreshnessAdjustment + (influence?.conditionModifier ?? 0));
+
+  return STANDARD_ROLES.map((role, index) => applyPlayerInfluence({
+    id: `${team.id}-${role}`,
+    teamId: team.id,
+    name: `${team.displayName} ${role}`,
+    role,
+    attributes: createAttributes(getRoleAttributeBase(team, role)),
+    fatigue: {
+      accumulatedFatigue: clampRating(100 - freshness),
+      freshness,
+    },
+    currentZone: zones[index] ?? zones[0] ?? fallbackZone,
+    momentum: 50,
+  }, influence));
+}
+
+function applyPlayerInfluence(
+  player: PlayerState,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): PlayerState {
+  if (influence === undefined) {
+    return player;
+  }
+
+  const freshnessAdjustment = influence.conditionModifier + Math.round(influence.mentalFreshnessModifier / 2);
+
+  return {
+    ...player,
+    fatigue: {
+      accumulatedFatigue: clampRating(player.fatigue.accumulatedFatigue - freshnessAdjustment),
+      freshness: clampRating(player.fatigue.freshness + freshnessAdjustment),
+    },
+    momentum: clampRating(player.momentum + influence.momentumModifier),
+  };
+}
+
+function applyCollectiveInfluence<T extends {
+  readonly cohesion: number;
+  readonly defensiveTransition: number;
+  readonly tacticalDiscipline: number;
+  readonly collectiveReading: number;
+  readonly resilience: number;
+}>(
+  properties: T,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): T {
+  if (influence === undefined) {
+    return properties;
+  }
+
+  return {
+    ...properties,
+    cohesion: clampRating(properties.cohesion + influence.supportStabilityModifier),
+    defensiveTransition: clampRating(
+      properties.defensiveTransition - Math.max(0, influence.defensiveStressModifier),
+    ),
+    tacticalDiscipline: clampRating(properties.tacticalDiscipline + influence.finalActionComposureModifier),
+    collectiveReading: clampRating(properties.collectiveReading + influence.supportStabilityModifier),
+    resilience: clampRating(
+      properties.resilience + influence.mentalFreshnessModifier - Math.max(0, influence.pressureLoadModifier),
+    ),
+  };
+}
+
+function getCollectiveProperties(
+  team: PrototypeTeamDefinition,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): PrototypeTeamDefinition["collectiveProperties"] {
+  const roster =
+    team.id === PrototypeTeamId.Control ? CONTROL_ROSTER : team.id === PrototypeTeamId.Blitz ? BLITZ_ROSTER : null;
+
+  if (roster === null) {
+    return applyCollectiveInfluence(team.collectiveProperties, influence);
+  }
+
+  const profile = deriveTeamProfileFromRoster({
+    roster,
+    instructions: team.tacticalInstructions,
+    baseCollective: team.collectiveProperties,
+    finishingIdentity: team.id === PrototypeTeamId.Blitz ? "CHAOTIC_AGGRESSION" : "CONTROLLED_EXECUTION",
+  });
+  const baseProperties: PrototypeTeamDefinition["collectiveProperties"] = {
+    ...team.collectiveProperties,
+    cohesion: profile.cohesion,
+    defensiveTransition: profile.recoveryStructure,
+    collectiveMobility: Math.round((profile.recoveryStructure + team.collectiveProperties.collectiveMobility) / 2),
+    tacticalDiscipline: profile.tacticalDiscipline,
+    collectiveReading: profile.supportQuality,
+    resilience: Math.round((profile.defensiveCompactness + team.collectiveProperties.resilience) / 2),
+  };
+
+  return applyCollectiveInfluence(baseProperties, influence);
+}
+
+function getStructuralShiftDelay(team: PrototypeTeamDefinition, sequenceIndex: number): number {
+  if (team.id === PrototypeTeamId.Blitz) {
+    return clampRating(32 + sequenceIndex * 4);
+  }
+
+  if (team.id === PrototypeTeamId.Control) {
+    return 10;
+  }
+
+  return 18;
+}
+
+export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
+  const controlRosterValidation = validateControlRoster();
+  const blitzRosterValidation = validateBlitzRoster();
+
+  if (!controlRosterValidation.valid) {
+    throw new Error(`CONTROL roster validation failed: ${controlRosterValidation.warnings.join("; ")}`);
+  }
+
+  if (!blitzRosterValidation.valid) {
+    throw new Error(`BLITZ roster validation failed: ${blitzRosterValidation.warnings.join("; ")}`);
+  }
+
+  const context: MiniMatchContext = {
+    teamA: input.teamA,
+    teamB: input.teamB,
+    requestedSequences: Math.max(1, Math.min(8, Math.round(input.numberOfSequences))),
+    startTick: input.startTick ?? 10,
+    seed: input.seed ?? DEFAULT_SIMULATION_CONFIG.seed,
+    attackingDirections: assignMiniMatchAttackingDirections({
+      teamAId: input.teamA.id,
+      teamBId: input.teamB.id,
+    }),
+    ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
+  };
+  const influenceAverage = input.segmentInfluence === undefined
+    ? 0
+    : Math.round((input.segmentInfluence.home.supportStabilityModifier + input.segmentInfluence.away.supportStabilityModifier) / 2);
+  const pressureAverage = input.segmentInfluence === undefined
+    ? 0
+    : Math.round((input.segmentInfluence.home.pressureLoadModifier + input.segmentInfluence.away.pressureLoadModifier) / 2);
+
+  return {
+    context,
+    score: {
+      teamA: 0,
+      teamB: 0,
+    },
+    records: [],
+    scoringEvents: [],
+    liveTryEvents: [],
+    finishingOpportunities: {
+      teamA: 0,
+      teamB: 0,
+    },
+    secondChanceCount: {
+      teamA: 0,
+      teamB: 0,
+    },
+    turnovers: {
+      teamA: 0,
+      teamB: 0,
+    },
+    continuity: {
+      lastBallContext: null,
+      lastPossessionTeamId: null,
+      lastTerritorialPressure: clampRating(44 + pressureAverage + (input.segmentInfluence?.global.matchTempoAdjustment ?? 0)),
+      lastChaosLevel: clampRating(38 + Math.max(0, pressureAverage) + (input.segmentInfluence?.global.repeatedPatternPressure ?? 0)),
+      lastDangerLevel: "MEDIUM",
+      lastPossessionReason: input.segmentInfluence === undefined
+        ? "initial mini-match setup"
+        : `segment influence active with support stability ${influenceAverage} and pattern pressure ${input.segmentInfluence.global.repeatedPatternPressure}`,
+    },
+    tacticalMemory: createTacticalMemory([input.teamA.id, input.teamB.id]),
+    recoverySaturation: {
+      teamA: createInitialRecoverySaturation(input.teamA.id),
+      teamB: createInitialRecoverySaturation(input.teamB.id),
+    },
+    offensiveMomentum: {
+      teamA: createInitialOffensiveMomentum(input.teamA.id),
+      teamB: createInitialOffensiveMomentum(input.teamB.id),
+    },
+  };
+}
+
+export function createMiniMatchTeamContext(
+  team: PrototypeTeamDefinition,
+  zones: readonly ZoneId[],
+  sequenceIndex: number,
+  recoverySaturation: RecoverySaturationState,
+  offensiveMomentum: OffensiveMomentumState,
+  segmentInfluence?: MiniMatchSegmentInfluence,
+): SpatialTeamContext {
+  const teamInfluence = influenceForTeam(segmentInfluence, team);
+
+  return {
+    teamId: team.id,
+    teamName: team.displayName,
+    tacticalStyle: team.tacticalStyle,
+    offensiveProgressionPhilosophy: team.offensiveProgressionPhilosophy,
+    players: createPrototypePlayers(team, zones, sequenceIndex, teamInfluence),
+    tacticalInstructions: team.tacticalInstructions,
+    collectiveProperties: getCollectiveProperties(team, teamInfluence),
+    structuralShiftDelay: getStructuralShiftDelay(team, sequenceIndex),
+    recoverySaturation,
+    offensiveMomentum,
+  };
+}
+```
+
+## File: src/simulation/miniMatch/selectInitialSequenceContext.ts
+
+```ts
+import { createZoneId, LateralCorridor, LongitudinalZone, type ZoneId } from "../../core/zones";
+import { PrototypeTeamId, type PrototypeTeamDefinition } from "../../data/prototypeTeams";
+import { PressureLevel } from "../../models/match";
+import {
+  calculateDefensiveOccupation,
+  calculateDensityValues,
+  calculateOffensiveOccupation,
+  evaluateDefensiveCompactness,
+  evaluateOffensiveSpread,
+  evaluateWeakSideExposure,
+  generateDefensiveShape,
+  generateOffensiveShape,
+  type SpatialTeamContext,
+} from "../../systems/spatial";
+import {
+  createBallContext,
+  getTeamAttackingDirection,
+} from "../../systems/spatial/intention";
+import { SequenceInteractionKind, SequenceLevel, type SequenceSpatialSnapshot } from "../../systems/sequences";
+import { TacticalPhaseState } from "../../systems/tacticalState";
+import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
+import { createMiniMatchTeamContext } from "./createMiniMatchContext";
+import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
+
+const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
+  createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
+  createZoneId(LongitudinalZone.Midfield, LateralCorridor.RightHalfSpace),
+  createZoneId(LongitudinalZone.OffensivePressure, LateralCorridor.CentralAxis),
+  createZoneId(LongitudinalZone.BuildOut, LateralCorridor.LeftHalfSpace),
+  createZoneId(LongitudinalZone.OffensivePressure, LateralCorridor.RightCorridor),
+  createZoneId(LongitudinalZone.Midfield, LateralCorridor.CentralAxis),
+];
+
+function getCycleValue<T>(values: readonly T[], index: number): T {
+  const value = values[index % values.length];
+  if (value === undefined) {
+    throw new Error("Mini-match setup cycle cannot be empty.");
+  }
+
+  return value;
+}
+
+function createPossessionZones(sequenceIndex: number): readonly ZoneId[] {
+  const leftBias = sequenceIndex % 2 === 0;
+  const wideCorridor = leftBias ? LateralCorridor.LeftCorridor : LateralCorridor.RightCorridor;
+  const halfSpace = leftBias ? LateralCorridor.LeftHalfSpace : LateralCorridor.RightHalfSpace;
+  const farCorridor = leftBias ? LateralCorridor.RightCorridor : LateralCorridor.LeftCorridor;
+
+  return [
+    createZoneId(LongitudinalZone.BuildOut, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.Midfield, halfSpace),
+    createZoneId(LongitudinalZone.BuildOut, halfSpace),
+    createZoneId(LongitudinalZone.Midfield, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.OffensivePressure, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.Midfield, wideCorridor),
+    createZoneId(LongitudinalZone.OffensivePressure, halfSpace),
+    createZoneId(LongitudinalZone.OffensivePressure, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.OffensivePressure, farCorridor),
+    createZoneId(LongitudinalZone.DeepDefense, LateralCorridor.CentralAxis),
+  ];
+}
+
+function createPressingZones(sequenceIndex: number): readonly ZoneId[] {
+  const rightBias = sequenceIndex % 2 === 0;
+  const strongHalfSpace = rightBias ? LateralCorridor.RightHalfSpace : LateralCorridor.LeftHalfSpace;
+  const strongCorridor = rightBias ? LateralCorridor.RightCorridor : LateralCorridor.LeftCorridor;
+  const weakCorridor = rightBias ? LateralCorridor.LeftCorridor : LateralCorridor.RightCorridor;
+
+  return [
+    createZoneId(LongitudinalZone.Midfield, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.Midfield, strongHalfSpace),
+    createZoneId(LongitudinalZone.OffensivePressure, strongCorridor),
+    createZoneId(LongitudinalZone.Midfield, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.OffensivePressure, LateralCorridor.CentralAxis),
+    createZoneId(LongitudinalZone.Midfield, strongHalfSpace),
+    createZoneId(LongitudinalZone.OffensivePressure, strongHalfSpace),
+    createZoneId(LongitudinalZone.Midfield, weakCorridor),
+    createZoneId(LongitudinalZone.OffensivePressure, weakCorridor),
+    createZoneId(LongitudinalZone.DeepDefense, LateralCorridor.CentralAxis),
+  ];
+}
+
+function createSpatialSnapshot(
+  offensiveTeam: SpatialTeamContext,
+  defensiveTeam: SpatialTeamContext,
+): SequenceSpatialSnapshot {
+  const offensiveShape = generateOffensiveShape(offensiveTeam);
+  const defensiveShape = generateDefensiveShape(defensiveTeam);
+  const offensiveOccupation = calculateOffensiveOccupation(offensiveTeam, offensiveShape);
+  const defensiveOccupation = calculateDefensiveOccupation(defensiveTeam, defensiveShape);
+  const density = calculateDensityValues(offensiveOccupation, defensiveOccupation);
+
+  return {
+    offensiveShape,
+    defensiveShape,
+    density,
+    offensiveSpread: evaluateOffensiveSpread(offensiveShape),
+    defensiveCompactness: evaluateDefensiveCompactness(defensiveShape, defensiveOccupation),
+    weakSide: evaluateWeakSideExposure(density),
+  };
+}
+
+function selectPossessionTeam(
+  state: MiniMatchState,
+  sequenceIndex: number,
+): PrototypeTeamDefinition {
+  if (state.continuity.lastPossessionTeamId !== null) {
+    return state.continuity.lastPossessionTeamId === state.context.teamA.id
+      ? state.context.teamA
+      : state.context.teamB;
+  }
+
+  const roll = seededRandom(createDeterministicSeed(state.context.seed + sequenceIndex));
+
+  return roll.value < 0.5 ? state.context.teamA : state.context.teamB;
+}
+
+function describePossessionReason(state: MiniMatchState, possessionTeam: PrototypeTeamDefinition, sequenceIndex: number): string {
+  if (state.continuity.lastPossessionTeamId === null) {
+    return `${possessionTeam.displayName} starts with the ball by mini-match setup.`;
+  }
+
+  if (state.continuity.lastPossessionTeamId === possessionTeam.id) {
+    if (!state.continuity.lastPossessionReason.includes("retained")) {
+      return `${possessionTeam.displayName} receives possession because ${state.continuity.lastPossessionReason}.`;
+    }
+
+    return `${possessionTeam.displayName} keeps possession from the previous sequence.`;
+  }
+
+  return `${possessionTeam.displayName} receives possession because ${state.continuity.lastPossessionReason}.`;
+}
+
+function selectPressingTeam(
+  state: MiniMatchState,
+  possessionTeam: PrototypeTeamDefinition,
+): PrototypeTeamDefinition {
+  return possessionTeam.id === state.context.teamA.id ? state.context.teamB : state.context.teamA;
+}
+
+function selectPressureLevel(pressingTeam: PrototypeTeamDefinition, sequenceIndex: number): PressureLevel {
+  if (pressingTeam.id === PrototypeTeamId.Blitz || pressingTeam.id === PrototypeTeamId.ChaosHunters) {
+    return sequenceIndex % 3 === 1 ? PressureLevel.Medium : PressureLevel.High;
+  }
+
+  return sequenceIndex % 2 === 0 ? PressureLevel.Medium : PressureLevel.Low;
+}
+
+function clampContextRating(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function influenceForTeam(
+  state: MiniMatchState,
+  team: PrototypeTeamDefinition,
+): MiniMatchTeamSegmentInfluence | undefined {
+  const influence = state.context.segmentInfluence;
+
+  if (influence === undefined) {
+    return undefined;
+  }
+
+  if (influence.home.teamId === team.id) {
+    return influence.home;
+  }
+
+  if (influence.away.teamId === team.id) {
+    return influence.away;
+  }
+
+  return undefined;
+}
+
+function sequenceLevelFromModifier(modifier: number): SequenceLevel {
+  if (modifier >= 3) {
+    return SequenceLevel.High;
+  }
+
+  if (modifier <= -3) {
+    return SequenceLevel.Low;
+  }
+
+  return SequenceLevel.Medium;
+}
+
+function adjustPressureLevel(
+  base: PressureLevel,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): PressureLevel {
+  const pressureModifier = influence?.pressureLoadModifier ?? 0;
+  const defensiveStressModifier = influence?.defensiveStressModifier ?? 0;
+  const combined = pressureModifier + Math.max(0, defensiveStressModifier);
+
+  if (combined >= 4 && base === PressureLevel.Low) {
+    return PressureLevel.Medium;
+  }
+
+  if (combined >= 6 && base === PressureLevel.Medium) {
+    return PressureLevel.High;
+  }
+
+  if (combined <= -4 && base === PressureLevel.High) {
+    return PressureLevel.Medium;
+  }
+
+  return base;
+}
+
+function getRecoverySaturationForTeam(state: MiniMatchState, team: PrototypeTeamDefinition) {
+  return team.id === state.context.teamA.id ? state.recoverySaturation.teamA : state.recoverySaturation.teamB;
+}
+
+function getOffensiveMomentumForTeam(state: MiniMatchState, team: PrototypeTeamDefinition) {
+  return team.id === state.context.teamA.id ? state.offensiveMomentum.teamA : state.offensiveMomentum.teamB;
+}
+
+function createOpeningLine(possessionTeam: PrototypeTeamDefinition, pressingTeam: PrototypeTeamDefinition): string {
+  if (possessionTeam.id === PrototypeTeamId.Control) {
+    return `${possessionTeam.displayName} attempts structured build-up.`;
+  }
+
+  if (possessionTeam.id === PrototypeTeamId.Blitz) {
+    return `${possessionTeam.displayName} tries to turn possession into immediate territory.`;
+  }
+
+  return `${possessionTeam.displayName} starts a tactical sequence under pressure from ${pressingTeam.displayName}.`;
+}
+
+export function selectInitialSequenceContext(
+  state: MiniMatchState,
+  sequenceIndex: number,
+): MiniMatchSequenceSetup {
+  const possessionTeamDefinition = selectPossessionTeam(state, sequenceIndex);
+  const pressingTeamDefinition = selectPressingTeam(state, possessionTeamDefinition);
+  const possessionInfluence = influenceForTeam(state, possessionTeamDefinition);
+  const pressingInfluence = influenceForTeam(state, pressingTeamDefinition);
+  const globalInfluence = state.context.segmentInfluence?.global;
+  const activeZone = state.continuity.lastBallContext?.ballLocation ?? getCycleValue(ACTIVE_ZONE_CYCLE, sequenceIndex);
+  const possessionTeam = createMiniMatchTeamContext(
+    possessionTeamDefinition,
+    createPossessionZones(sequenceIndex),
+    sequenceIndex,
+    getRecoverySaturationForTeam(state, possessionTeamDefinition),
+    getOffensiveMomentumForTeam(state, possessionTeamDefinition),
+    state.context.segmentInfluence,
+  );
+  const pressingTeam = createMiniMatchTeamContext(
+    pressingTeamDefinition,
+    createPressingZones(sequenceIndex),
+    sequenceIndex,
+    getRecoverySaturationForTeam(state, pressingTeamDefinition),
+    getOffensiveMomentumForTeam(state, pressingTeamDefinition),
+    state.context.segmentInfluence,
+  );
+  const pressureLevel = adjustPressureLevel(
+    selectPressureLevel(pressingTeamDefinition, sequenceIndex),
+    pressingInfluence,
+  );
+  const attackingDirection = getTeamAttackingDirection(
+    possessionTeam.teamId,
+    state.context.attackingDirections,
+  );
+  const previousCarrierRole = state.continuity.lastBallContext?.ballCarrierRole;
+  const ballContext =
+    previousCarrierRole === undefined
+      ? createBallContext({
+          team: possessionTeam,
+          ballLocation: activeZone,
+          attackingDirection,
+        })
+      : createBallContext({
+          team: possessionTeam,
+          ballLocation: activeZone,
+          attackingDirection,
+          ballCarrierRole: previousCarrierRole,
+        });
+  const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
+  const startTick = state.context.startTick + sequenceIndex * 10;
+
+  return {
+    sequenceNumber: sequenceIndex + 1,
+    possessionTeam,
+    pressingTeam,
+    activeZone,
+    pressureDescription: pressureLevel.toUpperCase(),
+    openingLine: createOpeningLine(possessionTeamDefinition, pressingTeamDefinition),
+    possessionReason: describePossessionReason(state, possessionTeamDefinition, sequenceIndex),
+    resolveInput: {
+      startTick,
+      teams: {
+        possessionTeam,
+        pressingTeam,
+      },
+      ballContext,
+      initialContext: {
+        chaosLevel: clampContextRating(
+          state.continuity.lastChaosLevel +
+            (sequenceIndex % 3) * 6 +
+            (globalInfluence?.repeatedPatternPressure ?? 0) +
+            Math.max(0, pressingInfluence?.defensiveStressModifier ?? 0),
+        ),
+        possessionStability: sequenceLevelFromModifier(possessionInfluence?.supportStabilityModifier ?? 0),
+        territorialPressure: clampContextRating(
+          state.continuity.lastTerritorialPressure +
+            (sequenceIndex % 2) * 8 +
+            (globalInfluence?.matchTempoAdjustment ?? 0) * 2 +
+            Math.max(0, pressingInfluence?.pressureLoadModifier ?? 0) * 2,
+        ),
+        currentDanger: sequenceLevelFromModifier(
+          (possessionInfluence?.routeRiskModifier ?? 0) +
+            (possessionInfluence?.finalActionComposureModifier ?? 0) +
+            (globalInfluence?.conversionVolatilityAdjustment ?? 0),
+        ),
+        activeZone,
+        sequenceMomentum: clampContextRating(
+          50 +
+            (sequenceIndex % 2) * 6 +
+            (possessionInfluence?.momentumModifier ?? 0) * 3 +
+            (possessionInfluence?.scoringConfidenceModifier ?? 0) * 2,
+        ),
+        weakSideExposure: SequenceLevel.Medium,
+        currentInteraction: SequenceInteractionKind.BuildUpUnderPressure,
+        pressureLevel,
+        tacticalPhaseState: TacticalPhaseState.StablePossession,
+      },
+      initialSpatial: snapshot,
+      transitionSpatial: snapshot,
+      constructionSpatial: snapshot,
+      finishingSpatial: snapshot,
+      tacticalMemory: state.tacticalMemory,
+    },
+  };
+}
+```
+
 ## File: src/simulation/miniMatch/runMiniMatch.ts
 
 ```ts
@@ -5516,5 +6527,150 @@ export function runMiniMatch(input: MiniMatchInput): MiniMatchResult {
       ...createFinalSummaryLogs(state, summary),
     ],
   };
+}
+```
+
+## File: src/simulation/miniMatch/miniMatchSegmentInfluence.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { adaptMatchInputToMiniMatch } from "../adapters/matchInputToMiniMatch";
+import { runFullMatch } from "../runFullMatch";
+import { runMiniMatch } from "./runMiniMatch";
+import type { MiniMatchSegmentInfluence } from "./types";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreFromConsequences(input: {
+  readonly report: ReturnType<typeof runFullMatch>;
+  readonly homeTeamId: string;
+  readonly awayTeamId: string;
+}): { readonly home: number; readonly away: number } {
+  return input.report.timeline.reduce(
+    (score, event) => {
+      const points = event.consequences
+        .filter((consequence) => consequence.type === "score_change")
+        .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+
+      return {
+        home: score.home + (event.teamId === input.homeTeamId ? points : 0),
+        away: score.away + (event.teamId === input.awayTeamId ? points : 0),
+      };
+    },
+    { home: 0, away: 0 },
+  );
+}
+
+export function validateMiniMatchSegmentInfluence(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const adapter = adaptMatchInputToMiniMatch(input);
+  const baselineA = runMiniMatch(adapter.miniMatchInput);
+  const baselineB = runMiniMatch(adapter.miniMatchInput);
+  const influence: MiniMatchSegmentInfluence = {
+    segmentIndex: 2,
+    scoreState: "close",
+    home: {
+      teamId: adapter.homePrototype.id,
+      conditionModifier: -2,
+      mentalFreshnessModifier: -1,
+      momentumModifier: 2,
+      pressureLoadModifier: 2,
+      defensiveStressModifier: 1,
+      scoringConfidenceModifier: 1,
+      routeRiskModifier: 1,
+      supportStabilityModifier: -1,
+      finalActionComposureModifier: 0,
+    },
+    away: {
+      teamId: adapter.awayPrototype.id,
+      conditionModifier: -3,
+      mentalFreshnessModifier: -2,
+      momentumModifier: -1,
+      pressureLoadModifier: 3,
+      defensiveStressModifier: 2,
+      scoringConfidenceModifier: -1,
+      routeRiskModifier: -2,
+      supportStabilityModifier: -3,
+      finalActionComposureModifier: -2,
+    },
+    global: {
+      repeatedPatternPressure: 3,
+      matchTempoAdjustment: 2,
+      conversionVolatilityAdjustment: 1,
+    },
+  };
+  const influenced = runMiniMatch({
+    ...adapter.miniMatchInput,
+    segmentInfluence: influence,
+  });
+  const baselineFirstContext = baselineA.state.records[0]?.setup.resolveInput.initialContext;
+  const influencedFirstContext = influenced.state.records[0]?.setup.resolveInput.initialContext;
+  const fullReport = runFullMatch(input);
+  const influencedEvents = fullReport.timeline.filter((event) => event.tags.includes("segment_influence_active"));
+  const firstSegmentInfluencedEvents = influencedEvents.filter((event) => event.eventId.includes("-segment-1-"));
+  const segmentStateFact = fullReport.evidenceFacts.find((fact) =>
+    fact.internalTags.includes("segment_state_influence"),
+  );
+  const consequenceScore = scoreFromConsequences({
+    report: fullReport,
+    homeTeamId: input.homeTeam.teamId,
+    awayTeamId: input.awayTeam.teamId,
+  });
+
+  assertTest(
+    JSON.stringify(baselineA.summary) === JSON.stringify(baselineB.summary),
+    "runMiniMatch without segment influence must remain deterministic and backward compatible.",
+  );
+  assertTest(
+    baselineA.state.context.segmentInfluence === undefined,
+    "runMiniMatch without segment influence must not attach influence context.",
+  );
+  assertTest(
+    influenced.state.context.segmentInfluence !== undefined,
+    "runMiniMatch with segment influence must attach influence context.",
+  );
+  assertTest(
+    baselineFirstContext !== undefined && influencedFirstContext !== undefined,
+    "mini-match test fixtures must produce at least one sequence context.",
+  );
+  if (baselineFirstContext !== undefined && influencedFirstContext !== undefined) {
+    assertTest(
+      influencedFirstContext.chaosLevel !== baselineFirstContext.chaosLevel ||
+        influencedFirstContext.territorialPressure !== baselineFirstContext.territorialPressure ||
+        influencedFirstContext.sequenceMomentum !== baselineFirstContext.sequenceMomentum,
+      "segment influence must affect resolution context without forcing score events.",
+    );
+  }
+  assertTest(influencedEvents.length > 0, "runFullMatch must tag events with segment influence after the first segment.");
+  assertTest(
+    firstSegmentInfluencedEvents.length === 0,
+    "runFullMatch must not apply segment influence to the first segment.",
+  );
+  assertTest(segmentStateFact !== undefined, "segment-state influence must appear in canonical evidence facts.");
+  assertTest(
+    consequenceScore.home === fullReport.score.home && consequenceScore.away === fullReport.score.away,
+    "final score must remain derived from score_change consequences.",
+  );
+
+  return [
+    "runMiniMatch remains backward compatible without influence",
+    "segment influence affects mini-match resolution context",
+    "runFullMatch applies segment influence after the first segment",
+    "segment influence is represented by internal tags and evidence facts",
+    "final score remains derived from score_change consequences",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMiniMatchSegmentInfluence();
+
+  console.log("miniMatchSegmentInfluence tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
 }
 ```

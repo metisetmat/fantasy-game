@@ -116,6 +116,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const canonicalMatchReportEvidenceContractValidation = readIfExists(join(shareDirectory, "validation.canonical-matchreport-evidence-contract.md"));
   const coachFacingSummaryBoundary = readIfExists(join(shareDirectory, "coach-facing-summary-boundary.md"));
   const coachFacingSummaryBoundaryValidation = readIfExists(join(shareDirectory, "validation.coach-facing-summary-boundary.md"));
+  const trueSegmentStateIntegration = readIfExists(join(shareDirectory, "true-segment-state-integration.md"));
+  const trueSegmentStateIntegrationValidation = readIfExists(join(shareDirectory, "validation.true-segment-state-integration.md"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
@@ -1600,6 +1602,67 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("recommendation CONFIRM_SCORING_DOMINANCE_DIAGNOSTICS_V0", fullMatchHarnessPlausibility.includes("CONFIRM_SCORING_DOMINANCE_DIAGNOSTICS_V0"), "recommendation visible"),
     check("recommendation PREPARE_TRUE_SEGMENT_STATE_INTEGRATION", fullMatchHarnessPlausibility.includes("PREPARE_TRUE_SEGMENT_STATE_INTEGRATION"), "next recommendation visible"),
   ];
+  const sprint2QExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "validation.share-pack.md",
+    "true-segment-state-integration.md",
+    "validation.true-segment-state-integration.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+    "bundle__docs.md",
+  ];
+  const sprint2QForbiddenLeftovers = [
+    "coach-facing-summary-boundary.md",
+    "validation.coach-facing-summary-boundary.md",
+    "canonical-matchreport-evidence-contract.md",
+    "validation.canonical-matchreport-evidence-contract.md",
+    "full-match-harness-plausibility.md",
+    "validation.full-match-harness-plausibility.md",
+  ];
+  const sprint2QChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2Q", activeConfig.sprintName === "Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint2QForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint2QForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2QExpectedFiles.every((file) => requiredCopied(file)), sprint2QExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2Q", manifest.includes("Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution") && detailedManifest.includes("Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution"), "Sprint 2Q visible"),
+    check("manifest reports final file count 14", manifest.includes("Final file count: 14") && detailedManifest.includes("Final file count: 14"), "final count visible"),
+    check("README is Sprint 2Q oriented", readme.includes("# Sprint 2Q Share Pack") && readme.includes("true-segment-state-integration.md"), "README current"),
+    check("true segment-state integration doc included", trueSegmentStateIntegration.includes("# True Segment-State Integration"), "doc included"),
+    check("true segment-state validation is PASS", trueSegmentStateIntegrationValidation.includes("Status: PASS"), "validation PASS"),
+    check("FullMatchSegmentInfluence source bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchSegmentInfluence.ts") && bundleSimulation.includes("createFullMatchSegmentInfluence"), "segment influence resolver bundled"),
+    check("FullMatchSegmentInfluence test bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchSegmentInfluence.test.ts") && bundleSimulation.includes("segment influence modifiers must remain bounded"), "segment influence test bundled"),
+    check("MiniMatchInput optional segmentInfluence bundled", bundleSimulation.includes("readonly segmentInfluence?: MiniMatchSegmentInfluence") && bundleSimulation.includes("MiniMatchTeamSegmentInfluence"), "optional segment influence type visible"),
+    check("mini-match context influence wiring bundled", bundleSimulation.includes("src/simulation/miniMatch/createMiniMatchContext.ts") && bundleSimulation.includes("applyPlayerInfluence") && bundleSimulation.includes("applyCollectiveInfluence"), "context wiring bundled"),
+    check("initial sequence influence wiring bundled", bundleSimulation.includes("src/simulation/miniMatch/selectInitialSequenceContext.ts") && bundleSimulation.includes("adjustPressureLevel") && bundleSimulation.includes("sequenceLevelFromModifier"), "sequence wiring bundled"),
+    check("runFullMatch passes segment influence after first segment", bundleSimulation.includes("index === 0 ? undefined : createFullMatchSegmentInfluence") && bundleSimulation.includes("segmentInfluence"), "runFullMatch influence handoff visible"),
+    check("segment influence tags included", bundleSimulation.includes("segment_influence_active") && bundleSimulation.includes("segment_influence_fatigue") && bundleSimulation.includes("segment_influence_momentum") && bundleSimulation.includes("segment_influence_defensive_stress") && bundleSimulation.includes("segment_influence_pattern_pressure"), "internal tags visible"),
+    check("segment influence evidence fact included", bundleSimulation.includes("segmentStateInfluenceFact") && bundleSimulation.includes("segment_state_influence"), "canonical evidence fact visible"),
+    check("mini-match segment influence test bundled", bundleSimulation.includes("src/simulation/miniMatch/miniMatchSegmentInfluence.test.ts") && bundleSimulation.includes("runMiniMatch without segment influence must remain deterministic"), "mini-match compatibility test bundled"),
+    check("segment diversity diagnostics include influence count", bundleSimulation.includes("segmentInfluenceActiveSegmentCount") && bundleSimulation.includes("SEGMENT_INFLUENCE_INACTIVE_AFTER_FIRST_SEGMENT"), "diagnostic fields visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", trueSegmentStateIntegrationValidation.includes("scoring events deleted or capped: 0") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && trueSegmentStateIntegrationValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && trueSegmentStateIntegrationValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("final score remains derived from score consequences", trueSegmentStateIntegrationValidation.includes("final score remains derived from score_change consequences") && bundleSimulation.includes("final score must remain derived from score_change consequences"), "score consequence guard"),
+    check("50-match economy remains global reference", trueSegmentStateIntegration.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single full-match harness run remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && trueSegmentStateIntegration.includes("without claiming global scoring-economy validity"), "single-run warning-only"),
+    check("recommendations visible", trueSegmentStateIntegration.includes("CONFIRM_TRUE_SEGMENT_STATE_INTEGRATION_V0") && trueSegmentStateIntegration.includes("PREPARE_DEEPER_TACTICAL_PLAN_INFLUENCE") && trueSegmentStateIntegration.includes("PREPARE_REAL_PLAYER_STATS"), "2Q recommendations visible"),
+  ];
   const checks = activeConfig.sprintName.includes("Role Fit UI Implementation")
     ? roleFitUiChecks
     : activeConfig.sprintName.includes("React JSX Role Fit Refactor")
@@ -1612,6 +1675,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? coachCopyChecks
     : activeConfig.sprintName.includes("Sprint 2O - Full-Match Harness Plausibility")
       ? sprint2OChecks
+    : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
+      ? sprint2QChecks
     : activeConfig.sprintName.includes("Sprint 2N - Segment Diversity")
       ? sprint2NChecks
     : activeConfig.sprintName.includes("Sprint 2M - Source-of-Truth Reconciliation")

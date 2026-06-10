@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-10T12:34:50.109Z
-Task/sprint: Micro-sprint 2P-Fix - Coach-Facing Summary Boundary
+Generated: 2026-06-10T13:15:48.527Z
+Task/sprint: Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -12,8 +12,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - coach-report.latest.html
 - scoring-events-summary.md
 - validation.share-pack.md
-- coach-facing-summary-boundary.md
-- validation.coach-facing-summary-boundary.md
+- true-segment-state-integration.md
+- validation.true-segment-state-integration.md
 - README.md
 
 ## Bundle Files

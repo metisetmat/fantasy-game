@@ -123,6 +123,39 @@ function momentumShiftFact(input: {
   };
 }
 
+function segmentStateInfluenceFact(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+}): MatchReportEvidenceFact | null {
+  const influenceEvents = input.timeline.filter((event) => event.tags.includes("segment_influence_active"));
+  const event = firstEvidenceEvent(influenceEvents);
+
+  if (event === undefined) {
+    return null;
+  }
+
+  return {
+    factId: `${input.matchInput.matchId}-segment-state-influence`,
+    matchId: input.matchInput.matchId,
+    teamId: event.teamId,
+    opponentTeamId: event.opponentTeamId,
+    category: "MOMENTUM_SHIFT",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: influenceEvents.slice(0, 6).map((candidate) => candidate.eventId),
+    affectedZones: topZones(influenceEvents, 3),
+    summary:
+      "L'etat accumule du match commence a peser sur la stabilite, la pression et la fraicheur mentale des sequences suivantes, sans forcer directement le score.",
+    confidence: "low",
+    strength: Math.min(100, 35 + influenceEvents.length * 4),
+    coachVisible: true,
+    internalTags: [
+      "segment_state_influence",
+      "segment_influence_active",
+      "bounded_full_match_segment_context",
+    ],
+  };
+}
+
 export function buildCanonicalMatchReportEvidenceFacts(input: {
   readonly matchInput: MatchInput;
   readonly timeline: readonly MatchEvent[];
@@ -137,6 +170,7 @@ export function buildCanonicalMatchReportEvidenceFacts(input: {
     tacticalPlanFact(input),
     fatigueLoadFact(input),
     momentumShiftFact(input),
+    segmentStateInfluenceFact(input),
   ].filter((fact): fact is MatchReportEvidenceFact => fact !== null);
 
   return [...baseFacts, ...supplementalFacts];

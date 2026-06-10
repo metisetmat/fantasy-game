@@ -22,6 +22,32 @@ export interface MiniMatchInput {
   readonly numberOfSequences: number;
   readonly startTick?: TacticalTick;
   readonly seed?: number;
+  readonly segmentInfluence?: MiniMatchSegmentInfluence;
+}
+
+export interface MiniMatchTeamSegmentInfluence {
+  readonly teamId: TeamId;
+  readonly conditionModifier: number;
+  readonly mentalFreshnessModifier: number;
+  readonly momentumModifier: number;
+  readonly pressureLoadModifier: number;
+  readonly defensiveStressModifier: number;
+  readonly scoringConfidenceModifier: number;
+  readonly routeRiskModifier: number;
+  readonly supportStabilityModifier: number;
+  readonly finalActionComposureModifier: number;
+}
+
+export interface MiniMatchSegmentInfluence {
+  readonly segmentIndex: number;
+  readonly scoreState: "level" | "close" | "home_leading" | "away_leading" | "lopsided";
+  readonly home: MiniMatchTeamSegmentInfluence;
+  readonly away: MiniMatchTeamSegmentInfluence;
+  readonly global: {
+    readonly repeatedPatternPressure: number;
+    readonly matchTempoAdjustment: number;
+    readonly conversionVolatilityAdjustment: number;
+  };
 }
 
 export interface MiniMatchScore {
@@ -127,6 +153,7 @@ export interface MiniMatchContext {
   readonly startTick: TacticalTick;
   readonly seed: number;
   readonly attackingDirections: readonly TeamDirectionAssignment[];
+  readonly segmentInfluence?: MiniMatchSegmentInfluence;
 }
 
 export interface MiniMatchContinuityState {

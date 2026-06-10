@@ -31,6 +31,7 @@ import {
   teamStateForId,
   type FullMatchSegmentState,
 } from "../fullMatch/fullMatchSegmentState";
+import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInfluence";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -42,6 +43,7 @@ export interface MiniMatchTimelineSegment {
   readonly period: MatchEvent["timestamp"]["period"];
   readonly includeKickoff: boolean;
   readonly segmentState?: FullMatchSegmentState;
+  readonly segmentInfluence?: FullMatchSegmentInfluence;
 }
 
 export interface MatchReportBuilderInput {
@@ -63,6 +65,33 @@ function clampRating(value: number): Rating {
 
 function opponentTeamId(teamId: TeamId, homeTeamId: TeamId, awayTeamId: TeamId): TeamId {
   return teamId === homeTeamId ? awayTeamId : homeTeamId;
+}
+
+function segmentInfluenceTags(influence: FullMatchSegmentInfluence | undefined): readonly string[] {
+  if (influence === undefined) {
+    return [];
+  }
+
+  const teamValues = [influence.home, influence.away];
+  const tags = ["segment_influence_active"];
+
+  if (teamValues.some((team) => team.conditionModifier !== 0 || team.mentalFreshnessModifier !== 0)) {
+    tags.push("segment_influence_fatigue");
+  }
+
+  if (teamValues.some((team) => team.momentumModifier !== 0 || team.scoringConfidenceModifier !== 0)) {
+    tags.push("segment_influence_momentum");
+  }
+
+  if (teamValues.some((team) => team.pressureLoadModifier !== 0 || team.defensiveStressModifier !== 0)) {
+    tags.push("segment_influence_defensive_stress");
+  }
+
+  if (influence.global.repeatedPatternPressure !== 0) {
+    tags.push("segment_influence_pattern_pressure");
+  }
+
+  return tags;
 }
 
 export function primaryReportZone(input: MatchInput): ZoneId {
@@ -175,6 +204,7 @@ function sequenceRecordToMatchEvent(input: {
     ...sequenceRecordTags(input.record),
     ...input.influence.tags,
     ...segmentStateTags,
+    ...segmentInfluenceTags(input.segment.segmentInfluence),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -289,6 +319,7 @@ function scoringEventToMatchEvent(input: {
       `scoring_type_${input.event.scoringType}`,
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
+      ...segmentInfluenceTags(input.segment.segmentInfluence),
     ],
     narrativeWeight: 70,
   };

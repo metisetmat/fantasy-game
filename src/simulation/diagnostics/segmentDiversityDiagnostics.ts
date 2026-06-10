@@ -10,6 +10,8 @@ export interface SegmentDiversityDiagnostic {
   readonly zonePattern: string;
   readonly fatigueDelta: number;
   readonly momentumDelta: number;
+  readonly segmentInfluenceActive: boolean;
+  readonly segmentInfluenceTagCount: number;
 }
 
 export type SegmentDiversityWarning =
@@ -21,7 +23,8 @@ export type SegmentDiversityWarning =
   | "ZERO_SCORING_EVENTS_FOR_ONE_TEAM"
   | "SAME_TEAM_SCORES_IN_MOST_SEGMENTS"
   | "HIGH_LOAD_NO_SCORING_PAYOFF"
-  | "SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT";
+  | "SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT"
+  | "SEGMENT_INFLUENCE_INACTIVE_AFTER_FIRST_SEGMENT";
 
 export interface SegmentDiversitySummary extends SegmentDiversityDiagnostic {
   readonly scoringPattern: string;
@@ -33,6 +36,7 @@ export type SegmentDiversityReport = {
   readonly repeatedScoringPatternCount: number;
   readonly repeatedZonePatternCount: number;
   readonly repeatedEventTypePatternCount: number;
+  readonly segmentInfluenceActiveSegmentCount: number;
   readonly segmentSummaries: readonly SegmentDiversitySummary[];
   readonly warnings: readonly SegmentDiversityWarning[];
   readonly dominanceSummary: string;
@@ -75,6 +79,10 @@ function momentumDelta(events: readonly MatchEvent[]): number {
     .reduce((total, consequence) => total + Math.abs(consequence.value ?? 0), 0);
 }
 
+function segmentInfluenceTagCount(events: readonly MatchEvent[]): number {
+  return events.filter((event) => event.tags.includes("segment_influence_active")).length;
+}
+
 export function createSegmentDiversityDiagnostics(report: MatchReport): readonly SegmentDiversityDiagnostic[] {
   const eventsBySegment = new Map<string, MatchEvent[]>();
 
@@ -97,6 +105,8 @@ export function createSegmentDiversityDiagnostics(report: MatchReport): readonly
       zonePattern: events.map((event) => event.zone).join(">"),
       fatigueDelta: fatigueDelta(events),
       momentumDelta: momentumDelta(events),
+      segmentInfluenceActive: segmentInfluenceTagCount(events) > 0,
+      segmentInfluenceTagCount: segmentInfluenceTagCount(events),
     }));
 }
 
@@ -124,6 +134,7 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
   const repeatedScoringPatternCount = repeatedPatternCount(segmentSummaries.map((summary) => summary.scoringPattern));
   const repeatedZonePatternCount = repeatedPatternCount(segmentSummaries.map((summary) => summary.zonePattern));
   const repeatedEventTypePatternCount = repeatedPatternCount(segmentSummaries.map((summary) => summary.eventFamilyPattern));
+  const segmentInfluenceActiveSegmentCount = segmentSummaries.filter((summary) => summary.segmentInfluenceActive).length;
   const warnings = new Set<SegmentDiversityWarning>();
 
   if (repeatedScoringPatternCount > 0) {
@@ -176,6 +187,10 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     warnings.add("SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT");
   }
 
+  if (segmentSummaries.length > 1 && segmentInfluenceActiveSegmentCount < segmentSummaries.length - 1) {
+    warnings.add("SEGMENT_INFLUENCE_INACTIVE_AFTER_FIRST_SEGMENT");
+  }
+
   const dominanceSummary = dominantEntry === undefined
     ? "No scoring dominance pattern was detected in the segment stream."
     : `${dominantEntry[0]} dominated the single-run scoring stream across ${dominantEntry[1]} segment(s). ${zeroScoringTeams.length === 0 ? "Both teams had scoring payoff." : `${zeroScoringTeams.join(", ")} produced no scoring payoff.`} Treat this as a harness plausibility warning, not a scoring-economy verdict.`;
@@ -185,6 +200,7 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     repeatedScoringPatternCount,
     repeatedZonePatternCount,
     repeatedEventTypePatternCount,
+    segmentInfluenceActiveSegmentCount,
     segmentSummaries,
     warnings: [...warnings],
     dominanceSummary,
