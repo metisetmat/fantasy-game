@@ -1,6 +1,7 @@
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import type { MatchReport } from "../contracts/engineToCoach";
 import { containsMojibake } from "../reports/coachCopyQuality";
+import { assertNoTechnicalContextLeak } from "../reports/coachFacingSummary";
 import { runFullMatch } from "./runFullMatch";
 import { runMatch } from "./runMatch";
 
@@ -44,6 +45,9 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
 
   for (const fact of report.evidenceFacts) {
     assertGuard(!containsMojibake(fact.summary), `${fact.factId} evidence summary contains mojibake.`);
+    if (fact.coachVisible) {
+      assertNoTechnicalContextLeak(fact.summary, `${fact.factId} evidence summary`);
+    }
     assertGuard(fact.strength >= 0 && fact.strength <= 100, `${fact.factId} strength must stay within 0-100.`);
     for (const eventId of fact.eventIds) {
       assertGuard(eventIds.has(eventId), `${fact.factId} references missing event ${eventId}.`);
@@ -53,6 +57,7 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
   for (const warning of report.warnings) {
     assertGuard(warning.mayInvalidateGlobalScoringEconomy === false, `${warning.warningId} must not invalidate global scoring economy.`);
     assertGuard(!containsMojibake(warning.coachSummary), `${warning.warningId} coach summary contains mojibake.`);
+    assertNoTechnicalContextLeak(warning.coachSummary, `${warning.warningId} coach summary`);
     for (const factId of warning.evidenceFactIds) {
       assertGuard(factIds.has(factId), `${warning.warningId} references missing evidence fact ${factId}.`);
     }
@@ -63,6 +68,7 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
 
   for (const insight of report.coachInsights) {
     assertGuard(!containsMojibake(insight.summary), `${insight.insightId} summary contains mojibake.`);
+    assertNoTechnicalContextLeak(insight.summary, `${insight.insightId} summary`);
     for (const evidence of insight.evidence) {
       for (const eventId of evidence.eventIds) {
         assertGuard(eventIds.has(eventId), `${insight.insightId} references missing event ${eventId}.`);
@@ -80,6 +86,7 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
   for (const moment of report.keyMoments) {
     assertGuard(eventIds.has(moment.eventId), `${moment.title} references missing event ${moment.eventId}.`);
     assertGuard(!containsMojibake(moment.summary), `${moment.title} summary contains mojibake.`);
+    assertNoTechnicalContextLeak(moment.summary, `${moment.title} summary`);
     if (moment.evidenceFactId !== undefined) {
       assertGuard(factIds.has(moment.evidenceFactId), `${moment.title} references missing evidence fact ${moment.evidenceFactId}.`);
     }

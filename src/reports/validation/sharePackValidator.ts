@@ -114,6 +114,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReportCopyQualityValidation = readIfExists(join(shareDirectory, "validation.coach-report-copy-quality.md"));
   const canonicalMatchReportEvidenceContract = readIfExists(join(shareDirectory, "canonical-matchreport-evidence-contract.md"));
   const canonicalMatchReportEvidenceContractValidation = readIfExists(join(shareDirectory, "validation.canonical-matchreport-evidence-contract.md"));
+  const coachFacingSummaryBoundary = readIfExists(join(shareDirectory, "coach-facing-summary-boundary.md"));
+  const coachFacingSummaryBoundaryValidation = readIfExists(join(shareDirectory, "validation.coach-facing-summary-boundary.md"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
@@ -1416,7 +1418,59 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "bundle__reports.md",
     "bundle__docs.md",
   ];
+  const coachFacingSummaryBoundaryExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "validation.share-pack.md",
+    "coach-facing-summary-boundary.md",
+    "validation.coach-facing-summary-boundary.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+    "bundle__docs.md",
+  ];
   const mojibakeFragments = ["Ãƒ", "Ã‚", "Ã¢â‚¬", "[object Object]"];
+  const coachFacingSummaryBoundaryChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Micro-sprint 2P-Fix", activeConfig.sprintName === "Micro-sprint 2P-Fix - Coach-Facing Summary Boundary", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", !requiredCopied("canonical-matchreport-evidence-contract.md") && !requiredCopied("validation.canonical-matchreport-evidence-contract.md"), "Sprint 2P docs omitted"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", coachFacingSummaryBoundaryExpectedFiles.every((file) => requiredCopied(file)), coachFacingSummaryBoundaryExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Micro-sprint 2P-Fix", manifest.includes("Micro-sprint 2P-Fix - Coach-Facing Summary Boundary") && detailedManifest.includes("Micro-sprint 2P-Fix - Coach-Facing Summary Boundary"), "2P-Fix visible"),
+    check("README is Micro-sprint 2P-Fix oriented", readme.includes("# Micro-sprint 2P-Fix Share Pack") && readme.includes("coach-facing-summary-boundary.md"), "README current"),
+    check("coach-facing summary boundary doc included", coachFacingSummaryBoundary.includes("# Coach-Facing Summary Boundary"), "doc included"),
+    check("coach-facing summary boundary validation is PASS", coachFacingSummaryBoundaryValidation.includes("Status: PASS"), "validation PASS"),
+    check("summary boundary helper bundled", bundleReports.includes("src/reports/coachFacingSummary.ts") && bundleReports.includes("isTechnicalContextLeak"), "coachFacingSummary bundled"),
+    check("summary boundary test bundled", bundleReports.includes("src/reports/coachFacingSummary.test.ts"), "coachFacingSummary test bundled"),
+    check("key moments use coach-facing summary helper", bundleSimulation.includes("coachFacingKeyMomentSummary") && bundleSimulation.includes("eventContext: event.tacticalContext.reason"), "key moments route through helper"),
+    check("warning summaries are type-specific", bundleSimulation.includes("coachFacingWarningSummaryByType"), "typed warning summaries visible"),
+    check("match report contract guard checks visible summaries", bundleSimulation.includes("assertNoTechnicalContextLeak"), "contract guard checks boundary"),
+    check("html guard checks visible copy only", bundleReports.includes("visibleHtml") && bundleReports.includes("assertNoTechnicalContextLeak"), "HTML visible guard bundled"),
+    check("coach-report.latest.html included", coachHtml.includes("<!doctype html>") || coachHtml.includes("<html"), "coach HTML copied"),
+    check("coach HTML contains no mojibake markers", !containsAny(coachHtml, mojibakeFragments), `mojibake marker count: ${countAny(coachHtml, mojibakeFragments)}`),
+    check("coach HTML keeps structured warnings", coachHtml.includes("Avertissements structur") && coachHtml.includes("Type :"), "structured warnings visible"),
+    check("technical details remain internal", coachHtml.includes("FULL_MATCH_HARNESS_SINGLE_RUN") && coachHtml.includes("Détails techniques"), "technical scope retained in details"),
+    check("canonical evidenceFacts preserved", bundleContracts.includes("evidenceFacts") && bundleContracts.includes("MatchReportEvidenceFact"), "evidenceFacts visible"),
+    check("canonical warnings preserved", bundleContracts.includes("warnings") && bundleContracts.includes("MatchReportWarning"), "warnings visible"),
+    check("reportMeta preserved", bundleContracts.includes("reportMeta") && bundleSimulation.includes("reportMeta"), "reportMeta visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS"), "batch/live PASS"),
+    check("50-match economy remains global reference", bundleSimulation.includes("FULL_MATCH_BATCH_ECONOMY") || bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendation CONFIRM_COACH_FACING_SUMMARY_BOUNDARY", coachFacingSummaryBoundary.includes("CONFIRM_COACH_FACING_SUMMARY_BOUNDARY") && coachFacingSummaryBoundaryValidation.includes("CONFIRM_COACH_FACING_SUMMARY_BOUNDARY"), "recommendation visible"),
+  ];
   const sprint2PChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("current sprint is Sprint 2P", activeConfig.sprintName === "Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract", activeConfig.sprintName),
@@ -1550,6 +1604,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     ? roleFitUiChecks
     : activeConfig.sprintName.includes("React JSX Role Fit Refactor")
       ? reactJsxPlayerProfileChecks
+    : activeConfig.sprintName.includes("Micro-sprint 2P-Fix")
+      ? coachFacingSummaryBoundaryChecks
     : activeConfig.sprintName.includes("Sprint 2P - Canonical MatchReport")
       ? sprint2PChecks
     : activeConfig.sprintName.includes("Micro-sprint 2O-Fix")

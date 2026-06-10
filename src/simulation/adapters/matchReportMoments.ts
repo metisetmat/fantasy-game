@@ -1,9 +1,11 @@
-import type {
+﻿import type {
   CoachInsight,
   KeyMoment,
   MatchEvent,
   MatchInput,
 } from "../../contracts/engineToCoach";
+import { normalizeCoachFacingCopy } from "../../reports/coachCopyQuality";
+import { coachFacingKeyMomentSummary } from "../../reports/coachFacingSummary";
 import type { MatchEvidenceFact } from "./matchReportEvidence";
 
 const MAX_KEY_MOMENTS = 5;
@@ -37,11 +39,11 @@ function factZone(fact: MatchEvidenceFact): string {
 
 function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
   if (event.eventType === "kickoff") {
-    return "Début du match";
+    return "DÃ©but du match";
   }
 
   if (event.eventType === "scoring") {
-    return "Action décisive";
+    return "Action dÃ©cisive";
   }
 
   if (fact?.category === "PRESSURE_WITHOUT_CONVERSION") {
@@ -49,19 +51,19 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
   }
 
   if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative") || fact?.category === "MOMENTUM_SHIFT") {
-    return "Signal d'élan à surveiller";
+    return "Signal d'Ã©lan Ã  surveiller";
   }
 
   if (fact?.category === "TERRITORIAL_PRESSURE") {
-    return `Pression concentrée en ${factZone(fact)}`;
+    return `Pression concentrÃ©e en ${factZone(fact)}`;
   }
 
   if (hasTag(event, "danger_high") || fact?.category === "DANGER_CREATION") {
-    return "Séquence dangereuse";
+    return "SÃ©quence dangereuse";
   }
 
   if (fact?.category === "HARNESS_PLAUSIBILITY_WARNING") {
-    return "Signal de harnais à surveiller";
+    return "Signal de harnais Ã  surveiller";
   }
 
   if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
@@ -69,18 +71,23 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
   }
 
   if (hasTag(event, "territorial_pressure_high")) {
-    return "Séquence de pression territoriale";
+    return "SÃ©quence de pression territoriale";
   }
 
-  return "Séquence tactique";
+  return "SÃ©quence tactique";
 }
 
 function summaryForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
-  if (fact !== undefined) {
-    return `${fact.summary} Contexte : ${event.tacticalContext.reason ?? "séquence tactique visible dans le rapport."}`;
-  }
+  const category = fact?.category ?? (event.eventType === "scoring" ? "SCORING_CONVERSION" : undefined);
 
-  return event.tacticalContext.reason ?? "Séquence tactique visible dans le rapport.";
+  return coachFacingKeyMomentSummary({
+    title: titleForEvent(event, fact),
+    teamId: event.teamId,
+    zone: fact?.affectedZones[0] ?? event.zone,
+    ...(fact === undefined ? {} : { evidenceSummary: fact.summary }),
+    ...(event.tacticalContext.reason === undefined ? {} : { eventContext: event.tacticalContext.reason }),
+    ...(category === undefined ? {} : { category }),
+  });
 }
 
 function candidatePriority(event: MatchEvent, fact: MatchEvidenceFact | undefined, insightEventIds: ReadonlySet<string>): number {
@@ -249,8 +256,9 @@ export function selectKeyMoments(input: {
         evidenceFactId: candidate.evidenceFact.factId,
         category: candidate.evidenceFact.category,
       }),
-      title: titleForEvent(candidate.event, candidate.evidenceFact),
+      title: normalizeCoachFacingCopy(titleForEvent(candidate.event, candidate.evidenceFact)),
       summary: summaryForEvent(candidate.event, candidate.evidenceFact),
       minute: candidate.event.timestamp.minute,
     }));
 }
+

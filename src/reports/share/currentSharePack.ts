@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract",
+  name: "Micro-sprint 2P-Fix - Coach-Facing Summary Boundary",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -9,8 +9,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "coach-report.latest.html",
     "scoring-events-summary.md",
     "validation.share-pack.md",
-    "canonical-matchreport-evidence-contract.md",
-    "validation.canonical-matchreport-evidence-contract.md",
+    "coach-facing-summary-boundary.md",
+    "validation.coach-facing-summary-boundary.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -22,19 +22,19 @@ export const currentSprint: CurrentSharePackConfig = {
   optionalFiles: [],
   excludedByDefault: [],
   fileReasons: {
-    "package.json": "records npm scripts and the canonical MatchReport contract guard wiring",
-    "tsconfig.json": "records the TypeScript compiler setup for the canonical evidence contract work",
-    "coach-report.latest.html": "latest generated coach HTML sample consuming typed MatchReport warnings",
+    "package.json": "records npm scripts and the coach-facing summary boundary guard wiring",
+    "tsconfig.json": "records the TypeScript compiler setup for the visible-summary boundary work",
+    "coach-report.latest.html": "latest generated coach HTML sample with clean visible key moments and warning summaries",
     "scoring-events-summary.md": "live scoring summary proving scoring values and score events remain intact",
-    "validation.share-pack.md": "proves the Sprint 2P share pack is current, complete, and below 20 files",
-    "canonical-matchreport-evidence-contract.md": "documents canonical evidenceFacts, warnings, and reportMeta alignment",
-    "validation.canonical-matchreport-evidence-contract.md": "validates typed evidence, structured warnings, and preserved scoring guardrails",
-    "README.md": "compact reviewer orientation for the Sprint 2P share pack",
-    "manifest.md": "compatibility manifest listing the Sprint 2P share pack files",
+    "validation.share-pack.md": "proves the 2P-Fix share pack is current, complete, and below 20 files",
+    "coach-facing-summary-boundary.md": "documents the visible coach-summary boundary and internal technical detail split",
+    "validation.coach-facing-summary-boundary.md": "validates clean visible summaries, typed evidence, and preserved scoring guardrails",
+    "README.md": "compact reviewer orientation for the 2P-Fix share pack",
+    "manifest.md": "compatibility manifest listing the 2P-Fix share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles runMatch/runFullMatch, canonical evidence builders, warnings, moments, focus, and harness tests",
-    "bundle__reports.md": "bundles coach report renderer, copy quality utilities, guards, and share-pack updater",
+    "bundle__reports.md": "bundles coach report renderer, summary-boundary utilities, copy quality utilities, guards, and share-pack updater",
     "bundle__docs.md": "bundles engine-to-coach review documentation",
   },
 };

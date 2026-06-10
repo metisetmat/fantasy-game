@@ -1,4 +1,4 @@
-import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+﻿import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import type { MatchEvent } from "../../contracts/engineToCoach";
 import type { ZoneId } from "../../core/zones";
 import { MatchPhase, PressureLevel } from "../../models/match";
@@ -97,3 +97,4 @@ if (require.main === module) {
     console.log(`- ${check}`);
   }
 }
+

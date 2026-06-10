@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-10T12:06:42.044Z
-Task/sprint: Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract
+Generated: 2026-06-10T12:34:50.109Z
+Task/sprint: Micro-sprint 2P-Fix - Coach-Facing Summary Boundary
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -12,8 +12,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - coach-report.latest.html
 - scoring-events-summary.md
 - validation.share-pack.md
-- canonical-matchreport-evidence-contract.md
-- validation.canonical-matchreport-evidence-contract.md
+- coach-facing-summary-boundary.md
+- validation.coach-facing-summary-boundary.md
 - README.md
 
 ## Bundle Files
