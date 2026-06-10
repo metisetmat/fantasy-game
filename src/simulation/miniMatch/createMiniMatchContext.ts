@@ -17,7 +17,13 @@ import { createTacticalMemory } from "../../systems/tacticalMemory";
 import { createInitialRecoverySaturation, type RecoverySaturationState } from "../../systems/structure";
 import { createInitialOffensiveMomentum, type OffensiveMomentumState } from "../../systems/offense/momentum";
 import { DEFAULT_SIMULATION_CONFIG } from "../../systems/matchLoop";
-import type { MiniMatchContext, MiniMatchInput, MiniMatchState } from "./types";
+import type {
+  MiniMatchContext,
+  MiniMatchInput,
+  MiniMatchSegmentInfluence,
+  MiniMatchTeamSegmentInfluence,
+  MiniMatchState,
+} from "./types";
 
 const STANDARD_ROLES: readonly PlayerRole[] = [
   PlayerRole.LeftAnchor,
@@ -34,6 +40,25 @@ const STANDARD_ROLES: readonly PlayerRole[] = [
 
 function clampRating(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function influenceForTeam(
+  influence: MiniMatchSegmentInfluence | undefined,
+  team: PrototypeTeamDefinition,
+): MiniMatchTeamSegmentInfluence | undefined {
+  if (influence === undefined) {
+    return undefined;
+  }
+
+  if (influence.home.teamId === team.id) {
+    return influence.home;
+  }
+
+  if (influence.away.teamId === team.id) {
+    return influence.away;
+  }
+
+  return undefined;
 }
 
 function createAttributes(base: number): PlayerAttributes {
@@ -89,20 +114,21 @@ function createPrototypePlayers(
   team: PrototypeTeamDefinition,
   zones: readonly ZoneId[],
   sequenceIndex: number,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
 ): readonly PlayerState[] {
   if (team.id === PrototypeTeamId.Control) {
-    return createControlPlayerStates({ zones, sequenceIndex });
+    return createControlPlayerStates({ zones, sequenceIndex }).map((player) => applyPlayerInfluence(player, influence));
   }
 
   if (team.id === PrototypeTeamId.Blitz) {
-    return createBlitzPlayerStates({ zones, sequenceIndex });
+    return createBlitzPlayerStates({ zones, sequenceIndex }).map((player) => applyPlayerInfluence(player, influence));
   }
 
   const fallbackZone = createZoneId(LongitudinalZone.Midfield, LateralCorridor.CentralAxis);
   const sequenceFreshnessAdjustment = sequenceIndex * 2;
-  const freshness = clampRating(getBaseFreshness(team) - sequenceFreshnessAdjustment);
+  const freshness = clampRating(getBaseFreshness(team) - sequenceFreshnessAdjustment + (influence?.conditionModifier ?? 0));
 
-  return STANDARD_ROLES.map((role, index) => ({
+  return STANDARD_ROLES.map((role, index) => applyPlayerInfluence({
     id: `${team.id}-${role}`,
     teamId: team.id,
     name: `${team.displayName} ${role}`,
@@ -114,15 +140,66 @@ function createPrototypePlayers(
     },
     currentZone: zones[index] ?? zones[0] ?? fallbackZone,
     momentum: 50,
-  }));
+  }, influence));
 }
 
-function getCollectiveProperties(team: PrototypeTeamDefinition) {
+function applyPlayerInfluence(
+  player: PlayerState,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): PlayerState {
+  if (influence === undefined) {
+    return player;
+  }
+
+  const freshnessAdjustment = influence.conditionModifier + Math.round(influence.mentalFreshnessModifier / 2);
+
+  return {
+    ...player,
+    fatigue: {
+      accumulatedFatigue: clampRating(player.fatigue.accumulatedFatigue - freshnessAdjustment),
+      freshness: clampRating(player.fatigue.freshness + freshnessAdjustment),
+    },
+    momentum: clampRating(player.momentum + influence.momentumModifier),
+  };
+}
+
+function applyCollectiveInfluence<T extends {
+  readonly cohesion: number;
+  readonly defensiveTransition: number;
+  readonly tacticalDiscipline: number;
+  readonly collectiveReading: number;
+  readonly resilience: number;
+}>(
+  properties: T,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): T {
+  if (influence === undefined) {
+    return properties;
+  }
+
+  return {
+    ...properties,
+    cohesion: clampRating(properties.cohesion + influence.supportStabilityModifier),
+    defensiveTransition: clampRating(
+      properties.defensiveTransition - Math.max(0, influence.defensiveStressModifier),
+    ),
+    tacticalDiscipline: clampRating(properties.tacticalDiscipline + influence.finalActionComposureModifier),
+    collectiveReading: clampRating(properties.collectiveReading + influence.supportStabilityModifier),
+    resilience: clampRating(
+      properties.resilience + influence.mentalFreshnessModifier - Math.max(0, influence.pressureLoadModifier),
+    ),
+  };
+}
+
+function getCollectiveProperties(
+  team: PrototypeTeamDefinition,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): PrototypeTeamDefinition["collectiveProperties"] {
   const roster =
     team.id === PrototypeTeamId.Control ? CONTROL_ROSTER : team.id === PrototypeTeamId.Blitz ? BLITZ_ROSTER : null;
 
   if (roster === null) {
-    return team.collectiveProperties;
+    return applyCollectiveInfluence(team.collectiveProperties, influence);
   }
 
   const profile = deriveTeamProfileFromRoster({
@@ -131,8 +208,7 @@ function getCollectiveProperties(team: PrototypeTeamDefinition) {
     baseCollective: team.collectiveProperties,
     finishingIdentity: team.id === PrototypeTeamId.Blitz ? "CHAOTIC_AGGRESSION" : "CONTROLLED_EXECUTION",
   });
-
-  return {
+  const baseProperties: PrototypeTeamDefinition["collectiveProperties"] = {
     ...team.collectiveProperties,
     cohesion: profile.cohesion,
     defensiveTransition: profile.recoveryStructure,
@@ -141,6 +217,8 @@ function getCollectiveProperties(team: PrototypeTeamDefinition) {
     collectiveReading: profile.supportQuality,
     resilience: Math.round((profile.defensiveCompactness + team.collectiveProperties.resilience) / 2),
   };
+
+  return applyCollectiveInfluence(baseProperties, influence);
 }
 
 function getStructuralShiftDelay(team: PrototypeTeamDefinition, sequenceIndex: number): number {
@@ -177,7 +255,14 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
       teamAId: input.teamA.id,
       teamBId: input.teamB.id,
     }),
+    ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
   };
+  const influenceAverage = input.segmentInfluence === undefined
+    ? 0
+    : Math.round((input.segmentInfluence.home.supportStabilityModifier + input.segmentInfluence.away.supportStabilityModifier) / 2);
+  const pressureAverage = input.segmentInfluence === undefined
+    ? 0
+    : Math.round((input.segmentInfluence.home.pressureLoadModifier + input.segmentInfluence.away.pressureLoadModifier) / 2);
 
   return {
     context,
@@ -203,10 +288,12 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
     continuity: {
       lastBallContext: null,
       lastPossessionTeamId: null,
-      lastTerritorialPressure: 44,
-      lastChaosLevel: 38,
+      lastTerritorialPressure: clampRating(44 + pressureAverage + (input.segmentInfluence?.global.matchTempoAdjustment ?? 0)),
+      lastChaosLevel: clampRating(38 + Math.max(0, pressureAverage) + (input.segmentInfluence?.global.repeatedPatternPressure ?? 0)),
       lastDangerLevel: "MEDIUM",
-      lastPossessionReason: "initial mini-match setup",
+      lastPossessionReason: input.segmentInfluence === undefined
+        ? "initial mini-match setup"
+        : `segment influence active with support stability ${influenceAverage} and pattern pressure ${input.segmentInfluence.global.repeatedPatternPressure}`,
     },
     tacticalMemory: createTacticalMemory([input.teamA.id, input.teamB.id]),
     recoverySaturation: {
@@ -226,15 +313,18 @@ export function createMiniMatchTeamContext(
   sequenceIndex: number,
   recoverySaturation: RecoverySaturationState,
   offensiveMomentum: OffensiveMomentumState,
+  segmentInfluence?: MiniMatchSegmentInfluence,
 ): SpatialTeamContext {
+  const teamInfluence = influenceForTeam(segmentInfluence, team);
+
   return {
     teamId: team.id,
     teamName: team.displayName,
     tacticalStyle: team.tacticalStyle,
     offensiveProgressionPhilosophy: team.offensiveProgressionPhilosophy,
-    players: createPrototypePlayers(team, zones, sequenceIndex),
+    players: createPrototypePlayers(team, zones, sequenceIndex, teamInfluence),
     tacticalInstructions: team.tacticalInstructions,
-    collectiveProperties: getCollectiveProperties(team),
+    collectiveProperties: getCollectiveProperties(team, teamInfluence),
     structuralShiftDelay: getStructuralShiftDelay(team, sequenceIndex),
     recoverySaturation,
     offensiveMomentum,

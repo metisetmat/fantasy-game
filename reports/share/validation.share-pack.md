@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Micro-sprint 2P-Fix - Coach-Facing Summary Boundary
+- current sprint: Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution
 - final file count: 14
 - share file count: 14
 - minimal allowlist count: 14
@@ -16,39 +16,40 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Micro-sprint 2P-Fix - Micro-sprint 2P-Fix - Coach-Facing Summary Boundary
+- PASS: current sprint is Sprint 2Q - Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 14
 - PASS: final file count is 14 - 14
 - PASS: minimal allowlist count is 14 - 14
 - PASS: missing expected files are none - none
 - PASS: stale share file count is 0 - 0
-- PASS: previous sprint leftovers are 0 - Sprint 2P docs omitted
+- PASS: previous sprint leftovers are 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Micro-sprint 2P-Fix - 2P-Fix visible
-- PASS: README is Micro-sprint 2P-Fix oriented - README current
-- PASS: coach-facing summary boundary doc included - doc included
-- PASS: coach-facing summary boundary validation is PASS - validation PASS
-- PASS: summary boundary helper bundled - coachFacingSummary bundled
-- PASS: summary boundary test bundled - coachFacingSummary test bundled
-- PASS: key moments use coach-facing summary helper - key moments route through helper
-- PASS: warning summaries are type-specific - typed warning summaries visible
-- PASS: match report contract guard checks visible summaries - contract guard checks boundary
-- PASS: html guard checks visible copy only - HTML visible guard bundled
-- PASS: coach-report.latest.html included - coach HTML copied
-- PASS: coach HTML contains no mojibake markers - mojibake marker count: 0
-- PASS: coach HTML keeps structured warnings - structured warnings visible
-- PASS: technical details remain internal - technical scope retained in details
-- PASS: canonical evidenceFacts preserved - evidenceFacts visible
-- PASS: canonical warnings preserved - warnings visible
-- PASS: reportMeta preserved - reportMeta visible
-- PASS: no scoring constants changed - scoring constants visible
+- PASS: manifest lists Sprint 2Q - Sprint 2Q visible
+- PASS: manifest reports final file count 14 - final count visible
+- PASS: README is Sprint 2Q oriented - README current
+- PASS: true segment-state integration doc included - doc included
+- PASS: true segment-state validation is PASS - validation PASS
+- PASS: FullMatchSegmentInfluence source bundled - segment influence resolver bundled
+- PASS: FullMatchSegmentInfluence test bundled - segment influence test bundled
+- PASS: MiniMatchInput optional segmentInfluence bundled - optional segment influence type visible
+- PASS: mini-match context influence wiring bundled - context wiring bundled
+- PASS: initial sequence influence wiring bundled - sequence wiring bundled
+- PASS: runFullMatch passes segment influence after first segment - runFullMatch influence handoff visible
+- PASS: segment influence tags included - internal tags visible
+- PASS: segment influence evidence fact included - canonical evidence fact visible
+- PASS: mini-match segment influence test bundled - mini-match compatibility test bundled
+- PASS: segment diversity diagnostics include influence count - diagnostic fields visible
+- PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
+- PASS: no scoring events deleted or capped - scoring event guard visible
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
+- PASS: final score remains derived from score consequences - score consequence guard
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: recommendation CONFIRM_COACH_FACING_SUMMARY_BOUNDARY - recommendation visible
+- PASS: single full-match harness run remains warning-only - single-run warning-only
+- PASS: recommendations visible - 2Q recommendations visible
 
 ## Files
 
@@ -58,11 +59,11 @@ Status: PASS
 - bundle__docs.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-facing-summary-boundary.md
 - coach-report.latest.html
 - manifest.md
 - package.json
 - scoring-events-summary.md
+- true-segment-state-integration.md
 - tsconfig.json
-- validation.coach-facing-summary-boundary.md
 - validation.share-pack.md
+- validation.true-segment-state-integration.md

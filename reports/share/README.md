@@ -1,11 +1,11 @@
-# Micro-sprint 2P-Fix Share Pack
+# Sprint 2Q Share Pack
 
-This compact review pack uses standalone generated docs plus bundled source files.
+This compact review pack covers true segment-state integration into mini-match resolution.
 
 Start with:
 - `00-share-manifest.txt` for copied files, bundle contents, commands, and git status.
-- `coach-facing-summary-boundary.md` for the sprint rationale.
-- `validation.coach-facing-summary-boundary.md` for the visible-copy checklist.
-- `bundle__reports.md` for the summary-boundary helper, tests, HTML renderer, copy quality utility, and guards.
-- `bundle__simulation.md` for key moments, evidence, warnings, runFullMatch, and harness diagnostics feeding the report.
+- `true-segment-state-integration.md` for the sprint rationale.
+- `validation.true-segment-state-integration.md` for the safety and compatibility checklist.
+- `bundle__simulation.md` for runFullMatch, segment influence, mini-match context wiring, evidence, diagnostics, and tests.
+- `bundle__reports.md` for the share-pack generator, coach report renderer, copy quality utility, and guards.
 - `coach-report.latest.html` for a visual full-match harness sample when present.

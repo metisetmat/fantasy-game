@@ -20,7 +20,7 @@ import { SequenceInteractionKind, SequenceLevel, type SequenceSpatialSnapshot } 
 import { TacticalPhaseState } from "../../systems/tacticalState";
 import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
-import type { MiniMatchSequenceSetup, MiniMatchState } from "./types";
+import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -146,6 +146,66 @@ function selectPressureLevel(pressingTeam: PrototypeTeamDefinition, sequenceInde
   return sequenceIndex % 2 === 0 ? PressureLevel.Medium : PressureLevel.Low;
 }
 
+function clampContextRating(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function influenceForTeam(
+  state: MiniMatchState,
+  team: PrototypeTeamDefinition,
+): MiniMatchTeamSegmentInfluence | undefined {
+  const influence = state.context.segmentInfluence;
+
+  if (influence === undefined) {
+    return undefined;
+  }
+
+  if (influence.home.teamId === team.id) {
+    return influence.home;
+  }
+
+  if (influence.away.teamId === team.id) {
+    return influence.away;
+  }
+
+  return undefined;
+}
+
+function sequenceLevelFromModifier(modifier: number): SequenceLevel {
+  if (modifier >= 3) {
+    return SequenceLevel.High;
+  }
+
+  if (modifier <= -3) {
+    return SequenceLevel.Low;
+  }
+
+  return SequenceLevel.Medium;
+}
+
+function adjustPressureLevel(
+  base: PressureLevel,
+  influence: MiniMatchTeamSegmentInfluence | undefined,
+): PressureLevel {
+  const pressureModifier = influence?.pressureLoadModifier ?? 0;
+  const defensiveStressModifier = influence?.defensiveStressModifier ?? 0;
+  const combined = pressureModifier + Math.max(0, defensiveStressModifier);
+
+  if (combined >= 4 && base === PressureLevel.Low) {
+    return PressureLevel.Medium;
+  }
+
+  if (combined >= 6 && base === PressureLevel.Medium) {
+    return PressureLevel.High;
+  }
+
+  if (combined <= -4 && base === PressureLevel.High) {
+    return PressureLevel.Medium;
+  }
+
+  return base;
+}
+
 function getRecoverySaturationForTeam(state: MiniMatchState, team: PrototypeTeamDefinition) {
   return team.id === state.context.teamA.id ? state.recoverySaturation.teamA : state.recoverySaturation.teamB;
 }
@@ -172,6 +232,9 @@ export function selectInitialSequenceContext(
 ): MiniMatchSequenceSetup {
   const possessionTeamDefinition = selectPossessionTeam(state, sequenceIndex);
   const pressingTeamDefinition = selectPressingTeam(state, possessionTeamDefinition);
+  const possessionInfluence = influenceForTeam(state, possessionTeamDefinition);
+  const pressingInfluence = influenceForTeam(state, pressingTeamDefinition);
+  const globalInfluence = state.context.segmentInfluence?.global;
   const activeZone = state.continuity.lastBallContext?.ballLocation ?? getCycleValue(ACTIVE_ZONE_CYCLE, sequenceIndex);
   const possessionTeam = createMiniMatchTeamContext(
     possessionTeamDefinition,
@@ -179,6 +242,7 @@ export function selectInitialSequenceContext(
     sequenceIndex,
     getRecoverySaturationForTeam(state, possessionTeamDefinition),
     getOffensiveMomentumForTeam(state, possessionTeamDefinition),
+    state.context.segmentInfluence,
   );
   const pressingTeam = createMiniMatchTeamContext(
     pressingTeamDefinition,
@@ -186,8 +250,12 @@ export function selectInitialSequenceContext(
     sequenceIndex,
     getRecoverySaturationForTeam(state, pressingTeamDefinition),
     getOffensiveMomentumForTeam(state, pressingTeamDefinition),
+    state.context.segmentInfluence,
   );
-  const pressureLevel = selectPressureLevel(pressingTeamDefinition, sequenceIndex);
+  const pressureLevel = adjustPressureLevel(
+    selectPressureLevel(pressingTeamDefinition, sequenceIndex),
+    pressingInfluence,
+  );
   const attackingDirection = getTeamAttackingDirection(
     possessionTeam.teamId,
     state.context.attackingDirections,
@@ -225,12 +293,31 @@ export function selectInitialSequenceContext(
       },
       ballContext,
       initialContext: {
-        chaosLevel: Math.max(20, Math.min(90, state.continuity.lastChaosLevel + (sequenceIndex % 3) * 6)),
-        possessionStability: SequenceLevel.Medium,
-        territorialPressure: Math.max(20, Math.min(90, state.continuity.lastTerritorialPressure + (sequenceIndex % 2) * 8)),
-        currentDanger: SequenceLevel.Medium,
+        chaosLevel: clampContextRating(
+          state.continuity.lastChaosLevel +
+            (sequenceIndex % 3) * 6 +
+            (globalInfluence?.repeatedPatternPressure ?? 0) +
+            Math.max(0, pressingInfluence?.defensiveStressModifier ?? 0),
+        ),
+        possessionStability: sequenceLevelFromModifier(possessionInfluence?.supportStabilityModifier ?? 0),
+        territorialPressure: clampContextRating(
+          state.continuity.lastTerritorialPressure +
+            (sequenceIndex % 2) * 8 +
+            (globalInfluence?.matchTempoAdjustment ?? 0) * 2 +
+            Math.max(0, pressingInfluence?.pressureLoadModifier ?? 0) * 2,
+        ),
+        currentDanger: sequenceLevelFromModifier(
+          (possessionInfluence?.routeRiskModifier ?? 0) +
+            (possessionInfluence?.finalActionComposureModifier ?? 0) +
+            (globalInfluence?.conversionVolatilityAdjustment ?? 0),
+        ),
         activeZone,
-        sequenceMomentum: 50 + (sequenceIndex % 2) * 6,
+        sequenceMomentum: clampContextRating(
+          50 +
+            (sequenceIndex % 2) * 6 +
+            (possessionInfluence?.momentumModifier ?? 0) * 3 +
+            (possessionInfluence?.scoringConfidenceModifier ?? 0) * 2,
+        ),
         weakSideExposure: SequenceLevel.Medium,
         currentInteraction: SequenceInteractionKind.BuildUpUnderPressure,
         pressureLevel,

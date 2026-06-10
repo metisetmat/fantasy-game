@@ -31,6 +31,10 @@ import {
   propagateFullMatchFatigue,
   type FullMatchFatiguePropagationResult,
 } from "./fullMatch/fullMatchFatiguePropagation";
+import {
+  createFullMatchSegmentInfluence,
+  type FullMatchSegmentInfluence,
+} from "./fullMatch/fullMatchSegmentInfluence";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -43,6 +47,7 @@ interface FullMatchSegmentResult {
   readonly config: FullMatchSegmentConfig;
   readonly miniMatch: MiniMatchResult;
   readonly stateBeforeSegment: FullMatchSegmentState;
+  readonly segmentInfluence?: FullMatchSegmentInfluence;
   readonly fatiguePropagation: FullMatchFatiguePropagationResult;
 }
 
@@ -284,11 +289,13 @@ export function runFullMatch(input: MatchInput): MatchReport {
 
   for (const [index, config] of FULL_MATCH_SEGMENTS.entries()) {
     const sequenceCount = sequenceCountForSegment(config, segmentState);
+    const segmentInfluence = index === 0 ? undefined : createFullMatchSegmentInfluence(segmentState);
     const miniMatch = runMiniMatch({
       ...adapter.miniMatchInput,
       numberOfSequences: sequenceCount,
       startTick: index * 100,
       ...miniMatchSeedInput((adapter.miniMatchInput.seed ?? 0) + segmentState.home.momentum + segmentState.away.defensiveStress, index),
+      ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
     });
     const rawSegmentEvents = timelineFromMiniMatch({
         matchInput: input,
@@ -304,6 +311,7 @@ export function runFullMatch(input: MatchInput): MatchReport {
           period: config.period,
           includeKickoff: index === 0,
           segmentState,
+          ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -335,6 +343,7 @@ export function runFullMatch(input: MatchInput): MatchReport {
       config,
       miniMatch,
       stateBeforeSegment: segmentState,
+      ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
       fatiguePropagation: propagation,
     });
     timelineSegments.push([...segmentEvents]);
