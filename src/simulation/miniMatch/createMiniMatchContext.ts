@@ -256,6 +256,7 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
       teamBId: input.teamB.id,
     }),
     ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
+    ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
   };
   const influenceAverage = input.segmentInfluence === undefined
     ? 0
@@ -292,7 +293,9 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
       lastChaosLevel: clampRating(38 + Math.max(0, pressureAverage) + (input.segmentInfluence?.global.repeatedPatternPressure ?? 0)),
       lastDangerLevel: "MEDIUM",
       lastPossessionReason: input.segmentInfluence === undefined
-        ? "initial mini-match setup"
+        ? input.spatialContext === undefined
+          ? "initial mini-match setup"
+          : `initial mini-match setup with spatial context active from ${input.spatialContext.sourceWorkbenchFrameId ?? "typed adapter"}`
         : `segment influence active with support stability ${influenceAverage} and pattern pressure ${input.segmentInfluence.global.repeatedPatternPressure}`,
     },
     tacticalMemory: createTacticalMemory([input.teamA.id, input.teamB.id]),

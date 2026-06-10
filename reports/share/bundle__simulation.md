@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -380,9 +380,9 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
     type: "ADAPTER_LIMITATION",
     scope: "coach_visible",
     severity: "low",
-    title: "Ancrage tactique full-match incomplet",
+    title: "Ancrage tactique full-match partiel",
     coachSummary:
-      "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques des workbenches action-par-action.",
+      "Le moteur sait convertir le roster et une verite workbench en contexte spatial type, mais le full-match ne rejoue pas encore toute la chaine workbench.",
     technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
     evidenceFactIds: groundingFacts.map((fact) => fact.factId),
     eventIds,
@@ -392,9 +392,9 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
   const diagnosis: TacticalDiagnosis = {
     diagnosisId: `${input.matchId}-tactical-grounding-gap`,
     teamId: input.homeTeam.teamId,
-    title: "Ancrage workbench encore partiel",
+    title: "Ancrage workbench maintenant partiel",
     summary:
-      "Le score du harnais doit etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas convertis en contexte spatial mini-match.",
+      "Le score du harnais doit etre lu avec prudence : les rosters et positions peuvent etre convertis en contexte spatial, mais les decisions visuelles ne pilotent pas encore toute la resolution mini-match.",
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
@@ -1096,6 +1096,10 @@ import type { MiniMatchInputAdapterResult } from "../adapters/matchInputToMiniMa
 
 export type RosterToMiniMatchGapAnalysis = {
   readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly spatialContextAdapterExists: boolean;
+  readonly rosterCanBecomeSpatialContext: boolean;
+  readonly workbenchPositionsCanSeedSpatialContext: boolean;
+  readonly miniMatchConsumesSpatialContextMetadata: "YES" | "PARTIAL" | "NO";
   readonly rosterDrivesMiniMatchPlayerPositions: boolean;
   readonly startersDriveActivePlayers: boolean;
   readonly playerRolesDriveActionResolution: boolean;
@@ -1119,8 +1123,12 @@ export function analyzeRosterToMiniMatchGap(input: {
 
   return {
     status: "PARTIAL",
-    rosterDrivesMiniMatchPlayerPositions: false,
-    startersDriveActivePlayers: false,
+    spatialContextAdapterExists: true,
+    rosterCanBecomeSpatialContext: true,
+    workbenchPositionsCanSeedSpatialContext: true,
+    miniMatchConsumesSpatialContextMetadata: "PARTIAL",
+    rosterDrivesMiniMatchPlayerPositions: true,
+    startersDriveActivePlayers: true,
     playerRolesDriveActionResolution: false,
     visibleAttributesDriveRouteRanking: false,
     tacticalPlanFullyDrivesTeamShape: false,
@@ -1128,16 +1136,582 @@ export function analyzeRosterToMiniMatchGap(input: {
     lostPlayerIdentity: rosterPlayerIds.filter((playerId) => !miniMatchPrototypeIds.includes(playerId)),
     documentedGaps: [
       "adaptMatchInputToMiniMatch maps official teams to CONTROL/BLITZ PrototypeTeamDefinition objects.",
-      "Official TeamSnapshot.roster is not converted into mini-match PlayerState positions.",
-      "TeamSnapshot starters do not select active mini-match players.",
+      "Sprint 2S can convert TeamSnapshot.roster into typed SpatialTeamContext.",
+      "Sprint 2S can seed SpatialTeamContext positions from workbench truth.",
+      "MiniMatchInput can carry SpatialMatchContext metadata, but normal action resolution remains prototype-driven.",
       "PlayerSnapshot roles and attributes do not yet drive route ranking.",
       "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
-      "CONTROL/BLITZ prototype teams remain the dominant source of mini-match tactical behavior.",
+      "CONTROL/BLITZ prototype teams remain a dominant source of mini-match tactical behavior.",
     ],
     recommendations: [
-      "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_GAP",
-      "PREPARE_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
-      "PREPARE_REAL_PLAYER_STATS",
+      "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
+      "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
+      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+    ],
+  };
+}
+```
+
+## File: src/simulation/spatialContext/spatialTeamContextTypes.ts
+
+```ts
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { Rating } from "../../core/ratings";
+import type { ZoneId } from "../../core/zones";
+import type { PlayerRole } from "../../models/player";
+
+export type SpatialPlayerContext = {
+  readonly playerId: PlayerId;
+  readonly teamId: TeamId;
+  readonly role: PlayerRole | string;
+  readonly displayRole: string;
+  readonly zone: ZoneId;
+  readonly projectedZone?: ZoneId;
+  readonly isStarter: boolean;
+  readonly isGoalkeeper: boolean;
+  readonly isBallCarrier: boolean;
+  readonly currentCondition: Rating;
+  readonly mentalFreshness: Rating;
+  readonly attributes: {
+    readonly speed?: Rating;
+    readonly power?: Rating;
+    readonly endurance?: Rating;
+    readonly handPlay?: Rating;
+    readonly footPlayDribble?: Rating;
+    readonly footPlayPassingShooting?: Rating;
+    readonly intelligence?: Rating;
+    readonly mental?: Rating;
+  };
+  readonly tacticalFunctions: readonly string[];
+};
+
+export type SpatialTeamContext = {
+  readonly teamId: TeamId;
+  readonly name: string;
+  readonly players: readonly SpatialPlayerContext[];
+  readonly goalkeeperId: PlayerId;
+  readonly starters: readonly PlayerId[];
+  readonly activePlayerIds: readonly PlayerId[];
+  readonly shapeSource: "workbench_truth" | "team_snapshot_default" | "prototype_fallback";
+  readonly tacticalPlanSummary: string;
+  readonly knownLimitations: readonly string[];
+};
+
+export type SpatialMatchContext = {
+  readonly matchId: string;
+  readonly possessionTeamId: TeamId;
+  readonly defendingTeamId: TeamId;
+  readonly ballCarrierId: PlayerId;
+  readonly ballZone: ZoneId;
+  readonly attackingDirection: string;
+  readonly home: SpatialTeamContext;
+  readonly away: SpatialTeamContext;
+  readonly sourceWorkbenchFrameId?: string;
+};
+```
+
+## File: src/simulation/spatialContext/roleToTacticalFunctions.ts
+
+```ts
+import { PlayerRole } from "../../models/player";
+
+const ROLE_FUNCTIONS: Readonly<Record<string, readonly string[]>> = {
+  [PlayerRole.TempoHalf]: ["tempo_controller", "first_receiver", "pressure_escape_decision_maker"],
+  [PlayerRole.HookLink]: ["direct_support", "wall_pass", "small_side_support"],
+  [PlayerRole.ForwardLeader]: ["contact_platform", "screen", "carry_platform"],
+  [PlayerRole.GoalkeeperFreeSafety]: ["rest_defense_anchor", "safe_recycle", "last_rempart"],
+  [PlayerRole.FreeSafety]: ["rest_defense_anchor", "safe_recycle", "last_rempart"],
+  [PlayerRole.MobileLock]: ["half_space_recycle", "ball_winner", "pressure_escape_receiver"],
+  [PlayerRole.SpaceHunter]: ["depth_threat", "chaos_attacker", "weak_side_runner"],
+  [PlayerRole.Playmaker]: ["third_man_connector", "creative_receiver", "tempo_accelerator"],
+  [PlayerRole.Pivot]: ["rest_defense_anchor", "central_recycle", "support_balance"],
+  [PlayerRole.LeftPiston]: ["wide_support", "press_trigger", "corridor_runner"],
+  [PlayerRole.RightPiston]: ["wide_support", "transition_hunter", "corridor_runner"],
+  [PlayerRole.LeftAnchor]: ["wide_rest_defense", "support_balance"],
+  [PlayerRole.RightAnchor]: ["wide_rest_defense", "support_balance"],
+  [PlayerRole.PowerRunner]: ["contact_platform", "carry_platform", "line_break_threat"],
+};
+
+export function tacticalFunctionsForRole(role: PlayerRole | string): readonly string[] {
+  return ROLE_FUNCTIONS[role] ?? ["unmapped_role_context"];
+}
+
+export function hasExplicitTacticalFunctionMapping(role: PlayerRole | string): boolean {
+  return ROLE_FUNCTIONS[role] !== undefined;
+}
+```
+
+## File: src/simulation/spatialContext/teamSnapshotToSpatialContext.ts
+
+```ts
+import type { MatchInput, PlayerSnapshot, TacticalPlan, TeamSnapshot } from "../../contracts/engineToCoach";
+import type { PlayerId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+import { PlayerRole } from "../../models/player";
+import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "../grounding/tacticalWorkbenchTypes";
+import { tacticalFunctionsForRole } from "./roleToTacticalFunctions";
+import type { SpatialPlayerContext, SpatialTeamContext } from "./spatialTeamContextTypes";
+
+const DEFAULT_ROLE_ZONES: Readonly<Record<string, ZoneId>> = {
+  [PlayerRole.GoalkeeperFreeSafety]: "Z2-C",
+  [PlayerRole.FreeSafety]: "Z2-C",
+  [PlayerRole.TempoHalf]: "Z4-HSL",
+  [PlayerRole.HookLink]: "Z4-CL",
+  [PlayerRole.ForwardLeader]: "Z5-HSL",
+  [PlayerRole.MobileLock]: "Z3-HSL",
+  [PlayerRole.SpaceHunter]: "Z5-HSR",
+  [PlayerRole.Playmaker]: "Z4-C",
+  [PlayerRole.Pivot]: "Z3-C",
+  [PlayerRole.LeftPiston]: "Z3-CL",
+  [PlayerRole.RightPiston]: "Z3-HSR",
+  [PlayerRole.LeftAnchor]: "Z3-CL",
+  [PlayerRole.RightAnchor]: "Z3-HSR",
+  [PlayerRole.PowerRunner]: "Z5-C",
+};
+
+function positionsForFrame(
+  workbench: TacticalWorkbenchFrame | undefined,
+  frame: "before" | "after",
+): readonly TacticalWorkbenchPlayerPosition[] {
+  if (workbench === undefined) {
+    return [];
+  }
+
+  if (frame === "after" && workbench.afterPlayerPositions !== undefined) {
+    return workbench.afterPlayerPositions;
+  }
+
+  return workbench.playerPositions;
+}
+
+function displayRole(role: PlayerRole | string): string {
+  return role
+    .split("_")
+    .map((part) => part.length === 0 ? part : `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
+    .join(" ");
+}
+
+function summarizePlan(plan: TacticalPlan): string {
+  return [
+    `attack=${plan.attackingIntent}`,
+    `defense=${plan.defensiveIntent}`,
+    `transition=${plan.transitionIntent}`,
+    `tempo=${plan.tempo}`,
+    `risk=${plan.riskLevel}`,
+    `scoring=${plan.scoringBias}`,
+  ].join("; ");
+}
+
+function defaultZoneForRole(role: PlayerRole | string): ZoneId {
+  return DEFAULT_ROLE_ZONES[role] ?? "Z3-C";
+}
+
+function projectedZone(position: TacticalWorkbenchPlayerPosition | undefined): { readonly projectedZone?: ZoneId } {
+  return position?.projectedZone === undefined ? {} : { projectedZone: position.projectedZone as ZoneId };
+}
+
+function playerToSpatialContext(input: {
+  readonly player: PlayerSnapshot;
+  readonly team: TeamSnapshot;
+  readonly position?: TacticalWorkbenchPlayerPosition;
+  readonly ballCarrierId?: PlayerId;
+}): SpatialPlayerContext {
+  return {
+    playerId: input.player.playerId,
+    teamId: input.team.teamId,
+    role: input.player.role,
+    displayRole: displayRole(input.player.role),
+    zone: (input.position?.realZone ?? defaultZoneForRole(input.player.role)) as ZoneId,
+    ...projectedZone(input.position),
+    isStarter: input.team.starters.includes(input.player.playerId),
+    isGoalkeeper: input.team.goalkeeperId === input.player.playerId,
+    isBallCarrier: input.ballCarrierId === input.player.playerId || input.position?.isBallCarrier === true,
+    currentCondition: input.player.currentCondition,
+    mentalFreshness: input.player.mentalFreshness,
+    attributes: {
+      speed: input.player.attributes.speed,
+      power: input.player.attributes.power,
+      endurance: input.player.attributes.endurance,
+      handPlay: input.player.attributes.handPlay,
+      footPlayDribble: input.player.attributes.footPlayDribble,
+      footPlayPassingShooting: input.player.attributes.footPlayPassingShooting,
+      intelligence: input.player.attributes.intelligence,
+      mental: input.player.attributes.mental,
+    },
+    tacticalFunctions: tacticalFunctionsForRole(input.player.role),
+  };
+}
+
+export function teamSnapshotToSpatialContext(input: {
+  readonly team: TeamSnapshot;
+  readonly tacticalPlan: TacticalPlan;
+  readonly workbench?: TacticalWorkbenchFrame;
+  readonly frame?: "before" | "after";
+}): SpatialTeamContext {
+  const frame = input.frame ?? "before";
+  const positions = positionsForFrame(input.workbench, frame).filter((position) => position.teamId === input.team.teamId);
+  const positionByPlayerId = new Map(positions.map((position) => [position.playerId, position]));
+  const rosterIds = new Set(input.team.roster.map((player) => player.playerId));
+  const missingWorkbenchPlayers = positions
+    .filter((position) => !rosterIds.has(position.playerId))
+    .map((position) => position.playerId);
+  const playersMissingWorkbenchPosition = input.team.roster
+    .filter((player) => input.workbench !== undefined && !positionByPlayerId.has(player.playerId))
+    .map((player) => player.playerId);
+  const ballCarrierId =
+    frame === "after"
+      ? input.workbench?.afterState?.newCarrierId
+      : input.workbench?.ballCarrierId;
+  const limitations: string[] = [];
+
+  if (input.workbench === undefined) {
+    limitations.push("No workbench truth supplied; conservative role-zone defaults used.");
+  }
+
+  if (missingWorkbenchPlayers.length > 0) {
+    limitations.push(`Workbench references players absent from TeamSnapshot: ${missingWorkbenchPlayers.join(", ")}.`);
+  }
+
+  if (playersMissingWorkbenchPosition.length > 0) {
+    limitations.push(`TeamSnapshot players missing workbench positions: ${playersMissingWorkbenchPosition.join(", ")}.`);
+  }
+
+  if (!rosterIds.has(input.team.goalkeeperId)) {
+    limitations.push(`Goalkeeper ${input.team.goalkeeperId} is not present in TeamSnapshot.roster.`);
+  }
+
+  return {
+    teamId: input.team.teamId,
+    name: input.team.name,
+    players: input.team.roster.map((player) => {
+      const position = positionByPlayerId.get(player.playerId);
+
+      return playerToSpatialContext({
+        player,
+        team: input.team,
+        ...(position === undefined ? {} : { position }),
+        ...(ballCarrierId === undefined ? {} : { ballCarrierId }),
+      });
+    }),
+    goalkeeperId: input.team.goalkeeperId,
+    starters: input.team.starters,
+    activePlayerIds: input.team.starters.filter((playerId) => rosterIds.has(playerId)),
+    shapeSource: input.workbench === undefined ? "team_snapshot_default" : "workbench_truth",
+    tacticalPlanSummary: summarizePlan(input.tacticalPlan),
+    knownLimitations: limitations,
+  };
+}
+
+export function buildSpatialContextForMatchTeam(input: {
+  readonly matchInput: MatchInput;
+  readonly team: "home" | "away";
+  readonly workbench?: TacticalWorkbenchFrame;
+  readonly frame?: "before" | "after";
+}): SpatialTeamContext {
+  return input.team === "home"
+    ? teamSnapshotToSpatialContext({
+        team: input.matchInput.homeTeam,
+        tacticalPlan: input.matchInput.homePlan,
+        ...(input.workbench === undefined ? {} : { workbench: input.workbench }),
+        ...(input.frame === undefined ? {} : { frame: input.frame }),
+      })
+    : teamSnapshotToSpatialContext({
+        team: input.matchInput.awayTeam,
+        tacticalPlan: input.matchInput.awayPlan,
+        ...(input.workbench === undefined ? {} : { workbench: input.workbench }),
+        ...(input.frame === undefined ? {} : { frame: input.frame }),
+      });
+}
+```
+
+## File: src/simulation/spatialContext/workbenchToSpatialMatchContext.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import { buildSpatialContextForMatchTeam } from "./teamSnapshotToSpatialContext";
+import type { SpatialMatchContext } from "./spatialTeamContextTypes";
+
+export function workbenchToSpatialMatchContext(input: {
+  readonly matchInput: MatchInput;
+  readonly workbench: TacticalWorkbenchFrame;
+  readonly frame: "before" | "after";
+}): SpatialMatchContext {
+  const after = input.frame === "after" ? input.workbench.afterState : undefined;
+
+  return {
+    matchId: input.matchInput.matchId,
+    possessionTeamId: input.workbench.possessionTeamId as TeamId,
+    defendingTeamId: input.workbench.defendingTeamId as TeamId,
+    ballCarrierId: (after?.newCarrierId ?? input.workbench.ballCarrierId) as PlayerId,
+    ballZone: (after?.ballZone ?? input.workbench.ballZone) as ZoneId,
+    attackingDirection: input.workbench.attackingDirection,
+    home: buildSpatialContextForMatchTeam({
+      matchInput: input.matchInput,
+      team: "home",
+      workbench: input.workbench,
+      frame: input.frame,
+    }),
+    away: buildSpatialContextForMatchTeam({
+      matchInput: input.matchInput,
+      team: "away",
+      workbench: input.workbench,
+      frame: input.frame,
+    }),
+    sourceWorkbenchFrameId: input.workbench.frameId,
+  };
+}
+```
+
+## File: src/simulation/grounding/runWorkbenchReplaySeed.ts
+
+```ts
+import type { MatchInput, PlayerSnapshot, TacticalPlan, TeamSnapshot } from "../../contracts/engineToCoach";
+import type { PlayerId } from "../../core/ids";
+import { PlayerRole } from "../../models/player";
+import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
+import { runMiniMatch } from "../miniMatch";
+import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
+import { workbenchToSpatialMatchContext } from "../spatialContext";
+
+export type WorkbenchReplaySeedResult = {
+  readonly fixtureId: string;
+  readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly spatialContextBuilt: boolean;
+  readonly selectedActionRepresented: boolean;
+  readonly actorPreserved: boolean;
+  readonly receiverPreserved: boolean;
+  readonly newCarrierPreserved: boolean;
+  readonly ballZonePreserved: boolean;
+  readonly missingTruths: readonly string[];
+  readonly lossyMappings: readonly string[];
+  readonly recommendations: readonly string[];
+};
+
+function roleFromWorkbench(role: string): PlayerRole {
+  switch (role) {
+    case PlayerRole.TempoHalf:
+      return PlayerRole.TempoHalf;
+    case PlayerRole.HookLink:
+      return PlayerRole.HookLink;
+    case PlayerRole.ForwardLeader:
+      return PlayerRole.ForwardLeader;
+    case PlayerRole.GoalkeeperFreeSafety:
+      return PlayerRole.GoalkeeperFreeSafety;
+    case PlayerRole.MobileLock:
+      return PlayerRole.MobileLock;
+    case PlayerRole.SpaceHunter:
+      return PlayerRole.SpaceHunter;
+    case PlayerRole.Playmaker:
+      return PlayerRole.Playmaker;
+    case PlayerRole.Pivot:
+      return PlayerRole.Pivot;
+    case PlayerRole.LeftPiston:
+      return PlayerRole.LeftPiston;
+    case PlayerRole.RightPiston:
+      return PlayerRole.RightPiston;
+    default:
+      return PlayerRole.Playmaker;
+  }
+}
+
+function displayNameFromPosition(position: TacticalWorkbenchPlayerPosition): string {
+  return `${position.teamId.toUpperCase()} ${position.initials}`;
+}
+
+function playerFromPosition(position: TacticalWorkbenchPlayerPosition): PlayerSnapshot {
+  const isGoalkeeper = position.role === PlayerRole.GoalkeeperFreeSafety;
+  const base = isGoalkeeper ? 82 : 76;
+
+  return {
+    playerId: position.playerId as PlayerId,
+    name: displayNameFromPosition(position),
+    role: roleFromWorkbench(position.role),
+    attributes: {
+      speed: base,
+      agility: base,
+      endurance: base,
+      power: base,
+      handPlay: isGoalkeeper ? 88 : base,
+      footPlayDribble: base,
+      footPlayPassingShooting: base,
+      intelligence: base,
+      mental: base,
+    },
+    traits: ["workbench_replay_seed"],
+    currentCondition: 92,
+    mentalFreshness: 90,
+  };
+}
+
+function uniquePositionsByPlayer(
+  positions: readonly TacticalWorkbenchPlayerPosition[],
+  teamId: string,
+): readonly TacticalWorkbenchPlayerPosition[] {
+  const seen = new Set<string>();
+  const result: TacticalWorkbenchPlayerPosition[] = [];
+
+  for (const position of positions.filter((candidate) => candidate.teamId === teamId)) {
+    if (seen.has(position.playerId)) {
+      continue;
+    }
+
+    seen.add(position.playerId);
+    result.push(position);
+  }
+
+  return result;
+}
+
+function teamFromWorkbench(input: {
+  readonly workbench: TacticalWorkbenchFrame;
+  readonly teamId: string;
+  readonly name: string;
+}): TeamSnapshot {
+  const positions = uniquePositionsByPlayer(input.workbench.playerPositions, input.teamId);
+  const roster = positions.map(playerFromPosition);
+  const goalkeeper = roster.find((player) => player.role === PlayerRole.GoalkeeperFreeSafety);
+
+  return {
+    teamId: input.teamId,
+    name: input.name,
+    roster,
+    starters: roster.map((player) => player.playerId),
+    bench: [],
+    goalkeeperId: goalkeeper?.playerId ?? roster[0]?.playerId ?? `${input.teamId}-missing-goalkeeper`,
+  };
+}
+
+const replayPlan: TacticalPlan = {
+  attackingIntent: "structured_possession",
+  defensiveIntent: "compact_block",
+  transitionIntent: "secure_rest_defense",
+  tempo: "balanced",
+  riskLevel: "medium",
+  targetZones: ["Z3-C"],
+  scoringBias: "balanced",
+  pressingIntensity: 55,
+  defensiveLineHeight: 50,
+  widthUsage: 55,
+  restDefensePriority: 70,
+};
+
+export function createWorkbenchReplayMatchInput(workbench: TacticalWorkbenchFrame): MatchInput {
+  return {
+    matchId: `${workbench.frameId}-replay-seed`,
+    seed: "workbench-replay-seed",
+    homeTeam: teamFromWorkbench({ workbench, teamId: "control", name: "CONTROL" }),
+    awayTeam: teamFromWorkbench({ workbench, teamId: "blitz", name: "BLITZ" }),
+    homePlan: replayPlan,
+    awayPlan: {
+      ...replayPlan,
+      attackingIntent: "direct_pressure",
+      defensiveIntent: "high_press",
+      transitionIntent: "counterpress",
+      tempo: "fast",
+      riskLevel: "high",
+      pressingIntensity: 86,
+      defensiveLineHeight: 78,
+      widthUsage: 62,
+      restDefensePriority: 52,
+    },
+    matchContext: {
+      competitionType: "friendly",
+      matchImportance: 40,
+    },
+    ruleset: {
+      rulesetId: "v0.1-workbench-replay",
+      scoringVersion: "V2_DROP_FOUNDATION",
+    },
+  };
+}
+
+function prototypeForTeam(id: string) {
+  const prototypeId = id === "control" ? PrototypeTeamId.Control : PrototypeTeamId.Blitz;
+  const prototype = PROTOTYPE_TEAMS.find((team) => team.id === prototypeId);
+
+  if (prototype === undefined) {
+    throw new Error(`Missing prototype team ${prototypeId}.`);
+  }
+
+  return prototype;
+}
+
+export function runWorkbenchReplaySeed(input: {
+  readonly matchInput: MatchInput;
+  readonly workbench: TacticalWorkbenchFrame;
+}): WorkbenchReplaySeedResult {
+  const beforeContext = workbenchToSpatialMatchContext({
+    matchInput: input.matchInput,
+    workbench: input.workbench,
+    frame: "before",
+  });
+  const afterContext = workbenchToSpatialMatchContext({
+    matchInput: input.matchInput,
+    workbench: input.workbench,
+    frame: "after",
+  });
+  const selectedAction = input.workbench.selectedAction;
+  const homePlayers = beforeContext.home.players;
+  const awayPlayers = beforeContext.away.players;
+  const allBeforePlayers = [...homePlayers, ...awayPlayers];
+  const allAfterPlayers = [...afterContext.home.players, ...afterContext.away.players];
+  const actorPreserved = allBeforePlayers.some((player) => player.playerId === selectedAction.actorId);
+  const receiverPreserved = selectedAction.receiverId === undefined
+    ? true
+    : allBeforePlayers.some((player) => player.playerId === selectedAction.receiverId);
+  const newCarrierPreserved = selectedAction.newCarrierId === undefined
+    ? true
+    : allAfterPlayers.some((player) => player.playerId === selectedAction.newCarrierId && player.isBallCarrier);
+  const ballZonePreserved =
+    beforeContext.ballZone === input.workbench.ballZone &&
+    afterContext.ballZone === input.workbench.afterState?.ballZone;
+  const selectedActionRepresented =
+    selectedAction.actionType === "SUPPORT_CLUSTER_RECYCLE" &&
+    selectedAction.actorId === beforeContext.ballCarrierId &&
+    selectedAction.newCarrierId === afterContext.ballCarrierId;
+  const miniMatch = runMiniMatch({
+    teamA: prototypeForTeam(input.matchInput.homeTeam.teamId),
+    teamB: prototypeForTeam(input.matchInput.awayTeam.teamId),
+    numberOfSequences: 1,
+    seed: 202,
+    spatialContext: beforeContext,
+  });
+  const lossyMappings = [
+    "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
+    "Route ranking is not yet fully driven by PlayerSnapshot attributes.",
+    `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s), but not a forced workbench action chain.`,
+  ];
+  const missingTruths = [
+    ...beforeContext.home.knownLimitations,
+    ...beforeContext.away.knownLimitations,
+    ...afterContext.home.knownLimitations,
+    ...afterContext.away.knownLimitations,
+  ];
+  const status: WorkbenchReplaySeedResult["status"] =
+    actorPreserved && receiverPreserved && newCarrierPreserved && ballZonePreserved && selectedActionRepresented
+      ? "PARTIAL"
+      : "FAIL";
+
+  return {
+    fixtureId: input.workbench.frameId,
+    status,
+    spatialContextBuilt: true,
+    selectedActionRepresented,
+    actorPreserved,
+    receiverPreserved,
+    newCarrierPreserved,
+    ballZonePreserved,
+    missingTruths,
+    lossyMappings,
+    recommendations: [
+      "CONFIRM_WORKBENCH_REPLAY_SEED",
+      "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
+      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
     ],
   };
 }
@@ -1149,11 +1723,12 @@ export function analyzeRosterToMiniMatchGap(input: {
 import type { MatchReport } from "../../contracts/engineToCoach";
 
 export type FullMatchGroundingWarning =
-  | "FULL_MATCH_NOT_WORKBENCH_GROUNDED"
-  | "ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT"
+  | "FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED"
+  | "SPATIAL_CONTEXT_ADAPTER_AVAILABLE"
+  | "WORKBENCH_REPLAY_SEED_AVAILABLE"
   | "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION"
-  | "PLAYER_IDENTITY_LOSS_IN_MINIMATCH"
-  | "WORKBENCH_TRUTH_NOT_REPLAYED_IN_FULLMATCH"
+  | "ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"
+  | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
 
 export type FullMatchGroundingDiagnostics = {
@@ -1171,11 +1746,12 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
   const oneTeamScoringOnly = new Set(report.timeline.filter((event) => event.eventType === "scoring").map((event) => event.teamId)).size === 1 &&
     scoringEventCount > 0;
   const warnings: FullMatchGroundingWarning[] = [
-    "FULL_MATCH_NOT_WORKBENCH_GROUNDED",
-    "ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT",
+    "FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED",
+    "SPATIAL_CONTEXT_ADAPTER_AVAILABLE",
+    "WORKBENCH_REPLAY_SEED_AVAILABLE",
     "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION",
-    "PLAYER_IDENTITY_LOSS_IN_MINIMATCH",
-    "WORKBENCH_TRUTH_NOT_REPLAYED_IN_FULLMATCH",
+    "ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN",
+    "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
 
   if (oneTeamScoringOnly || Math.abs(report.score.home - report.score.away) >= 21) {
@@ -1189,12 +1765,15 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match remains a deterministic harness: it has not yet replayed the typed workbench truth, official roster positions, or action-by-action visual decisions.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context, but the harness does not yet replay the full workbench sequence chain or drive route ranking from real player attributes.",
     recommendation: [
-      "CONFIRM_FULLMATCH_NOT_YET_WORKBENCH_GROUNDED",
+      "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
+      "CONFIRM_WORKBENCH_REPLAY_SEED",
+      "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
-      "PREPARE_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
-      "PREPARE_WORKBENCH_REPLAY_ENGINE",
+      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+      "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };
 }
@@ -1298,16 +1877,21 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   const analysis = analyzeRosterToMiniMatchGap({ matchInput, adapter });
 
   assertTest(analysis.status === "PARTIAL", `roster-to-mini-match gap must be PARTIAL, received ${analysis.status}.`);
-  assertTest(!analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must not be reported as driving mini-match positions yet.");
-  assertTest(!analysis.startersDriveActivePlayers, "TeamSnapshot.starters must not be reported as driving active players yet.");
+  assertTest(analysis.spatialContextAdapterExists, "spatial context adapter must be reported as available.");
+  assertTest(analysis.rosterCanBecomeSpatialContext, "TeamSnapshot.roster must be reported as convertible to SpatialTeamContext.");
+  assertTest(analysis.workbenchPositionsCanSeedSpatialContext, "workbench positions must be reported as able to seed spatial context.");
+  assertTest(analysis.miniMatchConsumesSpatialContextMetadata === "PARTIAL", "mini-match spatial context consumption must be PARTIAL.");
+  assertTest(analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must now drive adapter-level spatial player context.");
+  assertTest(analysis.startersDriveActivePlayers, "TeamSnapshot.starters must now drive adapter-level active player IDs.");
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
   assertTest(analysis.lostPlayerIdentity.length > 0, "lost official player identity must be reported.");
 
   return [
     "roster-to-mini-match gap is PARTIAL",
-    "TeamSnapshot roster and starters do not yet drive mini-match spatial state",
-    "prototype dominance is documented",
+    "TeamSnapshot roster and starters now drive adapter-level spatial context",
+    "workbench positions can seed spatial context",
+    "prototype dominance is still documented",
     "lost player identity is listed",
   ];
 }
@@ -1316,6 +1900,147 @@ if (require.main === module) {
   const checks = validateRosterToMiniMatchGapAnalysis();
 
   console.log("rosterToMiniMatchGapAnalysis tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/spatialContext/roleToTacticalFunctions.test.ts
+
+```ts
+import { sequence1Action1WorkbenchTruth } from "../grounding/fixtures/sequence1Action1.fixture";
+import { hasExplicitTacticalFunctionMapping, tacticalFunctionsForRole } from "./roleToTacticalFunctions";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRoleToTacticalFunctions(): readonly string[] {
+  const roles = new Set(sequence1Action1WorkbenchTruth.playerPositions.map((position) => position.role));
+
+  for (const role of roles) {
+    assertTest(hasExplicitTacticalFunctionMapping(role), `role ${role} must have explicit tactical functions.`);
+    assertTest(tacticalFunctionsForRole(role).length > 0, `role ${role} must map to at least one tactical function.`);
+  }
+
+  return [
+    "every CONTROL/BLITZ workbench role has explicit tactical functions",
+    "every mapped role has at least one tactical function",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRoleToTacticalFunctions();
+
+  console.log("roleToTacticalFunctions tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/spatialContext/workbenchToSpatialMatchContext.test.ts
+
+```ts
+import { sequence1Action1WorkbenchTruth } from "../grounding/fixtures/sequence1Action1.fixture";
+import { createWorkbenchReplayMatchInput } from "../grounding/runWorkbenchReplaySeed";
+import { workbenchToSpatialMatchContext } from "./workbenchToSpatialMatchContext";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateWorkbenchToSpatialMatchContext(): readonly string[] {
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const before = workbenchToSpatialMatchContext({
+    matchInput,
+    workbench: sequence1Action1WorkbenchTruth,
+    frame: "before",
+  });
+  const after = workbenchToSpatialMatchContext({
+    matchInput,
+    workbench: sequence1Action1WorkbenchTruth,
+    frame: "after",
+  });
+  const beforeControlMl = before.home.players.find((player) => player.playerId === "control-mobile-lock");
+
+  assertTest(before.possessionTeamId === "control", "possession team must be CONTROL.");
+  assertTest(before.defendingTeamId === "blitz", "defending team must be BLITZ.");
+  assertTest(before.ballCarrierId === "control-tempo-half", "before ball carrier must be CONTROL TH.");
+  assertTest(before.ballZone === "Z4-HSL", "before ball zone must be Z4-HSL.");
+  assertTest(beforeControlMl?.zone === "Z3-HSL", "CONTROL ML must exist at Z3-HSL before action.");
+  assertTest(after.ballCarrierId === "control-mobile-lock", "after new carrier must be CONTROL ML.");
+  assertTest(after.ballZone === "Z3-HSL", "after ball zone must be Z3-HSL.");
+
+  return [
+    "sequence-1-action-1 before frame becomes SpatialMatchContext",
+    "possession and defending teams are preserved",
+    "CONTROL ML before zone is preserved",
+    "after frame new carrier and ball zone are preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchToSpatialMatchContext();
+
+  console.log("workbenchToSpatialMatchContext tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/workbenchReplaySeed.test.ts
+
+```ts
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { createWorkbenchReplayMatchInput, runWorkbenchReplaySeed } from "./runWorkbenchReplaySeed";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateWorkbenchReplaySeed(): readonly string[] {
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const result = runWorkbenchReplaySeed({
+    matchInput,
+    workbench: sequence1Action1WorkbenchTruth,
+  });
+
+  assertTest(result.spatialContextBuilt, "spatial context must be built.");
+  assertTest(result.actorPreserved, "actor control-tempo-half must be preserved.");
+  assertTest(result.receiverPreserved, "receiver control-mobile-lock must be preserved.");
+  assertTest(result.newCarrierPreserved, "new carrier control-mobile-lock must be preserved.");
+  assertTest(result.ballZonePreserved, "before and after ball zones must be preserved.");
+  assertTest(result.selectedActionRepresented, "SUPPORT_CLUSTER_RECYCLE selected action must be represented.");
+  assertTest(result.status === "PARTIAL" || result.status === "PASS", `replay seed must not fail, received ${result.status}.`);
+  if (result.status === "PARTIAL") {
+    assertTest(result.lossyMappings.length > 0, "PARTIAL replay seed must list lossy mappings.");
+  }
+
+  return [
+    "spatial context is built",
+    "actor TH is preserved",
+    "receiver ML is preserved",
+    "new carrier ML is preserved",
+    "before ball zone Z4-HSL is preserved",
+    "after ball zone Z3-HSL is preserved",
+    "selected action type SUPPORT_CLUSTER_RECYCLE is represented",
+    "replay seed is PARTIAL and honest",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchReplaySeed();
+
+  console.log("workbenchReplaySeed tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -1354,8 +2079,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
     { home: 0, away: 0 },
   );
 
-  assertTest(diagnostics.warnings.includes("FULL_MATCH_NOT_WORKBENCH_GROUNDED"), "full-match grounding warning must be emitted.");
-  assertTest(diagnostics.warnings.includes("ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT"), "roster conversion warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED"), "partial full-match grounding warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("SPATIAL_CONTEXT_ADAPTER_AVAILABLE"), "spatial context adapter availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("WORKBENCH_REPLAY_SEED_AVAILABLE"), "workbench replay seed availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"), "route ranking attribute gap must be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
   assertTest(
@@ -1379,7 +2106,9 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   }
 
   return [
-    "full-match grounding warning is emitted",
+    "partial full-match grounding warning is emitted",
+    "spatial context adapter availability is emitted",
+    "workbench replay seed availability is emitted",
     "grounding evidence facts are attached",
     "scoring events are not mutated",
     "final score remains derived from score_change",
@@ -3151,7 +3880,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques observables dans les workbenches action-par-action. Le score doit donc etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas alignes avec la resolution mini-match.";
+    "Le moteur sait maintenant convertir une verite workbench en contexte spatial type, mais la resolution mini-match n'utilise encore que partiellement ces informations pour choisir ses actions.";
 
   return [
     {
@@ -3167,10 +3896,10 @@ function tacticalGroundingGapFacts(input: {
       confidence: "low",
       strength: 58,
       coachVisible: true,
-      internalTags: ["tactical_grounding_gap", "workbench_truth_available"],
+      internalTags: ["tactical_grounding_gap", "workbench_truth_fixture_available", "workbench_replay_seed"],
     },
     {
-      factId: `${input.matchInput.matchId}-mini-match-alignment-partial`,
+      factId: `${input.matchInput.matchId}-spatial-context-adapter-available`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -3178,14 +3907,19 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "Mini-match can represent some selected-action semantics, but it does not yet consume the complete workbench before/after spatial truth.",
+      summary: "Sprint 2S adds a typed roster/workbench to SpatialMatchContext adapter that can preserve player identity, starter status, ball carrier, and workbench zones.",
       confidence: "low",
-      strength: 55,
+      strength: 60,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "mini_match_alignment_partial"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "spatial_context_adapter_available",
+        "spatial_context_active",
+        "roster_to_spatial_context_adapter",
+      ],
     },
     {
-      factId: `${input.matchInput.matchId}-roster-to-spatial-context-gap`,
+      factId: `${input.matchInput.matchId}-workbench-replay-seed-partial`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -3193,14 +3927,14 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "Official rosters and starters are not yet converted into mini-match spatial contexts, so prototype teams remain the dominant resolution source.",
+      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones, but normal route ranking still resolves through the prototype path.",
       confidence: "low",
-      strength: 62,
+      strength: 58,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "roster_to_spatial_context_gap"],
+      internalTags: ["tactical_grounding_gap", "workbench_replay_seed_partial"],
     },
     {
-      factId: `${input.matchInput.matchId}-full-match-not-workbench-grounded`,
+      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -3208,11 +3942,30 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "The full-match harness is not yet a replay engine for the visual workbench truth.",
+      summary: "PlayerSnapshot roles and attributes are carried into the adapter layer, but they do not yet fully drive mini-match route ranking.",
       confidence: "low",
       strength: 65,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "full_match_harness_not_yet_workbench_grounded"],
+      internalTags: ["tactical_grounding_gap", "route_ranking_not_yet_attribute_driven", "route_ranking_attribute_gap"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-full-match-partial-workbench-grounding`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "Full-match is partially workbench-grounded, but it is not yet replaying the workbench sequence chain as the source of every tactical decision.",
+      confidence: "low",
+      strength: 62,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "full_match_partially_workbench_grounded",
+        "fullmatch_not_yet_replaying_workbench_sequence_chain",
+      ],
     },
   ];
 }
@@ -6370,6 +7123,7 @@ import type { SpatialTeamContext } from "../../systems/spatial";
 import type { TacticalMemoryState } from "../../systems/tacticalMemory";
 import type { RecoverySaturationState } from "../../systems/structure";
 import type { OffensiveMomentumState } from "../../systems/offense/momentum";
+import type { SpatialMatchContext as AdapterSpatialMatchContext } from "../spatialContext/spatialTeamContextTypes";
 
 export interface MiniMatchInput {
   readonly teamA: PrototypeTeamDefinition;
@@ -6378,6 +7132,7 @@ export interface MiniMatchInput {
   readonly startTick?: TacticalTick;
   readonly seed?: number;
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
+  readonly spatialContext?: AdapterSpatialMatchContext;
 }
 
 export interface MiniMatchTeamSegmentInfluence {
@@ -6509,6 +7264,7 @@ export interface MiniMatchContext {
   readonly seed: number;
   readonly attackingDirections: readonly TeamDirectionAssignment[];
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
+  readonly spatialContext?: AdapterSpatialMatchContext;
 }
 
 export interface MiniMatchContinuityState {
@@ -6528,6 +7284,8 @@ export interface MiniMatchSequenceSetup {
   readonly pressureDescription: string;
   readonly openingLine: string;
   readonly possessionReason: string;
+  readonly spatialContextActive: boolean;
+  readonly spatialContextSummary?: string;
   readonly resolveInput: ResolveSequenceInput;
 }
 
@@ -6836,6 +7594,7 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
       teamBId: input.teamB.id,
     }),
     ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
+    ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
   };
   const influenceAverage = input.segmentInfluence === undefined
     ? 0
@@ -6872,7 +7631,9 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
       lastChaosLevel: clampRating(38 + Math.max(0, pressureAverage) + (input.segmentInfluence?.global.repeatedPatternPressure ?? 0)),
       lastDangerLevel: "MEDIUM",
       lastPossessionReason: input.segmentInfluence === undefined
-        ? "initial mini-match setup"
+        ? input.spatialContext === undefined
+          ? "initial mini-match setup"
+          : `initial mini-match setup with spatial context active from ${input.spatialContext.sourceWorkbenchFrameId ?? "typed adapter"}`
         : `segment influence active with support stability ${influenceAverage} and pattern pressure ${input.segmentInfluence.global.repeatedPatternPressure}`,
     },
     tacticalMemory: createTacticalMemory([input.teamA.id, input.teamB.id]),
@@ -7143,6 +7904,21 @@ function createOpeningLine(possessionTeam: PrototypeTeamDefinition, pressingTeam
   return `${possessionTeam.displayName} starts a tactical sequence under pressure from ${pressingTeam.displayName}.`;
 }
 
+function spatialContextSummary(state: MiniMatchState): string | undefined {
+  const spatialContext = state.context.spatialContext;
+
+  if (spatialContext === undefined) {
+    return undefined;
+  }
+
+  return [
+    "spatial_context_active",
+    `fixture=${spatialContext.sourceWorkbenchFrameId ?? "none"}`,
+    `carrier=${spatialContext.ballCarrierId}`,
+    `zone=${spatialContext.ballZone}`,
+  ].join("; ");
+}
+
 export function selectInitialSequenceContext(
   state: MiniMatchState,
   sequenceIndex: number,
@@ -7193,6 +7969,7 @@ export function selectInitialSequenceContext(
         });
   const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
   const startTick = state.context.startTick + sequenceIndex * 10;
+  const spatialSummary = spatialContextSummary(state);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -7202,6 +7979,8 @@ export function selectInitialSequenceContext(
     pressureDescription: pressureLevel.toUpperCase(),
     openingLine: createOpeningLine(possessionTeamDefinition, pressingTeamDefinition),
     possessionReason: describePossessionReason(state, possessionTeamDefinition, sequenceIndex),
+    spatialContextActive: state.context.spatialContext !== undefined,
+    ...(spatialSummary === undefined ? {} : { spatialContextSummary: spatialSummary }),
     resolveInput: {
       startTick,
       teams: {
@@ -7399,6 +8178,10 @@ export function validateMiniMatchSegmentInfluence(): readonly string[] {
   assertTest(
     baselineA.state.context.segmentInfluence === undefined,
     "runMiniMatch without segment influence must not attach influence context.",
+  );
+  assertTest(
+    baselineA.state.context.spatialContext === undefined,
+    "runMiniMatch without spatial context must remain backward compatible.",
   );
   assertTest(
     influenced.state.context.segmentInfluence !== undefined,

@@ -14,16 +14,21 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   const analysis = analyzeRosterToMiniMatchGap({ matchInput, adapter });
 
   assertTest(analysis.status === "PARTIAL", `roster-to-mini-match gap must be PARTIAL, received ${analysis.status}.`);
-  assertTest(!analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must not be reported as driving mini-match positions yet.");
-  assertTest(!analysis.startersDriveActivePlayers, "TeamSnapshot.starters must not be reported as driving active players yet.");
+  assertTest(analysis.spatialContextAdapterExists, "spatial context adapter must be reported as available.");
+  assertTest(analysis.rosterCanBecomeSpatialContext, "TeamSnapshot.roster must be reported as convertible to SpatialTeamContext.");
+  assertTest(analysis.workbenchPositionsCanSeedSpatialContext, "workbench positions must be reported as able to seed spatial context.");
+  assertTest(analysis.miniMatchConsumesSpatialContextMetadata === "PARTIAL", "mini-match spatial context consumption must be PARTIAL.");
+  assertTest(analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must now drive adapter-level spatial player context.");
+  assertTest(analysis.startersDriveActivePlayers, "TeamSnapshot.starters must now drive adapter-level active player IDs.");
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
   assertTest(analysis.lostPlayerIdentity.length > 0, "lost official player identity must be reported.");
 
   return [
     "roster-to-mini-match gap is PARTIAL",
-    "TeamSnapshot roster and starters do not yet drive mini-match spatial state",
-    "prototype dominance is documented",
+    "TeamSnapshot roster and starters now drive adapter-level spatial context",
+    "workbench positions can seed spatial context",
+    "prototype dominance is still documented",
     "lost player identity is listed",
   ];
 }

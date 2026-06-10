@@ -120,6 +120,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const trueSegmentStateIntegrationValidation = readIfExists(join(shareDirectory, "validation.true-segment-state-integration.md"));
   const tacticalGroundingReconciliation = readIfExists(join(shareDirectory, "tactical-grounding-reconciliation.md"));
   const tacticalGroundingReconciliationValidation = readIfExists(join(shareDirectory, "validation.tactical-grounding-reconciliation.md"));
+  const rosterToSpatialContextAdapter = readIfExists(join(shareDirectory, "roster-to-spatial-context-adapter.md"));
+  const rosterToSpatialContextAdapterValidation = readIfExists(join(shareDirectory, "validation.roster-to-spatial-context-adapter.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
@@ -1689,6 +1691,65 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "coach-facing-summary-boundary.md",
     "validation.coach-facing-summary-boundary.md",
   ];
+  const sprint2SExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "validation.share-pack.md",
+    "roster-to-spatial-context-adapter.md",
+    "validation.roster-to-spatial-context-adapter.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint2SForbiddenLeftovers = [
+    "tactical-grounding-reconciliation.md",
+    "validation.tactical-grounding-reconciliation.md",
+    "true-segment-state-integration.md",
+    "validation.true-segment-state-integration.md",
+    "bundle__docs.md",
+  ];
+  const sprint2SChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2S", activeConfig.sprintName === "Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint2SForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint2SForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2SExpectedFiles.every((file) => requiredCopied(file)), sprint2SExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2S", manifest.includes("Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed") && detailedManifest.includes("Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed"), "Sprint 2S visible"),
+    check("README is Sprint 2S oriented", readme.includes("# Sprint 2S Share Pack") && readme.includes("roster-to-spatial-context-adapter.md"), "README current"),
+    check("workbench artifact copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionOneWorkbench.includes("data-player-id=\"control-tempo-half\""), "sequence workbench copied"),
+    check("roster-to-spatial-context adapter report included", rosterToSpatialContextAdapter.includes("# Roster-to-SpatialContext Adapter") && rosterToSpatialContextAdapter.includes("Can TeamSnapshot become SpatialTeamContext? YES"), "adapter doc included"),
+    check("roster-to-spatial-context validation is PASS", rosterToSpatialContextAdapterValidation.includes("Status: PASS") && rosterToSpatialContextAdapterValidation.includes("sequence-1-action-1 replay seed does not fail"), "validation PASS"),
+    check("spatial context types bundled", bundleSimulation.includes("src/simulation/spatialContext/spatialTeamContextTypes.ts") && bundleSimulation.includes("SpatialMatchContext"), "spatial types bundled"),
+    check("role-to-function mapping bundled", bundleSimulation.includes("src/simulation/spatialContext/roleToTacticalFunctions.ts") && bundleSimulation.includes("pressure_escape_decision_maker"), "role mapping bundled"),
+    check("TeamSnapshot to SpatialTeamContext adapter bundled", bundleSimulation.includes("src/simulation/spatialContext/teamSnapshotToSpatialContext.ts") && bundleSimulation.includes("teamSnapshotToSpatialContext"), "team adapter bundled"),
+    check("WorkbenchTruth to SpatialMatchContext adapter bundled", bundleSimulation.includes("src/simulation/spatialContext/workbenchToSpatialMatchContext.ts") && bundleSimulation.includes("workbenchToSpatialMatchContext"), "workbench adapter bundled"),
+    check("workbench replay seed runner bundled", bundleSimulation.includes("src/simulation/grounding/runWorkbenchReplaySeed.ts") && bundleSimulation.includes("runWorkbenchReplaySeed"), "replay seed bundled"),
+    check("mini-match optional spatial context bundled", bundleSimulation.includes("readonly spatialContext?: AdapterSpatialMatchContext") && bundleSimulation.includes("spatial_context_active"), "mini-match spatial metadata bundled"),
+    check("spatial context tests bundled", bundleSimulation.includes("roleToTacticalFunctions.test.ts") && bundleSimulation.includes("workbenchToSpatialMatchContext.test.ts") && bundleSimulation.includes("workbenchReplaySeed.test.ts"), "2S tests bundled"),
+    check("roster gap analysis updated", bundleSimulation.includes("spatialContextAdapterExists") && bundleSimulation.includes("miniMatchConsumesSpatialContextMetadata"), "gap analysis updated"),
+    check("full-match grounding diagnostics are nuanced", bundleSimulation.includes("FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED") && bundleSimulation.includes("ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"), "partial grounding diagnostics visible"),
+    check("MatchReport spatial grounding evidence included", bundleSimulation.includes("spatial_context_adapter_available") && bundleSimulation.includes("workbench_replay_seed_partial") && bundleSimulation.includes("route_ranking_not_yet_attribute_driven"), "grounding facts visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", rosterToSpatialContextAdapterValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && rosterToSpatialContextAdapterValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && rosterToSpatialContextAdapterValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", rosterToSpatialContextAdapter.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
+    check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
+  ];
   const sprint2RChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("current sprint is Sprint 2R", activeConfig.sprintName === "Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch", activeConfig.sprintName),
@@ -1739,6 +1800,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 2S - Roster-to-SpatialContext")
+      ? sprint2SChecks
     : activeConfig.sprintName.includes("Sprint 2R - Tactical Grounding Reconciliation")
       ? sprint2RChecks
     : activeConfig.sprintName.includes("Sprint 2N - Segment Diversity")

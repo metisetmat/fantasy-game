@@ -1,8 +1,8 @@
 # Share Pack
 
-Generated: 2026-06-10T15:32:52.268Z
-Task/sprint: Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch
-Final file count: 15
+Generated: 2026-06-10T16:01:13.282Z
+Task/sprint: Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed
+Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
 
@@ -13,15 +13,14 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - validation.share-pack.md
-- tactical-grounding-reconciliation.md
-- validation.tactical-grounding-reconciliation.md
+- roster-to-spatial-context-adapter.md
+- validation.roster-to-spatial-context-adapter.md
 - README.md
 
 ## Bundle Files
 - bundle__contracts.md
 - bundle__simulation.md
 - bundle__reports.md
-- bundle__docs.md
 
 ## Missing Expected Files
 - none

@@ -284,9 +284,9 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
     type: "ADAPTER_LIMITATION",
     scope: "coach_visible",
     severity: "low",
-    title: "Ancrage tactique full-match incomplet",
+    title: "Ancrage tactique full-match partiel",
     coachSummary:
-      "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques des workbenches action-par-action.",
+      "Le moteur sait convertir le roster et une verite workbench en contexte spatial type, mais le full-match ne rejoue pas encore toute la chaine workbench.",
     technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
     evidenceFactIds: groundingFacts.map((fact) => fact.factId),
     eventIds,
@@ -296,9 +296,9 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
   const diagnosis: TacticalDiagnosis = {
     diagnosisId: `${input.matchId}-tactical-grounding-gap`,
     teamId: input.homeTeam.teamId,
-    title: "Ancrage workbench encore partiel",
+    title: "Ancrage workbench maintenant partiel",
     summary:
-      "Le score du harnais doit etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas convertis en contexte spatial mini-match.",
+      "Le score du harnais doit etre lu avec prudence : les rosters et positions peuvent etre convertis en contexte spatial, mais les decisions visuelles ne pilotent pas encore toute la resolution mini-match.",
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",

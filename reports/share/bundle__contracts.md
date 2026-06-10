@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
