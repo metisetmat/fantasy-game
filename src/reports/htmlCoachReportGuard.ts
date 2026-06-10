@@ -1,6 +1,7 @@
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { containsMojibake } from "./coachCopyQuality";
+import { assertNoTechnicalContextLeak } from "./coachFacingSummary";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 
 function assertGuard(condition: boolean, message: string): void {
@@ -9,9 +10,14 @@ function assertGuard(condition: boolean, message: string): void {
   }
 }
 
+function visibleHtml(html: string): string {
+  return html.replace(/<details[\s\S]*?<\/details>/g, "");
+}
+
 export function validateHtmlCoachReportRenderer(): readonly string[] {
   const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
   const html = renderHtmlCoachReport(report);
+  const visible = visibleHtml(html);
   const firstInsight = report.coachInsights[0];
   const firstKeyMoment = report.keyMoments[0];
   const uniqueKeyMomentTitles = new Set(report.keyMoments.map((moment) => moment.title));
@@ -92,6 +98,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   assertGuard(!html.includes("Ã¢â‚¬"), "rendered coach report must not contain mojibake punctuation.");
   assertGuard(!html.includes("global scoring incoherence"), "rendered coach report must not claim global scoring incoherence from one run.");
   assertGuard(!html.includes("change scoring values"), "rendered coach report must not recommend scoring value changes from one run.");
+  assertNoTechnicalContextLeak(visible, "visible coach HTML");
 
   return [
     "HTML coach report includes document root",
@@ -120,6 +127,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     "HTML coach report keeps raw harness enum wording inside technical warning details only",
     "HTML coach report does not claim global scoring incoherence",
     "HTML coach report does not recommend scoring value changes",
+    "HTML visible copy contains no technical context leaks",
   ];
 }
 

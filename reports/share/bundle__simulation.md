@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract. Source files are bundled by domain for compact ChatGPT review.
+Generated for Micro-sprint 2P-Fix - Coach-Facing Summary Boundary. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -2182,8 +2182,8 @@ import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidenc
 import type { MatchReportWarning, MatchReportWarningType } from "../../contracts/matchReportWarnings";
 import {
   coachFacingHarnessWarningSummary,
-  coachFacingScoringDominanceSummary,
 } from "../../reports/coachFacingCopy";
+import { coachFacingWarningSummaryByType } from "../../reports/coachFacingSummary";
 import type {
   FullMatchHarnessSanityReport,
   FullMatchHarnessSanityWarning,
@@ -2326,7 +2326,8 @@ export function buildMatchReportWarnings(input: {
   const uniqueTypes = [...new Set(input.sanity.warnings.map(warningTypeForHarnessWarning))];
 
   return uniqueTypes.map((type) => {
-    const isDominance = type === "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+    const dominantTeamId = input.sanity.scoringDominance.dominantTeamId;
+    const dominatedTeamId = input.sanity.scoringDominance.dominatedTeamId;
 
     return {
       warningId: `${input.report.matchId}-${type.toLowerCase()}`,
@@ -2334,9 +2335,13 @@ export function buildMatchReportWarnings(input: {
       scope: "coach_visible",
       severity: severityForWarning(type),
       title: titleForWarning(type),
-      coachSummary: isDominance
-        ? coachFacingScoringDominanceSummary(input.sanity.scoringDominance)
-        : coachFacingHarnessWarningSummary(input.sanity.warnings),
+      coachSummary: coachFacingWarningSummaryByType({
+        warningType: type,
+        fallbackSummary: coachFacingHarnessWarningSummary(input.sanity.warnings),
+        score: input.report.score,
+        ...(dominantTeamId === undefined ? {} : { dominantTeamId }),
+        ...(dominatedTeamId === undefined ? {} : { dominatedTeamId }),
+      }),
       technicalSummary: `Harness warnings: ${input.sanity.warnings.join(", ")}. Scope: ${input.sanity.scope}. May invalidate global economy: false.`,
       evidenceFactIds: harnessFact === undefined ? [] : [harnessFact.factId],
       eventIds,
@@ -2349,12 +2354,14 @@ export function buildMatchReportWarnings(input: {
 ## File: src/simulation/adapters/matchReportMoments.ts
 
 ```ts
-import type {
+﻿import type {
   CoachInsight,
   KeyMoment,
   MatchEvent,
   MatchInput,
 } from "../../contracts/engineToCoach";
+import { normalizeCoachFacingCopy } from "../../reports/coachCopyQuality";
+import { coachFacingKeyMomentSummary } from "../../reports/coachFacingSummary";
 import type { MatchEvidenceFact } from "./matchReportEvidence";
 
 const MAX_KEY_MOMENTS = 5;
@@ -2388,11 +2395,11 @@ function factZone(fact: MatchEvidenceFact): string {
 
 function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
   if (event.eventType === "kickoff") {
-    return "Début du match";
+    return "DÃ©but du match";
   }
 
   if (event.eventType === "scoring") {
-    return "Action décisive";
+    return "Action dÃ©cisive";
   }
 
   if (fact?.category === "PRESSURE_WITHOUT_CONVERSION") {
@@ -2400,19 +2407,19 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
   }
 
   if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative") || fact?.category === "MOMENTUM_SHIFT") {
-    return "Signal d'élan à surveiller";
+    return "Signal d'Ã©lan Ã  surveiller";
   }
 
   if (fact?.category === "TERRITORIAL_PRESSURE") {
-    return `Pression concentrée en ${factZone(fact)}`;
+    return `Pression concentrÃ©e en ${factZone(fact)}`;
   }
 
   if (hasTag(event, "danger_high") || fact?.category === "DANGER_CREATION") {
-    return "Séquence dangereuse";
+    return "SÃ©quence dangereuse";
   }
 
   if (fact?.category === "HARNESS_PLAUSIBILITY_WARNING") {
-    return "Signal de harnais à surveiller";
+    return "Signal de harnais Ã  surveiller";
   }
 
   if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
@@ -2420,18 +2427,23 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
   }
 
   if (hasTag(event, "territorial_pressure_high")) {
-    return "Séquence de pression territoriale";
+    return "SÃ©quence de pression territoriale";
   }
 
-  return "Séquence tactique";
+  return "SÃ©quence tactique";
 }
 
 function summaryForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
-  if (fact !== undefined) {
-    return `${fact.summary} Contexte : ${event.tacticalContext.reason ?? "séquence tactique visible dans le rapport."}`;
-  }
+  const category = fact?.category ?? (event.eventType === "scoring" ? "SCORING_CONVERSION" : undefined);
 
-  return event.tacticalContext.reason ?? "Séquence tactique visible dans le rapport.";
+  return coachFacingKeyMomentSummary({
+    title: titleForEvent(event, fact),
+    teamId: event.teamId,
+    zone: fact?.affectedZones[0] ?? event.zone,
+    ...(fact === undefined ? {} : { evidenceSummary: fact.summary }),
+    ...(event.tacticalContext.reason === undefined ? {} : { eventContext: event.tacticalContext.reason }),
+    ...(category === undefined ? {} : { category }),
+  });
 }
 
 function candidatePriority(event: MatchEvent, fact: MatchEvidenceFact | undefined, insightEventIds: ReadonlySet<string>): number {
@@ -2600,7 +2612,7 @@ export function selectKeyMoments(input: {
         evidenceFactId: candidate.evidenceFact.factId,
         category: candidate.evidenceFact.category,
       }),
-      title: titleForEvent(candidate.event, candidate.evidenceFact),
+      title: normalizeCoachFacingCopy(titleForEvent(candidate.event, candidate.evidenceFact)),
       summary: summaryForEvent(candidate.event, candidate.evidenceFact),
       minute: candidate.event.timestamp.minute,
     }));
@@ -2610,7 +2622,7 @@ export function selectKeyMoments(input: {
 ## File: src/simulation/adapters/matchReportMoments.test.ts
 
 ```ts
-import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+﻿import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import type { MatchEvent } from "../../contracts/engineToCoach";
 import type { ZoneId } from "../../core/zones";
 import { MatchPhase, PressureLevel } from "../../models/match";
@@ -3548,6 +3560,7 @@ if (require.main === module) {
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import type { MatchReport } from "../contracts/engineToCoach";
 import { containsMojibake } from "../reports/coachCopyQuality";
+import { assertNoTechnicalContextLeak } from "../reports/coachFacingSummary";
 import { runFullMatch } from "./runFullMatch";
 import { runMatch } from "./runMatch";
 
@@ -3591,6 +3604,9 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
 
   for (const fact of report.evidenceFacts) {
     assertGuard(!containsMojibake(fact.summary), `${fact.factId} evidence summary contains mojibake.`);
+    if (fact.coachVisible) {
+      assertNoTechnicalContextLeak(fact.summary, `${fact.factId} evidence summary`);
+    }
     assertGuard(fact.strength >= 0 && fact.strength <= 100, `${fact.factId} strength must stay within 0-100.`);
     for (const eventId of fact.eventIds) {
       assertGuard(eventIds.has(eventId), `${fact.factId} references missing event ${eventId}.`);
@@ -3600,6 +3616,7 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
   for (const warning of report.warnings) {
     assertGuard(warning.mayInvalidateGlobalScoringEconomy === false, `${warning.warningId} must not invalidate global scoring economy.`);
     assertGuard(!containsMojibake(warning.coachSummary), `${warning.warningId} coach summary contains mojibake.`);
+    assertNoTechnicalContextLeak(warning.coachSummary, `${warning.warningId} coach summary`);
     for (const factId of warning.evidenceFactIds) {
       assertGuard(factIds.has(factId), `${warning.warningId} references missing evidence fact ${factId}.`);
     }
@@ -3610,6 +3627,7 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
 
   for (const insight of report.coachInsights) {
     assertGuard(!containsMojibake(insight.summary), `${insight.insightId} summary contains mojibake.`);
+    assertNoTechnicalContextLeak(insight.summary, `${insight.insightId} summary`);
     for (const evidence of insight.evidence) {
       for (const eventId of evidence.eventIds) {
         assertGuard(eventIds.has(eventId), `${insight.insightId} references missing event ${eventId}.`);
@@ -3627,6 +3645,7 @@ function validateReportContract(report: MatchReport, expectedScope: MatchReport[
   for (const moment of report.keyMoments) {
     assertGuard(eventIds.has(moment.eventId), `${moment.title} references missing event ${moment.eventId}.`);
     assertGuard(!containsMojibake(moment.summary), `${moment.title} summary contains mojibake.`);
+    assertNoTechnicalContextLeak(moment.summary, `${moment.title} summary`);
     if (moment.evidenceFactId !== undefined) {
       assertGuard(factIds.has(moment.evidenceFactId), `${moment.title} references missing evidence fact ${moment.evidenceFactId}.`);
     }

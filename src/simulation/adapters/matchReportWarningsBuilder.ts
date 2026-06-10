@@ -3,8 +3,8 @@ import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidenc
 import type { MatchReportWarning, MatchReportWarningType } from "../../contracts/matchReportWarnings";
 import {
   coachFacingHarnessWarningSummary,
-  coachFacingScoringDominanceSummary,
 } from "../../reports/coachFacingCopy";
+import { coachFacingWarningSummaryByType } from "../../reports/coachFacingSummary";
 import type {
   FullMatchHarnessSanityReport,
   FullMatchHarnessSanityWarning,
@@ -147,7 +147,8 @@ export function buildMatchReportWarnings(input: {
   const uniqueTypes = [...new Set(input.sanity.warnings.map(warningTypeForHarnessWarning))];
 
   return uniqueTypes.map((type) => {
-    const isDominance = type === "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+    const dominantTeamId = input.sanity.scoringDominance.dominantTeamId;
+    const dominatedTeamId = input.sanity.scoringDominance.dominatedTeamId;
 
     return {
       warningId: `${input.report.matchId}-${type.toLowerCase()}`,
@@ -155,9 +156,13 @@ export function buildMatchReportWarnings(input: {
       scope: "coach_visible",
       severity: severityForWarning(type),
       title: titleForWarning(type),
-      coachSummary: isDominance
-        ? coachFacingScoringDominanceSummary(input.sanity.scoringDominance)
-        : coachFacingHarnessWarningSummary(input.sanity.warnings),
+      coachSummary: coachFacingWarningSummaryByType({
+        warningType: type,
+        fallbackSummary: coachFacingHarnessWarningSummary(input.sanity.warnings),
+        score: input.report.score,
+        ...(dominantTeamId === undefined ? {} : { dominantTeamId }),
+        ...(dominatedTeamId === undefined ? {} : { dominatedTeamId }),
+      }),
       technicalSummary: `Harness warnings: ${input.sanity.warnings.join(", ")}. Scope: ${input.sanity.scope}. May invalidate global economy: false.`,
       evidenceFactIds: harnessFact === undefined ? [] : [harnessFact.factId],
       eventIds,

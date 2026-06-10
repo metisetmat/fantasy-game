@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract. Source files are bundled by domain for compact ChatGPT review.
+Generated for Micro-sprint 2P-Fix - Coach-Facing Summary Boundary. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
