@@ -17,6 +17,7 @@ export function validateSegmentDiversityDiagnostics(): readonly string[] {
   assertTest(diversity.segmentCount >= 2, "segment diversity diagnostics must cover multiple segments.");
   assertTest(diversity.segmentSummaries.length === diversity.segmentCount, "segment summaries must match segment count.");
   assertTest(diversity.segmentSummaries.some((summary) => summary.fatigueDelta > 0), "segment diagnostics must record fatigue delta.");
+  assertTest(diversity.dominanceSummary.length > 0, "segment diagnostics must expose a concise dominance summary.");
   assertTest(diversity.warnings.length >= 0, "segment warnings must be represented as diagnostics, not scoring failures.");
   assertTest(
     report.timeline.filter((event) => event.eventType === "scoring").length === scoringEventCount,
@@ -33,6 +34,7 @@ export function validateSegmentDiversityDiagnostics(): readonly string[] {
   return [
     "repeated segment patterns produce diagnostics",
     "fatigue delta appears in segment diagnostics",
+    "dominance summary appears in segment diagnostics",
     "no scoring events are removed",
     "source-of-truth guard still rejects non-batch global scoring claims",
   ];

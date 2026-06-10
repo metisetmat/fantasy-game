@@ -40,6 +40,10 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
     return "Action decisive";
   }
 
+  if (fact?.category === "dominated_team_no_payoff") {
+    return `${event.teamId} sous pression sans conversion`;
+  }
+
   if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
     return "Signal d'elan a surveiller";
   }
@@ -103,6 +107,10 @@ function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<strin
   return 0;
 }
 
+function candidateTitle(candidate: KeyMomentCandidate, facts: readonly MatchEvidenceFact[]): string {
+  return titleForEvent(candidate.event, factForEvent(candidate.event, facts));
+}
+
 function candidateFromEvent(input: {
   readonly event: MatchEvent;
   readonly facts: readonly MatchEvidenceFact[];
@@ -115,9 +123,12 @@ function candidateFromEvent(input: {
   }
 
   const fact = factForEvent(input.event, input.facts);
+  const adjustedPriority = fact?.category === "dominated_team_no_payoff"
+    ? Math.max(priority, 88)
+    : priority;
   const candidate: KeyMomentCandidate = {
     event: input.event,
-    priority,
+    priority: adjustedPriority,
   };
 
   return fact === undefined ? candidate : { ...candidate, evidenceSummary: fact.summary };
@@ -131,16 +142,25 @@ function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number
   return a.event.timestamp.tick - b.event.timestamp.tick;
 }
 
-function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): readonly KeyMomentCandidate[] {
+function selectDiverseCandidates(
+  candidates: readonly KeyMomentCandidate[],
+  facts: readonly MatchEvidenceFact[],
+): readonly KeyMomentCandidate[] {
   const sortedCandidates = [...candidates].sort(compareCandidates);
   const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
   const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
   const selected: KeyMomentCandidate[] = [];
+  const titleCounts = new Map<string, number>();
   let scoringCount = 0;
 
   for (const candidate of sortedCandidates) {
     if (selected.length >= MAX_KEY_MOMENTS) {
       break;
+    }
+
+    const title = candidateTitle(candidate, facts);
+    if ((titleCounts.get(title) ?? 0) >= 2) {
+      continue;
     }
 
     if (candidate.event.eventType === "scoring") {
@@ -151,6 +171,7 @@ function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): rea
     }
 
     selected.push(candidate);
+    titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
   }
 
   if (selected.length >= MAX_KEY_MOMENTS) {
@@ -163,7 +184,12 @@ function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): rea
     }
 
     if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
+      const title = candidateTitle(candidate, facts);
+      if ((titleCounts.get(title) ?? 0) >= 2) {
+        continue;
+      }
       selected.push(candidate);
+      titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
     }
   }
 
@@ -204,7 +230,7 @@ export function selectKeyMoments(input: {
     }
   }
 
-  return [...selectDiverseCandidates([...candidatesByEventId.values()])]
+  return [...selectDiverseCandidates([...candidatesByEventId.values()], input.facts)]
     .sort((a, b) => a.event.timestamp.tick - b.event.timestamp.tick)
     .map((candidate) => {
       const fact = factForEvent(candidate.event, input.facts);

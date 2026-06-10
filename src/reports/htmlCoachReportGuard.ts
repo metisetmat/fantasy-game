@@ -16,6 +16,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   const uniqueKeyMomentTitles = new Set(report.keyMoments.map((moment) => moment.title));
   const conditionDecreased = report.fatigueReport.playerSummaries.some((summary) => summary.conditionEnd < summary.conditionStart);
   const hasHarnessWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Avertissement de harnais full-match");
+  const hasDominanceWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Domination scoring single-run a surveiller");
 
   assertGuard(html.includes("<html"), "rendered coach report must include an html document root.");
   assertGuard(html.includes("Rapport du coach"), "rendered coach report must include the French report title.");
@@ -33,12 +34,21 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   if (hasHarnessWarning) {
     assertGuard(html.includes("Avertissement de harnais full-match"), "rendered coach report must include the full-match harness warning when warnings exist.");
   }
+  if (hasDominanceWarning) {
+    assertGuard(html.includes("Domination scoring single-run a surveiller"), "rendered coach report must include scoring dominance warning when the score is lopsided.");
+    assertGuard(html.includes("FULL_MATCH_HARNESS_SINGLE_RUN"), "rendered coach report must label single-run harness dominance scope.");
+    assertGuard(html.includes("50-match economy"), "rendered coach report must preserve the 50-match economy reference.");
+  }
   assertGuard(html.includes("Condition finale"), "rendered coach report must include fatigue values.");
   assertGuard(conditionDecreased, "full-match report must show at least one player condition decrease.");
   assertGuard(report.timeline.length >= 30, `HTML guard report should use the full-match harness, received ${report.timeline.length} events.`);
   if (report.keyMoments.length > 1) {
     assertGuard(uniqueKeyMomentTitles.size >= 2, "key moments should not all have identical titles when non-scoring candidates exist.");
   }
+  assertGuard(
+    report.keyMoments.every((moment) => report.keyMoments.filter((candidate) => candidate.title === moment.title).length <= 2),
+    "key moment titles should not repeat more than twice when alternatives exist.",
+  );
 
   if (firstInsight !== undefined) {
     assertGuard(html.includes(firstInsight.title), `rendered coach report must include insight title ${firstInsight.title}.`);
@@ -56,6 +66,8 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   assertGuard(!html.includes("mini-match"), "rendered coach report must not expose mini-match wording.");
   assertGuard(!html.includes("adapter de simulation actuel"), "rendered coach report must not expose old adapter limitation wording.");
   assertGuard(!html.includes("visible par l'adapter"), "rendered coach report must not expose old adapter visibility wording.");
+  assertGuard(!html.includes("global scoring incoherence"), "rendered coach report must not claim global scoring incoherence from one run.");
+  assertGuard(!html.includes("change scoring values"), "rendered coach report must not recommend scoring value changes from one run.");
 
   return [
     "HTML coach report includes document root",
@@ -67,15 +79,20 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     "HTML coach report uses full-match event volume",
     "HTML coach report keeps expandable timeline control",
     "HTML coach report includes full-match harness warning",
+    "HTML coach report includes scoring dominance warning when lopsided",
+    "HTML coach report preserves single-run and 50-match economy wording",
     "HTML coach report includes fatigue values",
     "HTML coach report shows condition decrease",
     "HTML coach report key moments are not all identical when alternatives exist",
+    "HTML coach report key moment titles repeat no more than twice",
     "HTML coach report includes at least one coach insight title when available",
     "HTML coach report includes at least one key moment title when available",
     "HTML coach report does not contain [object Object]",
     "HTML coach report does not contain old top-level English title",
     "HTML coach report does not expose old raw internal labels",
     "HTML coach report does not expose old technical product wording",
+    "HTML coach report does not claim global scoring incoherence",
+    "HTML coach report does not recommend scoring value changes",
   ];
 }
 

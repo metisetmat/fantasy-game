@@ -13,7 +13,8 @@ export type MatchEvidenceCategory =
   | "high_danger_sequences"
   | "unstable_under_pressure"
   | "converted_scoring"
-  | "visible_pressure_zone";
+  | "visible_pressure_zone"
+  | "dominated_team_no_payoff";
 
 export interface MatchEvidenceFact {
   readonly factId: string;
@@ -112,7 +113,7 @@ function highDangerFact(input: {
     eventIds: highDangerEvents.map((event) => event.eventId),
     zone: representativeZone(highDangerEvents, firstHighDangerEvent.zone),
     category: "high_danger_sequences",
-    summary: `${input.perspective.teamName} a créé ${highDangerEvents.length} séquence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} par l'adapter en ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} a crÃ©Ã© ${highDangerEvents.length} sÃ©quence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} par l'adapter en ${zones.join(", ")}.`,
     strength: clampRating(45 + highDangerEvents.length * 15),
     confidence: "medium",
   };
@@ -149,7 +150,7 @@ function unstablePressureFact(input: {
     eventIds: unstableEvents.map((event) => event.eventId),
     zone: representativeZone(unstableEvents, firstUnstableEvent.zone),
     category: "unstable_under_pressure",
-    summary: `${input.perspective.teamName} a connu ${unstableEvents.length} séquence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} a connu ${unstableEvents.length} sÃ©quence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
     strength: clampRating(40 + unstableEvents.length * 12),
     confidence: "medium",
   };
@@ -181,7 +182,7 @@ function scoringFact(input: {
     eventIds: scoringEvents.map((event) => event.eventId),
     zone: representativeZone(scoringEvents, firstScoringEvent.zone),
     category: "converted_scoring",
-    summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} décisive${scoringEvents.length === 1 ? "" : "s"} identifiée${scoringEvents.length === 1 ? "" : "s"} dans les séquences de score.`,
+    summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} dÃ©cisive${scoringEvents.length === 1 ? "" : "s"} identifiÃ©e${scoringEvents.length === 1 ? "" : "s"} dans les sÃ©quences de score.`,
     strength: clampRating(55 + scoringEvents.length * 15),
     confidence: "medium",
   };
@@ -221,8 +222,62 @@ function visiblePressureZoneFact(input: {
     eventIds: zoneEventIds,
     zone,
     category: "visible_pressure_zone",
-    summary: `La pression la plus visible par l'adapter pour ${input.perspective.teamName} s'est concentrée en ${zone}.`,
+    summary: `La pression la plus visible par l'adapter pour ${input.perspective.teamName} s'est concentrÃ©e en ${zone}.`,
     strength: clampRating(35 + zoneEventIds.length * 15),
+    confidence: "low",
+  };
+}
+
+function scorePoints(event: MatchEvent): number {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+function dominatedTeamNoPayoffFact(input: {
+  readonly matchInput: MatchInput;
+  readonly perspective: TeamPerspective;
+  readonly events: readonly MatchEvent[];
+}): MatchEvidenceFact | null {
+  const ownScoringEvents = input.events.filter((event) => event.teamId === input.perspective.teamId && scorePoints(event) > 0);
+  const opponentPoints = input.events
+    .filter((event) => event.teamId === input.perspective.opponentTeamId)
+    .reduce((total, event) => total + scorePoints(event), 0);
+  const signalEvents = input.events.filter(
+    (event) =>
+      event.teamId === input.perspective.teamId &&
+      event.eventType !== "kickoff" &&
+      (
+        event.eventType === "progression" ||
+        hasTag(event, "danger_high") ||
+        hasTag(event, "pressure_high") ||
+        hasTag(event, "pressure_medium") ||
+        hasTag(event, "territorial_pressure_high") ||
+        hasTag(event, "stability_low")
+      ),
+  );
+
+  if (ownScoringEvents.length > 0 || opponentPoints < 21 || signalEvents.length === 0) {
+    return null;
+  }
+
+  const firstSignalEvent = signalEvents[0];
+  if (firstSignalEvent === undefined) {
+    return null;
+  }
+
+  const zones = uniqueZones(signalEvents);
+
+  return {
+    factId: `${input.matchInput.matchId}-${input.perspective.teamId}-dominated-no-payoff`,
+    matchId: input.matchInput.matchId,
+    teamId: input.perspective.teamId,
+    opponentTeamId: input.perspective.opponentTeamId,
+    eventIds: signalEvents.map((event) => event.eventId),
+    zone: representativeZone(signalEvents, firstSignalEvent.zone),
+    category: "dominated_team_no_payoff",
+    summary: `${input.perspective.teamName} produit des signaux de pression, progression ou instabilitÃ© en ${zones.join(", ")}, mais aucune de ces sÃ©quences ne devient un Ã©vÃ©nement de score dans ce run de harnais.`,
+    strength: clampRating(45 + signalEvents.length * 8),
     confidence: "low",
   };
 }
@@ -244,6 +299,7 @@ export function createMatchEvidenceFacts(input: {
       unstablePressureFact(factInputs),
       scoringFact(factInputs),
       visiblePressureZoneFact(factInputs),
+      dominatedTeamNoPayoffFact(factInputs),
     ];
 
     for (const fact of candidateFacts) {
@@ -265,22 +321,25 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
       return "weakness";
     case "visible_pressure_zone":
       return "training_recommendation";
+    case "dominated_team_no_payoff":
+      return "tactical_failure";
   }
 }
 
 function titleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "high_danger_sequences":
-      return "Des séquences dangereuses ont émergé";
+      return "Des sequences dangereuses ont emerge";
     case "unstable_under_pressure":
-      return "La possession s'est fragilisée sous pression";
+      return "La possession s'est fragilisee sous pression";
     case "converted_scoring":
-      return "Les actions décisives sont bien identifiées";
+      return "Les actions decisives sont bien identifiees";
     case "visible_pressure_zone":
-      return "La pression s'est concentrée dans une zone";
+      return "La pression s'est concentree dans une zone";
+    case "dominated_team_no_payoff":
+      return `${fact.teamId} produit du volume sans conversion`;
   }
 }
-
 function confidenceText(value: MatchEvidenceFact["confidence"]): string {
   switch (value) {
     case "low":
@@ -288,7 +347,7 @@ function confidenceText(value: MatchEvidenceFact["confidence"]): string {
     case "medium":
       return "moyenne";
     case "high":
-      return "élevée";
+      return "Ã©levÃ©e";
   }
 }
 
@@ -297,32 +356,39 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "high_danger_sequences":
       return {
         actionId: `${fact.factId}-repeat-pattern`,
-        label: `Continuer à répéter les entrées en ${fact.zone}`,
-        tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque échoue.",
+        label: `Continuer Ã  rÃ©pÃ©ter les entrÃ©es en ${fact.zone}`,
+        tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque Ã©choue.",
       };
     case "unstable_under_pressure":
       return {
         actionId: `${fact.factId}-stabilize-possession`,
-        label: `Ajouter des soutiens plus sûrs autour de ${fact.zone}`,
-        tradeoff: "Des soutiens plus prudents peuvent réduire la menace verticale immédiate et ralentir le tempo de transition.",
+        label: `Ajouter des soutiens plus sÃ»rs autour de ${fact.zone}`,
+        tradeoff: "Des soutiens plus prudents peuvent rÃ©duire la menace verticale immÃ©diate et ralentir le tempo de transition.",
       };
     case "converted_scoring":
       return {
         actionId: `${fact.factId}-protect-finishing-platform`,
-        label: "Protéger le schéma qui a mené à l'action décisive",
-        tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prévisible.",
+        label: "ProtÃ©ger le schÃ©ma qui a menÃ© Ã  l'action dÃ©cisive",
+        tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prÃ©visible.",
       };
     case "visible_pressure_zone":
       return {
         actionId: `${fact.factId}-pressure-release`,
-        label: `Préparer une sortie de pression depuis ${fact.zone}`,
-        tradeoff: "Une sortie trop précoce peut concéder du terrain si la structure de réception n'est pas sécurisée.",
+        label: `PrÃ©parer une sortie de pression depuis ${fact.zone}`,
+        tradeoff: "Une sortie trop prÃ©coce peut concÃ©der du terrain si la structure de rÃ©ception n'est pas sÃ©curisÃ©e.",
+      };
+    case "dominated_team_no_payoff":
+      return {
+        actionId: `${fact.factId}-route-selection-after-pressure`,
+        label: `Revoir la route choisie apres pression en ${fact.zone}`,
+        tradeoff: "Reduire le risque peut stabiliser la plateforme de conversion, mais aussi retirer une partie de la menace immediate.",
       };
   }
 }
 
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
   const priority: readonly MatchEvidenceCategory[] = [
+    "dominated_team_no_payoff",
     "high_danger_sequences",
     "unstable_under_pressure",
     "visible_pressure_zone",
@@ -351,14 +417,14 @@ export function createEvidenceDrivenCoachInsights(input: {
       {
         insightId: `${input.matchInput.matchId}-adapter-insight`,
         type: "training_recommendation",
-        title: "Les preuves de l'adapter restent limitées",
+        title: "Les preuves de l'adapter restent limitÃ©es",
         summary:
-          "L'adapter mini-match a produit un fil officiel, mais aucun fait de preuve ciblé n'a franchi les seuils légers de Sprint 2C.",
+          "L'adapter mini-match a produit un fil officiel, mais aucun fait de preuve ciblÃ© n'a franchi les seuils lÃ©gers de Sprint 2C.",
         evidence: [
           {
             eventIds: [],
-            summary: "Aucun fait de preuve n'a été généré depuis le fil actuellement visible par l'adapter.",
-            confidenceNote: "Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.",
+            summary: "Aucun fait de preuve n'a Ã©tÃ© gÃ©nÃ©rÃ© depuis le fil actuellement visible par l'adapter.",
+            confidenceNote: "Analyse Ã  faible confiance tant que les plans tactiques ne sont pas entiÃ¨rement branchÃ©s.",
           },
         ],
         affectedPlayers: [],
@@ -367,8 +433,8 @@ export function createEvidenceDrivenCoachInsights(input: {
         recommendedActions: [
           {
             actionId: "expand-evidence-thresholds",
-            label: "Revoir les seuils de taxonomie après la prochaine passe adapter",
-            tradeoff: "Des seuils plus bas peuvent produire des signaux coach plus bruités.",
+            label: "Revoir les seuils de taxonomie aprÃ¨s la prochaine passe adapter",
+            tradeoff: "Des seuils plus bas peuvent produire des signaux coach plus bruitÃ©s.",
           },
         ],
       },
@@ -385,7 +451,7 @@ export function createEvidenceDrivenCoachInsights(input: {
         {
           eventIds: fact.eventIds,
           summary: `Fait de preuve ${fact.factId} : ${fact.summary}`,
-          confidenceNote: `Confiance ${confidenceText(fact.confidence)}; intensité ${fact.strength}/100. Données encore limitées par l'adapter de simulation actuel.`,
+          confidenceNote: `Confiance ${confidenceText(fact.confidence)}; intensitÃ© ${fact.strength}/100. DonnÃ©es encore limitÃ©es par l'adapter de simulation actuel.`,
         },
       ],
       affectedPlayers: [],
@@ -410,9 +476,9 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
       {
         diagnosisId: `${input.matchInput.matchId}-adapter-diagnosis`,
         teamId: input.matchInput.homeTeam.teamId,
-        title: "Diagnostic adapter à faible confiance",
+        title: "Diagnostic adapter Ã  faible confiance",
         summary:
-          "Le fil officiel est présent, mais les faits de preuve de Sprint 2C n'ont pas isolé de motif tactique ciblé.",
+          "Le fil officiel est prÃ©sent, mais les faits de preuve de Sprint 2C n'ont pas isolÃ© de motif tactique ciblÃ©.",
         evidenceEventIds: fallbackEvent === undefined ? [] : [fallbackEvent.eventId],
         affectedZones: fallbackEvent === undefined ? [] : [fallbackEvent.zone],
         confidence: "low",
@@ -425,7 +491,7 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
       diagnosisId: `${fact.factId}-diagnosis`,
       teamId: fact.teamId,
       title: titleForFact(fact),
-      summary: `${fact.summary} Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.`,
+      summary: `${fact.summary} Analyse Ã  faible confiance tant que les plans tactiques ne sont pas entiÃ¨rement branchÃ©s.`,
       evidenceEventIds: fact.eventIds,
       affectedZones: [fact.zone],
       confidence: "low",

@@ -100,6 +100,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const sourceOfTruthReconciliationValidation = readIfExists(join(shareDirectory, "validation.source-of-truth-reconciliation.md"));
   const fullMatchSegmentDiversityFatigue = readIfExists(join(shareDirectory, "full-match-segment-diversity-fatigue.md"));
   const fullMatchSegmentDiversityFatigueValidation = readIfExists(join(shareDirectory, "validation.full-match-segment-diversity-fatigue.md"));
+  const fullMatchHarnessPlausibility = readIfExists(join(shareDirectory, "full-match-harness-plausibility.md"));
+  const fullMatchHarnessPlausibilityValidation = readIfExists(join(shareDirectory, "validation.full-match-harness-plausibility.md"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
@@ -1354,10 +1356,72 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("validation recommendations visible", fullMatchSegmentDiversityFatigue.includes("CONFIRM_SEGMENT_DIVERSITY_V0") && fullMatchSegmentDiversityFatigue.includes("PREPARE_DEEPER_TACTICAL_PLAN_INFLUENCE"), "recommendations visible"),
     check("previous Sprint 2M docs not copied", !requiredCopied("source-of-truth-reconciliation.md") && !requiredCopied("validation.source-of-truth-reconciliation.md"), "2M docs omitted"),
   ];
+  const sprint2OExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "validation.share-pack.md",
+    "full-match-harness-plausibility.md",
+    "validation.full-match-harness-plausibility.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+    "bundle__docs.md",
+  ];
+  const sprint2OChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2O", activeConfig.sprintName === "Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2OExpectedFiles.every((file) => requiredCopied(file)), sprint2OExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2O", manifest.includes("Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality") && detailedManifest.includes("Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality"), "Sprint 2O visible"),
+    check("README is Sprint 2O oriented", readme.includes("# Sprint 2O Share Pack") && readme.includes("full-match-harness-plausibility.md"), "README current"),
+    check("scoring dominance diagnostics included", bundleSimulation.includes("src/simulation/diagnostics/fullMatchScoringDominanceDiagnostics.ts") && bundleSimulation.includes("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"), "dominance diagnostics bundled"),
+    check("scoring dominance tests included", bundleSimulation.includes("src/simulation/diagnostics/fullMatchScoringDominanceDiagnostics.test.ts"), "dominance tests bundled"),
+    check("full-match harness sanity includes dominance", bundleSimulation.includes("scoringDominance") && bundleSimulation.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM"), "sanity dominance visible"),
+    check("dominated-team evidence included", bundleSimulation.includes("dominated_team_no_payoff") && bundleSimulation.includes("produit du volume sans conversion"), "dominated-team evidence visible"),
+    check("key moment repetition guard included", bundleSimulation.includes("titleCounts") && bundleSimulation.includes("no more than 2"), "key moment repetition guard visible"),
+    check("fatigue/load contrast source included", bundleSimulation.includes("pressureLoadIncrease") && bundleSimulation.includes("concededPoints"), "load scale visible"),
+    check("segment dominance summary included", bundleSimulation.includes("dominanceSummary"), "segment dominance summary visible"),
+    check("runFullMatchContractGuard included", bundleSimulation.includes("src/simulation/runFullMatchContractGuard.ts") && bundleSimulation.includes("dominance diagnostics exist"), "runFullMatch guard bundled"),
+    check("htmlCoachReportGuard included", bundleReports.includes("src/reports/htmlCoachReportGuard.ts") && bundleReports.includes("Domination scoring single-run a surveiller"), "HTML guard bundled"),
+    check("full-match harness plausibility docs included", fullMatchHarnessPlausibility.includes("# Full-Match Harness Plausibility"), "doc included"),
+    check("full-match harness plausibility validation is PASS", fullMatchHarnessPlausibilityValidation.includes("Status: PASS"), "validation PASS"),
+    check("dominance diagnostics are warning-only", fullMatchHarnessPlausibilityValidation.includes("dominance diagnostics are warning-only") && bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false"), "warning-only"),
+    check("zero scoring team warning exists when applicable", fullMatchHarnessPlausibilityValidation.includes("zero scoring team warning exists when applicable") && bundleSimulation.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM"), "zero scoring warning"),
+    check("dominated-team evidence exists when applicable", fullMatchHarnessPlausibilityValidation.includes("dominated-team evidence exists when applicable") && bundleSimulation.includes("DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION"), "dominated evidence"),
+    check("key moment repetition reduced", fullMatchHarnessPlausibilityValidation.includes("key moment repetition reduced") && bundleSimulation.includes("titleCounts"), "key moments improved"),
+    check("highIntensityLoad scale has useful contrast", fullMatchHarnessPlausibilityValidation.includes("highIntensityLoad scale has useful contrast") && bundleSimulation.includes("pressureLoadIncrease"), "load contrast"),
+    check("score still equals score_change consequences", fullMatchHarnessPlausibilityValidation.includes("final score equals score_change consequences") && bundleSimulation.includes("score_change"), "score consequence guard visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted", fullMatchHarnessPlausibilityValidation.includes("no scoring events deleted") && bundleSimulation.includes("dominance diagnostics must not mutate scoring events"), "events preserved"),
+    check("no MatchBonusEvent mutation", fullMatchHarnessPlausibilityValidation.includes("no MatchBonusEvent mutation") && scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", fullMatchHarnessPlausibilityValidation.includes("batch/live separation preserved") && scoringEvents.includes("batch/live separation status: PASS"), "batch/live PASS"),
+    check("source-of-truth guardrails preserved", fullMatchHarnessPlausibilityValidation.includes("source-of-truth guardrails preserved") && bundleSimulation.includes("FULL_MATCH_BATCH_ECONOMY"), "source-of-truth preserved"),
+    check("50-match economy remains global reference", fullMatchHarnessPlausibility.includes("50-match economy remains the global reference") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("coach-report.latest.html included", coachHtml.includes("<!doctype html>") || coachHtml.includes("<html"), "coach HTML copied"),
+    check("HTML report contains harness warning", coachHtml.includes("Avertissement de harnais full-match"), "HTML harness warning visible"),
+    check("HTML report contains fatigue values", coachHtml.includes("Condition finale"), "HTML fatigue visible"),
+    check("previous Sprint 2N docs not copied", !requiredCopied("full-match-segment-diversity-fatigue.md") && !requiredCopied("validation.full-match-segment-diversity-fatigue.md"), "2N docs omitted"),
+    check("recommendation CONFIRM_SCORING_DOMINANCE_DIAGNOSTICS_V0", fullMatchHarnessPlausibility.includes("CONFIRM_SCORING_DOMINANCE_DIAGNOSTICS_V0"), "recommendation visible"),
+    check("recommendation PREPARE_TRUE_SEGMENT_STATE_INTEGRATION", fullMatchHarnessPlausibility.includes("PREPARE_TRUE_SEGMENT_STATE_INTEGRATION"), "next recommendation visible"),
+  ];
   const checks = activeConfig.sprintName.includes("Role Fit UI Implementation")
     ? roleFitUiChecks
     : activeConfig.sprintName.includes("React JSX Role Fit Refactor")
       ? reactJsxPlayerProfileChecks
+    : activeConfig.sprintName.includes("Sprint 2O - Full-Match Harness Plausibility")
+      ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2N - Segment Diversity")
       ? sprint2NChecks
     : activeConfig.sprintName.includes("Sprint 2M - Source-of-Truth Reconciliation")

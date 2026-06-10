@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 2N - Segment Diversity + Fatigue Propagation + Key Moment Diversity
+- current sprint: Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality
 - final file count: 14
 - share file count: 14
 - minimal allowlist count: 14
@@ -16,7 +16,7 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Sprint 2N - Sprint 2N - Segment Diversity + Fatigue Propagation + Key Moment Diversity
+- PASS: current sprint is Sprint 2O - Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 14
 - PASS: final file count is 14 - 14
@@ -25,31 +25,24 @@ Status: PASS
 - PASS: stale share file count is 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 2N - Sprint 2N visible
-- PASS: manifest reports final file count 14 - final count visible
-- PASS: README is Sprint 2N oriented - README current
-- PASS: segment state source included - segment state bundled
-- PASS: fatigue propagation source included - fatigue propagation bundled
-- PASS: segment diversity diagnostics included - segment diagnostics bundled
-- PASS: matchReportBuilder included - matchReportBuilder bundled
-- PASS: matchReportMoments included - matchReportMoments bundled
-- PASS: matchReportEvidence included - matchReportEvidence bundled
-- PASS: runFullMatchContractGuard included - runFullMatchContractGuard bundled
-- PASS: htmlCoachReportGuard included - html guard bundled
-- PASS: source-of-truth registry included - sourceOfTruthRegistry included
-- PASS: full-match economy anchor included - 50-match anchor included
-- PASS: full-match harness sanity included - harness sanity included
-- PASS: source-of-truth guards included - sourceOfTruthGuards included
-- PASS: new fatigue propagation test included - fatigue test bundled
-- PASS: new segment diversity test included - segment test bundled
-- PASS: new key moment diversity test included - moments test bundled
-- PASS: full-match segment diversity docs included - doc included
-- PASS: full-match segment diversity validation is PASS - validation PASS
-- PASS: full-match report uses propagated fatigue - propagated fatigue visible
-- PASS: at least one team condition decreases - condition movement guarded
-- PASS: high pressing team has higher/equal load - load guarded
-- PASS: key moment diversity improved - key moment diversity visible
-- PASS: no more than 2 scoring key moments when alternatives exist - scoring key moment cap visible
+- PASS: manifest lists Sprint 2O - Sprint 2O visible
+- PASS: README is Sprint 2O oriented - README current
+- PASS: scoring dominance diagnostics included - dominance diagnostics bundled
+- PASS: scoring dominance tests included - dominance tests bundled
+- PASS: full-match harness sanity includes dominance - sanity dominance visible
+- PASS: dominated-team evidence included - dominated-team evidence visible
+- PASS: key moment repetition guard included - key moment repetition guard visible
+- PASS: fatigue/load contrast source included - load scale visible
+- PASS: segment dominance summary included - segment dominance summary visible
+- PASS: runFullMatchContractGuard included - runFullMatch guard bundled
+- PASS: htmlCoachReportGuard included - HTML guard bundled
+- PASS: full-match harness plausibility docs included - doc included
+- PASS: full-match harness plausibility validation is PASS - validation PASS
+- PASS: dominance diagnostics are warning-only - warning-only
+- PASS: zero scoring team warning exists when applicable - zero scoring warning
+- PASS: dominated-team evidence exists when applicable - dominated evidence
+- PASS: key moment repetition reduced - key moments improved
+- PASS: highIntensityLoad scale has useful contrast - load contrast
 - PASS: score still equals score_change consequences - score consequence guard visible
 - PASS: no scoring constants changed - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
@@ -57,13 +50,13 @@ Status: PASS
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: source-of-truth guardrails preserved - source-of-truth preserved
-- PASS: single runFullMatch output remains warning-only - single-run warning-only
 - PASS: 50-match economy remains global reference - 50-match reference visible
 - PASS: coach-report.latest.html included - coach HTML copied
+- PASS: HTML report contains harness warning - HTML harness warning visible
 - PASS: HTML report contains fatigue values - HTML fatigue visible
-- PASS: HTML report contains expandable timeline - HTML timeline visible
-- PASS: validation recommendations visible - recommendations visible
-- PASS: previous Sprint 2M docs not copied - 2M docs omitted
+- PASS: previous Sprint 2N docs not copied - 2N docs omitted
+- PASS: recommendation CONFIRM_SCORING_DOMINANCE_DIAGNOSTICS_V0 - recommendation visible
+- PASS: recommendation PREPARE_TRUE_SEGMENT_STATE_INTEGRATION - next recommendation visible
 
 ## Files
 
@@ -74,10 +67,10 @@ Status: PASS
 - bundle__reports.md
 - bundle__simulation.md
 - coach-report.latest.html
-- full-match-segment-diversity-fatigue.md
+- full-match-harness-plausibility.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
 - tsconfig.json
-- validation.full-match-segment-diversity-fatigue.md
+- validation.full-match-harness-plausibility.md
 - validation.share-pack.md

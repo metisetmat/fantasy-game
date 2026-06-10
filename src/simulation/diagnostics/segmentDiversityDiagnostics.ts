@@ -17,7 +17,11 @@ export type SegmentDiversityWarning =
   | "REPEATED_ZONE_PATTERN"
   | "LOW_EVENT_FAMILY_DIVERSITY"
   | "NO_FATIGUE_DELTA"
-  | "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+  | "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"
+  | "ZERO_SCORING_EVENTS_FOR_ONE_TEAM"
+  | "SAME_TEAM_SCORES_IN_MOST_SEGMENTS"
+  | "HIGH_LOAD_NO_SCORING_PAYOFF"
+  | "SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT";
 
 export interface SegmentDiversitySummary extends SegmentDiversityDiagnostic {
   readonly scoringPattern: string;
@@ -31,6 +35,7 @@ export type SegmentDiversityReport = {
   readonly repeatedEventTypePatternCount: number;
   readonly segmentSummaries: readonly SegmentDiversitySummary[];
   readonly warnings: readonly SegmentDiversityWarning[];
+  readonly dominanceSummary: string;
 };
 
 function segmentKeyForEvent(event: MatchEvent): string {
@@ -142,6 +147,39 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     warnings.add("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN");
   }
 
+  const scoringTeamCounts = new Map<string, number>();
+  for (const summary of segmentSummaries) {
+    for (const teamId of summary.scoringTeams) {
+      scoringTeamCounts.set(teamId, (scoringTeamCounts.get(teamId) ?? 0) + 1);
+    }
+  }
+  const dominantEntry = [...scoringTeamCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+  const allTeamIds = [...new Set([...report.teamStats.map((stats) => stats.teamId), ...report.timeline.map((event) => event.teamId)])];
+  const zeroScoringTeams = allTeamIds.filter((teamId) => !scoringTeams.includes(teamId));
+  const highLoadNoPayoffTeams = zeroScoringTeams.filter((teamId) =>
+    (report.fatigueReport.teamSummaries.find((summary) => summary.teamId === teamId)?.highIntensityLoad ?? 0) >= 80,
+  );
+
+  if (zeroScoringTeams.length > 0 && scoringTeams.length > 0) {
+    warnings.add("ZERO_SCORING_EVENTS_FOR_ONE_TEAM");
+  }
+
+  if (dominantEntry !== undefined && dominantEntry[1] >= Math.ceil(segmentSummaries.length * 0.6)) {
+    warnings.add("SAME_TEAM_SCORES_IN_MOST_SEGMENTS");
+  }
+
+  if (highLoadNoPayoffTeams.length > 0) {
+    warnings.add("HIGH_LOAD_NO_SCORING_PAYOFF");
+  }
+
+  if (segmentSummaries.length > 1 && zeroScoringTeams.length > 0 && repeatedEventTypePatternCount < segmentSummaries.length - 1) {
+    warnings.add("SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT");
+  }
+
+  const dominanceSummary = dominantEntry === undefined
+    ? "No scoring dominance pattern was detected in the segment stream."
+    : `${dominantEntry[0]} dominated the single-run scoring stream across ${dominantEntry[1]} segment(s). ${zeroScoringTeams.length === 0 ? "Both teams had scoring payoff." : `${zeroScoringTeams.join(", ")} produced no scoring payoff.`} Treat this as a harness plausibility warning, not a scoring-economy verdict.`;
+
   return {
     segmentCount: segmentSummaries.length,
     repeatedScoringPatternCount,
@@ -149,5 +187,6 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     repeatedEventTypePatternCount,
     segmentSummaries,
     warnings: [...warnings],
+    dominanceSummary,
   };
 }
