@@ -258,6 +258,22 @@ function renderDiagnosis(diagnosis: TacticalDiagnosis): string {
     </article>`;
 }
 
+function renderWarning(warning: MatchReport["warnings"][number]): string {
+  return `
+    <article class="card">
+      <div class="card-meta">${renderBadge(warning.severity)} ${renderBadge(warning.scope)}</div>
+      <h3>${escapeHtml(warning.title)}</h3>
+      <p>${escapeHtml(warning.coachSummary)}</p>
+      <details class="internal-markers">
+        <summary>Détails techniques</summary>
+        <div class="muted">Type : ${escapeHtml(warning.type)}</div>
+        <div class="muted">Faits d'évidence : ${warning.evidenceFactIds.map(escapeHtml).join(", ") || "aucun"}</div>
+        <div class="muted">Événements : ${warning.eventIds.map(escapeHtml).join(", ") || "aucun"}</div>
+        <div class="muted">${escapeHtml(warning.technicalSummary)}</div>
+      </details>
+    </article>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -349,6 +365,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const keyMoments = report.keyMoments.map(renderKeyMoment).join("") || renderEmpty("Aucun moment clé sélectionné.");
   const insights = report.coachInsights.map(renderCoachInsight).join("") || renderEmpty("Aucune analyse coach générée.");
   const diagnoses = report.tacticalReport.diagnoses.map(renderDiagnosis).join("") || renderEmpty("Aucun diagnostic tactique généré.");
+  const warnings = report.warnings.map(renderWarning).join("") || renderEmpty("Aucun avertissement structuré généré.");
   const focus = report.suggestedFocus.map(renderFocus).join("") || renderEmpty("Aucun axe de travail généré.");
   const teamStats = report.teamStats.map(renderTeamStats).join("");
   const zoneStats = report.zoneStats.map(renderZoneStats).join("");
@@ -420,6 +437,11 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     <section>
       <h2>Diagnostic tactique</h2>
       <div class="grid">${diagnoses}</div>
+    </section>
+
+    <section>
+      <h2>Avertissements structurés</h2>
+      <div class="grid">${warnings}</div>
     </section>
 
     <section>

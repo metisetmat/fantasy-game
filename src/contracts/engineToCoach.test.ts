@@ -209,6 +209,31 @@ const matchSnapshotFixture: MatchSnapshot = {
 const matchReportFixture: MatchReport = {
   matchId: matchInputFixture.matchId,
   score: { home: 0, away: 0 },
+  evidenceFacts: [
+    {
+      factId: "contract-fixture-001-evidence-001",
+      matchId: matchInputFixture.matchId,
+      teamId: homeTeam.teamId,
+      opponentTeamId: awayTeam.teamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "MATCH_REPORT",
+      eventIds: [eventFixture.eventId],
+      affectedZones: [centralBuildOut],
+      summary: "CONTROL progression evidence remains typed and coach-visible.",
+      confidence: "medium",
+      strength: 55,
+      coachVisible: true,
+      internalTags: ["contract_fixture"],
+    },
+  ],
+  warnings: [],
+  reportMeta: {
+    reportScope: "MINI_MATCH_LOCAL",
+    generatorVersion: "contract-fixture-v2p",
+    generatedFrom: "runMatch",
+    sourceOfTruthNote: "Final score is derived only from score_change consequences.",
+    limitations: ["Contract fixture is intentionally compact."],
+  },
   timeline: [eventFixture],
   teamStats: [
     {
@@ -259,6 +284,8 @@ const matchReportFixture: MatchReport = {
   keyMoments: [
     {
       eventId: eventFixture.eventId,
+      evidenceFactId: "contract-fixture-001-evidence-001",
+      category: "TACTICAL_PLAN_SIGNAL",
       title: "First pressure escape",
       summary: "CONTROL progressed cleanly into midfield.",
       minute: 1,

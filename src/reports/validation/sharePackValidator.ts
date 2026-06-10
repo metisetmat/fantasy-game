@@ -112,6 +112,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchHarnessPlausibilityValidation = readIfExists(join(shareDirectory, "validation.full-match-harness-plausibility.md"));
   const coachReportCopyQuality = readIfExists(join(shareDirectory, "coach-report-copy-quality.md"));
   const coachReportCopyQualityValidation = readIfExists(join(shareDirectory, "validation.coach-report-copy-quality.md"));
+  const canonicalMatchReportEvidenceContract = readIfExists(join(shareDirectory, "canonical-matchreport-evidence-contract.md"));
+  const canonicalMatchReportEvidenceContractValidation = readIfExists(join(shareDirectory, "validation.canonical-matchreport-evidence-contract.md"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
@@ -1398,7 +1400,65 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "bundle__reports.md",
     "bundle__docs.md",
   ];
+  const sprint2PExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "validation.share-pack.md",
+    "canonical-matchreport-evidence-contract.md",
+    "validation.canonical-matchreport-evidence-contract.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+    "bundle__docs.md",
+  ];
   const mojibakeFragments = ["Ãƒ", "Ã‚", "Ã¢â‚¬", "[object Object]"];
+  const sprint2PChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2P", activeConfig.sprintName === "Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", !requiredCopied("coach-report-copy-quality.md") && !requiredCopied("validation.coach-report-copy-quality.md"), "2O-Fix docs omitted"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2PExpectedFiles.every((file) => requiredCopied(file)), sprint2PExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2P", manifest.includes("Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract") && detailedManifest.includes("Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract"), "Sprint 2P visible"),
+    check("README is Sprint 2P oriented", readme.includes("# Sprint 2P Share Pack") && readme.includes("canonical-matchreport-evidence-contract.md"), "README current"),
+    check("canonical MatchReport evidence doc included", canonicalMatchReportEvidenceContract.includes("# Canonical MatchReport Evidence Contract"), "doc included"),
+    check("canonical MatchReport evidence validation is PASS", canonicalMatchReportEvidenceContractValidation.includes("Status: PASS"), "validation PASS"),
+    check("evidence contract bundled", bundleContracts.includes("src/contracts/matchReportEvidence.ts") && bundleContracts.includes("MatchReportEvidenceFact"), "matchReportEvidence bundled"),
+    check("warning contract bundled", bundleContracts.includes("src/contracts/matchReportWarnings.ts") && bundleContracts.includes("MatchReportWarning"), "matchReportWarnings bundled"),
+    check("MatchReport exposes evidenceFacts", bundleContracts.includes("evidenceFacts") && bundleSimulation.includes("evidenceFacts"), "evidenceFacts visible"),
+    check("MatchReport exposes warnings", bundleContracts.includes("warnings") && bundleSimulation.includes("buildMatchReportWarnings"), "warnings visible"),
+    check("MatchReport exposes reportMeta", bundleContracts.includes("reportMeta") && bundleSimulation.includes("reportMeta"), "reportMeta visible"),
+    check("canonical evidence builder bundled", bundleSimulation.includes("src/simulation/adapters/matchReportEvidenceBuilder.ts") && bundleSimulation.includes("buildCanonicalMatchReportEvidenceFacts"), "evidence builder bundled"),
+    check("canonical warning builder bundled", bundleSimulation.includes("src/simulation/adapters/matchReportWarningsBuilder.ts") && bundleSimulation.includes("buildHarnessWarningEvidenceFacts"), "warning builder bundled"),
+    check("canonical MatchReport contract guard bundled", bundleSimulation.includes("src/simulation/matchReportContractGuard.ts") && bundleSimulation.includes("validateCanonicalMatchReportContract"), "contract guard bundled"),
+    check("test:contracts includes canonical guard", readIfExists(join(shareDirectory, "package.json")).includes("dist/simulation/matchReportContractGuard.js"), "canonical guard wired"),
+    check("coach-report.latest.html included", coachHtml.includes("<!doctype html>") || coachHtml.includes("<html"), "coach HTML copied"),
+    check("coach HTML renders structured warnings", coachHtml.includes("Avertissements structur") && coachHtml.includes("Détails techniques"), "structured warnings visible"),
+    check("coach HTML contains no mojibake markers", !containsAny(coachHtml, mojibakeFragments), `mojibake marker count: ${countAny(coachHtml, mojibakeFragments)}`),
+    check("single runFullMatch output cannot invalidate global economy", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && canonicalMatchReportEvidenceContract.includes("single runFullMatch output warning-only"), "warning-only"),
+    check("50-match economy remains global reference", bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR") || bundleSimulation.includes("FULL_MATCH_BATCH_ECONOMY"), "50-match reference visible"),
+    check("high single-run score emits harness warning, not scoring failure", bundleSimulation.includes("INFLATED_SINGLE_RUN_SCORE") && bundleSimulation.includes("warning-only"), "inflated score warning visible"),
+    check("repetitive key moments emit harness warning", bundleSimulation.includes("REPETITIVE_KEY_MOMENTS") || bundleSimulation.includes("REPEATED_SEGMENT_PATTERN"), "key moment warning visible"),
+    check("flat fatigue emits harness warning", bundleSimulation.includes("FLAT_FATIGUE_SIGNAL") || bundleSimulation.includes("FATIGUE_SIGNAL_FLAT"), "fatigue warning visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted", canonicalMatchReportEvidenceContractValidation.includes("no scoring events deleted") && bundleSimulation.includes("score_change"), "events preserved"),
+    check("no MatchBonusEvent mutation", canonicalMatchReportEvidenceContractValidation.includes("no MatchBonusEvent mutation") && scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", canonicalMatchReportEvidenceContractValidation.includes("batch/live separation preserved") && scoringEvents.includes("batch/live separation status: PASS"), "batch/live PASS"),
+    check("final score remains derived from score consequences", bundleSimulation.includes("score_change") && canonicalMatchReportEvidenceContract.includes("Final score remains derived only from score_change consequences"), "score consequences visible"),
+    check("recommendation CONFIRM_CANONICAL_MATCHREPORT_EVIDENCE_CONTRACT", canonicalMatchReportEvidenceContract.includes("CONFIRM_CANONICAL_MATCHREPORT_EVIDENCE_CONTRACT") && canonicalMatchReportEvidenceContractValidation.includes("CONFIRM_CANONICAL_MATCHREPORT_EVIDENCE_CONTRACT"), "recommendation visible"),
+    check("recommendation PREPARE_NEXT_SIMULATION_SPRINT_WITH_TYPED_REPORT_EVIDENCE", canonicalMatchReportEvidenceContract.includes("PREPARE_NEXT_SIMULATION_SPRINT_WITH_TYPED_REPORT_EVIDENCE"), "next recommendation visible"),
+  ];
   const coachCopyChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("current sprint is Micro-sprint 2O-Fix", activeConfig.sprintName === "Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene", activeConfig.sprintName),
@@ -1490,6 +1550,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     ? roleFitUiChecks
     : activeConfig.sprintName.includes("React JSX Role Fit Refactor")
       ? reactJsxPlayerProfileChecks
+    : activeConfig.sprintName.includes("Sprint 2P - Canonical MatchReport")
+      ? sprint2PChecks
     : activeConfig.sprintName.includes("Micro-sprint 2O-Fix")
       ? coachCopyChecks
     : activeConfig.sprintName.includes("Sprint 2O - Full-Match Harness Plausibility")

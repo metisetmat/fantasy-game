@@ -1,0 +1,33 @@
+export type MatchReportEvidenceCategory =
+  | "SCORING_CONVERSION"
+  | "DANGER_CREATION"
+  | "PRESSURE_WITHOUT_CONVERSION"
+  | "POSSESSION_INSTABILITY"
+  | "TERRITORIAL_PRESSURE"
+  | "FATIGUE_LOAD"
+  | "MOMENTUM_SHIFT"
+  | "TACTICAL_PLAN_SIGNAL"
+  | "HARNESS_PLAUSIBILITY_WARNING";
+
+export type MatchReportEvidenceScope =
+  | "MATCH_REPORT"
+  | "FULL_MATCH_HARNESS_SINGLE_RUN"
+  | "MINI_MATCH_LOCAL"
+  | "LIVE_SCORING_STREAM"
+  | "BATCH_DIAGNOSTIC_PROJECTION";
+
+export type MatchReportEvidenceFact = {
+  readonly factId: string;
+  readonly matchId: string;
+  readonly teamId?: string;
+  readonly opponentTeamId?: string;
+  readonly category: MatchReportEvidenceCategory;
+  readonly scope: MatchReportEvidenceScope;
+  readonly eventIds: readonly string[];
+  readonly affectedZones: readonly string[];
+  readonly summary: string;
+  readonly confidence: "low" | "medium" | "high";
+  readonly strength: number;
+  readonly coachVisible: boolean;
+  readonly internalTags: readonly string[];
+};

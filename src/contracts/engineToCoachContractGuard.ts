@@ -101,6 +101,7 @@ function validateMatchInputRatings(input: MatchInput): void {
 
 function validateMatchReportReferences(report: MatchReport): void {
   const timelineEventIds = new Set(report.timeline.map((event) => event.eventId));
+  const evidenceFactIds = new Set(report.evidenceFacts.map((fact) => fact.factId));
 
   for (const event of report.timeline) {
     assertGuard(
@@ -125,6 +126,36 @@ function validateMatchReportReferences(report: MatchReport): void {
       timelineEventIds.has(moment.eventId),
       `KeyMoment ${moment.title} references missing event ${moment.eventId}.`,
     );
+    if (moment.evidenceFactId !== undefined) {
+      assertGuard(
+        evidenceFactIds.has(moment.evidenceFactId),
+        `KeyMoment ${moment.title} references missing evidence fact ${moment.evidenceFactId}.`,
+      );
+    }
+  }
+
+  for (const fact of report.evidenceFacts) {
+    for (const eventId of fact.eventIds) {
+      assertGuard(
+        timelineEventIds.has(eventId),
+        `MatchReportEvidenceFact ${fact.factId} references missing event ${eventId}.`,
+      );
+    }
+  }
+
+  for (const warning of report.warnings) {
+    for (const factId of warning.evidenceFactIds) {
+      assertGuard(
+        evidenceFactIds.has(factId),
+        `MatchReportWarning ${warning.warningId} references missing evidence fact ${factId}.`,
+      );
+    }
+    for (const eventId of warning.eventIds) {
+      assertGuard(
+        timelineEventIds.has(eventId),
+        `MatchReportWarning ${warning.warningId} references missing event ${eventId}.`,
+      );
+    }
   }
 }
 
@@ -153,6 +184,10 @@ function validateMatchReportRatings(report: MatchReport): void {
       label: `${stats.playerId}.playerStats.contributionScore`,
       value: stats.contributionScore,
     })),
+    ...report.evidenceFacts.map((fact) => ({
+      label: `${fact.factId}.evidenceFacts.strength`,
+      value: fact.strength,
+    })),
     ...report.fatigueReport.teamSummaries.flatMap((summary) => [
       { label: `${summary.teamId}.fatigueReport.averageConditionEnd`, value: summary.averageConditionEnd },
       { label: `${summary.teamId}.fatigueReport.highIntensityLoad`, value: summary.highIntensityLoad },
@@ -169,6 +204,12 @@ function validateMatchReportRatings(report: MatchReport): void {
   }
 }
 
+function validateMatchReportMeta(report: MatchReport): void {
+  assertGuard(report.reportMeta.generatorVersion.length > 0, "MatchReport.reportMeta.generatorVersion must be populated.");
+  assertGuard(report.reportMeta.sourceOfTruthNote.length > 0, "MatchReport.reportMeta.sourceOfTruthNote must be populated.");
+  assertGuard(report.reportMeta.limitations.length > 0, "MatchReport.reportMeta.limitations must document report limitations.");
+}
+
 export function validateEngineToCoachContractFixtures(): readonly string[] {
   const { matchInputFixture, matchReportFixture, matchSnapshotFixture } = engineToCoachPublicContractFixtures;
 
@@ -177,6 +218,7 @@ export function validateEngineToCoachContractFixtures(): readonly string[] {
   validateMatchInputRatings(matchInputFixture);
   validateMatchReportReferences(matchReportFixture);
   validateMatchReportRatings(matchReportFixture);
+  validateMatchReportMeta(matchReportFixture);
 
   assertGuard(
     matchSnapshotFixture.matchId === matchInputFixture.matchId,
@@ -188,6 +230,9 @@ export function validateEngineToCoachContractFixtures(): readonly string[] {
     "MatchEvent.matchId values match parent MatchReport.matchId",
     "CoachInsight evidence references timeline events",
     "KeyMoment references timeline events",
+    "MatchReport evidenceFacts reference timeline events",
+    "MatchReport warnings reference evidenceFacts and timeline events",
+    "MatchReport reportMeta is populated",
     "contract fixture ratings stay within 0-100 bounds",
   ];
 }

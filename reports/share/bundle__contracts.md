@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -11,6 +11,8 @@ import type { ZoneId } from "../core/zones";
 import type { MatchPhase, PressureLevel, ScoreState } from "../models/match";
 import type { PlayerAttributes, PlayerRole } from "../models/player";
 import type { TeamIdentity } from "../models/team";
+import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "./matchReportEvidence";
+import type { MatchReportWarning } from "./matchReportWarnings";
 
 export type MatchTimestamp = {
   readonly tick: TacticalTick;
@@ -284,10 +286,20 @@ export interface TacticalReport {
 
 export interface KeyMoment {
   readonly eventId: EventId;
+  readonly evidenceFactId?: string;
+  readonly category?: MatchReportEvidenceCategory;
   readonly title: string;
   readonly summary: string;
   readonly minute: number;
 }
+
+export type MatchReportMeta = {
+  readonly reportScope: "MINI_MATCH_LOCAL" | "FULL_MATCH_HARNESS_SINGLE_RUN" | "FULL_MATCH_BATCH_ECONOMY";
+  readonly generatorVersion: string;
+  readonly generatedFrom: "runMatch" | "runFullMatch";
+  readonly sourceOfTruthNote: string;
+  readonly limitations: readonly string[];
+};
 
 export interface TrainingFocusSuggestion {
   readonly focusId: string;
@@ -298,6 +310,9 @@ export interface TrainingFocusSuggestion {
 export interface MatchReport {
   readonly matchId: MatchId;
   readonly score: ScoreState;
+  readonly evidenceFacts: readonly MatchReportEvidenceFact[];
+  readonly warnings: readonly MatchReportWarning[];
+  readonly reportMeta: MatchReportMeta;
   readonly timeline: readonly MatchEvent[];
   readonly teamStats: readonly TeamMatchStats[];
   readonly playerStats: readonly PlayerMatchStats[];
@@ -373,6 +388,73 @@ export interface ProgressionSignal {
   readonly direction: "positive" | "negative" | "neutral";
   readonly summary: string;
 }
+```
+
+## File: src/contracts/matchReportEvidence.ts
+
+```ts
+export type MatchReportEvidenceCategory =
+  | "SCORING_CONVERSION"
+  | "DANGER_CREATION"
+  | "PRESSURE_WITHOUT_CONVERSION"
+  | "POSSESSION_INSTABILITY"
+  | "TERRITORIAL_PRESSURE"
+  | "FATIGUE_LOAD"
+  | "MOMENTUM_SHIFT"
+  | "TACTICAL_PLAN_SIGNAL"
+  | "HARNESS_PLAUSIBILITY_WARNING";
+
+export type MatchReportEvidenceScope =
+  | "MATCH_REPORT"
+  | "FULL_MATCH_HARNESS_SINGLE_RUN"
+  | "MINI_MATCH_LOCAL"
+  | "LIVE_SCORING_STREAM"
+  | "BATCH_DIAGNOSTIC_PROJECTION";
+
+export type MatchReportEvidenceFact = {
+  readonly factId: string;
+  readonly matchId: string;
+  readonly teamId?: string;
+  readonly opponentTeamId?: string;
+  readonly category: MatchReportEvidenceCategory;
+  readonly scope: MatchReportEvidenceScope;
+  readonly eventIds: readonly string[];
+  readonly affectedZones: readonly string[];
+  readonly summary: string;
+  readonly confidence: "low" | "medium" | "high";
+  readonly strength: number;
+  readonly coachVisible: boolean;
+  readonly internalTags: readonly string[];
+};
+```
+
+## File: src/contracts/matchReportWarnings.ts
+
+```ts
+export type MatchReportWarningType =
+  | "FULL_MATCH_HARNESS_SINGLE_RUN"
+  | "INFLATED_SINGLE_RUN_SCORE"
+  | "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"
+  | "ZERO_SCORING_EVENTS_FOR_ONE_TEAM"
+  | "REPEATED_SEGMENT_PATTERN"
+  | "LOW_EVENT_FAMILY_DIVERSITY"
+  | "FATIGUE_SIGNAL_FLAT"
+  | "HIGH_LOAD_WITH_NO_PAYOFF"
+  | "REPORT_COPY_LIMITATION"
+  | "ADAPTER_LIMITATION";
+
+export type MatchReportWarning = {
+  readonly warningId: string;
+  readonly type: MatchReportWarningType;
+  readonly scope: "coach_visible" | "internal" | "validation_only";
+  readonly severity: "info" | "low" | "medium" | "high";
+  readonly title: string;
+  readonly coachSummary: string;
+  readonly technicalSummary: string;
+  readonly evidenceFactIds: readonly string[];
+  readonly eventIds: readonly string[];
+  readonly mayInvalidateGlobalScoringEconomy: false;
+};
 ```
 
 ## File: src/contracts/engineToCoach.test.ts
@@ -589,6 +671,31 @@ const matchSnapshotFixture: MatchSnapshot = {
 const matchReportFixture: MatchReport = {
   matchId: matchInputFixture.matchId,
   score: { home: 0, away: 0 },
+  evidenceFacts: [
+    {
+      factId: "contract-fixture-001-evidence-001",
+      matchId: matchInputFixture.matchId,
+      teamId: homeTeam.teamId,
+      opponentTeamId: awayTeam.teamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "MATCH_REPORT",
+      eventIds: [eventFixture.eventId],
+      affectedZones: [centralBuildOut],
+      summary: "CONTROL progression evidence remains typed and coach-visible.",
+      confidence: "medium",
+      strength: 55,
+      coachVisible: true,
+      internalTags: ["contract_fixture"],
+    },
+  ],
+  warnings: [],
+  reportMeta: {
+    reportScope: "MINI_MATCH_LOCAL",
+    generatorVersion: "contract-fixture-v2p",
+    generatedFrom: "runMatch",
+    sourceOfTruthNote: "Final score is derived only from score_change consequences.",
+    limitations: ["Contract fixture is intentionally compact."],
+  },
   timeline: [eventFixture],
   teamStats: [
     {
@@ -639,6 +746,8 @@ const matchReportFixture: MatchReport = {
   keyMoments: [
     {
       eventId: eventFixture.eventId,
+      evidenceFactId: "contract-fixture-001-evidence-001",
+      category: "TACTICAL_PLAN_SIGNAL",
       title: "First pressure escape",
       summary: "CONTROL progressed cleanly into midfield.",
       minute: 1,
@@ -772,6 +881,7 @@ function validateMatchInputRatings(input: MatchInput): void {
 
 function validateMatchReportReferences(report: MatchReport): void {
   const timelineEventIds = new Set(report.timeline.map((event) => event.eventId));
+  const evidenceFactIds = new Set(report.evidenceFacts.map((fact) => fact.factId));
 
   for (const event of report.timeline) {
     assertGuard(
@@ -796,6 +906,36 @@ function validateMatchReportReferences(report: MatchReport): void {
       timelineEventIds.has(moment.eventId),
       `KeyMoment ${moment.title} references missing event ${moment.eventId}.`,
     );
+    if (moment.evidenceFactId !== undefined) {
+      assertGuard(
+        evidenceFactIds.has(moment.evidenceFactId),
+        `KeyMoment ${moment.title} references missing evidence fact ${moment.evidenceFactId}.`,
+      );
+    }
+  }
+
+  for (const fact of report.evidenceFacts) {
+    for (const eventId of fact.eventIds) {
+      assertGuard(
+        timelineEventIds.has(eventId),
+        `MatchReportEvidenceFact ${fact.factId} references missing event ${eventId}.`,
+      );
+    }
+  }
+
+  for (const warning of report.warnings) {
+    for (const factId of warning.evidenceFactIds) {
+      assertGuard(
+        evidenceFactIds.has(factId),
+        `MatchReportWarning ${warning.warningId} references missing evidence fact ${factId}.`,
+      );
+    }
+    for (const eventId of warning.eventIds) {
+      assertGuard(
+        timelineEventIds.has(eventId),
+        `MatchReportWarning ${warning.warningId} references missing event ${eventId}.`,
+      );
+    }
   }
 }
 
@@ -824,6 +964,10 @@ function validateMatchReportRatings(report: MatchReport): void {
       label: `${stats.playerId}.playerStats.contributionScore`,
       value: stats.contributionScore,
     })),
+    ...report.evidenceFacts.map((fact) => ({
+      label: `${fact.factId}.evidenceFacts.strength`,
+      value: fact.strength,
+    })),
     ...report.fatigueReport.teamSummaries.flatMap((summary) => [
       { label: `${summary.teamId}.fatigueReport.averageConditionEnd`, value: summary.averageConditionEnd },
       { label: `${summary.teamId}.fatigueReport.highIntensityLoad`, value: summary.highIntensityLoad },
@@ -840,6 +984,12 @@ function validateMatchReportRatings(report: MatchReport): void {
   }
 }
 
+function validateMatchReportMeta(report: MatchReport): void {
+  assertGuard(report.reportMeta.generatorVersion.length > 0, "MatchReport.reportMeta.generatorVersion must be populated.");
+  assertGuard(report.reportMeta.sourceOfTruthNote.length > 0, "MatchReport.reportMeta.sourceOfTruthNote must be populated.");
+  assertGuard(report.reportMeta.limitations.length > 0, "MatchReport.reportMeta.limitations must document report limitations.");
+}
+
 export function validateEngineToCoachContractFixtures(): readonly string[] {
   const { matchInputFixture, matchReportFixture, matchSnapshotFixture } = engineToCoachPublicContractFixtures;
 
@@ -848,6 +998,7 @@ export function validateEngineToCoachContractFixtures(): readonly string[] {
   validateMatchInputRatings(matchInputFixture);
   validateMatchReportReferences(matchReportFixture);
   validateMatchReportRatings(matchReportFixture);
+  validateMatchReportMeta(matchReportFixture);
 
   assertGuard(
     matchSnapshotFixture.matchId === matchInputFixture.matchId,
@@ -859,6 +1010,9 @@ export function validateEngineToCoachContractFixtures(): readonly string[] {
     "MatchEvent.matchId values match parent MatchReport.matchId",
     "CoachInsight evidence references timeline events",
     "KeyMoment references timeline events",
+    "MatchReport evidenceFacts reference timeline events",
+    "MatchReport warnings reference evidenceFacts and timeline events",
+    "MatchReport reportMeta is populated",
     "contract fixture ratings stay within 0-100 bounds",
   ];
 }

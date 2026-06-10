@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -53,6 +53,12 @@ export function runMatch(input: MatchInput): MatchReport {
     adapter,
     score,
     influence,
+    generatedFrom: "runMatch",
+    reportScope: "MINI_MATCH_LOCAL",
+    limitations: [
+      "runMatch is a local mini-match adapter and cannot make global scoring economy claims.",
+      "Seed variation is forwarded to the mini-match but remains limited until deeper scenario variation is wired.",
+    ],
   });
 }
 
@@ -76,6 +82,9 @@ export function createMatchReportSignature(report: MatchReport): string {
     keyMoments: report.keyMoments,
     coachInsights: report.coachInsights,
     suggestedFocus: report.suggestedFocus,
+    evidenceFacts: report.evidenceFacts,
+    warnings: report.warnings,
+    reportMeta: report.reportMeta,
   };
 
   return JSON.stringify(source);
@@ -105,6 +114,10 @@ import {
   primaryZoneFromPlanInfluence,
 } from "./adapters/tacticalPlanInfluence";
 import { analyzeFullMatchHarnessSanity } from "./diagnostics/fullMatchHarnessSanity";
+import {
+  buildHarnessWarningEvidenceFacts,
+  buildMatchReportWarnings,
+} from "./adapters/matchReportWarningsBuilder";
 import {
   createInitialFullMatchSegmentState,
   type FullMatchSegmentState,
@@ -303,6 +316,16 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
     return report;
   }
 
+  const warningFacts = buildHarnessWarningEvidenceFacts({ report, sanity });
+  const reportWithWarningFacts: MatchReport = {
+    ...report,
+    evidenceFacts: [...report.evidenceFacts, ...warningFacts],
+  };
+  const warnings = buildMatchReportWarnings({
+    report: reportWithWarningFacts,
+    sanity,
+    evidenceFacts: reportWithWarningFacts.evidenceFacts,
+  });
   const evidenceEvent = report.timeline.find((event) => event.eventType !== "kickoff") ?? report.timeline[0];
   const diagnosis: TacticalDiagnosis = {
     diagnosisId: `${input.matchId}-full-match-harness-sanity`,
@@ -329,7 +352,8 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
       };
 
   return {
-    ...report,
+    ...reportWithWarningFacts,
+    warnings: [...report.warnings, ...warnings],
     tacticalReport: {
       diagnoses: [
         ...report.tacticalReport.diagnoses,
@@ -434,6 +458,12 @@ export function runFullMatch(input: MatchInput): MatchReport {
       matchInput: input,
       propagation: fatiguePropagation,
     }),
+    generatedFrom: "runFullMatch",
+    reportScope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    limitations: [
+      "runFullMatch is a deterministic harness sample and cannot invalidate the 50-match economy.",
+      "Harness warnings are warning-only and may not change scoring values.",
+    ],
   });
 
   return withHarnessSanityDiagnosis(report, input);
@@ -824,9 +854,9 @@ import {
 import {
   createEvidenceBasedTacticalDiagnoses,
   createEvidenceDrivenCoachInsights,
-  createMatchEvidenceFacts,
   eventTypeFromAdapterTags,
 } from "./matchReportEvidence";
+import { buildCanonicalMatchReportEvidenceFacts } from "./matchReportEvidenceBuilder";
 import { suggestedFocusFromEvidence } from "./matchReportFocus";
 import { selectKeyMoments } from "./matchReportMoments";
 import { createTeamMatchStatsFromEvents, createZoneStatsFromEvents } from "./matchReportStats";
@@ -857,6 +887,9 @@ export interface MatchReportBuilderInput {
   readonly score: ScoreState;
   readonly influence: TacticalPlanInfluence;
   readonly fatigueReport?: FatigueReport;
+  readonly generatedFrom: "runMatch" | "runFullMatch";
+  readonly reportScope: MatchReport["reportMeta"]["reportScope"];
+  readonly limitations?: readonly string[];
 }
 
 function clampRating(value: number): Rating {
@@ -1259,7 +1292,13 @@ function planInfluenceDiagnosis(input: {
 
 export function buildMatchReport(input: MatchReportBuilderInput): MatchReport {
   const timeline = [...input.timeline].sort(compareTimelineEvents);
-  const evidenceFacts = createMatchEvidenceFacts({ matchInput: input.matchInput, timeline });
+  const resolvedFatigueReport = input.fatigueReport ?? fatigueReport(input.matchInput);
+  const evidenceFacts = buildCanonicalMatchReportEvidenceFacts({
+    matchInput: input.matchInput,
+    timeline,
+    fatigueReport: resolvedFatigueReport,
+    influence: input.influence,
+  });
   const coachInsights = createEvidenceDrivenCoachInsights({
     matchInput: input.matchInput,
     facts: evidenceFacts,
@@ -1268,6 +1307,17 @@ export function buildMatchReport(input: MatchReportBuilderInput): MatchReport {
   return {
     matchId: input.matchInput.matchId,
     score: input.score,
+    evidenceFacts,
+    warnings: [],
+    reportMeta: {
+      reportScope: input.reportScope,
+      generatorVersion: "match-report-contract-v2p",
+      generatedFrom: input.generatedFrom,
+      sourceOfTruthNote: "Final score is derived only from score_change consequences; 50-match economy remains the global scoring reference.",
+      limitations: input.limitations ?? [
+        "Current adapter still maps the prototype mini-match into the official MatchReport contract.",
+      ],
+    },
     timeline,
     teamStats: createTeamMatchStatsFromEvents({
       matchInput: input.matchInput,
@@ -1278,7 +1328,7 @@ export function buildMatchReport(input: MatchReportBuilderInput): MatchReport {
     }),
     playerStats: [...playerStatsForTeam(input.matchInput.homeTeam), ...playerStatsForTeam(input.matchInput.awayTeam)],
     zoneStats: createZoneStatsFromEvents({ timeline }),
-    fatigueReport: input.fatigueReport ?? fatigueReport(input.matchInput),
+    fatigueReport: resolvedFatigueReport,
     tacticalReport: {
       diagnoses: [
         planInfluenceDiagnosis({
@@ -1431,29 +1481,13 @@ import type {
   MatchInput,
   TacticalDiagnosis,
 } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import type { TeamId } from "../../core/ids";
 import type { Rating } from "../../core/ratings";
 import type { ZoneId } from "../../core/zones";
 
-export type MatchEvidenceCategory =
-  | "high_danger_sequences"
-  | "unstable_under_pressure"
-  | "converted_scoring"
-  | "visible_pressure_zone"
-  | "dominated_team_no_payoff";
-
-export interface MatchEvidenceFact {
-  readonly factId: string;
-  readonly matchId: string;
-  readonly teamId: TeamId;
-  readonly opponentTeamId: TeamId;
-  readonly eventIds: readonly string[];
-  readonly zone: ZoneId;
-  readonly category: MatchEvidenceCategory;
-  readonly summary: string;
-  readonly strength: Rating;
-  readonly confidence: "low" | "medium" | "high";
-}
+export type MatchEvidenceCategory = MatchReportEvidenceCategory;
+export type MatchEvidenceFact = MatchReportEvidenceFact;
 
 interface TeamPerspective {
   readonly teamId: TeamId;
@@ -1491,6 +1525,10 @@ function representativeZone(events: readonly MatchEvent[], fallbackZone: ZoneId)
   }
 
   return selectedZone;
+}
+
+function primaryFactZone(fact: MatchEvidenceFact): ZoneId {
+  return (fact.affectedZones[0] ?? "Z3-C") as ZoneId;
 }
 
 function teamPerspectives(input: MatchInput): readonly TeamPerspective[] {
@@ -1537,11 +1575,14 @@ function highDangerFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: highDangerEvents.map((event) => event.eventId),
-    zone: representativeZone(highDangerEvents, firstHighDangerEvent.zone),
-    category: "high_danger_sequences",
+    affectedZones: [representativeZone(highDangerEvents, firstHighDangerEvent.zone)],
+    category: "DANGER_CREATION",
+    scope: "MATCH_REPORT",
     summary: `${input.perspective.teamName} a créé ${highDangerEvents.length} séquence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} dans les données de simulation actuelles en ${zones.join(", ")}.`,
     strength: clampRating(45 + highDangerEvents.length * 15),
     confidence: "medium",
+    coachVisible: true,
+    internalTags: ["high_danger_sequences"],
   };
 }
 
@@ -1574,11 +1615,14 @@ function unstablePressureFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: unstableEvents.map((event) => event.eventId),
-    zone: representativeZone(unstableEvents, firstUnstableEvent.zone),
-    category: "unstable_under_pressure",
+    affectedZones: [representativeZone(unstableEvents, firstUnstableEvent.zone)],
+    category: "POSSESSION_INSTABILITY",
+    scope: "MATCH_REPORT",
     summary: `${input.perspective.teamName} a connu ${unstableEvents.length} séquence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
     strength: clampRating(40 + unstableEvents.length * 12),
     confidence: "medium",
+    coachVisible: true,
+    internalTags: ["unstable_under_pressure"],
   };
 }
 
@@ -1606,11 +1650,14 @@ function scoringFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: scoringEvents.map((event) => event.eventId),
-    zone: representativeZone(scoringEvents, firstScoringEvent.zone),
-    category: "converted_scoring",
+    affectedZones: [representativeZone(scoringEvents, firstScoringEvent.zone)],
+    category: "SCORING_CONVERSION",
+    scope: "LIVE_SCORING_STREAM",
     summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} décisive${scoringEvents.length === 1 ? "" : "s"} identifiée${scoringEvents.length === 1 ? "" : "s"} dans les séquences de score.`,
     strength: clampRating(55 + scoringEvents.length * 15),
     confidence: "medium",
+    coachVisible: true,
+    internalTags: ["converted_scoring"],
   };
 }
 
@@ -1646,11 +1693,14 @@ function visiblePressureZoneFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: zoneEventIds,
-    zone,
-    category: "visible_pressure_zone",
+    affectedZones: [zone],
+    category: "TERRITORIAL_PRESSURE",
+    scope: "MATCH_REPORT",
     summary: `La pression la plus visible pour ${input.perspective.teamName} s'est concentrée en ${zone}.`,
     strength: clampRating(35 + zoneEventIds.length * 15),
     confidence: "low",
+    coachVisible: true,
+    internalTags: ["visible_pressure_zone"],
   };
 }
 
@@ -1700,11 +1750,14 @@ function dominatedTeamNoPayoffFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: signalEvents.map((event) => event.eventId),
-    zone: representativeZone(signalEvents, firstSignalEvent.zone),
-    category: "dominated_team_no_payoff",
+    affectedZones: [representativeZone(signalEvents, firstSignalEvent.zone)],
+    category: "PRESSURE_WITHOUT_CONVERSION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
     summary: `${input.perspective.teamName} apparaît dans plusieurs séquences de pression, de progression ou d'instabilité, mais aucune ne devient un événement de score dans ce run de harnais. La question utile est de savoir si ${input.perspective.teamName} manque de soutien dans le dernier geste, choisit une route trop risquée après pression, ou si le harnais répète une route non convertissante. Zones visibles : ${zones.join(", ")}.`,
     strength: clampRating(45 + signalEvents.length * 8),
     confidence: "low",
+    coachVisible: true,
+    internalTags: ["dominated_team_no_payoff"],
   };
 }
 
@@ -1740,30 +1793,43 @@ export function createMatchEvidenceFacts(input: {
 
 function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
   switch (fact.category) {
-    case "high_danger_sequences":
-    case "converted_scoring":
+    case "DANGER_CREATION":
+    case "SCORING_CONVERSION":
       return "tactical_success";
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return "weakness";
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return "training_recommendation";
-    case "dominated_team_no_payoff":
+    case "PRESSURE_WITHOUT_CONVERSION":
       return "tactical_failure";
+    case "FATIGUE_LOAD":
+    case "MOMENTUM_SHIFT":
+    case "TACTICAL_PLAN_SIGNAL":
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return "training_recommendation";
   }
 }
 
 function titleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
-    case "high_danger_sequences":
+    case "DANGER_CREATION":
       return "Des séquences dangereuses ont émergé";
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return "La possession s'est fragilisée sous pression";
-    case "converted_scoring":
+    case "SCORING_CONVERSION":
       return "Les actions décisives sont bien identifiées";
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return "La pression s'est concentrée dans une zone";
-    case "dominated_team_no_payoff":
-      return `${fact.teamId.toUpperCase()} produit du volume sans conversion`;
+    case "PRESSURE_WITHOUT_CONVERSION":
+      return `${(fact.teamId ?? "equipe").toUpperCase()} produit du volume sans conversion`;
+    case "FATIGUE_LOAD":
+      return "La charge physique devient un fait de match";
+    case "MOMENTUM_SHIFT":
+      return "L'élan du match change";
+    case "TACTICAL_PLAN_SIGNAL":
+      return "Le plan de match laisse un signal lisible";
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return "Avertissement de plausibilité du harnais";
   }
 }
 
@@ -1780,46 +1846,59 @@ function confidenceText(value: MatchEvidenceFact["confidence"]): string {
 
 function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recommendedActions"][number] {
   switch (fact.category) {
-    case "high_danger_sequences":
+    case "DANGER_CREATION":
       return {
         actionId: `${fact.factId}-repeat-pattern`,
-        label: `Continuer à répéter les entrées en ${fact.zone}`,
+        label: `Continuer à répéter les entrées en ${primaryFactZone(fact)}`,
         tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque échoue.",
       };
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return {
         actionId: `${fact.factId}-stabilize-possession`,
-        label: `Ajouter des soutiens plus sûrs autour de ${fact.zone}`,
+        label: `Ajouter des soutiens plus sûrs autour de ${primaryFactZone(fact)}`,
         tradeoff: "Des soutiens plus prudents peuvent réduire la menace verticale immédiate et ralentir le tempo de transition.",
       };
-    case "converted_scoring":
+    case "SCORING_CONVERSION":
       return {
         actionId: `${fact.factId}-protect-finishing-platform`,
         label: "Conserver le schéma qui a créé l'action décisive",
         tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prévisible.",
       };
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return {
         actionId: `${fact.factId}-pressure-release`,
-        label: `Préparer une sortie de pression depuis ${fact.zone}`,
+        label: `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`,
         tradeoff: "Une sortie trop précoce peut concéder du terrain si la structure de réception n'est pas sécurisée.",
       };
-    case "dominated_team_no_payoff":
+    case "PRESSURE_WITHOUT_CONVERSION":
       return {
         actionId: `${fact.factId}-route-selection-after-pressure`,
-        label: `Revoir la route choisie après pression en ${fact.zone}.`,
+        label: `Revoir la route choisie après pression en ${primaryFactZone(fact)}.`,
         tradeoff: "Réduire le risque peut stabiliser la plateforme de conversion, mais aussi retirer une partie de la menace immédiate.",
+      };
+    case "FATIGUE_LOAD":
+    case "MOMENTUM_SHIFT":
+    case "TACTICAL_PLAN_SIGNAL":
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return {
+        actionId: `${fact.factId}-review-signal`,
+        label: `Relire le signal autour de ${primaryFactZone(fact)}`,
+        tradeoff: "Agir trop vite sur un signal partiel peut masquer la cause tactique réelle.",
       };
   }
 }
 
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
   const priority: readonly MatchEvidenceCategory[] = [
-    "dominated_team_no_payoff",
-    "high_danger_sequences",
-    "unstable_under_pressure",
-    "visible_pressure_zone",
-    "converted_scoring",
+    "PRESSURE_WITHOUT_CONVERSION",
+    "DANGER_CREATION",
+    "POSSESSION_INSTABILITY",
+    "TERRITORIAL_PRESSURE",
+    "FATIGUE_LOAD",
+    "MOMENTUM_SHIFT",
+    "TACTICAL_PLAN_SIGNAL",
+    "HARNESS_PLAUSIBILITY_WARNING",
+    "SCORING_CONVERSION",
   ];
 
   for (const category of priority) {
@@ -1882,7 +1961,7 @@ export function createEvidenceDrivenCoachInsights(input: {
         },
       ],
       affectedPlayers: [],
-      affectedZones: [fact.zone],
+      affectedZones: [primaryFactZone(fact)],
       confidence: fact.confidence,
       recommendedActions: [recommendedActionForFact(fact)],
     },
@@ -1916,11 +1995,11 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
   return [
     {
       diagnosisId: `${fact.factId}-diagnosis`,
-      teamId: fact.teamId,
+      teamId: fact.teamId ?? input.matchInput.homeTeam.teamId,
       title: titleForFact(fact),
       summary: `${fact.summary} Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.`,
       evidenceEventIds: fact.eventIds,
-      affectedZones: [fact.zone],
+      affectedZones: [primaryFactZone(fact)],
       confidence: "low",
     },
   ];
@@ -1947,6 +2026,326 @@ export function eventTypeFromAdapterTags(tags: readonly string[]): MatchEventTyp
 }
 ```
 
+## File: src/simulation/adapters/matchReportEvidenceBuilder.ts
+
+```ts
+import type { FatigueReport, MatchEvent, MatchInput } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import type { ZoneId } from "../../core/zones";
+import type { TacticalPlanInfluence } from "./tacticalPlanInfluence";
+import { createMatchEvidenceFacts } from "./matchReportEvidence";
+
+function firstEvidenceEvent(events: readonly MatchEvent[]): MatchEvent | undefined {
+  return events.find((event) => event.eventType !== "kickoff") ?? events[0];
+}
+
+function topZones(events: readonly MatchEvent[], limit: number): readonly string[] {
+  const counts = new Map<string, number>();
+
+  for (const event of events) {
+    counts.set(event.zone, (counts.get(event.zone) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([zone]) => zone);
+}
+
+function tacticalPlanFact(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+  readonly influence: TacticalPlanInfluence;
+}): MatchReportEvidenceFact | null {
+  const event = firstEvidenceEvent(input.timeline);
+
+  if (event === undefined) {
+    return null;
+  }
+
+  const affectedZones = input.influence.targetZoneBias.length > 0
+    ? input.influence.targetZoneBias
+    : ([event.zone] as readonly ZoneId[]);
+
+  return {
+    factId: `${input.matchInput.matchId}-tactical-plan-signal`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "TACTICAL_PLAN_SIGNAL",
+    scope: "MATCH_REPORT",
+    eventIds: [event.eventId],
+    affectedZones,
+    summary: `${input.influence.homeSummary} ${input.influence.awaySummary} ${input.influence.matchEffectSummary}`,
+    confidence: "low",
+    strength: 50,
+    coachVisible: true,
+    internalTags: ["tactical_plan_influence"],
+  };
+}
+
+function fatigueLoadFact(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+  readonly fatigueReport: FatigueReport;
+}): MatchReportEvidenceFact | null {
+  const heaviestTeam = [...input.fatigueReport.teamSummaries].sort(
+    (a, b) => b.highIntensityLoad - a.highIntensityLoad,
+  )[0];
+
+  if (heaviestTeam === undefined) {
+    return null;
+  }
+
+  const teamEvents = input.timeline.filter((event) => event.teamId === heaviestTeam.teamId && event.eventType !== "kickoff");
+  const event = firstEvidenceEvent(teamEvents);
+
+  if (event === undefined) {
+    return null;
+  }
+
+  return {
+    factId: `${input.matchInput.matchId}-${heaviestTeam.teamId}-fatigue-load`,
+    matchId: input.matchInput.matchId,
+    teamId: heaviestTeam.teamId,
+    opponentTeamId: heaviestTeam.teamId === input.matchInput.homeTeam.teamId
+      ? input.matchInput.awayTeam.teamId
+      : input.matchInput.homeTeam.teamId,
+    category: "FATIGUE_LOAD",
+    scope: "MATCH_REPORT",
+    eventIds: [event.eventId],
+    affectedZones: topZones(teamEvents, 3),
+    summary: `${heaviestTeam.teamId.toUpperCase()} porte la charge physique la plus visible avec une intensité ${heaviestTeam.highIntensityLoad}/100 et une condition finale moyenne ${heaviestTeam.averageConditionEnd}/100.`,
+    confidence: "medium",
+    strength: heaviestTeam.highIntensityLoad,
+    coachVisible: true,
+    internalTags: ["fatigue_load", "full_match_fatigue_propagation"],
+  };
+}
+
+function momentumShiftFact(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+}): MatchReportEvidenceFact | null {
+  const momentumEvents = input.timeline.filter((event) =>
+    event.tags.includes("momentum_positive") || event.tags.includes("momentum_negative") || event.tags.includes("score_state_lopsided"),
+  );
+
+  const event = firstEvidenceEvent(momentumEvents);
+
+  if (event === undefined) {
+    return null;
+  }
+
+  return {
+    factId: `${input.matchInput.matchId}-momentum-shift`,
+    matchId: input.matchInput.matchId,
+    teamId: event.teamId,
+    opponentTeamId: event.opponentTeamId,
+    category: "MOMENTUM_SHIFT",
+    scope: "MATCH_REPORT",
+    eventIds: momentumEvents.slice(0, 6).map((candidate) => candidate.eventId),
+    affectedZones: topZones(momentumEvents, 3),
+    summary: `L'élan du match devient lisible autour de ${topZones(momentumEvents, 3).join(", ")} avec des signaux de score, pression ou momentum répétés.`,
+    confidence: "low",
+    strength: Math.min(100, 40 + momentumEvents.length * 8),
+    coachVisible: true,
+    internalTags: ["momentum_shift"],
+  };
+}
+
+export function buildCanonicalMatchReportEvidenceFacts(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+  readonly fatigueReport: FatigueReport;
+  readonly influence: TacticalPlanInfluence;
+}): readonly MatchReportEvidenceFact[] {
+  const baseFacts = createMatchEvidenceFacts({
+    matchInput: input.matchInput,
+    timeline: input.timeline,
+  });
+  const supplementalFacts = [
+    tacticalPlanFact(input),
+    fatigueLoadFact(input),
+    momentumShiftFact(input),
+  ].filter((fact): fact is MatchReportEvidenceFact => fact !== null);
+
+  return [...baseFacts, ...supplementalFacts];
+}
+```
+
+## File: src/simulation/adapters/matchReportWarningsBuilder.ts
+
+```ts
+import type { MatchEvent, MatchReport } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import type { MatchReportWarning, MatchReportWarningType } from "../../contracts/matchReportWarnings";
+import {
+  coachFacingHarnessWarningSummary,
+  coachFacingScoringDominanceSummary,
+} from "../../reports/coachFacingCopy";
+import type {
+  FullMatchHarnessSanityReport,
+  FullMatchHarnessSanityWarning,
+} from "../diagnostics/fullMatchHarnessSanity";
+
+function warningTypeForHarnessWarning(warning: FullMatchHarnessSanityWarning): MatchReportWarningType {
+  switch (warning) {
+    case "SINGLE_RUN_NOT_GLOBAL_ECONOMY":
+      return "FULL_MATCH_HARNESS_SINGLE_RUN";
+    case "INFLATED_SINGLE_RUN_SCORE":
+      return "INFLATED_SINGLE_RUN_SCORE";
+    case "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN":
+      return "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+    case "ZERO_SCORING_EVENTS_FOR_ONE_TEAM":
+      return "ZERO_SCORING_EVENTS_FOR_ONE_TEAM";
+    case "POSSIBLE_SEGMENT_PATTERN_REPETITION":
+    case "MISSING_SEGMENT_STATE_PROPAGATION":
+    case "MISSING_MOMENTUM_VARIATION":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_SEGMENT_PATTERN":
+      return "REPEATED_SEGMENT_PATTERN";
+    case "REPETITIVE_KEY_MOMENTS":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_ZONE":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_EVENT_FAMILY":
+      return "LOW_EVENT_FAMILY_DIVERSITY";
+    case "FLAT_FATIGUE_SIGNAL":
+    case "MISSING_FATIGUE_PROPAGATION":
+      return "FATIGUE_SIGNAL_FLAT";
+    case "HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM":
+      return "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+    case "DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE":
+    case "DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION":
+      return "ZERO_SCORING_EVENTS_FOR_ONE_TEAM";
+    case "DOMINATED_TEAM_HIGH_LOAD_NO_PAYOFF":
+      return "HIGH_LOAD_WITH_NO_PAYOFF";
+  }
+}
+
+function severityForWarning(type: MatchReportWarningType): MatchReportWarning["severity"] {
+  switch (type) {
+    case "FULL_MATCH_HARNESS_SINGLE_RUN":
+      return "info";
+    case "INFLATED_SINGLE_RUN_SCORE":
+    case "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN":
+    case "ZERO_SCORING_EVENTS_FOR_ONE_TEAM":
+      return "medium";
+    case "REPEATED_SEGMENT_PATTERN":
+    case "LOW_EVENT_FAMILY_DIVERSITY":
+    case "FATIGUE_SIGNAL_FLAT":
+    case "HIGH_LOAD_WITH_NO_PAYOFF":
+    case "REPORT_COPY_LIMITATION":
+    case "ADAPTER_LIMITATION":
+      return "low";
+  }
+}
+
+function titleForWarning(type: MatchReportWarningType): string {
+  switch (type) {
+    case "FULL_MATCH_HARNESS_SINGLE_RUN":
+      return "Avertissement de harnais full-match";
+    case "INFLATED_SINGLE_RUN_SCORE":
+      return "Score local élevé dans le harnais";
+    case "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN":
+      return "Domination scoring single-run à surveiller";
+    case "ZERO_SCORING_EVENTS_FOR_ONE_TEAM":
+      return "Équipe sans conversion dans ce run";
+    case "REPEATED_SEGMENT_PATTERN":
+      return "Répétition de segments à surveiller";
+    case "LOW_EVENT_FAMILY_DIVERSITY":
+      return "Diversité d'événements limitée";
+    case "FATIGUE_SIGNAL_FLAT":
+      return "Signal de fatigue trop plat";
+    case "HIGH_LOAD_WITH_NO_PAYOFF":
+      return "Charge élevée sans conversion";
+    case "REPORT_COPY_LIMITATION":
+      return "Limite de copie du rapport";
+    case "ADAPTER_LIMITATION":
+      return "Limite de l'adaptateur";
+  }
+}
+
+function evidenceEventIds(report: MatchReport, sanity: FullMatchHarnessSanityReport): readonly string[] {
+  const dominanceIds = sanity.scoringDominance.dominatedTeamEvidenceEventIds;
+
+  if (dominanceIds.length > 0) {
+    return dominanceIds;
+  }
+
+  const event = report.timeline.find((candidate) => candidate.eventType !== "kickoff") ?? report.timeline[0];
+
+  return event === undefined ? [] : [event.eventId];
+}
+
+function affectedZones(events: readonly MatchEvent[]): readonly string[] {
+  return [...new Set(events.map((event) => event.zone))].slice(0, 4);
+}
+
+export function buildHarnessWarningEvidenceFacts(input: {
+  readonly report: MatchReport;
+  readonly sanity: FullMatchHarnessSanityReport;
+}): readonly MatchReportEvidenceFact[] {
+  if (input.sanity.warnings.length <= 1) {
+    return [];
+  }
+
+  const eventIds = evidenceEventIds(input.report, input.sanity);
+  const events = input.report.timeline.filter((event) => eventIds.includes(event.eventId));
+  const teamId = input.report.teamStats[0]?.teamId;
+  const opponentTeamId = input.report.teamStats[1]?.teamId;
+
+  return [
+    {
+      factId: `${input.report.matchId}-harness-plausibility-warning`,
+      matchId: input.report.matchId,
+      ...(teamId === undefined ? {} : { teamId }),
+      ...(opponentTeamId === undefined ? {} : { opponentTeamId }),
+      category: "HARNESS_PLAUSIBILITY_WARNING",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones: affectedZones(events),
+      summary: coachFacingHarnessWarningSummary(input.sanity.warnings),
+      confidence: "low",
+      strength: Math.min(100, 35 + input.sanity.warnings.length * 8),
+      coachVisible: true,
+      internalTags: input.sanity.warnings,
+    },
+  ];
+}
+
+export function buildMatchReportWarnings(input: {
+  readonly report: MatchReport;
+  readonly sanity: FullMatchHarnessSanityReport;
+  readonly evidenceFacts: readonly MatchReportEvidenceFact[];
+}): readonly MatchReportWarning[] {
+  if (input.sanity.warnings.length <= 1) {
+    return [];
+  }
+
+  const harnessFact = input.evidenceFacts.find((fact) => fact.category === "HARNESS_PLAUSIBILITY_WARNING");
+  const eventIds = evidenceEventIds(input.report, input.sanity);
+  const uniqueTypes = [...new Set(input.sanity.warnings.map(warningTypeForHarnessWarning))];
+
+  return uniqueTypes.map((type) => {
+    const isDominance = type === "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+
+    return {
+      warningId: `${input.report.matchId}-${type.toLowerCase()}`,
+      type,
+      scope: "coach_visible",
+      severity: severityForWarning(type),
+      title: titleForWarning(type),
+      coachSummary: isDominance
+        ? coachFacingScoringDominanceSummary(input.sanity.scoringDominance)
+        : coachFacingHarnessWarningSummary(input.sanity.warnings),
+      technicalSummary: `Harness warnings: ${input.sanity.warnings.join(", ")}. Scope: ${input.sanity.scope}. May invalidate global economy: false.`,
+      evidenceFactIds: harnessFact === undefined ? [] : [harnessFact.factId],
+      eventIds,
+      mayInvalidateGlobalScoringEconomy: false,
+    };
+  });
+}
+```
+
 ## File: src/simulation/adapters/matchReportMoments.ts
 
 ```ts
@@ -1964,7 +2363,7 @@ const HIGH_NARRATIVE_WEIGHT = 60;
 interface KeyMomentCandidate {
   readonly event: MatchEvent;
   readonly priority: number;
-  readonly evidenceSummary?: string;
+  readonly evidenceFact?: MatchEvidenceFact;
 }
 
 function hasTag(event: MatchEvent, tag: string): boolean {
@@ -1980,7 +2379,11 @@ function primaryInsightEvidenceEventIds(coachInsights: readonly CoachInsight[]):
 }
 
 function factForEvent(event: MatchEvent, facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | undefined {
-  return facts.find((fact) => fact.eventIds.includes(event.eventId));
+  return facts.find((fact) => fact.coachVisible && fact.eventIds.includes(event.eventId));
+}
+
+function factZone(fact: MatchEvidenceFact): string {
+  return fact.affectedZones[0] ?? "Z3-C";
 }
 
 function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
@@ -1992,20 +2395,24 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
     return "Action décisive";
   }
 
-  if (fact?.category === "dominated_team_no_payoff") {
+  if (fact?.category === "PRESSURE_WITHOUT_CONVERSION") {
     return `${event.teamId.toUpperCase()} sous pression sans conversion`;
   }
 
-  if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
+  if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative") || fact?.category === "MOMENTUM_SHIFT") {
     return "Signal d'élan à surveiller";
   }
 
-  if (fact?.category === "visible_pressure_zone") {
-    return `Pression concentrée en ${fact.zone}`;
+  if (fact?.category === "TERRITORIAL_PRESSURE") {
+    return `Pression concentrée en ${factZone(fact)}`;
   }
 
-  if (hasTag(event, "danger_high") || fact?.category === "high_danger_sequences") {
+  if (hasTag(event, "danger_high") || fact?.category === "DANGER_CREATION") {
     return "Séquence dangereuse";
+  }
+
+  if (fact?.category === "HARNESS_PLAUSIBILITY_WARNING") {
+    return "Signal de harnais à surveiller";
   }
 
   if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
@@ -2027,9 +2434,17 @@ function summaryForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined)
   return event.tacticalContext.reason ?? "Séquence tactique visible dans le rapport.";
 }
 
-function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<string>): number {
+function candidatePriority(event: MatchEvent, fact: MatchEvidenceFact | undefined, insightEventIds: ReadonlySet<string>): number {
   if (event.eventType === "scoring") {
     return 100;
+  }
+
+  if (fact?.category === "PRESSURE_WITHOUT_CONVERSION") {
+    return 88;
+  }
+
+  if (fact?.category === "HARNESS_PLAUSIBILITY_WARNING") {
+    return 82;
   }
 
   if (insightEventIds.has(event.eventId)) {
@@ -2059,8 +2474,8 @@ function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<strin
   return 0;
 }
 
-function candidateTitle(candidate: KeyMomentCandidate, facts: readonly MatchEvidenceFact[]): string {
-  return titleForEvent(candidate.event, factForEvent(candidate.event, facts));
+function candidateTitle(candidate: KeyMomentCandidate): string {
+  return titleForEvent(candidate.event, candidate.evidenceFact);
 }
 
 function candidateFromEvent(input: {
@@ -2068,22 +2483,18 @@ function candidateFromEvent(input: {
   readonly facts: readonly MatchEvidenceFact[];
   readonly insightEventIds: ReadonlySet<string>;
 }): KeyMomentCandidate | null {
-  const priority = candidatePriority(input.event, input.insightEventIds);
+  const fact = factForEvent(input.event, input.facts);
+  const priority = candidatePriority(input.event, fact, input.insightEventIds);
 
   if (priority <= 0) {
     return null;
   }
 
-  const fact = factForEvent(input.event, input.facts);
-  const adjustedPriority = fact?.category === "dominated_team_no_payoff"
-    ? Math.max(priority, 88)
-    : priority;
-  const candidate: KeyMomentCandidate = {
+  return {
     event: input.event,
-    priority: adjustedPriority,
+    priority,
+    ...(fact === undefined ? {} : { evidenceFact: fact }),
   };
-
-  return fact === undefined ? candidate : { ...candidate, evidenceSummary: fact.summary };
 }
 
 function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number {
@@ -2094,14 +2505,11 @@ function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number
   return a.event.timestamp.tick - b.event.timestamp.tick;
 }
 
-function selectDiverseCandidates(
-  candidates: readonly KeyMomentCandidate[],
-  facts: readonly MatchEvidenceFact[],
-): readonly KeyMomentCandidate[] {
+function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): readonly KeyMomentCandidate[] {
   const sortedCandidates = [...candidates].sort(compareCandidates);
   const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
   const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
-  const availableTitleCount = new Set(sortedCandidates.map((candidate) => candidateTitle(candidate, facts))).size;
+  const availableTitleCount = new Set(sortedCandidates.map(candidateTitle)).size;
   const shouldLimitRepeatedTitles = availableTitleCount > 1;
   const selected: KeyMomentCandidate[] = [];
   const titleCounts = new Map<string, number>();
@@ -2112,7 +2520,7 @@ function selectDiverseCandidates(
       break;
     }
 
-    const title = candidateTitle(candidate, facts);
+    const title = candidateTitle(candidate);
     if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
       continue;
     }
@@ -2138,7 +2546,7 @@ function selectDiverseCandidates(
     }
 
     if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
-      const title = candidateTitle(candidate, facts);
+      const title = candidateTitle(candidate);
       if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
         continue;
       }
@@ -2184,18 +2592,18 @@ export function selectKeyMoments(input: {
     }
   }
 
-  return [...selectDiverseCandidates([...candidatesByEventId.values()], input.facts)]
+  return [...selectDiverseCandidates([...candidatesByEventId.values()])]
     .sort((a, b) => a.event.timestamp.tick - b.event.timestamp.tick)
-    .map((candidate) => {
-      const fact = factForEvent(candidate.event, input.facts);
-
-      return {
-        eventId: candidate.event.eventId,
-        title: titleForEvent(candidate.event, fact),
-        summary: candidate.evidenceSummary ?? summaryForEvent(candidate.event, fact),
-        minute: candidate.event.timestamp.minute,
-      };
-    });
+    .map((candidate) => ({
+      eventId: candidate.event.eventId,
+      ...(candidate.evidenceFact === undefined ? {} : {
+        evidenceFactId: candidate.evidenceFact.factId,
+        category: candidate.evidenceFact.category,
+      }),
+      title: titleForEvent(candidate.event, candidate.evidenceFact),
+      summary: summaryForEvent(candidate.event, candidate.evidenceFact),
+      minute: candidate.event.timestamp.minute,
+    }));
 }
 ```
 
@@ -2311,23 +2719,36 @@ import type { MatchEvidenceCategory, MatchEvidenceFact } from "./matchReportEvid
 
 const FALLBACK_FOCUS_TITLE = "Finaliser l'adaptation du contrat moteur";
 
+function primaryFactZone(fact: MatchEvidenceFact): string {
+  return fact.affectedZones[0] ?? "Z3-C";
+}
+
 function priorityForCategory(category: MatchEvidenceCategory): number {
   switch (category) {
-    case "converted_scoring":
+    case "SCORING_CONVERSION":
       return 100;
-    case "dominated_team_no_payoff":
+    case "PRESSURE_WITHOUT_CONVERSION":
       return 95;
-    case "high_danger_sequences":
+    case "DANGER_CREATION":
       return 90;
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return 80;
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return 70;
+    case "FATIGUE_LOAD":
+      return 65;
+    case "MOMENTUM_SHIFT":
+      return 60;
+    case "TACTICAL_PLAN_SIGNAL":
+      return 55;
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return 50;
   }
 }
 
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
-  const sortedFacts = [...facts].sort(
+  const coachVisibleFacts = facts.filter((fact) => fact.coachVisible);
+  const sortedFacts = [...coachVisibleFacts].sort(
     (a, b) => priorityForCategory(b.category) - priorityForCategory(a.category) || b.strength - a.strength,
   );
 
@@ -2336,16 +2757,24 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
 
 function focusTitleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
-    case "high_danger_sequences":
-      return `Répéter les entrées dangereuses en ${fact.zone}`;
-    case "unstable_under_pressure":
-      return `Stabiliser la possession sous pression en ${fact.zone}`;
-    case "converted_scoring":
+    case "DANGER_CREATION":
+      return `Répéter les entrées dangereuses en ${primaryFactZone(fact)}`;
+    case "POSSESSION_INSTABILITY":
+      return `Stabiliser la possession sous pression en ${primaryFactZone(fact)}`;
+    case "SCORING_CONVERSION":
       return "Sécuriser la séquence qui mène au score";
-    case "visible_pressure_zone":
-      return `Préparer une sortie de pression depuis ${fact.zone}`;
-    case "dominated_team_no_payoff":
-      return `Transformer la pression de ${fact.teamId.toUpperCase()} en plateforme de conversion`;
+    case "TERRITORIAL_PRESSURE":
+      return `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`;
+    case "PRESSURE_WITHOUT_CONVERSION":
+      return `Transformer la pression de ${(fact.teamId ?? "l'équipe").toUpperCase()} en plateforme de conversion`;
+    case "FATIGUE_LOAD":
+      return `Gérer la charge autour de ${primaryFactZone(fact)}`;
+    case "MOMENTUM_SHIFT":
+      return "Stabiliser l'élan après les bascules du match";
+    case "TACTICAL_PLAN_SIGNAL":
+      return "Relire le plan de match dans les zones visibles";
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return "Lire le signal de harnais sans changer l'économie du score";
   }
 }
 
@@ -3113,6 +3542,135 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/matchReportContractGuard.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import type { MatchReport } from "../contracts/engineToCoach";
+import { containsMojibake } from "../reports/coachCopyQuality";
+import { runFullMatch } from "./runFullMatch";
+import { runMatch } from "./runMatch";
+
+function assertGuard(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function validateScoreFromConsequences(report: MatchReport): void {
+  const [homeTeam, awayTeam] = report.teamStats;
+
+  if (homeTeam === undefined || awayTeam === undefined) {
+    return;
+  }
+
+  const score = report.timeline.reduce(
+    (currentScore, event) => {
+      const points = event.consequences
+        .filter((consequence) => consequence.type === "score_change")
+        .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+
+      return {
+        home: currentScore.home + (event.teamId === homeTeam.teamId ? points : 0),
+        away: currentScore.away + (event.teamId === awayTeam.teamId ? points : 0),
+      };
+    },
+    { home: 0, away: 0 },
+  );
+
+  assertGuard(score.home === report.score.home && score.away === report.score.away, "MatchReport score must equal score_change consequences.");
+}
+
+function validateReportContract(report: MatchReport, expectedScope: MatchReport["reportMeta"]["reportScope"]): void {
+  const eventIds = new Set(report.timeline.map((event) => event.eventId));
+  const factIds = new Set(report.evidenceFacts.map((fact) => fact.factId));
+
+  assertGuard(report.evidenceFacts.length > 0, "MatchReport.evidenceFacts must be non-empty when timeline evidence exists.");
+  assertGuard(report.warnings.length >= 0, "MatchReport.warnings must exist.");
+  assertGuard(report.reportMeta.reportScope === expectedScope, `reportMeta.reportScope must be ${expectedScope}.`);
+
+  for (const fact of report.evidenceFacts) {
+    assertGuard(!containsMojibake(fact.summary), `${fact.factId} evidence summary contains mojibake.`);
+    assertGuard(fact.strength >= 0 && fact.strength <= 100, `${fact.factId} strength must stay within 0-100.`);
+    for (const eventId of fact.eventIds) {
+      assertGuard(eventIds.has(eventId), `${fact.factId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const warning of report.warnings) {
+    assertGuard(warning.mayInvalidateGlobalScoringEconomy === false, `${warning.warningId} must not invalidate global scoring economy.`);
+    assertGuard(!containsMojibake(warning.coachSummary), `${warning.warningId} coach summary contains mojibake.`);
+    for (const factId of warning.evidenceFactIds) {
+      assertGuard(factIds.has(factId), `${warning.warningId} references missing evidence fact ${factId}.`);
+    }
+    for (const eventId of warning.eventIds) {
+      assertGuard(eventIds.has(eventId), `${warning.warningId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const insight of report.coachInsights) {
+    assertGuard(!containsMojibake(insight.summary), `${insight.insightId} summary contains mojibake.`);
+    for (const evidence of insight.evidence) {
+      for (const eventId of evidence.eventIds) {
+        assertGuard(eventIds.has(eventId), `${insight.insightId} references missing event ${eventId}.`);
+      }
+    }
+  }
+
+  for (const diagnosis of report.tacticalReport.diagnoses) {
+    assertGuard(!containsMojibake(diagnosis.summary), `${diagnosis.diagnosisId} summary contains mojibake.`);
+    for (const eventId of diagnosis.evidenceEventIds) {
+      assertGuard(eventIds.has(eventId), `${diagnosis.diagnosisId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const moment of report.keyMoments) {
+    assertGuard(eventIds.has(moment.eventId), `${moment.title} references missing event ${moment.eventId}.`);
+    assertGuard(!containsMojibake(moment.summary), `${moment.title} summary contains mojibake.`);
+    if (moment.evidenceFactId !== undefined) {
+      assertGuard(factIds.has(moment.evidenceFactId), `${moment.title} references missing evidence fact ${moment.evidenceFactId}.`);
+    }
+  }
+
+  validateScoreFromConsequences(report);
+}
+
+export function validateCanonicalMatchReportContract(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const miniReport = runMatch(input);
+  const fullReport = runFullMatch(input);
+
+  validateReportContract(miniReport, "MINI_MATCH_LOCAL");
+  validateReportContract(fullReport, "FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertGuard(fullReport.warnings.every((warning) => !warning.coachSummary.includes("FULL_MATCH_HARNESS_SINGLE_RUN")), "Visible warning copy must not expose raw harness scope enum.");
+  assertGuard(fullReport.warnings.every((warning) => warning.technicalSummary.includes("FULL_MATCH_HARNESS_SINGLE_RUN")), "Technical warning summary must preserve raw harness scope.");
+
+  return [
+    "runMatch returns canonical evidenceFacts, warnings, and reportMeta",
+    "runFullMatch returns canonical evidenceFacts, warnings, and reportMeta",
+    "runMatch reportMeta scope is MINI_MATCH_LOCAL",
+    "runFullMatch reportMeta scope is FULL_MATCH_HARNESS_SINGLE_RUN",
+    "evidence fact event IDs reference real timeline events",
+    "warning evidence fact IDs reference real evidence facts",
+    "key moments reference real events and evidence facts when present",
+    "coach insights and diagnoses reference real timeline events",
+    "visible report summaries contain no mojibake",
+    "full-match warnings cannot invalidate global scoring economy",
+    "technical summaries preserve internal scope while coach summaries stay clean",
+    "final score equals score_change consequences",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCanonicalMatchReportContract();
+
+  console.log("Canonical MatchReport contract guard passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/runFullMatchContractGuard.ts
 
 ```ts
@@ -3230,6 +3788,7 @@ function validateKeyMoments(report: MatchReport): void {
 
 function validateEvidenceReferences(report: MatchReport): void {
   const eventIds = new Set(report.timeline.map((event) => event.eventId));
+  const evidenceFactIds = new Set(report.evidenceFacts.map((fact) => fact.factId));
 
   for (const insight of report.coachInsights) {
     for (const evidence of insight.evidence) {
@@ -3242,6 +3801,19 @@ function validateEvidenceReferences(report: MatchReport): void {
   for (const diagnosis of report.tacticalReport.diagnoses) {
     for (const eventId of diagnosis.evidenceEventIds) {
       assertGuard(eventIds.has(eventId), `${diagnosis.diagnosisId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const fact of report.evidenceFacts) {
+    for (const eventId of fact.eventIds) {
+      assertGuard(eventIds.has(eventId), `${fact.factId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const warning of report.warnings) {
+    assertGuard(warning.mayInvalidateGlobalScoringEconomy === false, `${warning.warningId} must remain warning-only.`);
+    for (const factId of warning.evidenceFactIds) {
+      assertGuard(evidenceFactIds.has(factId), `${warning.warningId} references missing evidence fact ${factId}.`);
     }
   }
 }
@@ -3387,6 +3959,9 @@ export function validateRunFullMatchHarness(): readonly string[] {
   validateHarnessSanityWarnings(report);
   validateSegmentDiversityAndFatigue(report, input);
   validateDominatedTeamEvidence(report);
+  assertGuard(report.reportMeta.reportScope === "FULL_MATCH_HARNESS_SINGLE_RUN", "Full-match reportMeta scope must be FULL_MATCH_HARNESS_SINGLE_RUN.");
+  assertGuard(report.evidenceFacts.some((fact) => fact.category === "HARNESS_PLAUSIBILITY_WARNING"), "Full-match report must include harness plausibility evidence when sanity warnings exist.");
+  assertGuard(report.warnings.length > 0, "Full-match report must expose structured MatchReport warnings.");
   assertGuard(
     createMatchReportSignature(report) === createMatchReportSignature(repeatedReport),
     "runFullMatch must be deterministic for the same MatchInput.",
@@ -3403,11 +3978,14 @@ export function validateRunFullMatchHarness(): readonly string[] {
     "full-match key moments cap repeated titles when alternatives exist",
     "full-match scoring key moments are capped by selection when alternatives exist",
     "full-match insights and diagnoses reference existing events",
+    "full-match structured warnings reference canonical evidence facts",
     "segment diversity report exists",
     "fatigue propagation report exists",
     "at least one team condition decreases below starting condition",
     "high pressing team has greater or equal highIntensityLoad than balanced team",
     "full-match guard scope is FULL_MATCH_HARNESS_SINGLE_RUN",
+    "full-match reportMeta scope is FULL_MATCH_HARNESS_SINGLE_RUN",
+    "full-match report exposes canonical harness warning evidence",
     "high single-run score is a harness warning, not a scoring failure",
     "harness sanity warnings do not recommend scoring value changes",
     "dominance diagnostics exist for lopsided single-run score",
