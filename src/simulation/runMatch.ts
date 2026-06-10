@@ -46,6 +46,12 @@ export function runMatch(input: MatchInput): MatchReport {
     adapter,
     score,
     influence,
+    generatedFrom: "runMatch",
+    reportScope: "MINI_MATCH_LOCAL",
+    limitations: [
+      "runMatch is a local mini-match adapter and cannot make global scoring economy claims.",
+      "Seed variation is forwarded to the mini-match but remains limited until deeper scenario variation is wired.",
+    ],
   });
 }
 
@@ -69,6 +75,9 @@ export function createMatchReportSignature(report: MatchReport): string {
     keyMoments: report.keyMoments,
     coachInsights: report.coachInsights,
     suggestedFocus: report.suggestedFocus,
+    evidenceFacts: report.evidenceFacts,
+    warnings: report.warnings,
+    reportMeta: report.reportMeta,
   };
 
   return JSON.stringify(source);

@@ -3,23 +3,36 @@ import type { MatchEvidenceCategory, MatchEvidenceFact } from "./matchReportEvid
 
 const FALLBACK_FOCUS_TITLE = "Finaliser l'adaptation du contrat moteur";
 
+function primaryFactZone(fact: MatchEvidenceFact): string {
+  return fact.affectedZones[0] ?? "Z3-C";
+}
+
 function priorityForCategory(category: MatchEvidenceCategory): number {
   switch (category) {
-    case "converted_scoring":
+    case "SCORING_CONVERSION":
       return 100;
-    case "dominated_team_no_payoff":
+    case "PRESSURE_WITHOUT_CONVERSION":
       return 95;
-    case "high_danger_sequences":
+    case "DANGER_CREATION":
       return 90;
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return 80;
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return 70;
+    case "FATIGUE_LOAD":
+      return 65;
+    case "MOMENTUM_SHIFT":
+      return 60;
+    case "TACTICAL_PLAN_SIGNAL":
+      return 55;
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return 50;
   }
 }
 
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
-  const sortedFacts = [...facts].sort(
+  const coachVisibleFacts = facts.filter((fact) => fact.coachVisible);
+  const sortedFacts = [...coachVisibleFacts].sort(
     (a, b) => priorityForCategory(b.category) - priorityForCategory(a.category) || b.strength - a.strength,
   );
 
@@ -28,16 +41,24 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
 
 function focusTitleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
-    case "high_danger_sequences":
-      return `Répéter les entrées dangereuses en ${fact.zone}`;
-    case "unstable_under_pressure":
-      return `Stabiliser la possession sous pression en ${fact.zone}`;
-    case "converted_scoring":
+    case "DANGER_CREATION":
+      return `Répéter les entrées dangereuses en ${primaryFactZone(fact)}`;
+    case "POSSESSION_INSTABILITY":
+      return `Stabiliser la possession sous pression en ${primaryFactZone(fact)}`;
+    case "SCORING_CONVERSION":
       return "Sécuriser la séquence qui mène au score";
-    case "visible_pressure_zone":
-      return `Préparer une sortie de pression depuis ${fact.zone}`;
-    case "dominated_team_no_payoff":
-      return `Transformer la pression de ${fact.teamId.toUpperCase()} en plateforme de conversion`;
+    case "TERRITORIAL_PRESSURE":
+      return `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`;
+    case "PRESSURE_WITHOUT_CONVERSION":
+      return `Transformer la pression de ${(fact.teamId ?? "l'équipe").toUpperCase()} en plateforme de conversion`;
+    case "FATIGUE_LOAD":
+      return `Gérer la charge autour de ${primaryFactZone(fact)}`;
+    case "MOMENTUM_SHIFT":
+      return "Stabiliser l'élan après les bascules du match";
+    case "TACTICAL_PLAN_SIGNAL":
+      return "Relire le plan de match dans les zones visibles";
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return "Lire le signal de harnais sans changer l'économie du score";
   }
 }
 

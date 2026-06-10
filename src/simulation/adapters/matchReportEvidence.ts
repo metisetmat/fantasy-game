@@ -5,29 +5,13 @@ import type {
   MatchInput,
   TacticalDiagnosis,
 } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import type { TeamId } from "../../core/ids";
 import type { Rating } from "../../core/ratings";
 import type { ZoneId } from "../../core/zones";
 
-export type MatchEvidenceCategory =
-  | "high_danger_sequences"
-  | "unstable_under_pressure"
-  | "converted_scoring"
-  | "visible_pressure_zone"
-  | "dominated_team_no_payoff";
-
-export interface MatchEvidenceFact {
-  readonly factId: string;
-  readonly matchId: string;
-  readonly teamId: TeamId;
-  readonly opponentTeamId: TeamId;
-  readonly eventIds: readonly string[];
-  readonly zone: ZoneId;
-  readonly category: MatchEvidenceCategory;
-  readonly summary: string;
-  readonly strength: Rating;
-  readonly confidence: "low" | "medium" | "high";
-}
+export type MatchEvidenceCategory = MatchReportEvidenceCategory;
+export type MatchEvidenceFact = MatchReportEvidenceFact;
 
 interface TeamPerspective {
   readonly teamId: TeamId;
@@ -65,6 +49,10 @@ function representativeZone(events: readonly MatchEvent[], fallbackZone: ZoneId)
   }
 
   return selectedZone;
+}
+
+function primaryFactZone(fact: MatchEvidenceFact): ZoneId {
+  return (fact.affectedZones[0] ?? "Z3-C") as ZoneId;
 }
 
 function teamPerspectives(input: MatchInput): readonly TeamPerspective[] {
@@ -111,11 +99,14 @@ function highDangerFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: highDangerEvents.map((event) => event.eventId),
-    zone: representativeZone(highDangerEvents, firstHighDangerEvent.zone),
-    category: "high_danger_sequences",
+    affectedZones: [representativeZone(highDangerEvents, firstHighDangerEvent.zone)],
+    category: "DANGER_CREATION",
+    scope: "MATCH_REPORT",
     summary: `${input.perspective.teamName} a créé ${highDangerEvents.length} séquence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} dans les données de simulation actuelles en ${zones.join(", ")}.`,
     strength: clampRating(45 + highDangerEvents.length * 15),
     confidence: "medium",
+    coachVisible: true,
+    internalTags: ["high_danger_sequences"],
   };
 }
 
@@ -148,11 +139,14 @@ function unstablePressureFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: unstableEvents.map((event) => event.eventId),
-    zone: representativeZone(unstableEvents, firstUnstableEvent.zone),
-    category: "unstable_under_pressure",
+    affectedZones: [representativeZone(unstableEvents, firstUnstableEvent.zone)],
+    category: "POSSESSION_INSTABILITY",
+    scope: "MATCH_REPORT",
     summary: `${input.perspective.teamName} a connu ${unstableEvents.length} séquence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
     strength: clampRating(40 + unstableEvents.length * 12),
     confidence: "medium",
+    coachVisible: true,
+    internalTags: ["unstable_under_pressure"],
   };
 }
 
@@ -180,11 +174,14 @@ function scoringFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: scoringEvents.map((event) => event.eventId),
-    zone: representativeZone(scoringEvents, firstScoringEvent.zone),
-    category: "converted_scoring",
+    affectedZones: [representativeZone(scoringEvents, firstScoringEvent.zone)],
+    category: "SCORING_CONVERSION",
+    scope: "LIVE_SCORING_STREAM",
     summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} décisive${scoringEvents.length === 1 ? "" : "s"} identifiée${scoringEvents.length === 1 ? "" : "s"} dans les séquences de score.`,
     strength: clampRating(55 + scoringEvents.length * 15),
     confidence: "medium",
+    coachVisible: true,
+    internalTags: ["converted_scoring"],
   };
 }
 
@@ -220,11 +217,14 @@ function visiblePressureZoneFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: zoneEventIds,
-    zone,
-    category: "visible_pressure_zone",
+    affectedZones: [zone],
+    category: "TERRITORIAL_PRESSURE",
+    scope: "MATCH_REPORT",
     summary: `La pression la plus visible pour ${input.perspective.teamName} s'est concentrée en ${zone}.`,
     strength: clampRating(35 + zoneEventIds.length * 15),
     confidence: "low",
+    coachVisible: true,
+    internalTags: ["visible_pressure_zone"],
   };
 }
 
@@ -274,11 +274,14 @@ function dominatedTeamNoPayoffFact(input: {
     teamId: input.perspective.teamId,
     opponentTeamId: input.perspective.opponentTeamId,
     eventIds: signalEvents.map((event) => event.eventId),
-    zone: representativeZone(signalEvents, firstSignalEvent.zone),
-    category: "dominated_team_no_payoff",
+    affectedZones: [representativeZone(signalEvents, firstSignalEvent.zone)],
+    category: "PRESSURE_WITHOUT_CONVERSION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
     summary: `${input.perspective.teamName} apparaît dans plusieurs séquences de pression, de progression ou d'instabilité, mais aucune ne devient un événement de score dans ce run de harnais. La question utile est de savoir si ${input.perspective.teamName} manque de soutien dans le dernier geste, choisit une route trop risquée après pression, ou si le harnais répète une route non convertissante. Zones visibles : ${zones.join(", ")}.`,
     strength: clampRating(45 + signalEvents.length * 8),
     confidence: "low",
+    coachVisible: true,
+    internalTags: ["dominated_team_no_payoff"],
   };
 }
 
@@ -314,30 +317,43 @@ export function createMatchEvidenceFacts(input: {
 
 function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
   switch (fact.category) {
-    case "high_danger_sequences":
-    case "converted_scoring":
+    case "DANGER_CREATION":
+    case "SCORING_CONVERSION":
       return "tactical_success";
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return "weakness";
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return "training_recommendation";
-    case "dominated_team_no_payoff":
+    case "PRESSURE_WITHOUT_CONVERSION":
       return "tactical_failure";
+    case "FATIGUE_LOAD":
+    case "MOMENTUM_SHIFT":
+    case "TACTICAL_PLAN_SIGNAL":
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return "training_recommendation";
   }
 }
 
 function titleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
-    case "high_danger_sequences":
+    case "DANGER_CREATION":
       return "Des séquences dangereuses ont émergé";
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return "La possession s'est fragilisée sous pression";
-    case "converted_scoring":
+    case "SCORING_CONVERSION":
       return "Les actions décisives sont bien identifiées";
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return "La pression s'est concentrée dans une zone";
-    case "dominated_team_no_payoff":
-      return `${fact.teamId.toUpperCase()} produit du volume sans conversion`;
+    case "PRESSURE_WITHOUT_CONVERSION":
+      return `${(fact.teamId ?? "equipe").toUpperCase()} produit du volume sans conversion`;
+    case "FATIGUE_LOAD":
+      return "La charge physique devient un fait de match";
+    case "MOMENTUM_SHIFT":
+      return "L'élan du match change";
+    case "TACTICAL_PLAN_SIGNAL":
+      return "Le plan de match laisse un signal lisible";
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return "Avertissement de plausibilité du harnais";
   }
 }
 
@@ -354,46 +370,59 @@ function confidenceText(value: MatchEvidenceFact["confidence"]): string {
 
 function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recommendedActions"][number] {
   switch (fact.category) {
-    case "high_danger_sequences":
+    case "DANGER_CREATION":
       return {
         actionId: `${fact.factId}-repeat-pattern`,
-        label: `Continuer à répéter les entrées en ${fact.zone}`,
+        label: `Continuer à répéter les entrées en ${primaryFactZone(fact)}`,
         tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque échoue.",
       };
-    case "unstable_under_pressure":
+    case "POSSESSION_INSTABILITY":
       return {
         actionId: `${fact.factId}-stabilize-possession`,
-        label: `Ajouter des soutiens plus sûrs autour de ${fact.zone}`,
+        label: `Ajouter des soutiens plus sûrs autour de ${primaryFactZone(fact)}`,
         tradeoff: "Des soutiens plus prudents peuvent réduire la menace verticale immédiate et ralentir le tempo de transition.",
       };
-    case "converted_scoring":
+    case "SCORING_CONVERSION":
       return {
         actionId: `${fact.factId}-protect-finishing-platform`,
         label: "Conserver le schéma qui a créé l'action décisive",
         tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prévisible.",
       };
-    case "visible_pressure_zone":
+    case "TERRITORIAL_PRESSURE":
       return {
         actionId: `${fact.factId}-pressure-release`,
-        label: `Préparer une sortie de pression depuis ${fact.zone}`,
+        label: `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`,
         tradeoff: "Une sortie trop précoce peut concéder du terrain si la structure de réception n'est pas sécurisée.",
       };
-    case "dominated_team_no_payoff":
+    case "PRESSURE_WITHOUT_CONVERSION":
       return {
         actionId: `${fact.factId}-route-selection-after-pressure`,
-        label: `Revoir la route choisie après pression en ${fact.zone}.`,
+        label: `Revoir la route choisie après pression en ${primaryFactZone(fact)}.`,
         tradeoff: "Réduire le risque peut stabiliser la plateforme de conversion, mais aussi retirer une partie de la menace immédiate.",
+      };
+    case "FATIGUE_LOAD":
+    case "MOMENTUM_SHIFT":
+    case "TACTICAL_PLAN_SIGNAL":
+    case "HARNESS_PLAUSIBILITY_WARNING":
+      return {
+        actionId: `${fact.factId}-review-signal`,
+        label: `Relire le signal autour de ${primaryFactZone(fact)}`,
+        tradeoff: "Agir trop vite sur un signal partiel peut masquer la cause tactique réelle.",
       };
   }
 }
 
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
   const priority: readonly MatchEvidenceCategory[] = [
-    "dominated_team_no_payoff",
-    "high_danger_sequences",
-    "unstable_under_pressure",
-    "visible_pressure_zone",
-    "converted_scoring",
+    "PRESSURE_WITHOUT_CONVERSION",
+    "DANGER_CREATION",
+    "POSSESSION_INSTABILITY",
+    "TERRITORIAL_PRESSURE",
+    "FATIGUE_LOAD",
+    "MOMENTUM_SHIFT",
+    "TACTICAL_PLAN_SIGNAL",
+    "HARNESS_PLAUSIBILITY_WARNING",
+    "SCORING_CONVERSION",
   ];
 
   for (const category of priority) {
@@ -456,7 +485,7 @@ export function createEvidenceDrivenCoachInsights(input: {
         },
       ],
       affectedPlayers: [],
-      affectedZones: [fact.zone],
+      affectedZones: [primaryFactZone(fact)],
       confidence: fact.confidence,
       recommendedActions: [recommendedActionForFact(fact)],
     },
@@ -490,11 +519,11 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
   return [
     {
       diagnosisId: `${fact.factId}-diagnosis`,
-      teamId: fact.teamId,
+      teamId: fact.teamId ?? input.matchInput.homeTeam.teamId,
       title: titleForFact(fact),
       summary: `${fact.summary} Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.`,
       evidenceEventIds: fact.eventIds,
-      affectedZones: [fact.zone],
+      affectedZones: [primaryFactZone(fact)],
       confidence: "low",
     },
   ];

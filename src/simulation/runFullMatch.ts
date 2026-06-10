@@ -19,6 +19,10 @@ import {
 } from "./adapters/tacticalPlanInfluence";
 import { analyzeFullMatchHarnessSanity } from "./diagnostics/fullMatchHarnessSanity";
 import {
+  buildHarnessWarningEvidenceFacts,
+  buildMatchReportWarnings,
+} from "./adapters/matchReportWarningsBuilder";
+import {
   createInitialFullMatchSegmentState,
   type FullMatchSegmentState,
 } from "./fullMatch/fullMatchSegmentState";
@@ -216,6 +220,16 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
     return report;
   }
 
+  const warningFacts = buildHarnessWarningEvidenceFacts({ report, sanity });
+  const reportWithWarningFacts: MatchReport = {
+    ...report,
+    evidenceFacts: [...report.evidenceFacts, ...warningFacts],
+  };
+  const warnings = buildMatchReportWarnings({
+    report: reportWithWarningFacts,
+    sanity,
+    evidenceFacts: reportWithWarningFacts.evidenceFacts,
+  });
   const evidenceEvent = report.timeline.find((event) => event.eventType !== "kickoff") ?? report.timeline[0];
   const diagnosis: TacticalDiagnosis = {
     diagnosisId: `${input.matchId}-full-match-harness-sanity`,
@@ -242,7 +256,8 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
       };
 
   return {
-    ...report,
+    ...reportWithWarningFacts,
+    warnings: [...report.warnings, ...warnings],
     tacticalReport: {
       diagnoses: [
         ...report.tacticalReport.diagnoses,
@@ -347,6 +362,12 @@ export function runFullMatch(input: MatchInput): MatchReport {
       matchInput: input,
       propagation: fatiguePropagation,
     }),
+    generatedFrom: "runFullMatch",
+    reportScope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    limitations: [
+      "runFullMatch is a deterministic harness sample and cannot invalidate the 50-match economy.",
+      "Harness warnings are warning-only and may not change scoring values.",
+    ],
   });
 
   return withHarnessSanityDiagnosis(report, input);

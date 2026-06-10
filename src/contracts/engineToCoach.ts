@@ -4,6 +4,8 @@ import type { ZoneId } from "../core/zones";
 import type { MatchPhase, PressureLevel, ScoreState } from "../models/match";
 import type { PlayerAttributes, PlayerRole } from "../models/player";
 import type { TeamIdentity } from "../models/team";
+import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "./matchReportEvidence";
+import type { MatchReportWarning } from "./matchReportWarnings";
 
 export type MatchTimestamp = {
   readonly tick: TacticalTick;
@@ -277,10 +279,20 @@ export interface TacticalReport {
 
 export interface KeyMoment {
   readonly eventId: EventId;
+  readonly evidenceFactId?: string;
+  readonly category?: MatchReportEvidenceCategory;
   readonly title: string;
   readonly summary: string;
   readonly minute: number;
 }
+
+export type MatchReportMeta = {
+  readonly reportScope: "MINI_MATCH_LOCAL" | "FULL_MATCH_HARNESS_SINGLE_RUN" | "FULL_MATCH_BATCH_ECONOMY";
+  readonly generatorVersion: string;
+  readonly generatedFrom: "runMatch" | "runFullMatch";
+  readonly sourceOfTruthNote: string;
+  readonly limitations: readonly string[];
+};
 
 export interface TrainingFocusSuggestion {
   readonly focusId: string;
@@ -291,6 +303,9 @@ export interface TrainingFocusSuggestion {
 export interface MatchReport {
   readonly matchId: MatchId;
   readonly score: ScoreState;
+  readonly evidenceFacts: readonly MatchReportEvidenceFact[];
+  readonly warnings: readonly MatchReportWarning[];
+  readonly reportMeta: MatchReportMeta;
   readonly timeline: readonly MatchEvent[];
   readonly teamStats: readonly TeamMatchStats[];
   readonly playerStats: readonly PlayerMatchStats[];

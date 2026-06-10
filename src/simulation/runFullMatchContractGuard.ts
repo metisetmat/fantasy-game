@@ -112,6 +112,7 @@ function validateKeyMoments(report: MatchReport): void {
 
 function validateEvidenceReferences(report: MatchReport): void {
   const eventIds = new Set(report.timeline.map((event) => event.eventId));
+  const evidenceFactIds = new Set(report.evidenceFacts.map((fact) => fact.factId));
 
   for (const insight of report.coachInsights) {
     for (const evidence of insight.evidence) {
@@ -124,6 +125,19 @@ function validateEvidenceReferences(report: MatchReport): void {
   for (const diagnosis of report.tacticalReport.diagnoses) {
     for (const eventId of diagnosis.evidenceEventIds) {
       assertGuard(eventIds.has(eventId), `${diagnosis.diagnosisId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const fact of report.evidenceFacts) {
+    for (const eventId of fact.eventIds) {
+      assertGuard(eventIds.has(eventId), `${fact.factId} references missing event ${eventId}.`);
+    }
+  }
+
+  for (const warning of report.warnings) {
+    assertGuard(warning.mayInvalidateGlobalScoringEconomy === false, `${warning.warningId} must remain warning-only.`);
+    for (const factId of warning.evidenceFactIds) {
+      assertGuard(evidenceFactIds.has(factId), `${warning.warningId} references missing evidence fact ${factId}.`);
     }
   }
 }
@@ -269,6 +283,9 @@ export function validateRunFullMatchHarness(): readonly string[] {
   validateHarnessSanityWarnings(report);
   validateSegmentDiversityAndFatigue(report, input);
   validateDominatedTeamEvidence(report);
+  assertGuard(report.reportMeta.reportScope === "FULL_MATCH_HARNESS_SINGLE_RUN", "Full-match reportMeta scope must be FULL_MATCH_HARNESS_SINGLE_RUN.");
+  assertGuard(report.evidenceFacts.some((fact) => fact.category === "HARNESS_PLAUSIBILITY_WARNING"), "Full-match report must include harness plausibility evidence when sanity warnings exist.");
+  assertGuard(report.warnings.length > 0, "Full-match report must expose structured MatchReport warnings.");
   assertGuard(
     createMatchReportSignature(report) === createMatchReportSignature(repeatedReport),
     "runFullMatch must be deterministic for the same MatchInput.",
@@ -285,11 +302,14 @@ export function validateRunFullMatchHarness(): readonly string[] {
     "full-match key moments cap repeated titles when alternatives exist",
     "full-match scoring key moments are capped by selection when alternatives exist",
     "full-match insights and diagnoses reference existing events",
+    "full-match structured warnings reference canonical evidence facts",
     "segment diversity report exists",
     "fatigue propagation report exists",
     "at least one team condition decreases below starting condition",
     "high pressing team has greater or equal highIntensityLoad than balanced team",
     "full-match guard scope is FULL_MATCH_HARNESS_SINGLE_RUN",
+    "full-match reportMeta scope is FULL_MATCH_HARNESS_SINGLE_RUN",
+    "full-match report exposes canonical harness warning evidence",
     "high single-run score is a harness warning, not a scoring failure",
     "harness sanity warnings do not recommend scoring value changes",
     "dominance diagnostics exist for lopsided single-run score",

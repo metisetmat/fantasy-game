@@ -19,9 +19,9 @@ import {
 import {
   createEvidenceBasedTacticalDiagnoses,
   createEvidenceDrivenCoachInsights,
-  createMatchEvidenceFacts,
   eventTypeFromAdapterTags,
 } from "./matchReportEvidence";
+import { buildCanonicalMatchReportEvidenceFacts } from "./matchReportEvidenceBuilder";
 import { suggestedFocusFromEvidence } from "./matchReportFocus";
 import { selectKeyMoments } from "./matchReportMoments";
 import { createTeamMatchStatsFromEvents, createZoneStatsFromEvents } from "./matchReportStats";
@@ -52,6 +52,9 @@ export interface MatchReportBuilderInput {
   readonly score: ScoreState;
   readonly influence: TacticalPlanInfluence;
   readonly fatigueReport?: FatigueReport;
+  readonly generatedFrom: "runMatch" | "runFullMatch";
+  readonly reportScope: MatchReport["reportMeta"]["reportScope"];
+  readonly limitations?: readonly string[];
 }
 
 function clampRating(value: number): Rating {
@@ -454,7 +457,13 @@ function planInfluenceDiagnosis(input: {
 
 export function buildMatchReport(input: MatchReportBuilderInput): MatchReport {
   const timeline = [...input.timeline].sort(compareTimelineEvents);
-  const evidenceFacts = createMatchEvidenceFacts({ matchInput: input.matchInput, timeline });
+  const resolvedFatigueReport = input.fatigueReport ?? fatigueReport(input.matchInput);
+  const evidenceFacts = buildCanonicalMatchReportEvidenceFacts({
+    matchInput: input.matchInput,
+    timeline,
+    fatigueReport: resolvedFatigueReport,
+    influence: input.influence,
+  });
   const coachInsights = createEvidenceDrivenCoachInsights({
     matchInput: input.matchInput,
     facts: evidenceFacts,
@@ -463,6 +472,17 @@ export function buildMatchReport(input: MatchReportBuilderInput): MatchReport {
   return {
     matchId: input.matchInput.matchId,
     score: input.score,
+    evidenceFacts,
+    warnings: [],
+    reportMeta: {
+      reportScope: input.reportScope,
+      generatorVersion: "match-report-contract-v2p",
+      generatedFrom: input.generatedFrom,
+      sourceOfTruthNote: "Final score is derived only from score_change consequences; 50-match economy remains the global scoring reference.",
+      limitations: input.limitations ?? [
+        "Current adapter still maps the prototype mini-match into the official MatchReport contract.",
+      ],
+    },
     timeline,
     teamStats: createTeamMatchStatsFromEvents({
       matchInput: input.matchInput,
@@ -473,7 +493,7 @@ export function buildMatchReport(input: MatchReportBuilderInput): MatchReport {
     }),
     playerStats: [...playerStatsForTeam(input.matchInput.homeTeam), ...playerStatsForTeam(input.matchInput.awayTeam)],
     zoneStats: createZoneStatsFromEvents({ timeline }),
-    fatigueReport: input.fatigueReport ?? fatigueReport(input.matchInput),
+    fatigueReport: resolvedFatigueReport,
     tacticalReport: {
       diagnoses: [
         planInfluenceDiagnosis({

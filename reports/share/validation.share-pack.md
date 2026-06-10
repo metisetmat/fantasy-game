@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene
+- current sprint: Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract
 - final file count: 14
 - share file count: 14
 - minimal allowlist count: 14
@@ -16,46 +16,45 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Micro-sprint 2O-Fix - Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene
+- PASS: current sprint is Sprint 2P - Sprint 2P - Canonical MatchReport Alignment + Report Evidence Contract
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 14
 - PASS: final file count is 14 - 14
 - PASS: minimal allowlist count is 14 - 14
 - PASS: missing expected files are none - none
 - PASS: stale share file count is 0 - 0
-- PASS: previous sprint leftovers are 0 - Sprint 2O docs omitted
+- PASS: previous sprint leftovers are 0 - 2O-Fix docs omitted
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Micro-sprint 2O-Fix - micro-sprint visible
-- PASS: README is Micro-sprint 2O-Fix oriented - README current
-- PASS: coach-report-copy-quality doc included - doc included
-- PASS: coach-report-copy-quality validation is PASS - validation PASS
-- PASS: coach copy utility bundled - coachCopyQuality bundled
-- PASS: coach-facing copy helper bundled - coachFacingCopy bundled
-- PASS: coach copy quality test bundled - coachCopyQuality test bundled
-- PASS: htmlCoachReportGuard includes mojibake guard - HTML guard bundled
+- PASS: manifest lists Sprint 2P - Sprint 2P visible
+- PASS: README is Sprint 2P oriented - README current
+- PASS: canonical MatchReport evidence doc included - doc included
+- PASS: canonical MatchReport evidence validation is PASS - validation PASS
+- PASS: evidence contract bundled - matchReportEvidence bundled
+- PASS: warning contract bundled - matchReportWarnings bundled
+- PASS: MatchReport exposes evidenceFacts - evidenceFacts visible
+- PASS: MatchReport exposes warnings - warnings visible
+- PASS: MatchReport exposes reportMeta - reportMeta visible
+- PASS: canonical evidence builder bundled - evidence builder bundled
+- PASS: canonical warning builder bundled - warning builder bundled
+- PASS: canonical MatchReport contract guard bundled - contract guard bundled
+- PASS: test:contracts includes canonical guard - canonical guard wired
 - PASS: coach-report.latest.html included - coach HTML copied
+- PASS: coach HTML renders structured warnings - structured warnings visible
 - PASS: coach HTML contains no mojibake markers - mojibake marker count: 0
-- PASS: coach HTML contains Résumé - Résumé visible
-- PASS: coach HTML contains Moments clés - Moments clés visible
-- PASS: coach HTML contains generated-from copy - generated copy visible
-- PASS: coach HTML contains Action décisive - Action décisive visible
-- PASS: coach HTML contains Séquence dangereuse - Séquence dangereuse visible
-- PASS: coach HTML contains Équipe and Événement - French labels visible
-- PASS: coach HTML contains French harness warning - French harness warning visible
-- PASS: coach HTML does not expose raw Harness warning - raw English hidden
-- PASS: coach HTML does not expose raw scope enum - raw scope hidden
-- PASS: dominated-team copy is clean French - dominated-team copy visible
-- PASS: no global scoring incoherence claim - no incoherence claim
-- PASS: no scoring value change recommendation - no scoring change recommendation
+- PASS: single runFullMatch output cannot invalidate global economy - warning-only
+- PASS: 50-match economy remains global reference - 50-match reference visible
+- PASS: high single-run score emits harness warning, not scoring failure - inflated score warning visible
+- PASS: repetitive key moments emit harness warning - key moment warning visible
+- PASS: flat fatigue emits harness warning - fatigue warning visible
 - PASS: no scoring constants changed - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
+- PASS: no scoring events deleted - events preserved
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: 50-match economy still protected - 50-match anchor preserved
-- PASS: source-of-truth guards preserved - sourceOfTruthGuards included
-- PASS: recommendation CONFIRM_COACH_REPORT_ENCODING_CLEAN - recommendation visible
-- PASS: recommendation KEEP_SOURCE_OF_TRUTH_GUARDRAILS - source-of-truth recommendation visible
+- PASS: final score remains derived from score consequences - score consequences visible
+- PASS: recommendation CONFIRM_CANONICAL_MATCHREPORT_EVIDENCE_CONTRACT - recommendation visible
+- PASS: recommendation PREPARE_NEXT_SIMULATION_SPRINT_WITH_TYPED_REPORT_EVIDENCE - next recommendation visible
 
 ## Files
 
@@ -65,11 +64,11 @@ Status: PASS
 - bundle__docs.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-copy-quality.md
+- canonical-matchreport-evidence-contract.md
 - coach-report.latest.html
 - manifest.md
 - package.json
 - scoring-events-summary.md
 - tsconfig.json
-- validation.coach-report-copy-quality.md
+- validation.canonical-matchreport-evidence-contract.md
 - validation.share-pack.md

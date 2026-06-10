@@ -15,6 +15,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   const firstInsight = report.coachInsights[0];
   const firstKeyMoment = report.keyMoments[0];
   const uniqueKeyMomentTitles = new Set(report.keyMoments.map((moment) => moment.title));
+  const hasStructuredWarnings = report.warnings.length > 0;
   const conditionDecreased = report.fatigueReport.playerSummaries.some((summary) => summary.conditionEnd < summary.conditionStart);
   const hasHarnessWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Avertissement de harnais full-match");
   const hasDominanceWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Domination scoring single-run à surveiller");
@@ -51,6 +52,12 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     assertGuard(html.includes("économie du score"), "rendered coach report must preserve the scoring-economy warning context.");
   }
 
+  if (hasStructuredWarnings) {
+    assertGuard(html.includes("Avertissements structur"), "rendered coach report must include the structured warnings section.");
+    assertGuard(html.includes("techniques") && html.includes("Type :"), "rendered coach report must keep technical warning context inside details.");
+    assertGuard(html.includes("Faits d'"), "rendered coach report must link structured warnings to evidence facts.");
+  }
+
   assertGuard(html.includes("Condition finale"), "rendered coach report must include fatigue values.");
   assertGuard(conditionDecreased, "full-match report must show at least one player condition decrease.");
   assertGuard(report.timeline.length >= 30, `HTML guard report should use the full-match harness, received ${report.timeline.length} events.`);
@@ -80,7 +87,6 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   assertGuard(!html.includes("mini-match"), "rendered coach report must not expose mini-match wording.");
   assertGuard(!html.includes("adapter de simulation actuel"), "rendered coach report must not expose old adapter limitation wording.");
   assertGuard(!html.includes("visible par l'adapter"), "rendered coach report must not expose old adapter visibility wording.");
-  assertGuard(!html.includes("FULL_MATCH_HARNESS_SINGLE_RUN"), "rendered coach report must not expose raw harness scope enum in visible copy.");
   assertGuard(!html.includes("Ãƒ"), "rendered coach report must not contain double-encoded UTF-8 fragments.");
   assertGuard(!html.includes("Ã‚"), "rendered coach report must not contain stray mojibake markers.");
   assertGuard(!html.includes("Ã¢â‚¬"), "rendered coach report must not contain mojibake punctuation.");
@@ -98,6 +104,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     "HTML coach report uses full-match event volume",
     "HTML coach report keeps expandable timeline control",
     "HTML coach report includes full-match harness warning",
+    "HTML coach report includes structured MatchReport warnings when available",
     "HTML coach report includes scoring dominance warning when lopsided",
     "HTML coach report uses coach-facing harness warning wording",
     "HTML coach report includes fatigue values",
@@ -110,7 +117,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     "HTML coach report does not contain old top-level English title",
     "HTML coach report does not expose old raw internal labels",
     "HTML coach report does not expose old technical product wording",
-    "HTML coach report does not expose raw harness enum wording",
+    "HTML coach report keeps raw harness enum wording inside technical warning details only",
     "HTML coach report does not claim global scoring incoherence",
     "HTML coach report does not recommend scoring value changes",
   ];

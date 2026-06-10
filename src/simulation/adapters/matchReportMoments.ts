@@ -12,7 +12,7 @@ const HIGH_NARRATIVE_WEIGHT = 60;
 interface KeyMomentCandidate {
   readonly event: MatchEvent;
   readonly priority: number;
-  readonly evidenceSummary?: string;
+  readonly evidenceFact?: MatchEvidenceFact;
 }
 
 function hasTag(event: MatchEvent, tag: string): boolean {
@@ -28,7 +28,11 @@ function primaryInsightEvidenceEventIds(coachInsights: readonly CoachInsight[]):
 }
 
 function factForEvent(event: MatchEvent, facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | undefined {
-  return facts.find((fact) => fact.eventIds.includes(event.eventId));
+  return facts.find((fact) => fact.coachVisible && fact.eventIds.includes(event.eventId));
+}
+
+function factZone(fact: MatchEvidenceFact): string {
+  return fact.affectedZones[0] ?? "Z3-C";
 }
 
 function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
@@ -40,20 +44,24 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
     return "Action décisive";
   }
 
-  if (fact?.category === "dominated_team_no_payoff") {
+  if (fact?.category === "PRESSURE_WITHOUT_CONVERSION") {
     return `${event.teamId.toUpperCase()} sous pression sans conversion`;
   }
 
-  if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
+  if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative") || fact?.category === "MOMENTUM_SHIFT") {
     return "Signal d'élan à surveiller";
   }
 
-  if (fact?.category === "visible_pressure_zone") {
-    return `Pression concentrée en ${fact.zone}`;
+  if (fact?.category === "TERRITORIAL_PRESSURE") {
+    return `Pression concentrée en ${factZone(fact)}`;
   }
 
-  if (hasTag(event, "danger_high") || fact?.category === "high_danger_sequences") {
+  if (hasTag(event, "danger_high") || fact?.category === "DANGER_CREATION") {
     return "Séquence dangereuse";
+  }
+
+  if (fact?.category === "HARNESS_PLAUSIBILITY_WARNING") {
+    return "Signal de harnais à surveiller";
   }
 
   if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
@@ -75,9 +83,17 @@ function summaryForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined)
   return event.tacticalContext.reason ?? "Séquence tactique visible dans le rapport.";
 }
 
-function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<string>): number {
+function candidatePriority(event: MatchEvent, fact: MatchEvidenceFact | undefined, insightEventIds: ReadonlySet<string>): number {
   if (event.eventType === "scoring") {
     return 100;
+  }
+
+  if (fact?.category === "PRESSURE_WITHOUT_CONVERSION") {
+    return 88;
+  }
+
+  if (fact?.category === "HARNESS_PLAUSIBILITY_WARNING") {
+    return 82;
   }
 
   if (insightEventIds.has(event.eventId)) {
@@ -107,8 +123,8 @@ function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<strin
   return 0;
 }
 
-function candidateTitle(candidate: KeyMomentCandidate, facts: readonly MatchEvidenceFact[]): string {
-  return titleForEvent(candidate.event, factForEvent(candidate.event, facts));
+function candidateTitle(candidate: KeyMomentCandidate): string {
+  return titleForEvent(candidate.event, candidate.evidenceFact);
 }
 
 function candidateFromEvent(input: {
@@ -116,22 +132,18 @@ function candidateFromEvent(input: {
   readonly facts: readonly MatchEvidenceFact[];
   readonly insightEventIds: ReadonlySet<string>;
 }): KeyMomentCandidate | null {
-  const priority = candidatePriority(input.event, input.insightEventIds);
+  const fact = factForEvent(input.event, input.facts);
+  const priority = candidatePriority(input.event, fact, input.insightEventIds);
 
   if (priority <= 0) {
     return null;
   }
 
-  const fact = factForEvent(input.event, input.facts);
-  const adjustedPriority = fact?.category === "dominated_team_no_payoff"
-    ? Math.max(priority, 88)
-    : priority;
-  const candidate: KeyMomentCandidate = {
+  return {
     event: input.event,
-    priority: adjustedPriority,
+    priority,
+    ...(fact === undefined ? {} : { evidenceFact: fact }),
   };
-
-  return fact === undefined ? candidate : { ...candidate, evidenceSummary: fact.summary };
 }
 
 function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number {
@@ -142,14 +154,11 @@ function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number
   return a.event.timestamp.tick - b.event.timestamp.tick;
 }
 
-function selectDiverseCandidates(
-  candidates: readonly KeyMomentCandidate[],
-  facts: readonly MatchEvidenceFact[],
-): readonly KeyMomentCandidate[] {
+function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): readonly KeyMomentCandidate[] {
   const sortedCandidates = [...candidates].sort(compareCandidates);
   const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
   const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
-  const availableTitleCount = new Set(sortedCandidates.map((candidate) => candidateTitle(candidate, facts))).size;
+  const availableTitleCount = new Set(sortedCandidates.map(candidateTitle)).size;
   const shouldLimitRepeatedTitles = availableTitleCount > 1;
   const selected: KeyMomentCandidate[] = [];
   const titleCounts = new Map<string, number>();
@@ -160,7 +169,7 @@ function selectDiverseCandidates(
       break;
     }
 
-    const title = candidateTitle(candidate, facts);
+    const title = candidateTitle(candidate);
     if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
       continue;
     }
@@ -186,7 +195,7 @@ function selectDiverseCandidates(
     }
 
     if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
-      const title = candidateTitle(candidate, facts);
+      const title = candidateTitle(candidate);
       if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
         continue;
       }
@@ -232,16 +241,16 @@ export function selectKeyMoments(input: {
     }
   }
 
-  return [...selectDiverseCandidates([...candidatesByEventId.values()], input.facts)]
+  return [...selectDiverseCandidates([...candidatesByEventId.values()])]
     .sort((a, b) => a.event.timestamp.tick - b.event.timestamp.tick)
-    .map((candidate) => {
-      const fact = factForEvent(candidate.event, input.facts);
-
-      return {
-        eventId: candidate.event.eventId,
-        title: titleForEvent(candidate.event, fact),
-        summary: candidate.evidenceSummary ?? summaryForEvent(candidate.event, fact),
-        minute: candidate.event.timestamp.minute,
-      };
-    });
+    .map((candidate) => ({
+      eventId: candidate.event.eventId,
+      ...(candidate.evidenceFact === undefined ? {} : {
+        evidenceFactId: candidate.evidenceFact.factId,
+        category: candidate.evidenceFact.category,
+      }),
+      title: titleForEvent(candidate.event, candidate.evidenceFact),
+      summary: summaryForEvent(candidate.event, candidate.evidenceFact),
+      minute: candidate.event.timestamp.minute,
+    }));
 }
