@@ -1,0 +1,219 @@
+import type {
+  CoachInsight,
+  KeyMoment,
+  MatchEvent,
+  MatchInput,
+} from "../../contracts/engineToCoach";
+import type { MatchEvidenceFact } from "./matchReportEvidence";
+
+const MAX_KEY_MOMENTS = 5;
+const HIGH_NARRATIVE_WEIGHT = 60;
+
+interface KeyMomentCandidate {
+  readonly event: MatchEvent;
+  readonly priority: number;
+  readonly evidenceSummary?: string;
+}
+
+function hasTag(event: MatchEvent, tag: string): boolean {
+  return event.tags.includes(tag);
+}
+
+function primaryInsightEvidenceEventIds(coachInsights: readonly CoachInsight[]): readonly string[] {
+  const primaryInsight = coachInsights.find((insight) =>
+    insight.evidence.some((evidence) => evidence.eventIds.length > 0),
+  );
+
+  return primaryInsight?.evidence.flatMap((evidence) => evidence.eventIds) ?? [];
+}
+
+function factForEvent(event: MatchEvent, facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | undefined {
+  return facts.find((fact) => fact.eventIds.includes(event.eventId));
+}
+
+function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
+  if (event.eventType === "kickoff") {
+    return "Debut du match";
+  }
+
+  if (event.eventType === "scoring") {
+    return "Action decisive";
+  }
+
+  if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
+    return "Signal d'elan a surveiller";
+  }
+
+  if (fact?.category === "visible_pressure_zone") {
+    return `Pression concentree en ${fact.zone}`;
+  }
+
+  if (hasTag(event, "danger_high") || fact?.category === "high_danger_sequences") {
+    return "Sequence dangereuse";
+  }
+
+  if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
+    return "Possession sous pression";
+  }
+
+  if (hasTag(event, "territorial_pressure_high")) {
+    return "Sequence de pression territoriale";
+  }
+
+  return "Sequence tactique";
+}
+
+function summaryForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
+  if (fact !== undefined) {
+    return `${fact.summary} Contexte : ${event.tacticalContext.reason ?? "sequence tactique visible dans le rapport."}`;
+  }
+
+  return event.tacticalContext.reason ?? "Sequence tactique visible dans le rapport.";
+}
+
+function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<string>): number {
+  if (event.eventType === "scoring") {
+    return 100;
+  }
+
+  if (insightEventIds.has(event.eventId)) {
+    return 90;
+  }
+
+  if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
+    return 75;
+  }
+
+  if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
+    return 74;
+  }
+
+  if (hasTag(event, "territorial_pressure_high")) {
+    return 72;
+  }
+
+  if (event.narrativeWeight >= HIGH_NARRATIVE_WEIGHT) {
+    return 70;
+  }
+
+  if (event.eventType === "kickoff") {
+    return 5;
+  }
+
+  return 0;
+}
+
+function candidateFromEvent(input: {
+  readonly event: MatchEvent;
+  readonly facts: readonly MatchEvidenceFact[];
+  readonly insightEventIds: ReadonlySet<string>;
+}): KeyMomentCandidate | null {
+  const priority = candidatePriority(input.event, input.insightEventIds);
+
+  if (priority <= 0) {
+    return null;
+  }
+
+  const fact = factForEvent(input.event, input.facts);
+  const candidate: KeyMomentCandidate = {
+    event: input.event,
+    priority,
+  };
+
+  return fact === undefined ? candidate : { ...candidate, evidenceSummary: fact.summary };
+}
+
+function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number {
+  if (a.priority !== b.priority) {
+    return b.priority - a.priority;
+  }
+
+  return a.event.timestamp.tick - b.event.timestamp.tick;
+}
+
+function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): readonly KeyMomentCandidate[] {
+  const sortedCandidates = [...candidates].sort(compareCandidates);
+  const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
+  const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
+  const selected: KeyMomentCandidate[] = [];
+  let scoringCount = 0;
+
+  for (const candidate of sortedCandidates) {
+    if (selected.length >= MAX_KEY_MOMENTS) {
+      break;
+    }
+
+    if (candidate.event.eventType === "scoring") {
+      if (scoringCount >= scoringLimit) {
+        continue;
+      }
+      scoringCount += 1;
+    }
+
+    selected.push(candidate);
+  }
+
+  if (selected.length >= MAX_KEY_MOMENTS) {
+    return selected;
+  }
+
+  for (const candidate of nonScoringCandidates) {
+    if (selected.length >= MAX_KEY_MOMENTS) {
+      break;
+    }
+
+    if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
+      selected.push(candidate);
+    }
+  }
+
+  return selected;
+}
+
+export function selectKeyMoments(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+  readonly facts: readonly MatchEvidenceFact[];
+  readonly coachInsights: readonly CoachInsight[];
+}): readonly KeyMoment[] {
+  const insightEventIds = new Set(primaryInsightEvidenceEventIds(input.coachInsights));
+  const candidatesByEventId = new Map<string, KeyMomentCandidate>();
+  let kickoffIncluded = false;
+
+  for (const event of input.timeline) {
+    if (event.eventType === "kickoff") {
+      if (kickoffIncluded) {
+        continue;
+      }
+      kickoffIncluded = true;
+    }
+
+    const candidate = candidateFromEvent({
+      event,
+      facts: input.facts,
+      insightEventIds,
+    });
+
+    if (candidate === null) {
+      continue;
+    }
+
+    const existingCandidate = candidatesByEventId.get(event.eventId);
+    if (existingCandidate === undefined || candidate.priority > existingCandidate.priority) {
+      candidatesByEventId.set(event.eventId, candidate);
+    }
+  }
+
+  return [...selectDiverseCandidates([...candidatesByEventId.values()])]
+    .sort((a, b) => a.event.timestamp.tick - b.event.timestamp.tick)
+    .map((candidate) => {
+      const fact = factForEvent(candidate.event, input.facts);
+
+      return {
+        eventId: candidate.event.eventId,
+        title: titleForEvent(candidate.event, fact),
+        summary: candidate.evidenceSummary ?? summaryForEvent(candidate.event, fact),
+        minute: candidate.event.timestamp.minute,
+      };
+    });
+}
