@@ -170,7 +170,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques observables dans les workbenches action-par-action. Le score doit donc etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas alignes avec la resolution mini-match.";
+    "Le moteur sait maintenant convertir une verite workbench en contexte spatial type, mais la resolution mini-match n'utilise encore que partiellement ces informations pour choisir ses actions.";
 
   return [
     {
@@ -186,10 +186,10 @@ function tacticalGroundingGapFacts(input: {
       confidence: "low",
       strength: 58,
       coachVisible: true,
-      internalTags: ["tactical_grounding_gap", "workbench_truth_available"],
+      internalTags: ["tactical_grounding_gap", "workbench_truth_fixture_available", "workbench_replay_seed"],
     },
     {
-      factId: `${input.matchInput.matchId}-mini-match-alignment-partial`,
+      factId: `${input.matchInput.matchId}-spatial-context-adapter-available`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -197,14 +197,19 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "Mini-match can represent some selected-action semantics, but it does not yet consume the complete workbench before/after spatial truth.",
+      summary: "Sprint 2S adds a typed roster/workbench to SpatialMatchContext adapter that can preserve player identity, starter status, ball carrier, and workbench zones.",
       confidence: "low",
-      strength: 55,
+      strength: 60,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "mini_match_alignment_partial"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "spatial_context_adapter_available",
+        "spatial_context_active",
+        "roster_to_spatial_context_adapter",
+      ],
     },
     {
-      factId: `${input.matchInput.matchId}-roster-to-spatial-context-gap`,
+      factId: `${input.matchInput.matchId}-workbench-replay-seed-partial`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -212,14 +217,14 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "Official rosters and starters are not yet converted into mini-match spatial contexts, so prototype teams remain the dominant resolution source.",
+      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones, but normal route ranking still resolves through the prototype path.",
       confidence: "low",
-      strength: 62,
+      strength: 58,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "roster_to_spatial_context_gap"],
+      internalTags: ["tactical_grounding_gap", "workbench_replay_seed_partial"],
     },
     {
-      factId: `${input.matchInput.matchId}-full-match-not-workbench-grounded`,
+      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -227,11 +232,30 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "The full-match harness is not yet a replay engine for the visual workbench truth.",
+      summary: "PlayerSnapshot roles and attributes are carried into the adapter layer, but they do not yet fully drive mini-match route ranking.",
       confidence: "low",
       strength: 65,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "full_match_harness_not_yet_workbench_grounded"],
+      internalTags: ["tactical_grounding_gap", "route_ranking_not_yet_attribute_driven", "route_ranking_attribute_gap"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-full-match-partial-workbench-grounding`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "Full-match is partially workbench-grounded, but it is not yet replaying the workbench sequence chain as the source of every tactical decision.",
+      confidence: "low",
+      strength: 62,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "full_match_partially_workbench_grounded",
+        "fullmatch_not_yet_replaying_workbench_sequence_chain",
+      ],
     },
   ];
 }

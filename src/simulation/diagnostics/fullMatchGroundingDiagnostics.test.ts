@@ -27,8 +27,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
     { home: 0, away: 0 },
   );
 
-  assertTest(diagnostics.warnings.includes("FULL_MATCH_NOT_WORKBENCH_GROUNDED"), "full-match grounding warning must be emitted.");
-  assertTest(diagnostics.warnings.includes("ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT"), "roster conversion warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED"), "partial full-match grounding warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("SPATIAL_CONTEXT_ADAPTER_AVAILABLE"), "spatial context adapter availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("WORKBENCH_REPLAY_SEED_AVAILABLE"), "workbench replay seed availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"), "route ranking attribute gap must be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
   assertTest(
@@ -52,7 +54,9 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   }
 
   return [
-    "full-match grounding warning is emitted",
+    "partial full-match grounding warning is emitted",
+    "spatial context adapter availability is emitted",
+    "workbench replay seed availability is emitted",
     "grounding evidence facts are attached",
     "scoring events are not mutated",
     "final score remains derived from score_change",

@@ -151,8 +151,8 @@
     </article>
     <article class="card">
       <div class="card-meta">Équipe control <span class="badge confidence confidence-low">Confiance faible</span></div>
-      <h3>Ancrage workbench encore partiel</h3>
-      <p>Le score du harnais doit etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas convertis en contexte spatial simulation.</p>
+      <h3>Ancrage workbench maintenant partiel</h3>
+      <p>Le score du harnais doit etre lu avec prudence : les rosters et positions peuvent etre convertis en contexte spatial, mais les decisions visuelles ne pilotent pas encore toute la resolution simulation.</p>
       <div class="zones">Zones: <span class="badge">Z3-C</span> <span class="badge">Z4-HSL</span> <span class="badge">Z5-C</span></div>
       <div class="muted">Événements de preuve : contract-fixture-001-segment-1-sequence-1</div>
     </article></div>
@@ -235,14 +235,14 @@
     </article>
     <article class="card">
       <div class="card-meta"><span class="badge">low</span> <span class="badge">coach_visible</span></div>
-      <h3>Ancrage tactique full-match incomplet</h3>
-      <p>Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques des workbenches action-par-action.</p>
+      <h3>Ancrage tactique full-match partiel</h3>
+      <p>Le moteur sait convertir le roster et une verite workbench en contexte spatial type, mais le full-match ne rejoue pas encore toute la chaine workbench.</p>
       <details class="internal-markers">
         <summary>Détails techniques</summary>
         <div class="muted">Type : ADAPTER_LIMITATION</div>
-        <div class="muted">Faits d'évidence : contract-fixture-001-workbench-truth-available, contract-fixture-001-simulation-alignment-partial, contract-fixture-001-roster-to-spatial-context-gap, contract-fixture-001-full-match-not-workbench-grounded</div>
+        <div class="muted">Faits d'évidence : contract-fixture-001-workbench-truth-available, contract-fixture-001-spatial-context-adapter-available, contract-fixture-001-workbench-replay-seed-partial, contract-fixture-001-route-ranking-attribute-gap, contract-fixture-001-full-match-partial-workbench-grounding</div>
         <div class="muted">Événements : contract-fixture-001-segment-1-sequence-1, contract-fixture-001-segment-1-sequence-2, contract-fixture-001-segment-1-score-1, contract-fixture-001-segment-1-sequence-3, contract-fixture-001-segment-1-sequence-4, contract-fixture-001-segment-1-sequence-5</div>
-        <div class="muted">Grounding warnings: FULL_MATCH_NOT_WORKBENCH_GROUNDED, ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT, TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION, PLAYER_IDENTITY_LOSS_IN_MINIMATCH, WORKBENCH_TRUTH_NOT_REPLAYED_IN_FULLMATCH, FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED. Scope: FULL_MATCH_HARNESS_SINGLE_RUN. May invalidate global economy: false.</div>
+        <div class="muted">Grounding warnings: FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED, SPATIAL_CONTEXT_ADAPTER_AVAILABLE, WORKBENCH_REPLAY_SEED_AVAILABLE, TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION, ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN, FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN, FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED. Scope: FULL_MATCH_HARNESS_SINGLE_RUN. May invalidate global economy: false.</div>
       </details>
     </article></div>
     </section>

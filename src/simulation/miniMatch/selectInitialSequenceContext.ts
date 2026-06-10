@@ -226,6 +226,21 @@ function createOpeningLine(possessionTeam: PrototypeTeamDefinition, pressingTeam
   return `${possessionTeam.displayName} starts a tactical sequence under pressure from ${pressingTeam.displayName}.`;
 }
 
+function spatialContextSummary(state: MiniMatchState): string | undefined {
+  const spatialContext = state.context.spatialContext;
+
+  if (spatialContext === undefined) {
+    return undefined;
+  }
+
+  return [
+    "spatial_context_active",
+    `fixture=${spatialContext.sourceWorkbenchFrameId ?? "none"}`,
+    `carrier=${spatialContext.ballCarrierId}`,
+    `zone=${spatialContext.ballZone}`,
+  ].join("; ");
+}
+
 export function selectInitialSequenceContext(
   state: MiniMatchState,
   sequenceIndex: number,
@@ -276,6 +291,7 @@ export function selectInitialSequenceContext(
         });
   const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
   const startTick = state.context.startTick + sequenceIndex * 10;
+  const spatialSummary = spatialContextSummary(state);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -285,6 +301,8 @@ export function selectInitialSequenceContext(
     pressureDescription: pressureLevel.toUpperCase(),
     openingLine: createOpeningLine(possessionTeamDefinition, pressingTeamDefinition),
     possessionReason: describePossessionReason(state, possessionTeamDefinition, sequenceIndex),
+    spatialContextActive: state.context.spatialContext !== undefined,
+    ...(spatialSummary === undefined ? {} : { spatialContextSummary: spatialSummary }),
     resolveInput: {
       startTick,
       teams: {

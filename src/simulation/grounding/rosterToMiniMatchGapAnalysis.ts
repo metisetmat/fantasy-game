@@ -3,6 +3,10 @@ import type { MiniMatchInputAdapterResult } from "../adapters/matchInputToMiniMa
 
 export type RosterToMiniMatchGapAnalysis = {
   readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly spatialContextAdapterExists: boolean;
+  readonly rosterCanBecomeSpatialContext: boolean;
+  readonly workbenchPositionsCanSeedSpatialContext: boolean;
+  readonly miniMatchConsumesSpatialContextMetadata: "YES" | "PARTIAL" | "NO";
   readonly rosterDrivesMiniMatchPlayerPositions: boolean;
   readonly startersDriveActivePlayers: boolean;
   readonly playerRolesDriveActionResolution: boolean;
@@ -26,8 +30,12 @@ export function analyzeRosterToMiniMatchGap(input: {
 
   return {
     status: "PARTIAL",
-    rosterDrivesMiniMatchPlayerPositions: false,
-    startersDriveActivePlayers: false,
+    spatialContextAdapterExists: true,
+    rosterCanBecomeSpatialContext: true,
+    workbenchPositionsCanSeedSpatialContext: true,
+    miniMatchConsumesSpatialContextMetadata: "PARTIAL",
+    rosterDrivesMiniMatchPlayerPositions: true,
+    startersDriveActivePlayers: true,
     playerRolesDriveActionResolution: false,
     visibleAttributesDriveRouteRanking: false,
     tacticalPlanFullyDrivesTeamShape: false,
@@ -35,16 +43,18 @@ export function analyzeRosterToMiniMatchGap(input: {
     lostPlayerIdentity: rosterPlayerIds.filter((playerId) => !miniMatchPrototypeIds.includes(playerId)),
     documentedGaps: [
       "adaptMatchInputToMiniMatch maps official teams to CONTROL/BLITZ PrototypeTeamDefinition objects.",
-      "Official TeamSnapshot.roster is not converted into mini-match PlayerState positions.",
-      "TeamSnapshot starters do not select active mini-match players.",
+      "Sprint 2S can convert TeamSnapshot.roster into typed SpatialTeamContext.",
+      "Sprint 2S can seed SpatialTeamContext positions from workbench truth.",
+      "MiniMatchInput can carry SpatialMatchContext metadata, but normal action resolution remains prototype-driven.",
       "PlayerSnapshot roles and attributes do not yet drive route ranking.",
       "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
-      "CONTROL/BLITZ prototype teams remain the dominant source of mini-match tactical behavior.",
+      "CONTROL/BLITZ prototype teams remain a dominant source of mini-match tactical behavior.",
     ],
     recommendations: [
-      "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_GAP",
-      "PREPARE_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
-      "PREPARE_REAL_PLAYER_STATS",
+      "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
+      "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
+      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
     ],
   };
 }

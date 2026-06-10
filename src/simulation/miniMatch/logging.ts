@@ -144,6 +144,7 @@ export function createSequenceHeaderLogs(setup: MiniMatchSequenceSetup): readonl
   return [
     line(`Sequence ${setup.sequenceNumber}`),
     line(setup.possessionReason),
+    ...(setup.spatialContextSummary === undefined ? [] : [line(`Spatial context metadata: ${setup.spatialContextSummary}`)]),
     line(setup.openingLine),
     line(describeDefensivePreparation(setup)),
     line(""),

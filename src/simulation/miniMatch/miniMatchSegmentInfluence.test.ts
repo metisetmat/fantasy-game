@@ -95,6 +95,10 @@ export function validateMiniMatchSegmentInfluence(): readonly string[] {
     "runMiniMatch without segment influence must not attach influence context.",
   );
   assertTest(
+    baselineA.state.context.spatialContext === undefined,
+    "runMiniMatch without spatial context must remain backward compatible.",
+  );
+  assertTest(
     influenced.state.context.segmentInfluence !== undefined,
     "runMiniMatch with segment influence must attach influence context.",
   );

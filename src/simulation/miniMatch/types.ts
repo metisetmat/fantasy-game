@@ -15,6 +15,7 @@ import type { SpatialTeamContext } from "../../systems/spatial";
 import type { TacticalMemoryState } from "../../systems/tacticalMemory";
 import type { RecoverySaturationState } from "../../systems/structure";
 import type { OffensiveMomentumState } from "../../systems/offense/momentum";
+import type { SpatialMatchContext as AdapterSpatialMatchContext } from "../spatialContext/spatialTeamContextTypes";
 
 export interface MiniMatchInput {
   readonly teamA: PrototypeTeamDefinition;
@@ -23,6 +24,7 @@ export interface MiniMatchInput {
   readonly startTick?: TacticalTick;
   readonly seed?: number;
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
+  readonly spatialContext?: AdapterSpatialMatchContext;
 }
 
 export interface MiniMatchTeamSegmentInfluence {
@@ -154,6 +156,7 @@ export interface MiniMatchContext {
   readonly seed: number;
   readonly attackingDirections: readonly TeamDirectionAssignment[];
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
+  readonly spatialContext?: AdapterSpatialMatchContext;
 }
 
 export interface MiniMatchContinuityState {
@@ -173,6 +176,8 @@ export interface MiniMatchSequenceSetup {
   readonly pressureDescription: string;
   readonly openingLine: string;
   readonly possessionReason: string;
+  readonly spatialContextActive: boolean;
+  readonly spatialContextSummary?: string;
   readonly resolveInput: ResolveSequenceInput;
 }
 
