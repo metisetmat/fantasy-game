@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-10T14:38:49.372Z
+Generated timestamp: 2026-06-10T15:32:52.268Z
 Task/sprint name: Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch
 Final file count: 15
 
@@ -104,10 +104,4 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M package.json
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidenceBuilder.ts
- M src/simulation/runFullMatch.ts
-?? src/simulation/diagnostics/fullMatchGroundingDiagnostics.test.ts
-?? src/simulation/diagnostics/fullMatchGroundingDiagnostics.ts
-?? src/simulation/grounding/
+ M src/simulation/grounding/tacticalWorkbenchContractGuard.test.ts
