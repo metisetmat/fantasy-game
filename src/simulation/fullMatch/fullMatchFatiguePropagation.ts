@@ -70,16 +70,22 @@ function updateTeam(input: {
   const pressingLoad = input.ownPlan.pressingIntensity / 100;
   const secondHalfMultiplier = input.secondHalf ? 1.25 : 1;
   const conditionDrop =
-    (0.15 + pressingLoad * 0.65 + input.pressureEvents * 0.03 + planRiskLoad(input.ownPlan) * 0.12) *
+    (0.28 + pressingLoad * 0.82 + input.pressureEvents * 0.04 + input.concededPoints * 0.025 + planRiskLoad(input.ownPlan) * 0.16) *
     secondHalfMultiplier;
   const mentalDrop =
-    (0.14 + planRiskLoad(input.ownPlan) * 0.35 + input.concededPoints * 0.08 + input.pressureEvents * 0.03) *
+    (0.2 + planRiskLoad(input.ownPlan) * 0.4 + input.concededPoints * 0.1 + input.pressureEvents * 0.035) *
     secondHalfMultiplier;
   const conditionEnd = clampRating(input.teamState.condition - conditionDrop);
   const mentalFreshnessEnd = clampRating(input.teamState.mentalFreshness - mentalDrop);
   const momentum = clampRating(input.teamState.momentum + input.ownPoints * 1.7 - input.concededPoints * 1.2);
   const defensiveStress = clampRating(input.teamState.defensiveStress + input.concededPoints * 1.8 + input.pressureEvents * 0.5);
-  const highIntensityLoad = clampRating(input.teamState.pressureLoad + input.ownPlan.pressingIntensity * 0.1 + input.pressureEvents * 0.35);
+  const pressureLoadIncrease =
+    input.ownPlan.pressingIntensity * 0.055 +
+    input.pressureEvents * 0.22 +
+    input.concededPoints * 0.14 +
+    planRiskLoad(input.ownPlan) * 0.35 +
+    (input.secondHalf ? 1.1 : 0.4);
+  const highIntensityLoad = clampRating(input.teamState.pressureLoad + pressureLoadIncrease);
 
   return {
     teamId: input.teamState.teamId,

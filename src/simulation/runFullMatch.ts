@@ -223,11 +223,30 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
   };
+  const dominance = sanity.scoringDominance;
+  const dominanceDiagnosis: TacticalDiagnosis | null = dominance.warnings.length === 0 || dominance.dominantTeamId === undefined
+    ? null
+    : {
+        diagnosisId: `${input.matchId}-scoring-dominance-warning`,
+        teamId: dominance.dominantTeamId,
+        title: "Domination scoring single-run a surveiller",
+        summary:
+          `${dominance.dominantTeamId} converted ${dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId)?.scoringEventCount ?? 0} scoring events while ${dominance.dominatedTeamId ?? "the opponent"} did not convert in this FULL_MATCH_HARNESS_SINGLE_RUN. This is a harness plausibility warning, not a global scoring-economy verdict, and it does not override the validated 50-match economy. Warnings: ${dominance.warnings.join(", ")}.`,
+        evidenceEventIds: dominance.dominatedTeamEvidenceEventIds.length > 0
+          ? dominance.dominatedTeamEvidenceEventIds
+          : (evidenceEvent === undefined ? [] : [evidenceEvent.eventId]),
+        affectedZones: dominance.affectedZones as TacticalDiagnosis["affectedZones"],
+        confidence: dominance.warnings.length >= 3 ? "medium" : "low",
+      };
 
   return {
     ...report,
     tacticalReport: {
-      diagnoses: [...report.tacticalReport.diagnoses, diagnosis],
+      diagnoses: [
+        ...report.tacticalReport.diagnoses,
+        diagnosis,
+        ...(dominanceDiagnosis === null ? [] : [dominanceDiagnosis]),
+      ],
     },
   };
 }

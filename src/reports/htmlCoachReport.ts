@@ -36,6 +36,7 @@ function productCopy(value: string): string {
     .replaceAll("L'adapter mini-match", "Le moteur de simulation")
     .replaceAll("l'adapter mini-match", "le moteur de simulation")
     .replaceAll("adapter mini-match", "moteur de simulation")
+    .replaceAll("adapter de simulation actuel", "moteur de simulation actuel")
     .replaceAll("mini-match", "simulation");
 }
 

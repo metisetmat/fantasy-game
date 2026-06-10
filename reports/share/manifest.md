@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-10T06:37:07.707Z
-Task/sprint: Sprint 2N - Segment Diversity + Fatigue Propagation + Key Moment Diversity
+Generated: 2026-06-10T09:40:36.867Z
+Task/sprint: Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -12,8 +12,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - coach-report.latest.html
 - scoring-events-summary.md
 - validation.share-pack.md
-- full-match-segment-diversity-fatigue.md
-- validation.full-match-segment-diversity-fatigue.md
+- full-match-harness-plausibility.md
+- validation.full-match-harness-plausibility.md
 - README.md
 
 ## Bundle Files

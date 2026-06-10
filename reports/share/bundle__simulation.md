@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2N - Segment Diversity + Fatigue Propagation + Key Moment Diversity. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -310,11 +310,30 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
   };
+  const dominance = sanity.scoringDominance;
+  const dominanceDiagnosis: TacticalDiagnosis | null = dominance.warnings.length === 0 || dominance.dominantTeamId === undefined
+    ? null
+    : {
+        diagnosisId: `${input.matchId}-scoring-dominance-warning`,
+        teamId: dominance.dominantTeamId,
+        title: "Domination scoring single-run a surveiller",
+        summary:
+          `${dominance.dominantTeamId} converted ${dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId)?.scoringEventCount ?? 0} scoring events while ${dominance.dominatedTeamId ?? "the opponent"} did not convert in this FULL_MATCH_HARNESS_SINGLE_RUN. This is a harness plausibility warning, not a global scoring-economy verdict, and it does not override the validated 50-match economy. Warnings: ${dominance.warnings.join(", ")}.`,
+        evidenceEventIds: dominance.dominatedTeamEvidenceEventIds.length > 0
+          ? dominance.dominatedTeamEvidenceEventIds
+          : (evidenceEvent === undefined ? [] : [evidenceEvent.eventId]),
+        affectedZones: dominance.affectedZones as TacticalDiagnosis["affectedZones"],
+        confidence: dominance.warnings.length >= 3 ? "medium" : "low",
+      };
 
   return {
     ...report,
     tacticalReport: {
-      diagnoses: [...report.tacticalReport.diagnoses, diagnosis],
+      diagnoses: [
+        ...report.tacticalReport.diagnoses,
+        diagnosis,
+        ...(dominanceDiagnosis === null ? [] : [dominanceDiagnosis]),
+      ],
     },
   };
 }
@@ -587,16 +606,22 @@ function updateTeam(input: {
   const pressingLoad = input.ownPlan.pressingIntensity / 100;
   const secondHalfMultiplier = input.secondHalf ? 1.25 : 1;
   const conditionDrop =
-    (0.15 + pressingLoad * 0.65 + input.pressureEvents * 0.03 + planRiskLoad(input.ownPlan) * 0.12) *
+    (0.28 + pressingLoad * 0.82 + input.pressureEvents * 0.04 + input.concededPoints * 0.025 + planRiskLoad(input.ownPlan) * 0.16) *
     secondHalfMultiplier;
   const mentalDrop =
-    (0.14 + planRiskLoad(input.ownPlan) * 0.35 + input.concededPoints * 0.08 + input.pressureEvents * 0.03) *
+    (0.2 + planRiskLoad(input.ownPlan) * 0.4 + input.concededPoints * 0.1 + input.pressureEvents * 0.035) *
     secondHalfMultiplier;
   const conditionEnd = clampRating(input.teamState.condition - conditionDrop);
   const mentalFreshnessEnd = clampRating(input.teamState.mentalFreshness - mentalDrop);
   const momentum = clampRating(input.teamState.momentum + input.ownPoints * 1.7 - input.concededPoints * 1.2);
   const defensiveStress = clampRating(input.teamState.defensiveStress + input.concededPoints * 1.8 + input.pressureEvents * 0.5);
-  const highIntensityLoad = clampRating(input.teamState.pressureLoad + input.ownPlan.pressingIntensity * 0.1 + input.pressureEvents * 0.35);
+  const pressureLoadIncrease =
+    input.ownPlan.pressingIntensity * 0.055 +
+    input.pressureEvents * 0.22 +
+    input.concededPoints * 0.14 +
+    planRiskLoad(input.ownPlan) * 0.35 +
+    (input.secondHalf ? 1.1 : 0.4);
+  const highIntensityLoad = clampRating(input.teamState.pressureLoad + pressureLoadIncrease);
 
   return {
     teamId: input.teamState.teamId,
@@ -1412,7 +1437,8 @@ export type MatchEvidenceCategory =
   | "high_danger_sequences"
   | "unstable_under_pressure"
   | "converted_scoring"
-  | "visible_pressure_zone";
+  | "visible_pressure_zone"
+  | "dominated_team_no_payoff";
 
 export interface MatchEvidenceFact {
   readonly factId: string;
@@ -1511,7 +1537,7 @@ function highDangerFact(input: {
     eventIds: highDangerEvents.map((event) => event.eventId),
     zone: representativeZone(highDangerEvents, firstHighDangerEvent.zone),
     category: "high_danger_sequences",
-    summary: `${input.perspective.teamName} a créé ${highDangerEvents.length} séquence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} par l'adapter en ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} a crÃ©Ã© ${highDangerEvents.length} sÃ©quence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} par l'adapter en ${zones.join(", ")}.`,
     strength: clampRating(45 + highDangerEvents.length * 15),
     confidence: "medium",
   };
@@ -1548,7 +1574,7 @@ function unstablePressureFact(input: {
     eventIds: unstableEvents.map((event) => event.eventId),
     zone: representativeZone(unstableEvents, firstUnstableEvent.zone),
     category: "unstable_under_pressure",
-    summary: `${input.perspective.teamName} a connu ${unstableEvents.length} séquence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} a connu ${unstableEvents.length} sÃ©quence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
     strength: clampRating(40 + unstableEvents.length * 12),
     confidence: "medium",
   };
@@ -1580,7 +1606,7 @@ function scoringFact(input: {
     eventIds: scoringEvents.map((event) => event.eventId),
     zone: representativeZone(scoringEvents, firstScoringEvent.zone),
     category: "converted_scoring",
-    summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} décisive${scoringEvents.length === 1 ? "" : "s"} identifiée${scoringEvents.length === 1 ? "" : "s"} dans les séquences de score.`,
+    summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} dÃ©cisive${scoringEvents.length === 1 ? "" : "s"} identifiÃ©e${scoringEvents.length === 1 ? "" : "s"} dans les sÃ©quences de score.`,
     strength: clampRating(55 + scoringEvents.length * 15),
     confidence: "medium",
   };
@@ -1620,8 +1646,62 @@ function visiblePressureZoneFact(input: {
     eventIds: zoneEventIds,
     zone,
     category: "visible_pressure_zone",
-    summary: `La pression la plus visible par l'adapter pour ${input.perspective.teamName} s'est concentrée en ${zone}.`,
+    summary: `La pression la plus visible par l'adapter pour ${input.perspective.teamName} s'est concentrÃ©e en ${zone}.`,
     strength: clampRating(35 + zoneEventIds.length * 15),
+    confidence: "low",
+  };
+}
+
+function scorePoints(event: MatchEvent): number {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+function dominatedTeamNoPayoffFact(input: {
+  readonly matchInput: MatchInput;
+  readonly perspective: TeamPerspective;
+  readonly events: readonly MatchEvent[];
+}): MatchEvidenceFact | null {
+  const ownScoringEvents = input.events.filter((event) => event.teamId === input.perspective.teamId && scorePoints(event) > 0);
+  const opponentPoints = input.events
+    .filter((event) => event.teamId === input.perspective.opponentTeamId)
+    .reduce((total, event) => total + scorePoints(event), 0);
+  const signalEvents = input.events.filter(
+    (event) =>
+      event.teamId === input.perspective.teamId &&
+      event.eventType !== "kickoff" &&
+      (
+        event.eventType === "progression" ||
+        hasTag(event, "danger_high") ||
+        hasTag(event, "pressure_high") ||
+        hasTag(event, "pressure_medium") ||
+        hasTag(event, "territorial_pressure_high") ||
+        hasTag(event, "stability_low")
+      ),
+  );
+
+  if (ownScoringEvents.length > 0 || opponentPoints < 21 || signalEvents.length === 0) {
+    return null;
+  }
+
+  const firstSignalEvent = signalEvents[0];
+  if (firstSignalEvent === undefined) {
+    return null;
+  }
+
+  const zones = uniqueZones(signalEvents);
+
+  return {
+    factId: `${input.matchInput.matchId}-${input.perspective.teamId}-dominated-no-payoff`,
+    matchId: input.matchInput.matchId,
+    teamId: input.perspective.teamId,
+    opponentTeamId: input.perspective.opponentTeamId,
+    eventIds: signalEvents.map((event) => event.eventId),
+    zone: representativeZone(signalEvents, firstSignalEvent.zone),
+    category: "dominated_team_no_payoff",
+    summary: `${input.perspective.teamName} produit des signaux de pression, progression ou instabilitÃ© en ${zones.join(", ")}, mais aucune de ces sÃ©quences ne devient un Ã©vÃ©nement de score dans ce run de harnais.`,
+    strength: clampRating(45 + signalEvents.length * 8),
     confidence: "low",
   };
 }
@@ -1643,6 +1723,7 @@ export function createMatchEvidenceFacts(input: {
       unstablePressureFact(factInputs),
       scoringFact(factInputs),
       visiblePressureZoneFact(factInputs),
+      dominatedTeamNoPayoffFact(factInputs),
     ];
 
     for (const fact of candidateFacts) {
@@ -1664,22 +1745,25 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
       return "weakness";
     case "visible_pressure_zone":
       return "training_recommendation";
+    case "dominated_team_no_payoff":
+      return "tactical_failure";
   }
 }
 
 function titleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "high_danger_sequences":
-      return "Des séquences dangereuses ont émergé";
+      return "Des sequences dangereuses ont emerge";
     case "unstable_under_pressure":
-      return "La possession s'est fragilisée sous pression";
+      return "La possession s'est fragilisee sous pression";
     case "converted_scoring":
-      return "Les actions décisives sont bien identifiées";
+      return "Les actions decisives sont bien identifiees";
     case "visible_pressure_zone":
-      return "La pression s'est concentrée dans une zone";
+      return "La pression s'est concentree dans une zone";
+    case "dominated_team_no_payoff":
+      return `${fact.teamId} produit du volume sans conversion`;
   }
 }
-
 function confidenceText(value: MatchEvidenceFact["confidence"]): string {
   switch (value) {
     case "low":
@@ -1687,7 +1771,7 @@ function confidenceText(value: MatchEvidenceFact["confidence"]): string {
     case "medium":
       return "moyenne";
     case "high":
-      return "élevée";
+      return "Ã©levÃ©e";
   }
 }
 
@@ -1696,32 +1780,39 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "high_danger_sequences":
       return {
         actionId: `${fact.factId}-repeat-pattern`,
-        label: `Continuer à répéter les entrées en ${fact.zone}`,
-        tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque échoue.",
+        label: `Continuer Ã  rÃ©pÃ©ter les entrÃ©es en ${fact.zone}`,
+        tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque Ã©choue.",
       };
     case "unstable_under_pressure":
       return {
         actionId: `${fact.factId}-stabilize-possession`,
-        label: `Ajouter des soutiens plus sûrs autour de ${fact.zone}`,
-        tradeoff: "Des soutiens plus prudents peuvent réduire la menace verticale immédiate et ralentir le tempo de transition.",
+        label: `Ajouter des soutiens plus sÃ»rs autour de ${fact.zone}`,
+        tradeoff: "Des soutiens plus prudents peuvent rÃ©duire la menace verticale immÃ©diate et ralentir le tempo de transition.",
       };
     case "converted_scoring":
       return {
         actionId: `${fact.factId}-protect-finishing-platform`,
-        label: "Protéger le schéma qui a mené à l'action décisive",
-        tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prévisible.",
+        label: "ProtÃ©ger le schÃ©ma qui a menÃ© Ã  l'action dÃ©cisive",
+        tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prÃ©visible.",
       };
     case "visible_pressure_zone":
       return {
         actionId: `${fact.factId}-pressure-release`,
-        label: `Préparer une sortie de pression depuis ${fact.zone}`,
-        tradeoff: "Une sortie trop précoce peut concéder du terrain si la structure de réception n'est pas sécurisée.",
+        label: `PrÃ©parer une sortie de pression depuis ${fact.zone}`,
+        tradeoff: "Une sortie trop prÃ©coce peut concÃ©der du terrain si la structure de rÃ©ception n'est pas sÃ©curisÃ©e.",
+      };
+    case "dominated_team_no_payoff":
+      return {
+        actionId: `${fact.factId}-route-selection-after-pressure`,
+        label: `Revoir la route choisie apres pression en ${fact.zone}`,
+        tradeoff: "Reduire le risque peut stabiliser la plateforme de conversion, mais aussi retirer une partie de la menace immediate.",
       };
   }
 }
 
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
   const priority: readonly MatchEvidenceCategory[] = [
+    "dominated_team_no_payoff",
     "high_danger_sequences",
     "unstable_under_pressure",
     "visible_pressure_zone",
@@ -1750,14 +1841,14 @@ export function createEvidenceDrivenCoachInsights(input: {
       {
         insightId: `${input.matchInput.matchId}-adapter-insight`,
         type: "training_recommendation",
-        title: "Les preuves de l'adapter restent limitées",
+        title: "Les preuves de l'adapter restent limitÃ©es",
         summary:
-          "L'adapter mini-match a produit un fil officiel, mais aucun fait de preuve ciblé n'a franchi les seuils légers de Sprint 2C.",
+          "L'adapter mini-match a produit un fil officiel, mais aucun fait de preuve ciblÃ© n'a franchi les seuils lÃ©gers de Sprint 2C.",
         evidence: [
           {
             eventIds: [],
-            summary: "Aucun fait de preuve n'a été généré depuis le fil actuellement visible par l'adapter.",
-            confidenceNote: "Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.",
+            summary: "Aucun fait de preuve n'a Ã©tÃ© gÃ©nÃ©rÃ© depuis le fil actuellement visible par l'adapter.",
+            confidenceNote: "Analyse Ã  faible confiance tant que les plans tactiques ne sont pas entiÃ¨rement branchÃ©s.",
           },
         ],
         affectedPlayers: [],
@@ -1766,8 +1857,8 @@ export function createEvidenceDrivenCoachInsights(input: {
         recommendedActions: [
           {
             actionId: "expand-evidence-thresholds",
-            label: "Revoir les seuils de taxonomie après la prochaine passe adapter",
-            tradeoff: "Des seuils plus bas peuvent produire des signaux coach plus bruités.",
+            label: "Revoir les seuils de taxonomie aprÃ¨s la prochaine passe adapter",
+            tradeoff: "Des seuils plus bas peuvent produire des signaux coach plus bruitÃ©s.",
           },
         ],
       },
@@ -1784,7 +1875,7 @@ export function createEvidenceDrivenCoachInsights(input: {
         {
           eventIds: fact.eventIds,
           summary: `Fait de preuve ${fact.factId} : ${fact.summary}`,
-          confidenceNote: `Confiance ${confidenceText(fact.confidence)}; intensité ${fact.strength}/100. Données encore limitées par l'adapter de simulation actuel.`,
+          confidenceNote: `Confiance ${confidenceText(fact.confidence)}; intensitÃ© ${fact.strength}/100. DonnÃ©es encore limitÃ©es par l'adapter de simulation actuel.`,
         },
       ],
       affectedPlayers: [],
@@ -1809,9 +1900,9 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
       {
         diagnosisId: `${input.matchInput.matchId}-adapter-diagnosis`,
         teamId: input.matchInput.homeTeam.teamId,
-        title: "Diagnostic adapter à faible confiance",
+        title: "Diagnostic adapter Ã  faible confiance",
         summary:
-          "Le fil officiel est présent, mais les faits de preuve de Sprint 2C n'ont pas isolé de motif tactique ciblé.",
+          "Le fil officiel est prÃ©sent, mais les faits de preuve de Sprint 2C n'ont pas isolÃ© de motif tactique ciblÃ©.",
         evidenceEventIds: fallbackEvent === undefined ? [] : [fallbackEvent.eventId],
         affectedZones: fallbackEvent === undefined ? [] : [fallbackEvent.zone],
         confidence: "low",
@@ -1824,7 +1915,7 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
       diagnosisId: `${fact.factId}-diagnosis`,
       teamId: fact.teamId,
       title: titleForFact(fact),
-      summary: `${fact.summary} Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.`,
+      summary: `${fact.summary} Analyse Ã  faible confiance tant que les plans tactiques ne sont pas entiÃ¨rement branchÃ©s.`,
       evidenceEventIds: fact.eventIds,
       affectedZones: [fact.zone],
       confidence: "low",
@@ -1898,6 +1989,10 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
     return "Action decisive";
   }
 
+  if (fact?.category === "dominated_team_no_payoff") {
+    return `${event.teamId} sous pression sans conversion`;
+  }
+
   if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
     return "Signal d'elan a surveiller";
   }
@@ -1961,6 +2056,10 @@ function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<strin
   return 0;
 }
 
+function candidateTitle(candidate: KeyMomentCandidate, facts: readonly MatchEvidenceFact[]): string {
+  return titleForEvent(candidate.event, factForEvent(candidate.event, facts));
+}
+
 function candidateFromEvent(input: {
   readonly event: MatchEvent;
   readonly facts: readonly MatchEvidenceFact[];
@@ -1973,9 +2072,12 @@ function candidateFromEvent(input: {
   }
 
   const fact = factForEvent(input.event, input.facts);
+  const adjustedPriority = fact?.category === "dominated_team_no_payoff"
+    ? Math.max(priority, 88)
+    : priority;
   const candidate: KeyMomentCandidate = {
     event: input.event,
-    priority,
+    priority: adjustedPriority,
   };
 
   return fact === undefined ? candidate : { ...candidate, evidenceSummary: fact.summary };
@@ -1989,16 +2091,25 @@ function compareCandidates(a: KeyMomentCandidate, b: KeyMomentCandidate): number
   return a.event.timestamp.tick - b.event.timestamp.tick;
 }
 
-function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): readonly KeyMomentCandidate[] {
+function selectDiverseCandidates(
+  candidates: readonly KeyMomentCandidate[],
+  facts: readonly MatchEvidenceFact[],
+): readonly KeyMomentCandidate[] {
   const sortedCandidates = [...candidates].sort(compareCandidates);
   const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
   const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
   const selected: KeyMomentCandidate[] = [];
+  const titleCounts = new Map<string, number>();
   let scoringCount = 0;
 
   for (const candidate of sortedCandidates) {
     if (selected.length >= MAX_KEY_MOMENTS) {
       break;
+    }
+
+    const title = candidateTitle(candidate, facts);
+    if ((titleCounts.get(title) ?? 0) >= 2) {
+      continue;
     }
 
     if (candidate.event.eventType === "scoring") {
@@ -2009,6 +2120,7 @@ function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): rea
     }
 
     selected.push(candidate);
+    titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
   }
 
   if (selected.length >= MAX_KEY_MOMENTS) {
@@ -2021,7 +2133,12 @@ function selectDiverseCandidates(candidates: readonly KeyMomentCandidate[]): rea
     }
 
     if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
+      const title = candidateTitle(candidate, facts);
+      if ((titleCounts.get(title) ?? 0) >= 2) {
+        continue;
+      }
       selected.push(candidate);
+      titleCounts.set(title, (titleCounts.get(title) ?? 0) + 1);
     }
   }
 
@@ -2062,7 +2179,7 @@ export function selectKeyMoments(input: {
     }
   }
 
-  return [...selectDiverseCandidates([...candidatesByEventId.values()])]
+  return [...selectDiverseCandidates([...candidatesByEventId.values()], input.facts)]
     .sort((a, b) => a.event.timestamp.tick - b.event.timestamp.tick)
     .map((candidate) => {
       const fact = factForEvent(candidate.event, input.facts);
@@ -2135,6 +2252,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
   switch (category) {
     case "converted_scoring":
       return 100;
+    case "dominated_team_no_payoff":
+      return 95;
     case "high_danger_sequences":
       return 90;
     case "unstable_under_pressure":
@@ -2143,7 +2262,6 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 70;
   }
 }
-
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
   const sortedFacts = [...facts].sort(
     (a, b) => priorityForCategory(b.category) - priorityForCategory(a.category) || b.strength - a.strength,
@@ -2155,16 +2273,17 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
 function focusTitleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "high_danger_sequences":
-      return `Répéter les entrées dangereuses en ${fact.zone}`;
+      return `Repeter les entrees dangereuses en ${fact.zone}`;
     case "unstable_under_pressure":
       return `Stabiliser la possession sous pression en ${fact.zone}`;
     case "converted_scoring":
-      return "Sécuriser la séquence qui mène au score";
+      return "Securiser la sequence qui mene au score";
     case "visible_pressure_zone":
-      return `Préparer une sortie de pression depuis ${fact.zone}`;
+      return `Preparer une sortie de pression depuis ${fact.zone}`;
+    case "dominated_team_no_payoff":
+      return `Transformer la pression de ${fact.teamId} en plateforme de conversion`;
   }
 }
-
 export function suggestedFocusFromEvidence(input: {
   readonly matchInput: MatchInput;
   readonly facts: readonly MatchEvidenceFact[];
@@ -2176,7 +2295,7 @@ export function suggestedFocusFromEvidence(input: {
       {
         focusId: `${input.matchInput.matchId}-adapter-focus`,
         title: FALLBACK_FOCUS_TITLE,
-        reason: "Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.",
+        reason: "Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.",
       },
     ];
   }
@@ -2185,7 +2304,7 @@ export function suggestedFocusFromEvidence(input: {
     {
       focusId: `${primaryFact.factId}-focus`,
       title: focusTitleForFact(primaryFact),
-      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.`,
+      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.`,
     },
   ];
 }
@@ -2935,6 +3054,7 @@ if (require.main === module) {
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import type { MatchEvent, MatchInput, MatchReport } from "../contracts/engineToCoach";
 import { analyzeFullMatchHarnessSanity } from "./diagnostics/fullMatchHarnessSanity";
+import { analyzeFullMatchScoringDominance } from "./diagnostics/fullMatchScoringDominanceDiagnostics";
 import { createSegmentDiversityReport } from "./diagnostics/segmentDiversityDiagnostics";
 import { createMatchReportSignature } from "./runMatch";
 import { runFullMatch } from "./runFullMatch";
@@ -3022,9 +3142,17 @@ function validateKeyMoments(report: MatchReport): void {
   }
 
   const uniqueTitles = new Set(report.keyMoments.map((moment) => moment.title));
+  const titleCounts = new Map<string, number>();
+  for (const moment of report.keyMoments) {
+    titleCounts.set(moment.title, (titleCounts.get(moment.title) ?? 0) + 1);
+  }
   if (report.keyMoments.length > 1) {
     assertGuard(uniqueTitles.size >= 2, "Full-match key moments should include at least two different titles when possible.");
   }
+  assertGuard(
+    [...titleCounts.values()].every((count) => count <= 2),
+    "Full-match key moments should include no more than 2 moments with the same title when alternatives exist.",
+  );
 
   const scoringEventIds = new Set(report.timeline.filter((event) => event.eventType === "scoring").map((event) => event.eventId));
   const scoringMoments = report.keyMoments.filter((moment) => scoringEventIds.has(moment.eventId)).length;
@@ -3055,6 +3183,7 @@ function validateEvidenceReferences(report: MatchReport): void {
 
 function validateHarnessSanityWarnings(report: MatchReport): void {
   const sanity = analyzeFullMatchHarnessSanity(report);
+  const dominance = analyzeFullMatchScoringDominance(report);
   const forbiddenRecommendationFragments = [
     "reduce SHOT_GOAL",
     "reduce TRY_TOUCHDOWN",
@@ -3077,6 +3206,28 @@ function validateHarnessSanityWarnings(report: MatchReport): void {
     assertGuard(
       sanity.warnings.includes("INFLATED_SINGLE_RUN_SCORE"),
       "high single-run score must emit INFLATED_SINGLE_RUN_SCORE warning, not scoring failure.",
+    );
+  }
+
+  if (Math.abs(report.score.home - report.score.away) >= 21) {
+    assertGuard(
+      dominance.warnings.includes("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"),
+      "lopsided single-run score must emit one-team scoring dominance diagnostics.",
+    );
+    assertGuard(
+      sanity.warnings.includes("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"),
+      "lopsided single-run score must surface dominance warning through harness sanity.",
+    );
+    assertGuard(
+      dominance.mayInvalidateGlobalScoringEconomy === false,
+      "one-team scoring dominance must stay warning-only and cannot invalidate global economy.",
+    );
+  }
+
+  if (dominance.warnings.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM")) {
+    assertGuard(
+      sanity.warnings.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM"),
+      "zero scoring team must surface as warning-only through harness sanity.",
     );
   }
 
@@ -3127,7 +3278,33 @@ function validateSegmentDiversityAndFatigue(report: MatchReport, input: MatchInp
       awayFatigue.highIntensityLoad >= homeFatigue.highIntensityLoad,
       "High pressing team should have greater or equal highIntensityLoad than balanced team.",
     );
+    assertGuard(
+      !(awayFatigue.highIntensityLoad === 100 && homeFatigue.highIntensityLoad === 100),
+      "HighIntensityLoad should not saturate both teams to 100 unless explicitly justified by extreme load.",
+    );
   }
+}
+
+function validateDominatedTeamEvidence(report: MatchReport): void {
+  const dominance = analyzeFullMatchScoringDominance(report);
+
+  if (dominance.dominatedTeamId === undefined || !dominance.warnings.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM")) {
+    return;
+  }
+
+  const hasDominatedDiagnosis = report.tacticalReport.diagnoses.some((diagnosis) =>
+    diagnosis.summary.includes("FULL_MATCH_HARNESS_SINGLE_RUN") &&
+    diagnosis.summary.includes("50-match economy") &&
+    diagnosis.evidenceEventIds.length > 0,
+  );
+  const hasDominatedMoment = report.keyMoments.some((moment) => {
+    const event = report.timeline.find((candidate) => candidate.eventId === moment.eventId);
+
+    return event !== undefined && event.teamId === dominance.dominatedTeamId && event.eventType !== "kickoff";
+  });
+
+  assertGuard(hasDominatedDiagnosis, "Dominance diagnosis must mention FULL_MATCH_HARNESS_SINGLE_RUN and 50-match economy.");
+  assertGuard(hasDominatedMoment || dominance.dominatedTeamEvidenceEventIds.length === 0, "Key moments should include a dominated-team signal when evidence exists.");
 }
 
 export function validateRunFullMatchHarness(): readonly string[] {
@@ -3144,6 +3321,7 @@ export function validateRunFullMatchHarness(): readonly string[] {
   validateEvidenceReferences(report);
   validateHarnessSanityWarnings(report);
   validateSegmentDiversityAndFatigue(report, input);
+  validateDominatedTeamEvidence(report);
   assertGuard(
     createMatchReportSignature(report) === createMatchReportSignature(repeatedReport),
     "runFullMatch must be deterministic for the same MatchInput.",
@@ -3157,6 +3335,7 @@ export function validateRunFullMatchHarness(): readonly string[] {
     "full-match score equals score_change consequences",
     "full-match key moments remain selected and capped",
     "full-match key moments include diverse titles when possible",
+    "full-match key moments cap repeated titles when alternatives exist",
     "full-match scoring key moments are capped by selection when alternatives exist",
     "full-match insights and diagnoses reference existing events",
     "segment diversity report exists",
@@ -3166,6 +3345,11 @@ export function validateRunFullMatchHarness(): readonly string[] {
     "full-match guard scope is FULL_MATCH_HARNESS_SINGLE_RUN",
     "high single-run score is a harness warning, not a scoring failure",
     "harness sanity warnings do not recommend scoring value changes",
+    "dominance diagnostics exist for lopsided single-run score",
+    "one-team scoring dominance remains warning-only",
+    "zero scoring team remains warning-only",
+    "dominated-team evidence appears when available",
+    "highIntensityLoad avoids double saturation at 100",
     "runFullMatch is deterministic for the same input",
   ];
 }
@@ -3329,8 +3513,13 @@ export const VALIDATED_FULL_MATCH_ECONOMY_ANCHOR = {
 import type { MatchReport } from "../../contracts/engineToCoach";
 import { VALIDATED_FULL_MATCH_ECONOMY_ANCHOR } from "./fullMatchEconomyAnchors";
 import { createSegmentDiversityDiagnostics } from "./segmentDiversityDiagnostics";
+import {
+  analyzeFullMatchScoringDominance,
+  type FullMatchScoringDominanceReport,
+  type FullMatchScoringDominanceWarning,
+} from "./fullMatchScoringDominanceDiagnostics";
 
-export type FullMatchHarnessSanityWarning =
+export type FullMatchHarnessSanityWarning = FullMatchScoringDominanceWarning
   | "SINGLE_RUN_NOT_GLOBAL_ECONOMY"
   | "POSSIBLE_SEGMENT_PATTERN_REPETITION"
   | "INFLATED_SINGLE_RUN_SCORE"
@@ -3344,6 +3533,7 @@ export type FullMatchHarnessSanityReport = {
   readonly scope: "FULL_MATCH_HARNESS_SINGLE_RUN";
   readonly verdict: "OK" | "WARNING" | "FAIL_CONTRACT";
   readonly warnings: readonly FullMatchHarnessSanityWarning[];
+  readonly scoringDominance: FullMatchScoringDominanceReport;
   readonly interpretation: string;
   readonly mayInvalidateGlobalScoringEconomy: false;
   readonly recommendedNextActions: readonly string[];
@@ -3410,12 +3600,23 @@ function recommendationForWarning(warning: FullMatchHarnessSanityWarning): strin
     case "FLAT_FATIGUE_SIGNAL":
     case "MISSING_FATIGUE_PROPAGATION":
       return "propagate fatigue between segments";
+    case "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN":
+    case "ZERO_SCORING_EVENTS_FOR_ONE_TEAM":
+    case "HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_ZONE":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_EVENT_FAMILY":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_SEGMENT_PATTERN":
+    case "DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE":
+    case "DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION":
+    case "DOMINATED_TEAM_HIGH_LOAD_NO_PAYOFF":
+      return "explain full-match scoring dominance as a warning-only harness plausibility signal";
   }
 }
 
 export function analyzeFullMatchHarnessSanity(report: MatchReport): FullMatchHarnessSanityReport {
   const warnings = new Set<FullMatchHarnessSanityWarning>(["SINGLE_RUN_NOT_GLOBAL_ECONOMY"]);
   const scoreDifference = Math.abs(report.score.home - report.score.away);
+  const scoringDominance = analyzeFullMatchScoringDominance(report);
 
   if (totalScore(report) > HIGH_SINGLE_RUN_SCORE_THRESHOLD || scoreDifference >= LOPSIDED_SINGLE_RUN_SCORE_DIFFERENCE) {
     warnings.add("INFLATED_SINGLE_RUN_SCORE");
@@ -3440,16 +3641,219 @@ export function analyzeFullMatchHarnessSanity(report: MatchReport): FullMatchHar
     warnings.add("MISSING_FATIGUE_PROPAGATION");
   }
 
+  for (const dominanceWarning of scoringDominance.warnings) {
+    warnings.add(dominanceWarning);
+  }
+
   const orderedWarnings = [...warnings];
 
   return {
     scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
     verdict: orderedWarnings.length > 1 ? "WARNING" : "OK",
     warnings: orderedWarnings,
+    scoringDominance,
     interpretation:
       `This is a full-match harness/report sanity warning. It does not override the validated 50-match full-match economy. Current validated average total points anchor: ${VALIDATED_FULL_MATCH_ECONOMY_ANCHOR.averageTotalPoints}.`,
     mayInvalidateGlobalScoringEconomy: false,
     recommendedNextActions: [...new Set(orderedWarnings.map(recommendationForWarning))],
+  };
+}
+```
+
+## File: src/simulation/diagnostics/fullMatchScoringDominanceDiagnostics.ts
+
+```ts
+import type { MatchEvent, MatchReport } from "../../contracts/engineToCoach";
+import type { TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+
+export type FullMatchScoringDominanceWarning =
+  | "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"
+  | "ZERO_SCORING_EVENTS_FOR_ONE_TEAM"
+  | "HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM"
+  | "SCORING_EVENTS_CLUSTERED_IN_SAME_ZONE"
+  | "SCORING_EVENTS_CLUSTERED_IN_SAME_EVENT_FAMILY"
+  | "SCORING_EVENTS_CLUSTERED_IN_SAME_SEGMENT_PATTERN"
+  | "DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE"
+  | "DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION"
+  | "DOMINATED_TEAM_HIGH_LOAD_NO_PAYOFF";
+
+export type FullMatchScoringDominanceReport = {
+  readonly scope: "FULL_MATCH_HARNESS_SINGLE_RUN";
+  readonly warnings: readonly FullMatchScoringDominanceWarning[];
+  readonly score: {
+    readonly home: number;
+    readonly away: number;
+  };
+  readonly scoringEventsByTeam: readonly {
+    readonly teamId: string;
+    readonly scoringEventCount: number;
+    readonly points: number;
+    readonly mainScoringZones: readonly string[];
+    readonly mainScoringEventTypes: readonly string[];
+  }[];
+  readonly dominatedTeamId?: string;
+  readonly dominantTeamId?: string;
+  readonly dominatedTeamEvidenceEventIds: readonly string[];
+  readonly affectedZones: readonly string[];
+  readonly interpretation: string;
+  readonly mayInvalidateGlobalScoringEconomy: false;
+  readonly recommendedNextActions: readonly string[];
+};
+
+const HIGH_SINGLE_TEAM_SCORING_EVENTS = 10;
+const DOMINANCE_POINT_SHARE = 0.9;
+const CLUSTER_SHARE = 0.6;
+
+function scorePoints(event: MatchEvent): number {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+function scoringType(event: MatchEvent): string {
+  return event.tags.find((tag) => tag.startsWith("scoring_type_"))?.replace("scoring_type_", "") ?? event.tacticalContext.moveType ?? "scoring";
+}
+
+function segmentKey(event: MatchEvent): string {
+  const matchPrefix = `${event.matchId}-`;
+  const withoutMatch = event.eventId.startsWith(matchPrefix) ? event.eventId.slice(matchPrefix.length) : event.eventId;
+  const segmentMatch = /^segment-\d+/.exec(withoutMatch);
+
+  return segmentMatch?.[0] ?? "single";
+}
+
+function topValues<T extends string>(values: readonly T[], limit: number): readonly T[] {
+  const counts = new Map<T, number>();
+
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([value]) => value);
+}
+
+function topShare(values: readonly string[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const counts = new Map<string, number>();
+
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  return Math.max(...counts.values()) / values.length;
+}
+
+function teamIdsForReport(report: MatchReport): readonly TeamId[] {
+  return [...new Set([
+    ...report.teamStats.map((stats) => stats.teamId),
+    ...report.timeline.map((event) => event.teamId),
+  ])];
+}
+
+function hasDangerSignal(event: MatchEvent): boolean {
+  return event.eventType === "progression" || event.tags.includes("danger_high") || event.tags.includes("finishing_opportunity");
+}
+
+function hasPressureSignal(event: MatchEvent): boolean {
+  return event.tags.includes("pressure_high") ||
+    event.tags.includes("pressure_medium") ||
+    event.tags.includes("territorial_pressure_high") ||
+    event.tags.includes("stability_low");
+}
+
+export function analyzeFullMatchScoringDominance(report: MatchReport): FullMatchScoringDominanceReport {
+  const warnings = new Set<FullMatchScoringDominanceWarning>();
+  const teamIds = teamIdsForReport(report);
+  const scoringEvents = report.timeline.filter((event) => event.eventType === "scoring" || scorePoints(event) > 0);
+  const scoringEventsByTeam = teamIds.map((teamId) => {
+    const teamScoringEvents = scoringEvents.filter((event) => event.teamId === teamId);
+
+    return {
+      teamId,
+      scoringEventCount: teamScoringEvents.length,
+      points: teamScoringEvents.reduce((total, event) => total + scorePoints(event), 0),
+      mainScoringZones: topValues(teamScoringEvents.map((event) => event.zone), 3),
+      mainScoringEventTypes: topValues(teamScoringEvents.map(scoringType), 3),
+    };
+  });
+  const totalPoints = scoringEventsByTeam.reduce((total, item) => total + item.points, 0);
+  const dominantTeam = scoringEventsByTeam
+    .filter((item) => item.points > 0)
+    .sort((a, b) => b.points - a.points)[0];
+  const dominatedTeam = scoringEventsByTeam
+    .filter((item) => item.teamId !== dominantTeam?.teamId)
+    .sort((a, b) => a.points - b.points || a.scoringEventCount - b.scoringEventCount)[0];
+  const dominantScoringEvents = dominantTeam === undefined
+    ? []
+    : scoringEvents.filter((event) => event.teamId === dominantTeam.teamId);
+  const dominatedEvents = dominatedTeam === undefined
+    ? []
+    : report.timeline.filter((event) => event.teamId === dominatedTeam.teamId && event.eventType !== "kickoff");
+  const dominatedDangerEvents = dominatedEvents.filter(hasDangerSignal);
+  const dominatedPressureEvents = dominatedEvents.filter(hasPressureSignal);
+  const dominatedFatigue = report.fatigueReport.teamSummaries.find((summary) => summary.teamId === dominatedTeam?.teamId);
+
+  if (dominantTeam !== undefined && totalPoints > 0 && dominantTeam.points / totalPoints >= DOMINANCE_POINT_SHARE) {
+    warnings.add("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN");
+  }
+
+  if (scoringEventsByTeam.some((item) => item.scoringEventCount === 0) && scoringEvents.length > 0) {
+    warnings.add("ZERO_SCORING_EVENTS_FOR_ONE_TEAM");
+  }
+
+  if (scoringEventsByTeam.some((item) => item.scoringEventCount >= HIGH_SINGLE_TEAM_SCORING_EVENTS)) {
+    warnings.add("HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM");
+  }
+
+  if (topShare(dominantScoringEvents.map((event) => event.zone)) >= CLUSTER_SHARE && dominantScoringEvents.length >= 3) {
+    warnings.add("SCORING_EVENTS_CLUSTERED_IN_SAME_ZONE");
+  }
+
+  if (topShare(dominantScoringEvents.map(scoringType)) >= CLUSTER_SHARE && dominantScoringEvents.length >= 3) {
+    warnings.add("SCORING_EVENTS_CLUSTERED_IN_SAME_EVENT_FAMILY");
+  }
+
+  if (topShare(dominantScoringEvents.map(segmentKey)) >= CLUSTER_SHARE && dominantScoringEvents.length >= 3) {
+    warnings.add("SCORING_EVENTS_CLUSTERED_IN_SAME_SEGMENT_PATTERN");
+  }
+
+  if (dominatedTeam !== undefined && dominatedTeam.scoringEventCount === 0 && dominatedDangerEvents.length > 0) {
+    warnings.add("DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE");
+  }
+
+  if (dominatedTeam !== undefined && dominatedTeam.scoringEventCount === 0 && dominatedPressureEvents.length > 0) {
+    warnings.add("DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION");
+  }
+
+  if (dominatedTeam !== undefined && dominatedTeam.scoringEventCount === 0 && (dominatedFatigue?.highIntensityLoad ?? 0) >= 80) {
+    warnings.add("DOMINATED_TEAM_HIGH_LOAD_NO_PAYOFF");
+  }
+
+  return {
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    warnings: [...warnings],
+    score: report.score,
+    scoringEventsByTeam,
+    ...(dominatedTeam === undefined ? {} : { dominatedTeamId: dominatedTeam.teamId }),
+    ...(dominantTeam === undefined ? {} : { dominantTeamId: dominantTeam.teamId }),
+    dominatedTeamEvidenceEventIds: [...new Set([...dominatedDangerEvents, ...dominatedPressureEvents].map((event) => event.eventId))].slice(0, 8),
+    affectedZones: topValues([...dominantScoringEvents, ...dominatedDangerEvents, ...dominatedPressureEvents].map((event) => event.zone as ZoneId), 4),
+    interpretation:
+      "This is a single-run full-match harness dominance warning. It identifies local harness/report behavior and cannot invalidate the validated 50-match scoring economy.",
+    mayInvalidateGlobalScoringEconomy: false,
+    recommendedNextActions: [
+      "explain the single-run scoring dominance in the coach report",
+      "inspect repeated scoring zones and event families",
+      "surface dominated-team danger or pressure without conversion",
+      "keep scoring values tied to the validated 50-match economy, not this single run",
+    ],
   };
 }
 ```
@@ -3492,7 +3896,11 @@ export type SegmentDiversityWarning =
   | "REPEATED_ZONE_PATTERN"
   | "LOW_EVENT_FAMILY_DIVERSITY"
   | "NO_FATIGUE_DELTA"
-  | "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN";
+  | "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"
+  | "ZERO_SCORING_EVENTS_FOR_ONE_TEAM"
+  | "SAME_TEAM_SCORES_IN_MOST_SEGMENTS"
+  | "HIGH_LOAD_NO_SCORING_PAYOFF"
+  | "SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT";
 
 export interface SegmentDiversitySummary extends SegmentDiversityDiagnostic {
   readonly scoringPattern: string;
@@ -3506,6 +3914,7 @@ export type SegmentDiversityReport = {
   readonly repeatedEventTypePatternCount: number;
   readonly segmentSummaries: readonly SegmentDiversitySummary[];
   readonly warnings: readonly SegmentDiversityWarning[];
+  readonly dominanceSummary: string;
 };
 
 function segmentKeyForEvent(event: MatchEvent): string {
@@ -3617,6 +4026,39 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     warnings.add("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN");
   }
 
+  const scoringTeamCounts = new Map<string, number>();
+  for (const summary of segmentSummaries) {
+    for (const teamId of summary.scoringTeams) {
+      scoringTeamCounts.set(teamId, (scoringTeamCounts.get(teamId) ?? 0) + 1);
+    }
+  }
+  const dominantEntry = [...scoringTeamCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+  const allTeamIds = [...new Set([...report.teamStats.map((stats) => stats.teamId), ...report.timeline.map((event) => event.teamId)])];
+  const zeroScoringTeams = allTeamIds.filter((teamId) => !scoringTeams.includes(teamId));
+  const highLoadNoPayoffTeams = zeroScoringTeams.filter((teamId) =>
+    (report.fatigueReport.teamSummaries.find((summary) => summary.teamId === teamId)?.highIntensityLoad ?? 0) >= 80,
+  );
+
+  if (zeroScoringTeams.length > 0 && scoringTeams.length > 0) {
+    warnings.add("ZERO_SCORING_EVENTS_FOR_ONE_TEAM");
+  }
+
+  if (dominantEntry !== undefined && dominantEntry[1] >= Math.ceil(segmentSummaries.length * 0.6)) {
+    warnings.add("SAME_TEAM_SCORES_IN_MOST_SEGMENTS");
+  }
+
+  if (highLoadNoPayoffTeams.length > 0) {
+    warnings.add("HIGH_LOAD_NO_SCORING_PAYOFF");
+  }
+
+  if (segmentSummaries.length > 1 && zeroScoringTeams.length > 0 && repeatedEventTypePatternCount < segmentSummaries.length - 1) {
+    warnings.add("SEGMENT_VARIATION_WITH_LOW_OPPONENT_THREAT");
+  }
+
+  const dominanceSummary = dominantEntry === undefined
+    ? "No scoring dominance pattern was detected in the segment stream."
+    : `${dominantEntry[0]} dominated the single-run scoring stream across ${dominantEntry[1]} segment(s). ${zeroScoringTeams.length === 0 ? "Both teams had scoring payoff." : `${zeroScoringTeams.join(", ")} produced no scoring payoff.`} Treat this as a harness plausibility warning, not a scoring-economy verdict.`;
+
   return {
     segmentCount: segmentSummaries.length,
     repeatedScoringPatternCount,
@@ -3624,6 +4066,7 @@ export function createSegmentDiversityReport(report: MatchReport): SegmentDivers
     repeatedEventTypePatternCount,
     segmentSummaries,
     warnings: [...warnings],
+    dominanceSummary,
   };
 }
 ```
@@ -3650,6 +4093,7 @@ export function validateSegmentDiversityDiagnostics(): readonly string[] {
   assertTest(diversity.segmentCount >= 2, "segment diversity diagnostics must cover multiple segments.");
   assertTest(diversity.segmentSummaries.length === diversity.segmentCount, "segment summaries must match segment count.");
   assertTest(diversity.segmentSummaries.some((summary) => summary.fatigueDelta > 0), "segment diagnostics must record fatigue delta.");
+  assertTest(diversity.dominanceSummary.length > 0, "segment diagnostics must expose a concise dominance summary.");
   assertTest(diversity.warnings.length >= 0, "segment warnings must be represented as diagnostics, not scoring failures.");
   assertTest(
     report.timeline.filter((event) => event.eventType === "scoring").length === scoringEventCount,
@@ -3666,6 +4110,7 @@ export function validateSegmentDiversityDiagnostics(): readonly string[] {
   return [
     "repeated segment patterns produce diagnostics",
     "fatigue delta appears in segment diagnostics",
+    "dominance summary appears in segment diagnostics",
     "no scoring events are removed",
     "source-of-truth guard still rejects non-batch global scoring claims",
   ];
@@ -3752,7 +4197,9 @@ function assertGuard(condition: boolean, message: string): void {
 
 const testZone = "Z3-C" as ZoneId;
 
-function scoringEvent(index: number, points: number): MatchEvent {
+function scoringEvent(index: number, points: number, teamId = engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.teamId): MatchEvent {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+
   return {
     ...engineToCoachPublicContractFixtures.eventFixture,
     eventId: `synthetic-score-${index}`,
@@ -3763,6 +4210,8 @@ function scoringEvent(index: number, points: number): MatchEvent {
     },
     phase: MatchPhase.InProgress,
     sequenceId: `synthetic-sequence-${index}`,
+    teamId,
+    opponentTeamId: teamId === input.homeTeam.teamId ? input.awayTeam.teamId : input.homeTeam.teamId,
     eventType: "scoring",
     zone: testZone,
     tacticalContext: {
@@ -3780,18 +4229,50 @@ function scoringEvent(index: number, points: number): MatchEvent {
         value: points,
       },
     ],
-    tags: ["synthetic_test", "scoring_event"],
+    tags: ["synthetic_test", "scoring_event", "scoring_type_SHOT_GOAL"],
     narrativeWeight: 80,
   };
 }
 
+function pressureEvent(index: number): MatchEvent {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+
+  return {
+    ...engineToCoachPublicContractFixtures.eventFixture,
+    eventId: `synthetic-pressure-${index}`,
+    timestamp: {
+      tick: index,
+      minute: index,
+      period: index > 45 ? "second_half" : "first_half",
+    },
+    phase: MatchPhase.InProgress,
+    sequenceId: `synthetic-pressure-sequence-${index}`,
+    teamId: input.awayTeam.teamId,
+    opponentTeamId: input.homeTeam.teamId,
+    eventType: "progression",
+    zone: testZone,
+    tacticalContext: {
+      pressureLevel: PressureLevel.High,
+      ballZone: testZone,
+      targetZone: testZone,
+      moveType: "synthetic_pressure",
+      reason: "Synthetic dominated-team pressure event used only for harness sanity guard tests.",
+    },
+    outcome: "neutral",
+    consequences: [],
+    tags: ["synthetic_test", "pressure_high", "danger_high", "territorial_pressure_high"],
+    narrativeWeight: 75,
+  };
+}
+
 function syntheticHighScoreReport(): MatchReport {
-  const scoringEvents = Array.from({ length: 8 }, (_, index) => scoringEvent(index + 1, 5));
+  const scoringEvents = Array.from({ length: 11 }, (_, index) => scoringEvent(index + 1, 5));
+  const pressureEvents = Array.from({ length: 3 }, (_, index) => pressureEvent(index + 20));
 
   return {
     ...engineToCoachPublicContractFixtures.matchReportFixture,
-    score: { home: 40, away: 0 },
-    timeline: scoringEvents,
+    score: { home: 55, away: 0 },
+    timeline: [...scoringEvents, ...pressureEvents],
     keyMoments: scoringEvents.slice(0, 5).map((event) => ({
       eventId: event.eventId,
       title: "Scoring breakthrough",
@@ -3804,6 +4285,12 @@ function syntheticHighScoreReport(): MatchReport {
           teamId: engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.teamId,
           averageConditionEnd: 96,
           highIntensityLoad: 50,
+          lateErrorCount: 0,
+        },
+        {
+          teamId: engineToCoachPublicContractFixtures.matchInputFixture.awayTeam.teamId,
+          averageConditionEnd: 90,
+          highIntensityLoad: 90,
           lateErrorCount: 0,
         },
       ],
@@ -3827,6 +4314,10 @@ export function validateFullMatchHarnessSanity(): readonly string[] {
 
   assertGuard(sanity.scope === "FULL_MATCH_HARNESS_SINGLE_RUN", "sanity report must use full-match harness single-run scope.");
   assertGuard(sanity.warnings.includes("INFLATED_SINGLE_RUN_SCORE"), "high synthetic score must emit INFLATED_SINGLE_RUN_SCORE.");
+  assertGuard(sanity.warnings.includes("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"), "single-team scoring stream must emit ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN.");
+  assertGuard(sanity.warnings.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM"), "zero-scoring team must emit ZERO_SCORING_EVENTS_FOR_ONE_TEAM.");
+  assertGuard(sanity.warnings.includes("HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM"), "high scoring event count must emit HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM.");
+  assertGuard(sanity.scoringDominance.mayInvalidateGlobalScoringEconomy === false, "dominance report must stay warning-only.");
   assertGuard(sanity.warnings.includes("REPETITIVE_KEY_MOMENTS"), "mostly scoring key moments must emit REPETITIVE_KEY_MOMENTS.");
   assertGuard(sanity.warnings.includes("FLAT_FATIGUE_SIGNAL"), "unchanged condition must emit FLAT_FATIGUE_SIGNAL.");
   assertGuard(sanity.mayInvalidateGlobalScoringEconomy === false, "sanity report must never invalidate global scoring economy.");
@@ -3834,6 +4325,9 @@ export function validateFullMatchHarnessSanity(): readonly string[] {
 
   return [
     "high score creates INFLATED_SINGLE_RUN_SCORE",
+    "one-team scoring dominance creates warning",
+    "zero scoring team creates warning",
+    "high single-team scoring event count creates warning",
     "repetitive scoring moments create REPETITIVE_KEY_MOMENTS",
     "flat fatigue creates FLAT_FATIGUE_SIGNAL",
     "sanity report can never invalidate global scoring economy",
@@ -3845,6 +4339,160 @@ if (require.main === module) {
   const checks = validateFullMatchHarnessSanity();
 
   console.log("full-match harness sanity tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/fullMatchScoringDominanceDiagnostics.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { MatchPhase, PressureLevel } from "../../models/match";
+import type { MatchEvent, MatchReport } from "../../contracts/engineToCoach";
+import type { ZoneId } from "../../core/zones";
+import { analyzeFullMatchScoringDominance } from "./fullMatchScoringDominanceDiagnostics";
+
+function assertGuard(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+const testZone = "Z3-C" as ZoneId;
+
+function event(input: {
+  readonly index: number;
+  readonly teamId: string;
+  readonly opponentTeamId: string;
+  readonly eventType: MatchEvent["eventType"];
+  readonly points: number;
+  readonly tags: readonly string[];
+}): MatchEvent {
+  return {
+    ...engineToCoachPublicContractFixtures.eventFixture,
+    eventId: `dominance-test-segment-${Math.ceil(input.index / 3)}-${input.index}`,
+    timestamp: {
+      tick: input.index,
+      minute: input.index,
+      period: input.index > 45 ? "second_half" : "first_half",
+    },
+    phase: MatchPhase.InProgress,
+    sequenceId: `dominance-test-sequence-${input.index}`,
+    teamId: input.teamId,
+    opponentTeamId: input.opponentTeamId,
+    eventType: input.eventType,
+    zone: testZone,
+    tacticalContext: {
+      pressureLevel: PressureLevel.High,
+      ballZone: testZone,
+      targetZone: testZone,
+      moveType: input.eventType,
+      reason: "Synthetic dominance diagnostic test event.",
+    },
+    outcome: input.points > 0 ? "score" : "neutral",
+    consequences: input.points > 0
+      ? [
+          {
+            type: "score_change",
+            description: "Synthetic score.",
+            value: input.points,
+          },
+        ]
+      : [],
+    tags: input.tags,
+    narrativeWeight: 80,
+  };
+}
+
+function dominanceReport(): MatchReport {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const controlScores = Array.from({ length: 12 }, (_, index) =>
+    event({
+      index: index + 1,
+      teamId: input.homeTeam.teamId,
+      opponentTeamId: input.awayTeam.teamId,
+      eventType: "scoring",
+      points: 3,
+      tags: ["scoring_event", "scoring_type_SHOT_GOAL"],
+    }),
+  );
+  const blitzSignals = Array.from({ length: 4 }, (_, index) =>
+    event({
+      index: index + 20,
+      teamId: input.awayTeam.teamId,
+      opponentTeamId: input.homeTeam.teamId,
+      eventType: "progression",
+      points: 0,
+      tags: ["pressure_high", "danger_high", "territorial_pressure_high"],
+    }),
+  );
+
+  return {
+    ...engineToCoachPublicContractFixtures.matchReportFixture,
+    score: { home: 36, away: 0 },
+    timeline: [...controlScores, ...blitzSignals],
+    teamStats: [
+      {
+        teamId: input.homeTeam.teamId,
+        score: 36,
+      },
+      {
+        teamId: input.awayTeam.teamId,
+        score: 0,
+      },
+    ],
+    fatigueReport: {
+      teamSummaries: [
+        {
+          teamId: input.homeTeam.teamId,
+          averageConditionEnd: 86,
+          highIntensityLoad: 78,
+          lateErrorCount: 0,
+        },
+        {
+          teamId: input.awayTeam.teamId,
+          averageConditionEnd: 80,
+          highIntensityLoad: 91,
+          lateErrorCount: 0,
+        },
+      ],
+      playerSummaries: [],
+    },
+  };
+}
+
+export function validateFullMatchScoringDominanceDiagnostics(): readonly string[] {
+  const report = dominanceReport();
+  const beforeTimelineSignature = JSON.stringify(report.timeline);
+  const dominance = analyzeFullMatchScoringDominance(report);
+  const afterTimelineSignature = JSON.stringify(report.timeline);
+
+  assertGuard(dominance.scope === "FULL_MATCH_HARNESS_SINGLE_RUN", "dominance scope must be single-run harness.");
+  assertGuard(dominance.warnings.includes("ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"), "one-team dominance warning must be emitted.");
+  assertGuard(dominance.warnings.includes("ZERO_SCORING_EVENTS_FOR_ONE_TEAM"), "zero scoring team warning must be emitted.");
+  assertGuard(dominance.warnings.includes("HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM"), "high scoring event count warning must be emitted.");
+  assertGuard(dominance.warnings.includes("DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE"), "dominated danger without score must be detected.");
+  assertGuard(dominance.warnings.includes("DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION"), "dominated pressure without conversion must be detected.");
+  assertGuard(dominance.mayInvalidateGlobalScoringEconomy === false, "dominance diagnostics must not invalidate global economy.");
+  assertGuard(!dominance.recommendedNextActions.join(" ").includes("change scoring values"), "dominance diagnostics must not recommend scoring value changes.");
+  assertGuard(beforeTimelineSignature === afterTimelineSignature, "dominance diagnostics must not mutate scoring events.");
+
+  return [
+    "51-0 style report emits one-team scoring dominance warning",
+    "zero scoring team emits warning",
+    "dominance report cannot invalidate global economy",
+    "dominance report does not recommend scoring value changes",
+    "dominated-team pressure/danger without conversion is detected",
+    "scoring events are preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchScoringDominanceDiagnostics();
+
+  console.log("full-match scoring dominance diagnostics tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }

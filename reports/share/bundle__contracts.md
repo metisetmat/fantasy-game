@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2N - Segment Diversity + Fatigue Propagation + Key Moment Diversity. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

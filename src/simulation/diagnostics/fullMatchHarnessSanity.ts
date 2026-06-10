@@ -1,8 +1,13 @@
 import type { MatchReport } from "../../contracts/engineToCoach";
 import { VALIDATED_FULL_MATCH_ECONOMY_ANCHOR } from "./fullMatchEconomyAnchors";
 import { createSegmentDiversityDiagnostics } from "./segmentDiversityDiagnostics";
+import {
+  analyzeFullMatchScoringDominance,
+  type FullMatchScoringDominanceReport,
+  type FullMatchScoringDominanceWarning,
+} from "./fullMatchScoringDominanceDiagnostics";
 
-export type FullMatchHarnessSanityWarning =
+export type FullMatchHarnessSanityWarning = FullMatchScoringDominanceWarning
   | "SINGLE_RUN_NOT_GLOBAL_ECONOMY"
   | "POSSIBLE_SEGMENT_PATTERN_REPETITION"
   | "INFLATED_SINGLE_RUN_SCORE"
@@ -16,6 +21,7 @@ export type FullMatchHarnessSanityReport = {
   readonly scope: "FULL_MATCH_HARNESS_SINGLE_RUN";
   readonly verdict: "OK" | "WARNING" | "FAIL_CONTRACT";
   readonly warnings: readonly FullMatchHarnessSanityWarning[];
+  readonly scoringDominance: FullMatchScoringDominanceReport;
   readonly interpretation: string;
   readonly mayInvalidateGlobalScoringEconomy: false;
   readonly recommendedNextActions: readonly string[];
@@ -82,12 +88,23 @@ function recommendationForWarning(warning: FullMatchHarnessSanityWarning): strin
     case "FLAT_FATIGUE_SIGNAL":
     case "MISSING_FATIGUE_PROPAGATION":
       return "propagate fatigue between segments";
+    case "ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN":
+    case "ZERO_SCORING_EVENTS_FOR_ONE_TEAM":
+    case "HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_ZONE":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_EVENT_FAMILY":
+    case "SCORING_EVENTS_CLUSTERED_IN_SAME_SEGMENT_PATTERN":
+    case "DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE":
+    case "DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION":
+    case "DOMINATED_TEAM_HIGH_LOAD_NO_PAYOFF":
+      return "explain full-match scoring dominance as a warning-only harness plausibility signal";
   }
 }
 
 export function analyzeFullMatchHarnessSanity(report: MatchReport): FullMatchHarnessSanityReport {
   const warnings = new Set<FullMatchHarnessSanityWarning>(["SINGLE_RUN_NOT_GLOBAL_ECONOMY"]);
   const scoreDifference = Math.abs(report.score.home - report.score.away);
+  const scoringDominance = analyzeFullMatchScoringDominance(report);
 
   if (totalScore(report) > HIGH_SINGLE_RUN_SCORE_THRESHOLD || scoreDifference >= LOPSIDED_SINGLE_RUN_SCORE_DIFFERENCE) {
     warnings.add("INFLATED_SINGLE_RUN_SCORE");
@@ -112,12 +129,17 @@ export function analyzeFullMatchHarnessSanity(report: MatchReport): FullMatchHar
     warnings.add("MISSING_FATIGUE_PROPAGATION");
   }
 
+  for (const dominanceWarning of scoringDominance.warnings) {
+    warnings.add(dominanceWarning);
+  }
+
   const orderedWarnings = [...warnings];
 
   return {
     scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
     verdict: orderedWarnings.length > 1 ? "WARNING" : "OK",
     warnings: orderedWarnings,
+    scoringDominance,
     interpretation:
       `This is a full-match harness/report sanity warning. It does not override the validated 50-match full-match economy. Current validated average total points anchor: ${VALIDATED_FULL_MATCH_ECONOMY_ANCHOR.averageTotalPoints}.`,
     mayInvalidateGlobalScoringEconomy: false,
