@@ -33,27 +33,27 @@ function factForEvent(event: MatchEvent, facts: readonly MatchEvidenceFact[]): M
 
 function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
   if (event.eventType === "kickoff") {
-    return "Debut du match";
+    return "Début du match";
   }
 
   if (event.eventType === "scoring") {
-    return "Action decisive";
+    return "Action décisive";
   }
 
   if (fact?.category === "dominated_team_no_payoff") {
-    return `${event.teamId} sous pression sans conversion`;
+    return `${event.teamId.toUpperCase()} sous pression sans conversion`;
   }
 
   if (hasTag(event, "score_state_lopsided") || hasTag(event, "momentum_negative")) {
-    return "Signal d'elan a surveiller";
+    return "Signal d'élan à surveiller";
   }
 
   if (fact?.category === "visible_pressure_zone") {
-    return `Pression concentree en ${fact.zone}`;
+    return `Pression concentrée en ${fact.zone}`;
   }
 
   if (hasTag(event, "danger_high") || fact?.category === "high_danger_sequences") {
-    return "Sequence dangereuse";
+    return "Séquence dangereuse";
   }
 
   if (hasTag(event, "stability_low") && (hasTag(event, "pressure_high") || hasTag(event, "pressure_medium"))) {
@@ -61,18 +61,18 @@ function titleForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): 
   }
 
   if (hasTag(event, "territorial_pressure_high")) {
-    return "Sequence de pression territoriale";
+    return "Séquence de pression territoriale";
   }
 
-  return "Sequence tactique";
+  return "Séquence tactique";
 }
 
 function summaryForEvent(event: MatchEvent, fact: MatchEvidenceFact | undefined): string {
   if (fact !== undefined) {
-    return `${fact.summary} Contexte : ${event.tacticalContext.reason ?? "sequence tactique visible dans le rapport."}`;
+    return `${fact.summary} Contexte : ${event.tacticalContext.reason ?? "séquence tactique visible dans le rapport."}`;
   }
 
-  return event.tacticalContext.reason ?? "Sequence tactique visible dans le rapport.";
+  return event.tacticalContext.reason ?? "Séquence tactique visible dans le rapport.";
 }
 
 function candidatePriority(event: MatchEvent, insightEventIds: ReadonlySet<string>): number {

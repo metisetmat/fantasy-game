@@ -11,9 +11,10 @@ import type {
   TrainingFocusSuggestion,
   ZoneStats,
 } from "../contracts/engineToCoach";
+import { normalizeCoachFacingCopy } from "./coachCopyQuality";
 
 export function escapeHtml(value: string): string {
-  return productCopy(value)
+  return normalizeCoachFacingCopy(productCopy(value))
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -25,6 +26,10 @@ function productCopy(value: string): string {
   return value
     .replaceAll(
       "Données encore limitées par l'adapter de simulation actuel.",
+      "Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.",
+    )
+    .replaceAll(
+      "DonnÃ©es encore limitÃ©es par l'adapter de simulation actuel.",
       "Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.",
     )
     .replaceAll("issue du résumé de score mini-match", "identifiée dans le résumé de score")
@@ -335,6 +340,7 @@ function renderSummary(report: MatchReport): string {
       <article class="card summary-card">
         <p>Score final : <strong>${escapeHtml(scoreText(report))}</strong>.</p>
         <p>Ce rapport met en avant ${report.keyMoments.length} moments clés, ${report.coachInsights.length} ${insightLabel} et un axe de travail prioritaire : <strong>${escapeHtml(primaryFocus)}</strong>.</p>
+        <p>Catégories de lecture : Action décisive, Séquence dangereuse, possession sous pression.</p>
       </article>
     </section>`;
 }
@@ -396,7 +402,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
       <div class="muted">Match : ${escapeHtml(report.matchId)}</div>
       <h1>Rapport du coach</h1>
       <div class="score">${escapeHtml(scoreText(report))}</div>
-      <div class="muted">Généré depuis le MatchReport typé.</div>
+      <div class="muted">Généré depuis le rapport de match typé.</div>
     </header>
 
     ${renderSummary(report)}

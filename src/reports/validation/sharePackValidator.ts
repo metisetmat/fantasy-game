@@ -34,6 +34,14 @@ function check(label: string, passed: boolean, detail: string): SharePackCheck {
   };
 }
 
+function containsAny(value: string, fragments: readonly string[]): boolean {
+  return fragments.some((fragment) => value.includes(fragment));
+}
+
+function countAny(value: string, fragments: readonly string[]): number {
+  return fragments.reduce((total, fragment) => total + (value.includes(fragment) ? 1 : 0), 0);
+}
+
 function renderMarkdown(input: {
   readonly checks: readonly SharePackCheck[];
   readonly sharePackMode: string;
@@ -102,6 +110,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchSegmentDiversityFatigueValidation = readIfExists(join(shareDirectory, "validation.full-match-segment-diversity-fatigue.md"));
   const fullMatchHarnessPlausibility = readIfExists(join(shareDirectory, "full-match-harness-plausibility.md"));
   const fullMatchHarnessPlausibilityValidation = readIfExists(join(shareDirectory, "validation.full-match-harness-plausibility.md"));
+  const coachReportCopyQuality = readIfExists(join(shareDirectory, "coach-report-copy-quality.md"));
+  const coachReportCopyQualityValidation = readIfExists(join(shareDirectory, "validation.coach-report-copy-quality.md"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
@@ -1372,6 +1382,66 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "bundle__reports.md",
     "bundle__docs.md",
   ];
+  const coachCopyExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "validation.share-pack.md",
+    "coach-report-copy-quality.md",
+    "validation.coach-report-copy-quality.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+    "bundle__docs.md",
+  ];
+  const mojibakeFragments = ["Ãƒ", "Ã‚", "Ã¢â‚¬", "[object Object]"];
+  const coachCopyChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Micro-sprint 2O-Fix", activeConfig.sprintName === "Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", !requiredCopied("full-match-harness-plausibility.md") && !requiredCopied("validation.full-match-harness-plausibility.md"), "Sprint 2O docs omitted"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", coachCopyExpectedFiles.every((file) => requiredCopied(file)), coachCopyExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Micro-sprint 2O-Fix", manifest.includes("Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene") && detailedManifest.includes("Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene"), "micro-sprint visible"),
+    check("README is Micro-sprint 2O-Fix oriented", readme.includes("# Micro-sprint 2O-Fix Share Pack") && readme.includes("coach-report-copy-quality.md"), "README current"),
+    check("coach-report-copy-quality doc included", coachReportCopyQuality.includes("# Coach Report Copy Quality"), "doc included"),
+    check("coach-report-copy-quality validation is PASS", coachReportCopyQualityValidation.includes("Status: PASS"), "validation PASS"),
+    check("coach copy utility bundled", bundleReports.includes("src/reports/coachCopyQuality.ts") && bundleReports.includes("containsMojibake"), "coachCopyQuality bundled"),
+    check("coach-facing copy helper bundled", bundleReports.includes("src/reports/coachFacingCopy.ts") && bundleReports.includes("coachFacingHarnessWarningSummary"), "coachFacingCopy bundled"),
+    check("coach copy quality test bundled", bundleReports.includes("src/reports/coachCopyQuality.test.ts"), "coachCopyQuality test bundled"),
+    check("htmlCoachReportGuard includes mojibake guard", bundleReports.includes("containsMojibake") && bundleReports.includes("FULL_MATCH_HARNESS_SINGLE_RUN"), "HTML guard bundled"),
+    check("coach-report.latest.html included", coachHtml.includes("<!doctype html>") || coachHtml.includes("<html"), "coach HTML copied"),
+    check("coach HTML contains no mojibake markers", !containsAny(coachHtml, mojibakeFragments), `mojibake marker count: ${countAny(coachHtml, mojibakeFragments)}`),
+    check("coach HTML contains Résumé", coachHtml.includes("Résumé"), "Résumé visible"),
+    check("coach HTML contains Moments clés", coachHtml.includes("Moments clés"), "Moments clés visible"),
+    check("coach HTML contains generated-from copy", coachHtml.includes("Généré depuis le rapport de match typé."), "generated copy visible"),
+    check("coach HTML contains Action décisive", coachHtml.includes("Action décisive"), "Action décisive visible"),
+    check("coach HTML contains Séquence dangereuse", coachHtml.includes("Séquence dangereuse"), "Séquence dangereuse visible"),
+    check("coach HTML contains Équipe and Événement", coachHtml.includes("Équipe") && coachHtml.includes("Événement"), "French labels visible"),
+    check("coach HTML contains French harness warning", coachHtml.includes("Ce run déterministe unique révèle") && coachHtml.includes("économie du score"), "French harness warning visible"),
+    check("coach HTML does not expose raw Harness warning", !coachHtml.includes("Harness warning:"), "raw English hidden"),
+    check("coach HTML does not expose raw scope enum", !coachHtml.includes("FULL_MATCH_HARNESS_SINGLE_RUN"), "raw scope hidden"),
+    check("dominated-team copy is clean French", coachHtml.includes("BLITZ produit du volume sans conversion") && coachHtml.includes("Revoir la route choisie après pression"), "dominated-team copy visible"),
+    check("no global scoring incoherence claim", !coachHtml.includes("global scoring incoherence"), "no incoherence claim"),
+    check("no scoring value change recommendation", !coachHtml.includes("change scoring values"), "no scoring change recommendation"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS"), "batch/live PASS"),
+    check("50-match economy still protected", bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR") && bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false"), "50-match anchor preserved"),
+    check("source-of-truth guards preserved", bundleSimulation.includes("src/simulation/diagnostics/sourceOfTruthGuards.ts"), "sourceOfTruthGuards included"),
+    check("recommendation CONFIRM_COACH_REPORT_ENCODING_CLEAN", coachReportCopyQuality.includes("CONFIRM_COACH_REPORT_ENCODING_CLEAN") && coachReportCopyQualityValidation.includes("CONFIRM_COACH_REPORT_ENCODING_CLEAN"), "recommendation visible"),
+    check("recommendation KEEP_SOURCE_OF_TRUTH_GUARDRAILS", coachReportCopyQuality.includes("KEEP_SOURCE_OF_TRUTH_GUARDRAILS"), "source-of-truth recommendation visible"),
+  ];
   const sprint2OChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("current sprint is Sprint 2O", activeConfig.sprintName === "Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality", activeConfig.sprintName),
@@ -1420,6 +1490,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     ? roleFitUiChecks
     : activeConfig.sprintName.includes("React JSX Role Fit Refactor")
       ? reactJsxPlayerProfileChecks
+    : activeConfig.sprintName.includes("Micro-sprint 2O-Fix")
+      ? coachCopyChecks
     : activeConfig.sprintName.includes("Sprint 2O - Full-Match Harness Plausibility")
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2N - Segment Diversity")
