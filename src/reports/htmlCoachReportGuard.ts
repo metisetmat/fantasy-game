@@ -1,5 +1,6 @@
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
+import { containsMojibake } from "./coachCopyQuality";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 
 function assertGuard(condition: boolean, message: string): void {
@@ -16,14 +17,20 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   const uniqueKeyMomentTitles = new Set(report.keyMoments.map((moment) => moment.title));
   const conditionDecreased = report.fatigueReport.playerSummaries.some((summary) => summary.conditionEnd < summary.conditionStart);
   const hasHarnessWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Avertissement de harnais full-match");
-  const hasDominanceWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Domination scoring single-run a surveiller");
+  const hasDominanceWarning = report.tacticalReport.diagnoses.some((diagnosis) => diagnosis.title === "Domination scoring single-run à surveiller");
 
   assertGuard(html.includes("<html"), "rendered coach report must include an html document root.");
+  assertGuard(!containsMojibake(html), "rendered coach report must not contain mojibake markers.");
   assertGuard(html.includes("Rapport du coach"), "rendered coach report must include the French report title.");
+  assertGuard(html.includes("Résumé"), "rendered coach report must include the French summary section.");
   assertGuard(html.includes("Moments clés"), "rendered coach report must include the French key moments section.");
+  assertGuard(html.includes("Généré depuis le rapport de match typé."), "rendered coach report must include clean generated-from copy.");
   assertGuard(html.includes("Analyse du coach"), "rendered coach report must include the French coach insight section.");
   assertGuard(html.includes("Repères internes"), "rendered coach report must label internal tags in French.");
   assertGuard(html.includes("Action décisive"), "rendered coach report must display timeline event types in French.");
+  assertGuard(html.includes("Séquence dangereuse"), "rendered coach report must include clean dangerous-sequence copy.");
+  assertGuard(html.includes("Équipe"), "rendered coach report must include clean team label copy.");
+  assertGuard(html.includes("Événement"), "rendered coach report must include clean event label copy.");
   assertGuard(html.includes("Plan de match observé"), "rendered coach report must include observed match plan diagnosis.");
   assertGuard(
     html.includes("tempo rapide") || html.includes("risque élevé"),
@@ -31,20 +38,27 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   );
   assertGuard(html.includes(`${report.score.home} - ${report.score.away}`), "rendered coach report must include the final score.");
   assertGuard(html.includes("Afficher les"), "rendered coach report must keep the expandable timeline control.");
+
   if (hasHarnessWarning) {
     assertGuard(html.includes("Avertissement de harnais full-match"), "rendered coach report must include the full-match harness warning when warnings exist.");
+    assertGuard(html.includes("Ce run déterministe unique révèle"), "rendered coach report must describe harness warnings in French coach-facing copy.");
+    assertGuard(!html.includes("Harness warning:"), "rendered coach report must not expose raw English harness warning copy.");
   }
+
   if (hasDominanceWarning) {
-    assertGuard(html.includes("Domination scoring single-run a surveiller"), "rendered coach report must include scoring dominance warning when the score is lopsided.");
-    assertGuard(html.includes("FULL_MATCH_HARNESS_SINGLE_RUN"), "rendered coach report must label single-run harness dominance scope.");
-    assertGuard(html.includes("50-match economy"), "rendered coach report must preserve the 50-match economy reference.");
+    assertGuard(html.includes("Domination scoring single-run à surveiller"), "rendered coach report must include scoring dominance warning when the score is lopsided.");
+    assertGuard(html.includes("CONTROL a converti"), "rendered coach report must explain the scoring dominance in French.");
+    assertGuard(html.includes("économie du score"), "rendered coach report must preserve the scoring-economy warning context.");
   }
+
   assertGuard(html.includes("Condition finale"), "rendered coach report must include fatigue values.");
   assertGuard(conditionDecreased, "full-match report must show at least one player condition decrease.");
   assertGuard(report.timeline.length >= 30, `HTML guard report should use the full-match harness, received ${report.timeline.length} events.`);
+
   if (report.keyMoments.length > 1) {
     assertGuard(uniqueKeyMomentTitles.size >= 2, "key moments should not all have identical titles when non-scoring candidates exist.");
   }
+
   assertGuard(
     report.keyMoments.every((moment) => report.keyMoments.filter((candidate) => candidate.title === moment.title).length <= 2),
     "key moment titles should not repeat more than twice when alternatives exist.",
@@ -66,13 +80,18 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   assertGuard(!html.includes("mini-match"), "rendered coach report must not expose mini-match wording.");
   assertGuard(!html.includes("adapter de simulation actuel"), "rendered coach report must not expose old adapter limitation wording.");
   assertGuard(!html.includes("visible par l'adapter"), "rendered coach report must not expose old adapter visibility wording.");
+  assertGuard(!html.includes("FULL_MATCH_HARNESS_SINGLE_RUN"), "rendered coach report must not expose raw harness scope enum in visible copy.");
+  assertGuard(!html.includes("Ãƒ"), "rendered coach report must not contain double-encoded UTF-8 fragments.");
+  assertGuard(!html.includes("Ã‚"), "rendered coach report must not contain stray mojibake markers.");
+  assertGuard(!html.includes("Ã¢â‚¬"), "rendered coach report must not contain mojibake punctuation.");
   assertGuard(!html.includes("global scoring incoherence"), "rendered coach report must not claim global scoring incoherence from one run.");
   assertGuard(!html.includes("change scoring values"), "rendered coach report must not recommend scoring value changes from one run.");
 
   return [
     "HTML coach report includes document root",
+    "HTML coach report contains no mojibake markers",
     "HTML coach report includes French report title",
-    "HTML coach report includes French key moments and coach analysis sections",
+    "HTML coach report includes clean French summary, generated-from, key moments, and coach analysis sections",
     "HTML coach report uses French timeline labels",
     "HTML coach report includes observed match plan summary",
     "HTML coach report includes final score",
@@ -80,7 +99,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     "HTML coach report keeps expandable timeline control",
     "HTML coach report includes full-match harness warning",
     "HTML coach report includes scoring dominance warning when lopsided",
-    "HTML coach report preserves single-run and 50-match economy wording",
+    "HTML coach report uses coach-facing harness warning wording",
     "HTML coach report includes fatigue values",
     "HTML coach report shows condition decrease",
     "HTML coach report key moments are not all identical when alternatives exist",
@@ -91,6 +110,7 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
     "HTML coach report does not contain old top-level English title",
     "HTML coach report does not expose old raw internal labels",
     "HTML coach report does not expose old technical product wording",
+    "HTML coach report does not expose raw harness enum wording",
     "HTML coach report does not claim global scoring incoherence",
     "HTML coach report does not recommend scoring value changes",
   ];

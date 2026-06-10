@@ -1,4 +1,8 @@
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
+import {
+  coachFacingHarnessWarningSummary,
+  coachFacingScoringDominanceSummary,
+} from "../reports/coachFacingCopy";
 import { runMiniMatch, type MiniMatchResult, type MiniMatchScore, type MiniMatchTeamCount } from "./miniMatch";
 import { adaptMatchInputToMiniMatch } from "./adapters/matchInputToMiniMatch";
 import {
@@ -217,8 +221,7 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
     diagnosisId: `${input.matchId}-full-match-harness-sanity`,
     teamId: input.homeTeam.teamId,
     title: "Avertissement de harnais full-match",
-    summary:
-      `Harness warning: this single deterministic full-match run shows repeated scoring or report patterns. This is useful for report sanity testing but does not override the validated 50-match economy. Warnings: ${sanity.warnings.join(", ")}.`,
+    summary: coachFacingHarnessWarningSummary(sanity.warnings),
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
@@ -229,9 +232,8 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
     : {
         diagnosisId: `${input.matchId}-scoring-dominance-warning`,
         teamId: dominance.dominantTeamId,
-        title: "Domination scoring single-run a surveiller",
-        summary:
-          `${dominance.dominantTeamId} converted ${dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId)?.scoringEventCount ?? 0} scoring events while ${dominance.dominatedTeamId ?? "the opponent"} did not convert in this FULL_MATCH_HARNESS_SINGLE_RUN. This is a harness plausibility warning, not a global scoring-economy verdict, and it does not override the validated 50-match economy. Warnings: ${dominance.warnings.join(", ")}.`,
+        title: "Domination scoring single-run à surveiller",
+        summary: coachFacingScoringDominanceSummary(dominance),
         evidenceEventIds: dominance.dominatedTeamEvidenceEventIds.length > 0
           ? dominance.dominatedTeamEvidenceEventIds
           : (evidenceEvent === undefined ? [] : [evidenceEvent.eventId]),

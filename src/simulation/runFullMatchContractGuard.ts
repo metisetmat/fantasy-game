@@ -240,8 +240,8 @@ function validateDominatedTeamEvidence(report: MatchReport): void {
   }
 
   const hasDominatedDiagnosis = report.tacticalReport.diagnoses.some((diagnosis) =>
-    diagnosis.summary.includes("FULL_MATCH_HARNESS_SINGLE_RUN") &&
-    diagnosis.summary.includes("50-match economy") &&
+    diagnosis.summary.includes("domination scoring locale") &&
+    diagnosis.summary.includes("économie du score") &&
     diagnosis.evidenceEventIds.length > 0,
   );
   const hasDominatedMoment = report.keyMoments.some((moment) => {
@@ -250,7 +250,7 @@ function validateDominatedTeamEvidence(report: MatchReport): void {
     return event !== undefined && event.teamId === dominance.dominatedTeamId && event.eventType !== "kickoff";
   });
 
-  assertGuard(hasDominatedDiagnosis, "Dominance diagnosis must mention FULL_MATCH_HARNESS_SINGLE_RUN and 50-match economy.");
+  assertGuard(hasDominatedDiagnosis, "Dominance diagnosis must explain single-run scoring dominance without leaking raw scope enums.");
   assertGuard(hasDominatedMoment || dominance.dominatedTeamEvidenceEventIds.length === 0, "Key moments should include a dominated-team signal when evidence exists.");
 }
 

@@ -1,7 +1,7 @@
 import type { MatchInput, TrainingFocusSuggestion } from "../../contracts/engineToCoach";
 import type { MatchEvidenceCategory, MatchEvidenceFact } from "./matchReportEvidence";
 
-const FALLBACK_FOCUS_TITLE = "Finaliser l'adapter du contrat moteur";
+const FALLBACK_FOCUS_TITLE = "Finaliser l'adaptation du contrat moteur";
 
 function priorityForCategory(category: MatchEvidenceCategory): number {
   switch (category) {
@@ -17,6 +17,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 70;
   }
 }
+
 function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFact | null {
   const sortedFacts = [...facts].sort(
     (a, b) => priorityForCategory(b.category) - priorityForCategory(a.category) || b.strength - a.strength,
@@ -28,17 +29,18 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
 function focusTitleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "high_danger_sequences":
-      return `Repeter les entrees dangereuses en ${fact.zone}`;
+      return `Répéter les entrées dangereuses en ${fact.zone}`;
     case "unstable_under_pressure":
       return `Stabiliser la possession sous pression en ${fact.zone}`;
     case "converted_scoring":
-      return "Securiser la sequence qui mene au score";
+      return "Sécuriser la séquence qui mène au score";
     case "visible_pressure_zone":
-      return `Preparer une sortie de pression depuis ${fact.zone}`;
+      return `Préparer une sortie de pression depuis ${fact.zone}`;
     case "dominated_team_no_payoff":
-      return `Transformer la pression de ${fact.teamId} en plateforme de conversion`;
+      return `Transformer la pression de ${fact.teamId.toUpperCase()} en plateforme de conversion`;
   }
 }
+
 export function suggestedFocusFromEvidence(input: {
   readonly matchInput: MatchInput;
   readonly facts: readonly MatchEvidenceFact[];
@@ -50,7 +52,7 @@ export function suggestedFocusFromEvidence(input: {
       {
         focusId: `${input.matchInput.matchId}-adapter-focus`,
         title: FALLBACK_FOCUS_TITLE,
-        reason: "Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.",
+        reason: "Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.",
       },
     ];
   }
@@ -59,7 +61,7 @@ export function suggestedFocusFromEvidence(input: {
     {
       focusId: `${primaryFact.factId}-focus`,
       title: focusTitleForFact(primaryFact),
-      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.`,
+      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.`,
     },
   ];
 }

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-10T09:40:36.867Z
-Task/sprint: Sprint 2O - Full-Match Harness Plausibility: Scoring Dominance + Report Signal Quality
+Generated: 2026-06-10T11:03:41.957Z
+Task/sprint: Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -12,8 +12,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - coach-report.latest.html
 - scoring-events-summary.md
 - validation.share-pack.md
-- full-match-harness-plausibility.md
-- validation.full-match-harness-plausibility.md
+- coach-report-copy-quality.md
+- validation.coach-report-copy-quality.md
 - README.md
 
 ## Bundle Files
