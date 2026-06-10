@@ -1,6 +1,6 @@
 # Bundle: bundle__docs.md
 
-Generated for Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: docs/audits/engine_to_coach_gap_analysis_v0_1.md
 

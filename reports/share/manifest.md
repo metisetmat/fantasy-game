@@ -1,8 +1,8 @@
 # Share Pack
 
-Generated: 2026-06-10T13:15:48.527Z
-Task/sprint: Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution
-Final file count: 14
+Generated: 2026-06-10T15:32:52.268Z
+Task/sprint: Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch
+Final file count: 15
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
 
@@ -11,9 +11,10 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - tsconfig.json
 - coach-report.latest.html
 - scoring-events-summary.md
+- sequence-1-action-1.html
 - validation.share-pack.md
-- true-segment-state-integration.md
-- validation.true-segment-state-integration.md
+- tactical-grounding-reconciliation.md
+- validation.tactical-grounding-reconciliation.md
 - README.md
 
 ## Bundle Files

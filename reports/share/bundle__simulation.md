@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2Q - True Segment-State Integration Into Mini-Match Resolution. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -95,6 +95,7 @@ export function createMatchReportSignature(report: MatchReport): string {
 
 ```ts
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
+import type { MatchReportWarning } from "../contracts/matchReportWarnings";
 import {
   coachFacingHarnessWarningSummary,
   coachFacingScoringDominanceSummary,
@@ -114,6 +115,7 @@ import {
   primaryZoneFromPlanInfluence,
 } from "./adapters/tacticalPlanInfluence";
 import { analyzeFullMatchHarnessSanity } from "./diagnostics/fullMatchHarnessSanity";
+import { analyzeFullMatchGroundingDiagnostics } from "./diagnostics/fullMatchGroundingDiagnostics";
 import {
   buildHarnessWarningEvidenceFacts,
   buildMatchReportWarnings,
@@ -369,6 +371,44 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
   };
 }
 
+function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput): MatchReport {
+  const grounding = analyzeFullMatchGroundingDiagnostics(report);
+  const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
+  const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
+  const warning: MatchReportWarning = {
+    warningId: `${input.matchId}-tactical-grounding-gap`,
+    type: "ADAPTER_LIMITATION",
+    scope: "coach_visible",
+    severity: "low",
+    title: "Ancrage tactique full-match incomplet",
+    coachSummary:
+      "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques des workbenches action-par-action.",
+    technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
+    evidenceFactIds: groundingFacts.map((fact) => fact.factId),
+    eventIds,
+    mayInvalidateGlobalScoringEconomy: false,
+  };
+  const evidenceEvent = report.timeline.find((event) => event.eventType !== "kickoff") ?? report.timeline[0];
+  const diagnosis: TacticalDiagnosis = {
+    diagnosisId: `${input.matchId}-tactical-grounding-gap`,
+    teamId: input.homeTeam.teamId,
+    title: "Ancrage workbench encore partiel",
+    summary:
+      "Le score du harnais doit etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas convertis en contexte spatial mini-match.",
+    evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
+    confidence: "low",
+  };
+
+  return {
+    ...report,
+    warnings: [...report.warnings, warning],
+    tacticalReport: {
+      diagnoses: [...report.tacticalReport.diagnoses, diagnosis],
+    },
+  };
+}
+
 export function runFullMatch(input: MatchInput): MatchReport {
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
@@ -475,7 +515,7 @@ export function runFullMatch(input: MatchInput): MatchReport {
     ],
   });
 
-  return withHarnessSanityDiagnosis(report, input);
+  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(report, input), input);
 }
 ```
 
@@ -703,6 +743,657 @@ export function allSegmentInfluenceModifiers(input: FullMatchSegmentInfluence): 
     input.global.matchTempoAdjustment,
     input.global.conversionVolatilityAdjustment,
   ];
+}
+```
+
+## File: src/simulation/grounding/tacticalWorkbenchTypes.ts
+
+```ts
+export type TacticalWorkbenchPlayerPosition = {
+  readonly playerId: string;
+  readonly teamId: string;
+  readonly role: string;
+  readonly initials: string;
+  readonly realZone: string;
+  readonly renderedZone?: string;
+  readonly projectedZone?: string;
+  readonly isBallCarrier?: boolean;
+};
+
+export type TacticalWorkbenchTeamShapeIntent = {
+  readonly teamId: string;
+  readonly frame: "before" | "after";
+  readonly intent: string;
+  readonly evidence: readonly string[];
+};
+
+export type TacticalWorkbenchSelectedAction = {
+  readonly actorId: string;
+  readonly receiverId?: string;
+  readonly newCarrierId?: string;
+  readonly fromZone: string;
+  readonly targetZone: string;
+  readonly actualReceptionZone?: string;
+  readonly actionType: string;
+  readonly actionSubtype?: string;
+  readonly transferType?: string;
+  readonly possessionResult?: string;
+};
+
+export type TacticalWorkbenchRankedOption = {
+  readonly rank: number;
+  readonly actionType: string;
+  readonly receiverId?: string;
+  readonly targetZone: string;
+  readonly laneState?: string;
+  readonly risk?: string;
+  readonly score?: number;
+  readonly finalSelectionScore?: number;
+  readonly selected: boolean;
+};
+
+export type TacticalWorkbenchAfterState = {
+  readonly newCarrierId: string;
+  readonly ballZone: string;
+  readonly possessionResult: string;
+};
+
+export type TacticalWorkbenchFrame = {
+  readonly frameId: string;
+  readonly sequenceId: string;
+  readonly actionId: string;
+  readonly phase: string;
+  readonly possessionTeamId: string;
+  readonly defendingTeamId: string;
+  readonly ballCarrierId: string;
+  readonly ballZone: string;
+  readonly attackingDirection: string;
+  readonly playerPositions: readonly TacticalWorkbenchPlayerPosition[];
+  readonly afterPlayerPositions?: readonly TacticalWorkbenchPlayerPosition[];
+  readonly teamShapeIntents: readonly TacticalWorkbenchTeamShapeIntent[];
+  readonly selectedAction: TacticalWorkbenchSelectedAction;
+  readonly rankedOptions: readonly TacticalWorkbenchRankedOption[];
+  readonly afterState?: TacticalWorkbenchAfterState;
+};
+```
+
+## File: src/simulation/grounding/fixtures/sequence1Action1.fixture.ts
+
+```ts
+import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "../tacticalWorkbenchTypes";
+
+const beforeControl: readonly TacticalWorkbenchPlayerPosition[] = [
+  { playerId: "control-tempo-half", teamId: "control", role: "tempo_half", initials: "TH", realZone: "Z4-HSL", renderedZone: "Z4-HSL offset", projectedZone: "Z4-HSL", isBallCarrier: true },
+  { playerId: "control-hook-link", teamId: "control", role: "hook_link", initials: "HL", realZone: "Z4-CL", renderedZone: "Z4-CL offset", projectedZone: "Z4-CL" },
+  { playerId: "control-forward-leader", teamId: "control", role: "forward_leader", initials: "FL", realZone: "Z5-HSL", renderedZone: "Z5-HSL offset", projectedZone: "Z5-HSL" },
+  { playerId: "control-goalkeeper-free-safety", teamId: "control", role: "goalkeeper_free_safety", initials: "GK", realZone: "Z2-C", renderedZone: "Z2-C", projectedZone: "Z2-C" },
+  { playerId: "control-mobile-lock", teamId: "control", role: "mobile_lock", initials: "ML", realZone: "Z3-HSL", renderedZone: "Z3-HSL", projectedZone: "Z3-HSL" },
+  { playerId: "control-space-hunter", teamId: "control", role: "space_hunter", initials: "SH", realZone: "Z5-HSR", renderedZone: "Z5-HSR", projectedZone: "Z5-HSR" },
+  { playerId: "control-playmaker", teamId: "control", role: "playmaker", initials: "PM", realZone: "Z4-C", renderedZone: "Z4-C offset", projectedZone: "Z4-C" },
+  { playerId: "control-pivot", teamId: "control", role: "pivot", initials: "PV", realZone: "Z3-C", renderedZone: "Z3-C", projectedZone: "Z3-C" },
+  { playerId: "control-left-piston", teamId: "control", role: "left_piston", initials: "LP", realZone: "Z3-CL", renderedZone: "Z3-CL", projectedZone: "Z3-CL" },
+  { playerId: "control-right-piston", teamId: "control", role: "right_piston", initials: "RP", realZone: "Z3-HSR", renderedZone: "Z3-HSR", projectedZone: "Z3-HSR" },
+];
+
+const beforeBlitz: readonly TacticalWorkbenchPlayerPosition[] = [
+  { playerId: "blitz-tempo-half", teamId: "blitz", role: "tempo_half", initials: "TH", realZone: "Z5-HSL", renderedZone: "Z5-HSL offset", projectedZone: "Z5-HSL" },
+  { playerId: "blitz-hook-link", teamId: "blitz", role: "hook_link", initials: "HL", realZone: "Z4-CL", renderedZone: "Z4-CL offset", projectedZone: "Z4-CL" },
+  { playerId: "blitz-forward-leader", teamId: "blitz", role: "forward_leader", initials: "FL", realZone: "Z4-C", renderedZone: "Z4-C offset", projectedZone: "Z4-C" },
+  { playerId: "blitz-goalkeeper-free-safety", teamId: "blitz", role: "goalkeeper_free_safety", initials: "GK", realZone: "Z6-C", renderedZone: "Z6-C", projectedZone: "Z6-C" },
+  { playerId: "blitz-mobile-lock", teamId: "blitz", role: "mobile_lock", initials: "ML", realZone: "Z4-HSL", renderedZone: "Z4-HSL offset", projectedZone: "Z4-HSL" },
+  { playerId: "blitz-space-hunter", teamId: "blitz", role: "space_hunter", initials: "SH", realZone: "Z5-C", renderedZone: "Z5-C offset", projectedZone: "Z5-C" },
+  { playerId: "blitz-playmaker", teamId: "blitz", role: "playmaker", initials: "PM", realZone: "Z5-HSL", renderedZone: "Z5-HSL offset", projectedZone: "Z5-HSL" },
+  { playerId: "blitz-pivot", teamId: "blitz", role: "pivot", initials: "PV", realZone: "Z4-HSL", renderedZone: "Z4-HSL offset", projectedZone: "Z4-HSL" },
+  { playerId: "blitz-left-piston", teamId: "blitz", role: "left_piston", initials: "LP", realZone: "Z5-CL", renderedZone: "Z5-CL", projectedZone: "Z5-CL" },
+  { playerId: "blitz-right-piston", teamId: "blitz", role: "right_piston", initials: "RP", realZone: "Z5-C", renderedZone: "Z5-C offset", projectedZone: "Z5-C" },
+];
+
+export const sequence1Action1AfterPositions: readonly TacticalWorkbenchPlayerPosition[] = [
+  { playerId: "control-tempo-half", teamId: "control", role: "tempo_half", initials: "TH", realZone: "Z3-HSL", renderedZone: "Z3-HSL offset", projectedZone: "Z3-HSL" },
+  { playerId: "control-hook-link", teamId: "control", role: "hook_link", initials: "HL", realZone: "Z3-CL", renderedZone: "Z3-CL offset", projectedZone: "Z3-HSL" },
+  { playerId: "control-forward-leader", teamId: "control", role: "forward_leader", initials: "FL", realZone: "Z4-C", renderedZone: "Z4-C offset", projectedZone: "Z4-C" },
+  { playerId: "control-goalkeeper-free-safety", teamId: "control", role: "goalkeeper_free_safety", initials: "GK", realZone: "Z1-C", renderedZone: "Z1-C", projectedZone: "Z1-C" },
+  { playerId: "control-mobile-lock", teamId: "control", role: "mobile_lock", initials: "ML", realZone: "Z3-HSL", renderedZone: "Z3-HSL offset", projectedZone: "Z2-C", isBallCarrier: true },
+  { playerId: "control-space-hunter", teamId: "control", role: "space_hunter", initials: "SH", realZone: "Z4-C", renderedZone: "Z4-C offset", projectedZone: "Z4-C" },
+  { playerId: "control-playmaker", teamId: "control", role: "playmaker", initials: "PM", realZone: "Z2-C", renderedZone: "Z2-C", projectedZone: "Z2-C" },
+  { playerId: "control-pivot", teamId: "control", role: "pivot", initials: "PV", realZone: "Z2-HSL", renderedZone: "Z2-HSL offset", projectedZone: "Z2-HSL" },
+  { playerId: "control-left-piston", teamId: "control", role: "left_piston", initials: "LP", realZone: "Z2-CL", renderedZone: "Z2-CL", projectedZone: "Z2-CL" },
+  { playerId: "control-right-piston", teamId: "control", role: "right_piston", initials: "RP", realZone: "Z2-HSR", renderedZone: "Z2-HSR", projectedZone: "Z2-CR" },
+  { playerId: "blitz-mobile-lock", teamId: "blitz", role: "mobile_lock", initials: "ML", realZone: "Z3-HSL", renderedZone: "Z3-HSL offset", projectedZone: "Z3-HSL" },
+  { playerId: "blitz-space-hunter", teamId: "blitz", role: "space_hunter", initials: "SH", realZone: "Z3-C", renderedZone: "Z3-C", projectedZone: "Z3-C" },
+  { playerId: "blitz-pivot", teamId: "blitz", role: "pivot", initials: "PV", realZone: "Z3-HSL", renderedZone: "Z3-HSL offset", projectedZone: "Z3-HSL" },
+];
+
+export const sequence1Action1WorkbenchTruth: TacticalWorkbenchFrame = {
+  frameId: "sequence-1-action-1",
+  sequenceId: "sequence-1",
+  actionId: "action-1",
+  phase: "STABLE_POSSESSION",
+  possessionTeamId: "control",
+  defendingTeamId: "blitz",
+  ballCarrierId: "control-tempo-half",
+  ballZone: "Z4-HSL",
+  attackingDirection: "LEFT_TO_RIGHT",
+  playerPositions: [...beforeControl, ...beforeBlitz],
+  afterPlayerPositions: sequence1Action1AfterPositions,
+  teamShapeIntents: [
+    { teamId: "control", frame: "before", intent: "structured pressure escape support", evidence: ["TH@Z4-HSL", "ML@Z3-HSL", "PV@Z3-C"] },
+    { teamId: "control", frame: "after", intent: "rest-defense protected recycle base", evidence: ["GK@Z1-C", "PV@Z2-HSL", "LP@Z2-CL"] },
+    { teamId: "blitz", frame: "before", intent: "ball-side pressure and lane compression", evidence: ["ML@Z4-HSL", "PV@Z4-HSL"] },
+    { teamId: "blitz", frame: "after", intent: "compact response around ML reception", evidence: ["ML@Z3-HSL", "SH@Z3-C", "PV@Z3-HSL"] },
+  ],
+  selectedAction: {
+    actorId: "control-tempo-half",
+    receiverId: "control-mobile-lock",
+    newCarrierId: "control-mobile-lock",
+    fromZone: "Z4-HSL",
+    targetZone: "Z3-C",
+    actualReceptionZone: "Z3-HSL",
+    actionType: "SUPPORT_CLUSTER_RECYCLE",
+    actionSubtype: "BALL_SIDE_PRESSURE_ESCAPE",
+    transferType: "PASS",
+    possessionResult: "CONTROL_RETAINED",
+  },
+  rankedOptions: [
+    { rank: 1, actionType: "SUPPORT_CLUSTER_RECYCLE", receiverId: "control-mobile-lock", targetZone: "Z3-C", laneState: "CLOSED", risk: "LOW", score: 87, finalSelectionScore: 87, selected: true },
+    { rank: 2, actionType: "FORWARD_PROGRESS", receiverId: "control-forward-leader", targetZone: "Z5-HSL", laneState: "CLOSED", risk: "HIGH", score: 78, finalSelectionScore: 78, selected: false },
+    { rank: 3, actionType: "WEAK_SIDE_SWITCH", receiverId: "control-right-piston", targetZone: "Z3-HSR", laneState: "CONTESTED", risk: "MEDIUM", score: 72, finalSelectionScore: 72, selected: false },
+  ],
+  afterState: {
+    newCarrierId: "control-mobile-lock",
+    ballZone: "Z3-HSL",
+    possessionResult: "CONTROL_RETAINED",
+  },
+};
+```
+
+## File: src/simulation/grounding/extractWorkbenchTruth.ts
+
+```ts
+import { readFileSync } from "node:fs";
+import type { TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+
+function attributeValue(fragment: string, attribute: string): string | undefined {
+  const match = new RegExp(`${attribute}="([^"]+)"`).exec(fragment);
+
+  return match?.[1];
+}
+
+export function extractWorkbenchPlayerPositions(html: string, frame: "before" | "after"): readonly TacticalWorkbenchPlayerPosition[] {
+  const pattern = new RegExp(`<g id="${frame}-player-[^"]+"[^>]*data-truth-type="real-player-position"[^>]*>`, "g");
+  const matches = html.match(pattern) ?? [];
+
+  return matches.map((fragment) => {
+    const renderedZone = attributeValue(fragment, "data-rendered-zone");
+    const projectedZone = attributeValue(fragment, "data-projected-zone");
+
+    return {
+      playerId: attributeValue(fragment, "data-player-id") ?? "unknown-player",
+      teamId: attributeValue(fragment, "data-team-id") ?? "unknown-team",
+      role: attributeValue(fragment, "data-role") ?? "unknown-role",
+      initials: attributeValue(fragment, "data-initials") ?? "??",
+      realZone: attributeValue(fragment, "data-real-zone") ?? "UNKNOWN_ZONE",
+      ...(renderedZone === undefined ? {} : { renderedZone }),
+      ...(projectedZone === undefined ? {} : { projectedZone }),
+    };
+  });
+}
+
+export function extractSequenceOneActionOneWorkbenchTruthFromHtml(path: string): typeof sequence1Action1WorkbenchTruth {
+  const html = readFileSync(path, "utf8");
+  const beforePositions = extractWorkbenchPlayerPositions(html, "before");
+  const afterPositions = extractWorkbenchPlayerPositions(html, "after");
+
+  if (beforePositions.length < 20 || afterPositions.length < 10) {
+    return sequence1Action1WorkbenchTruth;
+  }
+
+  return {
+    ...sequence1Action1WorkbenchTruth,
+    playerPositions: beforePositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-tempo-half",
+    })),
+    afterPlayerPositions: afterPositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-mobile-lock",
+    })),
+  };
+}
+```
+
+## File: src/simulation/grounding/tacticalWorkbenchContractGuard.ts
+
+```ts
+import type { TacticalWorkbenchFrame } from "./tacticalWorkbenchTypes";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+
+function assertGuard(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function playerExists(frame: TacticalWorkbenchFrame, playerId: string, zone: string): boolean {
+  return frame.playerPositions.some((player) => player.playerId === playerId && player.realZone === zone);
+}
+
+function afterPlayerExists(frame: TacticalWorkbenchFrame, playerId: string, zone: string): boolean {
+  return (frame.afterPlayerPositions ?? []).some((player) => player.playerId === playerId && player.realZone === zone);
+}
+
+function renderedZonesStayDistinctFromRealOffsets(frame: TacticalWorkbenchFrame): boolean {
+  return frame.playerPositions
+    .filter((player) => player.renderedZone?.includes("offset"))
+    .every((player) => player.renderedZone !== player.realZone);
+}
+
+export function validateSequenceOneActionOneWorkbenchTruth(
+  frame: TacticalWorkbenchFrame = sequence1Action1WorkbenchTruth,
+): readonly string[] {
+  assertGuard(frame.ballCarrierId === "control-tempo-half", "before ball carrier must be CONTROL TH.");
+  assertGuard(frame.ballZone === "Z4-HSL", "before ball zone must be Z4-HSL.");
+  assertGuard(frame.selectedAction.actorId === "control-tempo-half", "selected action decision actor must be CONTROL TH.");
+  assertGuard(frame.selectedAction.receiverId === "control-mobile-lock", "selected receiver must be CONTROL ML.");
+  assertGuard(frame.selectedAction.newCarrierId === "control-mobile-lock", "new carrier after action must be CONTROL ML.");
+  assertGuard(frame.selectedAction.actualReceptionZone === "Z3-HSL", "actual reception zone must be Z3-HSL.");
+  assertGuard(frame.afterState?.ballZone === "Z3-HSL", "actual ball zone after action must be Z3-HSL.");
+  assertGuard(frame.selectedAction.actionType === "SUPPORT_CLUSTER_RECYCLE", "selected action type must be SUPPORT_CLUSTER_RECYCLE.");
+  assertGuard(frame.selectedAction.actionSubtype === "BALL_SIDE_PRESSURE_ESCAPE", "selected action subtype must be BALL_SIDE_PRESSURE_ESCAPE.");
+  assertGuard(frame.selectedAction.targetZone === "Z3-C", "target cluster must be Z3-C.");
+  assertGuard(frame.selectedAction.actorId !== "control-mobile-lock", "selected action must not say ML was decision actor.");
+  assertGuard(playerExists(frame, "control-tempo-half", "Z4-HSL"), "CONTROL TH must exist at real zone Z4-HSL before action.");
+  assertGuard(playerExists(frame, "control-mobile-lock", "Z3-HSL"), "CONTROL ML must exist at real zone Z3-HSL before action.");
+  assertGuard(afterPlayerExists(frame, "control-mobile-lock", "Z3-HSL"), "CONTROL ML must exist at real zone Z3-HSL after action.");
+  assertGuard(
+    frame.teamShapeIntents.some((intent) => intent.teamId === "control" && intent.frame === "after"),
+    "CONTROL rest-defense after-state must exist.",
+  );
+  assertGuard(
+    frame.teamShapeIntents.some((intent) => intent.teamId === "blitz" && intent.frame === "after"),
+    "BLITZ defensive/pressing response must exist.",
+  );
+  assertGuard(renderedZonesStayDistinctFromRealOffsets(frame), "real zones and rendered offset zones must not be confused.");
+
+  return [
+    "before ball carrier is CONTROL TH",
+    "before ball zone is Z4-HSL",
+    "selected action is TH -> ML",
+    "new carrier after action is CONTROL ML",
+    "actual ball zone after action is Z3-HSL",
+    "selected action type is SUPPORT_CLUSTER_RECYCLE",
+    "target cluster is Z3-C",
+    "CONTROL and BLITZ after-state shapes exist",
+    "real zones and rendered-offset zones remain distinct",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSequenceOneActionOneWorkbenchTruth();
+
+  console.log("tacticalWorkbenchContractGuard passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/miniMatchWorkbenchAlignment.ts
+
+```ts
+import type { TacticalWorkbenchFrame } from "./tacticalWorkbenchTypes";
+
+export type MiniMatchWorkbenchAlignmentReport = {
+  readonly fixtureId: string;
+  readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly supportedTruths: readonly string[];
+  readonly missingTruths: readonly string[];
+  readonly lossyMappings: readonly string[];
+  readonly recommendations: readonly string[];
+};
+
+export function analyzeMiniMatchWorkbenchAlignment(frame: TacticalWorkbenchFrame): MiniMatchWorkbenchAlignmentReport {
+  const supportedTruths = [
+    `can represent selected action type ${frame.selectedAction.actionType}`,
+    `can represent from-zone ${frame.selectedAction.fromZone}`,
+    `can represent target cluster ${frame.selectedAction.targetZone}`,
+    `can represent reception zone ${frame.selectedAction.actualReceptionZone ?? "unknown"}`,
+    "can preserve selected candidate versus ranked alternatives in report artifacts",
+  ];
+  const missingTruths = [
+    "official MatchInput roster players are not yet converted into mini-match SpatialTeamContext players",
+    "workbench before/after team shapes are not replayed as the source of mini-match state",
+    "visual role occupation and rendered-zone offset semantics are not consumed by runMiniMatch",
+    "full ranked option table is not a first-class mini-match decision input",
+  ];
+  const lossyMappings = [
+    "CONTROL TH / ML identities map to prototype role players rather than official roster snapshots",
+    "target cluster Z3-C and actual reception Z3-HSL can be reported, but are not yet grounded from workbench truth",
+    "team shape intents become general tactical context rather than exact before/after spatial state",
+  ];
+
+  return {
+    fixtureId: frame.frameId,
+    status: missingTruths.length === 0 && lossyMappings.length === 0 ? "PASS" : "PARTIAL",
+    supportedTruths,
+    missingTruths,
+    lossyMappings,
+    recommendations: [
+      "CONFIRM_MINIMATCH_ALIGNMENT_PARTIAL",
+      "PREPARE_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
+      "PREPARE_WORKBENCH_REPLAY_ENGINE",
+    ],
+  };
+}
+```
+
+## File: src/simulation/grounding/rosterToMiniMatchGapAnalysis.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import type { MiniMatchInputAdapterResult } from "../adapters/matchInputToMiniMatch";
+
+export type RosterToMiniMatchGapAnalysis = {
+  readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly rosterDrivesMiniMatchPlayerPositions: boolean;
+  readonly startersDriveActivePlayers: boolean;
+  readonly playerRolesDriveActionResolution: boolean;
+  readonly visibleAttributesDriveRouteRanking: boolean;
+  readonly tacticalPlanFullyDrivesTeamShape: boolean;
+  readonly prototypesStillDominant: boolean;
+  readonly lostPlayerIdentity: readonly string[];
+  readonly documentedGaps: readonly string[];
+  readonly recommendations: readonly string[];
+};
+
+export function analyzeRosterToMiniMatchGap(input: {
+  readonly matchInput: MatchInput;
+  readonly adapter: MiniMatchInputAdapterResult;
+}): RosterToMiniMatchGapAnalysis {
+  const rosterPlayerIds = [
+    ...input.matchInput.homeTeam.roster.map((player) => player.playerId),
+    ...input.matchInput.awayTeam.roster.map((player) => player.playerId),
+  ];
+  const miniMatchPrototypeIds = [String(input.adapter.homePrototype.id), String(input.adapter.awayPrototype.id)];
+
+  return {
+    status: "PARTIAL",
+    rosterDrivesMiniMatchPlayerPositions: false,
+    startersDriveActivePlayers: false,
+    playerRolesDriveActionResolution: false,
+    visibleAttributesDriveRouteRanking: false,
+    tacticalPlanFullyDrivesTeamShape: false,
+    prototypesStillDominant: true,
+    lostPlayerIdentity: rosterPlayerIds.filter((playerId) => !miniMatchPrototypeIds.includes(playerId)),
+    documentedGaps: [
+      "adaptMatchInputToMiniMatch maps official teams to CONTROL/BLITZ PrototypeTeamDefinition objects.",
+      "Official TeamSnapshot.roster is not converted into mini-match PlayerState positions.",
+      "TeamSnapshot starters do not select active mini-match players.",
+      "PlayerSnapshot roles and attributes do not yet drive route ranking.",
+      "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
+      "CONTROL/BLITZ prototype teams remain the dominant source of mini-match tactical behavior.",
+    ],
+    recommendations: [
+      "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_GAP",
+      "PREPARE_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
+      "PREPARE_REAL_PLAYER_STATS",
+    ],
+  };
+}
+```
+
+## File: src/simulation/diagnostics/fullMatchGroundingDiagnostics.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+
+export type FullMatchGroundingWarning =
+  | "FULL_MATCH_NOT_WORKBENCH_GROUNDED"
+  | "ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT"
+  | "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION"
+  | "PLAYER_IDENTITY_LOSS_IN_MINIMATCH"
+  | "WORKBENCH_TRUTH_NOT_REPLAYED_IN_FULLMATCH"
+  | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
+
+export type FullMatchGroundingDiagnostics = {
+  readonly scope: "FULL_MATCH_HARNESS_SINGLE_RUN";
+  readonly warnings: readonly FullMatchGroundingWarning[];
+  readonly mayInvalidateGlobalScoringEconomy: false;
+  readonly scoreUnchanged: true;
+  readonly scoringEventsMutated: false;
+  readonly summary: string;
+  readonly recommendation: readonly string[];
+};
+
+export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullMatchGroundingDiagnostics {
+  const scoringEventCount = report.timeline.filter((event) => event.eventType === "scoring").length;
+  const oneTeamScoringOnly = new Set(report.timeline.filter((event) => event.eventType === "scoring").map((event) => event.teamId)).size === 1 &&
+    scoringEventCount > 0;
+  const warnings: FullMatchGroundingWarning[] = [
+    "FULL_MATCH_NOT_WORKBENCH_GROUNDED",
+    "ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT",
+    "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION",
+    "PLAYER_IDENTITY_LOSS_IN_MINIMATCH",
+    "WORKBENCH_TRUTH_NOT_REPLAYED_IN_FULLMATCH",
+  ];
+
+  if (oneTeamScoringOnly || Math.abs(report.score.home - report.score.away) >= 21) {
+    warnings.push("FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED");
+  }
+
+  return {
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    warnings,
+    mayInvalidateGlobalScoringEconomy: false,
+    scoreUnchanged: true,
+    scoringEventsMutated: false,
+    summary:
+      "Full-match remains a deterministic harness: it has not yet replayed the typed workbench truth, official roster positions, or action-by-action visual decisions.",
+    recommendation: [
+      "CONFIRM_FULLMATCH_NOT_YET_WORKBENCH_GROUNDED",
+      "KEEP_50_MATCH_ECONOMY_REFERENCE",
+      "PREPARE_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
+      "PREPARE_WORKBENCH_REPLAY_ENGINE",
+    ],
+  };
+}
+```
+
+## File: src/simulation/grounding/tacticalWorkbenchContractGuard.test.ts
+
+```ts
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { extractSequenceOneActionOneWorkbenchTruthFromHtml } from "./extractWorkbenchTruth";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { validateSequenceOneActionOneWorkbenchTruth } from "./tacticalWorkbenchContractGuard";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateTacticalWorkbenchContractGuard(): readonly string[] {
+  const workbenchPath = join(__dirname, "..", "..", "..", "reports", "workbench", "sequence-1-action-1.html");
+  const extracted = existsSync(workbenchPath)
+    ? extractSequenceOneActionOneWorkbenchTruthFromHtml(workbenchPath)
+    : sequence1Action1WorkbenchTruth;
+  const checks = validateSequenceOneActionOneWorkbenchTruth(sequence1Action1WorkbenchTruth);
+
+  assertTest(extracted.selectedAction.actorId === "control-tempo-half", "selected action actor must be TH.");
+  assertTest(extracted.selectedAction.receiverId === "control-mobile-lock", "selected action receiver must be ML.");
+  assertTest(extracted.afterState?.ballZone === "Z3-HSL", "after ball zone must be Z3-HSL.");
+  assertTest(extracted.playerPositions.length >= 20, "extracted before positions must include both teams.");
+  assertTest((extracted.afterPlayerPositions ?? []).length >= 10, "extracted after positions must include tactical after-state.");
+
+  return checks;
+}
+
+if (require.main === module) {
+  const checks = validateTacticalWorkbenchContractGuard();
+
+  console.log("tacticalWorkbenchContractGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/miniMatchWorkbenchAlignment.test.ts
+
+```ts
+import { analyzeMiniMatchWorkbenchAlignment } from "./miniMatchWorkbenchAlignment";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMiniMatchWorkbenchAlignment(): readonly string[] {
+  const report = analyzeMiniMatchWorkbenchAlignment(sequence1Action1WorkbenchTruth);
+
+  assertTest(report.status === "PARTIAL", `mini-match alignment must honestly be PARTIAL, received ${report.status}.`);
+  assertTest(report.supportedTruths.some((truth) => truth.includes("SUPPORT_CLUSTER_RECYCLE")), "selected action type must be supported.");
+  assertTest(report.supportedTruths.some((truth) => truth.includes("Z3-HSL")), "reception zone must be representable.");
+  assertTest(report.missingTruths.some((truth) => truth.includes("official MatchInput roster")), "official roster gap must be named.");
+  assertTest(report.lossyMappings.some((truth) => truth.includes("prototype")), "prototype lossy mapping must be named.");
+
+  return [
+    "mini-match alignment is PARTIAL, not fake PASS",
+    "selected action semantics are partially supported",
+    "official roster and workbench shape gaps are named",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMiniMatchWorkbenchAlignment();
+
+  console.log("miniMatchWorkbenchAlignment tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/rosterToMiniMatchGapAnalysis.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { adaptMatchInputToMiniMatch } from "../adapters/matchInputToMiniMatch";
+import { analyzeRosterToMiniMatchGap } from "./rosterToMiniMatchGapAnalysis";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const adapter = adaptMatchInputToMiniMatch(matchInput);
+  const analysis = analyzeRosterToMiniMatchGap({ matchInput, adapter });
+
+  assertTest(analysis.status === "PARTIAL", `roster-to-mini-match gap must be PARTIAL, received ${analysis.status}.`);
+  assertTest(!analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must not be reported as driving mini-match positions yet.");
+  assertTest(!analysis.startersDriveActivePlayers, "TeamSnapshot.starters must not be reported as driving active players yet.");
+  assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
+  assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
+  assertTest(analysis.lostPlayerIdentity.length > 0, "lost official player identity must be reported.");
+
+  return [
+    "roster-to-mini-match gap is PARTIAL",
+    "TeamSnapshot roster and starters do not yet drive mini-match spatial state",
+    "prototype dominance is documented",
+    "lost player identity is listed",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRosterToMiniMatchGapAnalysis();
+
+  console.log("rosterToMiniMatchGapAnalysis tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/fullMatchGroundingDiagnostics.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { analyzeFullMatchGroundingDiagnostics } from "./fullMatchGroundingDiagnostics";
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchGroundingDiagnostics(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const report = runFullMatch(input);
+  const diagnostics = analyzeFullMatchGroundingDiagnostics(report);
+  const scoreFromConsequences = report.timeline.reduce(
+    (score, event) => {
+      const points = event.consequences
+        .filter((consequence) => consequence.type === "score_change")
+        .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+
+      return {
+        home: score.home + (event.teamId === input.homeTeam.teamId ? points : 0),
+        away: score.away + (event.teamId === input.awayTeam.teamId ? points : 0),
+      };
+    },
+    { home: 0, away: 0 },
+  );
+
+  assertTest(diagnostics.warnings.includes("FULL_MATCH_NOT_WORKBENCH_GROUNDED"), "full-match grounding warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT"), "roster conversion warning must be emitted.");
+  assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
+  assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
+  assertTest(
+    report.warnings.some((warning) => warning.warningId.endsWith("tactical-grounding-gap")),
+    "MatchReport must include a grounding warning.",
+  );
+  assertTest(
+    report.evidenceFacts.some((fact) => fact.internalTags.includes("tactical_grounding_gap")),
+    "MatchReport must include grounding evidence facts.",
+  );
+  assertTest(
+    scoreFromConsequences.home === report.score.home && scoreFromConsequences.away === report.score.away,
+    "final score must remain derived from score_change consequences.",
+  );
+
+  try {
+    assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_HARNESS_SINGLE_RUN");
+    throw new Error("FULL_MATCH_HARNESS_SINGLE_RUN must not be allowed to make global economy claims.");
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), "50-match economy must remain the global reference.");
+  }
+
+  return [
+    "full-match grounding warning is emitted",
+    "grounding evidence facts are attached",
+    "scoring events are not mutated",
+    "final score remains derived from score_change",
+    "50-match economy remains the global reference",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchGroundingDiagnostics();
+
+  console.log("fullMatchGroundingDiagnostics tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
 }
 ```
 
@@ -2446,6 +3137,86 @@ function segmentStateInfluenceFact(input: {
   };
 }
 
+function tacticalGroundingGapFacts(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+}): readonly MatchReportEvidenceFact[] {
+  const fullMatchEvents = input.timeline.filter((event) => event.eventId.includes("-segment-") && event.eventType !== "kickoff");
+  const event = firstEvidenceEvent(fullMatchEvents);
+
+  if (event === undefined) {
+    return [];
+  }
+
+  const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
+  const affectedZones = topZones(fullMatchEvents, 3);
+  const summary =
+    "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques observables dans les workbenches action-par-action. Le score doit donc etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas alignes avec la resolution mini-match.";
+
+  return [
+    {
+      factId: `${input.matchInput.matchId}-workbench-truth-available`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary,
+      confidence: "low",
+      strength: 58,
+      coachVisible: true,
+      internalTags: ["tactical_grounding_gap", "workbench_truth_available"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-mini-match-alignment-partial`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "Mini-match can represent some selected-action semantics, but it does not yet consume the complete workbench before/after spatial truth.",
+      confidence: "low",
+      strength: 55,
+      coachVisible: false,
+      internalTags: ["tactical_grounding_gap", "mini_match_alignment_partial"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-roster-to-spatial-context-gap`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "Official rosters and starters are not yet converted into mini-match spatial contexts, so prototype teams remain the dominant resolution source.",
+      confidence: "low",
+      strength: 62,
+      coachVisible: false,
+      internalTags: ["tactical_grounding_gap", "roster_to_spatial_context_gap"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-full-match-not-workbench-grounded`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "The full-match harness is not yet a replay engine for the visual workbench truth.",
+      confidence: "low",
+      strength: 65,
+      coachVisible: false,
+      internalTags: ["tactical_grounding_gap", "full_match_harness_not_yet_workbench_grounded"],
+    },
+  ];
+}
+
 export function buildCanonicalMatchReportEvidenceFacts(input: {
   readonly matchInput: MatchInput;
   readonly timeline: readonly MatchEvent[];
@@ -2463,7 +3234,7 @@ export function buildCanonicalMatchReportEvidenceFacts(input: {
     segmentStateInfluenceFact(input),
   ].filter((fact): fact is MatchReportEvidenceFact => fact !== null);
 
-  return [...baseFacts, ...supplementalFacts];
+  return [...baseFacts, ...supplementalFacts, ...tacticalGroundingGapFacts(input)];
 }
 ```
 

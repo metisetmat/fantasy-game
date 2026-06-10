@@ -118,6 +118,9 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachFacingSummaryBoundaryValidation = readIfExists(join(shareDirectory, "validation.coach-facing-summary-boundary.md"));
   const trueSegmentStateIntegration = readIfExists(join(shareDirectory, "true-segment-state-integration.md"));
   const trueSegmentStateIntegrationValidation = readIfExists(join(shareDirectory, "validation.true-segment-state-integration.md"));
+  const tacticalGroundingReconciliation = readIfExists(join(shareDirectory, "tactical-grounding-reconciliation.md"));
+  const tacticalGroundingReconciliationValidation = readIfExists(join(shareDirectory, "validation.tactical-grounding-reconciliation.md"));
+  const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
@@ -1663,6 +1666,65 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness run remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && trueSegmentStateIntegration.includes("without claiming global scoring-economy validity"), "single-run warning-only"),
     check("recommendations visible", trueSegmentStateIntegration.includes("CONFIRM_TRUE_SEGMENT_STATE_INTEGRATION_V0") && trueSegmentStateIntegration.includes("PREPARE_DEEPER_TACTICAL_PLAN_INFLUENCE") && trueSegmentStateIntegration.includes("PREPARE_REAL_PLAYER_STATS"), "2Q recommendations visible"),
   ];
+  const sprint2RExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "validation.share-pack.md",
+    "tactical-grounding-reconciliation.md",
+    "validation.tactical-grounding-reconciliation.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+    "bundle__docs.md",
+  ];
+  const sprint2RForbiddenLeftovers = [
+    "true-segment-state-integration.md",
+    "validation.true-segment-state-integration.md",
+    "coach-facing-summary-boundary.md",
+    "validation.coach-facing-summary-boundary.md",
+  ];
+  const sprint2RChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2R", activeConfig.sprintName === "Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 15", filesOnDisk.length === 15, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 15", allowlistedFiles.length === 15, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint2RForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint2RForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2RExpectedFiles.every((file) => requiredCopied(file)), sprint2RExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2R", manifest.includes("Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch") && detailedManifest.includes("Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch"), "Sprint 2R visible"),
+    check("README is Sprint 2R oriented", readme.includes("# Sprint 2R Share Pack") && readme.includes("tactical-grounding-reconciliation.md"), "README current"),
+    check("workbench artifact copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionOneWorkbench.includes("data-player-id=\"control-tempo-half\""), "sequence workbench copied"),
+    check("tactical grounding reconciliation doc included", tacticalGroundingReconciliation.includes("# Tactical Grounding Reconciliation"), "doc included"),
+    check("tactical grounding validation is PASS", tacticalGroundingReconciliationValidation.includes("Status: PASS"), "validation PASS"),
+    check("workbench fixture source bundled", bundleSimulation.includes("src/simulation/grounding/fixtures/sequence1Action1.fixture.ts") && bundleSimulation.includes("sequence1Action1WorkbenchTruth"), "fixture bundled"),
+    check("workbench type contract bundled", bundleSimulation.includes("src/simulation/grounding/tacticalWorkbenchTypes.ts") && bundleSimulation.includes("TacticalWorkbenchFrame"), "types bundled"),
+    check("workbench extractor bundled", bundleSimulation.includes("src/simulation/grounding/extractWorkbenchTruth.ts") && bundleSimulation.includes("extractWorkbenchPlayerPositions"), "extractor bundled"),
+    check("workbench contract guard bundled", bundleSimulation.includes("src/simulation/grounding/tacticalWorkbenchContractGuard.ts") && bundleSimulation.includes("validateSequenceOneActionOneWorkbenchTruth"), "contract guard bundled"),
+    check("mini-match alignment report bundled", bundleSimulation.includes("src/simulation/grounding/miniMatchWorkbenchAlignment.ts") && bundleSimulation.includes("MiniMatchWorkbenchAlignmentReport") && bundleSimulation.includes("status: \"PARTIAL\""), "alignment bundled"),
+    check("roster gap analysis bundled", bundleSimulation.includes("src/simulation/grounding/rosterToMiniMatchGapAnalysis.ts") && bundleSimulation.includes("prototypesStillDominant"), "gap analysis bundled"),
+    check("full-match grounding diagnostics bundled", bundleSimulation.includes("src/simulation/diagnostics/fullMatchGroundingDiagnostics.ts") && bundleSimulation.includes("FULL_MATCH_NOT_WORKBENCH_GROUNDED"), "diagnostics bundled"),
+    check("grounding tests bundled", bundleSimulation.includes("tacticalWorkbenchContractGuard.test.ts") && bundleSimulation.includes("miniMatchWorkbenchAlignment.test.ts") && bundleSimulation.includes("rosterToMiniMatchGapAnalysis.test.ts") && bundleSimulation.includes("fullMatchGroundingDiagnostics.test.ts"), "tests bundled"),
+    check("MatchReport grounding evidence included", bundleSimulation.includes("tacticalGroundingGapFacts") && bundleSimulation.includes("tactical_grounding_gap"), "grounding facts visible"),
+    check("MatchReport grounding warning included", bundleSimulation.includes("tactical-grounding-gap") && bundleSimulation.includes("ADAPTER_LIMITATION"), "grounding warning visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", tacticalGroundingReconciliationValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && tacticalGroundingReconciliationValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && tacticalGroundingReconciliationValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", tacticalGroundingReconciliation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && tacticalGroundingReconciliation.includes("harness plausibility signal"), "single-run warning-only"),
+    check("recommendations visible", tacticalGroundingReconciliation.includes("CONFIRM_WORKBENCH_TRUTH_FIXTURE") && tacticalGroundingReconciliation.includes("CONFIRM_MINIMATCH_ALIGNMENT_PARTIAL") && tacticalGroundingReconciliation.includes("PREPARE_WORKBENCH_REPLAY_ENGINE"), "2R recommendations visible"),
+  ];
   const checks = activeConfig.sprintName.includes("Role Fit UI Implementation")
     ? roleFitUiChecks
     : activeConfig.sprintName.includes("React JSX Role Fit Refactor")
@@ -1677,6 +1739,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 2R - Tactical Grounding Reconciliation")
+      ? sprint2RChecks
     : activeConfig.sprintName.includes("Sprint 2N - Segment Diversity")
       ? sprint2NChecks
     : activeConfig.sprintName.includes("Sprint 2M - Source-of-Truth Reconciliation")
