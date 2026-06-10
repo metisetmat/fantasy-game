@@ -1,6 +1,6 @@
 # Share Pack
 
-Generated: 2026-06-10T10:23:33.403Z
+Generated: 2026-06-10T11:01:21.402Z
 Task/sprint: Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene
 Final file count: 14
 

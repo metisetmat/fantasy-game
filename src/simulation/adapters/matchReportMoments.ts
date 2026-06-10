@@ -149,6 +149,8 @@ function selectDiverseCandidates(
   const sortedCandidates = [...candidates].sort(compareCandidates);
   const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
   const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
+  const availableTitleCount = new Set(sortedCandidates.map((candidate) => candidateTitle(candidate, facts))).size;
+  const shouldLimitRepeatedTitles = availableTitleCount > 1;
   const selected: KeyMomentCandidate[] = [];
   const titleCounts = new Map<string, number>();
   let scoringCount = 0;
@@ -159,7 +161,7 @@ function selectDiverseCandidates(
     }
 
     const title = candidateTitle(candidate, facts);
-    if ((titleCounts.get(title) ?? 0) >= 2) {
+    if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
       continue;
     }
 
@@ -185,7 +187,7 @@ function selectDiverseCandidates(
 
     if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
       const title = candidateTitle(candidate, facts);
-      if ((titleCounts.get(title) ?? 0) >= 2) {
+      if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
         continue;
       }
       selected.push(candidate);

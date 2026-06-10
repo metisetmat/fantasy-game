@@ -2101,6 +2101,8 @@ function selectDiverseCandidates(
   const sortedCandidates = [...candidates].sort(compareCandidates);
   const nonScoringCandidates = sortedCandidates.filter((candidate) => candidate.event.eventType !== "scoring");
   const scoringLimit = nonScoringCandidates.length > 0 ? 2 : MAX_KEY_MOMENTS;
+  const availableTitleCount = new Set(sortedCandidates.map((candidate) => candidateTitle(candidate, facts))).size;
+  const shouldLimitRepeatedTitles = availableTitleCount > 1;
   const selected: KeyMomentCandidate[] = [];
   const titleCounts = new Map<string, number>();
   let scoringCount = 0;
@@ -2111,7 +2113,7 @@ function selectDiverseCandidates(
     }
 
     const title = candidateTitle(candidate, facts);
-    if ((titleCounts.get(title) ?? 0) >= 2) {
+    if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
       continue;
     }
 
@@ -2137,7 +2139,7 @@ function selectDiverseCandidates(
 
     if (!selected.some((item) => item.event.eventId === candidate.event.eventId)) {
       const title = candidateTitle(candidate, facts);
-      if ((titleCounts.get(title) ?? 0) >= 2) {
+      if (shouldLimitRepeatedTitles && (titleCounts.get(title) ?? 0) >= 2) {
         continue;
       }
       selected.push(candidate);
@@ -2201,12 +2203,56 @@ export function selectKeyMoments(input: {
 
 ```ts
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import type { MatchEvent } from "../../contracts/engineToCoach";
+import type { ZoneId } from "../../core/zones";
+import { MatchPhase, PressureLevel } from "../../models/match";
 import { runFullMatch } from "../runFullMatch";
+import { selectKeyMoments } from "./matchReportMoments";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function scoringOnlyEvent(index: number): MatchEvent {
+  const zone = "Z3-C" as ZoneId;
+
+  return {
+    eventId: `scoring-only-${index}`,
+    matchId: engineToCoachPublicContractFixtures.matchInputFixture.matchId,
+    timestamp: {
+      tick: index,
+      minute: index,
+      period: "first_half",
+    },
+    phase: MatchPhase.InProgress,
+    sequenceId: `scoring-only-sequence-${index}`,
+    teamId: engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.teamId,
+    opponentTeamId: engineToCoachPublicContractFixtures.matchInputFixture.awayTeam.teamId,
+    eventType: "scoring",
+    zone,
+    tacticalContext: {
+      pressureLevel: PressureLevel.Medium,
+      ballZone: zone,
+      targetZone: zone,
+      moveType: "shot_goal",
+      reason: "scoring-only regression fixture",
+    },
+    fatigueContext: {
+      teamCondition: 90,
+    },
+    outcome: "score",
+    consequences: [
+      {
+        type: "score_change",
+        description: "scoring-only fixture score",
+        value: 3,
+      },
+    ],
+    tags: ["scoring_event"],
+    narrativeWeight: 100,
+  };
 }
 
 export function validateMatchReportMomentDiversity(): readonly string[] {
@@ -2226,10 +2272,24 @@ export function validateMatchReportMomentDiversity(): readonly string[] {
     assertTest(uniqueTitles.size >= 2, "key moments include at least two different titles when possible.");
   }
 
+  const scoringOnlyMoments = selectKeyMoments({
+    matchInput: engineToCoachPublicContractFixtures.matchInputFixture,
+    timeline: [1, 2, 3, 4, 5].map(scoringOnlyEvent),
+    facts: [],
+    coachInsights: [],
+  });
+
+  assertTest(scoringOnlyMoments.length === 5, `scoring-only reports should fill the key moment cap, received ${scoringOnlyMoments.length}.`);
+  assertTest(
+    scoringOnlyMoments.every((moment) => moment.title === "Action décisive"),
+    "scoring-only reports keep repeated scoring titles when no title alternatives exist.",
+  );
+
   return [
     "key moments include non-scoring moments when available",
     "max 2 scoring moments when alternatives exist",
     "key moments include diverse titles",
+    "scoring-only key moments fill the cap when no title alternatives exist",
   ];
 }
 
