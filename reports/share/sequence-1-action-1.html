@@ -1,0 +1,2038 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sequence 1 Action 1 Tactical Workbench</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #eef2f7; color: #0f172a; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; max-width: 100%; overflow-x: hidden; background: #eef2f7; }
+    .page { width: min(100%, 1800px); margin: 0 auto; padding: 18px; }
+    .workbench-title { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 14px; align-items: end; margin-bottom: 14px; }
+    h1 { margin: 0; font-size: 30px; letter-spacing: 0; }
+    .meta-strip { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; min-width: 0; }
+    .meta-strip span { background: #ffffff; border: 1px solid #d8dee9; border-radius: 8px; padding: 7px 9px; font-size: 13px; font-weight: 700; }
+    .top-context-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: stretch; margin-bottom: 12px; min-width: 0; }
+    .pitch-comparison-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; min-width: 0; }
+    .top-context-grid, .pitch-comparison-grid, .summary-grid, .details-grid, .bottom-grid, .legend-grid { min-width: 0; }
+    .panel { background: #ffffff; border: 1px solid #d8dee9; border-radius: 10px; padding: 14px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05); min-width: 0; }
+    .panel h2 { margin: 0 0 10px; font-size: 18px; }
+    .compact-list { margin: 0; padding-left: 19px; font-size: 13px; line-height: 1.45; }
+    .spatial-panel { margin-top: 12px; }
+    .pitch-card { background: #ffffff; border: 1px solid #d8dee9; border-radius: 10px; padding: 10px; overflow: hidden; min-width: 0; }
+    .pitch-card h2 { margin: 0 0 7px; font-size: 17px; }
+    .human-pitch { width: 100%; min-width: 0; max-width: 100%; height: auto; display: block; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .pitch-bg { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2; }
+    .cell { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+    .coord-label { font-size: 20px; fill: #0f172a; font-weight: 800; }
+    .frame-label { font-size: 24px; font-weight: 900; fill: #0f172a; }
+    .goal-area { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; opacity: 0.24; }
+    .goal-post { stroke: #111827; stroke-width: 6; }
+    .goal-crossbar { stroke: #111827; stroke-width: 4; }
+    .goal-target { fill: #22c55e; opacity: 0.17; }
+    .drop-target { fill: #f97316; opacity: 0.17; }
+    .goal-label { font-size: 16px; font-weight: 800; fill: #334155; }
+    .target-highlight { fill: #f59e0b; stroke: #b45309; stroke-width: 4; opacity: 0.2; }
+    .selected-arrow { stroke: #111827; stroke-width: 4; stroke-linecap: round; }
+    .lane-pill { font-size: 19px; font-weight: 900; fill: #b91c1c; paint-order: stroke; stroke: #ffffff; stroke-width: 5px; }
+    .pressure-ring { fill: #7c3aed; opacity: 0.1; stroke: #7c3aed; stroke-width: 4; stroke-dasharray: 10 8; }
+    .overload-ring { fill: #fb923c; opacity: 0.16; stroke: #fb923c; stroke-width: 4; }
+    .compact-overlay-label { font-size: 18px; font-weight: 900; fill: #111827; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }
+    .leader-line { stroke: #475569; stroke-width: 2; stroke-dasharray: 4 4; opacity: 0.65; }
+    .player-circle { stroke: #ffffff; stroke-width: 4; }
+    .ball-carrier { stroke: #facc15; stroke-width: 7; }
+    .player-initials { fill: #ffffff; font-size: 22px; font-weight: 900; }
+    .gk-icon { fill: none; stroke: #111827; stroke-width: 3; opacity: 0.8; }
+    .status-badge { fill: #fef3c7; stroke: #92400e; stroke-width: 2; }
+    .status-badge-text { font-size: 11px; font-weight: 900; fill: #92400e; }
+    .ball-marker { fill: #facc15; stroke: #111827; stroke-width: 3; }
+    .direction-line { stroke: #0f172a; stroke-width: 4; }
+    .direction-label { font-size: 18px; font-weight: 800; fill: #334155; }
+    .context-grid { display: grid; grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr); gap: 7px 10px; margin: 0; font-size: 13px; }
+    .context-grid dt { font-weight: 800; color: #475569; } .context-grid dd { margin: 0; font-weight: 700; }
+    .quality-summary { display: grid; gap: 4px; margin-bottom: 12px; font-size: 14px; }
+    .quality-summary p { margin: 0; }
+    .summary-grid { display: grid; grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr); gap: 14px; margin-top: 14px; }
+    .ranked-panel { margin-top: 0; }
+    .selection-note { margin: 0 0 10px; font-weight: 700; color: #334155; }
+    .reception-card-grid, .chain-card-grid, .structure-card-grid, .position-card-grid, .guardrail-grid, .occupation-card-grid, .occupation-quality-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+    .ranked-list { display: grid; gap: 10px; }
+    .mini-card, .ranked-card { border: 1px solid #e2e8f0; border-radius: 9px; background: #f8fafc; padding: 10px; min-width: 0; }
+    .selected-card { background: #fff7ed; border-color: #fdba74; }
+    .card-topline, .ranked-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; min-width: 0; }
+    .card-topline span, .card-metrics span, .ranked-summary span { border-radius: 999px; background: #ffffff; border: 1px solid #e2e8f0; padding: 3px 7px; font-size: 12px; font-weight: 800; }
+    .card-metrics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .mini-card p, .ranked-card p { margin: 8px 0 0; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+    .rank-pill { background: #0f172a !important; color: #ffffff; border-color: #0f172a !important; }
+    .score-pill { background: #dcfce7 !important; color: #166534; border-color: #bbf7d0 !important; }
+    details { margin-top: 9px; }
+    summary { cursor: pointer; font-weight: 800; color: #334155; }
+    .details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .details-block { background: #ffffff; border: 1px solid #d8dee9; border-radius: 10px; padding: 0; overflow: hidden; }
+    .details-block > summary { padding: 13px 14px; background: #f8fafc; }
+    .details-block > .details-body { padding: 14px; }
+    .details-grid-list { display: grid; grid-template-columns: minmax(110px, 0.36fr) minmax(0, 1fr); gap: 6px 10px; margin: 10px 0 0; font-size: 13px; }
+    .details-grid-list dt { font-weight: 900; color: #475569; }
+    .details-grid-list dd { margin: 0; overflow-wrap: anywhere; }
+    .bottom-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+    .narrative-panel ul { margin: 0; padding-left: 20px; line-height: 1.55; }
+    .legend-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .legend-card { background: #ffffff; border: 1px solid #d8dee9; border-radius: 10px; padding: 14px; }
+    .legend-card h3 { margin: 0 0 10px; font-size: 17px; }
+    .legend-card p { display: flex; gap: 9px; align-items: center; margin: 8px 0; font-size: 13px; }
+    .swatch { width: 18px; height: 18px; border-radius: 4px; display: inline-block; flex: 0 0 auto; border: 1px solid #cbd5e1; }
+    .pressure { background: #c4b5fd; } .target { background: #fbbf24; } .overload { background: #fed7aa; }
+    .circle-swatch { width: 18px; height: 18px; border-radius: 999px; display: inline-block; flex: 0 0 auto; }
+    .circle-swatch.control { background: #2563eb; } .circle-swatch.blitz { background: #dc2626; }
+    .ring-swatch { width: 18px; height: 18px; border-radius: 999px; border: 4px solid #facc15; display: inline-block; flex: 0 0 auto; }
+    .ghost-swatch { width: 18px; height: 18px; border-radius: 999px; border: 2px dashed #64748b; display: inline-block; flex: 0 0 auto; opacity: 0.65; }
+    .line-swatch { width: 32px; height: 0; border-top: 3px solid #111827; display: inline-block; flex: 0 0 auto; }
+    .line-swatch.dashed, .line-swatch.leader { border-top-style: dashed; }
+    .badge-swatch { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; background: #fef3c7; border: 1px solid #92400e; font-weight: 900; color: #92400e; }
+    .pill-swatch { display: inline-block; padding: 3px 6px; border-radius: 999px; background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 900; }
+    .position-check { margin-top: 18px; }
+    .pass { color: #166534; font-weight: 800; }
+    @media (min-width: 1440px) {
+      .summary-grid { grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); }
+    }
+    @media (min-width: 1100px) and (max-width: 1439px) {
+      .page { padding: 12px; }
+      .workbench-title { grid-template-columns: 1fr; align-items: start; }
+      .meta-strip { justify-content: flex-start; }
+      .top-context-grid, .pitch-comparison-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      h1 { font-size: 26px; }
+      .meta-strip span { font-size: 12px; padding: 6px 8px; }
+      .pitch-card { padding: 6px; }
+      .pitch-card h2 { font-size: 16px; }
+      .coord-label { font-size: 19px; }
+      .frame-label { font-size: 22px; }
+      .goal-label, .direction-label { font-size: 15px; }
+      .player-initials { font-size: 21px; }
+      .panel { padding: 12px; }
+      .panel h2 { font-size: 17px; }
+      .summary-grid, .bottom-grid { grid-template-columns: 1fr; }
+      .legend-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 1099px) {
+      .page { padding: 12px; }
+      .workbench-title, .top-context-grid, .pitch-comparison-grid, .summary-grid, .details-grid, .bottom-grid, .legend-grid { grid-template-columns: 1fr; }
+      .workbench-title { align-items: start; }
+      .meta-strip { justify-content: flex-start; }
+      h1 { font-size: 25px; }
+      .pitch-card { padding: 8px; }
+      .panel { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="workbench-title">
+      <div><h1>Sequence 1 - Action 1</h1></div>
+      <div class="meta-strip">
+        <span>CONTROL vs BLITZ</span>
+        <span>Phase: STABLE_POSSESSION</span>
+        <span>Possession: CONTROL</span>
+        <span>Direction: Z1 -> Z7</span>
+        <span>Ball carrier: CONTROL TH</span>
+        <span>Ball zone: Z4-HSL</span>
+        <span>Focus: OVERLOAD_CREATION</span>
+        <a href="../coach-summary.latest.md">Coach summary</a>
+        <a href="../tactical-evidence.latest.md">Tactical evidence</a>
+        <a href="../debug-full.latest.md">Debug full</a>
+      </div>
+    </header>
+
+    <section class="top-context-grid">
+      <section class="panel"><h2>Tactical Analysis Board</h2><p>This calibration workbench keeps the Sequence 1 Action 1 context, reception model, option ranking, and pitch evidence together for coach-readable review.</p></section>
+      <section class="panel">
+    <h2>Action Context</h2>
+    <dl class="context-grid">
+      <dt>Ball state</dt><dd>CONTROLLED</dd>
+      <dt>Possession</dt><dd>CONTROL</dd>
+      <dt>Defending team</dt><dd>BLITZ</dd>
+      <dt>Ball carrier</dt><dd>CONTROL TH</dd>
+      <dt>Ball zone</dt><dd>Z4-HSL</dd>
+      <dt>Direction</dt><dd>Z1 -> Z7</dd>
+      <dt>Phase</dt><dd>STABLE_POSSESSION</dd>
+    </dl>
+  </section>
+    </section>
+
+    <section class="pitch-comparison-grid">
+      <div class="pitch-card"><h2>BEFORE pitch</h2><svg class="human-pitch" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 950" width="1700" height="950" data-workbench-frame="before" data-render-mode="COACH_READABLE">
+    <defs>
+      <marker id="actionArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#111827" /></marker>
+      <marker id="directionArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a" /></marker>
+    </defs>
+    <rect class="pitch-bg" x="130" y="118" width="1395" height="630" />
+    <text class="frame-label" x="130" y="54">BEFORE - Sequence 1 Action 1</text>
+    <g id="grid-layer" data-layer="zone-grid" data-truth-type="coordinate-grid">
+    <rect class="cell" x="130" y="118" width="155" height="126" data-zone="Z0-CL"><title>Z0-CL</title></rect>
+<rect class="cell" x="130" y="244" width="155" height="126" data-zone="Z0-HSL"><title>Z0-HSL</title></rect>
+<rect class="cell" x="130" y="370" width="155" height="126" data-zone="Z0-C"><title>Z0-C</title></rect>
+<rect class="cell" x="130" y="496" width="155" height="126" data-zone="Z0-HSR"><title>Z0-HSR</title></rect>
+<rect class="cell" x="130" y="622" width="155" height="126" data-zone="Z0-CR"><title>Z0-CR</title></rect>
+<rect class="cell" x="285" y="118" width="155" height="126" data-zone="Z1-CL"><title>Z1-CL</title></rect>
+<rect class="cell" x="285" y="244" width="155" height="126" data-zone="Z1-HSL"><title>Z1-HSL</title></rect>
+<rect class="cell" x="285" y="370" width="155" height="126" data-zone="Z1-C"><title>Z1-C</title></rect>
+<rect class="cell" x="285" y="496" width="155" height="126" data-zone="Z1-HSR"><title>Z1-HSR</title></rect>
+<rect class="cell" x="285" y="622" width="155" height="126" data-zone="Z1-CR"><title>Z1-CR</title></rect>
+<rect class="cell" x="440" y="118" width="155" height="126" data-zone="Z2-CL"><title>Z2-CL</title></rect>
+<rect class="cell" x="440" y="244" width="155" height="126" data-zone="Z2-HSL"><title>Z2-HSL</title></rect>
+<rect class="cell" x="440" y="370" width="155" height="126" data-zone="Z2-C"><title>Z2-C</title></rect>
+<rect class="cell" x="440" y="496" width="155" height="126" data-zone="Z2-HSR"><title>Z2-HSR</title></rect>
+<rect class="cell" x="440" y="622" width="155" height="126" data-zone="Z2-CR"><title>Z2-CR</title></rect>
+<rect class="cell" x="595" y="118" width="155" height="126" data-zone="Z3-CL"><title>Z3-CL</title></rect>
+<rect class="cell" x="595" y="244" width="155" height="126" data-zone="Z3-HSL"><title>Z3-HSL</title></rect>
+<rect class="cell" x="595" y="370" width="155" height="126" data-zone="Z3-C"><title>Z3-C</title></rect>
+<rect class="cell" x="595" y="496" width="155" height="126" data-zone="Z3-HSR"><title>Z3-HSR</title></rect>
+<rect class="cell" x="595" y="622" width="155" height="126" data-zone="Z3-CR"><title>Z3-CR</title></rect>
+<rect class="cell" x="750" y="118" width="155" height="126" data-zone="Z4-CL"><title>Z4-CL</title></rect>
+<rect class="cell" x="750" y="244" width="155" height="126" data-zone="Z4-HSL"><title>Z4-HSL</title></rect>
+<rect class="cell" x="750" y="370" width="155" height="126" data-zone="Z4-C"><title>Z4-C</title></rect>
+<rect class="cell" x="750" y="496" width="155" height="126" data-zone="Z4-HSR"><title>Z4-HSR</title></rect>
+<rect class="cell" x="750" y="622" width="155" height="126" data-zone="Z4-CR"><title>Z4-CR</title></rect>
+<rect class="cell" x="905" y="118" width="155" height="126" data-zone="Z5-CL"><title>Z5-CL</title></rect>
+<rect class="cell" x="905" y="244" width="155" height="126" data-zone="Z5-HSL"><title>Z5-HSL</title></rect>
+<rect class="cell" x="905" y="370" width="155" height="126" data-zone="Z5-C"><title>Z5-C</title></rect>
+<rect class="cell" x="905" y="496" width="155" height="126" data-zone="Z5-HSR"><title>Z5-HSR</title></rect>
+<rect class="cell" x="905" y="622" width="155" height="126" data-zone="Z5-CR"><title>Z5-CR</title></rect>
+<rect class="cell" x="1060" y="118" width="155" height="126" data-zone="Z6-CL"><title>Z6-CL</title></rect>
+<rect class="cell" x="1060" y="244" width="155" height="126" data-zone="Z6-HSL"><title>Z6-HSL</title></rect>
+<rect class="cell" x="1060" y="370" width="155" height="126" data-zone="Z6-C"><title>Z6-C</title></rect>
+<rect class="cell" x="1060" y="496" width="155" height="126" data-zone="Z6-HSR"><title>Z6-HSR</title></rect>
+<rect class="cell" x="1060" y="622" width="155" height="126" data-zone="Z6-CR"><title>Z6-CR</title></rect>
+<rect class="cell" x="1215" y="118" width="155" height="126" data-zone="Z7-CL"><title>Z7-CL</title></rect>
+<rect class="cell" x="1215" y="244" width="155" height="126" data-zone="Z7-HSL"><title>Z7-HSL</title></rect>
+<rect class="cell" x="1215" y="370" width="155" height="126" data-zone="Z7-C"><title>Z7-C</title></rect>
+<rect class="cell" x="1215" y="496" width="155" height="126" data-zone="Z7-HSR"><title>Z7-HSR</title></rect>
+<rect class="cell" x="1215" y="622" width="155" height="126" data-zone="Z7-CR"><title>Z7-CR</title></rect>
+<rect class="cell" x="1370" y="118" width="155" height="126" data-zone="Z8-CL"><title>Z8-CL</title></rect>
+<rect class="cell" x="1370" y="244" width="155" height="126" data-zone="Z8-HSL"><title>Z8-HSL</title></rect>
+<rect class="cell" x="1370" y="370" width="155" height="126" data-zone="Z8-C"><title>Z8-C</title></rect>
+<rect class="cell" x="1370" y="496" width="155" height="126" data-zone="Z8-HSR"><title>Z8-HSR</title></rect>
+<rect class="cell" x="1370" y="622" width="155" height="126" data-zone="Z8-CR"><title>Z8-CR</title></rect>
+    <text class="coord-label" x="207.5" y="82" text-anchor="middle">Z0</text><text class="coord-label" x="207.5" y="796" text-anchor="middle">Z0</text>
+<text class="coord-label" x="362.5" y="82" text-anchor="middle">Z1</text><text class="coord-label" x="362.5" y="796" text-anchor="middle">Z1</text>
+<text class="coord-label" x="517.5" y="82" text-anchor="middle">Z2</text><text class="coord-label" x="517.5" y="796" text-anchor="middle">Z2</text>
+<text class="coord-label" x="672.5" y="82" text-anchor="middle">Z3</text><text class="coord-label" x="672.5" y="796" text-anchor="middle">Z3</text>
+<text class="coord-label" x="827.5" y="82" text-anchor="middle">Z4</text><text class="coord-label" x="827.5" y="796" text-anchor="middle">Z4</text>
+<text class="coord-label" x="982.5" y="82" text-anchor="middle">Z5</text><text class="coord-label" x="982.5" y="796" text-anchor="middle">Z5</text>
+<text class="coord-label" x="1137.5" y="82" text-anchor="middle">Z6</text><text class="coord-label" x="1137.5" y="796" text-anchor="middle">Z6</text>
+<text class="coord-label" x="1292.5" y="82" text-anchor="middle">Z7</text><text class="coord-label" x="1292.5" y="796" text-anchor="middle">Z7</text>
+<text class="coord-label" x="1447.5" y="82" text-anchor="middle">Z8</text><text class="coord-label" x="1447.5" y="796" text-anchor="middle">Z8</text>
+    <text class="coord-label" x="102" y="188" text-anchor="end">CL</text><text class="coord-label" x="1553" y="188" text-anchor="start">CL</text>
+<text class="coord-label" x="102" y="314" text-anchor="end">HSL</text><text class="coord-label" x="1553" y="314" text-anchor="start">HSL</text>
+<text class="coord-label" x="102" y="440" text-anchor="end">C</text><text class="coord-label" x="1553" y="440" text-anchor="start">C</text>
+<text class="coord-label" x="102" y="566" text-anchor="end">HSR</text><text class="coord-label" x="1553" y="566" text-anchor="start">HSR</text>
+<text class="coord-label" x="102" y="692" text-anchor="end">CR</text><text class="coord-label" x="1553" y="692" text-anchor="start">CR</text>
+  </g>
+    <g id="scoring-layer" data-layer="scoring" data-truth-type="goal-frame">
+    <rect id="left-goal-area" class="goal-area" x="285" y="307" width="155" height="252" data-truth-type="goal-area"><title>Left goal area rectangle: boundary Z0/Z1 to boundary Z1/Z2.</title></rect>
+    <rect id="right-goal-area" class="goal-area" x="1215" y="307" width="155" height="252" data-truth-type="goal-area"><title>Right goal area rectangle: boundary Z7/Z8 to boundary Z6/Z7.</title></rect>
+    <line id="goal-frame-left" class="goal-post" x1="285" y1="392" x2="285" y2="474" data-truth-type="goal-frame" />
+    <line class="goal-crossbar" x1="285" y1="419.88" x2="285" y2="474" />
+    <rect class="goal-target" x="277" y="419.88" width="16" height="54.120000000000005" />
+    <rect class="drop-target" x="277" y="392" width="16" height="27.879999999999995" />
+    <text class="goal-label" x="297" y="380">CONTROL defensive goal</text>
+    <line id="goal-frame-right" class="goal-post" x1="1370" y1="392" x2="1370" y2="474" data-truth-type="goal-frame" />
+    <line class="goal-crossbar" x1="1370" y1="419.88" x2="1370" y2="474" />
+    <rect class="goal-target" x="1362" y="419.88" width="16" height="54.120000000000005" />
+    <rect class="drop-target" x="1362" y="392" width="16" height="27.879999999999995" />
+    <text class="goal-label" x="1358" y="380" text-anchor="end">BLITZ defensive goal</text>
+  </g>
+    
+    <g id="before-pressure-cue" data-layer="influence" data-truth-type="pressure-on-ball-carrier" data-player-id="control-tempo-half">
+    <circle class="pressure-ring" cx="827.5" cy="307" r="68" />
+    <text class="compact-overlay-label" x="827.5" y="229" text-anchor="middle">Pressure 26</text>
+  </g>
+    <g id="before-selected-action" data-layer="selected-action" data-truth-type="selected-action" data-primary-actor="control-tempo-half" data-zone="Z3-HSL">
+    <rect class="target-highlight" x="605" y="254" width="135" height="106" rx="12" />
+    <line class="selected-arrow" x1="827.5" y1="307" x2="672.5" y2="307" marker-end="url(#actionArrow)" />
+    <text class="lane-pill" x="750" y="289" text-anchor="middle">RECYCLE - CLOSED</text>
+  </g>
+    <g id="before-player-control-tempo-half" data-layer="players" data-truth-type="real-player-position" data-player-id="control-tempo-half" data-team-id="control" data-role="tempo_half" data-initials="TH" data-real-zone="Z4-HSL" data-rendered-zone="Z4-HSL offset" data-projected-zone="Z4-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="307" x2="797.5" y2="335" />
+        
+        <circle class="player-circle ball-carrier" cx="797.5" cy="335" r="22" fill="#2563eb" />
+        <text class="player-initials" x="797.5" y="343" text-anchor="middle">TH</text>
+        
+      </g>
+<g id="before-player-control-hook-link" data-layer="players" data-truth-type="real-player-position" data-player-id="control-hook-link" data-team-id="control" data-role="hook_link" data-initials="HL" data-real-zone="Z4-CL" data-rendered-zone="Z4-CL offset" data-projected-zone="Z4-CL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="181" x2="857.5" y2="153" />
+        
+        <circle class="player-circle" cx="857.5" cy="153" r="22" fill="#2563eb" />
+        <text class="player-initials" x="857.5" y="161" text-anchor="middle">HL</text>
+        
+      </g>
+<g id="before-player-control-forward-leader" data-layer="players" data-truth-type="real-player-position" data-player-id="control-forward-leader" data-team-id="control" data-role="forward_leader" data-initials="FL" data-real-zone="Z5-HSL" data-rendered-zone="Z5-HSL offset" data-projected-zone="Z5-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="982.5" y1="307" x2="952.5" y2="335" />
+        
+        <circle class="player-circle" cx="952.5" cy="335" r="22" fill="#2563eb" />
+        <text class="player-initials" x="952.5" y="343" text-anchor="middle">FL</text>
+        
+      </g>
+<g id="before-player-control-goalkeeper-free-safety" data-layer="players" data-truth-type="real-player-position" data-player-id="control-goalkeeper-free-safety" data-team-id="control" data-role="goalkeeper_free_safety" data-initials="GK" data-real-zone="Z2-C" data-rendered-zone="Z2-C" data-projected-zone="Z2-C" data-position-source="REAL">
+        
+        <rect class="gk-icon" x="499.5" y="415" width="36" height="36" rx="7" />
+        <circle class="player-circle" cx="517.5" cy="433" r="22" fill="#2563eb" />
+        <text class="player-initials" x="517.5" y="441" text-anchor="middle">GK</text>
+        <circle class="status-badge" cx="537.5" cy="413" r="11" /><text class="status-badge-text" x="537.5" y="418" text-anchor="middle">R</text>
+      </g>
+<g id="before-player-control-mobile-lock" data-layer="players" data-truth-type="real-player-position" data-player-id="control-mobile-lock" data-team-id="control" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL" data-projected-zone="Z3-HSL" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="672.5" cy="307" r="22" fill="#2563eb" />
+        <text class="player-initials" x="672.5" y="315" text-anchor="middle">ML</text>
+        
+      </g>
+<g id="before-player-control-space-hunter" data-layer="players" data-truth-type="real-player-position" data-player-id="control-space-hunter" data-team-id="control" data-role="space_hunter" data-initials="SH" data-real-zone="Z5-HSR" data-rendered-zone="Z5-HSR" data-projected-zone="Z5-HSR" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="982.5" cy="559" r="22" fill="#2563eb" />
+        <text class="player-initials" x="982.5" y="567" text-anchor="middle">SH</text>
+        
+      </g>
+<g id="before-player-control-playmaker" data-layer="players" data-truth-type="real-player-position" data-player-id="control-playmaker" data-team-id="control" data-role="playmaker" data-initials="PM" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="433" x2="857.5" y2="405" />
+        
+        <circle class="player-circle" cx="857.5" cy="405" r="22" fill="#2563eb" />
+        <text class="player-initials" x="857.5" y="413" text-anchor="middle">PM</text>
+        
+      </g>
+<g id="before-player-control-pivot" data-layer="players" data-truth-type="real-player-position" data-player-id="control-pivot" data-team-id="control" data-role="pivot" data-initials="PV" data-real-zone="Z3-C" data-rendered-zone="Z3-C" data-projected-zone="Z3-C" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="672.5" cy="433" r="22" fill="#2563eb" />
+        <text class="player-initials" x="672.5" y="441" text-anchor="middle">PV</text>
+        <circle class="status-badge" cx="692.5" cy="413" r="11" /><text class="status-badge-text" x="692.5" y="418" text-anchor="middle">R</text>
+      </g>
+<g id="before-player-control-left-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="control-left-piston" data-team-id="control" data-role="left_piston" data-initials="LP" data-real-zone="Z3-CL" data-rendered-zone="Z3-CL" data-projected-zone="Z3-CL" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="672.5" cy="181" r="22" fill="#2563eb" />
+        <text class="player-initials" x="672.5" y="189" text-anchor="middle">LP</text>
+        <circle class="status-badge" cx="692.5" cy="161" r="11" /><text class="status-badge-text" x="692.5" y="166" text-anchor="middle">R</text>
+      </g>
+<g id="before-player-control-right-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="control-right-piston" data-team-id="control" data-role="right_piston" data-initials="RP" data-real-zone="Z3-HSR" data-rendered-zone="Z3-HSR" data-projected-zone="Z3-HSR" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="672.5" cy="559" r="22" fill="#2563eb" />
+        <text class="player-initials" x="672.5" y="567" text-anchor="middle">RP</text>
+        <circle class="status-badge" cx="692.5" cy="539" r="11" /><text class="status-badge-text" x="692.5" y="544" text-anchor="middle">R</text>
+      </g>
+<g id="before-player-blitz-tempo-half" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-tempo-half" data-team-id="blitz" data-role="tempo_half" data-initials="TH" data-real-zone="Z5-HSL" data-rendered-zone="Z5-HSL offset" data-projected-zone="Z5-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="982.5" y1="307" x2="1012.5" y2="279" />
+        
+        <circle class="player-circle" cx="1012.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="1012.5" y="287" text-anchor="middle">TH</text>
+        
+      </g>
+<g id="before-player-blitz-hook-link" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-hook-link" data-team-id="blitz" data-role="hook_link" data-initials="HL" data-real-zone="Z4-CL" data-rendered-zone="Z4-CL offset" data-projected-zone="Z4-CL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="181" x2="797.5" y2="153" />
+        
+        <circle class="player-circle" cx="797.5" cy="153" r="22" fill="#dc2626" />
+        <text class="player-initials" x="797.5" y="161" text-anchor="middle">HL</text>
+        
+      </g>
+<g id="before-player-blitz-forward-leader" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-forward-leader" data-team-id="blitz" data-role="forward_leader" data-initials="FL" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="433" x2="797.5" y2="405" />
+        
+        <circle class="player-circle" cx="797.5" cy="405" r="22" fill="#dc2626" />
+        <text class="player-initials" x="797.5" y="413" text-anchor="middle">FL</text>
+        
+      </g>
+<g id="before-player-blitz-goalkeeper-free-safety" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-goalkeeper-free-safety" data-team-id="blitz" data-role="goalkeeper_free_safety" data-initials="GK" data-real-zone="Z6-C" data-rendered-zone="Z6-C" data-projected-zone="Z6-C" data-position-source="REAL">
+        
+        <rect class="gk-icon" x="1119.5" y="415" width="36" height="36" rx="7" />
+        <circle class="player-circle" cx="1137.5" cy="433" r="22" fill="#dc2626" />
+        <text class="player-initials" x="1137.5" y="441" text-anchor="middle">GK</text>
+        
+      </g>
+<g id="before-player-blitz-mobile-lock" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-mobile-lock" data-team-id="blitz" data-role="mobile_lock" data-initials="ML" data-real-zone="Z4-HSL" data-rendered-zone="Z4-HSL offset" data-projected-zone="Z4-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="307" x2="797.5" y2="279" />
+        
+        <circle class="player-circle" cx="797.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="797.5" y="287" text-anchor="middle">ML</text>
+        
+      </g>
+<g id="before-player-blitz-space-hunter" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-space-hunter" data-team-id="blitz" data-role="space_hunter" data-initials="SH" data-real-zone="Z5-C" data-rendered-zone="Z5-C offset" data-projected-zone="Z5-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="982.5" y1="433" x2="1012.5" y2="405" />
+        
+        <circle class="player-circle" cx="1012.5" cy="405" r="22" fill="#dc2626" />
+        <text class="player-initials" x="1012.5" y="413" text-anchor="middle">SH</text>
+        
+      </g>
+<g id="before-player-blitz-playmaker" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-playmaker" data-team-id="blitz" data-role="playmaker" data-initials="PM" data-real-zone="Z5-HSL" data-rendered-zone="Z5-HSL offset" data-projected-zone="Z5-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="982.5" y1="307" x2="952.5" y2="279" />
+        
+        <circle class="player-circle" cx="952.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="952.5" y="287" text-anchor="middle">PM</text>
+        
+      </g>
+<g id="before-player-blitz-pivot" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-pivot" data-team-id="blitz" data-role="pivot" data-initials="PV" data-real-zone="Z4-HSL" data-rendered-zone="Z4-HSL offset" data-projected-zone="Z4-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="307" x2="857.5" y2="279" />
+        
+        <circle class="player-circle" cx="857.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="857.5" y="287" text-anchor="middle">PV</text>
+        
+      </g>
+<g id="before-player-blitz-left-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-left-piston" data-team-id="blitz" data-role="left_piston" data-initials="LP" data-real-zone="Z5-CL" data-rendered-zone="Z5-CL" data-projected-zone="Z5-CL" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="982.5" cy="181" r="22" fill="#dc2626" />
+        <text class="player-initials" x="982.5" y="189" text-anchor="middle">LP</text>
+        
+      </g>
+<g id="before-player-blitz-right-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-right-piston" data-team-id="blitz" data-role="right_piston" data-initials="RP" data-real-zone="Z5-C" data-rendered-zone="Z5-C offset" data-projected-zone="Z5-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="982.5" y1="433" x2="952.5" y2="405" />
+        
+        <circle class="player-circle" cx="952.5" cy="405" r="22" fill="#dc2626" />
+        <text class="player-initials" x="952.5" y="413" text-anchor="middle">RP</text>
+        
+      </g>
+    <g id="before-ball-marker" data-layer="ball" data-truth-type="ball-carrier" data-player-id="control-tempo-half" data-zone="Z4-HSL">
+    <circle class="ball-marker" cx="831.5" cy="305" r="10" />
+  </g>
+    <g id="direction-layer" data-layer="direction" data-truth-type="attacking-direction">
+    <line class="direction-line" x1="300.5" y1="836" x2="1354.5" y2="836" marker-end="url(#directionArrow)" />
+    <text class="direction-label" x="827.5" y="864" text-anchor="middle">CONTROL attacks Z1 to Z7</text>
+  </g>
+  </svg></div>
+      <div class="pitch-card"><h2>AFTER pitch</h2><svg class="human-pitch" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 950" width="1700" height="950" data-workbench-frame="after" data-render-mode="COACH_READABLE">
+    <defs>
+      <marker id="actionArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#111827" /></marker>
+      <marker id="directionArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a" /></marker>
+    </defs>
+    <rect class="pitch-bg" x="130" y="118" width="1395" height="630" />
+    <text class="frame-label" x="130" y="54">AFTER - Sequence 1 Action 1</text>
+    <g id="grid-layer" data-layer="zone-grid" data-truth-type="coordinate-grid">
+    <rect class="cell" x="130" y="118" width="155" height="126" data-zone="Z0-CL"><title>Z0-CL</title></rect>
+<rect class="cell" x="130" y="244" width="155" height="126" data-zone="Z0-HSL"><title>Z0-HSL</title></rect>
+<rect class="cell" x="130" y="370" width="155" height="126" data-zone="Z0-C"><title>Z0-C</title></rect>
+<rect class="cell" x="130" y="496" width="155" height="126" data-zone="Z0-HSR"><title>Z0-HSR</title></rect>
+<rect class="cell" x="130" y="622" width="155" height="126" data-zone="Z0-CR"><title>Z0-CR</title></rect>
+<rect class="cell" x="285" y="118" width="155" height="126" data-zone="Z1-CL"><title>Z1-CL</title></rect>
+<rect class="cell" x="285" y="244" width="155" height="126" data-zone="Z1-HSL"><title>Z1-HSL</title></rect>
+<rect class="cell" x="285" y="370" width="155" height="126" data-zone="Z1-C"><title>Z1-C</title></rect>
+<rect class="cell" x="285" y="496" width="155" height="126" data-zone="Z1-HSR"><title>Z1-HSR</title></rect>
+<rect class="cell" x="285" y="622" width="155" height="126" data-zone="Z1-CR"><title>Z1-CR</title></rect>
+<rect class="cell" x="440" y="118" width="155" height="126" data-zone="Z2-CL"><title>Z2-CL</title></rect>
+<rect class="cell" x="440" y="244" width="155" height="126" data-zone="Z2-HSL"><title>Z2-HSL</title></rect>
+<rect class="cell" x="440" y="370" width="155" height="126" data-zone="Z2-C"><title>Z2-C</title></rect>
+<rect class="cell" x="440" y="496" width="155" height="126" data-zone="Z2-HSR"><title>Z2-HSR</title></rect>
+<rect class="cell" x="440" y="622" width="155" height="126" data-zone="Z2-CR"><title>Z2-CR</title></rect>
+<rect class="cell" x="595" y="118" width="155" height="126" data-zone="Z3-CL"><title>Z3-CL</title></rect>
+<rect class="cell" x="595" y="244" width="155" height="126" data-zone="Z3-HSL"><title>Z3-HSL</title></rect>
+<rect class="cell" x="595" y="370" width="155" height="126" data-zone="Z3-C"><title>Z3-C</title></rect>
+<rect class="cell" x="595" y="496" width="155" height="126" data-zone="Z3-HSR"><title>Z3-HSR</title></rect>
+<rect class="cell" x="595" y="622" width="155" height="126" data-zone="Z3-CR"><title>Z3-CR</title></rect>
+<rect class="cell" x="750" y="118" width="155" height="126" data-zone="Z4-CL"><title>Z4-CL</title></rect>
+<rect class="cell" x="750" y="244" width="155" height="126" data-zone="Z4-HSL"><title>Z4-HSL</title></rect>
+<rect class="cell" x="750" y="370" width="155" height="126" data-zone="Z4-C"><title>Z4-C</title></rect>
+<rect class="cell" x="750" y="496" width="155" height="126" data-zone="Z4-HSR"><title>Z4-HSR</title></rect>
+<rect class="cell" x="750" y="622" width="155" height="126" data-zone="Z4-CR"><title>Z4-CR</title></rect>
+<rect class="cell" x="905" y="118" width="155" height="126" data-zone="Z5-CL"><title>Z5-CL</title></rect>
+<rect class="cell" x="905" y="244" width="155" height="126" data-zone="Z5-HSL"><title>Z5-HSL</title></rect>
+<rect class="cell" x="905" y="370" width="155" height="126" data-zone="Z5-C"><title>Z5-C</title></rect>
+<rect class="cell" x="905" y="496" width="155" height="126" data-zone="Z5-HSR"><title>Z5-HSR</title></rect>
+<rect class="cell" x="905" y="622" width="155" height="126" data-zone="Z5-CR"><title>Z5-CR</title></rect>
+<rect class="cell" x="1060" y="118" width="155" height="126" data-zone="Z6-CL"><title>Z6-CL</title></rect>
+<rect class="cell" x="1060" y="244" width="155" height="126" data-zone="Z6-HSL"><title>Z6-HSL</title></rect>
+<rect class="cell" x="1060" y="370" width="155" height="126" data-zone="Z6-C"><title>Z6-C</title></rect>
+<rect class="cell" x="1060" y="496" width="155" height="126" data-zone="Z6-HSR"><title>Z6-HSR</title></rect>
+<rect class="cell" x="1060" y="622" width="155" height="126" data-zone="Z6-CR"><title>Z6-CR</title></rect>
+<rect class="cell" x="1215" y="118" width="155" height="126" data-zone="Z7-CL"><title>Z7-CL</title></rect>
+<rect class="cell" x="1215" y="244" width="155" height="126" data-zone="Z7-HSL"><title>Z7-HSL</title></rect>
+<rect class="cell" x="1215" y="370" width="155" height="126" data-zone="Z7-C"><title>Z7-C</title></rect>
+<rect class="cell" x="1215" y="496" width="155" height="126" data-zone="Z7-HSR"><title>Z7-HSR</title></rect>
+<rect class="cell" x="1215" y="622" width="155" height="126" data-zone="Z7-CR"><title>Z7-CR</title></rect>
+<rect class="cell" x="1370" y="118" width="155" height="126" data-zone="Z8-CL"><title>Z8-CL</title></rect>
+<rect class="cell" x="1370" y="244" width="155" height="126" data-zone="Z8-HSL"><title>Z8-HSL</title></rect>
+<rect class="cell" x="1370" y="370" width="155" height="126" data-zone="Z8-C"><title>Z8-C</title></rect>
+<rect class="cell" x="1370" y="496" width="155" height="126" data-zone="Z8-HSR"><title>Z8-HSR</title></rect>
+<rect class="cell" x="1370" y="622" width="155" height="126" data-zone="Z8-CR"><title>Z8-CR</title></rect>
+    <text class="coord-label" x="207.5" y="82" text-anchor="middle">Z0</text><text class="coord-label" x="207.5" y="796" text-anchor="middle">Z0</text>
+<text class="coord-label" x="362.5" y="82" text-anchor="middle">Z1</text><text class="coord-label" x="362.5" y="796" text-anchor="middle">Z1</text>
+<text class="coord-label" x="517.5" y="82" text-anchor="middle">Z2</text><text class="coord-label" x="517.5" y="796" text-anchor="middle">Z2</text>
+<text class="coord-label" x="672.5" y="82" text-anchor="middle">Z3</text><text class="coord-label" x="672.5" y="796" text-anchor="middle">Z3</text>
+<text class="coord-label" x="827.5" y="82" text-anchor="middle">Z4</text><text class="coord-label" x="827.5" y="796" text-anchor="middle">Z4</text>
+<text class="coord-label" x="982.5" y="82" text-anchor="middle">Z5</text><text class="coord-label" x="982.5" y="796" text-anchor="middle">Z5</text>
+<text class="coord-label" x="1137.5" y="82" text-anchor="middle">Z6</text><text class="coord-label" x="1137.5" y="796" text-anchor="middle">Z6</text>
+<text class="coord-label" x="1292.5" y="82" text-anchor="middle">Z7</text><text class="coord-label" x="1292.5" y="796" text-anchor="middle">Z7</text>
+<text class="coord-label" x="1447.5" y="82" text-anchor="middle">Z8</text><text class="coord-label" x="1447.5" y="796" text-anchor="middle">Z8</text>
+    <text class="coord-label" x="102" y="188" text-anchor="end">CL</text><text class="coord-label" x="1553" y="188" text-anchor="start">CL</text>
+<text class="coord-label" x="102" y="314" text-anchor="end">HSL</text><text class="coord-label" x="1553" y="314" text-anchor="start">HSL</text>
+<text class="coord-label" x="102" y="440" text-anchor="end">C</text><text class="coord-label" x="1553" y="440" text-anchor="start">C</text>
+<text class="coord-label" x="102" y="566" text-anchor="end">HSR</text><text class="coord-label" x="1553" y="566" text-anchor="start">HSR</text>
+<text class="coord-label" x="102" y="692" text-anchor="end">CR</text><text class="coord-label" x="1553" y="692" text-anchor="start">CR</text>
+  </g>
+    <g id="scoring-layer" data-layer="scoring" data-truth-type="goal-frame">
+    <rect id="left-goal-area" class="goal-area" x="285" y="307" width="155" height="252" data-truth-type="goal-area"><title>Left goal area rectangle: boundary Z0/Z1 to boundary Z1/Z2.</title></rect>
+    <rect id="right-goal-area" class="goal-area" x="1215" y="307" width="155" height="252" data-truth-type="goal-area"><title>Right goal area rectangle: boundary Z7/Z8 to boundary Z6/Z7.</title></rect>
+    <line id="goal-frame-left" class="goal-post" x1="285" y1="392" x2="285" y2="474" data-truth-type="goal-frame" />
+    <line class="goal-crossbar" x1="285" y1="419.88" x2="285" y2="474" />
+    <rect class="goal-target" x="277" y="419.88" width="16" height="54.120000000000005" />
+    <rect class="drop-target" x="277" y="392" width="16" height="27.879999999999995" />
+    <text class="goal-label" x="297" y="380">CONTROL defensive goal</text>
+    <line id="goal-frame-right" class="goal-post" x1="1370" y1="392" x2="1370" y2="474" data-truth-type="goal-frame" />
+    <line class="goal-crossbar" x1="1370" y1="419.88" x2="1370" y2="474" />
+    <rect class="goal-target" x="1362" y="419.88" width="16" height="54.120000000000005" />
+    <rect class="drop-target" x="1362" y="392" width="16" height="27.879999999999995" />
+    <text class="goal-label" x="1358" y="380" text-anchor="end">BLITZ defensive goal</text>
+  </g>
+    <g id="after-true-overload" data-layer="overload" data-truth-type="current-overload" data-zone="Z4-C" data-attackers-now="2" data-defenders-now="1">
+    <rect class="overload-ring" x="759" y="379" width="137" height="108" rx="14" />
+    <text class="compact-overlay-label" x="827.5" y="478" text-anchor="middle">2v1 current</text>
+  </g>
+    <g id="after-pressure-cue" data-layer="influence" data-truth-type="pressure-on-ball-carrier" data-player-id="control-mobile-lock">
+    <circle class="pressure-ring" cx="672.5" cy="307" r="68" />
+    <text class="compact-overlay-label" x="672.5" y="229" text-anchor="middle">Pressure 26</text>
+  </g>
+    <g id="after-selected-action" data-layer="selected-action" data-truth-type="selected-action" data-primary-actor="control-tempo-half" data-zone="Z3-HSL">
+    <rect class="target-highlight" x="605" y="254" width="135" height="106" rx="12" />
+    <line class="selected-arrow" x1="827.5" y1="307" x2="672.5" y2="307" marker-end="url(#actionArrow)" />
+    <text class="lane-pill" x="750" y="289" text-anchor="middle">RECYCLE - CLOSED</text>
+  </g>
+    <g id="after-player-control-tempo-half" data-layer="players" data-truth-type="real-player-position" data-player-id="control-tempo-half" data-team-id="control" data-role="tempo_half" data-initials="TH" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="672.5" y1="307" x2="702.5" y2="335" />
+        
+        <circle class="player-circle" cx="702.5" cy="335" r="22" fill="#2563eb" />
+        <text class="player-initials" x="702.5" y="343" text-anchor="middle">TH</text>
+        
+      </g>
+<g id="after-player-control-hook-link" data-layer="players" data-truth-type="real-player-position" data-player-id="control-hook-link" data-team-id="control" data-role="hook_link" data-initials="HL" data-real-zone="Z3-CL" data-rendered-zone="Z3-CL offset" data-projected-zone="Z3-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="672.5" y1="181" x2="702.5" y2="153" />
+        
+        <circle class="player-circle" cx="702.5" cy="153" r="22" fill="#2563eb" />
+        <text class="player-initials" x="702.5" y="161" text-anchor="middle">HL</text>
+        
+      </g>
+<g id="after-player-control-forward-leader" data-layer="players" data-truth-type="real-player-position" data-player-id="control-forward-leader" data-team-id="control" data-role="forward_leader" data-initials="FL" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="433" x2="857.5" y2="405" />
+        
+        <circle class="player-circle" cx="857.5" cy="405" r="22" fill="#2563eb" />
+        <text class="player-initials" x="857.5" y="413" text-anchor="middle">FL</text>
+        
+      </g>
+<g id="after-player-control-goalkeeper-free-safety" data-layer="players" data-truth-type="real-player-position" data-player-id="control-goalkeeper-free-safety" data-team-id="control" data-role="goalkeeper_free_safety" data-initials="GK" data-real-zone="Z1-C" data-rendered-zone="Z1-C" data-projected-zone="Z1-C" data-position-source="REAL">
+        
+        <rect class="gk-icon" x="344.5" y="415" width="36" height="36" rx="7" />
+        <circle class="player-circle" cx="362.5" cy="433" r="22" fill="#2563eb" />
+        <text class="player-initials" x="362.5" y="441" text-anchor="middle">GK</text>
+        <circle class="status-badge" cx="382.5" cy="413" r="11" /><text class="status-badge-text" x="382.5" y="418" text-anchor="middle">R</text>
+      </g>
+<g id="after-player-control-mobile-lock" data-layer="players" data-truth-type="real-player-position" data-player-id="control-mobile-lock" data-team-id="control" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z2-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="672.5" y1="307" x2="642.5" y2="335" />
+        
+        <circle class="player-circle ball-carrier" cx="642.5" cy="335" r="22" fill="#2563eb" />
+        <text class="player-initials" x="642.5" y="343" text-anchor="middle">ML</text>
+        
+      </g>
+<g id="after-player-control-space-hunter" data-layer="players" data-truth-type="real-player-position" data-player-id="control-space-hunter" data-team-id="control" data-role="space_hunter" data-initials="SH" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="433" x2="797.5" y2="461" />
+        
+        <circle class="player-circle" cx="797.5" cy="461" r="22" fill="#2563eb" />
+        <text class="player-initials" x="797.5" y="469" text-anchor="middle">SH</text>
+        
+      </g>
+<g id="after-player-control-playmaker" data-layer="players" data-truth-type="real-player-position" data-player-id="control-playmaker" data-team-id="control" data-role="playmaker" data-initials="PM" data-real-zone="Z2-C" data-rendered-zone="Z2-C" data-projected-zone="Z2-C" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="517.5" cy="433" r="22" fill="#2563eb" />
+        <text class="player-initials" x="517.5" y="441" text-anchor="middle">PM</text>
+        
+      </g>
+<g id="after-player-control-pivot" data-layer="players" data-truth-type="real-player-position" data-player-id="control-pivot" data-team-id="control" data-role="pivot" data-initials="PV" data-real-zone="Z2-HSL" data-rendered-zone="Z2-HSL offset" data-projected-zone="Z2-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="517.5" y1="307" x2="547.5" y2="279" />
+        
+        <circle class="player-circle" cx="547.5" cy="279" r="22" fill="#2563eb" />
+        <text class="player-initials" x="547.5" y="287" text-anchor="middle">PV</text>
+        <circle class="status-badge" cx="567.5" cy="259" r="11" /><text class="status-badge-text" x="567.5" y="264" text-anchor="middle">R</text>
+      </g>
+<g id="after-player-control-left-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="control-left-piston" data-team-id="control" data-role="left_piston" data-initials="LP" data-real-zone="Z2-CL" data-rendered-zone="Z2-CL" data-projected-zone="Z2-CL" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="517.5" cy="181" r="22" fill="#2563eb" />
+        <text class="player-initials" x="517.5" y="189" text-anchor="middle">LP</text>
+        <circle class="status-badge" cx="537.5" cy="161" r="11" /><text class="status-badge-text" x="537.5" y="166" text-anchor="middle">R</text>
+      </g>
+<g id="after-player-control-right-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="control-right-piston" data-team-id="control" data-role="right_piston" data-initials="RP" data-real-zone="Z2-HSR" data-rendered-zone="Z2-HSR" data-projected-zone="Z2-CR" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="517.5" cy="559" r="22" fill="#2563eb" />
+        <text class="player-initials" x="517.5" y="567" text-anchor="middle">RP</text>
+        <circle class="status-badge" cx="537.5" cy="539" r="11" /><text class="status-badge-text" x="537.5" y="544" text-anchor="middle">R</text>
+      </g>
+<g id="after-player-blitz-tempo-half" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-tempo-half" data-team-id="blitz" data-role="tempo_half" data-initials="TH" data-real-zone="Z4-HSL" data-rendered-zone="Z4-HSL offset" data-projected-zone="Z4-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="307" x2="857.5" y2="279" />
+        
+        <circle class="player-circle" cx="857.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="857.5" y="287" text-anchor="middle">TH</text>
+        
+      </g>
+<g id="after-player-blitz-hook-link" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-hook-link" data-team-id="blitz" data-role="hook_link" data-initials="HL" data-real-zone="Z3-CL" data-rendered-zone="Z3-CL offset" data-projected-zone="Z3-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="672.5" y1="181" x2="642.5" y2="153" />
+        
+        <circle class="player-circle" cx="642.5" cy="153" r="22" fill="#dc2626" />
+        <text class="player-initials" x="642.5" y="161" text-anchor="middle">HL</text>
+        
+      </g>
+<g id="after-player-blitz-forward-leader" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-forward-leader" data-team-id="blitz" data-role="forward_leader" data-initials="FL" data-real-zone="Z2-HSL" data-rendered-zone="Z2-HSL offset" data-projected-zone="Z2-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="517.5" y1="307" x2="487.5" y2="279" />
+        
+        <circle class="player-circle" cx="487.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="487.5" y="287" text-anchor="middle">FL</text>
+        
+      </g>
+<g id="after-player-blitz-goalkeeper-free-safety" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-goalkeeper-free-safety" data-team-id="blitz" data-role="goalkeeper_free_safety" data-initials="GK" data-real-zone="Z6-C" data-rendered-zone="Z6-C" data-projected-zone="Z6-C" data-position-source="REAL">
+        
+        <rect class="gk-icon" x="1119.5" y="415" width="36" height="36" rx="7" />
+        <circle class="player-circle" cx="1137.5" cy="433" r="22" fill="#dc2626" />
+        <text class="player-initials" x="1137.5" y="441" text-anchor="middle">GK</text>
+        
+      </g>
+<g id="after-player-blitz-mobile-lock" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-mobile-lock" data-team-id="blitz" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="672.5" y1="307" x2="642.5" y2="279" />
+        
+        <circle class="player-circle" cx="642.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="642.5" y="287" text-anchor="middle">ML</text>
+        
+      </g>
+<g id="after-player-blitz-space-hunter" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-space-hunter" data-team-id="blitz" data-role="space_hunter" data-initials="SH" data-real-zone="Z3-C" data-rendered-zone="Z3-C" data-projected-zone="Z3-C" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="672.5" cy="433" r="22" fill="#dc2626" />
+        <text class="player-initials" x="672.5" y="441" text-anchor="middle">SH</text>
+        
+      </g>
+<g id="after-player-blitz-playmaker" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-playmaker" data-team-id="blitz" data-role="playmaker" data-initials="PM" data-real-zone="Z4-HSL" data-rendered-zone="Z4-HSL offset" data-projected-zone="Z4-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="307" x2="797.5" y2="279" />
+        
+        <circle class="player-circle" cx="797.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="797.5" y="287" text-anchor="middle">PM</text>
+        
+      </g>
+<g id="after-player-blitz-pivot" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-pivot" data-team-id="blitz" data-role="pivot" data-initials="PV" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="672.5" y1="307" x2="702.5" y2="279" />
+        
+        <circle class="player-circle" cx="702.5" cy="279" r="22" fill="#dc2626" />
+        <text class="player-initials" x="702.5" y="287" text-anchor="middle">PV</text>
+        
+      </g>
+<g id="after-player-blitz-left-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-left-piston" data-team-id="blitz" data-role="left_piston" data-initials="LP" data-real-zone="Z4-CL" data-rendered-zone="Z4-CL" data-projected-zone="Z4-CL" data-position-source="REAL">
+        
+        
+        <circle class="player-circle" cx="827.5" cy="181" r="22" fill="#dc2626" />
+        <text class="player-initials" x="827.5" y="189" text-anchor="middle">LP</text>
+        
+      </g>
+<g id="after-player-blitz-right-piston" data-layer="players" data-truth-type="real-player-position" data-player-id="blitz-right-piston" data-team-id="blitz" data-role="right_piston" data-initials="RP" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C" data-position-source="OFFSET_FOR_VISIBILITY">
+        <line class="leader-line" x1="827.5" y1="433" x2="797.5" y2="405" />
+        
+        <circle class="player-circle" cx="797.5" cy="405" r="22" fill="#dc2626" />
+        <text class="player-initials" x="797.5" y="413" text-anchor="middle">RP</text>
+        
+      </g>
+    <g id="after-ball-marker" data-layer="ball" data-truth-type="ball-carrier" data-player-id="control-mobile-lock" data-zone="Z3-HSL">
+    <circle class="ball-marker" cx="676.5" cy="305" r="10" />
+  </g>
+    <g id="direction-layer" data-layer="direction" data-truth-type="attacking-direction">
+    <line class="direction-line" x1="300.5" y1="836" x2="1354.5" y2="836" marker-end="url(#directionArrow)" />
+    <text class="direction-label" x="827.5" y="864" text-anchor="middle">CONTROL attacks Z1 to Z7</text>
+  </g>
+  </svg></div>
+    </section>
+
+    <section class="summary-grid">
+      <div>
+        <section class="panel spatial-panel">
+    <h2>Team Shape Intent</h2>
+    <p>Collective positions are resolved from phase, style, ball zone, rest-defense needs, defensive axis protection, and pressing synchronization.</p>
+    <div class="occupation-card-grid">
+      <article class="mini-card">
+    <div class="card-topline"><strong>CONTROL intent before</strong><span>PRESSURE_ESCAPE</span><span>CONTROL</span></div>
+    <div class="card-metrics">
+      <span>required Z3-HSL, Z3-C, Z2-C</span>
+      <span>preferred Z3-HSL, Z2-HSL, Z2-C</span>
+    </div>
+    <p>CONTROL keeps the TH -&gt; ML recycle but must preserve enough structure to survive an immediate turnover.</p>
+    <p><strong>secondary intents:</strong> secure first recycle; preserve rest-defense base</p>
+    <p><strong>risk tradeoff:</strong> sacrifices immediate weak-side access</p>
+  </article>
+      <article class="mini-card">
+    <div class="card-topline"><strong>BLITZ intent before</strong><span>BALL_GOAL_AXIS_PROTECTION</span><span>BLITZ</span></div>
+    <div class="card-metrics">
+      <span>required Z5-CL, Z5-HSL, Z5-C</span>
+      <span>preferred Z5-CL, Z5-HSL, Z5-C, Z4-HSL</span>
+    </div>
+    <p>BLITZ protects the ball-to-score axis before chasing the carrier; aggressive style can accept weak-side exposure, not an open central route.</p>
+    <p><strong>secondary intents:</strong> TRY_ACCESS_PROTECTION; near-side pressure support; central cover</p>
+    <p><strong>risk tradeoff:</strong> controlled weak-side exposure</p>
+  </article>
+      <article class="mini-card">
+    <div class="card-topline"><strong>CONTROL intent after</strong><span>REST_DEFENSE_PROTECTION</span><span>CONTROL</span></div>
+    <div class="card-metrics">
+      <span>required Z2-HSL, Z2-C, Z1-C</span>
+      <span>preferred Z2-HSL, Z2-C, Z1-C, Z4-C</span>
+    </div>
+    <p>CONTROL's recycle is safe only if PV/PM/GK form a staggered rest-defense triangle behind ML.</p>
+    <p><strong>secondary intents:</strong> loss-channel protection; secure nearby support; methodical reset</p>
+    <p><strong>risk tradeoff:</strong> delays immediate rupture to protect against counterattack</p>
+  </article>
+      <article class="mini-card">
+    <div class="card-topline"><strong>BLITZ intent after</strong><span>COMPACT_PRESS</span><span>BLITZ</span></div>
+    <div class="card-metrics">
+      <span>required Z3-HSL, Z2-HSL, Z4-HSL, Z4-C, Z3-C</span>
+      <span>preferred Z3-HSL, Z2-HSL, Z4-HSL, Z4-C, Z3-C</span>
+    </div>
+    <p>BLITZ compresses the new carrier and nearest escape routes while preserving central cover behind the press.</p>
+    <p><strong>secondary intents:</strong> COUNTERPRESS; central recycle cut; next-lane protection</p>
+    <p><strong>risk tradeoff:</strong> intentional opposite-side weak-side exposure</p>
+  </article>
+    </div>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>CONTROL Rest Defense After Recycle</h2>
+    <dl class="details-grid-list">
+      <dt>immediate loss channel</dt><dd>PASS - PV protects Z2-HSL behind ML at Z3-HSL.</dd>
+      <dt>rest-defense triangle</dt><dd>GK Z1-C, PV Z2-HSL, PM Z2-C</dd>
+      <dt>GK last-rempart status</dt><dd>PASS - GK retreats behind the rest-defense line.</dd>
+      <dt>SH reconnection</dt><dd>PASS - SH reconnects toward Z4-C instead of drifting away.</dd>
+      <dt>verdict</dt><dd>PASS - CONTROL's recycle protects the immediate turnover route behind the new carrier.</dd>
+    </dl>
+  </section>
+      </div>
+      <div>
+        <section class="panel spatial-panel">
+    <h2>Defensive Axis Protection</h2>
+    <dl class="details-grid-list">
+      <dt>ball-to-goal axis</dt><dd>PASS - BLITZ protects Z5-CL, Z5-HSL, and Z5-C before chasing TH.</dd>
+      <dt>ball-to-try-access axis</dt><dd>PASS - near-side central-lateral and half-space access are covered.</dd>
+      <dt>protected zones</dt><dd>Z5-CL, Z5-HSL, Z5-C</dd>
+      <dt>missing zones</dt><dd>none</dd>
+      <dt>verdict</dt><dd>PASS - BLITZ protects the ball-to-score axis before chasing the carrier. Aggressive weak-side exposure is documented as a style risk.</dd>
+    </dl>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>BLITZ Pressing Response After Recycle</h2>
+    <dl class="details-grid-list">
+      <dt>pressing trigger</dt><dd>ML receives in Z3-HSL, triggering compact ball-side pressure.</dd>
+      <dt>ball-side pressure</dt><dd>PASS - ML/PV/FL compress the new carrier and immediate outlet.</dd>
+      <dt>cover line</dt><dd>LP Z4-CL, PM/TH Z4-HSL, RP Z4-C, SH Z3-C</dd>
+      <dt>central lane protection</dt><dd>PASS - central recycle and next central lane remain covered.</dd>
+      <dt>weak-side risk</dt><dd>PASS - opposite-side risk is intentional BLITZ aggression, not accidental abandonment.</dd>
+      <dt>verdict</dt><dd>PASS - BLITZ presses by compressing ML and nearest escape routes while preserving cover.</dd>
+    </dl>
+  </section>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <div>
+        <section class="panel spatial-panel">
+    <h2>CONTROL Attacking Spatial Reading</h2>
+    <ul class="compact-list">
+      <li><strong>CONTROL team positions:</strong> TH@Z4-HSL, HL@Z4-CL, FL@Z5-HSL, GK@Z2-C, ML@Z3-HSL, SH@Z5-HSR, PM@Z4-C, PV@Z3-C, LP@Z3-CL, RP@Z3-HSR</li>
+      <li><strong>Ahead of ball:</strong> FL@Z5-HSL, SH@Z5-HSR</li>
+      <li><strong>Support behind ball:</strong> GK@Z2-C, ML@Z3-HSL, PV@Z3-C, LP@Z3-CL, RP@Z3-HSR</li>
+      <li><strong>Same column support:</strong> HL@Z4-CL, PM@Z4-C</li>
+      <li><strong>Corridor occupation:</strong> 5/5 occupied by CONTROL; 4/5 target lanes stay tactically relevant.</li>
+      <li><strong>Short-side coverage:</strong> covered.</li>
+      <li><strong>Open-side coverage:</strong> open.</li>
+      <li><strong>Pressure on ball carrier:</strong> 26/100.</li>
+      <li><strong>Selected passing lane:</strong> Z4-HSL -> Z3-HSL CLOSED.</li>
+      <li><strong>True current overload:</strong> Z3-C 1v0 (PV). Z2-C is not labelled as a current 3v0.</li>
+      <li><strong>Projected overload:</strong> Z2-C may become relevant only as a projected support destination.</li>
+    </ul>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Decision Target</h2>
+    <dl class="context-grid">
+      <dt>targetType</dt><dd>SUPPORT_CLUSTER</dd>
+      <dt>tactical target cluster</dt><dd>Z3-C</dd>
+      <dt>selected receiver</dt><dd>ML</dd>
+      <dt>receiver resolved zone</dt><dd>Z3-HSL</dd>
+      <dt>actual reception zone</dt><dd>Z3-HSL</dd>
+    </dl>
+    <p>Z3-C is the pressure-escape support cluster; ML receives from the adjacent half-space support lane Z3-HSL.</p>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Ball Transfer Result</h2>
+    <dl class="context-grid">
+      <dt>previousCarrier</dt><dd>TH at Z4-HSL</dd>
+      <dt>selectedReceiver</dt><dd>ML</dd>
+      <dt>newCarrier</dt><dd>ML at Z3-HSL</dd>
+      <dt>targetType</dt><dd>SUPPORT_CLUSTER</dd>
+      <dt>tactical target cluster</dt><dd>Z3-C</dd>
+      <dt>receiver resolved zone</dt><dd>Z3-HSL</dd>
+      <dt>actual reception zone</dt><dd>Z3-HSL</dd>
+      <dt>actual ball zone after action</dt><dd>Z3-HSL</dd>
+      <dt>world state ball zone after action</dt><dd>Z3-HSL</dd>
+      <dt>transferType</dt><dd>HAND_PASS</dd>
+      <dt>possessionResult</dt><dd>CONTROL_UNDER_PRESSURE</dd>
+      <dt>follow-up role</dt><dd>SECURE_RECYCLE</dd>
+      <dt>next window</dt><dd>1 ticks</dd>
+    </dl>
+    <p data-validation="new carrier: ML"><strong>new carrier:</strong> ML.</p>
+    <p>ML becomes the ball carrier after the recycle; TH becomes support</p>
+    <p><strong>TH is not after-frame carrier:</strong> PASS.</p>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Ball State Zone Contract</h2>
+    <dl class="context-grid">
+      <dt>tactical target cluster</dt><dd>Z3-C</dd>
+      <dt>selected receiver</dt><dd>ML</dd>
+      <dt>receiver resolved zone</dt><dd>Z3-HSL</dd>
+      <dt>actual reception zone</dt><dd>Z3-HSL</dd>
+      <dt>actual ball zone after action</dt><dd>Z3-HSL</dd>
+      <dt>world state ball zone after action</dt><dd>Z3-HSL</dd>
+      <dt>contract status</dt><dd>PASS</dd>
+    </dl>
+    <p>Z3-C is the pressure escape cluster; ML receives from Z3-HSL.</p>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Action Semantic Contract</h2>
+    <dl class="context-grid">
+      <dt>decision actor</dt><dd>CONTROL TH</dd>
+      <dt>selected receiver</dt><dd>CONTROL ML</dd>
+      <dt>new carrier</dt><dd>CONTROL ML</dd>
+      <dt>post-action primary actor</dt><dd>CONTROL ML</dd>
+      <dt>selectedActionType</dt><dd>SUPPORT_CLUSTER_RECYCLE</dd>
+      <dt>selectedActionSubtype</dt><dd>BALL_SIDE_PRESSURE_ESCAPE</dd>
+      <dt>semantic status</dt><dd>PASS</dd>
+    </dl>
+    <p>TH plays the action. ML receives and becomes the next carrier; that does not make ML the decision actor for this action.</p>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Decision Reasoning</h2>
+    <dl class="context-grid">
+      <dt>raw top candidate</dt><dd>Z4-HSL -&gt; Z3-C RECYCLE, rank 1, score 87</dd>
+      <dt>selected candidate</dt><dd>Z4-HSL -&gt; Z3-C RECYCLE, rank 1, score 87</dd>
+      <dt>override applied</dt><dd>NO</dd>
+      <dt>final executed action</dt><dd>TH -&gt; ML</dd>
+      <dt>selectedActionType</dt><dd>SUPPORT_CLUSTER_RECYCLE</dd>
+      <dt>targetType</dt><dd>SUPPORT_CLUSTER</dd>
+      <dt>actual reception zone</dt><dd>Z3-HSL</dd>
+      <dt>candidate/executed consistency</dt><dd>PASS</dd>
+      <dt>normalizedCandidateActionType</dt><dd>SUPPORT_CLUSTER_RECYCLE</dd>
+    </dl>
+    <p>CONTROL chooses the safest first pressure-escape recycle. No tactical override is required.</p>
+    <p>Z3-C is the SUPPORT_CLUSTER tactical cluster, while ML receives in Z3-HSL.</p>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Tactical Reading</h2>
+    <ul class="compact-list">
+      <li><strong>Main attacking plan:</strong> CONTROL avoids forcing the closed forward lane and protects possession through ML in the resolved Z3-HSL support lane.</li>
+      <li><strong>Main defensive problem:</strong> BLITZ pressure makes first-contact reception harder, but does not fully remove the backward recycle.</li>
+      <li><strong>Decisive timing question:</strong> can CONTROL turn the Z3 support band into the next action before BLITZ recovery resets?</li>
+      <li><strong>Expected consequence:</strong> the action lowers immediate danger but improves possession security.</li>
+    </ul>
+  </section>
+      </div>
+      <div>
+        <section class="panel ranked-panel">
+    <h2>Ranked Options</h2>
+    <p class="selection-note">Selected because it is the safest pressure escape despite the lane being closed. Offensive alternatives are still evaluated.</p>
+    <div class="ranked-list">
+      <article class="ranked-card selected-card">
+            <div class="ranked-summary">
+              <span class="rank-pill">#1</span>
+              <strong>RECYCLE</strong>
+              <span>ML</span>
+              <span>POSITIVE</span>
+              <span>chain 82</span>
+              <span>risk low</span>
+              <span class="score-pill">87</span>
+            </div>
+            <p>safest pressure escape despite the closed lane because ML can secure the resolved recycle lane</p>
+            <details>
+              <summary>Advanced option details</summary>
+              <dl class="details-grid-list">
+                <dt>From</dt><dd>Z4-HSL</dd>
+                <dt>To</dt><dd>Z3-HSL</dd>
+                <dt>Legal</dt><dd>YES</dd>
+                <dt>Lane</dt><dd>CLOSED</dd>
+                <dt>Follow-up</dt><dd>SECURE_RECYCLE</dd>
+                <dt>Third-man</dt><dd>42/100</dd>
+                <dt>Direct</dt><dd>87</dd>
+                <dt>Best follow-up role</dt><dd>ML -&gt; HL reset</dd>
+                <dt>Final receiver</dt><dd>ML</dd>
+                <dt>Timing</dt><dd>82</dd>
+                <dt>Transfer</dt><dd>HAND_PASS</dd>
+                <dt>Shot legality</dt><dd>n/a</dd>
+                <dt>Style fit</dt><dd>CONTROL high</dd>
+              </dl>
+            </details>
+          </article><article class="ranked-card ">
+            <div class="ranked-summary">
+              <span class="rank-pill">#2</span>
+              <strong>INDIRECT_PROGRESSION</strong>
+              <span>RP</span>
+              <span>POSITIVE</span>
+              <span>chain 79</span>
+              <span>risk medium</span>
+              <span class="score-pill">75</span>
+            </div>
+            <p>opens the far side without forcing a rupture action</p>
+            <details>
+              <summary>Advanced option details</summary>
+              <dl class="details-grid-list">
+                <dt>From</dt><dd>Z4-HSL</dd>
+                <dt>To</dt><dd>Z3-HSR</dd>
+                <dt>Legal</dt><dd>YES</dd>
+                <dt>Lane</dt><dd>CONTESTED</dd>
+                <dt>Follow-up</dt><dd>FAST_RELEASE</dd>
+                <dt>Third-man</dt><dd>56/100</dd>
+                <dt>Direct</dt><dd>75</dd>
+                <dt>Best follow-up role</dt><dd>RP -&gt; SH</dd>
+                <dt>Final receiver</dt><dd>SH</dd>
+                <dt>Timing</dt><dd>68</dd>
+                <dt>Transfer</dt><dd>HAND_PASS</dd>
+                <dt>Shot legality</dt><dd>n/a</dd>
+                <dt>Style fit</dt><dd>CONTROL medium-high</dd>
+              </dl>
+            </details>
+          </article><article class="ranked-card ">
+            <div class="ranked-summary">
+              <span class="rank-pill">#3</span>
+              <strong>LATERAL_STABILIZE</strong>
+              <span>PM</span>
+              <span>NEUTRAL</span>
+              <span>chain 76</span>
+              <span>risk medium</span>
+              <span class="score-pill">64</span>
+            </div>
+            <p>keeps the play alive but PM receives without a clean forward body angle</p>
+            <details>
+              <summary>Advanced option details</summary>
+              <dl class="details-grid-list">
+                <dt>From</dt><dd>Z4-HSL</dd>
+                <dt>To</dt><dd>Z4-C</dd>
+                <dt>Legal</dt><dd>YES</dd>
+                <dt>Lane</dt><dd>CONTESTED</dd>
+                <dt>Follow-up</dt><dd>THIRD_MAN_SET</dd>
+                <dt>Third-man</dt><dd>78/100</dd>
+                <dt>Direct</dt><dd>64</dd>
+                <dt>Best follow-up role</dt><dd>PM -&gt; RP</dd>
+                <dt>Final receiver</dt><dd>RP</dd>
+                <dt>Timing</dt><dd>70</dd>
+                <dt>Transfer</dt><dd>HAND_PASS</dd>
+                <dt>Shot legality</dt><dd>n/a</dd>
+                <dt>Style fit</dt><dd>CONTROL medium</dd>
+              </dl>
+            </details>
+          </article><article class="ranked-card ">
+            <div class="ranked-summary">
+              <span class="rank-pill">#4</span>
+              <strong>FORWARD_PROGRESS</strong>
+              <span>FL</span>
+              <span>NEUTRAL</span>
+              <span>chain 80</span>
+              <span>risk medium-high</span>
+              <span class="score-pill">56</span>
+            </div>
+            <p>forward option exists, but the reception is likely back-to-pressure</p>
+            <details>
+              <summary>Advanced option details</summary>
+              <dl class="details-grid-list">
+                <dt>From</dt><dd>Z4-HSL</dd>
+                <dt>To</dt><dd>Z5-HSL</dd>
+                <dt>Legal</dt><dd>YES</dd>
+                <dt>Lane</dt><dd>CONTESTED</dd>
+                <dt>Follow-up</dt><dd>CONTACT_PLATFORM</dd>
+                <dt>Third-man</dt><dd>72/100</dd>
+                <dt>Direct</dt><dd>56</dd>
+                <dt>Best follow-up role</dt><dd>FL -&gt; SH</dd>
+                <dt>Final receiver</dt><dd>SH</dd>
+                <dt>Timing</dt><dd>64</dd>
+                <dt>Transfer</dt><dd>HAND_PASS</dd>
+                <dt>Shot legality</dt><dd>n/a</dd>
+                <dt>Style fit</dt><dd>CONTROL medium-low</dd>
+              </dl>
+            </details>
+          </article><article class="ranked-card ">
+            <div class="ranked-summary">
+              <span class="rank-pill">#5</span>
+              <strong>RUPTURE</strong>
+              <span>SH</span>
+              <span>NEUTRAL</span>
+              <span>chain 68</span>
+              <span>risk high</span>
+              <span class="score-pill">49</span>
+            </div>
+            <p>aggressive team might attack it, but CONTROL prefers not to force the contested far-side window</p>
+            <details>
+              <summary>Advanced option details</summary>
+              <dl class="details-grid-list">
+                <dt>From</dt><dd>Z4-HSL</dd>
+                <dt>To</dt><dd>Z5-HSR</dd>
+                <dt>Legal</dt><dd>YES</dd>
+                <dt>Lane</dt><dd>TEMPORARY</dd>
+                <dt>Follow-up</dt><dd>THIRD_MAN_SET</dd>
+                <dt>Third-man</dt><dd>70/100</dd>
+                <dt>Direct</dt><dd>49</dd>
+                <dt>Best follow-up role</dt><dd>SH weak-side continuation</dd>
+                <dt>Final receiver</dt><dd>SH</dd>
+                <dt>Timing</dt><dd>54</dd>
+                <dt>Transfer</dt><dd>KICK_PASS</dd>
+                <dt>Shot legality</dt><dd>n/a</dd>
+                <dt>Style fit</dt><dd>CONTROL low, BLITZ high</dd>
+              </dl>
+            </details>
+          </article><article class="ranked-card ">
+            <div class="ranked-summary">
+              <span class="rank-pill">#6</span>
+              <strong>GOAL_ATTEMPT</strong>
+              <span>self</span>
+              <span>NEUTRAL</span>
+              <span>chain 16</span>
+              <span>risk high</span>
+              <span class="score-pill">22</span>
+            </div>
+            <p>shot can be legal outside the goal area by foot, but this context does not justify it</p>
+            <details>
+              <summary>Advanced option details</summary>
+              <dl class="details-grid-list">
+                <dt>From</dt><dd>Z4-HSL</dd>
+                <dt>To</dt><dd>Z7-C frame</dd>
+                <dt>Legal</dt><dd>YES</dd>
+                <dt>Lane</dt><dd>LOW_VALUE</dd>
+                <dt>Follow-up</dt><dd>HOLD_AND_WAIT</dd>
+                <dt>Third-man</dt><dd>0/100</dd>
+                <dt>Direct</dt><dd>22</dd>
+                <dt>Best follow-up role</dt><dd>none</dd>
+                <dt>Final receiver</dt><dd>self</dd>
+                <dt>Timing</dt><dd>22</dd>
+                <dt>Transfer</dt><dd>CARRY</dd>
+                <dt>Shot legality</dt><dd>legal only as foot strike from controlled ball; no self half-volley/drop</dd>
+                <dt>Style fit</dt><dd>CONTROL low</dd>
+              </dl>
+            </details>
+          </article>
+    </div>
+  </section>
+        <section class="panel spatial-panel">
+    <h2>Action Selection Diagnostic</h2>
+    <div class="diagnostic-verdict">
+      <strong>TH -> ML</strong>
+      <span>CLEARLY_JUSTIFIED</span>
+      <span>finalSelectionScore 99</span>
+    </div>
+    <ul class="compact-list">
+      <li><strong>Why selected:</strong> selected because its final selection score is boosted by CONTROL pressure-escape priority, support-cluster fit, and possession stabilization under high pressure.</li>
+      <li><strong>Best rejected alternative:</strong> TH -&gt; PV (rawCandidateScore 81, finalSelectionScore 87).</li>
+      <li><strong>higher raw score was demoted:</strong> YES - TH -&gt; RP has the higher rawCandidateScore, but is demoted because its value is mostly second-phase and less immediate as a first pressure-escape pass.</li>
+      <li><strong>override used:</strong> NO.</li>
+      <li><strong>What it sacrifices:</strong> immediate vertical progression, early weak-side rupture access, contact-platform test into FL.</li>
+      <li><strong>OverConservatismPenalty:</strong> OverConservatismPenalty = 0 because no alternative beats the selected finalSelectionScore after selection adjustments; higher raw-upside options are closed, contested, second-phase, or require a risky elite override.</li>
+      <li><strong>elite override:</strong> elite override can upgrade CONTESTED/TEMPORARY lanes to PLAYABLE_RISK, but does not upgrade a CLOSED lane for CONTROL in this phase.</li>
+      <li><strong>Expected next phase:</strong> ML receives under control, draws the first press line deeper, and looks to rebuild toward RP/PM or the delayed FL/SH weak-side concept.</li>
+    </ul>
+    <h3>Candidate Score Breakdown</h3>
+    <div class="chain-card-grid">
+      <article class="mini-card chain-card selected-card">
+            <div class="card-topline"><strong>TH -> ML</strong><span>LIMITED_WINDOW</span><span>final 99</span></div>
+            <div class="card-metrics">
+              <span>SAFE_RECYCLE</span>
+              <span>ML@Z3-HSL</span>
+              <span>rawCandidateScore 82</span>
+              <span>finalSelectionScore 99</span>
+              <span>CONTESTED</span>
+              <span>POSITIVE</span>
+              <span>SECURE_RECYCLE</span>
+              <span>chain 49</span>
+              <span>risk 46</span>
+              <span>NON_THIRD_MAN_CHAIN</span>
+              <span>elite override NOT_NEEDED</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> CONTROL_PRESSURE_ESCAPE_PRIORITY +6; SAFEST_FIRST_PASS_OUTLET +4; SUPPORT_CLUSTER_MATCH +4; POSSESSION_STABILIZATION_UNDER_HIGH_PRESSURE +3</p>
+            <p>selected because its final selection score is boosted by CONTROL pressure-escape priority, support-cluster fit, and possession stabilization under high pressure</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 82</li><li>+28 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+18 retention: protects CONTROL possession</li><li>+8 progression: creates forward or next-phase access</li><li>+8 chain value: accounts for the next receiver after this action</li><li>-10 limited window: pass is playable only through a contested window</li><li>-16 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-8 no immediate progression: the recycle stabilizes rather than breaks BLITZ</li><li>+6 CONTROL_PRESSURE_ESCAPE_PRIORITY: CONTROL prioritizes the first pass that releases the ball-side press.</li><li>+4 SAFEST_FIRST_PASS_OUTLET: ML is the nearest half-space recycle outlet for the first escape pass.</li><li>+4 SUPPORT_CLUSTER_MATCH: the selected receiver belongs to the intended Z3-C support cluster.</li><li>+3 POSSESSION_STABILIZATION_UNDER_HIGH_PRESSURE: the action stabilizes possession before CONTROL tries the weak side.</li><li>finalSelectionScore: 99</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> PV</strong><span>LIMITED_WINDOW</span><span>final 87</span></div>
+            <div class="card-metrics">
+              <span>CENTRAL_RECYCLE</span>
+              <span>PV@Z3-C</span>
+              <span>rawCandidateScore 81</span>
+              <span>finalSelectionScore 87</span>
+              <span>CONTESTED</span>
+              <span>POSITIVE</span>
+              <span>SECURE_RECYCLE</span>
+              <span>chain 49</span>
+              <span>risk 46</span>
+              <span>NON_THIRD_MAN_CHAIN</span>
+              <span>elite override NOT_NEEDED</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> REST_DEFENSE_PRESERVED +4; SUPPORT_CLUSTER_MATCH +2</p>
+            <p>PV loses at final selection because the first-pass selection value is lower than ML's pressure escape.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 81</li><li>+22 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+18 retention: protects CONTROL possession</li><li>+8 progression: creates forward or next-phase access</li><li>+8 chain value: accounts for the next receiver after this action</li><li>-10 limited window: pass is playable only through a contested window</li><li>-16 turnover risk: risk adjusted by lane state and receiver pressure</li><li>+4 REST_DEFENSE_PRESERVED: central recycle protects the counterpress base.</li><li>+2 SUPPORT_CLUSTER_MATCH: PV also belongs to the support cluster.</li><li>finalSelectionScore: 87</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> RP</strong><span>LIMITED_WINDOW</span><span>final 67</span></div>
+            <div class="card-metrics">
+              <span>WEAK_SIDE_SUPPORT</span>
+              <span>RP@Z3-HSR</span>
+              <span>rawCandidateScore 91</span>
+              <span>finalSelectionScore 67</span>
+              <span>CONTESTED</span>
+              <span>POSITIVE</span>
+              <span>SECURE_RECYCLE</span>
+              <span>chain 73</span>
+              <span>risk 16</span>
+              <span>SAFE_RECYCLE</span>
+              <span>elite override PLAYABLE_RISK</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> DOES_NOT_ESCAPE_PRIMARY_PRESSURE -14; SUPPORT_CLUSTER_MISMATCH -6; WEAK_SIDE_TOO_EARLY -4</p>
+            <p>RP has the highest raw upside, but its value is mostly second-phase weak-side support rather than the cleanest first pressure-escape pass.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 91</li><li>+16 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+23 retention: protects CONTROL possession</li><li>+8 progression: creates forward or next-phase access</li><li>+12 chain value: accounts for the next receiver after this action</li><li>-10 limited window: pass is playable only through a contested window</li><li>-6 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-8 strict third-man rejected: chain concept exists but is not a formal third-man progression now</li><li>-14 DOES_NOT_ESCAPE_PRIMARY_PRESSURE: RP has high weak-side upside but is not the cleanest first escape from the ball-side press.</li><li>-6 SUPPORT_CLUSTER_MISMATCH: the selected tactical target is the Z3-C recycle cluster, not the far half-space outlet.</li><li>-4 WEAK_SIDE_TOO_EARLY: CONTROL wants to secure the first pass before opening the weak-side continuation.</li><li>finalSelectionScore: 67</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> SH</strong><span>FUTURE_WINDOW</span><span>final 31</span></div>
+            <div class="card-metrics">
+              <span>WEAK_SIDE_RUPTURE</span>
+              <span>SH@Z5-HSR</span>
+              <span>rawCandidateScore 49</span>
+              <span>finalSelectionScore 31</span>
+              <span>TEMPORARY_WINDOW</span>
+              <span>NEUTRAL</span>
+              <span>THIRD_MAN_SET</span>
+              <span>chain 73</span>
+              <span>risk 46</span>
+              <span>SAFE_RECYCLE</span>
+              <span>elite override PLAYABLE_RISK</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> SELECTION_RISK_TOO_HIGH_FOR_CONTROL -10; WEAK_SIDE_TOO_EARLY -8</p>
+            <p>SH is a future weak-side threat, but the current lane is not available now.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 49</li><li>+10 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+18 retention: protects CONTROL possession</li><li>+13 progression: creates forward or next-phase access</li><li>+12 chain value: accounts for the next receiver after this action</li><li>-12 future window: timing needs one more action before the option is clean</li><li>-16 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-8 strict third-man rejected: chain concept exists but is not a formal third-man progression now</li><li>-10 SELECTION_RISK_TOO_HIGH_FOR_CONTROL: SH is a real threat, but the rupture lane is not a CONTROL first-pass selection here.</li><li>-8 WEAK_SIDE_TOO_EARLY: CONTROL waits for the weak-side lane to become playable rather than forcing it.</li><li>finalSelectionScore: 31</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> PM</strong><span>NOT_AVAILABLE_NOW</span><span>final 21</span></div>
+            <div class="card-metrics">
+              <span>SHORT_INTERIOR_SUPPORT</span>
+              <span>PM@Z4-C</span>
+              <span>rawCandidateScore 35</span>
+              <span>finalSelectionScore 21</span>
+              <span>CLOSED</span>
+              <span>NEUTRAL</span>
+              <span>THIRD_MAN_SET</span>
+              <span>chain 69</span>
+              <span>risk 82</span>
+              <span>VALID_THIRD_MAN_PROGRESSION</span>
+              <span>elite override BLOCKED_BY_CLOSED_LANE</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> NOT_IMMEDIATE_ENOUGH_UNDER_HIGH_PRESSURE -8; REQUIRES_SECOND_ACTION_BEFORE_VALUE -6</p>
+            <p>PM loses at final selection because the first-pass selection value is lower than ML's pressure escape.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 35</li><li>+16 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+18 retention: protects CONTROL possession</li><li>+4 progression: creates forward or next-phase access</li><li>+11 chain value: accounts for the next receiver after this action</li><li>-30 lane/action unavailable: current lane state does not support the pass now</li><li>-29 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-8 NOT_IMMEDIATE_ENOUGH_UNDER_HIGH_PRESSURE: PM can connect play, but the first touch is less secure than the recycle outlet.</li><li>-6 REQUIRES_SECOND_ACTION_BEFORE_VALUE: PM's best value comes from the next combination rather than the first pressure escape.</li><li>finalSelectionScore: 21</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> FL</strong><span>NOT_AVAILABLE_NOW</span><span>final 0</span></div>
+            <div class="card-metrics">
+              <span>CONTACT_PLATFORM_PASS</span>
+              <span>FL@Z5-HSL</span>
+              <span>rawCandidateScore 15</span>
+              <span>finalSelectionScore 0</span>
+              <span>CLOSED</span>
+              <span>NEUTRAL</span>
+              <span>CONTACT_PLATFORM</span>
+              <span>chain 71</span>
+              <span>risk 82</span>
+              <span>REJECTED_THIRD_MAN</span>
+              <span>elite override BLOCKED_BY_CLOSED_LANE</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> LANE_CLOSED -12; REQUIRES_SECOND_ACTION_BEFORE_VALUE -8</p>
+            <p>FL is a valuable contact-platform concept, but the first lane is not playable enough for CONTROL now.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 15</li><li>+10 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+18 retention: protects CONTROL possession</li><li>+10 progression: creates forward or next-phase access</li><li>+11 chain value: accounts for the next receiver after this action</li><li>-30 lane/action unavailable: current lane state does not support the pass now</li><li>-29 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-8 strict third-man rejected: chain concept exists but is not a formal third-man progression now</li><li>-12 LANE_CLOSED: FL is a useful platform concept, but the first pass is not clean enough for CONTROL now.</li><li>-8 REQUIRES_SECOND_ACTION_BEFORE_VALUE: the main value appears after the layoff, not on the first action.</li><li>finalSelectionScore: 0</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> HL</strong><span>NOT_AVAILABLE_NOW</span><span>final 21</span></div>
+            <div class="card-metrics">
+              <span>SMALL_SIDE_RESET</span>
+              <span>HL@Z4-CL</span>
+              <span>rawCandidateScore 29</span>
+              <span>finalSelectionScore 21</span>
+              <span>CLOSED</span>
+              <span>NEUTRAL</span>
+              <span>WALL_PASS</span>
+              <span>chain 41</span>
+              <span>risk 82</span>
+              <span>NON_THIRD_MAN_CHAIN</span>
+              <span>elite override BLOCKED_BY_CLOSED_LANE</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> SELECTION_RISK_TOO_HIGH_FOR_CONTROL -8</p>
+            <p>HL loses at final selection because the first-pass selection value is lower than ML's pressure escape.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 29</li><li>+22 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+18 retention: protects CONTROL possession</li><li>+4 progression: creates forward or next-phase access</li><li>+7 chain value: accounts for the next receiver after this action</li><li>-30 lane/action unavailable: current lane state does not support the pass now</li><li>-29 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-8 SELECTION_RISK_TOO_HIGH_FOR_CONTROL: risk is too high for CONTROL's first pass.</li><li>finalSelectionScore: 21</li>
+              </ul>
+            </details>
+          </article><article class="mini-card chain-card ">
+            <div class="card-topline"><strong>TH -> TH</strong><span>HOLD_AVAILABLE</span><span>final 0</span></div>
+            <div class="card-metrics">
+              <span>CARRY_OR_HOLD</span>
+              <span>TH@Z4-HSL</span>
+              <span>rawCandidateScore 9</span>
+              <span>finalSelectionScore 0</span>
+              <span>HOLD</span>
+              <span>NEUTRAL</span>
+              <span>HOLD_AND_WAIT</span>
+              <span>chain 34</span>
+              <span>risk 68</span>
+              <span>NON_THIRD_MAN_CHAIN</span>
+              <span>elite override NOT_JUSTIFIED</span>
+            </div>
+            <p><strong>Selection adjustments:</strong> DOES_NOT_ESCAPE_PRIMARY_PRESSURE -12; SELECTION_RISK_TOO_HIGH_FOR_CONTROL -8</p>
+            <p>TH loses at final selection because the first-pass selection value is lower than ML's pressure escape.</p>
+            <details>
+              <summary>Scoring details</summary>
+              <ul class="compact-list">
+                <li>rawCandidateScore: 9</li><li>+8 pressure escape: helps TH escape the BLITZ pressure pocket</li><li>+13 retention: protects CONTROL possession</li><li>+4 progression: creates forward or next-phase access</li><li>+5 chain value: accounts for the next receiver after this action</li><li>-24 turnover risk: risk adjusted by lane state and receiver pressure</li><li>-22 invites pressure: holding keeps TH inside the pressure pocket</li><li>-12 DOES_NOT_ESCAPE_PRIMARY_PRESSURE: holding keeps TH inside the press rather than moving the pressure point.</li><li>-8 SELECTION_RISK_TOO_HIGH_FOR_CONTROL: continued carry is too risky for CONTROL with a recycle outlet available.</li><li>finalSelectionScore: 0</li>
+              </ul>
+            </details>
+          </article>
+    </div>
+  </section>
+      </div>
+    </section>
+
+    <section class="details-grid">
+      <details class="details-block" open><summary>Reception Follow-Up</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Reception Quality + Follow-Up Role</h2>
+    <p><strong>Lane State To Receiver</strong> is reported separately from reception quality; a closed lane can make the action unavailable without making the receiver trapped.</p>
+    <div class="quality-summary">
+      <p><strong>Excellent:</strong> none</p>
+      <p><strong>Positive:</strong> GK@Z2-C, ML@Z3-HSL, PV@Z3-C, LP@Z3-CL, RP@Z3-HSR</p>
+      <p><strong>Neutral:</strong> HL@Z4-CL, FL@Z5-HSL, SH@Z5-HSR, PM@Z4-C</p>
+      <p><strong>Negative:</strong> none</p>
+    </div>
+    <div class="reception-card-grid">
+      <article class="mini-card reception-card">
+            <div class="card-topline"><strong>HL</strong><span>Z4-CL</span><span>SAME_LINE</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>NEUTRAL</strong></span>
+              <span>Upgrade: none</span>
+              <span>WALL_PASS</span>
+              <span>Lane State To Receiver: CLOSED</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>NON_THIRD_MAN_CHAIN</span>
+              <span>potential third-man 30</span>
+              <span>risk 60</span>
+            </div>
+            <p>same-line outlet can act as a wall pass, but the touch does not create immediate forward access</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>FL</strong><span>Z5-HSL</span><span>AHEAD</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>NEUTRAL</strong></span>
+              <span>Upgrade: none</span>
+              <span>CONTACT_PLATFORM</span>
+              <span>Lane State To Receiver: CLOSED</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>SECOND_MAN_CANDIDATE</span>
+              <span>potential third-man 72</span>
+              <span>risk 60</span>
+            </div>
+            <p>neutral ahead-of-ball reception can be valuable as a contact platform</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>GK</strong><span>Z2-C</span><span>BEHIND</span></div>
+            <div class="card-metrics">
+              <span>POSITIVE -> <strong>POSITIVE</strong></span>
+              <span>Upgrade: none</span>
+              <span>SECURE_RECYCLE</span>
+              <span>Lane State To Receiver: CONTESTED</span>
+              <span>LIMITED_WINDOW</span>
+              <span>SAFE_RECYCLE</span>
+              <span>potential third-man 30</span>
+              <span>risk 16</span>
+            </div>
+            <p>controlled recycle support with enough body shape to secure possession</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>ML</strong><span>Z3-HSL</span><span>BEHIND</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>POSITIVE</strong></span>
+              <span>Upgrade: none</span>
+              <span>SECURE_RECYCLE</span>
+              <span>Lane State To Receiver: CONTESTED</span>
+              <span>LIMITED_WINDOW</span>
+              <span>SAFE_RECYCLE</span>
+              <span>potential third-man 30</span>
+              <span>risk 46</span>
+            </div>
+            <p>controlled recycle support with enough body shape to secure possession</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>SH</strong><span>Z5-HSR</span><span>AHEAD</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>NEUTRAL</strong></span>
+              <span>Upgrade: none</span>
+              <span>THIRD_MAN_SET</span>
+              <span>Lane State To Receiver: TEMPORARY_WINDOW</span>
+              <span>FUTURE_WINDOW</span>
+              <span>THIRD_MAN_CANDIDATE</span>
+              <span>potential third-man 82</span>
+              <span>risk 46</span>
+            </div>
+            <p>ahead option is tactically useful if it becomes a layoff or weak-side continuation</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>PM</strong><span>Z4-C</span><span>SAME_LINE</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>NEUTRAL</strong></span>
+              <span>Upgrade: none</span>
+              <span>THIRD_MAN_SET</span>
+              <span>Lane State To Receiver: CLOSED</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>NON_THIRD_MAN_CHAIN</span>
+              <span>potential third-man 78</span>
+              <span>risk 60</span>
+            </div>
+            <p>neutral same-line reception can become a third-man set if support arrives</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>PV</strong><span>Z3-C</span><span>BEHIND</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>POSITIVE</strong></span>
+              <span>Upgrade: none</span>
+              <span>SECURE_RECYCLE</span>
+              <span>Lane State To Receiver: CONTESTED</span>
+              <span>LIMITED_WINDOW</span>
+              <span>SAFE_RECYCLE</span>
+              <span>potential third-man 30</span>
+              <span>risk 46</span>
+            </div>
+            <p>controlled recycle support with enough body shape to secure possession</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>LP</strong><span>Z3-CL</span><span>BEHIND</span></div>
+            <div class="card-metrics">
+              <span>NEUTRAL -> <strong>POSITIVE</strong></span>
+              <span>Upgrade: none</span>
+              <span>SECURE_RECYCLE</span>
+              <span>Lane State To Receiver: CONTESTED</span>
+              <span>LIMITED_WINDOW</span>
+              <span>SAFE_RECYCLE</span>
+              <span>potential third-man 30</span>
+              <span>risk 46</span>
+            </div>
+            <p>controlled recycle support with enough body shape to secure possession</p>
+          </article><article class="mini-card reception-card">
+            <div class="card-topline"><strong>RP</strong><span>Z3-HSR</span><span>BEHIND</span></div>
+            <div class="card-metrics">
+              <span>POSITIVE -> <strong>POSITIVE</strong></span>
+              <span>Upgrade: none</span>
+              <span>SECURE_RECYCLE</span>
+              <span>Lane State To Receiver: CONTESTED</span>
+              <span>LIMITED_WINDOW</span>
+              <span>SAFE_RECYCLE</span>
+              <span>potential third-man 30</span>
+              <span>risk 16</span>
+            </div>
+            <p>controlled recycle support with enough body shape to secure possession</p>
+          </article>
+    </div>
+  </section></div></details>
+      <details class="details-block" open><summary>Functional Occupation Resolution</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Functional Occupation Resolution</h2>
+    <p>Players are interpreted by tactical function first, then each function resolves into a preferred zone and micro-position.</p>
+    <div class="occupation-card-grid">
+      <article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL TH</strong><span>Z4-HSL</span></div>
+              <div class="card-metrics">
+                <span>TEMPO_CONTROLLER</span>
+                <span>DIRECT_SUPPORT</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z4-HSL</span>
+                <span>CENTER</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> TH slows or accelerates play according to support quality; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> TEMPO_CONTROLLER resolves to Z4-HSL because TH slows or accelerates play according to support quality; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL HL</strong><span>Z4-CL</span></div>
+              <div class="card-metrics">
+                <span>DIRECT_SUPPORT</span>
+                <span>SAFE_RECYCLE</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z4-CL</span>
+                <span>RIGHT_SUPPORT_ANGLE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> HL occupies a nearby angle that keeps the carrier connected; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> DIRECT_SUPPORT resolves to Z4-CL because HL occupies a nearby angle that keeps the carrier connected; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL FL</strong><span>Z5-C</span></div>
+              <div class="card-metrics">
+                <span>CONTACT_PLATFORM</span>
+                <span>WIDTH_FIXER</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z5-HSL</span>
+                <span>OUTSIDE_SHOULDER</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> FL absorbs contact and sets the next receiver; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> CONTACT_PLATFORM resolves to Z5-HSL because FL absorbs contact and sets the next receiver; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL GK</strong><span>Z2-C</span></div>
+              <div class="card-metrics">
+                <span>REST_DEFENSE_ANCHOR</span>
+                <span>SAFE_RECYCLE</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z2-C</span>
+                <span>REST_DEFENSE_BASE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> GK protects the central transition lane; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> REST_DEFENSE_ANCHOR resolves to Z2-C because GK protects the central transition lane; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL ML</strong><span>Z3-C</span></div>
+              <div class="card-metrics">
+                <span>HALF_SPACE_RECYCLE</span>
+                <span>REST_DEFENSE_ANCHOR</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z3-HSL</span>
+                <span>LEFT_SUPPORT_ANGLE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> ML offers a half-space reset rather than duplicating the anchor; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> HALF_SPACE_RECYCLE resolves to Z3-HSL because ML offers a half-space reset rather than duplicating the anchor; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL SH</strong><span>Z5-CR</span></div>
+              <div class="card-metrics">
+                <span>DEPTH_THREAT</span>
+                <span>SWITCH_RECEIVER</span>
+                <span>DISCIPLINED_INTERPRETER</span>
+                <span>Z5-HSR</span>
+                <span>HIGH_PIN</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> SH pins depth and threatens the space behind recovery; DISCIPLINED_INTERPRETER because the player can interpret space, but structure remains the first reference</p>
+              <p><strong>why this location:</strong> DEPTH_THREAT resolves to Z5-HSR because SH pins depth and threatens the space behind recovery; DISCIPLINED_INTERPRETER because the player can interpret space, but structure remains the first reference</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL PM</strong><span>Z4-C</span></div>
+              <div class="card-metrics">
+                <span>DIRECT_SUPPORT</span>
+                <span>THIRD_MAN_CONNECTOR</span>
+                <span>DISCIPLINED_INTERPRETER</span>
+                <span>Z4-C</span>
+                <span>RIGHT_SUPPORT_ANGLE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> PM occupies a nearby angle that keeps the carrier connected; DISCIPLINED_INTERPRETER because the player can interpret space, but structure remains the first reference</p>
+              <p><strong>why this location:</strong> DIRECT_SUPPORT resolves to Z4-C because PM occupies a nearby angle that keeps the carrier connected; DISCIPLINED_INTERPRETER because the player can interpret space, but structure remains the first reference</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL PV</strong><span>Z3-C</span></div>
+              <div class="card-metrics">
+                <span>REST_DEFENSE_ANCHOR</span>
+                <span>SAFE_RECYCLE</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z3-C</span>
+                <span>REST_DEFENSE_BASE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> PV protects the central transition lane; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> REST_DEFENSE_ANCHOR resolves to Z3-C because PV protects the central transition lane; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL LP</strong><span>Z3-CL</span></div>
+              <div class="card-metrics">
+                <span>SAFE_RECYCLE</span>
+                <span>SUPPORT_BEHIND_BALL</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z3-CL</span>
+                <span>LOW_SUPPORT</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> LP keeps possession secure through a low-risk reset; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> SAFE_RECYCLE resolves to Z3-CL because LP keeps possession secure through a low-risk reset; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>CONTROL RP</strong><span>Z3-HSR</span></div>
+              <div class="card-metrics">
+                <span>SAFE_RECYCLE</span>
+                <span>SUPPORT_BEHIND_BALL</span>
+                <span>STRICT_STRUCTURE</span>
+                <span>Z3-HSR</span>
+                <span>LOW_SUPPORT</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> RP keeps possession secure through a low-risk reset; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              <p><strong>why this location:</strong> SAFE_RECYCLE resolves to Z3-HSR because RP keeps possession secure through a low-risk reset; STRICT_STRUCTURE because high discipline and low risk keep the player close to the team structure</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ TH</strong><span>Z6-HSL</span></div>
+              <div class="card-metrics">
+                <span>TEMPO_ACCELERATOR</span>
+                <span>PRESS_TRIGGER</span>
+                <span>FREE_ROAMER</span>
+                <span>Z5-HSL</span>
+                <span>HIGH_PIN</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> TH speeds the next action toward vertical pressure; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> TEMPO_ACCELERATOR resolves to Z5-HSL because TH speeds the next action toward vertical pressure; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>conflict resolved:</strong> TH accepted Z5-HSL with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ HL</strong><span>Z4-CL</span></div>
+              <div class="card-metrics">
+                <span>DIRECT_SUPPORT</span>
+                <span>SCREEN_SUPPORT</span>
+                <span>FREE_ROAMER</span>
+                <span>Z4-CL</span>
+                <span>RIGHT_SUPPORT_ANGLE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> HL occupies a nearby angle that keeps the carrier connected; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> DIRECT_SUPPORT resolves to Z4-CL because HL occupies a nearby angle that keeps the carrier connected; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>conflict resolved:</strong> HL accepted Z4-CL with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ FL</strong><span>Z4-C</span></div>
+              <div class="card-metrics">
+                <span>CONTACT_PLATFORM</span>
+                <span>SCREEN_SUPPORT</span>
+                <span>CREATIVE_INTERPRETER</span>
+                <span>Z4-C</span>
+                <span>OUTSIDE_SHOULDER</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> FL absorbs contact and sets the next receiver; CREATIVE_INTERPRETER because creativity and tactical intelligence allow controlled occupation drift</p>
+              <p><strong>why this location:</strong> CONTACT_PLATFORM resolves to Z4-C because FL absorbs contact and sets the next receiver; CREATIVE_INTERPRETER because creativity and tactical intelligence allow controlled occupation drift</p>
+              <p><strong>conflict resolved:</strong> FL accepted Z4-C with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ GK</strong><span>Z6-C</span></div>
+              <div class="card-metrics">
+                <span>REST_DEFENSE_ANCHOR</span>
+                <span>SWITCH_RECEIVER</span>
+                <span>CREATIVE_INTERPRETER</span>
+                <span>Z6-C</span>
+                <span>REST_DEFENSE_BASE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> GK protects the central transition lane; CREATIVE_INTERPRETER because creativity and tactical intelligence allow controlled occupation drift</p>
+              <p><strong>why this location:</strong> REST_DEFENSE_ANCHOR resolves to Z6-C because GK protects the central transition lane; CREATIVE_INTERPRETER because creativity and tactical intelligence allow controlled occupation drift</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ ML</strong><span>Z4-HSL</span></div>
+              <div class="card-metrics">
+                <span>PRESS_TRIGGER</span>
+                <span>COVER_SHADOW_BLOCKER</span>
+                <span>FREE_ROAMER</span>
+                <span>Z4-HSL</span>
+                <span>PRESSURE_ANGLE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> ML steps forward when the pressure cue appears; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> PRESS_TRIGGER resolves to Z4-HSL because ML steps forward when the pressure cue appears; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>conflict resolved:</strong> ML accepted Z4-HSL with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ SH</strong><span>Z5-C</span></div>
+              <div class="card-metrics">
+                <span>CHAOS_ATTACKER</span>
+                <span>DEPTH_THREAT</span>
+                <span>FREE_ROAMER</span>
+                <span>Z5-C</span>
+                <span>HIGH_PIN</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> SH attacks unstable second-ball space; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> CHAOS_ATTACKER resolves to Z5-C because SH attacks unstable second-ball space; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ PM</strong><span>Z5-HSL</span></div>
+              <div class="card-metrics">
+                <span>CHAOS_ATTACKER</span>
+                <span>TEMPO_ACCELERATOR</span>
+                <span>FREE_ROAMER</span>
+                <span>Z5-C</span>
+                <span>HIGH_PIN</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> PM attacks unstable second-ball space; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> CHAOS_ATTACKER resolves to Z5-C because PM attacks unstable second-ball space; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>conflict resolved:</strong> PM accepted Z5-C with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ PV</strong><span>Z4-HSL</span></div>
+              <div class="card-metrics">
+                <span>COVER_SHADOW_BLOCKER</span>
+                <span>PRESSING_TRAP</span>
+                <span>CREATIVE_INTERPRETER</span>
+                <span>Z4-HSL</span>
+                <span>COVER_LANE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> PV blocks the next lane rather than only marking a zone; CREATIVE_INTERPRETER because creativity and tactical intelligence allow controlled occupation drift</p>
+              <p><strong>why this location:</strong> COVER_SHADOW_BLOCKER resolves to Z4-HSL because PV blocks the next lane rather than only marking a zone; CREATIVE_INTERPRETER because creativity and tactical intelligence allow controlled occupation drift</p>
+              <p><strong>conflict resolved:</strong> PV accepted Z4-HSL with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ LP</strong><span>Z6-HSL</span></div>
+              <div class="card-metrics">
+                <span>PRESS_TRIGGER</span>
+                <span>PRESSING_TRAP</span>
+                <span>FREE_ROAMER</span>
+                <span>Z5-HSL</span>
+                <span>PRESSURE_ANGLE</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> LP steps forward when the pressure cue appears; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> PRESS_TRIGGER resolves to Z5-HSL because LP steps forward when the pressure cue appears; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>conflict resolved:</strong> LP accepted Z5-HSL with micro-position differentiation</p>
+            </article><article class="mini-card occupation-card">
+              <div class="card-topline"><strong>BLITZ RP</strong><span>Z6-HSR</span></div>
+              <div class="card-metrics">
+                <span>TEMPO_ACCELERATOR</span>
+                <span>TRANSITION_HUNTER</span>
+                <span>FREE_ROAMER</span>
+                <span>Z5-HSR</span>
+                <span>HIGH_PIN</span>
+              </div>
+              <p><strong>occupation interpretation:</strong> RP speeds the next action toward vertical pressure; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>why this location:</strong> TEMPO_ACCELERATOR resolves to Z5-HSR because RP speeds the next action toward vertical pressure; FREE_ROAMER because risk appetite and style allow aggressive spatial freedom</p>
+              <p><strong>conflict resolved:</strong> RP accepted Z5-HSR with micro-position differentiation</p>
+            </article>
+    </div>
+    <p><strong>function-zone mismatch count:</strong> 0.</p>
+  </section></div></details>
+      <details class="details-block" open><summary>Occupation Quality Evaluation</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Occupation Quality Evaluation</h2>
+    <p>The evaluator asks whether each resolved position actually fulfills its tactical function, instead of trusting the function label alone.</p>
+    <div class="occupation-quality-grid">
+      <article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL TH</strong><span>EXCELLENT</span><span>90/100</span></div>
+            <div class="card-metrics"><span>TEMPO_CONTROLLER</span><span>Z4-HSL</span><span>CENTER</span></div>
+            <p><strong>Main strength:</strong> function and resolved zone are broadly compatible</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL HL</strong><span>ACCEPTABLE</span><span>70/100</span></div>
+            <div class="card-metrics"><span>DIRECT_SUPPORT</span><span>Z4-CL</span><span>RIGHT_SUPPORT_ANGLE</span></div>
+            <p><strong>Main strength:</strong> keeps a playable pressure escape near the carrier</p>
+            <p><strong>Main weakness:</strong> support is available but not close enough for elite short-support CONTROL behavior</p>
+            <p><strong>Suggested adjustment:</strong> HL -&gt; Z4-HSL RIGHT_SUPPORT_ANGLE or Z4-C LOW_SUPPORT</p>
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL FL</strong><span>GOOD</span><span>86/100</span></div>
+            <div class="card-metrics"><span>CONTACT_PLATFORM</span><span>Z5-HSL</span><span>OUTSIDE_SHOULDER</span></div>
+            <p><strong>Main strength:</strong> can act as point d'appui before a chain continuation value</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL GK</strong><span>EXCELLENT</span><span>92/100</span></div>
+            <div class="card-metrics"><span>REST_DEFENSE_ANCHOR</span><span>Z2-C</span><span>REST_DEFENSE_BASE</span></div>
+            <p><strong>Main strength:</strong> protects the transition lane behind the ball</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL ML</strong><span>EXCELLENT</span><span>93/100</span></div>
+            <div class="card-metrics"><span>HALF_SPACE_RECYCLE</span><span>Z3-HSL</span><span>LEFT_SUPPORT_ANGLE</span></div>
+            <p><strong>Main strength:</strong> creates a diagonal reset rather than duplicating the anchor</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL SH</strong><span>EXCELLENT</span><span>90/100</span></div>
+            <div class="card-metrics"><span>DEPTH_THREAT</span><span>Z5-HSR</span><span>HIGH_PIN</span></div>
+            <p><strong>Main strength:</strong> function and resolved zone are broadly compatible</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL PM</strong><span>ACCEPTABLE</span><span>70/100</span></div>
+            <div class="card-metrics"><span>DIRECT_SUPPORT</span><span>Z4-C</span><span>RIGHT_SUPPORT_ANGLE</span></div>
+            <p><strong>Main strength:</strong> keeps a playable pressure escape near the carrier</p>
+            <p><strong>Main weakness:</strong> support is available but not close enough for elite short-support CONTROL behavior</p>
+            <p><strong>Suggested adjustment:</strong> PM -&gt; Z4-HSL RIGHT_SUPPORT_ANGLE or Z4-C LOW_SUPPORT</p>
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL PV</strong><span>EXCELLENT</span><span>92/100</span></div>
+            <div class="card-metrics"><span>REST_DEFENSE_ANCHOR</span><span>Z3-C</span><span>REST_DEFENSE_BASE</span></div>
+            <p><strong>Main strength:</strong> protects the transition lane behind the ball</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>CONTROL RP</strong><span>EXCELLENT</span><span>90/100</span></div>
+            <div class="card-metrics"><span>SAFE_RECYCLE</span><span>Z3-HSR</span><span>LOW_SUPPORT</span></div>
+            <p><strong>Main strength:</strong> function and resolved zone are broadly compatible</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ TH</strong><span>GOOD</span><span>80/100</span></div>
+            <div class="card-metrics"><span>TEMPO_ACCELERATOR</span><span>Z5-HSL</span><span>HIGH_PIN</span></div>
+            <p><strong>Main strength:</strong> projects a first outlet after recovery</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ GK</strong><span>ACCEPTABLE</span><span>62/100</span></div>
+            <div class="card-metrics"><span>REST_DEFENSE_ANCHOR</span><span>Z6-C</span><span>REST_DEFENSE_BASE</span></div>
+            <p><strong>Main strength:</strong> protects the transition lane behind the ball</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ ML</strong><span>EXCELLENT</span><span>100/100</span></div>
+            <div class="card-metrics"><span>PRESS_TRIGGER</span><span>Z4-HSL</span><span>PRESSURE_ANGLE</span></div>
+            <p><strong>Main strength:</strong> compresses the carrier lane</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ SH</strong><span>EXCELLENT</span><span>90/100</span></div>
+            <div class="card-metrics"><span>CHAOS_ATTACKER</span><span>Z5-C</span><span>HIGH_PIN</span></div>
+            <p><strong>Main strength:</strong> function and resolved zone are broadly compatible</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ PM</strong><span>EXCELLENT</span><span>90/100</span></div>
+            <div class="card-metrics"><span>CHAOS_ATTACKER</span><span>Z5-C</span><span>HIGH_PIN</span></div>
+            <p><strong>Main strength:</strong> function and resolved zone are broadly compatible</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ PV</strong><span>EXCELLENT</span><span>100/100</span></div>
+            <div class="card-metrics"><span>COVER_SHADOW_BLOCKER</span><span>Z4-HSL</span><span>COVER_LANE</span></div>
+            <p><strong>Main strength:</strong> compresses the carrier lane</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ LP</strong><span>EXCELLENT</span><span>100/100</span></div>
+            <div class="card-metrics"><span>PRESS_TRIGGER</span><span>Z5-HSL</span><span>PRESSURE_ANGLE</span></div>
+            <p><strong>Main strength:</strong> compresses the carrier lane</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article><article class="mini-card quality-card">
+            <div class="card-topline"><strong>BLITZ RP</strong><span>GOOD</span><span>80/100</span></div>
+            <div class="card-metrics"><span>TEMPO_ACCELERATOR</span><span>Z5-HSR</span><span>HIGH_PIN</span></div>
+            <p><strong>Main strength:</strong> projects a first outlet after recovery</p>
+            <p><strong>Main weakness:</strong> none</p>
+            
+          </article>
+    </div>
+    <h2>Team Occupation Quality</h2>
+    <div class="occupation-quality-grid">
+      <article class="mini-card team-quality-card">
+            <div class="card-topline"><strong>CONTROL</strong><span>84/100</span></div>
+            <div class="card-metrics">
+              <span>support 83</span>
+              <span>width 60</span>
+              <span>rest defense 92</span>
+              <span>weak-side 90</span>
+              <span>risk 88</span>
+            </div>
+            <p>PM support may be too far for elite CONTROL short support</p>
+          </article><article class="mini-card team-quality-card">
+            <div class="card-topline"><strong>BLITZ</strong><span>71/100</span></div>
+            <div class="card-metrics">
+              <span>support 70</span>
+              <span>width 60</span>
+              <span>rest defense 62</span>
+              <span>weak-side 60</span>
+              <span>risk 81</span>
+            </div>
+            <p>BLITZ weak-side exposure risk: pressure outpaces weak-side protection</p>
+          </article>
+    </div>
+    <h2>Quality Warnings</h2>
+    <ul class="compact-list">
+      <li>HL higher alternative: current 70/100, alternative Z5-CL 70/100 - more pinning and small-side threat, slightly more transition risk</li><li>RP creative alternative: current 90/100, alternative Z4-C 70/100 - higher weak-side connection if creativity/vision justify leaving the recycle base</li><li>DIRECT_SUPPORT_TOO_FAR</li><li>DIRECT_SUPPORT_TOO_FAR</li><li>DIRECT_SUPPORT_TOO_FAR</li>
+    </ul>
+  </section></div></details>
+      <details class="details-block"><summary>Reception Chains + Third-Man Patterns</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Reception Chains</h2>
+    <p>Chains compare the first reception with what the next receiver can do. This is why a NEUTRAL FL touch can still carry value as a platform for SH.</p>
+    <div class="chain-card-grid">
+      <article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> SH -> RP</strong><span>style 78</span></div>
+            <div class="card-metrics">
+              <span>direct 64</span>
+              <span>chain 73</span>
+              <span>TACTICAL_WINDOW</span>
+              <span>risk 37</span>
+              <span>SAFE_RECYCLE</span>
+              <span>REJECTED</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-3 / 90. TH -&gt; SH -&gt; RP: SH sets the third-man lane before RP attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> RP -> SH</strong><span>style 71</span></div>
+            <div class="card-metrics">
+              <span>direct 70</span>
+              <span>chain 72</span>
+              <span>TACTICAL_WINDOW</span>
+              <span>risk 37</span>
+              <span>WALL_PASS_RESET</span>
+              <span>REJECTED</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-4 / 89. TH -&gt; RP -&gt; SH: RP can release quickly before SH attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> FL -> SH</strong><span>style 70</span></div>
+            <div class="card-metrics">
+              <span>direct 59</span>
+              <span>chain 71</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>risk 64</span>
+              <span>WALL_PASS_RESET</span>
+              <span>REJECTED</span>
+              <span>effectiveChainQuality NEUTRAL</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-2 / 66. TH -&gt; FL -&gt; SH: FL acts as a contact platform before SH attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> SH -> FL</strong><span>style 70</span></div>
+            <div class="card-metrics">
+              <span>direct 64</span>
+              <span>chain 71</span>
+              <span>TACTICAL_WINDOW</span>
+              <span>risk 64</span>
+              <span>WALL_PASS_RESET</span>
+              <span>REJECTED</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-3 / 66. TH -&gt; SH -&gt; FL: SH sets the third-man lane before FL attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> SH -> PM</strong><span>style 69</span></div>
+            <div class="card-metrics">
+              <span>direct 64</span>
+              <span>chain 69</span>
+              <span>TACTICAL_WINDOW</span>
+              <span>risk 64</span>
+              <span>THIRD_MAN_PROGRESSION</span>
+              <span>VALID</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-3 / 66. TH -&gt; SH -&gt; PM: SH sets the third-man lane before PM attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> FL -> RP</strong><span>style 72</span></div>
+            <div class="card-metrics">
+              <span>direct 59</span>
+              <span>chain 67</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>risk 44</span>
+              <span>SAFE_RECYCLE</span>
+              <span>REJECTED</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-2 / 77. TH -&gt; FL -&gt; RP: FL acts as a contact platform before RP attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> PM -> RP</strong><span>style 75</span></div>
+            <div class="card-metrics">
+              <span>direct 54</span>
+              <span>chain 65</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>risk 44</span>
+              <span>SAFE_RECYCLE</span>
+              <span>REJECTED</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-2 / 77. TH -&gt; PM -&gt; RP: PM sets the third-man lane before RP attacks the next progression window.</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> FL -> GK</strong><span>style 72</span></div>
+            <div class="card-metrics">
+              <span>direct 59</span>
+              <span>chain 64</span>
+              <span>NOT_AVAILABLE_NOW</span>
+              <span>risk 44</span>
+              <span>SAFE_RECYCLE</span>
+              <span>NOT_THIRD_MAN</span>
+              <span>effectiveChainQuality POSITIVE</span>
+            </div>
+            <p><strong>chain timing:</strong> 0-2 / 77. TH -&gt; FL -&gt; GK: FL acts as a contact platform before GK attacks the next progression window.</p>
+          </article>
+    </div>
+    <p><strong>chain continuation value:</strong> TH -&gt; FL -&gt; SH: FL acts as a contact platform before SH attacks the next progression window..</p>
+  </section><section class="panel spatial-panel">
+    <h2>Strict Third-Man Logic</h2>
+    <ul class="compact-list">
+      <li><strong>First man:</strong> TH.</li>
+      <li><strong>Third-Man pattern score:</strong> 49/100.</li>
+      <li><strong>Wall receiver:</strong> control-forward-leader.</li>
+      <li><strong>Third man:</strong> control-space-hunter.</li>
+      <li><strong>Return lane:</strong> Z5-HSL->Z5-HSR.</li>
+      <li><strong>Timing window:</strong> 1 ticks.</li>
+      <li><strong>Explanation:</strong> FL can act as point d'appui for SH through Z5-HSL-&gt;Z5-HSR</li>
+    </ul>
+    <div class="chain-card-grid">
+      <article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> SH -> RP</strong><span>SAFE_RECYCLE</span><span>REJECTED</span></div>
+            <div class="card-metrics">
+              <span>progression 64</span>
+              <span>recycle 77</span>
+              <span>THIRD_MAN_BEHIND_FIRST_MAN</span>
+            </div>
+            <p>third man is behind the first man, so this is a recycle/reset; chain continuation value does not beat recycle value</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> RP -> SH</strong><span>WALL_PASS_RESET</span><span>REJECTED</span></div>
+            <div class="card-metrics">
+              <span>progression 68</span>
+              <span>recycle 41</span>
+              <span>SECOND_MAN_NOT_AHEAD</span>
+            </div>
+            <p>second man is not ahead of the first man</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> FL -> SH</strong><span>WALL_PASS_RESET</span><span>REJECTED</span></div>
+            <div class="card-metrics">
+              <span>progression 68</span>
+              <span>recycle 41</span>
+              <span>FIRST_LANE_NOT_PLAYABLE</span>
+            </div>
+            <p>first-to-second lane is CLOSED</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> SH -> FL</strong><span>WALL_PASS_RESET</span><span>REJECTED</span></div>
+            <div class="card-metrics">
+              <span>progression 48</span>
+              <span>recycle 36</span>
+              <span>THIRD_MAN_NOT_FACING_PLAY</span>
+            </div>
+            <p>third man is not facing play or half-turned</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> SH -> PM</strong><span>THIRD_MAN_PROGRESSION</span><span>VALID</span></div>
+            <div class="card-metrics">
+              <span>progression 50</span>
+              <span>recycle 36</span>
+              <span>strict-valid</span>
+            </div>
+            <p>third man receives a quick layoff facing play with progression value above recycle</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> FL -> RP</strong><span>SAFE_RECYCLE</span><span>REJECTED</span></div>
+            <div class="card-metrics">
+              <span>progression 64</span>
+              <span>recycle 77</span>
+              <span>FIRST_LANE_NOT_PLAYABLE</span>
+            </div>
+            <p>first-to-second lane is CLOSED; third man is behind the first man, so this is a recycle/reset; chain continuation value does not beat recycle value</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> PM -> RP</strong><span>SAFE_RECYCLE</span><span>REJECTED</span></div>
+            <div class="card-metrics">
+              <span>progression 64</span>
+              <span>recycle 77</span>
+              <span>SECOND_MAN_NOT_AHEAD</span>
+            </div>
+            <p>second man is not ahead of the first man; first-to-second lane is CLOSED; third man is behind the first man, so this is a recycle/reset; chain continuation value does not beat recycle value</p>
+          </article><article class="mini-card chain-card">
+            <div class="card-topline"><strong>TH -> FL -> GK</strong><span>SAFE_RECYCLE</span><span>NOT_THIRD_MAN</span></div>
+            <div class="card-metrics">
+              <span>progression 64</span>
+              <span>recycle 77</span>
+              <span>FIRST_LANE_NOT_PLAYABLE</span>
+            </div>
+            <p>first-to-second lane is CLOSED; GK receives as a safety valve, not as a forward-facing attacking third man; third man is behind the first man, so this is a recycle/reset; chain continuation value does not beat recycle value</p>
+          </article>
+    </div>
+  </section></div></details>
+      <details class="details-block"><summary>Post-Resolution Consistency</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Post-Resolution Consistency Check</h2>
+    <ul class="compact-list">
+      <li><strong>Resolved-position source:</strong> Functional Occupation Resolution feeds Reception Quality, Ranked Options, Ball Transfer, Reception Chains, and Strict Third-Man display.</li>
+      <li><strong>Selected recycle:</strong> TH@Z4-HSL -> ML@Z3-HSL.</li>
+      <li><strong>receiver/new carrier mismatch count = 0:</strong> receiver and new carrier both resolve to ML.</li>
+      <li><strong>Legacy positions:</strong> pre-resolution/debug-only values are hidden from coach-facing panels.</li>
+      <li><strong>Chain classification:</strong> useful chains remain visible, but strict-third-man status is shown separately.</li>
+    </ul>
+  </section></div></details>
+      <details class="details-block"><summary>Structure Rationality + GK Guardrails</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Structure Rationality</h2>
+    <p>Control score: 100/100. BLITZ score: 58/100. No live tactical decision was changed by this checker; goalkeeper guardrails may correct snapshot positioning.</p>
+    <div class="structure-card-grid">
+      <article class="mini-card structure-card">
+                    <div class="card-topline"><strong>GOALKEEPER_TOO_HIGH</strong><span>explained</span></div>
+                    <p>BLITZ GK is higher than the settled-possession guardrail at Z6-C.</p>
+                    <p><strong>Calibration:</strong> Allow BLITZ GK to sweep, but keep a frame recovery route.</p>
+                  </article><article class="mini-card structure-card">
+                    <div class="card-topline"><strong>REST_DEFENSE_DUPLICATION</strong><span>explained</span></div>
+                    <p>BLITZ ML and PV occupy the same functional support lane at Z4-HSL.</p>
+                    <p><strong>Calibration:</strong> Use ML as a half-space recovery player and PV as the central rest-defense anchor.</p>
+                  </article><article class="mini-card structure-card">
+                    <div class="card-topline"><strong>NARROW_CORRIDOR_OCCUPATION</strong><span>explained</span></div>
+                    <p>BLITZ occupies only 3/5 corridors.</p>
+                    <p><strong>Calibration:</strong> Keep at least one piston or runner in the far-side corridor.</p>
+                  </article>
+    </div>
+  </section><section class="panel spatial-panel">
+    <h2>GK Guardrail</h2>
+    <div class="guardrail-grid">
+      <article class="mini-card">
+        <div class="card-topline"><strong>CONTROL</strong><span>OK</span></div>
+        <div class="card-metrics"><span>base Z1-C</span><span>max Z2-C</span><span>actual Z2-C</span></div>
+        <p>inside default goalkeeper support guardrail</p>
+      </article>
+      <article class="mini-card">
+        <div class="card-topline"><strong>BLITZ</strong><span>OK</span></div>
+        <div class="card-metrics"><span>base Z7-C</span><span>max Z6-C</span><span>actual Z6-C</span></div>
+        <p>inside default goalkeeper support guardrail</p>
+      </article>
+    </div>
+    <p>GK not selected as recycle receiver if ML/PV are available.</p>
+  </section></div></details>
+      <details class="details-block"><summary>Shot Rules</summary><div class="details-body"><section class="panel spatial-panel">
+    <h2>Shot Rules Summary</h2>
+    <ul class="compact-list">
+      <li>Can a player shoot from outside the goal area? YES, if it is a foot strike from a legal ball state.</li>
+      <li>Ground kick: LEGAL - outside the goal area, a controlled ball may be shot by foot from the ground.</li>
+      <li>no self half-volley/drop: PASS - player cannot create a self half-volley or volley for himself.</li>
+      <li>Goal attempt = foot contact; hand-thrown goal attempts are illegal.</li>
+    </ul>
+  </section></div></details>
+    </section>
+
+    <section class="bottom-grid">
+      <section class="panel narrative-panel">
+    <h2>Before Narrative</h2>
+    <ul><li>CONTROL has controlled possession with TH in Z4-HSL.</li><li>BLITZ pressure makes the direct forward lane risky.</li><li>CONTROL chooses the recycle toward ML in Z3-HSL.</li><li>The main tactical question is whether CONTROL can use the Z3 support band before BLITZ recovery closes it.</li></ul>
+  </section>
+      <section class="panel narrative-panel">
+    <h2>After Narrative</h2>
+    <ul><li>The after pitch uses the same scale and grid, so the recycle consequence can be compared directly.</li><li>If the support cluster appears in Z2-C after the action, that is after-state occupation, not the before-frame overload.</li><li>CONTROL has made the next touch safer, but the move is less immediately progressive.</li><li>BLITZ still has time to recover if CONTROL cannot use the reset quickly.</li></ul>
+  </section>
+      <section class="panel narrative-panel">
+    <h2>AI Tactical Analysis</h2>
+    <ul><li>Why it worked: the best reception quality is behind the ball, where CONTROL can secure possession.</li><li>Key tactical cause: the forward options are neutral, not cleanly free, because their first touch is pressure-facing.</li><li>Biggest consequence: CONTROL chooses structure over rupture and keeps the action coachable.</li><li>Next opportunity: use RP or SH only if the next lane opens before the defensive line resets.</li></ul>
+  </section>
+    </section>
+
+    <section class="legend-grid">
+    <div class="legend-card"><h3>Influence overlays</h3><p><span class="swatch pressure"></span>Pressure on ball carrier</p><p><span class="swatch target"></span>Target highlight</p><p><span class="swatch overload"></span>Current overload</p></div>
+    <div class="legend-card"><h3>Player markers</h3><p><span class="circle-swatch control"></span>CONTROL player</p><p><span class="circle-swatch blitz"></span>BLITZ player</p><p><span class="ring-swatch"></span>Ball carrier</p><p><span class="ghost-swatch"></span>Projected position, never replacing the real marker</p></div>
+    <div class="legend-card"><h3>Arrows</h3><p><span class="line-swatch selected"></span>Selected action</p><p><span class="line-swatch dashed"></span>Projected trajectory, only when shown</p><p><span class="line-swatch leader"></span>Leader line from offset marker to real zone anchor</p><p><span class="line-swatch direction"></span>Attacking direction</p></div>
+    <div class="legend-card"><h3>Status badges</h3><p><span class="badge-swatch">D</span>Delayed defender</p><p><span class="badge-swatch">R</span>Recovering defender</p><p><span class="badge-swatch">E</span>Eliminated defender</p><p><span class="pill-swatch">CLOSED</span>Lane label</p><p>Goal area is a geometric rectangle, not a zone cell. Goal frames are rendered on zone boundaries.</p></div>
+  </section>
+    <section class="panel position-check">
+    <h2>Position Consistency Check</h2>
+    <p>Sequence 1 Action 1 before frame compares Tactical Analysis Board positions, SVG data-real-zone, and visual cell placement.</p>
+    <div class="position-card-grid">
+      <article class="mini-card position-card">
+            <div class="card-topline"><strong>TH</strong><span class="pass">PASS - rendered offset, anchored to real zone</span></div>
+            <div class="card-metrics"><span>board Z4-HSL</span><span>real Z4-HSL</span><span>visual Z4-HSL offset</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>HL</strong><span class="pass">PASS - rendered offset, anchored to real zone</span></div>
+            <div class="card-metrics"><span>board Z4-CL</span><span>real Z4-CL</span><span>visual Z4-CL offset</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>FL</strong><span class="pass">PASS - rendered offset, anchored to real zone</span></div>
+            <div class="card-metrics"><span>board Z5-HSL</span><span>real Z5-HSL</span><span>visual Z5-HSL offset</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>GK</strong><span class="pass">PASS</span></div>
+            <div class="card-metrics"><span>board Z2-C</span><span>real Z2-C</span><span>visual Z2-C</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>ML</strong><span class="pass">PASS</span></div>
+            <div class="card-metrics"><span>board Z3-HSL</span><span>real Z3-HSL</span><span>visual Z3-HSL</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>SH</strong><span class="pass">PASS</span></div>
+            <div class="card-metrics"><span>board Z5-HSR</span><span>real Z5-HSR</span><span>visual Z5-HSR</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>PM</strong><span class="pass">PASS - rendered offset, anchored to real zone</span></div>
+            <div class="card-metrics"><span>board Z4-C</span><span>real Z4-C</span><span>visual Z4-C offset</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>PV</strong><span class="pass">PASS</span></div>
+            <div class="card-metrics"><span>board Z3-C</span><span>real Z3-C</span><span>visual Z3-C</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>LP</strong><span class="pass">PASS</span></div>
+            <div class="card-metrics"><span>board Z3-CL</span><span>real Z3-CL</span><span>visual Z3-CL</span></div>
+          </article><article class="mini-card position-card">
+            <div class="card-topline"><strong>RP</strong><span class="pass">PASS</span></div>
+            <div class="card-metrics"><span>board Z3-HSR</span><span>real Z3-HSR</span><span>visual Z3-HSR</span></div>
+          </article>
+    </div>
+  </section>
+  </main>
+</body>
+</html>

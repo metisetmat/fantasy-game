@@ -156,6 +156,86 @@ function segmentStateInfluenceFact(input: {
   };
 }
 
+function tacticalGroundingGapFacts(input: {
+  readonly matchInput: MatchInput;
+  readonly timeline: readonly MatchEvent[];
+}): readonly MatchReportEvidenceFact[] {
+  const fullMatchEvents = input.timeline.filter((event) => event.eventId.includes("-segment-") && event.eventType !== "kickoff");
+  const event = firstEvidenceEvent(fullMatchEvents);
+
+  if (event === undefined) {
+    return [];
+  }
+
+  const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
+  const affectedZones = topZones(fullMatchEvents, 3);
+  const summary =
+    "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques observables dans les workbenches action-par-action. Le score doit donc etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas alignes avec la resolution mini-match.";
+
+  return [
+    {
+      factId: `${input.matchInput.matchId}-workbench-truth-available`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary,
+      confidence: "low",
+      strength: 58,
+      coachVisible: true,
+      internalTags: ["tactical_grounding_gap", "workbench_truth_available"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-mini-match-alignment-partial`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "Mini-match can represent some selected-action semantics, but it does not yet consume the complete workbench before/after spatial truth.",
+      confidence: "low",
+      strength: 55,
+      coachVisible: false,
+      internalTags: ["tactical_grounding_gap", "mini_match_alignment_partial"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-roster-to-spatial-context-gap`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "Official rosters and starters are not yet converted into mini-match spatial contexts, so prototype teams remain the dominant resolution source.",
+      confidence: "low",
+      strength: 62,
+      coachVisible: false,
+      internalTags: ["tactical_grounding_gap", "roster_to_spatial_context_gap"],
+    },
+    {
+      factId: `${input.matchInput.matchId}-full-match-not-workbench-grounded`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "The full-match harness is not yet a replay engine for the visual workbench truth.",
+      confidence: "low",
+      strength: 65,
+      coachVisible: false,
+      internalTags: ["tactical_grounding_gap", "full_match_harness_not_yet_workbench_grounded"],
+    },
+  ];
+}
+
 export function buildCanonicalMatchReportEvidenceFacts(input: {
   readonly matchInput: MatchInput;
   readonly timeline: readonly MatchEvent[];
@@ -173,5 +253,5 @@ export function buildCanonicalMatchReportEvidenceFacts(input: {
     segmentStateInfluenceFact(input),
   ].filter((fact): fact is MatchReportEvidenceFact => fact !== null);
 
-  return [...baseFacts, ...supplementalFacts];
+  return [...baseFacts, ...supplementalFacts, ...tacticalGroundingGapFacts(input)];
 }

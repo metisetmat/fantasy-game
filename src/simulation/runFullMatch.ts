@@ -1,4 +1,5 @@
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
+import type { MatchReportWarning } from "../contracts/matchReportWarnings";
 import {
   coachFacingHarnessWarningSummary,
   coachFacingScoringDominanceSummary,
@@ -18,6 +19,7 @@ import {
   primaryZoneFromPlanInfluence,
 } from "./adapters/tacticalPlanInfluence";
 import { analyzeFullMatchHarnessSanity } from "./diagnostics/fullMatchHarnessSanity";
+import { analyzeFullMatchGroundingDiagnostics } from "./diagnostics/fullMatchGroundingDiagnostics";
 import {
   buildHarnessWarningEvidenceFacts,
   buildMatchReportWarnings,
@@ -273,6 +275,44 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
   };
 }
 
+function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput): MatchReport {
+  const grounding = analyzeFullMatchGroundingDiagnostics(report);
+  const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
+  const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
+  const warning: MatchReportWarning = {
+    warningId: `${input.matchId}-tactical-grounding-gap`,
+    type: "ADAPTER_LIMITATION",
+    scope: "coach_visible",
+    severity: "low",
+    title: "Ancrage tactique full-match incomplet",
+    coachSummary:
+      "Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques des workbenches action-par-action.",
+    technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
+    evidenceFactIds: groundingFacts.map((fact) => fact.factId),
+    eventIds,
+    mayInvalidateGlobalScoringEconomy: false,
+  };
+  const evidenceEvent = report.timeline.find((event) => event.eventType !== "kickoff") ?? report.timeline[0];
+  const diagnosis: TacticalDiagnosis = {
+    diagnosisId: `${input.matchId}-tactical-grounding-gap`,
+    teamId: input.homeTeam.teamId,
+    title: "Ancrage workbench encore partiel",
+    summary:
+      "Le score du harnais doit etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas convertis en contexte spatial mini-match.",
+    evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
+    confidence: "low",
+  };
+
+  return {
+    ...report,
+    warnings: [...report.warnings, warning],
+    tacticalReport: {
+      diagnoses: [...report.tacticalReport.diagnoses, diagnosis],
+    },
+  };
+}
+
 export function runFullMatch(input: MatchInput): MatchReport {
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
@@ -379,5 +419,5 @@ export function runFullMatch(input: MatchInput): MatchReport {
     ],
   });
 
-  return withHarnessSanityDiagnosis(report, input);
+  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(report, input), input);
 }

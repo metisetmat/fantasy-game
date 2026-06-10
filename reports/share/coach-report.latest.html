@@ -148,6 +148,13 @@
       <p>CONTROL a converti 15 actions décisives tandis que BLITZ n’a converti aucun événement de score. Ce run déterministe unique révèle une domination scoring locale. Il s’agit d’un signal de plausibilité du harnais, pas d’un verdict global sur l’économie du score.</p>
       <div class="zones">Zones: <span class="badge">Z3-C</span> <span class="badge">Z5-HSR</span></div>
       <div class="muted">Événements de preuve : contract-fixture-001-segment-1-sequence-1, contract-fixture-001-segment-1-sequence-3, contract-fixture-001-segment-1-sequence-6, contract-fixture-001-segment-2-sequence-1, contract-fixture-001-segment-2-sequence-4, contract-fixture-001-segment-2-sequence-6, contract-fixture-001-segment-3-sequence-1, contract-fixture-001-segment-3-sequence-4</div>
+    </article>
+    <article class="card">
+      <div class="card-meta">Équipe control <span class="badge confidence confidence-low">Confiance faible</span></div>
+      <h3>Ancrage workbench encore partiel</h3>
+      <p>Le score du harnais doit etre lu avec prudence tant que les rosters, positions et decisions visuelles ne sont pas convertis en contexte spatial simulation.</p>
+      <div class="zones">Zones: <span class="badge">Z3-C</span> <span class="badge">Z4-HSL</span> <span class="badge">Z5-C</span></div>
+      <div class="muted">Événements de preuve : contract-fixture-001-segment-1-sequence-1</div>
     </article></div>
     </section>
 
@@ -224,6 +231,18 @@
         <div class="muted">Faits d'évidence : contract-fixture-001-harness-plausibility-warning</div>
         <div class="muted">Événements : contract-fixture-001-segment-1-sequence-1, contract-fixture-001-segment-1-sequence-3, contract-fixture-001-segment-1-sequence-6, contract-fixture-001-segment-2-sequence-1, contract-fixture-001-segment-2-sequence-4, contract-fixture-001-segment-2-sequence-6, contract-fixture-001-segment-3-sequence-1, contract-fixture-001-segment-3-sequence-4</div>
         <div class="muted">Harness warnings: SINGLE_RUN_NOT_GLOBAL_ECONOMY, INFLATED_SINGLE_RUN_SCORE, ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN, ZERO_SCORING_EVENTS_FOR_ONE_TEAM, HIGH_SCORING_EVENT_COUNT_SINGLE_TEAM, SCORING_EVENTS_CLUSTERED_IN_SAME_ZONE, SCORING_EVENTS_CLUSTERED_IN_SAME_EVENT_FAMILY, DOMINATED_TEAM_HAS_DANGER_WITHOUT_SCORE, DOMINATED_TEAM_HAS_PRESSURE_WITHOUT_CONVERSION, DOMINATED_TEAM_HIGH_LOAD_NO_PAYOFF. Scope: FULL_MATCH_HARNESS_SINGLE_RUN. May invalidate global economy: false.</div>
+      </details>
+    </article>
+    <article class="card">
+      <div class="card-meta"><span class="badge">low</span> <span class="badge">coach_visible</span></div>
+      <h3>Ancrage tactique full-match incomplet</h3>
+      <p>Le rapport full-match reste un harnais deterministe : il ne rejoue pas encore toutes les verites tactiques des workbenches action-par-action.</p>
+      <details class="internal-markers">
+        <summary>Détails techniques</summary>
+        <div class="muted">Type : ADAPTER_LIMITATION</div>
+        <div class="muted">Faits d'évidence : contract-fixture-001-workbench-truth-available, contract-fixture-001-simulation-alignment-partial, contract-fixture-001-roster-to-spatial-context-gap, contract-fixture-001-full-match-not-workbench-grounded</div>
+        <div class="muted">Événements : contract-fixture-001-segment-1-sequence-1, contract-fixture-001-segment-1-sequence-2, contract-fixture-001-segment-1-score-1, contract-fixture-001-segment-1-sequence-3, contract-fixture-001-segment-1-sequence-4, contract-fixture-001-segment-1-sequence-5</div>
+        <div class="muted">Grounding warnings: FULL_MATCH_NOT_WORKBENCH_GROUNDED, ROSTER_NOT_CONVERTED_TO_SPATIAL_CONTEXT, TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION, PLAYER_IDENTITY_LOSS_IN_MINIMATCH, WORKBENCH_TRUTH_NOT_REPLAYED_IN_FULLMATCH, FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED. Scope: FULL_MATCH_HARNESS_SINGLE_RUN. May invalidate global economy: false.</div>
       </details>
     </article></div>
     </section>
