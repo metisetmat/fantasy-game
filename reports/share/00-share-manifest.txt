@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-10T11:01:21.402Z
+Generated timestamp: 2026-06-10T11:03:41.957Z
 Task/sprint name: Micro-sprint 2O-Fix - Coach Report Encoding + Copy Hygiene
 Final file count: 14
 
@@ -81,7 +81,7 @@ Test/build commands run:
 
 Git status summary:
  D reports/share/00-share-manifest.txt
- M reports/share/bundle__simulation.md
+ M reports/share/bundle__reports.md
  D reports/share/manifest.md
- M src/simulation/adapters/matchReportMoments.test.ts
- M src/simulation/adapters/matchReportMoments.ts
+ M src/reports/coachCopyQuality.test.ts
+ M src/reports/coachFacingCopy.ts

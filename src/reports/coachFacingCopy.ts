@@ -45,11 +45,16 @@ export function coachFacingHarnessWarningSummary(warnings: readonly FullMatchHar
 export function coachFacingScoringDominanceSummary(dominance: FullMatchScoringDominanceReport): string {
   const dominantTeam = teamLabel(dominance.dominantTeamId, "l'équipe dominante");
   const dominatedTeam = teamLabel(dominance.dominatedTeamId, "l'adversaire");
-  const dominantCount =
-    dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId)?.scoringEventCount ?? 0;
+  const dominantScoring = dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId);
+  const dominatedScoring = dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominatedTeamId);
+  const dominantCount = dominantScoring?.scoringEventCount ?? 0;
+  const dominatedCount = dominatedScoring?.scoringEventCount ?? 0;
+  const dominatedClause = dominatedCount === 0
+    ? `${dominatedTeam} n’a converti aucun événement de score`
+    : `${dominatedTeam} a converti ${dominatedCount} événement${dominatedCount === 1 ? "" : "s"} de score pour ${dominatedScoring?.points ?? 0} point${(dominatedScoring?.points ?? 0) === 1 ? "" : "s"}, mais reste nettement derrière`;
 
   return normalizeCoachFacingCopy(
-    `${dominantTeam} a converti ${dominantCount} actions décisives tandis que ${dominatedTeam} n’a converti aucun événement de score. Ce run déterministe unique révèle une domination scoring locale. Il s’agit d’un signal de plausibilité du harnais, pas d’un verdict global sur l’économie du score.`,
+    `${dominantTeam} a converti ${dominantCount} actions décisives tandis que ${dominatedClause}. Ce run déterministe unique révèle une domination scoring locale. Il s’agit d’un signal de plausibilité du harnais, pas d’un verdict global sur l’économie du score.`,
   );
 }
 

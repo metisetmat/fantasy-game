@@ -1450,11 +1450,16 @@ export function coachFacingHarnessWarningSummary(warnings: readonly FullMatchHar
 export function coachFacingScoringDominanceSummary(dominance: FullMatchScoringDominanceReport): string {
   const dominantTeam = teamLabel(dominance.dominantTeamId, "l'équipe dominante");
   const dominatedTeam = teamLabel(dominance.dominatedTeamId, "l'adversaire");
-  const dominantCount =
-    dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId)?.scoringEventCount ?? 0;
+  const dominantScoring = dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominantTeamId);
+  const dominatedScoring = dominance.scoringEventsByTeam.find((team) => team.teamId === dominance.dominatedTeamId);
+  const dominantCount = dominantScoring?.scoringEventCount ?? 0;
+  const dominatedCount = dominatedScoring?.scoringEventCount ?? 0;
+  const dominatedClause = dominatedCount === 0
+    ? `${dominatedTeam} n’a converti aucun événement de score`
+    : `${dominatedTeam} a converti ${dominatedCount} événement${dominatedCount === 1 ? "" : "s"} de score pour ${dominatedScoring?.points ?? 0} point${(dominatedScoring?.points ?? 0) === 1 ? "" : "s"}, mais reste nettement derrière`;
 
   return normalizeCoachFacingCopy(
-    `${dominantTeam} a converti ${dominantCount} actions décisives tandis que ${dominatedTeam} n’a converti aucun événement de score. Ce run déterministe unique révèle une domination scoring locale. Il s’agit d’un signal de plausibilité du harnais, pas d’un verdict global sur l’économie du score.`,
+    `${dominantTeam} a converti ${dominantCount} actions décisives tandis que ${dominatedClause}. Ce run déterministe unique révèle une domination scoring locale. Il s’agit d’un signal de plausibilité du harnais, pas d’un verdict global sur l’économie du score.`,
   );
 }
 
@@ -1467,6 +1472,8 @@ export function coachFacingEvidenceSummary(summary: string): string {
 
 ```ts
 import { assertNoMojibake, containsMojibake, normalizeCoachFacingCopy } from "./coachCopyQuality";
+import { coachFacingScoringDominanceSummary } from "./coachFacingCopy";
+import type { FullMatchScoringDominanceReport } from "../simulation/diagnostics/fullMatchScoringDominanceDiagnostics";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -1484,11 +1491,45 @@ export function validateCoachCopyQualityUtilities(): readonly string[] {
   assertTest(normalized.includes("typé"), "normalizer must repair typed-report mojibake.");
   assertNoMojibake(normalized, "normalized coach copy");
 
+  const partialDominance: FullMatchScoringDominanceReport = {
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    warnings: ["ONE_TEAM_SCORING_DOMINANCE_SINGLE_RUN"],
+    score: { home: 27, away: 3 },
+    scoringEventsByTeam: [
+      {
+        teamId: "control",
+        scoringEventCount: 9,
+        points: 27,
+        mainScoringZones: ["Z3-C"],
+        mainScoringEventTypes: ["SHOT_GOAL"],
+      },
+      {
+        teamId: "blitz",
+        scoringEventCount: 1,
+        points: 3,
+        mainScoringZones: ["Z4-C"],
+        mainScoringEventTypes: ["SHOT_GOAL"],
+      },
+    ],
+    dominatedTeamId: "blitz",
+    dominantTeamId: "control",
+    dominatedTeamEvidenceEventIds: [],
+    affectedZones: ["Z3-C"],
+    interpretation: "test fixture",
+    mayInvalidateGlobalScoringEconomy: false,
+    recommendedNextActions: [],
+  };
+  const partialDominanceSummary = coachFacingScoringDominanceSummary(partialDominance);
+
+  assertTest(!partialDominanceSummary.includes("BLITZ n’a converti aucun événement de score"), "dominance copy must not say a scoring opponent had zero conversion.");
+  assertTest(partialDominanceSummary.includes("BLITZ a converti 1 événement de score pour 3 points"), "dominance copy must mention opponent scoring when present.");
+
   return [
     "coach copy mojibake marker detection works",
     "clean French copy is accepted",
     "coach copy normalizer repairs generated-copy mojibake",
     "coach copy assertion accepts normalized French text",
+    "coach-facing dominance copy handles opponents that scored",
   ];
 }
 
