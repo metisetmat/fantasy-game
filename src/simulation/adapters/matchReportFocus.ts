@@ -45,6 +45,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 44;
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
       return 43;
+    case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
+      return 42;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -97,6 +99,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire l'experience mini-match isolee avec override";
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
       return "Relire la comparaison de replay controle du segment";
+    case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
+      return "Relire les evenements de replay isole du segment";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

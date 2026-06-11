@@ -1,0 +1,116 @@
+# FullMatch Workbench Chain Replay 3J Validation
+
+Status: PASS
+
+## Checks
+- PASS: runFullMatch default remains segment_harness.
+- PASS: workbench_chain_replay_experimental remains opt-in.
+- PASS: controlled segment replay comparison remains available.
+- PASS: real isolated segment replay status is available.
+- PASS: real isolated segment replay origin is controlled_segment_replay_comparison.
+- PASS: baseline candidate is chain-context-safe-recycle-pv.
+- PASS: baseline action is SAFE_RECYCLE.
+- PASS: baseline receiver is control-pivot.
+- PASS: baseline zone is Z2-HSL.
+- PASS: baseline isolated replay event count is greater than 0.
+- PASS: baseline resulting carrier is control-pivot.
+- PASS: baseline resulting zone is Z2-HSL.
+- PASS: override candidate is chain-context-forward-progress-sh.
+- PASS: override action is FORWARD_PROGRESS.
+- PASS: override receiver is control-space-hunter.
+- PASS: override zone is Z4-HSR.
+- PASS: override isolated replay event count is greater than 0.
+- PASS: override resulting carrier is control-space-hunter.
+- PASS: override resulting zone is Z4-HSR.
+- PASS: selection divergence is observed.
+- PASS: carrier divergence is observed.
+- PASS: zone progression divergence is observed.
+- PASS: danger creation divergence is observed.
+- PASS: isolated timeline divergence is observed.
+- PASS: replay applies only in isolated engine.
+- PASS: replay is not applied to normal live selection.
+- PASS: isolated replay events are experimental-only.
+- PASS: isolated replay events are not inserted into official timeline.
+- PASS: CLOSED candidates remain rejected.
+- PASS: unavailable candidates remain rejected.
+- PASS: real isolated replay cannot mutate official score.
+- PASS: real isolated replay cannot mutate official scoring events.
+- PASS: real isolated replay cannot create production scoring events.
+- PASS: real isolated replay cannot mutate production route resolution.
+- PASS: real isolated replay cannot mutate global route success rates.
+- PASS: real isolated replay cannot claim global economy.
+- PASS: experimental timeline/report includes real isolated replay tags.
+- PASS: default timeline/report has no real isolated replay tags.
+- PASS: experimental report includes real isolated replay evidence.
+- PASS: experimental coach diagnosis mentions real isolated replay events.
+- PASS: coach copy avoids stale wording.
+- PASS: normal full-match is not falsely claimed as production chain-driven.
+- PASS: default and experimental official score signatures remain equal.
+- PASS: default and experimental official scoring event counts remain equal.
+- PASS: default and experimental official score_change totals remain equal.
+- PASS: FULL_MATCH_HARNESS_SINGLE_RUN remains warning-only.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains the global economy reference.
+- PASS: scoring constants unchanged.
+- PASS: no production scoring events deleted or capped.
+- PASS: MatchBonusEvent unchanged.
+- PASS: batch/live separation preserved.
+
+## Counts
+- default real isolated replay tag count: 0
+- experimental real isolated replay tag count: greater than 0
+- real isolated replay status: available
+- real isolated replay origin: controlled_segment_replay_comparison
+- baseline candidate: chain-context-safe-recycle-pv
+- baseline action: SAFE_RECYCLE
+- baseline receiver: control-pivot
+- baseline zone: Z2-HSL
+- baseline event count: greater than 0
+- baseline resulting carrier: control-pivot
+- baseline resulting zone: Z2-HSL
+- override candidate: chain-context-forward-progress-sh
+- override action: FORWARD_PROGRESS
+- override receiver: control-space-hunter
+- override zone: Z4-HSR
+- override event count: greater than 0
+- override resulting carrier: control-space-hunter
+- override resulting zone: Z4-HSR
+- selection divergence observed: true
+- possession continuity divergence observed: false
+- carrier divergence observed: true
+- zone progression divergence observed: true
+- danger creation divergence observed: true
+- scoring opportunity divergence observed: false
+- isolated timeline divergence observed: true
+- isolated score divergence observed: false
+- isolated scoring event divergence observed: false
+- replayAppliedOnlyInIsolatedEngine: true
+- replayAppliedToNormalLiveSelection: false
+- rejected closed candidate count: 1
+- rejected unavailable candidate count: 1
+- isolated events injected into official timeline count: 0
+- official score mutation count: 0
+- official scoring event mutation count: 0
+- production scoring event creation count: 0
+- production route resolution mutation count: 0
+- global route success mutation count: 0
+- global economy claim count: 0
+- default official scoring event count: unchanged
+- experimental official scoring event count: unchanged
+- default official score_change total: unchanged
+- experimental official score_change total: unchanged
+- scoring constants changed: 0
+- production scoring events deleted or capped: 0
+- share file count: 18
+
+## Recommendation
+- CONFIRM_CONTROLLED_SEGMENT_REPLAY_COMPARISON_TO_REAL_ISOLATED_REPLAY_ENGINE
+- CONFIRM_REAL_REPLAY_EVENTS_ARE_ISOLATED_ONLY
+- CONFIRM_REAL_REPLAY_EVENTS_ARE_NOT_OFFICIAL_MATCH_EVENTS
+- CONFIRM_REPLAY_IS_NOT_APPLIED_TO_NORMAL_LIVE_SELECTION
+- CONFIRM_REPLAY_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS
+- CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED
+- CONFIRM_DEFAULT_FULLMATCH_UNCHANGED
+- CONFIRM_NO_OFFICIAL_SCORE_OR_SCORING_EVENT_MUTATION
+- KEEP_SCORING_VALUES_UNCHANGED
+- KEEP_50_MATCH_ECONOMY_REFERENCE
+- PREPARE_REAL_ISOLATED_REPLAY_ENGINE_TO_CONTROLLED_ROUTE_RESOLUTION_SANDBOX

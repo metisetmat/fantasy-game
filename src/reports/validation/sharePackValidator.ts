@@ -154,6 +154,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3h.md"));
   const fullMatchWorkbenchChainReplay3I = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3i.md"));
   const fullMatchWorkbenchChainReplay3IValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3i.md"));
+  const fullMatchWorkbenchChainReplay3J = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3j.md"));
+  const fullMatchWorkbenchChainReplay3JValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3j.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1786,6 +1788,91 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3JExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3j.md",
+    "validation.fullmatch-workbench-chain-replay-3j.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3JForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3i.md",
+    "validation.fullmatch-workbench-chain-replay-3i.md",
+    "fullmatch-workbench-chain-replay-3h.md",
+    "validation.fullmatch-workbench-chain-replay-3h.md",
+    "fullmatch-workbench-chain-replay-3g.md",
+    "validation.fullmatch-workbench-chain-replay-3g.md",
+    "fullmatch-workbench-chain-replay-3f.md",
+    "validation.fullmatch-workbench-chain-replay-3f.md",
+    "fullmatch-workbench-chain-replay-3e.md",
+    "validation.fullmatch-workbench-chain-replay-3e.md",
+  ];
+  const sprint3JChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3J", activeConfig.sprintName === "Sprint 3J - Real Isolated Replay Engine", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 18", allowlistedFiles.length === 18, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3JForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3JForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3JExpectedFiles.every((file) => requiredCopied(file)), sprint3JExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3J", manifest.includes("Sprint 3J - Real Isolated Replay Engine") && detailedManifest.includes("Sprint 3J - Real Isolated Replay Engine"), "Sprint 3J visible"),
+    check("README is Sprint 3J oriented", readme.includes("# Sprint 3J Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3j.md"), "README current"),
+    check("default and experimental coach reports copied", (coachDefaultHtml.includes("<!doctype html>") || coachDefaultHtml.includes("<html")) && (coachExperimentalHtml.includes("<!doctype html>") || coachExperimentalHtml.includes("<html")), "coach HTML variants copied"),
+    check("3J report included", fullMatchWorkbenchChainReplay3J.includes("# FullMatch Workbench Chain Replay 3J") && fullMatchWorkbenchChainReplay3J.includes("real isolated replay status: available"), "3J doc included"),
+    check("3J validation is PASS", fullMatchWorkbenchChainReplay3JValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated segment replay status is available"), "3J validation PASS"),
+    check("real isolated replay origin visible", fullMatchWorkbenchChainReplay3J.includes("real isolated replay origin: controlled_segment_replay_comparison"), "origin visible"),
+    check("baseline candidate/action/receiver/zone/event visible", fullMatchWorkbenchChainReplay3J.includes("baseline candidate: chain-context-safe-recycle-pv") && fullMatchWorkbenchChainReplay3J.includes("baseline action: SAFE_RECYCLE") && fullMatchWorkbenchChainReplay3J.includes("baseline receiver: control-pivot") && fullMatchWorkbenchChainReplay3J.includes("baseline zone: Z2-HSL") && fullMatchWorkbenchChainReplay3J.includes("baseline event count: greater than 0"), "baseline visible"),
+    check("override candidate/action/receiver/zone/event visible", fullMatchWorkbenchChainReplay3J.includes("override candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3J.includes("override action: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3J.includes("override receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3J.includes("override zone: Z4-HSR") && fullMatchWorkbenchChainReplay3J.includes("override event count: greater than 0"), "override visible"),
+    check("real replay divergence fields visible", fullMatchWorkbenchChainReplay3J.includes("selection divergence observed: true") && fullMatchWorkbenchChainReplay3J.includes("carrier divergence observed: true") && fullMatchWorkbenchChainReplay3J.includes("zone progression divergence observed: true") && fullMatchWorkbenchChainReplay3J.includes("danger creation divergence observed: true") && fullMatchWorkbenchChainReplay3J.includes("isolated timeline divergence observed: true"), "divergence fields visible"),
+    check("real isolated replay contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchRealIsolatedSegmentReplay.ts") && bundleSimulation.includes("FullMatchRealIsolatedSegmentReplay"), "3J contract bundled"),
+    check("isolated replay event contract bundled", bundleSimulation.includes("src/simulation/fullMatch/isolatedSegmentReplayEvent.ts") && bundleSimulation.includes("IsolatedSegmentReplayEvent"), "3J event contract bundled"),
+    check("real isolated replay engine bundled", bundleSimulation.includes("src/simulation/fullMatch/realIsolatedSegmentReplayEngine.ts") && bundleSimulation.includes("runRealIsolatedSegmentReplayPath"), "3J engine bundled"),
+    check("real isolated replay converter bundled", bundleSimulation.includes("src/simulation/fullMatch/realIsolatedSegmentReplayFromComparison.ts") && bundleSimulation.includes("realIsolatedSegmentReplayFromComparison"), "3J converter bundled"),
+    check("real isolated replay comparison helper bundled", bundleSimulation.includes("src/simulation/fullMatch/compareRealIsolatedSegmentReplayPaths.ts") && bundleSimulation.includes("compareRealIsolatedSegmentReplayPaths"), "3J helper bundled"),
+    check("real isolated replay signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchRealIsolatedSegmentReplaySignature.ts") && bundleSimulation.includes("FullMatchRealIsolatedSegmentReplaySignature"), "3J signature bundled"),
+    check("real isolated replay tests bundled", bundleSimulation.includes("compareRealIsolatedSegmentReplayPaths.test.ts") && bundleSimulation.includes("fullMatchRealIsolatedSegmentReplay.test.ts") && bundleSimulation.includes("fullMatchRealIsolatedSegmentReplayGuard.test.ts"), "3J unit tests bundled"),
+    check("3J runFullMatch real isolated replay tests bundled", bundleSimulation.includes("runFullMatchExperimentalRealIsolatedSegmentReplay.test.ts") && bundleSimulation.includes("runFullMatchRealIsolatedSegmentReplayScoringGuard.test.ts"), "3J full-match tests bundled"),
+    check("3J scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3j.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3j.test.ts"), "3J guards bundled"),
+    check("real isolated replay evidence included", fullMatchWorkbenchChainReplay3J.includes("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY") && bundleSimulation.includes("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"), "3J evidence visible"),
+    check("isolated events are not official MatchEvents", fullMatchWorkbenchChainReplay3J.includes("isolated replay events are official MatchEvents: false") && fullMatchWorkbenchChainReplay3J.includes("no isolated replay event is inserted as an official MatchEvent: YES"), "official timeline clean"),
+    check("closed and unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3J.includes("rejected closed candidate count: 1") && fullMatchWorkbenchChainReplay3J.includes("rejected unavailable candidate count: 1"), "blocked routes rejected"),
+    check("default real isolated replay absent", fullMatchWorkbenchChainReplay3J.includes("default real isolated replay tag count: 0"), "default replay clean"),
+    check("experimental real isolated replay present", fullMatchWorkbenchChainReplay3J.includes("experimental real isolated replay tag count: greater than 0"), "experimental replay visible"),
+    check("replay is isolated-only", fullMatchWorkbenchChainReplay3J.includes("replayAppliedOnlyInIsolatedEngine: true") && fullMatchWorkbenchChainReplay3J.includes("replayAppliedToNormalLiveSelection: false"), "isolated replay visible"),
+    check("default and experimental official score signatures remain equal", fullMatchWorkbenchChainReplay3J.includes("default and experimental official score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3JValidation.includes("default and experimental official score signatures remain equal"), "score signatures equal"),
+    check("real replay cannot mutate official score", fullMatchWorkbenchChainReplay3J.includes("real isolated replay can mutate official score: false") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated replay cannot mutate official score"), "official score mutation forbidden"),
+    check("real replay cannot mutate official scoring events", fullMatchWorkbenchChainReplay3J.includes("real isolated replay can mutate official scoring events: false") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated replay cannot mutate official scoring events"), "official scoring event mutation forbidden"),
+    check("real replay cannot create production scoring events", fullMatchWorkbenchChainReplay3J.includes("real isolated replay can create production scoring events: false") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated replay cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("real replay cannot mutate production route resolution", fullMatchWorkbenchChainReplay3J.includes("real isolated replay can mutate production route resolution: false") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated replay cannot mutate production route resolution"), "production route forbidden"),
+    check("real replay cannot mutate global route success", fullMatchWorkbenchChainReplay3J.includes("real isolated replay can mutate global route success rates: false") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated replay cannot mutate global route success rates"), "global route success forbidden"),
+    check("real replay cannot claim global economy", fullMatchWorkbenchChainReplay3J.includes("real isolated replay can claim global economy: false") && fullMatchWorkbenchChainReplay3JValidation.includes("real isolated replay cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3J.includes("stale coach wording status: absent") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3JValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3JValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3JValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3J.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3J.includes("CONFIRM_CONTROLLED_SEGMENT_REPLAY_COMPARISON_TO_REAL_ISOLATED_REPLAY_ENGINE") && fullMatchWorkbenchChainReplay3J.includes("CONFIRM_REAL_REPLAY_EVENTS_ARE_NOT_OFFICIAL_MATCH_EVENTS") && fullMatchWorkbenchChainReplay3J.includes("PREPARE_REAL_ISOLATED_REPLAY_ENGINE_TO_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"), "3J recommendations visible"),
+  ];
+
   const sprint3IExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3052,6 +3139,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3J - Real Isolated Replay Engine")
+      ? sprint3JChecks
     : activeConfig.sprintName.includes("Sprint 3I - Controlled Segment Replay Comparison")
       ? sprint3IChecks
     : activeConfig.sprintName.includes("Sprint 3H - Isolated MiniMatch Override Experiment")

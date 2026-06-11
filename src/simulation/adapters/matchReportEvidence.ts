@@ -340,6 +340,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
     case "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT":
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
+    case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
       return "training_recommendation";
   }
 }
@@ -382,6 +383,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Experience mini-match isolee avec override";
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
       return "Comparaison de replay controle du segment";
+    case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
+      return "Replay isole reel du segment";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -443,6 +446,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
     case "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT":
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
+    case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -471,6 +475,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
     "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT",
     "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON",
+    "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
