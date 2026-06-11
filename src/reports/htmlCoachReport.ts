@@ -42,7 +42,10 @@ function productCopy(value: string): string {
     .replaceAll("l'adapter mini-match", "le moteur de simulation")
     .replaceAll("adapter mini-match", "moteur de simulation")
     .replaceAll("adapter de simulation actuel", "moteur de simulation actuel")
-    .replaceAll("mini-match", "simulation");
+    .replaceAll("mini-match", "simulation")
+    .replaceAll("resolution live du simulation", "resolution live normale")
+    .replaceAll("experience simulation isolee", "experience isolee")
+    .replaceAll("source de route controlee pour simulation", "source de route controlee experimentale");
 }
 
 function scoreText(report: MatchReport): string {

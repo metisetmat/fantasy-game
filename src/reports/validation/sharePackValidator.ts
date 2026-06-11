@@ -150,6 +150,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3f.md"));
   const fullMatchWorkbenchChainReplay3G = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3g.md"));
   const fullMatchWorkbenchChainReplay3GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3g.md"));
+  const fullMatchWorkbenchChainReplay3H = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3h.md"));
+  const fullMatchWorkbenchChainReplay3HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3h.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1782,6 +1784,100 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3HExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3h.md",
+    "validation.fullmatch-workbench-chain-replay-3h.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3HForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3g.md",
+    "validation.fullmatch-workbench-chain-replay-3g.md",
+    "fullmatch-workbench-chain-replay-3f.md",
+    "validation.fullmatch-workbench-chain-replay-3f.md",
+    "fullmatch-workbench-chain-replay-3e.md",
+    "validation.fullmatch-workbench-chain-replay-3e.md",
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+  ];
+  const sprint3HChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3H", activeConfig.sprintName === "Sprint 3H - Isolated MiniMatch Override Experiment", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 18", allowlistedFiles.length === 18, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3HForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3HForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3HExpectedFiles.every((file) => requiredCopied(file)), sprint3HExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3H", manifest.includes("Sprint 3H - Isolated MiniMatch Override Experiment") && detailedManifest.includes("Sprint 3H - Isolated MiniMatch Override Experiment"), "Sprint 3H visible"),
+    check("README is Sprint 3H oriented", readme.includes("# Sprint 3H Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3h.md"), "README current"),
+    check("default and experimental coach reports copied", (coachDefaultHtml.includes("<!doctype html>") || coachDefaultHtml.includes("<html")) && (coachExperimentalHtml.includes("<!doctype html>") || coachExperimentalHtml.includes("<html")), "coach HTML variants copied"),
+    check("3H report included", fullMatchWorkbenchChainReplay3H.includes("# FullMatch Workbench Chain Replay 3H") && fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment status: available"), "3H doc included"),
+    check("3H validation is PASS", fullMatchWorkbenchChainReplay3HValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated mini-match override experiment status is available"), "3H validation PASS"),
+    check("isolated override origin visible", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment origin: live_selection_override_guard") && fullMatchWorkbenchChainReplay3HValidation.includes("origin is live_selection_override_guard"), "origin visible"),
+    check("baseline candidate visible", fullMatchWorkbenchChainReplay3H.includes("baseline candidate: chain-context-safe-recycle-pv") && fullMatchWorkbenchChainReplay3HValidation.includes("baseline candidate is chain-context-safe-recycle-pv"), "baseline visible"),
+    check("override candidate visible", fullMatchWorkbenchChainReplay3H.includes("override candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3HValidation.includes("override candidate is chain-context-forward-progress-sh"), "candidate visible"),
+    check("override action visible", fullMatchWorkbenchChainReplay3H.includes("override action type: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3HValidation.includes("override action is FORWARD_PROGRESS"), "action visible"),
+    check("override receiver and zone visible", fullMatchWorkbenchChainReplay3H.includes("override receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3H.includes("override target zone: Z4-HSR"), "receiver/zone visible"),
+    check("override source scores visible", fullMatchWorkbenchChainReplay3H.includes("source base score: 82") && fullMatchWorkbenchChainReplay3H.includes("source influence delta: 5") && fullMatchWorkbenchChainReplay3H.includes("source influenced score: 87"), "source scores visible"),
+    check("isolated override contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchIsolatedMiniMatchOverrideExperiment.ts") && bundleSimulation.includes("FullMatchIsolatedMiniMatchOverrideExperiment"), "3H contract bundled"),
+    check("isolated override converter bundled", bundleSimulation.includes("src/simulation/fullMatch/isolatedMiniMatchOverrideExperimentFromGuard.ts") && bundleSimulation.includes("isolatedMiniMatchOverrideExperimentFromGuard"), "3H converter bundled"),
+    check("isolated override comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareIsolatedMiniMatchOverride.ts") && bundleSimulation.includes("compareIsolatedMiniMatchOverride"), "3H comparison bundled"),
+    check("isolated override signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchIsolatedMiniMatchOverrideExperimentSignature.ts") && bundleSimulation.includes("FullMatchIsolatedMiniMatchOverrideExperimentSignature"), "3H signature bundled"),
+    check("isolated override tests bundled", bundleSimulation.includes("fullMatchIsolatedMiniMatchOverrideExperiment.test.ts") && bundleSimulation.includes("fullMatchIsolatedMiniMatchOverrideExperimentGuard.test.ts"), "3H unit tests bundled"),
+    check("3H runFullMatch isolated override tests bundled", bundleSimulation.includes("runFullMatchExperimentalIsolatedMiniMatchOverrideExperiment.test.ts") && bundleSimulation.includes("runFullMatchIsolatedMiniMatchOverrideExperimentScoringGuard.test.ts"), "3H full-match tests bundled"),
+    check("3H scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3h.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3h.test.ts"), "3H guards bundled"),
+    check("isolated override evidence included", fullMatchWorkbenchChainReplay3H.includes("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT") && bundleSimulation.includes("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"), "3H evidence visible"),
+    check("closed candidates remain rejected", fullMatchWorkbenchChainReplay3H.includes("rejected closed candidate count: 1") && fullMatchWorkbenchChainReplay3HValidation.includes("CLOSED candidates remain unselectable"), "closed route rejected"),
+    check("unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3H.includes("rejected unavailable candidate count: 1") && fullMatchWorkbenchChainReplay3HValidation.includes("unavailable candidates remain unselectable"), "unavailable route rejected"),
+    check("override candidate legal and available", fullMatchWorkbenchChainReplay3H.includes("candidate legal: true") && fullMatchWorkbenchChainReplay3H.includes("candidate available: true"), "candidate valid"),
+    check("default isolated override absent", fullMatchWorkbenchChainReplay3H.includes("default isolated mini-match override experiment tag count: 0"), "default experiment clean"),
+    check("experimental isolated override present", fullMatchWorkbenchChainReplay3H.includes("experimental isolated mini-match override experiment tag count: greater than 0"), "experimental experiment visible"),
+    check("override applies only in isolated experiment", fullMatchWorkbenchChainReplay3H.includes("overrideAppliedInIsolatedExperiment: true") && fullMatchWorkbenchChainReplay3HValidation.includes("overrideAppliedInIsolatedExperiment is true"), "isolated apply true"),
+    check("override is not applied to normal live", fullMatchWorkbenchChainReplay3H.includes("overrideAppliedToNormalLiveSelection: false") && fullMatchWorkbenchChainReplay3HValidation.includes("overrideAppliedToNormalLiveSelection is false"), "normal live false"),
+    check("isolated selection divergence visible", fullMatchWorkbenchChainReplay3H.includes("isolated selection divergence observed: true") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated selection divergence is observed"), "selection divergence visible"),
+    check("score and scoring event divergence remain false", fullMatchWorkbenchChainReplay3H.includes("isolated score divergence observed: false") && fullMatchWorkbenchChainReplay3H.includes("isolated scoring event divergence observed: false"), "score/scoring divergence false"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3H.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3HValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("isolated override cannot mutate normal score", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment can mutate normal score: false") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated experiment cannot mutate normal score"), "normal score mutation forbidden"),
+    check("isolated override cannot mutate normal scoring events", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment can mutate normal scoring events: false") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated experiment cannot mutate normal scoring events"), "normal scoring event mutation forbidden"),
+    check("isolated override cannot create production scoring events", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment can create production scoring events: false") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated experiment cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("isolated override cannot mutate production route resolution", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment can mutate production route resolution: false") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated experiment cannot mutate production route resolution"), "production route forbidden"),
+    check("isolated override cannot mutate global route success", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment can mutate global route success rates: false") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated experiment cannot mutate global route success rates"), "global route success forbidden"),
+    check("isolated override cannot claim global economy", fullMatchWorkbenchChainReplay3H.includes("isolated mini-match override experiment can claim global economy: false") && fullMatchWorkbenchChainReplay3HValidation.includes("isolated experiment cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3H.includes("stale coach wording status: absent") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3HValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3HValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3HValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3H.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3H.includes("CONFIRM_LIVE_SELECTION_OVERRIDE_GUARD_TO_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT") && fullMatchWorkbenchChainReplay3H.includes("CONFIRM_ISOLATED_EXPERIMENT_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS") && fullMatchWorkbenchChainReplay3H.includes("PREPARE_ISOLATED_OVERRIDE_EXPERIMENT_TO_CONTROLLED_SEGMENT_REPLAY_COMPARISON"), "3H recommendations visible"),
+  ];
   const sprint3GExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2865,6 +2961,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3H - Isolated MiniMatch Override Experiment")
+      ? sprint3HChecks
     : activeConfig.sprintName.includes("Sprint 3G - Controlled Route Source to Live Selection Override Guards")
       ? sprint3GChecks
     : activeConfig.sprintName.includes("Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source")
