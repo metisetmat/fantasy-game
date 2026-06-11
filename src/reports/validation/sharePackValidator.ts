@@ -122,6 +122,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const tacticalGroundingReconciliationValidation = readIfExists(join(shareDirectory, "validation.tactical-grounding-reconciliation.md"));
   const rosterToSpatialContextAdapter = readIfExists(join(shareDirectory, "roster-to-spatial-context-adapter.md"));
   const rosterToSpatialContextAdapterValidation = readIfExists(join(shareDirectory, "validation.roster-to-spatial-context-adapter.md"));
+  const attributeDrivenRouteRanking = readIfExists(join(shareDirectory, "attribute-driven-route-ranking.md"));
+  const attributeDrivenRouteRankingValidation = readIfExists(join(shareDirectory, "validation.attribute-driven-route-ranking.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
@@ -1750,6 +1752,64 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint2TExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "validation.share-pack.md",
+    "attribute-driven-route-ranking.md",
+    "validation.attribute-driven-route-ranking.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint2TForbiddenLeftovers = [
+    "roster-to-spatial-context-adapter.md",
+    "validation.roster-to-spatial-context-adapter.md",
+    "tactical-grounding-reconciliation.md",
+    "validation.tactical-grounding-reconciliation.md",
+    "bundle__docs.md",
+  ];
+  const sprint2TChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2T", activeConfig.sprintName === "Sprint 2T - Attribute-Driven Route Ranking", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint2TForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint2TForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2TExpectedFiles.every((file) => requiredCopied(file)), sprint2TExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2T", manifest.includes("Sprint 2T - Attribute-Driven Route Ranking") && detailedManifest.includes("Sprint 2T - Attribute-Driven Route Ranking"), "Sprint 2T visible"),
+    check("README is Sprint 2T oriented", readme.includes("# Sprint 2T Share Pack") && readme.includes("attribute-driven-route-ranking.md"), "README current"),
+    check("workbench artifact copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionOneWorkbench.includes("data-player-id=\"control-tempo-half\""), "sequence workbench copied"),
+    check("attribute-driven route ranking report included", attributeDrivenRouteRanking.includes("# Attribute-Driven Route Ranking") && attributeDrivenRouteRanking.includes("Are real player attributes now carried into route ranking? YES/PARTIAL"), "2T doc included"),
+    check("attribute-driven route ranking validation is PASS", attributeDrivenRouteRankingValidation.includes("Status: PASS") && attributeDrivenRouteRankingValidation.includes("candidates can receive attribute-adjusted scores"), "2T validation PASS"),
+    check("route attribute influence types bundled", bundleSimulation.includes("src/simulation/routeRanking/routeAttributeInfluenceTypes.ts") && bundleSimulation.includes("RouteCandidateAttributeContext"), "route attribute types bundled"),
+    check("route attribute helper bundled", bundleSimulation.includes("src/simulation/routeRanking/routeAttributeInfluence.ts") && bundleSimulation.includes("clampRouteAttributeModifier"), "route attribute helper bundled"),
+    check("candidate influence adapter bundled", bundleSimulation.includes("src/simulation/routeRanking/applySpatialAttributeInfluenceToCandidates.ts") && bundleSimulation.includes("applySpatialAttributeInfluenceToCandidates"), "candidate influence adapter bundled"),
+    check("route attribute tests bundled", bundleSimulation.includes("routeAttributeInfluence.test.ts") && bundleSimulation.includes("applySpatialAttributeInfluenceToCandidates.test.ts"), "2T tests bundled"),
+    check("workbench replay seed applies attribute influence", bundleSimulation.includes("attributeInfluenceApplied") && bundleSimulation.includes("selectedCandidateAttributeAdjustedScore"), "replay seed influence visible"),
+    check("mini-match exposes attribute influence metadata", bundleSimulation.includes("attribute_influence_active") && bundleSimulation.includes("attributeInfluenceMode: \"metadata_only\""), "metadata mode visible"),
+    check("route ranking gap reduced to PARTIAL", bundleSimulation.includes("visibleAttributesDriveRouteRanking: \"PARTIAL\"") && bundleSimulation.includes("routeRankingAttributeInfluenceMode: \"metadata_only\""), "gap PARTIAL visible"),
+    check("full-match grounding diagnostics mention attribute influence", bundleSimulation.includes("ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE") && bundleSimulation.includes("PROTOTYPE_SELECTION_STILL_DOMINANT"), "grounding diagnostics updated"),
+    check("MatchReport route attribute evidence included", bundleSimulation.includes("route_attribute_influence_available") && bundleSimulation.includes("attribute_adjusted_score") && bundleSimulation.includes("prototype_selection_still_partial"), "route attribute evidence visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", attributeDrivenRouteRankingValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && attributeDrivenRouteRankingValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && attributeDrivenRouteRankingValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", attributeDrivenRouteRanking.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && attributeDrivenRouteRanking.includes("Does full-match now fully replay workbench truth? PARTIAL"), "single-run warning-only"),
+    check("recommendations visible", attributeDrivenRouteRanking.includes("CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER") && attributeDrivenRouteRanking.includes("CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES") && attributeDrivenRouteRanking.includes("PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING"), "2T recommendations visible"),
+  ];
   const sprint2RChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("current sprint is Sprint 2R", activeConfig.sprintName === "Sprint 2R - Tactical Grounding Reconciliation: Workbench to MiniMatch to FullMatch", activeConfig.sprintName),
@@ -1800,6 +1860,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 2T - Attribute-Driven Route Ranking")
+      ? sprint2TChecks
     : activeConfig.sprintName.includes("Sprint 2S - Roster-to-SpatialContext")
       ? sprint2SChecks
     : activeConfig.sprintName.includes("Sprint 2R - Tactical Grounding Reconciliation")

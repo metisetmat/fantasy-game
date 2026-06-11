@@ -1,10 +1,13 @@
 import type { MatchInput, PlayerSnapshot, TacticalPlan, TeamSnapshot } from "../../contracts/engineToCoach";
-import type { PlayerId } from "../../core/ids";
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
 import { PlayerRole } from "../../models/player";
 import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
 import { runMiniMatch } from "../miniMatch";
 import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
+import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
+import type { RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
 
 export type WorkbenchReplaySeedResult = {
   readonly fixtureId: string;
@@ -15,6 +18,11 @@ export type WorkbenchReplaySeedResult = {
   readonly receiverPreserved: boolean;
   readonly newCarrierPreserved: boolean;
   readonly ballZonePreserved: boolean;
+  readonly attributeInfluenceApplied: boolean;
+  readonly selectedCandidateBaseScore?: number;
+  readonly selectedCandidateAttributeAdjustedScore?: number;
+  readonly selectedCandidateInfluences?: readonly RouteAttributeInfluence[];
+  readonly routeRankingUsesRealAttributes: RouteRankingAttributeUsage;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -202,6 +210,25 @@ export function runWorkbenchReplaySeed(input: {
     selectedAction.actionType === "SUPPORT_CLUSTER_RECYCLE" &&
     selectedAction.actorId === beforeContext.ballCarrierId &&
     selectedAction.newCarrierId === afterContext.ballCarrierId;
+  const attributeCandidates = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: beforeContext,
+    pressureLevel: "HIGH",
+    candidates: input.workbench.rankedOptions.map((option) => ({
+      candidateId: `rank-${option.rank}`,
+      actorId: selectedAction.actorId as PlayerId,
+      ...(option.receiverId === undefined ? {} : { receiverId: option.receiverId as PlayerId }),
+      teamId: input.workbench.possessionTeamId as TeamId,
+      fromZone: selectedAction.fromZone as ZoneId,
+      targetZone: option.targetZone as ZoneId,
+      actionType: option.actionType,
+      ...(option.laneState === undefined ? {} : { laneState: option.laneState }),
+      baseScore: option.finalSelectionScore ?? option.score ?? 0,
+      baseRisk: option.risk === "HIGH" ? 80 : option.risk === "MEDIUM" ? 50 : 20,
+    })),
+  });
+  const selectedCandidate =
+    attributeCandidates.find((candidate) => candidate.receiverId === selectedAction.receiverId) ??
+    attributeCandidates.find((candidate) => candidate.actionType === selectedAction.actionType);
   const miniMatch = runMiniMatch({
     teamA: prototypeForTeam(input.matchInput.homeTeam.teamId),
     teamB: prototypeForTeam(input.matchInput.awayTeam.teamId),
@@ -211,7 +238,7 @@ export function runWorkbenchReplaySeed(input: {
   });
   const lossyMappings = [
     "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
-    "Route ranking is not yet fully driven by PlayerSnapshot attributes.",
+    "Route ranking can receive bounded attribute-adjusted candidate scores, but final mini-match selection is not yet fully selection-driving.",
     `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s), but not a forced workbench action chain.`,
   ];
   const missingTruths = [
@@ -234,13 +261,19 @@ export function runWorkbenchReplaySeed(input: {
     receiverPreserved,
     newCarrierPreserved,
     ballZonePreserved,
+    attributeInfluenceApplied: attributeCandidates.some((candidate) => candidate.attributeInfluences.length > 0),
+    ...(selectedCandidate === undefined ? {} : { selectedCandidateBaseScore: selectedCandidate.baseScore }),
+    ...(selectedCandidate === undefined ? {} : { selectedCandidateAttributeAdjustedScore: selectedCandidate.attributeAdjustedScore }),
+    ...(selectedCandidate === undefined ? {} : { selectedCandidateInfluences: selectedCandidate.attributeInfluences }),
+    routeRankingUsesRealAttributes: "PARTIAL",
     missingTruths,
     lossyMappings,
     recommendations: [
       "CONFIRM_WORKBENCH_REPLAY_SEED",
-      "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
-      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+      "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
+      "CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
+      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
     ],
   };
 }

@@ -5,7 +5,9 @@ export type FullMatchGroundingWarning =
   | "SPATIAL_CONTEXT_ADAPTER_AVAILABLE"
   | "WORKBENCH_REPLAY_SEED_AVAILABLE"
   | "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION"
-  | "ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"
+  | "ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE"
+  | "ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL"
+  | "PROTOTYPE_SELECTION_STILL_DOMINANT"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
 
@@ -28,7 +30,9 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "SPATIAL_CONTEXT_ADAPTER_AVAILABLE",
     "WORKBENCH_REPLAY_SEED_AVAILABLE",
     "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION",
-    "ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN",
+    "ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE",
+    "ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL",
+    "PROTOTYPE_SELECTION_STILL_DOMINANT",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
 
@@ -43,14 +47,15 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context, but the harness does not yet replay the full workbench sequence chain or drive route ranking from real player attributes.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and route candidates can receive bounded attribute influence, but the harness does not yet replay the full workbench sequence chain or drive final selection from real player attributes.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
       "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
+      "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
-      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
       "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };

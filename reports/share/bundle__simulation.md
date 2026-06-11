@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2T - Attribute-Driven Route Ranking. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -1100,10 +1100,13 @@ export type RosterToMiniMatchGapAnalysis = {
   readonly rosterCanBecomeSpatialContext: boolean;
   readonly workbenchPositionsCanSeedSpatialContext: boolean;
   readonly miniMatchConsumesSpatialContextMetadata: "YES" | "PARTIAL" | "NO";
+  readonly attributeInfluenceLayerExists: boolean;
+  readonly routeRankingAttributeInfluenceMode: "metadata_only" | "candidate_modifier" | "selection_driving";
+  readonly remainingPrototypeDominance: "HIGH" | "MEDIUM" | "LOW";
   readonly rosterDrivesMiniMatchPlayerPositions: boolean;
   readonly startersDriveActivePlayers: boolean;
   readonly playerRolesDriveActionResolution: boolean;
-  readonly visibleAttributesDriveRouteRanking: boolean;
+  readonly visibleAttributesDriveRouteRanking: "YES" | "PARTIAL" | "NO";
   readonly tacticalPlanFullyDrivesTeamShape: boolean;
   readonly prototypesStillDominant: boolean;
   readonly lostPlayerIdentity: readonly string[];
@@ -1127,10 +1130,13 @@ export function analyzeRosterToMiniMatchGap(input: {
     rosterCanBecomeSpatialContext: true,
     workbenchPositionsCanSeedSpatialContext: true,
     miniMatchConsumesSpatialContextMetadata: "PARTIAL",
+    attributeInfluenceLayerExists: true,
+    routeRankingAttributeInfluenceMode: "metadata_only",
+    remainingPrototypeDominance: "HIGH",
     rosterDrivesMiniMatchPlayerPositions: true,
     startersDriveActivePlayers: true,
     playerRolesDriveActionResolution: false,
-    visibleAttributesDriveRouteRanking: false,
+    visibleAttributesDriveRouteRanking: "PARTIAL",
     tacticalPlanFullyDrivesTeamShape: false,
     prototypesStillDominant: true,
     lostPlayerIdentity: rosterPlayerIds.filter((playerId) => !miniMatchPrototypeIds.includes(playerId)),
@@ -1138,16 +1144,17 @@ export function analyzeRosterToMiniMatchGap(input: {
       "adaptMatchInputToMiniMatch maps official teams to CONTROL/BLITZ PrototypeTeamDefinition objects.",
       "Sprint 2S can convert TeamSnapshot.roster into typed SpatialTeamContext.",
       "Sprint 2S can seed SpatialTeamContext positions from workbench truth.",
-      "MiniMatchInput can carry SpatialMatchContext metadata, but normal action resolution remains prototype-driven.",
-      "PlayerSnapshot roles and attributes do not yet drive route ranking.",
+      "MiniMatchInput can carry SpatialMatchContext metadata and bounded route attribute influence summaries.",
+      "PlayerSnapshot roles and attributes now adjust candidate metadata, but final selection is not yet end-to-end attribute-driven.",
       "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
       "CONTROL/BLITZ prototype teams remain a dominant source of mini-match tactical behavior.",
     ],
     recommendations: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
-      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+      "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
+      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
     ],
   };
 }
@@ -1470,12 +1477,15 @@ export function workbenchToSpatialMatchContext(input: {
 
 ```ts
 import type { MatchInput, PlayerSnapshot, TacticalPlan, TeamSnapshot } from "../../contracts/engineToCoach";
-import type { PlayerId } from "../../core/ids";
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
 import { PlayerRole } from "../../models/player";
 import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
 import { runMiniMatch } from "../miniMatch";
 import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
+import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
+import type { RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
 
 export type WorkbenchReplaySeedResult = {
   readonly fixtureId: string;
@@ -1486,6 +1496,11 @@ export type WorkbenchReplaySeedResult = {
   readonly receiverPreserved: boolean;
   readonly newCarrierPreserved: boolean;
   readonly ballZonePreserved: boolean;
+  readonly attributeInfluenceApplied: boolean;
+  readonly selectedCandidateBaseScore?: number;
+  readonly selectedCandidateAttributeAdjustedScore?: number;
+  readonly selectedCandidateInfluences?: readonly RouteAttributeInfluence[];
+  readonly routeRankingUsesRealAttributes: RouteRankingAttributeUsage;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -1673,6 +1688,25 @@ export function runWorkbenchReplaySeed(input: {
     selectedAction.actionType === "SUPPORT_CLUSTER_RECYCLE" &&
     selectedAction.actorId === beforeContext.ballCarrierId &&
     selectedAction.newCarrierId === afterContext.ballCarrierId;
+  const attributeCandidates = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: beforeContext,
+    pressureLevel: "HIGH",
+    candidates: input.workbench.rankedOptions.map((option) => ({
+      candidateId: `rank-${option.rank}`,
+      actorId: selectedAction.actorId as PlayerId,
+      ...(option.receiverId === undefined ? {} : { receiverId: option.receiverId as PlayerId }),
+      teamId: input.workbench.possessionTeamId as TeamId,
+      fromZone: selectedAction.fromZone as ZoneId,
+      targetZone: option.targetZone as ZoneId,
+      actionType: option.actionType,
+      ...(option.laneState === undefined ? {} : { laneState: option.laneState }),
+      baseScore: option.finalSelectionScore ?? option.score ?? 0,
+      baseRisk: option.risk === "HIGH" ? 80 : option.risk === "MEDIUM" ? 50 : 20,
+    })),
+  });
+  const selectedCandidate =
+    attributeCandidates.find((candidate) => candidate.receiverId === selectedAction.receiverId) ??
+    attributeCandidates.find((candidate) => candidate.actionType === selectedAction.actionType);
   const miniMatch = runMiniMatch({
     teamA: prototypeForTeam(input.matchInput.homeTeam.teamId),
     teamB: prototypeForTeam(input.matchInput.awayTeam.teamId),
@@ -1682,7 +1716,7 @@ export function runWorkbenchReplaySeed(input: {
   });
   const lossyMappings = [
     "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
-    "Route ranking is not yet fully driven by PlayerSnapshot attributes.",
+    "Route ranking can receive bounded attribute-adjusted candidate scores, but final mini-match selection is not yet fully selection-driving.",
     `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s), but not a forced workbench action chain.`,
   ];
   const missingTruths = [
@@ -1705,15 +1739,468 @@ export function runWorkbenchReplaySeed(input: {
     receiverPreserved,
     newCarrierPreserved,
     ballZonePreserved,
+    attributeInfluenceApplied: attributeCandidates.some((candidate) => candidate.attributeInfluences.length > 0),
+    ...(selectedCandidate === undefined ? {} : { selectedCandidateBaseScore: selectedCandidate.baseScore }),
+    ...(selectedCandidate === undefined ? {} : { selectedCandidateAttributeAdjustedScore: selectedCandidate.attributeAdjustedScore }),
+    ...(selectedCandidate === undefined ? {} : { selectedCandidateInfluences: selectedCandidate.attributeInfluences }),
+    routeRankingUsesRealAttributes: "PARTIAL",
     missingTruths,
     lossyMappings,
     recommendations: [
       "CONFIRM_WORKBENCH_REPLAY_SEED",
-      "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
-      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+      "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
+      "CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
+      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
     ],
   };
+}
+```
+
+## File: src/simulation/routeRanking/routeAttributeInfluenceTypes.ts
+
+```ts
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { Rating } from "../../core/ratings";
+import type { ZoneId } from "../../core/zones";
+
+export type RouteAttributeInfluenceCategory =
+  | "PASS_SECURITY"
+  | "RECEPTION_QUALITY"
+  | "PRESSURE_ESCAPE"
+  | "SUPPORT_TIMING"
+  | "CONTACT_PLATFORM"
+  | "RUPTURE_THREAT"
+  | "THIRD_MAN_LINK"
+  | "BALL_CARRY"
+  | "FINAL_ACTION_COMPOSURE"
+  | "TURNOVER_RISK"
+  | "FATIGUE_DRAG";
+
+export type RouteAttributeInfluence = {
+  readonly playerId: PlayerId;
+  readonly teamId: TeamId;
+  readonly category: RouteAttributeInfluenceCategory;
+  readonly modifier: number;
+  readonly confidence: "low" | "medium" | "high";
+  readonly reason: string;
+  readonly sourceAttributes: readonly string[];
+};
+
+export type RouteCandidateAttributeContext = {
+  readonly candidateId: string;
+  readonly actorId: PlayerId;
+  readonly receiverId?: PlayerId;
+  readonly teamId: TeamId;
+  readonly fromZone: ZoneId;
+  readonly targetZone: ZoneId;
+  readonly actionType: string;
+  readonly laneState?: string;
+  readonly baseScore: number;
+  readonly attributeInfluences: readonly RouteAttributeInfluence[];
+  readonly attributeAdjustedScore: number;
+};
+
+export type RouteAttributeInfluenceMode = "metadata_only" | "candidate_modifier" | "selection_driving";
+
+export type RouteRankingAttributeUsage = "YES" | "PARTIAL" | "NO";
+```
+
+## File: src/simulation/routeRanking/routeAttributeInfluence.ts
+
+```ts
+import type { SpatialPlayerContext } from "../spatialContext";
+import type { RouteAttributeInfluence } from "./routeAttributeInfluenceTypes";
+
+const MAX_TOTAL_ATTRIBUTE_ADJUSTMENT = 12;
+const MIN_TOTAL_ATTRIBUTE_ADJUSTMENT = -12;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
+function rating(value: number | undefined, fallback: number): number {
+  return value ?? fallback;
+}
+
+function average(values: readonly number[]): number {
+  if (values.length === 0) {
+    return 50;
+  }
+
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function highAttributeModifier(value: number): number {
+  if (value >= 88) {
+    return 5;
+  }
+
+  if (value >= 78) {
+    return 3;
+  }
+
+  if (value >= 65) {
+    return 1;
+  }
+
+  if (value <= 40) {
+    return -4;
+  }
+
+  if (value <= 52) {
+    return -2;
+  }
+
+  return 0;
+}
+
+function fatigueModifier(player: SpatialPlayerContext): number {
+  const freshness = average([player.currentCondition, player.mentalFreshness]);
+
+  if (freshness >= 86) {
+    return 2;
+  }
+
+  if (freshness <= 42) {
+    return -6;
+  }
+
+  if (freshness <= 58) {
+    return -3;
+  }
+
+  return 0;
+}
+
+function influence(input: {
+  readonly player: SpatialPlayerContext;
+  readonly category: RouteAttributeInfluence["category"];
+  readonly modifier: number;
+  readonly reason: string;
+  readonly sourceAttributes: readonly string[];
+  readonly confidence?: RouteAttributeInfluence["confidence"];
+}): RouteAttributeInfluence {
+  return {
+    playerId: input.player.playerId,
+    teamId: input.player.teamId,
+    category: input.category,
+    modifier: clamp(input.modifier, -8, 8),
+    confidence: input.confidence ?? "medium",
+    reason: input.reason,
+    sourceAttributes: input.sourceAttributes,
+  };
+}
+
+function actionFamily(actionType: string): "support" | "progress" | "rupture" | "third_man" | "shot" | "carry" {
+  if (actionType.includes("SHOT") || actionType.includes("FINAL")) {
+    return "shot";
+  }
+
+  if (actionType.includes("WEAK_SIDE") || actionType.includes("RUPTURE")) {
+    return "rupture";
+  }
+
+  if (actionType.includes("THIRD")) {
+    return "third_man";
+  }
+
+  if (actionType.includes("CARRY")) {
+    return "carry";
+  }
+
+  if (actionType.includes("FORWARD") || actionType.includes("CONTACT")) {
+    return "progress";
+  }
+
+  return "support";
+}
+
+export function clampRouteAttributeModifier(value: number): number {
+  return clamp(value, MIN_TOTAL_ATTRIBUTE_ADJUSTMENT, MAX_TOTAL_ATTRIBUTE_ADJUSTMENT);
+}
+
+export function buildRouteAttributeInfluences(input: {
+  readonly actor: SpatialPlayerContext;
+  readonly receiver?: SpatialPlayerContext;
+  readonly actionType: string;
+  readonly laneState?: string;
+  readonly pressureLevel?: string;
+  readonly baseRisk?: number;
+}): readonly RouteAttributeInfluence[] {
+  const family = actionFamily(input.actionType);
+  const influences: RouteAttributeInfluence[] = [];
+  const actor = input.actor;
+  const receiver = input.receiver;
+  const pressureIsHigh = input.pressureLevel === "HIGH" || input.pressureLevel === "MEDIUM_HIGH";
+
+  if (family === "support") {
+    const actorSecurity = average([
+      rating(actor.attributes.handPlay, 60),
+      rating(actor.attributes.intelligence, 60),
+      rating(actor.attributes.mental, 60),
+    ]);
+    influences.push(influence({
+      player: actor,
+      category: "PASS_SECURITY",
+      modifier: highAttributeModifier(actorSecurity),
+      reason: `${actor.playerId} improves recycle security through handPlay, intelligence and mental reliability.`,
+      sourceAttributes: ["handPlay", "intelligence", "mental"],
+    }));
+
+    if (receiver !== undefined) {
+      const receiverQuality = average([
+        rating(receiver.attributes.handPlay, 60),
+        rating(receiver.attributes.intelligence, 60),
+        receiver.currentCondition,
+        receiver.mentalFreshness,
+      ]);
+      influences.push(influence({
+        player: receiver,
+        category: "RECEPTION_QUALITY",
+        modifier: highAttributeModifier(receiverQuality),
+        reason: `${receiver.playerId} supports the recycle through reception quality and freshness.`,
+        sourceAttributes: ["handPlay", "intelligence", "currentCondition", "mentalFreshness"],
+      }));
+      influences.push(influence({
+        player: receiver,
+        category: "SUPPORT_TIMING",
+        modifier: receiver.tacticalFunctions.includes("pressure_escape_receiver") ? 2 : 0,
+        reason: `${receiver.playerId} tactical functions describe pressure-escape support timing.`,
+        sourceAttributes: ["tacticalFunctions"],
+        confidence: "low",
+      }));
+    }
+  }
+
+  if (family === "progress") {
+    const platform = receiver === undefined
+      ? 50
+      : average([
+          rating(receiver.attributes.power, 60),
+          rating(receiver.attributes.handPlay, 60),
+          rating(receiver.attributes.endurance, 60),
+          rating(receiver.attributes.mental, 60),
+        ]);
+    influences.push(influence({
+      player: receiver ?? actor,
+      category: "CONTACT_PLATFORM",
+      modifier: highAttributeModifier(platform),
+      reason: `${(receiver ?? actor).playerId} changes forward progress value through power, handling, endurance and mental stability.`,
+      sourceAttributes: ["power", "handPlay", "endurance", "mental"],
+    }));
+  }
+
+  if (family === "rupture") {
+    const runner = receiver ?? actor;
+    const rupture = average([
+      rating(runner.attributes.speed, 60),
+      rating(runner.attributes.footPlayDribble, 60),
+      rating(runner.attributes.intelligence, 60),
+    ]);
+    influences.push(influence({
+      player: runner,
+      category: "RUPTURE_THREAT",
+      modifier: highAttributeModifier(rupture) + (input.laneState === "CLOSED" ? -3 : 0),
+      reason: input.laneState === "CLOSED"
+        ? `${runner.playerId} has rupture qualities, but the closed lane keeps the route constrained.`
+        : `${runner.playerId} improves rupture threat through speed, dribble quality and timing.`,
+      sourceAttributes: ["speed", "footPlayDribble", "intelligence", "laneState"],
+    }));
+  }
+
+  if (family === "third_man") {
+    const link = receiver === undefined
+      ? rating(actor.attributes.intelligence, 60)
+      : average([
+          rating(actor.attributes.intelligence, 60),
+          rating(receiver.attributes.intelligence, 60),
+          rating(actor.attributes.handPlay, 60),
+          rating(receiver.attributes.handPlay, 60),
+          rating(actor.attributes.mental, 60),
+        ]);
+    influences.push(influence({
+      player: receiver ?? actor,
+      category: "THIRD_MAN_LINK",
+      modifier: highAttributeModifier(link),
+      reason: "Third-man link reliability is adjusted from intelligence, handPlay and mental attributes.",
+      sourceAttributes: ["intelligence", "handPlay", "mental"],
+    }));
+  }
+
+  if (family === "shot") {
+    const shotComposure = average([
+      rating(actor.attributes.footPlayPassingShooting, 60),
+      rating(actor.attributes.mental, 60),
+      rating(actor.attributes.intelligence, 60),
+      actor.currentCondition,
+      actor.mentalFreshness,
+    ]);
+    influences.push(influence({
+      player: actor,
+      category: "FINAL_ACTION_COMPOSURE",
+      modifier: highAttributeModifier(shotComposure) + (pressureIsHigh ? -2 : 0),
+      reason: `${actor.playerId} final-action quality is adjusted by shooting, mental freshness and pressure.`,
+      sourceAttributes: ["footPlayPassingShooting", "mental", "intelligence", "currentCondition", "mentalFreshness", "pressureLevel"],
+    }));
+  }
+
+  if (family === "carry") {
+    const carry = average([
+      rating(actor.attributes.speed, 60),
+      rating(actor.attributes.power, 60),
+      rating(actor.attributes.footPlayDribble, 60),
+      actor.currentCondition,
+    ]);
+    influences.push(influence({
+      player: actor,
+      category: "BALL_CARRY",
+      modifier: highAttributeModifier(carry),
+      reason: `${actor.playerId} carry value is adjusted by speed, power, dribble and condition.`,
+      sourceAttributes: ["speed", "power", "footPlayDribble", "currentCondition"],
+    }));
+  }
+
+  const fatigue = fatigueModifier(receiver ?? actor);
+  if (fatigue !== 0) {
+    influences.push(influence({
+      player: receiver ?? actor,
+      category: fatigue < 0 ? "FATIGUE_DRAG" : "PRESSURE_ESCAPE",
+      modifier: fatigue,
+      reason: fatigue < 0
+        ? `${(receiver ?? actor).playerId} has fatigue or mental freshness drag that increases route fragility.`
+        : `${(receiver ?? actor).playerId} freshness improves route reliability.`,
+      sourceAttributes: ["currentCondition", "mentalFreshness"],
+    }));
+  }
+
+  if ((input.baseRisk ?? 0) >= 70 || (pressureIsHigh && input.laneState === "CLOSED")) {
+    influences.push(influence({
+      player: receiver ?? actor,
+      category: "TURNOVER_RISK",
+      modifier: -3,
+      reason: "High pressure or closed lane adds bounded turnover risk without changing lane legality.",
+      sourceAttributes: ["baseRisk", "pressureLevel", "laneState"],
+    }));
+  }
+
+  return influences.filter((item) => item.modifier !== 0);
+}
+
+export function applyRouteAttributeInfluence(input: {
+  readonly baseScore: number;
+  readonly influences: readonly RouteAttributeInfluence[];
+}): number {
+  const total = clampRouteAttributeModifier(
+    input.influences.reduce((sum, influenceItem) => sum + influenceItem.modifier, 0),
+  );
+
+  return clamp(input.baseScore + total, 0, 100);
+}
+```
+
+## File: src/simulation/routeRanking/applySpatialAttributeInfluenceToCandidates.ts
+
+```ts
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+import type { SpatialMatchContext, SpatialPlayerContext } from "../spatialContext";
+import { applyRouteAttributeInfluence, buildRouteAttributeInfluences } from "./routeAttributeInfluence";
+import type { RouteCandidateAttributeContext } from "./routeAttributeInfluenceTypes";
+
+export type RouteCandidateInput = {
+  readonly candidateId: string;
+  readonly actorId: PlayerId;
+  readonly receiverId?: PlayerId;
+  readonly teamId: TeamId;
+  readonly fromZone: ZoneId;
+  readonly targetZone: ZoneId;
+  readonly actionType: string;
+  readonly laneState?: string;
+  readonly baseScore: number;
+  readonly baseRisk?: number;
+};
+
+function spatialPlayers(context: SpatialMatchContext): readonly SpatialPlayerContext[] {
+  return [...context.home.players, ...context.away.players];
+}
+
+function findPlayer(
+  players: readonly SpatialPlayerContext[],
+  playerId: PlayerId | undefined,
+): SpatialPlayerContext | undefined {
+  return playerId === undefined ? undefined : players.find((player) => player.playerId === playerId);
+}
+
+export function applySpatialAttributeInfluenceToCandidates(input: {
+  readonly spatialContext?: SpatialMatchContext;
+  readonly candidates: readonly RouteCandidateInput[];
+  readonly pressureLevel?: string;
+}): readonly RouteCandidateAttributeContext[] {
+  if (input.spatialContext === undefined) {
+    return input.candidates.map((candidate) => ({
+      candidateId: candidate.candidateId,
+      actorId: candidate.actorId,
+      ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+      teamId: candidate.teamId,
+      fromZone: candidate.fromZone,
+      targetZone: candidate.targetZone,
+      actionType: candidate.actionType,
+      ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      baseScore: candidate.baseScore,
+      attributeInfluences: [],
+      attributeAdjustedScore: candidate.baseScore,
+    }));
+  }
+
+  const players = spatialPlayers(input.spatialContext);
+
+  return input.candidates.map((candidate) => {
+    const actor = findPlayer(players, candidate.actorId);
+    const receiver = findPlayer(players, candidate.receiverId);
+
+    if (actor === undefined) {
+      return {
+        candidateId: candidate.candidateId,
+        actorId: candidate.actorId,
+        ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+        teamId: candidate.teamId,
+        fromZone: candidate.fromZone,
+        targetZone: candidate.targetZone,
+        actionType: candidate.actionType,
+        ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+        baseScore: candidate.baseScore,
+        attributeInfluences: [],
+        attributeAdjustedScore: candidate.baseScore,
+      };
+    }
+
+    const influences = buildRouteAttributeInfluences({
+      actor,
+      ...(receiver === undefined ? {} : { receiver }),
+      actionType: candidate.actionType,
+      ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      ...(input.pressureLevel === undefined ? {} : { pressureLevel: input.pressureLevel }),
+      ...(candidate.baseRisk === undefined ? {} : { baseRisk: candidate.baseRisk }),
+    });
+
+    return {
+      candidateId: candidate.candidateId,
+      actorId: candidate.actorId,
+      ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+      teamId: candidate.teamId,
+      fromZone: candidate.fromZone,
+      targetZone: candidate.targetZone,
+      actionType: candidate.actionType,
+      ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      baseScore: candidate.baseScore,
+      attributeInfluences: influences,
+      attributeAdjustedScore: applyRouteAttributeInfluence({
+        baseScore: candidate.baseScore,
+        influences,
+      }),
+    };
+  });
 }
 ```
 
@@ -1727,7 +2214,9 @@ export type FullMatchGroundingWarning =
   | "SPATIAL_CONTEXT_ADAPTER_AVAILABLE"
   | "WORKBENCH_REPLAY_SEED_AVAILABLE"
   | "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION"
-  | "ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"
+  | "ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE"
+  | "ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL"
+  | "PROTOTYPE_SELECTION_STILL_DOMINANT"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
 
@@ -1750,7 +2239,9 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "SPATIAL_CONTEXT_ADAPTER_AVAILABLE",
     "WORKBENCH_REPLAY_SEED_AVAILABLE",
     "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION",
-    "ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN",
+    "ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE",
+    "ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL",
+    "PROTOTYPE_SELECTION_STILL_DOMINANT",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
 
@@ -1765,14 +2256,15 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context, but the harness does not yet replay the full workbench sequence chain or drive route ranking from real player attributes.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and route candidates can receive bounded attribute influence, but the harness does not yet replay the full workbench sequence chain or drive final selection from real player attributes.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
       "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP",
+      "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
+      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
-      "PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING",
+      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
       "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };
@@ -1884,6 +2376,10 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   assertTest(analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must now drive adapter-level spatial player context.");
   assertTest(analysis.startersDriveActivePlayers, "TeamSnapshot.starters must now drive adapter-level active player IDs.");
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
+  assertTest(analysis.attributeInfluenceLayerExists, "attribute influence layer must be reported as available.");
+  assertTest(analysis.routeRankingAttributeInfluenceMode === "metadata_only", "attribute influence mode must be metadata_only.");
+  assertTest(analysis.visibleAttributesDriveRouteRanking === "PARTIAL", "visible attributes must reduce ranking gap to PARTIAL.");
+  assertTest(analysis.remainingPrototypeDominance === "HIGH", "remaining prototype dominance must be reported honestly.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
   assertTest(analysis.lostPlayerIdentity.length > 0, "lost official player identity must be reported.");
 
@@ -1891,6 +2387,8 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
     "roster-to-mini-match gap is PARTIAL",
     "TeamSnapshot roster and starters now drive adapter-level spatial context",
     "workbench positions can seed spatial context",
+    "route attribute influence layer exists",
+    "visible attributes drive route ranking partially",
     "prototype dominance is still documented",
     "lost player identity is listed",
   ];
@@ -2020,6 +2518,11 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.newCarrierPreserved, "new carrier control-mobile-lock must be preserved.");
   assertTest(result.ballZonePreserved, "before and after ball zones must be preserved.");
   assertTest(result.selectedActionRepresented, "SUPPORT_CLUSTER_RECYCLE selected action must be represented.");
+  assertTest(result.attributeInfluenceApplied, "replay seed must apply route attribute influence.");
+  assertTest(result.routeRankingUsesRealAttributes === "PARTIAL", "replay seed must report attribute route ranking as PARTIAL.");
+  assertTest(result.selectedCandidateBaseScore !== undefined, "selected candidate base score must be exposed.");
+  assertTest(result.selectedCandidateAttributeAdjustedScore !== undefined, "selected candidate adjusted score must be exposed.");
+  assertTest((result.selectedCandidateInfluences ?? []).length > 0, "selected candidate influences must be exposed.");
   assertTest(result.status === "PARTIAL" || result.status === "PASS", `replay seed must not fail, received ${result.status}.`);
   if (result.status === "PARTIAL") {
     assertTest(result.lossyMappings.length > 0, "PARTIAL replay seed must list lossy mappings.");
@@ -2033,6 +2536,8 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "before ball zone Z4-HSL is preserved",
     "after ball zone Z3-HSL is preserved",
     "selected action type SUPPORT_CLUSTER_RECYCLE is represented",
+    "route attribute influence is applied",
+    "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",
   ];
 }
@@ -2041,6 +2546,239 @@ if (require.main === module) {
   const checks = validateWorkbenchReplaySeed();
 
   console.log("workbenchReplaySeed tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/routeRanking/routeAttributeInfluence.test.ts
+
+```ts
+import type { SpatialPlayerContext } from "../spatialContext";
+import { applyRouteAttributeInfluence, buildRouteAttributeInfluences, clampRouteAttributeModifier } from "./routeAttributeInfluence";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function player(input: {
+  readonly playerId: string;
+  readonly speed?: number;
+  readonly power?: number;
+  readonly handPlay?: number;
+  readonly footPlayDribble?: number;
+  readonly footPlayPassingShooting?: number;
+  readonly intelligence?: number;
+  readonly mental?: number;
+  readonly condition?: number;
+  readonly freshness?: number;
+  readonly functions?: readonly string[];
+}): SpatialPlayerContext {
+  return {
+    playerId: input.playerId,
+    teamId: "control",
+    role: "test_role",
+    displayRole: "Test Role",
+    zone: "Z3-HSL",
+    isStarter: true,
+    isGoalkeeper: false,
+    isBallCarrier: false,
+    currentCondition: input.condition ?? 86,
+    mentalFreshness: input.freshness ?? 86,
+    attributes: {
+      speed: input.speed ?? 70,
+      power: input.power ?? 70,
+      endurance: 80,
+      handPlay: input.handPlay ?? 70,
+      footPlayDribble: input.footPlayDribble ?? 70,
+      footPlayPassingShooting: input.footPlayPassingShooting ?? 70,
+      intelligence: input.intelligence ?? 70,
+      mental: input.mental ?? 70,
+    },
+    tacticalFunctions: input.functions ?? [],
+  };
+}
+
+export function validateRouteAttributeInfluence(): readonly string[] {
+  const strongActor = player({ playerId: "actor", handPlay: 92, intelligence: 90, mental: 88 });
+  const strongReceiver = player({
+    playerId: "receiver",
+    handPlay: 90,
+    intelligence: 88,
+    condition: 92,
+    freshness: 90,
+    functions: ["pressure_escape_receiver"],
+  });
+  const supportInfluences = buildRouteAttributeInfluences({
+    actor: strongActor,
+    receiver: strongReceiver,
+    actionType: "SUPPORT_CLUSTER_RECYCLE",
+    laneState: "CLOSED",
+    pressureLevel: "HIGH",
+    baseRisk: 20,
+  });
+  const supportAdjusted = applyRouteAttributeInfluence({
+    baseScore: 70,
+    influences: supportInfluences,
+  });
+  const tiredShooter = player({
+    playerId: "tired-shooter",
+    footPlayPassingShooting: 84,
+    mental: 35,
+    intelligence: 50,
+    condition: 38,
+    freshness: 34,
+  });
+  const shotInfluences = buildRouteAttributeInfluences({
+    actor: tiredShooter,
+    actionType: "SHOT",
+    pressureLevel: "HIGH",
+    baseRisk: 80,
+  });
+  const shotAdjusted = applyRouteAttributeInfluence({ baseScore: 60, influences: shotInfluences });
+  const fastRunner = player({
+    playerId: "fast-runner",
+    speed: 95,
+    footPlayDribble: 90,
+    intelligence: 86,
+  });
+  const ruptureInfluences = buildRouteAttributeInfluences({
+    actor: strongActor,
+    receiver: fastRunner,
+    actionType: "WEAK_SIDE_SWITCH",
+    laneState: "CLOSED",
+  });
+  const platformInfluences = buildRouteAttributeInfluences({
+    actor: strongActor,
+    receiver: player({ playerId: "platform", power: 93, handPlay: 88, mental: 84 }),
+    actionType: "FORWARD_PROGRESS",
+  });
+
+  assertTest(supportAdjusted > 70, "high handPlay and intelligence must improve support/recycle reliability.");
+  assertTest(
+    supportInfluences.some((item) => item.category === "PASS_SECURITY") &&
+      supportInfluences.some((item) => item.category === "RECEPTION_QUALITY"),
+    "support/recycle influences must explain pass security and reception quality.",
+  );
+  assertTest(shotAdjusted < 60, "low condition and mental freshness must increase final-action risk.");
+  assertTest(
+    shotInfluences.some((item) => item.category === "FATIGUE_DRAG" || item.category === "TURNOVER_RISK"),
+    "shot risk must include fatigue or turnover explanation.",
+  );
+  assertTest(
+    ruptureInfluences.some((item) => item.category === "RUPTURE_THREAT" && item.reason.includes("closed lane")),
+    "high speed may improve rupture threat but must not override closed lane legality.",
+  );
+  assertTest(
+    platformInfluences.some((item) => item.category === "CONTACT_PLATFORM" && item.modifier > 0),
+    "power and handPlay must improve contact platform value.",
+  );
+  assertTest(clampRouteAttributeModifier(99) === 12, "positive modifiers must be bounded at +12.");
+  assertTest(clampRouteAttributeModifier(-99) === -12, "negative modifiers must be bounded at -12.");
+
+  return [
+    "support/recycle attributes improve reliability",
+    "fatigue and mental freshness increase risk",
+    "rupture threat does not override closed lane legality",
+    "contact platform value uses power and handPlay",
+    "route attribute modifiers are bounded",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRouteAttributeInfluence();
+
+  console.log("routeAttributeInfluence tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/routeRanking/applySpatialAttributeInfluenceToCandidates.test.ts
+
+```ts
+import { sequence1Action1WorkbenchTruth } from "../grounding/fixtures/sequence1Action1.fixture";
+import { createWorkbenchReplayMatchInput } from "../grounding/runWorkbenchReplaySeed";
+import { workbenchToSpatialMatchContext } from "../spatialContext";
+import { applySpatialAttributeInfluenceToCandidates, type RouteCandidateInput } from "./applySpatialAttributeInfluenceToCandidates";
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function candidates(): readonly RouteCandidateInput[] {
+  return sequence1Action1WorkbenchTruth.rankedOptions.map((option) => ({
+    candidateId: `rank-${option.rank}`,
+    actorId: sequence1Action1WorkbenchTruth.selectedAction.actorId as PlayerId,
+    ...(option.receiverId === undefined ? {} : { receiverId: option.receiverId as PlayerId }),
+    teamId: sequence1Action1WorkbenchTruth.possessionTeamId as TeamId,
+    fromZone: sequence1Action1WorkbenchTruth.selectedAction.fromZone as ZoneId,
+    targetZone: option.targetZone as ZoneId,
+    actionType: option.actionType,
+    ...(option.laneState === undefined ? {} : { laneState: option.laneState }),
+    baseScore: option.finalSelectionScore ?? option.score ?? 0,
+    baseRisk: option.risk === "HIGH" ? 80 : option.risk === "MEDIUM" ? 50 : 20,
+  }));
+}
+
+export function validateApplySpatialAttributeInfluenceToCandidates(): readonly string[] {
+  const baseCandidates = candidates();
+  const unchanged = applySpatialAttributeInfluenceToCandidates({
+    candidates: baseCandidates,
+  });
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const spatialContext = workbenchToSpatialMatchContext({
+    matchInput,
+    workbench: sequence1Action1WorkbenchTruth,
+    frame: "before",
+  });
+  const adjusted = applySpatialAttributeInfluenceToCandidates({
+    spatialContext,
+    candidates: baseCandidates,
+    pressureLevel: "HIGH",
+  });
+  const selected = adjusted.find((candidate) => candidate.candidateId === "rank-1");
+  const weakSide = adjusted.find((candidate) => candidate.actionType === "WEAK_SIDE_SWITCH");
+
+  assertTest(
+    unchanged.every((candidate) => candidate.attributeAdjustedScore === candidate.baseScore && candidate.attributeInfluences.length === 0),
+    "absence of spatialContext must leave candidate scores unchanged.",
+  );
+  assertTest(
+    adjusted.some((candidate) => candidate.attributeInfluences.length > 0),
+    "spatialContext must add attribute influence metadata.",
+  );
+  assertTest(selected !== undefined && selected.attributeAdjustedScore >= selected.baseScore, "selected recycle candidate should remain plausible after attribute influence.");
+  assertTest(
+    weakSide !== undefined && weakSide.laneState === "CONTESTED",
+    "attribute influence must preserve lane state and not rewrite legality.",
+  );
+  assertTest(
+    adjusted.every((candidate) => Math.abs(candidate.attributeAdjustedScore - candidate.baseScore) <= 12),
+    "total attribute adjustment must remain bounded.",
+  );
+
+  return [
+    "no spatialContext leaves candidate scores unchanged",
+    "spatialContext enriches candidates with attribute influences",
+    "selected recycle remains plausible",
+    "lane state legality is preserved",
+    "candidate score adjustments are bounded",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateApplySpatialAttributeInfluenceToCandidates();
+
+  console.log("applySpatialAttributeInfluenceToCandidates tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -2082,7 +2820,9 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED"), "partial full-match grounding warning must be emitted.");
   assertTest(diagnostics.warnings.includes("SPATIAL_CONTEXT_ADAPTER_AVAILABLE"), "spatial context adapter availability must be emitted.");
   assertTest(diagnostics.warnings.includes("WORKBENCH_REPLAY_SEED_AVAILABLE"), "workbench replay seed availability must be emitted.");
-  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"), "route ranking attribute gap must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE"), "route attribute influence availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL"), "partial route ranking attribute influence must be emitted.");
+  assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_DOMINANT"), "prototype selection dominance must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
   assertTest(
@@ -3880,7 +4620,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le moteur sait maintenant convertir une verite workbench en contexte spatial type, mais la resolution mini-match n'utilise encore que partiellement ces informations pour choisir ses actions.";
+    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant etre expliques depuis le SpatialContext. La selection finale reste encore partiellement pilotee par le chemin prototype.";
 
   return [
     {
@@ -3896,7 +4636,12 @@ function tacticalGroundingGapFacts(input: {
       confidence: "low",
       strength: 58,
       coachVisible: true,
-      internalTags: ["tactical_grounding_gap", "workbench_truth_fixture_available", "workbench_replay_seed"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "workbench_truth_fixture_available",
+        "workbench_replay_seed",
+        "route_attribute_influence",
+      ],
     },
     {
       factId: `${input.matchInput.matchId}-spatial-context-adapter-available`,
@@ -3927,14 +4672,19 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones, but normal route ranking still resolves through the prototype path.",
+      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones while applying bounded attribute-adjusted candidate scores.",
       confidence: "low",
       strength: 58,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "workbench_replay_seed_partial"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "workbench_replay_seed_partial",
+        "attribute_adjusted_candidate_scores_available",
+        "attribute_adjusted_score",
+      ],
     },
     {
-      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap`,
+      factId: `${input.matchInput.matchId}-route-attribute-influence-available`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -3942,11 +4692,35 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "PlayerSnapshot roles and attributes are carried into the adapter layer, but they do not yet fully drive mini-match route ranking.",
+      summary: "Route attribute influence is available for pass security, reception quality, support timing, rupture threat, contact platform, fatigue drag, turnover risk, and final-action composure.",
       confidence: "low",
       strength: 65,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "route_ranking_not_yet_attribute_driven", "route_ranking_attribute_gap"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "route_attribute_influence_available",
+        "route_attribute_influence",
+        "selected_route_attribute_explanation_available",
+      ],
+    },
+    {
+      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap-partial`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "PlayerSnapshot roles and attributes now influence candidate metadata, but final mini-match selection remains prototype-dominant rather than fully attribute-driven.",
+      confidence: "low",
+      strength: 61,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "route_ranking_attribute_gap_partial",
+        "prototype_selection_still_partial",
+      ],
     },
     {
       factId: `${input.matchInput.matchId}-full-match-partial-workbench-grounding`,
@@ -7124,6 +7898,7 @@ import type { TacticalMemoryState } from "../../systems/tacticalMemory";
 import type { RecoverySaturationState } from "../../systems/structure";
 import type { OffensiveMomentumState } from "../../systems/offense/momentum";
 import type { SpatialMatchContext as AdapterSpatialMatchContext } from "../spatialContext/spatialTeamContextTypes";
+import type { RouteAttributeInfluenceMode, RouteRankingAttributeUsage } from "../routeRanking";
 
 export interface MiniMatchInput {
   readonly teamA: PrototypeTeamDefinition;
@@ -7286,6 +8061,9 @@ export interface MiniMatchSequenceSetup {
   readonly possessionReason: string;
   readonly spatialContextActive: boolean;
   readonly spatialContextSummary?: string;
+  readonly attributeInfluenceMode?: RouteAttributeInfluenceMode;
+  readonly routeRankingUsesRealAttributes?: RouteRankingAttributeUsage;
+  readonly attributeInfluenceSummary?: string;
   readonly resolveInput: ResolveSequenceInput;
 }
 
@@ -7699,6 +8477,7 @@ import { TacticalPhaseState } from "../../systems/tacticalState";
 import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
 import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
+import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -7919,6 +8698,63 @@ function spatialContextSummary(state: MiniMatchState): string | undefined {
   ].join("; ");
 }
 
+function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
+  const spatialContext = state.context.spatialContext;
+
+  if (spatialContext === undefined) {
+    return undefined;
+  }
+
+  const players = spatialContext.possessionTeamId === spatialContext.home.teamId
+    ? spatialContext.home.players
+    : spatialContext.away.players;
+  const actor = players.find((player) => player.playerId === spatialContext.ballCarrierId);
+  const receiver = players.find((player) => player.playerId !== spatialContext.ballCarrierId && !player.isGoalkeeper);
+
+  if (actor === undefined) {
+    return "attribute_influence_active; mode=metadata_only; actor=missing; routeRankingUsesRealAttributes=PARTIAL";
+  }
+
+  const candidate = applySpatialAttributeInfluenceToCandidates({
+    spatialContext,
+    pressureLevel: "MEDIUM",
+    candidates: [
+      {
+        candidateId: "spatial-context-metadata-candidate",
+        actorId: actor.playerId,
+        ...(receiver === undefined ? {} : { receiverId: receiver.playerId }),
+        teamId: actor.teamId,
+        fromZone: spatialContext.ballZone,
+        targetZone: receiver?.zone ?? spatialContext.ballZone,
+        actionType: "SUPPORT_CLUSTER_RECYCLE",
+        laneState: "CONTESTED",
+        baseScore: 50,
+        baseRisk: 35,
+      },
+    ],
+  })[0];
+
+  if (candidate === undefined) {
+    return "attribute_influence_active; mode=metadata_only; candidate=missing; routeRankingUsesRealAttributes=PARTIAL";
+  }
+
+  const reasons = candidate.attributeInfluences
+    .slice(0, 2)
+    .map((influence) => influence.category)
+    .join("/");
+
+  return [
+    "attribute_influence_active",
+    "mode=metadata_only",
+    `actor=${actor.playerId}`,
+    `receiver=${receiver?.playerId ?? "none"}`,
+    `base=${candidate.baseScore}`,
+    `adjusted=${candidate.attributeAdjustedScore}`,
+    `reasons=${reasons.length === 0 ? "none" : reasons}`,
+    "routeRankingUsesRealAttributes=PARTIAL",
+  ].join("; ");
+}
+
 export function selectInitialSequenceContext(
   state: MiniMatchState,
   sequenceIndex: number,
@@ -7970,6 +8806,7 @@ export function selectInitialSequenceContext(
   const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
   const startTick = state.context.startTick + sequenceIndex * 10;
   const spatialSummary = spatialContextSummary(state);
+  const attributeSummary = attributeInfluenceSummary(state);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -7981,6 +8818,13 @@ export function selectInitialSequenceContext(
     possessionReason: describePossessionReason(state, possessionTeamDefinition, sequenceIndex),
     spatialContextActive: state.context.spatialContext !== undefined,
     ...(spatialSummary === undefined ? {} : { spatialContextSummary: spatialSummary }),
+    ...(attributeSummary === undefined
+      ? {}
+      : {
+          attributeInfluenceMode: "metadata_only" as const,
+          routeRankingUsesRealAttributes: "PARTIAL" as const,
+          attributeInfluenceSummary: attributeSummary,
+        }),
     resolveInput: {
       startTick,
       teams: {

@@ -170,7 +170,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le moteur sait maintenant convertir une verite workbench en contexte spatial type, mais la resolution mini-match n'utilise encore que partiellement ces informations pour choisir ses actions.";
+    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant etre expliques depuis le SpatialContext. La selection finale reste encore partiellement pilotee par le chemin prototype.";
 
   return [
     {
@@ -186,7 +186,12 @@ function tacticalGroundingGapFacts(input: {
       confidence: "low",
       strength: 58,
       coachVisible: true,
-      internalTags: ["tactical_grounding_gap", "workbench_truth_fixture_available", "workbench_replay_seed"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "workbench_truth_fixture_available",
+        "workbench_replay_seed",
+        "route_attribute_influence",
+      ],
     },
     {
       factId: `${input.matchInput.matchId}-spatial-context-adapter-available`,
@@ -217,14 +222,19 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones, but normal route ranking still resolves through the prototype path.",
+      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones while applying bounded attribute-adjusted candidate scores.",
       confidence: "low",
       strength: 58,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "workbench_replay_seed_partial"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "workbench_replay_seed_partial",
+        "attribute_adjusted_candidate_scores_available",
+        "attribute_adjusted_score",
+      ],
     },
     {
-      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap`,
+      factId: `${input.matchInput.matchId}-route-attribute-influence-available`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -232,11 +242,35 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "PlayerSnapshot roles and attributes are carried into the adapter layer, but they do not yet fully drive mini-match route ranking.",
+      summary: "Route attribute influence is available for pass security, reception quality, support timing, rupture threat, contact platform, fatigue drag, turnover risk, and final-action composure.",
       confidence: "low",
       strength: 65,
       coachVisible: false,
-      internalTags: ["tactical_grounding_gap", "route_ranking_not_yet_attribute_driven", "route_ranking_attribute_gap"],
+      internalTags: [
+        "tactical_grounding_gap",
+        "route_attribute_influence_available",
+        "route_attribute_influence",
+        "selected_route_attribute_explanation_available",
+      ],
+    },
+    {
+      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap-partial`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "PlayerSnapshot roles and attributes now influence candidate metadata, but final mini-match selection remains prototype-dominant rather than fully attribute-driven.",
+      confidence: "low",
+      strength: 61,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "route_ranking_attribute_gap_partial",
+        "prototype_selection_still_partial",
+      ],
     },
     {
       factId: `${input.matchInput.matchId}-full-match-partial-workbench-grounding`,

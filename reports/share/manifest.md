@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-10T16:01:13.282Z
-Task/sprint: Sprint 2S - Roster-to-SpatialContext Adapter + Workbench Replay Seed
+Generated: 2026-06-11T06:28:00.579Z
+Task/sprint: Sprint 2T - Attribute-Driven Route Ranking
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -13,8 +13,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - validation.share-pack.md
-- roster-to-spatial-context-adapter.md
-- validation.roster-to-spatial-context-adapter.md
+- attribute-driven-route-ranking.md
+- validation.attribute-driven-route-ranking.md
 - README.md
 
 ## Bundle Files
