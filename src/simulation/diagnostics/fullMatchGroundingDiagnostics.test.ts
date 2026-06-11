@@ -34,6 +34,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE"), "candidate_modifier availability must be emitted.");
   assertTest(diagnostics.warnings.includes("ATTRIBUTE_SELECTION_GUARD_ACTIVE"), "attribute selection guard activity must be emitted.");
   assertTest(diagnostics.warnings.includes("ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE"), "full-match authority limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE"), "spatial route selection path availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"), "controlled mini-match spatial selection availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"), "normal full-match limitation must be emitted.");
   assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_PARTIAL"), "prototype selection partiality must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");

@@ -23,6 +23,11 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
   assertTest(analysis.attributeInfluenceLayerExists, "attribute influence layer must be reported as available.");
   assertTest(analysis.routeRankingAttributeInfluenceMode === "candidate_modifier", "attribute influence mode must be candidate_modifier.");
+  assertTest(analysis.selectionSource === "spatial_candidate_modifier", "selection source must report spatial_candidate_modifier availability.");
+  assertTest(analysis.spatialSelectionPathExists, "spatial selection path must exist.");
+  assertTest(analysis.prototypeFallbackStillEnabled, "prototype fallback must remain enabled.");
+  assertTest(!analysis.normalFullMatchUsesSpatialSelection, "normal full-match must not be reported as spatial-selection-driven yet.");
+  assertTest(analysis.controlledMiniMatchUsesSpatialSelection, "controlled mini-match must use spatial route selection.");
   assertTest(analysis.visibleAttributesDriveRouteRanking === "PARTIAL", "visible attributes must reduce ranking gap to PARTIAL.");
   assertTest(analysis.remainingPrototypeDominance === "HIGH", "remaining prototype dominance must be reported honestly.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
@@ -33,6 +38,8 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
     "TeamSnapshot roster and starters now drive adapter-level spatial context",
     "workbench positions can seed spatial context",
     "route attribute influence layer exists",
+    "controlled spatial route selection path exists",
+    "prototype fallback remains enabled",
     "visible attributes drive candidate_modifier route ranking partially",
     "prototype dominance is still documented",
     "lost player identity is listed",

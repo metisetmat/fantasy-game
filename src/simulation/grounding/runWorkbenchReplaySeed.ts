@@ -4,6 +4,7 @@ import type { ZoneId } from "../../core/zones";
 import { PlayerRole } from "../../models/player";
 import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
 import { runMiniMatch } from "../miniMatch";
+import type { MiniMatchRouteSelectionResult, MiniMatchRouteSelectionSource } from "../miniMatch";
 import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
@@ -28,6 +29,9 @@ export type WorkbenchReplaySeedResult = {
   readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
   readonly selectedBy?: "base_score" | "attribute_adjusted_score";
   readonly selectionChangedByAttributes: boolean;
+  readonly routeSelectionSource: MiniMatchRouteSelectionSource;
+  readonly miniMatchRouteSelectionResult?: MiniMatchRouteSelectionResult;
+  readonly miniMatchRouteSelectionUsedSpatialResult: boolean;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -254,7 +258,11 @@ export function runWorkbenchReplaySeed(input: {
     numberOfSequences: 1,
     seed: 202,
     spatialContext: beforeContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    routeSelectionSource: "spatial_candidate_modifier",
+    routeSelectionWorkbench: input.workbench,
   });
+  const miniMatchRouteSelectionResult = miniMatch.state.records[0]?.setup.routeSelectionResult;
   const lossyMappings = [
     "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
     "Route ranking can receive bounded attribute-adjusted candidate scores, but final mini-match selection is not yet fully selection-driving.",
@@ -290,14 +298,20 @@ export function runWorkbenchReplaySeed(input: {
     attributeSelectionResult: candidateModifierSelectionResult,
     selectedBy: candidateModifierSelectionResult.selectedBy,
     selectionChangedByAttributes: candidateModifierSelectionResult.selectionChanged,
+    routeSelectionSource: "spatial_candidate_modifier",
+    ...(miniMatchRouteSelectionResult === undefined ? {} : { miniMatchRouteSelectionResult }),
+    miniMatchRouteSelectionUsedSpatialResult:
+      miniMatchRouteSelectionResult?.selectionSource === "spatial_candidate_modifier" &&
+      miniMatchRouteSelectionResult.guardValid,
     missingTruths,
     lossyMappings,
     recommendations: [
       "CONFIRM_WORKBENCH_REPLAY_SEED",
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
-      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
+      "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };
 }

@@ -9,6 +9,11 @@ export type RosterToMiniMatchGapAnalysis = {
   readonly miniMatchConsumesSpatialContextMetadata: "YES" | "PARTIAL" | "NO";
   readonly attributeInfluenceLayerExists: boolean;
   readonly routeRankingAttributeInfluenceMode: "metadata_only" | "candidate_modifier" | "selection_driving";
+  readonly selectionSource: "prototype" | "spatial_candidate_modifier" | "spatial_selection_driving";
+  readonly spatialSelectionPathExists: boolean;
+  readonly prototypeFallbackStillEnabled: boolean;
+  readonly normalFullMatchUsesSpatialSelection: boolean;
+  readonly controlledMiniMatchUsesSpatialSelection: boolean;
   readonly remainingPrototypeDominance: "HIGH" | "MEDIUM" | "LOW";
   readonly rosterDrivesMiniMatchPlayerPositions: boolean;
   readonly startersDriveActivePlayers: boolean;
@@ -39,6 +44,11 @@ export function analyzeRosterToMiniMatchGap(input: {
     miniMatchConsumesSpatialContextMetadata: "PARTIAL",
     attributeInfluenceLayerExists: true,
     routeRankingAttributeInfluenceMode: "candidate_modifier",
+    selectionSource: "spatial_candidate_modifier",
+    spatialSelectionPathExists: true,
+    prototypeFallbackStillEnabled: true,
+    normalFullMatchUsesSpatialSelection: false,
+    controlledMiniMatchUsesSpatialSelection: true,
     remainingPrototypeDominance: "HIGH",
     rosterDrivesMiniMatchPlayerPositions: true,
     startersDriveActivePlayers: true,
@@ -52,7 +62,8 @@ export function analyzeRosterToMiniMatchGap(input: {
       "Sprint 2S can convert TeamSnapshot.roster into typed SpatialTeamContext.",
       "Sprint 2S can seed SpatialTeamContext positions from workbench truth.",
       "MiniMatchInput can carry SpatialMatchContext metadata and bounded route attribute influence summaries.",
-      "PlayerSnapshot roles and attributes can now evaluate candidate_modifier selection under guardrails, but normal full-match selection is not yet end-to-end attribute-driven.",
+      "PlayerSnapshot roles and attributes can now evaluate candidate_modifier selection under guardrails through a controlled mini-match route selection source.",
+      "Prototype fallback remains enabled and normal full-match selection is not yet spatial-selection-driven by default.",
       "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
       "CONTROL/BLITZ prototype teams remain a dominant source of mini-match tactical behavior.",
     ],
@@ -62,7 +73,10 @@ export function analyzeRosterToMiniMatchGap(input: {
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
       "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
-      "PREPARE_PROTOTYPE_SELECTION_REPLACEMENT",
+      "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "CONFIRM_CONTROLLED_MINIMATCH_SPATIAL_SELECTION",
+      "PREPARE_NORMAL_FULLMATCH_SPATIAL_SELECTION_FLAG",
     ],
   };
 }

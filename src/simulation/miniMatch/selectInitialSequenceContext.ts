@@ -22,6 +22,9 @@ import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
 import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
 import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate, type AttributeAdjustedSelectionResult } from "../routeRanking";
+import { generateSpatialRouteCandidates, type SpatialRouteCandidate } from "./spatialCandidateGeneration";
+import { mapPrototypeToSpatialCandidates } from "./prototypeToSpatialCandidateMapper";
+import { selectMiniMatchRoute, type MiniMatchRouteSelectionResult } from "./miniMatchRouteSelection";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -309,6 +312,81 @@ function attributeInfluenceSummary(result: AttributeAdjustedSelectionResult | un
   ].join("; ");
 }
 
+function prototypeCandidateIdFromWorkbench(state: MiniMatchState): string {
+  const selectedOption = state.context.routeSelectionWorkbench?.rankedOptions.find((option) => option.selected);
+
+  return selectedOption === undefined ? "prototype-current-route" : `workbench-rank-${selectedOption.rank}`;
+}
+
+function routeSelectionResult(input: {
+  readonly state: MiniMatchState;
+  readonly possessionTeam: SpatialTeamContext;
+  readonly activeZone: ZoneId;
+  readonly pressureLevel: PressureLevel;
+}): MiniMatchRouteSelectionResult | undefined {
+  const spatialContext = input.state.context.spatialContext;
+
+  if (spatialContext === undefined && input.state.context.routeSelectionSource === undefined) {
+    return undefined;
+  }
+
+  const currentBallCarrierId = spatialContext?.ballCarrierId ?? input.possessionTeam.players[0]?.id;
+
+  if (currentBallCarrierId === undefined) {
+    return undefined;
+  }
+
+  const mappedPrototype = mapPrototypeToSpatialCandidates({
+    ...(spatialContext === undefined ? {} : { spatialContext }),
+    currentBallCarrierId,
+    currentBallZone: spatialContext?.ballZone ?? input.activeZone,
+    currentPossessionTeamId: spatialContext?.possessionTeamId ?? input.possessionTeam.teamId,
+  });
+  const spatialCandidates: readonly SpatialRouteCandidate[] = spatialContext === undefined
+    ? mappedPrototype.candidates
+    : generateSpatialRouteCandidates({
+        spatialContext,
+        possessionTeamId: spatialContext.possessionTeamId,
+        ballCarrierId: spatialContext.ballCarrierId,
+        ballZone: spatialContext.ballZone,
+        pressureLevel: input.pressureLevel.toUpperCase(),
+        ...(input.state.context.routeSelectionWorkbench === undefined ? {} : { workbench: input.state.context.routeSelectionWorkbench }),
+        prototypeCandidates: mappedPrototype.candidates,
+      });
+  const selected = selectMiniMatchRoute({
+    ...(spatialContext === undefined ? {} : { spatialContext }),
+    ...(input.state.context.routeSelectionSource === undefined ? {} : { selectionSource: input.state.context.routeSelectionSource }),
+    ...(input.state.context.routeRankingAttributeMode === undefined ? {} : { routeRankingAttributeMode: input.state.context.routeRankingAttributeMode }),
+    candidates: spatialCandidates,
+    prototypeCandidateId: prototypeCandidateIdFromWorkbench(input.state),
+    pressureLevel: input.pressureLevel.toUpperCase(),
+    ...(input.state.context.routeSelectionWorkbench === undefined ? {} : { workbench: input.state.context.routeSelectionWorkbench }),
+  });
+
+  return {
+    ...selected,
+    notes: [...selected.notes, ...mappedPrototype.lossyMappings],
+  };
+}
+
+function routeSelectionSummary(result: MiniMatchRouteSelectionResult | undefined): string | undefined {
+  if (result === undefined) {
+    return undefined;
+  }
+
+  return [
+    "route_selection_active",
+    `source=${result.selectionSource}`,
+    `selected=${result.selectedCandidateId}`,
+    `action=${result.selectedActionType}`,
+    `selectedBy=${result.selectedBy}`,
+    `changed=${result.selectionChangedFromPrototype ? "YES" : "NO"}`,
+    `guard=${result.guardValid ? "PASS" : "FAIL"}`,
+    `blocked=${result.blockedReasons.join("/") || "none"}`,
+    `routeRankingUsesRealAttributes=${result.routeRankingUsesRealAttributes}`,
+  ].join("; ");
+}
+
 export function selectInitialSequenceContext(
   state: MiniMatchState,
   sequenceIndex: number,
@@ -362,6 +440,8 @@ export function selectInitialSequenceContext(
   const spatialSummary = spatialContextSummary(state);
   const selectionResult = attributeSelectionResult(state);
   const attributeSummary = attributeInfluenceSummary(selectionResult);
+  const routeResult = routeSelectionResult({ state, possessionTeam, activeZone, pressureLevel });
+  const routeSummary = routeSelectionSummary(routeResult);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -380,6 +460,12 @@ export function selectInitialSequenceContext(
           routeRankingUsesRealAttributes: "PARTIAL" as const,
           attributeInfluenceSummary: attributeSummary,
           ...(selectionResult === undefined ? {} : { attributeSelectionResult: selectionResult }),
+        }),
+    ...(routeSummary === undefined
+      ? {}
+      : {
+          routeSelectionSummary: routeSummary,
+          ...(routeResult === undefined ? {} : { routeSelectionResult: routeResult }),
         }),
     resolveInput: {
       startTick,

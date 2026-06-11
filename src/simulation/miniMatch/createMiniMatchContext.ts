@@ -258,6 +258,8 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
     ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
     ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
     ...(input.routeRankingAttributeMode === undefined ? {} : { routeRankingAttributeMode: input.routeRankingAttributeMode }),
+    ...(input.routeSelectionSource === undefined ? {} : { routeSelectionSource: input.routeSelectionSource }),
+    ...(input.routeSelectionWorkbench === undefined ? {} : { routeSelectionWorkbench: input.routeSelectionWorkbench }),
   };
   const influenceAverage = input.segmentInfluence === undefined
     ? 0

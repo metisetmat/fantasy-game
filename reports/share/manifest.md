@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T07:10:28.721Z
-Task/sprint: Sprint 2U - Selection-Driving Attribute Ranking
+Generated: 2026-06-11T08:17:08.906Z
+Task/sprint: Sprint 2V - Prototype Selection Replacement in MiniMatch
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -13,8 +13,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - validation.share-pack.md
-- selection-driving-attribute-ranking.md
-- validation.selection-driving-attribute-ranking.md
+- prototype-selection-replacement.md
+- validation.prototype-selection-replacement.md
 - README.md
 
 ## Bundle Files

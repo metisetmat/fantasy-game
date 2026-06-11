@@ -170,7 +170,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant modifier une selection candidate sous garde-fous. La selection full-match finale reste encore partiellement pilotee par le chemin prototype.";
+    "Le mini-match dispose maintenant d'un chemin controle ou les candidats issus du SpatialContext peuvent etre classes par score ajuste d'attributs, avec fallback prototype si les garde-fous bloquent la selection.";
 
   return [
     {
@@ -193,6 +193,9 @@ function tacticalGroundingGapFacts(input: {
         "route_attribute_influence",
         "candidate_modifier_mode",
         "attribute_selection_guard",
+        "spatial_route_selection",
+        "prototype_fallback",
+        "controlled_minimatch_only",
       ],
     },
     {
@@ -235,6 +238,7 @@ function tacticalGroundingGapFacts(input: {
         "attribute_adjusted_score",
         "attribute_adjusted_selection",
         "replay_seed_attribute_selection_partial",
+        "controlled_minimatch_spatial_selection_available",
       ],
     },
     {
@@ -256,6 +260,32 @@ function tacticalGroundingGapFacts(input: {
         "route_attribute_influence",
         "selected_route_attribute_explanation_available",
         "attribute_candidate_modifier_available",
+        "attribute_guarded_candidate_modifier_available",
+      ],
+    },
+    {
+      factId: `${input.matchInput.matchId}-spatial-route-selection-path-available`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary:
+        "A controlled mini-match path can map SpatialContext route candidates, apply attribute-adjusted ranking, preserve legality, and fall back to prototype selection when guardrails block the spatial choice.",
+      confidence: "low",
+      strength: 63,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "spatial_route_selection_path_available",
+        "spatial_route_selection",
+        "prototype_fallback_still_enabled",
+        "prototype_fallback",
+        "attribute_guard",
+        "controlled_minimatch_only",
+        "fullmatch_not_default_spatial_selection",
       ],
     },
     {
@@ -278,6 +308,7 @@ function tacticalGroundingGapFacts(input: {
         "closed_lane_not_overridden_by_attributes",
         "closed_lane_not_overridden",
         "prototype_selection_still_partial",
+        "normal_fullmatch_selection_still_partial",
       ],
     },
     {

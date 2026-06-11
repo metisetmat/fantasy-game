@@ -17,6 +17,9 @@ import type { RecoverySaturationState } from "../../systems/structure";
 import type { OffensiveMomentumState } from "../../systems/offense/momentum";
 import type { SpatialMatchContext as AdapterSpatialMatchContext } from "../spatialContext/spatialTeamContextTypes";
 import type { AttributeAdjustedSelectionResult, RouteRankingAttributeMode, RouteRankingAttributeUsage } from "../routeRanking";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { MiniMatchRouteSelectionSource } from "./miniMatchRouteSelectionMode";
+import type { MiniMatchRouteSelectionResult } from "./miniMatchRouteSelection";
 
 export interface MiniMatchInput {
   readonly teamA: PrototypeTeamDefinition;
@@ -27,6 +30,8 @@ export interface MiniMatchInput {
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
   readonly spatialContext?: AdapterSpatialMatchContext;
   readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
+  readonly routeSelectionSource?: MiniMatchRouteSelectionSource;
+  readonly routeSelectionWorkbench?: TacticalWorkbenchFrame;
 }
 
 export interface MiniMatchTeamSegmentInfluence {
@@ -160,6 +165,8 @@ export interface MiniMatchContext {
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
   readonly spatialContext?: AdapterSpatialMatchContext;
   readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
+  readonly routeSelectionSource?: MiniMatchRouteSelectionSource;
+  readonly routeSelectionWorkbench?: TacticalWorkbenchFrame;
 }
 
 export interface MiniMatchContinuityState {
@@ -185,6 +192,8 @@ export interface MiniMatchSequenceSetup {
   readonly routeRankingUsesRealAttributes?: RouteRankingAttributeUsage;
   readonly attributeInfluenceSummary?: string;
   readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
+  readonly routeSelectionResult?: MiniMatchRouteSelectionResult;
+  readonly routeSelectionSummary?: string;
   readonly resolveInput: ResolveSequenceInput;
 }
 
