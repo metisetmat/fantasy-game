@@ -128,6 +128,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const selectionDrivingAttributeRankingValidation = readIfExists(join(shareDirectory, "validation.selection-driving-attribute-ranking.md"));
   const prototypeSelectionReplacement = readIfExists(join(shareDirectory, "prototype-selection-replacement.md"));
   const prototypeSelectionReplacementValidation = readIfExists(join(shareDirectory, "validation.prototype-selection-replacement.md"));
+  const fullMatchWorkbenchChainReplay = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay.md"));
+  const fullMatchWorkbenchChainReplayValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
@@ -1756,6 +1758,69 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint2WExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay.md",
+    "validation.fullmatch-workbench-chain-replay.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint2WForbiddenLeftovers = [
+    "prototype-selection-replacement.md",
+    "validation.prototype-selection-replacement.md",
+    "selection-driving-attribute-ranking.md",
+    "validation.selection-driving-attribute-ranking.md",
+    "attribute-driven-route-ranking.md",
+    "validation.attribute-driven-route-ranking.md",
+    "bundle__docs.md",
+  ];
+  const sprint2WChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2W", activeConfig.sprintName === "Sprint 2W - FullMatch Workbench Chain Replay", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint2WForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint2WForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2WExpectedFiles.every((file) => requiredCopied(file)), sprint2WExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2W", manifest.includes("Sprint 2W - FullMatch Workbench Chain Replay") && detailedManifest.includes("Sprint 2W - FullMatch Workbench Chain Replay"), "Sprint 2W visible"),
+    check("README is Sprint 2W oriented", readme.includes("# Sprint 2W Share Pack") && readme.includes("fullmatch-workbench-chain-replay.md"), "README current"),
+    check("workbench artifact copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionOneWorkbench.includes("data-player-id=\"control-tempo-half\""), "sequence workbench copied"),
+    check("fullmatch workbench chain replay report included", fullMatchWorkbenchChainReplay.includes("# FullMatch Workbench Chain Replay") && fullMatchWorkbenchChainReplay.includes("Does a WorkbenchChain contract exist? YES"), "2W doc included"),
+    check("fullmatch workbench chain replay validation is PASS", fullMatchWorkbenchChainReplayValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplayValidation.includes("controlled_minimatch uses spatial_candidate_modifier"), "2W validation PASS"),
+    check("WorkbenchChain contract bundled", bundleSimulation.includes("src/simulation/grounding/workbenchChainTypes.ts") && bundleSimulation.includes("WorkbenchChainReplayMode"), "chain types bundled"),
+    check("sequence-1-action-1 chain fixture bundled", bundleSimulation.includes("src/simulation/grounding/fixtures/sequence1Action1.chain.fixture.ts") && bundleSimulation.includes("sequence-1-action-1-chain"), "chain fixture bundled"),
+    check("workbench chain catalog bundled", bundleSimulation.includes("src/simulation/grounding/fixtures/workbenchChainCatalog.ts") && bundleSimulation.includes("WORKBENCH_CHAIN_CATALOG"), "catalog bundled"),
+    check("chain state propagation bundled", bundleSimulation.includes("src/simulation/grounding/workbenchChainState.ts") && bundleSimulation.includes("applyWorkbenchChainStep"), "state propagation bundled"),
+    check("chain replay bundled", bundleSimulation.includes("src/simulation/grounding/workbenchChainReplay.ts") && bundleSimulation.includes("replayWorkbenchChain"), "chain replay bundled"),
+    check("chain tests bundled", bundleSimulation.includes("workbenchChainState.test.ts") && bundleSimulation.includes("workbenchChainReplay.test.ts"), "2W tests bundled"),
+    check("diagnostic_only creates no scoring events", fullMatchWorkbenchChainReplayValidation.includes("diagnostic_only creates no scoring events") && bundleSimulation.includes("scoringEventsCreated: 0"), "diagnostic mode guarded"),
+    check("controlled_minimatch uses spatial_candidate_modifier", fullMatchWorkbenchChainReplay.includes("controlled_minimatch uses spatial_candidate_modifier") && bundleSimulation.includes("routeSelectionSource: \"spatial_candidate_modifier\""), "controlled mode visible"),
+    check("TH -> ML preserved", fullMatchWorkbenchChainReplay.includes("TH -> ML remains preserved") && bundleSimulation.includes("selectedReceiverId === input.step.expectedReceiverId"), "TH -> ML visible"),
+    check("normal full-match not claimed as chain-driven", fullMatchWorkbenchChainReplay.includes("Does normal full-match consume chains by default? NO") && bundleSimulation.includes("NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN"), "full-match limitation visible"),
+    check("prototype fallback remains enabled", fullMatchWorkbenchChainReplay.includes("Is prototype fallback still present? YES") && bundleSimulation.includes("CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback visible"),
+    check("MatchReport chain evidence included", bundleSimulation.includes("workbench_chain_replay_available") && bundleSimulation.includes("segment_harness_still_active"), "chain evidence visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplayValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplayValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplayValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && fullMatchWorkbenchChainReplay.includes("fullmatch_warning_only"), "single-run warning-only"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay.includes("CONFIRM_WORKBENCH_CHAIN_REPLAY_V0") && fullMatchWorkbenchChainReplay.includes("PREPARE_MULTI_ACTION_WORKBENCH_CHAIN") && fullMatchWorkbenchChainReplay.includes("PREPARE_NORMAL_FULLMATCH_SPATIAL_SELECTION_FLAG"), "2W recommendations visible"),
+  ];
   const sprint2VExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -1987,6 +2052,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 2W - FullMatch Workbench Chain Replay")
+      ? sprint2WChecks
     : activeConfig.sprintName.includes("Sprint 2V - Prototype Selection Replacement in MiniMatch")
       ? sprint2VChecks
     : activeConfig.sprintName.includes("Sprint 2U - Selection-Driving Attribute Ranking")

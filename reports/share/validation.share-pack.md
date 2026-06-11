@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 2V - Prototype Selection Replacement in MiniMatch
+- current sprint: Sprint 2W - FullMatch Workbench Chain Replay
 - final file count: 14
 - share file count: 14
 - minimal allowlist count: 14
@@ -16,7 +16,7 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Sprint 2V - Sprint 2V - Prototype Selection Replacement in MiniMatch
+- PASS: current sprint is Sprint 2W - Sprint 2W - FullMatch Workbench Chain Replay
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 14
 - PASS: final file count is 14 - 14
@@ -26,23 +26,23 @@ Status: PASS
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 2V - Sprint 2V visible
-- PASS: README is Sprint 2V oriented - README current
+- PASS: manifest lists Sprint 2W - Sprint 2W visible
+- PASS: README is Sprint 2W oriented - README current
 - PASS: workbench artifact copied - sequence workbench copied
-- PASS: prototype selection replacement report included - 2V doc included
-- PASS: prototype selection replacement validation is PASS - 2V validation PASS
-- PASS: MiniMatchRouteSelectionSource contract bundled - route selection source bundled
-- PASS: MiniMatchInput accepts routeSelectionSource - input routeSelectionSource visible
-- PASS: spatial candidate generator bundled - spatial generator bundled
-- PASS: prototype-to-spatial mapper bundled - prototype mapper bundled
-- PASS: MiniMatchRouteSelectionResult bundled - route selection result bundled
-- PASS: controlled mini-match spatial selection test bundled - controlled test bundled
-- PASS: contrast selection test bundled - contrast test bundled
-- PASS: replay seed uses spatial_candidate_modifier - replay seed route source visible
+- PASS: fullmatch workbench chain replay report included - 2W doc included
+- PASS: fullmatch workbench chain replay validation is PASS - 2W validation PASS
+- PASS: WorkbenchChain contract bundled - chain types bundled
+- PASS: sequence-1-action-1 chain fixture bundled - chain fixture bundled
+- PASS: workbench chain catalog bundled - catalog bundled
+- PASS: chain state propagation bundled - state propagation bundled
+- PASS: chain replay bundled - chain replay bundled
+- PASS: chain tests bundled - 2W tests bundled
+- PASS: diagnostic_only creates no scoring events - diagnostic mode guarded
+- PASS: controlled_minimatch uses spatial_candidate_modifier - controlled mode visible
+- PASS: TH -> ML preserved - TH -> ML visible
+- PASS: normal full-match not claimed as chain-driven - full-match limitation visible
 - PASS: prototype fallback remains enabled - prototype fallback visible
-- PASS: closed/unavailable routes blocked - guardrails visible
-- PASS: normal full-match not claimed as fixed - full-match limitation visible
-- PASS: MatchReport route selection evidence included - route selection facts visible
+- PASS: MatchReport chain evidence included - chain evidence visible
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: no scoring events deleted or capped - scoring event guard visible
@@ -50,7 +50,7 @@ Status: PASS
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
 - PASS: single full-match harness remains warning-only - single-run warning-only
-- PASS: recommendations visible - 2V recommendations visible
+- PASS: recommendations visible - 2W recommendations visible
 
 ## Files
 
@@ -60,11 +60,11 @@ Status: PASS
 - bundle__reports.md
 - bundle__simulation.md
 - coach-report.latest.html
+- fullmatch-workbench-chain-replay.md
 - manifest.md
 - package.json
-- prototype-selection-replacement.md
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - tsconfig.json
-- validation.prototype-selection-replacement.md
+- validation.fullmatch-workbench-chain-replay.md
 - validation.share-pack.md

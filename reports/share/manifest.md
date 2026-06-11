@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T08:38:11.914Z
-Task/sprint: Sprint 2V - Prototype Selection Replacement in MiniMatch
+Generated: 2026-06-11T09:05:40.380Z
+Task/sprint: Sprint 2W - FullMatch Workbench Chain Replay
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -13,8 +13,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - validation.share-pack.md
-- prototype-selection-replacement.md
-- validation.prototype-selection-replacement.md
+- fullmatch-workbench-chain-replay.md
+- validation.fullmatch-workbench-chain-replay.md
 - README.md
 
 ## Bundle Files

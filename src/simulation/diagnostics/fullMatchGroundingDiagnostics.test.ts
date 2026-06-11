@@ -38,6 +38,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"), "controlled mini-match spatial selection availability must be emitted.");
   assertTest(diagnostics.warnings.includes("PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback warning must be emitted.");
   assertTest(diagnostics.warnings.includes("NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"), "normal full-match limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("WORKBENCH_CHAIN_REPLAY_AVAILABLE"), "workbench chain replay availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY"), "workbench chain controlled-only warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN"), "normal full-match chain limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("FULLMATCH_STILL_USES_SEGMENT_HARNESS"), "segment harness warning must be emitted.");
   assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_PARTIAL"), "prototype selection partiality must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
@@ -65,6 +69,8 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
     "partial full-match grounding warning is emitted",
     "spatial context adapter availability is emitted",
     "workbench replay seed availability is emitted",
+    "workbench chain replay availability is emitted",
+    "normal full-match chain limitation is emitted",
     "grounding evidence facts are attached",
     "scoring events are not mutated",
     "final score remains derived from score_change",

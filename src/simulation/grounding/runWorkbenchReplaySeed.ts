@@ -9,6 +9,8 @@ import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./
 import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
 import type { AttributeAdjustedSelectionResult, RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
+import { sequence1Action1Chain } from "./fixtures/sequence1Action1.chain.fixture";
+import { replayWorkbenchChain } from "./workbenchChainReplay";
 
 export type WorkbenchReplaySeedResult = {
   readonly fixtureId: string;
@@ -32,6 +34,9 @@ export type WorkbenchReplaySeedResult = {
   readonly routeSelectionSource: MiniMatchRouteSelectionSource;
   readonly miniMatchRouteSelectionResult?: MiniMatchRouteSelectionResult;
   readonly miniMatchRouteSelectionUsedSpatialResult: boolean;
+  readonly workbenchChainReplayAvailable: boolean;
+  readonly workbenchChainReplayStatus?: "PASS" | "PARTIAL" | "FAIL";
+  readonly workbenchChainId?: string;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -263,10 +268,15 @@ export function runWorkbenchReplaySeed(input: {
     routeSelectionWorkbench: input.workbench,
   });
   const miniMatchRouteSelectionResult = miniMatch.state.records[0]?.setup.routeSelectionResult;
+  const chainReplay = replayWorkbenchChain({
+    matchInput: input.matchInput,
+    chain: sequence1Action1Chain,
+    mode: "controlled_minimatch",
+  });
   const lossyMappings = [
     "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
     "Route ranking can receive bounded attribute-adjusted candidate scores, but final mini-match selection is not yet fully selection-driving.",
-    `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s), but not a forced workbench action chain.`,
+    `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s); a controlled workbench chain replay is now available, but normal full-match still does not consume it by default.`,
   ];
   const missingTruths = [
     ...beforeContext.home.knownLimitations,
@@ -303,10 +313,16 @@ export function runWorkbenchReplaySeed(input: {
     miniMatchRouteSelectionUsedSpatialResult:
       miniMatchRouteSelectionResult?.selectionSource === "spatial_candidate_modifier" &&
       miniMatchRouteSelectionResult.guardValid,
+    workbenchChainReplayAvailable: true,
+    workbenchChainReplayStatus: chainReplay.status,
+    workbenchChainId: chainReplay.chainId,
     missingTruths,
     lossyMappings,
     recommendations: [
       "CONFIRM_WORKBENCH_REPLAY_SEED",
+      "CONFIRM_WORKBENCH_CHAIN_REPLAY_V0",
+      "CONFIRM_CHAIN_STATE_PROPAGATION",
+      "CONFIRM_CONTROLLED_MINIMATCH_CHAIN_REPLAY",
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES",
       "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",

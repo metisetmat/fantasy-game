@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2V - Prototype Selection Replacement in MiniMatch. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2W - FullMatch Workbench Chain Replay. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

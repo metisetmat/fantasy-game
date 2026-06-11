@@ -170,7 +170,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le mini-match dispose maintenant d'un chemin controle ou les candidats issus du SpatialContext peuvent etre classes par score ajuste d'attributs, avec fallback prototype si les garde-fous bloquent la selection.";
+    "Le moteur peut maintenant rejouer une chaine workbench controlee en conservant l'etat spatial attendu, mais le full-match normal reste encore un harnais par segments et ne consomme pas cette chaine par defaut.";
 
   return [
     {
@@ -194,6 +194,10 @@ function tacticalGroundingGapFacts(input: {
         "candidate_modifier_mode",
         "attribute_selection_guard",
         "spatial_route_selection",
+        "workbench_chain_replay",
+        "controlled_chain_only",
+        "fullmatch_not_chain_driven",
+        "segment_harness_still_active",
         "prototype_fallback",
         "controlled_minimatch_only",
       ],
@@ -312,6 +316,30 @@ function tacticalGroundingGapFacts(input: {
       ],
     },
     {
+      factId: `${input.matchInput.matchId}-workbench-chain-replay-available`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "A WorkbenchChain contract can now represent sequence-1-action-1, propagate TH -> ML and Z4-HSL -> Z3-HSL, and drive a controlled mini-match route-selection replay without creating scoring truth.",
+      confidence: "low",
+      strength: 64,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "workbench_chain_replay_available",
+        "controlled_chain_replay_passed",
+        "workbench_chain_replay",
+        "controlled_chain_only",
+        "fullmatch_not_chain_driven",
+        "segment_harness_still_active",
+        "normal_fullmatch_not_chain_replay_driven",
+      ],
+    },
+    {
       factId: `${input.matchInput.matchId}-full-match-partial-workbench-grounding`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
@@ -328,6 +356,8 @@ function tacticalGroundingGapFacts(input: {
         "tactical_grounding_gap",
         "full_match_partially_workbench_grounded",
         "fullmatch_not_yet_replaying_workbench_sequence_chain",
+        "normal_fullmatch_not_chain_replay_driven",
+        "segment_harness_still_active",
       ],
     },
   ];
