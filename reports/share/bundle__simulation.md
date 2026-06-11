@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -95,6 +95,7 @@ export function createMatchReportSignature(report: MatchReport): string {
 
 ```ts
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import type { MatchReportWarning } from "../contracts/matchReportWarnings";
 import {
   coachFacingHarnessWarningSummary,
@@ -138,6 +139,8 @@ import {
   resolveFullMatchRouteSelectionMode,
   type FullMatchOptions,
 } from "./fullMatch/fullMatchRouteSelectionMode";
+import { consumeWorkbenchChainForFullMatch } from "./fullMatch/consumeWorkbenchChainForFullMatch";
+import type { FullMatchChainConsumptionResult } from "./fullMatch/fullMatchChainConsumption";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -376,21 +379,90 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
   };
 }
 
-function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput): MatchReport {
+function chainConsumptionLimitations(consumption: FullMatchChainConsumptionResult): readonly string[] {
+  if (consumption.status === "not_requested") {
+    return [
+      "FULLMATCH_CHAIN_CONSUMPTION_DISABLED_BY_DEFAULT",
+      "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS",
+    ];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_CONSUMPTION_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_CONSUMPTION_STATUS_${consumption.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_CONSUMED_FOR_SEGMENT_1",
+    "FULLMATCH_CHAIN_CONSUMPTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_CONSUMPTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_CONSUMPTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    ...(consumption.status === "partial" ? ["FULLMATCH_CHAIN_CONSUMPTION_PARTIAL"] : []),
+    ...consumption.warnings,
+  ];
+}
+
+function chainConsumptionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly consumption: FullMatchChainConsumptionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.consumption.status === "not_requested") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-consumption`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONSUMPTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.consumption.finalPropagatedZone ?? "Z4-HSR"],
+    summary:
+      `Experimental chain consumption ${input.consumption.status}: chain ${input.consumption.chainId ?? "none"} ` +
+      `on ${input.consumption.segmentLabel ?? "segment-1"} consumed ${input.consumption.consumedStepCount} step(s), ` +
+      `${input.consumption.visualWorkbenchStepCount} visual step(s), ${input.consumption.spatialSelectionStepCount} spatial selection step(s), ` +
+      `final carrier ${input.consumption.finalPropagatedCarrierId ?? "none"} at ${input.consumption.finalPropagatedZone ?? "none"}, ` +
+      `scoreMutationCount=${input.consumption.scoreMutationCount}, scoringEventsMutationCount=${input.consumption.scoringEventsMutationCount}.`,
+    confidence: input.consumption.status === "consumed" ? "medium" : "low",
+    strength: input.consumption.status === "consumed" ? 65 : 35,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_consumption",
+      "workbench_chain_experimental",
+      "fullmatch_chain_consumed",
+      "diagnostic_only_chain_consumption",
+      `chain_id_${input.consumption.chainId ?? "none"}`,
+      `segment_${input.consumption.segmentLabel ?? "segment-1"}`,
+      `consumed_steps_${input.consumption.consumedStepCount}`,
+      `visual_steps_${input.consumption.visualWorkbenchStepCount}`,
+      `spatial_steps_${input.consumption.spatialSelectionStepCount}`,
+      `mismatch_warnings_${input.consumption.mismatchWarningCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
+function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput, chainConsumption: FullMatchChainConsumptionResult): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
+  const chainFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("workbench_chain_consumption"));
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
+  const chainSummary = chainConsumption.status === "not_requested"
+    ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
+    : "Le moteur a consomme une chaine workbench visuelle sur le premier segment, mais cette consommation reste experimentale et ne modifie pas encore la resolution complete du match.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
     scope: "coach_visible",
     severity: "low",
     title: "Ancrage tactique full-match partiel",
-    coachSummary:
-      "Le moteur sait convertir le roster et une verite workbench en contexte spatial type, mais le full-match ne rejoue pas encore toute la chaine workbench.",
+    coachSummary: chainSummary,
     technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
-    evidenceFactIds: groundingFacts.map((fact) => fact.factId),
-    eventIds,
+    evidenceFactIds: [...groundingFacts, ...chainFacts].map((fact) => fact.factId),
+    eventIds: chainFacts.length > 0 ? [...eventIds, ...chainFacts.flatMap((fact) => fact.eventIds)].slice(0, 8) : eventIds,
     mayInvalidateGlobalScoringEconomy: false,
   };
   const evidenceEvent = report.timeline.find((event) => event.eventType !== "kickoff") ?? report.timeline[0];
@@ -398,8 +470,7 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
     diagnosisId: `${input.matchId}-tactical-grounding-gap`,
     teamId: input.homeTeam.teamId,
     title: "Ancrage workbench maintenant partiel",
-    summary:
-      "Le score du harnais doit etre lu avec prudence : les rosters et positions peuvent etre convertis en contexte spatial, mais les decisions visuelles ne pilotent pas encore toute la resolution mini-match.",
+    summary: chainSummary,
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
@@ -416,6 +487,11 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
 
 export function runFullMatch(input: MatchInput, options?: FullMatchOptions): MatchReport {
   const routeSelectionMode = resolveFullMatchRouteSelectionMode(options);
+  const chainConsumption = consumeWorkbenchChainForFullMatch({
+    matchInput: input,
+    routeSelectionMode,
+    segmentLabel: "segment-1",
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -520,10 +596,22 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       "Harness warnings are warning-only and may not change scoring values.",
       `Full-match route selection mode: ${routeSelectionMode}.`,
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
+      ...chainConsumptionLimitations(chainConsumption),
     ],
   });
+  const chainFact = chainConsumptionEvidenceFact({
+    report,
+    matchInput: input,
+    consumption: chainConsumption,
+  });
+  const reportWithChainEvidence = chainFact === null
+    ? report
+    : {
+        ...report,
+        evidenceFacts: [...report.evidenceFacts, chainFact],
+      };
 
-  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(report, input), input);
+  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(reportWithChainEvidence, input), input, chainConsumption);
 }
 ```
 
@@ -1777,6 +1865,147 @@ export function fullMatchRouteSelectionModeDiagnostics(mode: FullMatchRouteSelec
     "FULLMATCH_CHAIN_REPLAY_FLAG_DISABLED_BY_DEFAULT",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchChainConsumption.ts
+
+```ts
+import type { WorkbenchChainReplayResult } from "../grounding/workbenchChainReplay";
+
+export type FullMatchChainConsumptionMode =
+  | "disabled"
+  | "experimental_first_segment";
+
+export type FullMatchChainConsumptionStatus =
+  | "not_requested"
+  | "consumed"
+  | "partial"
+  | "failed";
+
+export type FullMatchChainConsumptionResult = {
+  readonly mode: FullMatchChainConsumptionMode;
+  readonly status: FullMatchChainConsumptionStatus;
+  readonly chainId?: string;
+  readonly segmentLabel?: string;
+  readonly consumedStepCount: number;
+  readonly visualWorkbenchStepCount: number;
+  readonly syntheticStepCount: number;
+  readonly hybridStepCount: number;
+  readonly spatialSelectionStepCount: number;
+  readonly preservedActorStepCount: number;
+  readonly preservedReceiverStepCount: number;
+  readonly preservedActionTypeStepCount: number;
+  readonly preservedBeforeStateStepCount: number;
+  readonly preservedAfterStateStepCount: number;
+  readonly finalPropagatedCarrierId?: string;
+  readonly finalPropagatedZone?: string;
+  readonly mismatchWarningCount: number;
+  readonly warnings: readonly string[];
+  readonly replay?: WorkbenchChainReplayResult;
+  readonly scoreMutationCount: 0;
+  readonly scoringEventsMutationCount: 0;
+};
+
+export function disabledFullMatchChainConsumption(): FullMatchChainConsumptionResult {
+  return {
+    mode: "disabled",
+    status: "not_requested",
+    consumedStepCount: 0,
+    visualWorkbenchStepCount: 0,
+    syntheticStepCount: 0,
+    hybridStepCount: 0,
+    spatialSelectionStepCount: 0,
+    preservedActorStepCount: 0,
+    preservedReceiverStepCount: 0,
+    preservedActionTypeStepCount: 0,
+    preservedBeforeStateStepCount: 0,
+    preservedAfterStateStepCount: 0,
+    mismatchWarningCount: 0,
+    warnings: [],
+    scoreMutationCount: 0,
+    scoringEventsMutationCount: 0,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/consumeWorkbenchChainForFullMatch.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import { sequence1MultiActionChain } from "../grounding/fixtures/sequence1MultiAction.chain.fixture";
+import { replayWorkbenchChain } from "../grounding/workbenchChainReplay";
+import type { WorkbenchChain } from "../grounding/workbenchChainTypes";
+import type { FullMatchRouteSelectionMode } from "./fullMatchRouteSelectionMode";
+import {
+  disabledFullMatchChainConsumption,
+  type FullMatchChainConsumptionResult,
+  type FullMatchChainConsumptionStatus,
+} from "./fullMatchChainConsumption";
+
+function consumptionStatus(replay: ReturnType<typeof replayWorkbenchChain>): FullMatchChainConsumptionStatus {
+  const expectedSteps = 3;
+  const fullyPreserved =
+    replay.totalSteps === expectedSteps &&
+    replay.visualWorkbenchStepCount === expectedSteps &&
+    replay.syntheticStepCount === 0 &&
+    replay.hybridStepCount === 0 &&
+    replay.spatialSelectionStepCount === expectedSteps &&
+    replay.preservedActorStepCount === expectedSteps &&
+    replay.preservedReceiverStepCount === expectedSteps &&
+    replay.preservedActionTypeStepCount === expectedSteps &&
+    replay.preservedBeforeStateStepCount === expectedSteps &&
+    replay.preservedAfterStateStepCount === expectedSteps &&
+    replay.mismatchWarningCount === 0 &&
+    replay.finalState.stateWarnings.length === 0;
+
+  if (replay.steps.some((step) => !step.guardValid)) {
+    return "failed";
+  }
+
+  return fullyPreserved ? "consumed" : "partial";
+}
+
+export function consumeWorkbenchChainForFullMatch(input: {
+  readonly matchInput: MatchInput;
+  readonly routeSelectionMode: FullMatchRouteSelectionMode;
+  readonly segmentLabel: string;
+  readonly chain?: WorkbenchChain;
+}): FullMatchChainConsumptionResult {
+  if (input.routeSelectionMode !== "workbench_chain_replay_experimental") {
+    return disabledFullMatchChainConsumption();
+  }
+
+  const chain = input.chain ?? sequence1MultiActionChain;
+  const replay = replayWorkbenchChain({
+    matchInput: input.matchInput,
+    chain,
+    mode: "controlled_minimatch",
+  });
+
+  return {
+    mode: "experimental_first_segment",
+    status: consumptionStatus(replay),
+    chainId: replay.chainId,
+    segmentLabel: input.segmentLabel,
+    consumedStepCount: replay.totalSteps,
+    visualWorkbenchStepCount: replay.visualWorkbenchStepCount,
+    syntheticStepCount: replay.syntheticStepCount,
+    hybridStepCount: replay.hybridStepCount,
+    spatialSelectionStepCount: replay.spatialSelectionStepCount,
+    preservedActorStepCount: replay.preservedActorStepCount,
+    preservedReceiverStepCount: replay.preservedReceiverStepCount,
+    preservedActionTypeStepCount: replay.preservedActionTypeStepCount,
+    preservedBeforeStateStepCount: replay.preservedBeforeStateStepCount,
+    preservedAfterStateStepCount: replay.preservedAfterStateStepCount,
+    finalPropagatedCarrierId: replay.finalState.ballCarrierId,
+    finalPropagatedZone: replay.finalState.ballZone,
+    mismatchWarningCount: replay.mismatchWarningCount,
+    warnings: replay.finalState.stateWarnings,
+    replay,
+    scoreMutationCount: 0,
+    scoringEventsMutationCount: 0,
+  };
 }
 ```
 
@@ -4943,6 +5172,358 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchChainConsumption.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchChainConsumption(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const disabled = consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "segment_harness",
+    segmentLabel: "segment-1",
+  });
+  const consumed = consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+  });
+
+  assertTest(disabled.status === "not_requested", "segment_harness must return status not_requested.");
+  assertTest(consumed.status === "consumed", "experimental mode must consume the visual chain.");
+  assertTest(consumed.chainId === "sequence-1-multi-action-chain", "consumed chain id must be sequence-1-multi-action-chain.");
+  assertTest(consumed.consumedStepCount === 3, "consumed step count must be 3.");
+  assertTest(consumed.visualWorkbenchStepCount === 3, "visual step count must be 3.");
+  assertTest(consumed.syntheticStepCount === 0, "synthetic step count must be 0.");
+  assertTest(consumed.spatialSelectionStepCount === 3, "spatial selection step count must be 3.");
+  assertTest(consumed.finalPropagatedCarrierId === "control-space-hunter", "final carrier must be control-space-hunter.");
+  assertTest(consumed.finalPropagatedZone === "Z4-HSR", "final zone must be Z4-HSR.");
+  assertTest(consumed.scoreMutationCount === 0, "scoreMutationCount must be 0.");
+  assertTest(consumed.scoringEventsMutationCount === 0, "scoringEventsMutationCount must be 0.");
+  assertTest(consumed.mismatchWarningCount === 0, "valid chain mismatch warning count must be 0.");
+
+  return [
+    "segment_harness returns status not_requested",
+    "workbench_chain_replay_experimental consumes sequence-1-multi-action-chain",
+    "consumed chain id is sequence-1-multi-action-chain",
+    "consumed step count is 3",
+    "visual step count is 3",
+    "synthetic step count is 0",
+    "spatial selection step count is 3",
+    "final propagated carrier is control-space-hunter",
+    "final propagated zone is Z4-HSR",
+    "scoreMutationCount is 0",
+    "scoringEventsMutationCount is 0",
+    "mismatch warning count is 0 for valid chain",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchChainConsumption();
+
+  console.log("fullMatchChainConsumption tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchChainConsumptionMismatch.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { sequence1MultiActionChain } from "../grounding/fixtures/sequence1MultiAction.chain.fixture";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchChainConsumptionMismatch(): readonly string[] {
+  const brokenChain = {
+    ...sequence1MultiActionChain,
+    chainId: "sequence-1-multi-action-broken-for-fullmatch-consumption",
+    steps: sequence1MultiActionChain.steps.map((step) =>
+      step.stepIndex === 2
+        ? { ...step, expectedActorId: "control-hook-link" }
+        : step,
+    ),
+  };
+  const result = consumeWorkbenchChainForFullMatch({
+    matchInput: engineToCoachPublicContractFixtures.matchInputFixture,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+    chain: brokenChain,
+  });
+
+  assertTest(result.status === "partial", "broken chain consumption must return partial.");
+  assertTest(result.mismatchWarningCount > 0, "mismatch warnings must be exposed.");
+  assertTest(result.warnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH")), "carrier mismatch warning must be present.");
+  assertTest(result.replay?.recommendations.includes("CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED") ?? false, "fallback must remain observable.");
+  assertTest(result.scoreMutationCount === 0, "scoreMutationCount must remain 0.");
+  assertTest(result.scoringEventsMutationCount === 0, "scoringEventsMutationCount must remain 0.");
+
+  return [
+    "broken chain consumption returns partial",
+    "mismatch warnings are exposed",
+    "fallback does not hide mismatch",
+    "scoreMutationCount remains 0",
+    "scoringEventsMutationCount remains 0",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchChainConsumptionMismatch();
+
+  console.log("fullMatchChainConsumptionMismatch tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoringEventCount(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline.filter((event) => event.eventType === "scoring").length;
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  return `${report.score.home}-${report.score.away}:${scoringEventCount(report)}:${scoreChangeTotal(report)}`;
+}
+
+export function validateRunFullMatchExperimentalChainConsumption(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const chainFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.internalTags.includes("workbench_chain_consumption"),
+  );
+
+  assertTest(defaultReport.reportMeta.limitations.includes("Full-match route selection mode: segment_harness."), "default runFullMatch must remain segment_harness.");
+  assertTest(defaultReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMPTION_DISABLED_BY_DEFAULT"), "default runFullMatch must not consume chain.");
+  assertTest(!defaultReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMED_FOR_SEGMENT_1"), "default report must not consume segment-1 chain.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMED_FOR_SEGMENT_1"), "experimental report must include chain consumption diagnostic.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMPTION_DIAGNOSTIC_ONLY"), "experimental consumption must be diagnostic-only.");
+  assertTest(chainFact !== undefined, "experimental report must include chain consumption evidence.");
+  assertTest(chainFact?.summary.includes("sequence-1-multi-action-chain") ?? false, "chain evidence must include consumed chain id.");
+  assertTest(chainFact?.internalTags.includes("consumed_steps_3") ?? false, "chain evidence must include consumed step count.");
+  assertTest(chainFact?.internalTags.includes("visual_steps_3") ?? false, "chain evidence must include visual step count.");
+  assertTest(chainFact?.internalTags.includes("spatial_steps_3") ?? false, "chain evidence must include spatial step count.");
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "experimental full-match score signature must equal default for now.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "experimental score must derive from score_change.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match must not be claimed production chain-driven.");
+
+  return [
+    "default runFullMatch remains segment_harness",
+    "default runFullMatch does not consume chain",
+    "experimental runFullMatch consumes chain",
+    "experimental report limitations include chain consumption diagnostics",
+    "experimental report includes chain consumption evidence",
+    "experimental full-match final score equals default full-match final score for now",
+    "experimental full-match scoring event count equals default scoring event count",
+    "experimental score_change total equals final score total",
+    "normal full-match is not claimed as production chain-driven",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalChainConsumption();
+
+  console.log("runFullMatchExperimentalChainConsumption tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchDefaultRegression.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function fullMatchScoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const scoringEventCount = report.timeline.filter((event) => event.eventType === "scoring").length;
+
+  return `${report.score.home}-${report.score.away}:${scoringEventCount}:${scoreChangeTotal(report)}:${report.timeline.length}`;
+}
+
+export function validateRunFullMatchDefaultRegression(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const explicitDefaultReport = runFullMatch(input, { routeSelectionMode: "segment_harness" });
+
+  assertTest(fullMatchScoreSignature(defaultReport) === fullMatchScoreSignature(explicitDefaultReport), "default and explicit segment_harness signatures must match.");
+  assertTest(defaultReport.reportMeta.reportScope === "FULL_MATCH_HARNESS_SINGLE_RUN", "default report scope must remain FULL_MATCH_HARNESS_SINGLE_RUN.");
+  assertTest(defaultReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMPTION_DISABLED_BY_DEFAULT"), "default report must say chain consumption is disabled by default.");
+  assertTest(defaultReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS"), "default report must say normal full-match remains segment harness.");
+  assertTest(!defaultReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMED_FOR_SEGMENT_1"), "default report must not include consumed chain diagnostic.");
+
+  return [
+    "runFullMatch(input) and explicit segment_harness produce same score signature",
+    "default report still contains FULL_MATCH_HARNESS_SINGLE_RUN limitations",
+    "default report says chain consumption is disabled by default",
+    "default report does not include FULLMATCH_CHAIN_CONSUMED_FOR_SEGMENT_1",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchDefaultRegression();
+
+  console.log("runFullMatchDefaultRegression tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.2z.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard2Z(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMPTION_DID_NOT_MUTATE_SCORE"), "chain consumption must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMPTION_DID_NOT_MUTATE_SCORING_EVENTS"), "chain consumption must not mutate scoring events.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("score_mutation_count_0")), "score mutation count evidence must be 0.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("scoring_events_mutation_count_0")), "scoring event mutation count evidence must be 0.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard2Z();
+
+  console.log("scoringGuard.2z tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards2Z(): readonly string[] {
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  mustRejectGlobalEconomy("BATCH_DIAGNOSTIC_PROJECTION");
+  mustRejectGlobalEconomy("LIVE_SCORING_STREAM");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make a global economy claim",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global economy proof",
+    "experimental chain consumption cannot make global economy claims",
+    "diagnostic evidence cannot mutate scoring truth",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards2Z();
+
+  console.log("sourceOfTruthGuards.2z tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/routeRanking/routeAttributeInfluence.test.ts
 
 ```ts
@@ -6909,6 +7490,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "MOMENTUM_SHIFT":
     case "TACTICAL_PLAN_SIGNAL":
     case "HARNESS_PLAUSIBILITY_WARNING":
+    case "WORKBENCH_CHAIN_CONSUMPTION":
       return "training_recommendation";
   }
 }
@@ -6931,6 +7513,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "L'élan du match change";
     case "TACTICAL_PLAN_SIGNAL":
       return "Le plan de match laisse un signal lisible";
+    case "WORKBENCH_CHAIN_CONSUMPTION":
+      return "Consommation workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -6982,6 +7566,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "FATIGUE_LOAD":
     case "MOMENTUM_SHIFT":
     case "TACTICAL_PLAN_SIGNAL":
+    case "WORKBENCH_CHAIN_CONSUMPTION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -7000,6 +7585,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "FATIGUE_LOAD",
     "MOMENTUM_SHIFT",
     "TACTICAL_PLAN_SIGNAL",
+    "WORKBENCH_CHAIN_CONSUMPTION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -8097,6 +8683,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 60;
     case "TACTICAL_PLAN_SIGNAL":
       return 55;
+    case "WORKBENCH_CHAIN_CONSUMPTION":
+      return 52;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -8129,6 +8717,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Stabiliser l'élan après les bascules du match";
     case "TACTICAL_PLAN_SIGNAL":
       return "Relire le plan de match dans les zones visibles";
+    case "WORKBENCH_CHAIN_CONSUMPTION":
+      return "Relire la consommation workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

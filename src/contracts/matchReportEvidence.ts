@@ -7,7 +7,8 @@ export type MatchReportEvidenceCategory =
   | "FATIGUE_LOAD"
   | "MOMENTUM_SHIFT"
   | "TACTICAL_PLAN_SIGNAL"
-  | "HARNESS_PLAUSIBILITY_WARNING";
+  | "HARNESS_PLAUSIBILITY_WARNING"
+  | "WORKBENCH_CHAIN_CONSUMPTION";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

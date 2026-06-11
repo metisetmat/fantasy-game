@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -402,7 +402,8 @@ export type MatchReportEvidenceCategory =
   | "FATIGUE_LOAD"
   | "MOMENTUM_SHIFT"
   | "TACTICAL_PLAN_SIGNAL"
-  | "HARNESS_PLAUSIBILITY_WARNING";
+  | "HARNESS_PLAUSIBILITY_WARNING"
+  | "WORKBENCH_CHAIN_CONSUMPTION";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"
