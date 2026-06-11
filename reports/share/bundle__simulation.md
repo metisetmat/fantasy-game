@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3A - Experimental Chain Influence on Segment Context. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3B - Experimental Chain Context to Route Candidate Influence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -145,6 +145,11 @@ import {
   chainConsumptionToSegmentContext,
   type FullMatchChainSegmentContext,
 } from "./fullMatch/fullMatchChainSegmentContext";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./fullMatch/applyChainContextToRouteCandidates";
+import type { FullMatchChainRouteCandidateInfluenceResult } from "./fullMatch/fullMatchChainRouteCandidateInfluence";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -418,6 +423,22 @@ function chainSegmentContextLimitations(context: FullMatchChainSegmentContext): 
   ];
 }
 
+function routeCandidateInfluenceLimitations(influence: FullMatchChainRouteCandidateInfluenceResult): readonly string[] {
+  if (influence.status === "not_available") {
+    return ["FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_STATUS_${influence.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_OVERRIDE_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -513,22 +534,84 @@ function chainSegmentContextEvidenceFact(input: {
   };
 }
 
+function routeCandidateInfluenceEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly influence: FullMatchChainRouteCandidateInfluenceResult;
+}): MatchReportEvidenceFact | null {
+  if (input.influence.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_route_candidate_influence")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-route-candidate-influence`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.influence.finalZone ?? "Z4-HSR"],
+    summary:
+      `Experimental route candidate influence ${input.influence.status}: segment ${input.influence.segmentLabel ?? "segment-1"} ` +
+      `uses chain ${input.influence.chainId ?? "none"}, final carrier ${input.influence.finalCarrierId ?? "none"} ` +
+      `at ${input.influence.finalZone ?? "none"}, candidates ${input.influence.candidateCount}, influenced ${input.influence.influencedCandidateCount}, ` +
+      `positive deltas ${input.influence.positiveDeltaCount}, negative deltas ${input.influence.negativeDeltaCount}, ` +
+      `closed boosts blocked ${input.influence.illegalCandidateBoostBlockedCount}, unavailable boosts blocked ${input.influence.unavailableCandidateBoostBlockedCount}, ` +
+      `diagnostic selection ${input.influence.selectedCandidateBefore ?? "none"} -> ${input.influence.selectedCandidateAfterDiagnostic ?? "none"}, ` +
+      `selectionChanged=${input.influence.diagnosticSelectionChanged}, diagnosticOnly=${input.influence.diagnosticOnly}, ` +
+      `canMutateScore=${input.influence.canMutateScore}, canMutateScoringEvents=${input.influence.canMutateScoringEvents}, ` +
+      `canDriveProductionSelection=${input.influence.canDriveProductionSelection}.`,
+    confidence: input.influence.status === "available" ? "medium" : "low",
+    strength: input.influence.status === "available" ? 58 : 28,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_route_candidate_influence",
+      "route_candidate_influence_diagnostic_only",
+      "route_candidate_influence_segment_1",
+      "route_candidate_influence_score_mutation_forbidden",
+      "route_candidate_influence_scoring_events_mutation_forbidden",
+      "route_candidate_influence_production_selection_forbidden",
+      "route_candidate_influence_closed_override_blocked",
+      "route_candidate_influence_unavailable_override_blocked",
+      ...(input.influence.chainId === undefined ? [] : [`route_candidate_influence_chain_id_${input.influence.chainId}`]),
+      ...(input.influence.finalCarrierId === undefined ? [] : [`route_candidate_influence_final_carrier_${input.influence.finalCarrierId}`]),
+      ...(input.influence.finalZone === undefined ? [] : [`route_candidate_influence_final_zone_${input.influence.finalZone}`]),
+      `route_candidate_influence_candidate_count_${input.influence.candidateCount}`,
+      `route_candidate_influence_influenced_count_${input.influence.influencedCandidateCount}`,
+      `route_candidate_influence_positive_delta_count_${input.influence.positiveDeltaCount}`,
+      `route_candidate_influence_negative_delta_count_${input.influence.negativeDeltaCount}`,
+      `route_candidate_influence_illegal_boost_blocked_count_${input.influence.illegalCandidateBoostBlockedCount}`,
+      `route_candidate_influence_unavailable_boost_blocked_count_${input.influence.unavailableCandidateBoostBlockedCount}`,
+      `route_candidate_influence_selection_changed_${input.influence.diagnosticSelectionChanged ? "true" : "false"}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
   chainConsumption: FullMatchChainConsumptionResult,
   chainSegmentContext: FullMatchChainSegmentContext,
+  routeCandidateInfluence: FullMatchChainRouteCandidateInfluenceResult,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
   const chainFacts = report.evidenceFacts.filter((fact) =>
     fact.internalTags.includes("workbench_chain_consumption") ||
-    fact.internalTags.includes("workbench_chain_segment_context")
+    fact.internalTags.includes("workbench_chain_segment_context") ||
+    fact.internalTags.includes("workbench_chain_route_candidate_influence")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le premier segment dispose maintenant d'un contexte experimental issu de la chaine workbench : porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"}. Ce contexte ameliore l'ancrage tactique du diagnostic, mais ne modifie pas encore la resolution ni le score.`;
+    : `Le contexte workbench du premier segment est maintenant utilise pour influencer le classement diagnostique des options de route. Le porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"} favorise les options compatibles avec cette continuite, mais cette influence reste experimentale, bornee, et ne modifie pas encore la resolution ni le score. Les options fermees ou indisponibles restent bloquees meme si le contexte de chaine leur donnerait un bonus theorique. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -569,6 +652,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     segmentLabel: "segment-1",
   });
   const chainSegmentContext = chainConsumptionToSegmentContext(chainConsumption);
+  const routeCandidateInfluence = applyChainContextToRouteCandidates({
+    segmentContext: chainSegmentContext,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext,
+    }),
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -608,6 +698,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           segmentState,
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
           ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
+          ...(index === 0 && routeCandidateInfluence.status !== "not_available" ? { routeCandidateInfluence } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -676,6 +767,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
       ...chainConsumptionLimitations(chainConsumption),
       ...chainSegmentContextLimitations(chainSegmentContext),
+      ...routeCandidateInfluenceLimitations(routeCandidateInfluence),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -688,15 +780,21 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     context: chainSegmentContext,
   });
-  const reportWithChainEvidence = chainFact === null
+  const routeInfluenceFact = routeCandidateInfluenceEvidenceFact({
+    report,
+    matchInput: input,
+    influence: routeCandidateInfluence,
+  });
+  const chainEvidenceFacts = [
+    ...(chainFact === null ? [] : [chainFact]),
+    ...(chainContextFact === null ? [] : [chainContextFact]),
+    ...(routeInfluenceFact === null ? [] : [routeInfluenceFact]),
+  ];
+  const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
     : {
         ...report,
-        evidenceFacts: [
-          ...report.evidenceFacts,
-          chainFact,
-          ...(chainContextFact === null ? [] : [chainContextFact]),
-        ],
+        evidenceFacts: [...report.evidenceFacts, ...chainEvidenceFacts],
       };
 
   return withFullMatchGroundingDiagnosis(
@@ -704,6 +802,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     input,
     chainConsumption,
     chainSegmentContext,
+    routeCandidateInfluence,
   );
 }
 ```
@@ -2259,6 +2358,406 @@ export function fullMatchSegmentContextSignature(report: MatchReport): FullMatch
     chainContextTagCount: chainContextEvents.length,
     ...(chainContextFinalCarrier === undefined ? {} : { chainContextFinalCarrier }),
     ...(chainContextFinalZone === undefined ? {} : { chainContextFinalZone }),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchChainRouteCandidateInfluence.ts
+
+```ts
+import type { FullMatchChainSegmentContext } from "./fullMatchChainSegmentContext";
+
+export type FullMatchChainRouteCandidateInfluenceStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type FullMatchChainRouteCandidateInfluenceScope =
+  | "diagnostic_shadow_ranking"
+  | "production_selection_forbidden";
+
+export type ChainRouteCandidateInfluenceReason =
+  | "FINAL_CARRIER_ADVANCED_SUPPORT"
+  | "FINAL_ZONE_RIGHT_HALF_SPACE_ACCESS"
+  | "CHAIN_CONTEXT_CONTINUITY"
+  | "CHAIN_CONTEXT_NOT_COMPATIBLE"
+  | "CANDIDATE_ILLEGAL_OR_UNAVAILABLE";
+
+export type DiagnosticRouteCandidate = {
+  readonly candidateId: string;
+  readonly actionType: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly laneState?: string;
+  readonly baseScore: number;
+  readonly available: boolean;
+};
+
+export type ChainRouteCandidateInfluence = {
+  readonly candidateId: string;
+  readonly actionType: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly laneState?: string;
+  readonly baseScore: number;
+  readonly influenceDelta: number;
+  readonly influencedScore: number;
+  readonly reason: ChainRouteCandidateInfluenceReason;
+  readonly legalBeforeInfluence: boolean;
+  readonly availableBeforeInfluence: boolean;
+  readonly selectableAfterInfluence: boolean;
+  readonly blockedReasons: readonly string[];
+};
+
+export type FullMatchChainRouteCandidateInfluenceResult = {
+  readonly status: FullMatchChainRouteCandidateInfluenceStatus;
+  readonly scope: FullMatchChainRouteCandidateInfluenceScope;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly finalCarrierId?: string;
+  readonly finalZone?: string;
+  readonly diagnosticOnly: boolean;
+  readonly canMutateScore: false;
+  readonly canMutateScoringEvents: false;
+  readonly canDriveProductionSelection: false;
+  readonly candidateCount: number;
+  readonly influencedCandidateCount: number;
+  readonly positiveDeltaCount: number;
+  readonly negativeDeltaCount: number;
+  readonly illegalCandidateBoostBlockedCount: number;
+  readonly unavailableCandidateBoostBlockedCount: number;
+  readonly selectedCandidateBefore?: string;
+  readonly selectedCandidateAfterDiagnostic?: string;
+  readonly diagnosticSelectionChanged: boolean;
+  readonly influences: readonly ChainRouteCandidateInfluence[];
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyChainRouteCandidateInfluence(
+  segmentContext: FullMatchChainSegmentContext,
+): FullMatchChainRouteCandidateInfluenceResult {
+  return {
+    status: "not_available",
+    scope: "production_selection_forbidden",
+    ...(segmentContext.segmentLabel === undefined ? {} : { segmentLabel: segmentContext.segmentLabel }),
+    ...(segmentContext.chainId === undefined ? {} : { chainId: segmentContext.chainId }),
+    ...(segmentContext.finalCarrierId === undefined ? {} : { finalCarrierId: segmentContext.finalCarrierId }),
+    ...(segmentContext.finalZone === undefined ? {} : { finalZone: segmentContext.finalZone }),
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canDriveProductionSelection: false,
+    candidateCount: 0,
+    influencedCandidateCount: 0,
+    positiveDeltaCount: 0,
+    negativeDeltaCount: 0,
+    illegalCandidateBoostBlockedCount: 0,
+    unavailableCandidateBoostBlockedCount: 0,
+    diagnosticSelectionChanged: false,
+    influences: [],
+    tags: [],
+    warnings: segmentContext.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/applyChainContextToRouteCandidates.ts
+
+```ts
+import type { FullMatchChainSegmentContext } from "./fullMatchChainSegmentContext";
+import {
+  emptyChainRouteCandidateInfluence,
+  type ChainRouteCandidateInfluence,
+  type ChainRouteCandidateInfluenceReason,
+  type DiagnosticRouteCandidate,
+  type FullMatchChainRouteCandidateInfluenceResult,
+  type FullMatchChainRouteCandidateInfluenceStatus,
+} from "./fullMatchChainRouteCandidateInfluence";
+
+export function clampChainInfluenceDelta(value: number): number {
+  return Math.max(-3, Math.min(5, Math.round(value)));
+}
+
+export function canCandidateReceiveChainInfluence(candidate: DiagnosticRouteCandidate): boolean {
+  return candidate.laneState !== "CLOSED" && candidate.available;
+}
+
+export function chainInfluenceCannotOverrideAvailability(candidate: DiagnosticRouteCandidate): boolean {
+  return candidate.laneState === "CLOSED" || !candidate.available;
+}
+
+function statusFromSegmentContext(context: FullMatchChainSegmentContext): FullMatchChainRouteCandidateInfluenceStatus {
+  switch (context.status) {
+    case "not_available":
+      return "not_available";
+    case "available":
+      return "available";
+    case "partial":
+      return "partial";
+    case "failed":
+      return "failed";
+  }
+}
+
+function supportsContinuity(actionType: string): boolean {
+  return actionType === "FORWARD_PROGRESS" || actionType === "WEAK_SIDE_SWITCH" || actionType === "CARRY_OR_HOLD";
+}
+
+function rawDelta(input: {
+  readonly segmentContext: FullMatchChainSegmentContext;
+  readonly candidate: DiagnosticRouteCandidate;
+}): number {
+  let delta = 0;
+
+  if (input.candidate.receiverId === input.segmentContext.finalCarrierId) {
+    delta += 3;
+  }
+
+  if (input.candidate.targetZone === input.segmentContext.finalZone) {
+    delta += 2;
+  }
+
+  if (supportsContinuity(input.candidate.actionType)) {
+    delta += 1;
+  }
+
+  if (delta === 0 && input.candidate.actionType === "SAFE_RECYCLE") {
+    delta -= 1;
+  }
+
+  return delta;
+}
+
+function reasonFor(input: {
+  readonly candidate: DiagnosticRouteCandidate;
+  readonly segmentContext: FullMatchChainSegmentContext;
+  readonly rawDelta: number;
+  readonly selectableAfterInfluence: boolean;
+}): ChainRouteCandidateInfluenceReason {
+  if (!input.selectableAfterInfluence && input.rawDelta > 0) {
+    return "CANDIDATE_ILLEGAL_OR_UNAVAILABLE";
+  }
+
+  if (input.candidate.receiverId === input.segmentContext.finalCarrierId) {
+    return "FINAL_CARRIER_ADVANCED_SUPPORT";
+  }
+
+  if (input.candidate.targetZone === input.segmentContext.finalZone) {
+    return "FINAL_ZONE_RIGHT_HALF_SPACE_ACCESS";
+  }
+
+  if (supportsContinuity(input.candidate.actionType)) {
+    return "CHAIN_CONTEXT_CONTINUITY";
+  }
+
+  return "CHAIN_CONTEXT_NOT_COMPATIBLE";
+}
+
+function blockedReasons(candidate: DiagnosticRouteCandidate): readonly string[] {
+  return [
+    ...(candidate.laneState === "CLOSED" ? ["CLOSED_LANE_NOT_OVERRIDABLE"] : []),
+    ...(!candidate.available ? ["CANDIDATE_NOT_AVAILABLE_NOW"] : []),
+  ];
+}
+
+function topSelectableByScore(candidates: readonly ChainRouteCandidateInfluence[], useInfluencedScore: boolean): ChainRouteCandidateInfluence | undefined {
+  return candidates
+    .filter((candidate) => candidate.selectableAfterInfluence)
+    .sort((a, b) =>
+      (useInfluencedScore ? b.influencedScore - a.influencedScore : b.baseScore - a.baseScore) ||
+      b.baseScore - a.baseScore ||
+      a.candidateId.localeCompare(b.candidateId),
+    )[0];
+}
+
+export function buildDiagnosticRouteCandidatesForSegment(input: {
+  readonly segmentLabel: string;
+  readonly chainSegmentContext: FullMatchChainSegmentContext;
+}): readonly DiagnosticRouteCandidate[] {
+  if (input.chainSegmentContext.status === "not_available") {
+    return [];
+  }
+
+  const finalCarrierId = input.chainSegmentContext.finalCarrierId ?? "control-space-hunter";
+  const finalZone = input.chainSegmentContext.finalZone ?? "Z4-HSR";
+
+  return [
+    {
+      candidateId: "chain-context-forward-progress-sh",
+      actionType: "FORWARD_PROGRESS",
+      receiverId: finalCarrierId,
+      targetZone: finalZone,
+      laneState: "OPEN",
+      baseScore: 82,
+      available: true,
+    },
+    {
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      laneState: "OPEN",
+      baseScore: 86,
+      available: true,
+    },
+    {
+      candidateId: "chain-context-closed-central-force",
+      actionType: "CENTRAL_FORCE",
+      receiverId: finalCarrierId,
+      targetZone: finalZone,
+      laneState: "CLOSED",
+      baseScore: 90,
+      available: true,
+    },
+    {
+      candidateId: "chain-context-unavailable-switch",
+      actionType: "WEAK_SIDE_SWITCH",
+      receiverId: "control-right-piston",
+      targetZone: finalZone,
+      laneState: "OPEN",
+      baseScore: 79,
+      available: false,
+    },
+  ];
+}
+
+export function applyChainContextToRouteCandidates(input: {
+  readonly segmentContext: FullMatchChainSegmentContext;
+  readonly candidates: readonly DiagnosticRouteCandidate[];
+}): FullMatchChainRouteCandidateInfluenceResult {
+  if (input.segmentContext.status === "not_available" || input.candidates.length === 0) {
+    return emptyChainRouteCandidateInfluence(input.segmentContext);
+  }
+
+  const influences = input.candidates.map((candidate): ChainRouteCandidateInfluence => {
+    const theoreticalDelta = rawDelta({ segmentContext: input.segmentContext, candidate });
+    const selectableAfterInfluence = canCandidateReceiveChainInfluence(candidate);
+    const influenceDelta = selectableAfterInfluence ? clampChainInfluenceDelta(theoreticalDelta) : 0;
+    const legalBeforeInfluence = candidate.laneState !== "CLOSED";
+    const availableBeforeInfluence = candidate.available;
+
+    return {
+      candidateId: candidate.candidateId,
+      actionType: candidate.actionType,
+      ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+      ...(candidate.targetZone === undefined ? {} : { targetZone: candidate.targetZone }),
+      ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      baseScore: candidate.baseScore,
+      influenceDelta,
+      influencedScore: candidate.baseScore + influenceDelta,
+      reason: reasonFor({
+        candidate,
+        segmentContext: input.segmentContext,
+        rawDelta: theoreticalDelta,
+        selectableAfterInfluence,
+      }),
+      legalBeforeInfluence,
+      availableBeforeInfluence,
+      selectableAfterInfluence,
+      blockedReasons: blockedReasons(candidate),
+    };
+  });
+  const selectedBefore = topSelectableByScore(influences, false);
+  const selectedAfter = topSelectableByScore(influences, true);
+  const illegalCandidateBoostBlockedCount = input.candidates.filter((candidate) =>
+    candidate.laneState === "CLOSED" && rawDelta({ segmentContext: input.segmentContext, candidate }) > 0
+  ).length;
+  const unavailableCandidateBoostBlockedCount = input.candidates.filter((candidate) =>
+    !candidate.available && rawDelta({ segmentContext: input.segmentContext, candidate }) > 0
+  ).length;
+
+  return {
+    status: statusFromSegmentContext(input.segmentContext),
+    scope: "diagnostic_shadow_ranking",
+    ...(input.segmentContext.segmentLabel === undefined ? {} : { segmentLabel: input.segmentContext.segmentLabel }),
+    ...(input.segmentContext.chainId === undefined ? {} : { chainId: input.segmentContext.chainId }),
+    ...(input.segmentContext.finalCarrierId === undefined ? {} : { finalCarrierId: input.segmentContext.finalCarrierId }),
+    ...(input.segmentContext.finalZone === undefined ? {} : { finalZone: input.segmentContext.finalZone }),
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canDriveProductionSelection: false,
+    candidateCount: input.candidates.length,
+    influencedCandidateCount: influences.filter((candidate) => candidate.influenceDelta !== 0).length,
+    positiveDeltaCount: influences.filter((candidate) => candidate.influenceDelta > 0).length,
+    negativeDeltaCount: influences.filter((candidate) => candidate.influenceDelta < 0).length,
+    illegalCandidateBoostBlockedCount,
+    unavailableCandidateBoostBlockedCount,
+    ...(selectedBefore === undefined ? {} : { selectedCandidateBefore: selectedBefore.candidateId }),
+    ...(selectedAfter === undefined ? {} : { selectedCandidateAfterDiagnostic: selectedAfter.candidateId }),
+    diagnosticSelectionChanged: selectedBefore?.candidateId !== selectedAfter?.candidateId,
+    influences,
+    tags: [
+      "workbench_chain_route_candidate_influence",
+      "route_candidate_influence_diagnostic_only",
+      "route_candidate_influence_segment_1",
+      "route_candidate_influence_score_mutation_forbidden",
+      "route_candidate_influence_scoring_events_mutation_forbidden",
+      "route_candidate_influence_closed_override_blocked",
+      "route_candidate_influence_unavailable_override_blocked",
+      ...(input.segmentContext.chainId === undefined ? [] : [`route_candidate_influence_chain_id_${input.segmentContext.chainId}`]),
+      ...(input.segmentContext.finalCarrierId === undefined ? [] : [`route_candidate_influence_final_carrier_${input.segmentContext.finalCarrierId}`]),
+      ...(input.segmentContext.finalZone === undefined ? [] : [`route_candidate_influence_final_zone_${input.segmentContext.finalZone}`]),
+      `route_candidate_influence_candidate_count_${input.candidates.length}`,
+      `route_candidate_influence_influenced_count_${influences.filter((candidate) => candidate.influenceDelta !== 0).length}`,
+    ],
+    warnings: input.segmentContext.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchRouteCandidateInfluenceSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type FullMatchRouteCandidateInfluenceSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly chainContextTagCount: number;
+  readonly routeCandidateInfluenceTagCount: number;
+  readonly influencedCandidateCount: number;
+  readonly diagnosticSelectionChanged: boolean;
+  readonly scoreMutationCount: number;
+  readonly scoringEventsMutationCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function numberFromEvidenceTag(report: MatchReport, prefix: string): number {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag === undefined ? 0 : Number.parseInt(tag.slice(prefix.length), 10);
+}
+
+export function fullMatchRouteCandidateInfluenceSignature(report: MatchReport): FullMatchRouteCandidateInfluenceSignature {
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    chainContextTagCount: countTag(report, "workbench_chain_context"),
+    routeCandidateInfluenceTagCount: countTag(report, "workbench_chain_route_candidate_influence"),
+    influencedCandidateCount: numberFromEvidenceTag(report, "route_candidate_influence_influenced_count_"),
+    diagnosticSelectionChanged: report.evidenceFacts.some((fact) => fact.internalTags.includes("route_candidate_influence_selection_changed_true")),
+    scoreMutationCount: numberFromEvidenceTag(report, "score_mutation_count_"),
+    scoringEventsMutationCount: numberFromEvidenceTag(report, "scoring_events_mutation_count_"),
   };
 }
 ```
@@ -5652,6 +6151,167 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchChainRouteCandidateInfluence.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+  clampChainInfluenceDelta,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchChainRouteCandidateInfluence(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const disabledContext = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "segment_harness",
+    segmentLabel: "segment-1",
+  }));
+  const availableContext = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+  }));
+  const disabledInfluence = applyChainContextToRouteCandidates({
+    segmentContext: disabledContext,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: disabledContext,
+    }),
+  });
+  const availableInfluence = applyChainContextToRouteCandidates({
+    segmentContext: availableContext,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: availableContext,
+    }),
+  });
+  const compatible = availableInfluence.influences.find((candidate) => candidate.candidateId === "chain-context-forward-progress-sh");
+  const finalZoneCandidate = availableInfluence.influences.find((candidate) => candidate.targetZone === "Z4-HSR" && candidate.selectableAfterInfluence);
+
+  assertTest(disabledInfluence.status === "not_available", "not_available segment context must return no influence.");
+  assertTest(disabledInfluence.candidateCount === 0, "not_available segment context must not create candidates.");
+  assertTest(availableInfluence.status === "available", "available segment context must return available influence.");
+  assertTest(availableInfluence.scope === "diagnostic_shadow_ranking", "route candidate influence must be shadow diagnostic ranking.");
+  assertTest(availableInfluence.finalCarrierId === "control-space-hunter", "influence must expose final carrier.");
+  assertTest(availableInfluence.finalZone === "Z4-HSR", "influence must expose final zone.");
+  assertTest((compatible?.influenceDelta ?? 0) > 0, "finalCarrierId must boost compatible receiver candidate.");
+  assertTest((finalZoneCandidate?.influenceDelta ?? 0) > 0, "finalZone must boost compatible zone candidate.");
+  assertTest(availableInfluence.influences.every((candidate) => candidate.influenceDelta >= -3 && candidate.influenceDelta <= 5), "influence delta must remain bounded.");
+  assertTest(clampChainInfluenceDelta(12) === 5, "positive influence clamp must be capped at 5.");
+  assertTest(clampChainInfluenceDelta(-8) === -3, "negative influence clamp must be capped at -3.");
+  assertTest(availableInfluence.influencedCandidateCount > 0, "available influence must include influenced candidates.");
+  assertTest(availableInfluence.diagnosticOnly, "route candidate influence must be diagnostic-only.");
+  assertTest(!availableInfluence.canMutateScore, "route candidate influence must not mutate score.");
+  assertTest(!availableInfluence.canMutateScoringEvents, "route candidate influence must not mutate scoring events.");
+  assertTest(!availableInfluence.canDriveProductionSelection, "route candidate influence must not drive production selection.");
+
+  return [
+    "not_available segment context returns no influence",
+    "available segment context returns influence result",
+    "finalCarrierId boosts compatible receiver candidate",
+    "finalZone boosts compatible zone candidate",
+    "total delta is bounded",
+    "influencedCandidateCount > 0",
+    "diagnosticOnly = true",
+    "canMutateScore = false",
+    "canMutateScoringEvents = false",
+    "canDriveProductionSelection = false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchChainRouteCandidateInfluence();
+
+  console.log("fullMatchChainRouteCandidateInfluence tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchChainRouteCandidateInfluenceGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+  canCandidateReceiveChainInfluence,
+  chainInfluenceCannotOverrideAvailability,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchChainRouteCandidateInfluenceGuard(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const segmentContext = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+  }));
+  const candidates = buildDiagnosticRouteCandidatesForSegment({
+    segmentLabel: "segment-1",
+    chainSegmentContext: segmentContext,
+  });
+  const influence = applyChainContextToRouteCandidates({
+    segmentContext,
+    candidates,
+  });
+  const closedCandidate = influence.influences.find((candidate) => candidate.candidateId === "chain-context-closed-central-force");
+  const unavailableCandidate = influence.influences.find((candidate) => candidate.candidateId === "chain-context-unavailable-switch");
+  const selectedAfter = influence.influences.find((candidate) => candidate.candidateId === influence.selectedCandidateAfterDiagnostic);
+
+  assertTest(closedCandidate !== undefined, "closed diagnostic candidate must be present.");
+  assertTest(unavailableCandidate !== undefined, "unavailable diagnostic candidate must be present.");
+  assertTest(closedCandidate?.selectableAfterInfluence === false, "CLOSED candidate must remain unselectable after influence.");
+  assertTest(closedCandidate?.influenceDelta === 0, "CLOSED candidate must not receive selectable boost.");
+  assertTest(closedCandidate?.blockedReasons.includes("CLOSED_LANE_NOT_OVERRIDABLE") ?? false, "CLOSED candidate must expose blocked reason.");
+  assertTest(unavailableCandidate?.selectableAfterInfluence === false, "unavailable candidate must remain unselectable after influence.");
+  assertTest(unavailableCandidate?.influenceDelta === 0, "unavailable candidate must not receive selectable boost.");
+  assertTest(unavailableCandidate?.blockedReasons.includes("CANDIDATE_NOT_AVAILABLE_NOW") ?? false, "unavailable candidate must expose blocked reason.");
+  assertTest(influence.illegalCandidateBoostBlockedCount > 0, "illegal boost blocked counter must increment.");
+  assertTest(influence.unavailableCandidateBoostBlockedCount > 0, "unavailable boost blocked counter must increment.");
+  assertTest(selectedAfter !== undefined, "diagnostic winner must be present.");
+  assertTest(selectedAfter?.selectableAfterInfluence === true, "diagnostic winner may only be legal and available.");
+  assertTest(candidates.every((candidate) =>
+    canCandidateReceiveChainInfluence(candidate) || chainInfluenceCannotOverrideAvailability(candidate)
+  ), "guard helpers must not leave a candidate in an undefined availability state.");
+
+  return [
+    "CLOSED candidate remains unselectable after influence",
+    "unavailable candidate remains unselectable after influence",
+    "illegal/unavailable boost blocked counters are incremented",
+    "diagnostic winner may only be legal and available",
+    "fallback cannot hide illegal candidate selection",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchChainRouteCandidateInfluenceGuard();
+
+  console.log("fullMatchChainRouteCandidateInfluenceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -5750,7 +6410,7 @@ export function validateRunFullMatchExperimentalSegmentContext(): readonly strin
   const chainContextEvents = experimentalReport.timeline.filter((event) => event.tags.includes("workbench_chain_context"));
   const chainContextFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_SEGMENT_CONTEXT");
   const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
-    candidate.summary.includes("contexte experimental issu de la chaine workbench"),
+    candidate.summary.includes("contexte workbench") || candidate.summary.includes("chaine workbench"),
   );
 
   assertTest(defaultSignature.chainContextTagCount === 0, "default runFullMatch must not expose chain context tags.");
@@ -5787,6 +6447,66 @@ if (require.main === module) {
   const checks = validateRunFullMatchExperimentalSegmentContext();
 
   console.log("runFullMatchExperimentalSegmentContext tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchExperimentalRouteCandidateInfluence.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchRouteCandidateInfluenceSignature } from "./fullMatchRouteCandidateInfluenceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalRouteCandidateInfluence(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchRouteCandidateInfluenceSignature(defaultReport);
+  const experimentalSignature = fullMatchRouteCandidateInfluenceSignature(experimentalReport);
+  const routeInfluenceFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("influencer le classement diagnostique des options de route"),
+  );
+
+  assertTest(defaultSignature.routeCandidateInfluenceTagCount === 0, "default runFullMatch must not expose route candidate influence tags.");
+  assertTest(experimentalSignature.routeCandidateInfluenceTagCount > 0, "experimental runFullMatch must expose route candidate influence tags.");
+  assertTest(experimentalSignature.influencedCandidateCount > 0, "experimental signature must expose influenced candidate count.");
+  assertTest(routeInfluenceFact !== undefined, "experimental report must include route candidate influence evidence.");
+  assertTest(routeInfluenceFact?.internalTags.includes("route_candidate_influence_diagnostic_only") ?? false, "route influence evidence must be diagnostic-only.");
+  assertTest(routeInfluenceFact?.internalTags.includes("route_candidate_influence_production_selection_forbidden") ?? false, "route influence evidence must forbid production selection.");
+  assertTest(routeInfluenceFact?.summary.includes("control-space-hunter") ?? false, "route influence evidence must include final carrier.");
+  assertTest(routeInfluenceFact?.summary.includes("Z4-HSR") ?? false, "route influence evidence must include final zone.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention route candidate influence.");
+  assertTest(diagnosis?.summary.includes("ne modifie pas encore la resolution ni le score") ?? false, "coach diagnosis must state diagnostic influence does not mutate resolution or score.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DIAGNOSTIC_ONLY"), "experimental limitations must mark route influence diagnostic-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION"), "experimental limitations must forbid production selection.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
+
+  return [
+    "default runFullMatch has no route candidate influence tags",
+    "experimental runFullMatch has route candidate influence tags",
+    "experimental report includes route candidate influence evidence",
+    "experimental coach diagnosis mentions route candidate influence",
+    "experimental report says influence is diagnostic-only",
+    "normal full-match is not claimed as production chain-driven",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalRouteCandidateInfluence();
+
+  console.log("runFullMatchExperimentalRouteCandidateInfluence tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -5847,6 +6567,68 @@ if (require.main === module) {
   const checks = validateRunFullMatchSegmentContextScoringGuard();
 
   console.log("runFullMatchSegmentContextScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchRouteCandidateInfluenceScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchRouteCandidateInfluenceSignature } from "./fullMatchRouteCandidateInfluenceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const signature = fullMatchRouteCandidateInfluenceSignature(report);
+
+  return `${signature.score.home}-${signature.score.away}:${signature.scoringEventCount}:${signature.scoreChangeTotal}:${signature.timelineEventCount}`;
+}
+
+export function validateRunFullMatchRouteCandidateInfluenceScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchRouteCandidateInfluenceSignature(defaultReport);
+  const experimentalSignature = fullMatchRouteCandidateInfluenceSignature(experimentalReport);
+
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "default and experimental score signatures must remain equal.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "scoring event counts must remain equal.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "score_change totals must remain equal.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "timeline event counts must remain equal.");
+  assertTest(experimentalSignature.scoreMutationCount === 0, "route candidate influence must not mutate score.");
+  assertTest(experimentalSignature.scoringEventsMutationCount === 0, "route candidate influence must not mutate scoring events.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORE"), "route influence limitation must forbid score mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORING_EVENTS"), "route influence limitation must forbid scoring event mutation.");
+  assertTest(experimentalReport.evidenceFacts.some((fact) =>
+    fact.internalTags.includes("route_candidate_influence_score_mutation_forbidden") &&
+    fact.internalTags.includes("route_candidate_influence_scoring_events_mutation_forbidden"),
+  ), "route influence evidence must forbid score and scoring-event mutation.");
+
+  return [
+    "default and experimental final scores remain equal",
+    "default and experimental scoring event counts remain equal",
+    "default and experimental score_change totals remain equal",
+    "timeline event count remains equal or only metadata differs",
+    "no scoring events are deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchRouteCandidateInfluenceScoringGuard();
+
+  console.log("runFullMatchRouteCandidateInfluenceScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -6078,6 +6860,67 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3b.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3B(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORE"), "route candidate influence must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORING_EVENTS"), "route candidate influence must not mutate scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION"), "route candidate influence must not drive production selection.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("route_candidate_influence_score_mutation_forbidden")), "score mutation must be forbidden in route influence evidence.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("route_candidate_influence_scoring_events_mutation_forbidden")), "scoring event mutation must be forbidden in route influence evidence.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3B();
+
+  console.log("scoringGuard.3b tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -6161,6 +7004,52 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3A();
 
   console.log("sourceOfTruthGuards.3a tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3b.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3B(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3B();
+
+  console.log("sourceOfTruthGuards.3b tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -7164,6 +8053,7 @@ import {
 } from "../fullMatch/fullMatchSegmentState";
 import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInfluence";
 import type { FullMatchChainSegmentContext } from "../fullMatch/fullMatchChainSegmentContext";
+import type { FullMatchChainRouteCandidateInfluenceResult } from "../fullMatch/fullMatchChainRouteCandidateInfluence";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -7177,6 +8067,7 @@ export interface MiniMatchTimelineSegment {
   readonly segmentState?: FullMatchSegmentState;
   readonly segmentInfluence?: FullMatchSegmentInfluence;
   readonly chainSegmentContext?: FullMatchChainSegmentContext;
+  readonly routeCandidateInfluence?: FullMatchChainRouteCandidateInfluenceResult;
 }
 
 export interface MatchReportBuilderInput {
@@ -7256,6 +8147,37 @@ function chainSegmentContextReason(context: FullMatchChainSegmentContext | undef
   return ` Experimental workbench-chain context available: final carrier ${context.finalCarrierId ?? "none"} at ${context.finalZone ?? "none"} after ${context.chainId ?? "unknown-chain"}. Diagnostic-only; does not mutate score.`;
 }
 
+function routeCandidateInfluenceTags(influence: FullMatchChainRouteCandidateInfluenceResult | undefined): readonly string[] {
+  if (influence === undefined || influence.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_route_candidate_influence",
+    "route_candidate_influence_diagnostic_only",
+    "route_candidate_influence_segment_1",
+    "route_candidate_influence_score_mutation_forbidden",
+    "route_candidate_influence_scoring_events_mutation_forbidden",
+    "route_candidate_influence_production_selection_forbidden",
+    "route_candidate_influence_closed_override_blocked",
+    "route_candidate_influence_unavailable_override_blocked",
+    ...(influence.chainId === undefined ? [] : [`route_candidate_influence_chain_id_${influence.chainId}`]),
+    ...(influence.finalCarrierId === undefined ? [] : [`route_candidate_influence_final_carrier_${influence.finalCarrierId}`]),
+    ...(influence.finalZone === undefined ? [] : [`route_candidate_influence_final_zone_${influence.finalZone}`]),
+    `route_candidate_influence_status_${influence.status}`,
+    `route_candidate_influence_candidate_count_${influence.candidateCount}`,
+    `route_candidate_influence_influenced_count_${influence.influencedCandidateCount}`,
+  ];
+}
+
+function routeCandidateInfluenceReason(influence: FullMatchChainRouteCandidateInfluenceResult | undefined): string {
+  if (influence === undefined || influence.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental route-candidate influence available: ${influence.influencedCandidateCount}/${influence.candidateCount} diagnostic candidates receive bounded deltas; closed or unavailable routes remain blocked. Diagnostic-only; does not drive production selection.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -7297,7 +8219,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -7316,6 +8238,7 @@ function kickoffEvent(input: {
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
+      ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
     ],
     narrativeWeight: 5,
   };
@@ -7369,6 +8292,7 @@ function sequenceRecordToMatchEvent(input: {
     ...segmentStateTags,
     ...segmentInfluenceTags(input.segment.segmentInfluence),
     ...chainSegmentContextTags(input.segment.chainSegmentContext),
+    ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -7393,7 +8317,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -7456,7 +8380,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -7485,6 +8409,7 @@ function scoringEventToMatchEvent(input: {
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...segmentInfluenceTags(input.segment.segmentInfluence),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
+      ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
     ],
     narrativeWeight: 70,
   };
@@ -8169,6 +9094,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "HARNESS_PLAUSIBILITY_WARNING":
     case "WORKBENCH_CHAIN_CONSUMPTION":
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
       return "training_recommendation";
   }
 }
@@ -8195,6 +9121,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Consommation workbench experimentale";
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return "Contexte segmentaire workbench experimental";
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+      return "Influence candidate-route workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -8248,6 +9176,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "TACTICAL_PLAN_SIGNAL":
     case "WORKBENCH_CHAIN_CONSUMPTION":
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -8268,6 +9197,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "TACTICAL_PLAN_SIGNAL",
     "WORKBENCH_CHAIN_CONSUMPTION",
     "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -9369,6 +10299,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 52;
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return 51;
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+      return 50;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -9405,6 +10337,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la consommation workbench experimentale";
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return "Relire le contexte segmentaire workbench experimental";
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+      return "Relire l'influence candidate-route workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -10656,7 +11590,9 @@ export type MatchEvidenceScope =
   | "BATCH_DIAGNOSTIC_PROJECTION"
   | "LIVE_SCORING_STREAM"
   | "REPORT_RENDERING_ONLY"
-  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
+  | "WORKBENCH_CHAIN_CONSUMPTION"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
+  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -10766,6 +11702,26 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     globalScoringEconomyVerdictAllowed: false,
   },
+  WORKBENCH_CHAIN_CONSUMPTION: {
+    scope: "WORKBENCH_CHAIN_CONSUMPTION",
+    canProve: [
+      "experimental workbench chain was consumed behind an opt-in flag",
+      "visual chain steps were replayed for diagnostic grounding",
+      "chain consumption remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "full-match batch economy",
+      "scoring constants",
+      "production route selection",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
   WORKBENCH_CHAIN_SEGMENT_CONTEXT: {
     scope: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     canProve: [
@@ -10780,6 +11736,26 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotOverride: [
       "live score",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE: {
+    scope: "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    canProve: [
+      "experimental chain context influenced diagnostic route candidate scores",
+      "closed and unavailable route candidates remained blocked",
+      "diagnostic selection changes were shadow-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
       "full-match batch economy",
       "scoring constants",
     ],

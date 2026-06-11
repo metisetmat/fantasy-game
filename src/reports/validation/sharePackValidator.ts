@@ -138,6 +138,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay2ZValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-2z.md"));
   const fullMatchWorkbenchChainReplay3A = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3a.md"));
   const fullMatchWorkbenchChainReplay3AValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3a.md"));
+  const fullMatchWorkbenchChainReplay3B = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3b.md"));
+  const fullMatchWorkbenchChainReplay3BValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3b.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1768,6 +1770,88 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3BExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3BForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+    "fullmatch-workbench-chain-replay-2y.md",
+    "validation.fullmatch-workbench-chain-replay-2y.md",
+    "fullmatch-workbench-chain-replay-2x.md",
+    "validation.fullmatch-workbench-chain-replay-2x.md",
+    "fullmatch-workbench-chain-replay.md",
+    "validation.fullmatch-workbench-chain-replay.md",
+    "bundle__docs.md",
+  ];
+  const sprint3BChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3B", activeConfig.sprintName === "Sprint 3B - Experimental Chain Context to Route Candidate Influence", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 16", filesOnDisk.length === 16, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 16", allowlistedFiles.length === 16, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3BForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3BForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3BExpectedFiles.every((file) => requiredCopied(file)), sprint3BExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3B", manifest.includes("Sprint 3B - Experimental Chain Context to Route Candidate Influence") && detailedManifest.includes("Sprint 3B - Experimental Chain Context to Route Candidate Influence"), "Sprint 3B visible"),
+    check("README is Sprint 3B oriented", readme.includes("# Sprint 3B Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3b.md"), "README current"),
+    check("sequence workbench artifacts copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionTwoWorkbench.includes("Sequence 1 Action 2 Tactical Workbench") && sequenceOneActionThreeWorkbench.includes("Sequence 1 Action 3 Tactical Workbench"), "three workbench artifacts copied"),
+    check("3B report included", fullMatchWorkbenchChainReplay3B.includes("# FullMatch Workbench Chain Replay 3B") && fullMatchWorkbenchChainReplay3B.includes("route candidate influence status: available"), "3B doc included"),
+    check("3B validation is PASS", fullMatchWorkbenchChainReplay3BValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3BValidation.includes("chain context maps to route candidate influence"), "3B validation PASS"),
+    check("segment context final carrier visible", fullMatchWorkbenchChainReplay3B.includes("segment context final carrier: control-space-hunter") && fullMatchWorkbenchChainReplay3BValidation.includes("segment context final carrier is control-space-hunter"), "final carrier visible"),
+    check("segment context final zone visible", fullMatchWorkbenchChainReplay3B.includes("segment context final zone: Z4-HSR") && fullMatchWorkbenchChainReplay3BValidation.includes("segment context final zone is Z4-HSR"), "final zone visible"),
+    check("route candidate influence contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchChainRouteCandidateInfluence.ts") && bundleSimulation.includes("FullMatchChainRouteCandidateInfluenceResult"), "route influence contract bundled"),
+    check("route candidate influence mapper bundled", bundleSimulation.includes("src/simulation/fullMatch/applyChainContextToRouteCandidates.ts") && bundleSimulation.includes("applyChainContextToRouteCandidates"), "route influence mapper bundled"),
+    check("route candidate influence signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchRouteCandidateInfluenceSignature.ts") && bundleSimulation.includes("FullMatchRouteCandidateInfluenceSignature"), "route influence signature bundled"),
+    check("matchReportBuilder route influence wiring bundled", bundleSimulation.includes("src/simulation/adapters/matchReportBuilder.ts") && bundleSimulation.includes("routeCandidateInfluenceTags") && bundleSimulation.includes("routeCandidateInfluenceReason"), "builder route influence wiring bundled"),
+    check("runFullMatch route influence wiring bundled", bundleSimulation.includes("applyChainContextToRouteCandidates") && bundleSimulation.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION"), "runFullMatch route influence wiring bundled"),
+    check("compatible route candidates receive bounded deltas", fullMatchWorkbenchChainReplay3B.includes("influenced candidate count: 2") && fullMatchWorkbenchChainReplay3BValidation.includes("compatible route candidates receive bounded deltas"), "bounded deltas visible"),
+    check("closed candidates remain blocked", fullMatchWorkbenchChainReplay3B.includes("closed candidates remain selectable after influence: NO") && fullMatchWorkbenchChainReplay3BValidation.includes("CLOSED candidates remain unselectable"), "closed route guarded"),
+    check("unavailable candidates remain blocked", fullMatchWorkbenchChainReplay3B.includes("unavailable candidates remain selectable after influence: NO") && fullMatchWorkbenchChainReplay3BValidation.includes("unavailable candidates remain unselectable"), "unavailable route guarded"),
+    check("illegal/unavailable boost blocking counted", fullMatchWorkbenchChainReplay3B.includes("illegal candidate boost blocked count: 1") && fullMatchWorkbenchChainReplay3B.includes("unavailable candidate boost blocked count: 1"), "blocked counters visible"),
+    check("diagnostic selection before/after visible", fullMatchWorkbenchChainReplay3B.includes("diagnostic selection before: chain-context-safe-recycle-pv") && fullMatchWorkbenchChainReplay3B.includes("diagnostic selection after: chain-context-forward-progress-sh"), "diagnostic selection visible"),
+    check("route influence evidence included", fullMatchWorkbenchChainReplay3B.includes("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE") && bundleSimulation.includes("category: \"WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE\""), "route influence evidence visible"),
+    check("3B route influence tests bundled", bundleSimulation.includes("fullMatchChainRouteCandidateInfluence.test.ts") && bundleSimulation.includes("fullMatchChainRouteCandidateInfluenceGuard.test.ts"), "3B route tests bundled"),
+    check("3B runFullMatch influence tests bundled", bundleSimulation.includes("runFullMatchExperimentalRouteCandidateInfluence.test.ts") && bundleSimulation.includes("runFullMatchRouteCandidateInfluenceScoringGuard.test.ts"), "3B full-match tests bundled"),
+    check("3B scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3b.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3b.test.ts"), "3B guards bundled"),
+    check("coach diagnosis mentions route candidate influence", fullMatchWorkbenchChainReplay3B.includes("coach diagnosis mentions route candidate influence") && bundleSimulation.includes("influencer le classement diagnostique des options de route"), "coach diagnosis visible"),
+    check("default mode remains segment_harness", fullMatchWorkbenchChainReplay3B.includes("default full-match mode: segment_harness") && bundleSimulation.includes("DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE"), "default mode visible"),
+    check("experimental mode remains opt-in", fullMatchWorkbenchChainReplay3B.includes("experimental mode active by default: NO") && bundleSimulation.includes("workbench_chain_replay_experimental"), "experimental opt-in visible"),
+    check("normal full-match not production chain-driven", fullMatchWorkbenchChainReplay3B.includes("normal full-match chain-driven claim status: NO") && bundleSimulation.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match guarded"),
+    check("default route influence absent", fullMatchWorkbenchChainReplay3B.includes("default route candidate influence tag count: 0") && fullMatchWorkbenchChainReplay3BValidation.includes("default timeline/report has no route candidate influence tags"), "default clean"),
+    check("experimental route influence present", fullMatchWorkbenchChainReplay3B.includes("experimental route candidate influence tag count: greater than 0") && fullMatchWorkbenchChainReplay3BValidation.includes("experimental timeline/report includes route candidate influence tags"), "experimental influence visible"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3B.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3BValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("route candidate influence cannot mutate score", fullMatchWorkbenchChainReplay3B.includes("route candidate influence can mutate score: false") && fullMatchWorkbenchChainReplay3BValidation.includes("route candidate influence cannot mutate score"), "score mutation forbidden"),
+    check("route candidate influence cannot mutate scoring events", fullMatchWorkbenchChainReplay3B.includes("route candidate influence can mutate scoring events: false") && fullMatchWorkbenchChainReplay3BValidation.includes("route candidate influence cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("route candidate influence cannot drive production selection", fullMatchWorkbenchChainReplay3B.includes("route candidate influence can drive production selection: false") && fullMatchWorkbenchChainReplay3BValidation.includes("route candidate influence cannot drive production selection"), "production selection forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3BValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3BValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3BValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3B.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3B.includes("CONFIRM_EXPERIMENTAL_CHAIN_CONTEXT_TO_ROUTE_CANDIDATE_INFLUENCE") && fullMatchWorkbenchChainReplay3B.includes("CONFIRM_ROUTE_CANDIDATE_INFLUENCE_IS_DIAGNOSTIC_ONLY") && fullMatchWorkbenchChainReplay3B.includes("PREPARE_EXPERIMENTAL_CHAIN_CONTEXT_TO_SHADOW_ROUTE_SELECTION"), "3B recommendations visible"),
+  ];
   const sprint3AExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2361,6 +2445,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3B - Experimental Chain Context to Route Candidate Influence")
+      ? sprint3BChecks
     : activeConfig.sprintName.includes("Sprint 3A - Experimental Chain Influence on Segment Context")
       ? sprint3AChecks
     : activeConfig.sprintName.includes("Sprint 2Z - Experimental FullMatch Chain Consumption")
