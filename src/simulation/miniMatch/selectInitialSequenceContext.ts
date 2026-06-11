@@ -21,6 +21,7 @@ import { TacticalPhaseState } from "../../systems/tacticalState";
 import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
 import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
+import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -241,6 +242,63 @@ function spatialContextSummary(state: MiniMatchState): string | undefined {
   ].join("; ");
 }
 
+function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
+  const spatialContext = state.context.spatialContext;
+
+  if (spatialContext === undefined) {
+    return undefined;
+  }
+
+  const players = spatialContext.possessionTeamId === spatialContext.home.teamId
+    ? spatialContext.home.players
+    : spatialContext.away.players;
+  const actor = players.find((player) => player.playerId === spatialContext.ballCarrierId);
+  const receiver = players.find((player) => player.playerId !== spatialContext.ballCarrierId && !player.isGoalkeeper);
+
+  if (actor === undefined) {
+    return "attribute_influence_active; mode=metadata_only; actor=missing; routeRankingUsesRealAttributes=PARTIAL";
+  }
+
+  const candidate = applySpatialAttributeInfluenceToCandidates({
+    spatialContext,
+    pressureLevel: "MEDIUM",
+    candidates: [
+      {
+        candidateId: "spatial-context-metadata-candidate",
+        actorId: actor.playerId,
+        ...(receiver === undefined ? {} : { receiverId: receiver.playerId }),
+        teamId: actor.teamId,
+        fromZone: spatialContext.ballZone,
+        targetZone: receiver?.zone ?? spatialContext.ballZone,
+        actionType: "SUPPORT_CLUSTER_RECYCLE",
+        laneState: "CONTESTED",
+        baseScore: 50,
+        baseRisk: 35,
+      },
+    ],
+  })[0];
+
+  if (candidate === undefined) {
+    return "attribute_influence_active; mode=metadata_only; candidate=missing; routeRankingUsesRealAttributes=PARTIAL";
+  }
+
+  const reasons = candidate.attributeInfluences
+    .slice(0, 2)
+    .map((influence) => influence.category)
+    .join("/");
+
+  return [
+    "attribute_influence_active",
+    "mode=metadata_only",
+    `actor=${actor.playerId}`,
+    `receiver=${receiver?.playerId ?? "none"}`,
+    `base=${candidate.baseScore}`,
+    `adjusted=${candidate.attributeAdjustedScore}`,
+    `reasons=${reasons.length === 0 ? "none" : reasons}`,
+    "routeRankingUsesRealAttributes=PARTIAL",
+  ].join("; ");
+}
+
 export function selectInitialSequenceContext(
   state: MiniMatchState,
   sequenceIndex: number,
@@ -292,6 +350,7 @@ export function selectInitialSequenceContext(
   const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
   const startTick = state.context.startTick + sequenceIndex * 10;
   const spatialSummary = spatialContextSummary(state);
+  const attributeSummary = attributeInfluenceSummary(state);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -303,6 +362,13 @@ export function selectInitialSequenceContext(
     possessionReason: describePossessionReason(state, possessionTeamDefinition, sequenceIndex),
     spatialContextActive: state.context.spatialContext !== undefined,
     ...(spatialSummary === undefined ? {} : { spatialContextSummary: spatialSummary }),
+    ...(attributeSummary === undefined
+      ? {}
+      : {
+          attributeInfluenceMode: "metadata_only" as const,
+          routeRankingUsesRealAttributes: "PARTIAL" as const,
+          attributeInfluenceSummary: attributeSummary,
+        }),
     resolveInput: {
       startTick,
       teams: {

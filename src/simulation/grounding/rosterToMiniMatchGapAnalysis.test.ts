@@ -21,6 +21,10 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   assertTest(analysis.rosterDrivesMiniMatchPlayerPositions, "TeamSnapshot.roster must now drive adapter-level spatial player context.");
   assertTest(analysis.startersDriveActivePlayers, "TeamSnapshot.starters must now drive adapter-level active player IDs.");
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
+  assertTest(analysis.attributeInfluenceLayerExists, "attribute influence layer must be reported as available.");
+  assertTest(analysis.routeRankingAttributeInfluenceMode === "metadata_only", "attribute influence mode must be metadata_only.");
+  assertTest(analysis.visibleAttributesDriveRouteRanking === "PARTIAL", "visible attributes must reduce ranking gap to PARTIAL.");
+  assertTest(analysis.remainingPrototypeDominance === "HIGH", "remaining prototype dominance must be reported honestly.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
   assertTest(analysis.lostPlayerIdentity.length > 0, "lost official player identity must be reported.");
 
@@ -28,6 +32,8 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
     "roster-to-mini-match gap is PARTIAL",
     "TeamSnapshot roster and starters now drive adapter-level spatial context",
     "workbench positions can seed spatial context",
+    "route attribute influence layer exists",
+    "visible attributes drive route ranking partially",
     "prototype dominance is still documented",
     "lost player identity is listed",
   ];

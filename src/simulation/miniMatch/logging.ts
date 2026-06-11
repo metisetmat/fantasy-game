@@ -145,6 +145,7 @@ export function createSequenceHeaderLogs(setup: MiniMatchSequenceSetup): readonl
     line(`Sequence ${setup.sequenceNumber}`),
     line(setup.possessionReason),
     ...(setup.spatialContextSummary === undefined ? [] : [line(`Spatial context metadata: ${setup.spatialContextSummary}`)]),
+    ...(setup.attributeInfluenceSummary === undefined ? [] : [line(`Attribute influence metadata: ${setup.attributeInfluenceSummary}`)]),
     line(setup.openingLine),
     line(describeDefensivePreparation(setup)),
     line(""),

@@ -30,7 +30,9 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED"), "partial full-match grounding warning must be emitted.");
   assertTest(diagnostics.warnings.includes("SPATIAL_CONTEXT_ADAPTER_AVAILABLE"), "spatial context adapter availability must be emitted.");
   assertTest(diagnostics.warnings.includes("WORKBENCH_REPLAY_SEED_AVAILABLE"), "workbench replay seed availability must be emitted.");
-  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_NOT_YET_ATTRIBUTE_DRIVEN"), "route ranking attribute gap must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE"), "route attribute influence availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL"), "partial route ranking attribute influence must be emitted.");
+  assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_DOMINANT"), "prototype selection dominance must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
   assertTest(
