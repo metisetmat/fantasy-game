@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source",
+  name: "Sprint 3G - Controlled Route Source to Live Selection Override Guards",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -14,8 +14,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-3f.md",
-    "validation.fullmatch-workbench-chain-replay-3f.md",
+    "fullmatch-workbench-chain-replay-3g.md",
+    "validation.fullmatch-workbench-chain-replay-3g.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -26,7 +26,7 @@ export const currentSprint: CurrentSharePackConfig = {
   optionalFiles: [],
   excludedByDefault: [],
   fileReasons: {
-    "package.json": "records npm scripts and controlled mini-match route source contract test wiring",
+    "package.json": "records npm scripts and live selection override guard contract test wiring",
     "tsconfig.json": "records the TypeScript compiler setup for route ranking work",
     "coach-report.latest.html": "latest generated default coach HTML sample",
     "coach-report.default.html": "default full-match harness coach HTML sample without controlled mini-match route source tags",
@@ -35,14 +35,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 3F share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-3f.md": "documents SegmentRouteInput conversion into a controlled mini-match route source behind the opt-in flag",
-    "validation.fullmatch-workbench-chain-replay-3f.md": "validates controlled route source status, source, candidate identity, score guardrails, live-resolution guardrails, and source-of-truth invariants",
-    "README.md": "compact reviewer orientation for the 3F share pack",
-    "manifest.md": "compatibility manifest listing the 3F share pack files",
+    "validation.share-pack.md": "proves the 3G share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-3g.md": "documents controlled route source conversion into a guarded live selection override preparation behind the opt-in flag",
+    "validation.fullmatch-workbench-chain-replay-3g.md": "validates live override guard status, origin, candidate identity, score guardrails, live-resolution guardrails, scoring-event-creation guardrails, and source-of-truth invariants",
+    "README.md": "compact reviewer orientation for the 3G share pack",
+    "manifest.md": "compatibility manifest listing the 3G share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, segment context influence, diagnostic route candidate influence, shadow route selection, controlled segment selection, SegmentRouteInput wiring, controlled mini-match route source wiring, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
+    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, segment context influence, diagnostic route candidate influence, shadow route selection, controlled segment selection, SegmentRouteInput wiring, controlled mini-match route source wiring, live selection override guard wiring, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
     "bundle__reports.md": "bundles coach report renderer, summary utilities, copy quality utilities, guards, and share-pack updater",
   },
 };

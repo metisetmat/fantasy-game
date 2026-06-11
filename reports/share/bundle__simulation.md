@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3G - Controlled Route Source to Live Selection Override Guards. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -158,6 +158,8 @@ import { segmentRouteInputFromControlledSelection } from "./fullMatch/segmentRou
 import type { FullMatchSegmentRouteInput } from "./fullMatch/fullMatchSegmentRouteInput";
 import { controlledMiniMatchRouteSourceFromSegmentRouteInput } from "./fullMatch/controlledMiniMatchRouteSourceFromSegmentRouteInput";
 import type { FullMatchControlledMiniMatchRouteSource } from "./fullMatch/fullMatchControlledMiniMatchRouteSource";
+import { liveSelectionOverrideGuardFromControlledRouteSource } from "./fullMatch/liveSelectionOverrideGuardFromControlledRouteSource";
+import type { FullMatchLiveSelectionOverrideGuard } from "./fullMatch/fullMatchLiveSelectionOverrideGuard";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -514,6 +516,27 @@ function controlledMiniMatchRouteSourceLimitations(source: FullMatchControlledMi
     "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
     "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION",
     "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function liveSelectionOverrideGuardLimitations(guard: FullMatchLiveSelectionOverrideGuard): readonly string[] {
+  if (guard.status === "not_available") {
+    return ["FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_EXPERIMENTAL",
+    `FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_STATUS_${guard.status.toUpperCase()}`,
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DIAGNOSTIC_ONLY",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_NOT_APPLIED_TO_LIVE_SELECTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_CREATE_SCORING_EVENTS",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_NORMAL_LIVE_MINIMATCH_RESOLUTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -932,6 +955,78 @@ function controlledMiniMatchRouteSourceEvidenceFact(input: {
   };
 }
 
+function liveSelectionOverrideGuardEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly guard: FullMatchLiveSelectionOverrideGuard;
+}): MatchReportEvidenceFact | null {
+  if (input.guard.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_live_selection_override_guard")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-live-selection-override-guard`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.guard.overrideTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental live selection override guard ${input.guard.status}: origin ${input.guard.origin}, ` +
+      `override candidate ${input.guard.overrideCandidateId ?? "none"} (${input.guard.overrideActionType ?? "none"}) ` +
+      `to receiver ${input.guard.overrideReceiverId ?? "none"} in ${input.guard.overrideTargetZone ?? "none"}, ` +
+      `sourceBaseScore=${input.guard.sourceBaseScore ?? 0}, sourceInfluenceDelta=${input.guard.sourceInfluenceDelta ?? 0}, ` +
+      `sourceInfluencedScore=${input.guard.sourceInfluencedScore ?? 0}, candidateLegal=${input.guard.candidateLegal}, ` +
+      `candidateAvailable=${input.guard.candidateAvailable}, closedRejected=${input.guard.rejectedClosedCandidateCount}, ` +
+      `unavailableRejected=${input.guard.rejectedUnavailableCandidateCount}, experimentalOverridePrepared=${input.guard.experimentalOverridePrepared}, ` +
+      `overrideAppliedToLiveSelection=${input.guard.overrideAppliedToLiveSelection}, diagnosticOnly=${input.guard.diagnosticOnly}, ` +
+      `canMutateScore=${input.guard.canMutateScore}, canMutateScoringEvents=${input.guard.canMutateScoringEvents}, ` +
+      `canMutateRouteSuccessRates=${input.guard.canMutateRouteSuccessRates}, canDriveProductionFullMatchSelection=${input.guard.canDriveProductionFullMatchSelection}, ` +
+      `canDriveProductionRouteResolution=${input.guard.canDriveProductionRouteResolution}, ` +
+      `canDriveNormalLiveMiniMatchResolution=${input.guard.canDriveNormalLiveMiniMatchResolution}, canCreateScoringEvents=${input.guard.canCreateScoringEvents}.`,
+    confidence: input.guard.status === "available" ? "medium" : "low",
+    strength: input.guard.status === "available" ? 66 : 22,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_live_selection_override_guard",
+      "live_selection_override_guard_experimental",
+      "live_selection_override_guard_diagnostic_only",
+      "live_selection_override_guard_score_mutation_forbidden",
+      "live_selection_override_guard_scoring_events_mutation_forbidden",
+      "live_selection_override_guard_route_success_mutation_forbidden",
+      "live_selection_override_guard_production_fullmatch_forbidden",
+      "live_selection_override_guard_production_resolution_forbidden",
+      "live_selection_override_guard_normal_live_resolution_forbidden",
+      "live_selection_override_guard_scoring_event_creation_forbidden",
+      "live_selection_override_guard_closed_candidates_rejected",
+      "live_selection_override_guard_unavailable_candidates_rejected",
+      ...(input.guard.chainId === undefined ? [] : [`live_selection_override_chain_id_${input.guard.chainId}`]),
+      ...(input.guard.overrideCandidateId === undefined ? [] : [`live_selection_override_candidate_${input.guard.overrideCandidateId}`]),
+      ...(input.guard.overrideActionType === undefined ? [] : [`live_selection_override_action_${input.guard.overrideActionType}`]),
+      ...(input.guard.overrideReceiverId === undefined ? [] : [`live_selection_override_receiver_${input.guard.overrideReceiverId}`]),
+      ...(input.guard.overrideTargetZone === undefined ? [] : [`live_selection_override_zone_${input.guard.overrideTargetZone}`]),
+      `live_selection_override_candidate_legal_${input.guard.candidateLegal ? "true" : "false"}`,
+      `live_selection_override_candidate_available_${input.guard.candidateAvailable ? "true" : "false"}`,
+      `live_selection_override_closed_rejected_count_${input.guard.rejectedClosedCandidateCount}`,
+      `live_selection_override_unavailable_rejected_count_${input.guard.rejectedUnavailableCandidateCount}`,
+      `live_selection_override_applied_${input.guard.overrideAppliedToLiveSelection ? "true" : "false"}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      "scoring_event_creation_count_0",
+      "route_success_mutation_count_0",
+      "production_route_resolution_mutation_count_0",
+      "normal_live_minimatch_resolution_mutation_count_0",
+      ...input.guard.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -942,6 +1037,7 @@ function withFullMatchGroundingDiagnosis(
   controlledSegmentSelection: FullMatchControlledSegmentSelectionResult,
   segmentRouteInput: FullMatchSegmentRouteInput,
   controlledMiniMatchRouteSource: FullMatchControlledMiniMatchRouteSource,
+  liveSelectionOverrideGuard: FullMatchLiveSelectionOverrideGuard,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -952,12 +1048,13 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_shadow_route_selection") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_selection") ||
     fact.internalTags.includes("workbench_chain_segment_route_input") ||
-    fact.internalTags.includes("workbench_chain_controlled_minimatch_route_source")
+    fact.internalTags.includes("workbench_chain_controlled_minimatch_route_source") ||
+    fact.internalTags.includes("workbench_chain_live_selection_override_guard")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match experimental sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cette source vient du SegmentRouteInput, lui-meme issu de la selection controlee workbench. Elle reste cantonnee au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution live du mini-match, le score, les evenements de score, ni les taux de succes des routes ; elle ne pilote pas encore la resolution reelle du full-match. Les routes fermees ou indisponibles restent rejetees avant la creation de cette source controlee. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match, en mode experimental, sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. La selection controlee experimentale ne pilote pas encore la resolution reelle du full-match. La source de route controlee pour mini-match ne pilote pas encore la resolution live du mini-match. Le moteur prepare maintenant un override de selection live experimental pour le premier segment : ${liveSelectionOverrideGuard.overrideActionType ?? controlledMiniMatchRouteSource.actionType ?? "none"} vers ${liveSelectionOverrideGuard.overrideReceiverId ?? controlledMiniMatchRouteSource.receiverId ?? "none"} en ${liveSelectionOverrideGuard.overrideTargetZone ?? controlledMiniMatchRouteSource.targetZone ?? "none"}. Cet override vient de la source de route controlee issue du SegmentRouteInput. Il reste volontairement non applique : il ne pilote pas encore la resolution live, le score, les evenements de score, ni les taux de succes des routes. Cette source et cet override restent cantonnes au diagnostic sans modifier le score ni les evenements ; ils ne pilotent pas encore la resolution reelle du full-match. Les routes fermees ou indisponibles restent rejetees avant la preparation de cet override. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -1020,6 +1117,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const controlledMiniMatchRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
     segmentRouteInput,
   });
+  const liveSelectionOverrideGuard = liveSelectionOverrideGuardFromControlledRouteSource({
+    controlledRouteSource: controlledMiniMatchRouteSource,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -1064,6 +1164,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && controlledSegmentSelection.status !== "not_available" ? { controlledSegmentSelection } : {}),
           ...(index === 0 && segmentRouteInput.status !== "not_available" ? { segmentRouteInput } : {}),
           ...(index === 0 && controlledMiniMatchRouteSource.status !== "not_available" ? { controlledMiniMatchRouteSource } : {}),
+          ...(index === 0 && liveSelectionOverrideGuard.status !== "not_available" ? { liveSelectionOverrideGuard } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -1137,6 +1238,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...controlledSegmentSelectionLimitations(controlledSegmentSelection),
       ...segmentRouteInputLimitations(segmentRouteInput),
       ...controlledMiniMatchRouteSourceLimitations(controlledMiniMatchRouteSource),
+      ...liveSelectionOverrideGuardLimitations(liveSelectionOverrideGuard),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -1174,6 +1276,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     routeSource: controlledMiniMatchRouteSource,
   });
+  const liveSelectionOverrideGuardFact = liveSelectionOverrideGuardEvidenceFact({
+    report,
+    matchInput: input,
+    guard: liveSelectionOverrideGuard,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -1182,6 +1289,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(controlledSelectionFact === null ? [] : [controlledSelectionFact]),
     ...(segmentRouteInputFact === null ? [] : [segmentRouteInputFact]),
     ...(controlledRouteSourceFact === null ? [] : [controlledRouteSourceFact]),
+    ...(liveSelectionOverrideGuardFact === null ? [] : [liveSelectionOverrideGuardFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1200,6 +1308,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     controlledSegmentSelection,
     segmentRouteInput,
     controlledMiniMatchRouteSource,
+    liveSelectionOverrideGuard,
   );
 }
 ```
@@ -4409,6 +4518,350 @@ export function fullMatchControlledMiniMatchRouteSourceSignature(
     routeSuccessRateMutationCount: numberFromTag(report, "route_success_mutation_count_"),
     productionRouteResolutionMutationCount: numberFromTag(report, "production_route_resolution_mutation_count_"),
     liveMiniMatchResolutionMutationCount: numberFromTag(report, "live_minimatch_resolution_mutation_count_"),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchLiveSelectionOverrideGuard.ts
+
+```ts
+export type FullMatchLiveSelectionOverrideGuardStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type FullMatchLiveSelectionOverrideGuardScope =
+  | "experimental_live_selection_override_guard"
+  | "production_live_resolution_forbidden";
+
+export type FullMatchLiveSelectionOverrideGuardOrigin =
+  | "none"
+  | "controlled_minimatch_route_source";
+
+export type FullMatchLiveSelectionOverrideGuard = {
+  readonly status: FullMatchLiveSelectionOverrideGuardStatus;
+  readonly scope: FullMatchLiveSelectionOverrideGuardScope;
+  readonly origin: FullMatchLiveSelectionOverrideGuardOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly overrideCandidateId?: string;
+  readonly overrideActionType?: string;
+  readonly overrideReceiverId?: string;
+  readonly overrideTargetZone?: string;
+  readonly sourceBaseScore?: number;
+  readonly sourceInfluenceDelta?: number;
+  readonly sourceInfluencedScore?: number;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly experimentalOverridePrepared: boolean;
+  readonly overrideAppliedToLiveSelection: false;
+  readonly diagnosticOnly: boolean;
+  readonly canMutateScore: false;
+  readonly canMutateScoringEvents: false;
+  readonly canMutateRouteSuccessRates: false;
+  readonly canDriveProductionFullMatchSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canDriveNormalLiveMiniMatchResolution: false;
+  readonly canCreateScoringEvents: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyLiveSelectionOverrideGuard(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): FullMatchLiveSelectionOverrideGuard {
+  return {
+    status: "not_available",
+    scope: "production_live_resolution_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    candidateLegal: false,
+    candidateAvailable: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    experimentalOverridePrepared: false,
+    overrideAppliedToLiveSelection: false,
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveNormalLiveMiniMatchResolution: false,
+    canCreateScoringEvents: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/liveSelectionOverrideGuardFromControlledRouteSource.ts
+
+```ts
+import type { FullMatchControlledMiniMatchRouteSource } from "./fullMatchControlledMiniMatchRouteSource";
+import {
+  emptyLiveSelectionOverrideGuard,
+  type FullMatchLiveSelectionOverrideGuard,
+} from "./fullMatchLiveSelectionOverrideGuard";
+
+export function liveSelectionOverrideGuardCannotMutateScore(
+  guard: FullMatchLiveSelectionOverrideGuard,
+): boolean {
+  return (
+    !guard.canMutateScore &&
+    !guard.canMutateScoringEvents &&
+    !guard.canMutateRouteSuccessRates &&
+    !guard.canCreateScoringEvents
+  );
+}
+
+export function liveSelectionOverrideGuardCannotDriveNormalLiveResolution(
+  guard: FullMatchLiveSelectionOverrideGuard,
+): boolean {
+  return (
+    !guard.canDriveProductionFullMatchSelection &&
+    !guard.canDriveProductionRouteResolution &&
+    !guard.canDriveNormalLiveMiniMatchResolution &&
+    !guard.overrideAppliedToLiveSelection
+  );
+}
+
+export function validateLiveSelectionOverrideGuard(
+  guard: FullMatchLiveSelectionOverrideGuard,
+): readonly string[] {
+  const shouldValidateCandidate = guard.status !== "not_available";
+
+  return [
+    ...(shouldValidateCandidate && guard.overrideCandidateId === undefined ? ["LIVE_SELECTION_OVERRIDE_MISSING_CANDIDATE"] : []),
+    ...(shouldValidateCandidate && guard.overrideActionType === undefined ? ["LIVE_SELECTION_OVERRIDE_MISSING_ACTION"] : []),
+    ...(shouldValidateCandidate && guard.overrideReceiverId === undefined ? ["LIVE_SELECTION_OVERRIDE_MISSING_RECEIVER"] : []),
+    ...(shouldValidateCandidate && guard.overrideTargetZone === undefined ? ["LIVE_SELECTION_OVERRIDE_MISSING_TARGET_ZONE"] : []),
+    ...(shouldValidateCandidate && !guard.candidateLegal ? ["LIVE_SELECTION_OVERRIDE_ILLEGAL_CANDIDATE"] : []),
+    ...(shouldValidateCandidate && !guard.candidateAvailable ? ["LIVE_SELECTION_OVERRIDE_UNAVAILABLE_CANDIDATE"] : []),
+    ...(guard.overrideAppliedToLiveSelection ? ["LIVE_SELECTION_OVERRIDE_WAS_APPLIED"] : []),
+    ...(!liveSelectionOverrideGuardCannotMutateScore(guard) ? ["LIVE_SELECTION_OVERRIDE_MUTATION_FORBIDDEN_BREACH"] : []),
+    ...(!liveSelectionOverrideGuardCannotDriveNormalLiveResolution(guard) ? ["LIVE_SELECTION_OVERRIDE_LIVE_RESOLUTION_FORBIDDEN_BREACH"] : []),
+  ];
+}
+
+function blockedLiveSelectionOverrideGuardFromControlledRouteSource(
+  controlledRouteSource: FullMatchControlledMiniMatchRouteSource,
+): FullMatchLiveSelectionOverrideGuard {
+  return {
+    status: "blocked",
+    scope: "production_live_resolution_forbidden",
+    origin: "controlled_minimatch_route_source",
+    ...(controlledRouteSource.segmentLabel === undefined ? {} : { segmentLabel: controlledRouteSource.segmentLabel }),
+    ...(controlledRouteSource.chainId === undefined ? {} : { chainId: controlledRouteSource.chainId }),
+    ...(controlledRouteSource.candidateId === undefined ? {} : { overrideCandidateId: controlledRouteSource.candidateId }),
+    ...(controlledRouteSource.actionType === undefined ? {} : { overrideActionType: controlledRouteSource.actionType }),
+    ...(controlledRouteSource.receiverId === undefined ? {} : { overrideReceiverId: controlledRouteSource.receiverId }),
+    ...(controlledRouteSource.targetZone === undefined ? {} : { overrideTargetZone: controlledRouteSource.targetZone }),
+    ...(controlledRouteSource.sourceBaseScore === undefined ? {} : { sourceBaseScore: controlledRouteSource.sourceBaseScore }),
+    ...(controlledRouteSource.sourceInfluenceDelta === undefined ? {} : { sourceInfluenceDelta: controlledRouteSource.sourceInfluenceDelta }),
+    ...(controlledRouteSource.sourceInfluencedScore === undefined ? {} : { sourceInfluencedScore: controlledRouteSource.sourceInfluencedScore }),
+    candidateLegal: controlledRouteSource.candidateLegal,
+    candidateAvailable: controlledRouteSource.candidateAvailable,
+    rejectedClosedCandidateCount: controlledRouteSource.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: controlledRouteSource.rejectedUnavailableCandidateCount,
+    experimentalOverridePrepared: false,
+    overrideAppliedToLiveSelection: false,
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveNormalLiveMiniMatchResolution: false,
+    canCreateScoringEvents: false,
+    tags: [],
+    warnings: [...controlledRouteSource.warnings, "LIVE_SELECTION_OVERRIDE_GUARD_BLOCKED"],
+  };
+}
+
+function availableLiveSelectionOverrideGuardFromControlledRouteSource(
+  controlledRouteSource: FullMatchControlledMiniMatchRouteSource,
+): FullMatchLiveSelectionOverrideGuard {
+  if (
+    controlledRouteSource.candidateId === undefined ||
+    controlledRouteSource.actionType === undefined ||
+    controlledRouteSource.receiverId === undefined ||
+    controlledRouteSource.targetZone === undefined ||
+    !controlledRouteSource.candidateLegal ||
+    !controlledRouteSource.candidateAvailable
+  ) {
+    return blockedLiveSelectionOverrideGuardFromControlledRouteSource(controlledRouteSource);
+  }
+
+  return {
+    status: "available",
+    scope: "experimental_live_selection_override_guard",
+    origin: "controlled_minimatch_route_source",
+    ...(controlledRouteSource.segmentLabel === undefined ? {} : { segmentLabel: controlledRouteSource.segmentLabel }),
+    ...(controlledRouteSource.chainId === undefined ? {} : { chainId: controlledRouteSource.chainId }),
+    overrideCandidateId: controlledRouteSource.candidateId,
+    overrideActionType: controlledRouteSource.actionType,
+    overrideReceiverId: controlledRouteSource.receiverId,
+    overrideTargetZone: controlledRouteSource.targetZone,
+    ...(controlledRouteSource.sourceBaseScore === undefined ? {} : { sourceBaseScore: controlledRouteSource.sourceBaseScore }),
+    ...(controlledRouteSource.sourceInfluenceDelta === undefined ? {} : { sourceInfluenceDelta: controlledRouteSource.sourceInfluenceDelta }),
+    ...(controlledRouteSource.sourceInfluencedScore === undefined ? {} : { sourceInfluencedScore: controlledRouteSource.sourceInfluencedScore }),
+    candidateLegal: controlledRouteSource.candidateLegal,
+    candidateAvailable: controlledRouteSource.candidateAvailable,
+    rejectedClosedCandidateCount: controlledRouteSource.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: controlledRouteSource.rejectedUnavailableCandidateCount,
+    experimentalOverridePrepared: true,
+    overrideAppliedToLiveSelection: false,
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveNormalLiveMiniMatchResolution: false,
+    canCreateScoringEvents: false,
+    tags: [
+      "workbench_chain_live_selection_override_guard",
+      "live_selection_override_guard_experimental",
+      "live_selection_override_guard_diagnostic_only",
+      `live_selection_override_candidate_${controlledRouteSource.candidateId}`,
+      `live_selection_override_action_${controlledRouteSource.actionType}`,
+      `live_selection_override_receiver_${controlledRouteSource.receiverId}`,
+      `live_selection_override_zone_${controlledRouteSource.targetZone}`,
+      "live_selection_override_applied_false",
+      "live_selection_override_score_mutation_forbidden",
+      "live_selection_override_scoring_events_mutation_forbidden",
+      "live_selection_override_route_success_mutation_forbidden",
+      "live_selection_override_production_fullmatch_forbidden",
+      "live_selection_override_production_resolution_forbidden",
+      "live_selection_override_normal_live_resolution_forbidden",
+      "live_selection_override_scoring_event_creation_forbidden",
+      "live_selection_override_closed_candidates_rejected",
+      "live_selection_override_unavailable_candidates_rejected",
+      ...(controlledRouteSource.chainId === undefined ? [] : [`live_selection_override_chain_id_${controlledRouteSource.chainId}`]),
+    ],
+    warnings: controlledRouteSource.warnings,
+  };
+}
+
+export function liveSelectionOverrideGuardFromControlledRouteSource(input: {
+  readonly controlledRouteSource: FullMatchControlledMiniMatchRouteSource;
+}): FullMatchLiveSelectionOverrideGuard {
+  if (input.controlledRouteSource.status === "not_available") {
+    return emptyLiveSelectionOverrideGuard({
+      ...(input.controlledRouteSource.segmentLabel === undefined ? {} : { segmentLabel: input.controlledRouteSource.segmentLabel }),
+      ...(input.controlledRouteSource.chainId === undefined ? {} : { chainId: input.controlledRouteSource.chainId }),
+      warnings: input.controlledRouteSource.warnings,
+    });
+  }
+
+  const guard = availableLiveSelectionOverrideGuardFromControlledRouteSource(input.controlledRouteSource);
+  const validationWarnings = validateLiveSelectionOverrideGuard(guard);
+
+  if (validationWarnings.length === 0) {
+    return guard;
+  }
+
+  return {
+    ...guard,
+    status: guard.status === "available" ? "failed" : guard.status,
+    warnings: [...guard.warnings, ...validationWarnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchLiveSelectionOverrideGuardSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type FullMatchLiveSelectionOverrideGuardSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly controlledMiniMatchRouteSourceTagCount: number;
+  readonly liveSelectionOverrideGuardTagCount: number;
+  readonly overrideCandidateId?: string;
+  readonly overrideActionType?: string;
+  readonly overrideReceiverId?: string;
+  readonly overrideTargetZone?: string;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly overrideAppliedToLiveSelection: boolean;
+  readonly scoreMutationCount: number;
+  readonly scoringEventsMutationCount: number;
+  readonly routeSuccessRateMutationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly normalLiveMiniMatchResolutionMutationCount: number;
+  readonly scoringEventCreationCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+export function fullMatchLiveSelectionOverrideGuardSignature(
+  report: MatchReport,
+): FullMatchLiveSelectionOverrideGuardSignature {
+  const overrideCandidateId = suffixFromTag(report, "live_selection_override_candidate_");
+  const overrideActionType = suffixFromTag(report, "live_selection_override_action_");
+  const overrideReceiverId = suffixFromTag(report, "live_selection_override_receiver_");
+  const overrideTargetZone = suffixFromTag(report, "live_selection_override_zone_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    controlledMiniMatchRouteSourceTagCount: countTag(report, "workbench_chain_controlled_minimatch_route_source"),
+    liveSelectionOverrideGuardTagCount: countTag(report, "workbench_chain_live_selection_override_guard"),
+    ...(overrideCandidateId === undefined ? {} : { overrideCandidateId }),
+    ...(overrideActionType === undefined ? {} : { overrideActionType }),
+    ...(overrideReceiverId === undefined ? {} : { overrideReceiverId }),
+    ...(overrideTargetZone === undefined ? {} : { overrideTargetZone }),
+    candidateLegal: report.evidenceFacts.some((fact) => fact.internalTags.includes("live_selection_override_candidate_legal_true")),
+    candidateAvailable: report.evidenceFacts.some((fact) => fact.internalTags.includes("live_selection_override_candidate_available_true")),
+    rejectedClosedCandidateCount: numberFromTag(report, "live_selection_override_closed_rejected_count_"),
+    rejectedUnavailableCandidateCount: numberFromTag(report, "live_selection_override_unavailable_rejected_count_"),
+    overrideAppliedToLiveSelection: report.evidenceFacts.some((fact) => fact.internalTags.includes("live_selection_override_applied_true")),
+    scoreMutationCount: numberFromTag(report, "score_mutation_count_"),
+    scoringEventsMutationCount: numberFromTag(report, "scoring_events_mutation_count_"),
+    routeSuccessRateMutationCount: numberFromTag(report, "route_success_mutation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(report, "production_route_resolution_mutation_count_"),
+    normalLiveMiniMatchResolutionMutationCount: numberFromTag(report, "normal_live_minimatch_resolution_mutation_count_"),
+    scoringEventCreationCount: numberFromTag(report, "scoring_event_creation_count_"),
   };
 }
 ```
@@ -8696,6 +9149,214 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchLiveSelectionOverrideGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+import { selectShadowRouteFromInfluencedCandidates } from "./selectShadowRouteFromInfluencedCandidates";
+import { controlledSegmentSelectionFromShadow } from "./controlledSegmentSelectionFromShadow";
+import { segmentRouteInputFromControlledSelection } from "./segmentRouteInputFromControlledSelection";
+import { controlledMiniMatchRouteSourceFromSegmentRouteInput } from "./controlledMiniMatchRouteSourceFromSegmentRouteInput";
+import { liveSelectionOverrideGuardFromControlledRouteSource } from "./liveSelectionOverrideGuardFromControlledRouteSource";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function overrideGuardForMode(routeSelectionMode: "segment_harness" | "workbench_chain_replay_experimental") {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const context = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode,
+    segmentLabel: "segment-1",
+  }));
+  const influence = applyChainContextToRouteCandidates({
+    segmentContext: context,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: context,
+    }),
+  });
+  const shadowSelection = selectShadowRouteFromInfluencedCandidates({
+    influence,
+    ...(influence.selectedCandidateBefore === undefined ? {} : { productionSelectionCandidateId: influence.selectedCandidateBefore }),
+  });
+  const controlledSelection = controlledSegmentSelectionFromShadow({ shadowSelection });
+  const segmentRouteInput = segmentRouteInputFromControlledSelection({ controlledSelection });
+  const controlledRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({ segmentRouteInput });
+
+  return liveSelectionOverrideGuardFromControlledRouteSource({ controlledRouteSource });
+}
+
+export function validateFullMatchLiveSelectionOverrideGuard(): readonly string[] {
+  const unavailable = overrideGuardForMode("segment_harness");
+  const guard = overrideGuardForMode("workbench_chain_replay_experimental");
+
+  assertTest(unavailable.status === "not_available", "default route mode must not expose live selection override guard.");
+  assertTest(guard.status === "available", "available controlled route source must return live selection override guard.");
+  assertTest(guard.origin === "controlled_minimatch_route_source", "override guard origin must be controlled_minimatch_route_source.");
+  assertTest(guard.scope === "experimental_live_selection_override_guard", "override guard scope must remain experimental.");
+  assertTest(guard.overrideCandidateId === "chain-context-forward-progress-sh", "override candidate must be chain-context-forward-progress-sh.");
+  assertTest(guard.overrideActionType === "FORWARD_PROGRESS", "override action must be FORWARD_PROGRESS.");
+  assertTest(guard.overrideReceiverId === "control-space-hunter", "override receiver must be control-space-hunter.");
+  assertTest(guard.overrideTargetZone === "Z4-HSR", "override target zone must be Z4-HSR.");
+  assertTest(guard.sourceBaseScore === 82, "override guard must expose source base score 82.");
+  assertTest(guard.sourceInfluenceDelta === 5, "override guard must expose source influence delta 5.");
+  assertTest(guard.sourceInfluencedScore === 87, "override guard must expose source influenced score 87.");
+  assertTest(guard.candidateLegal, "override candidate must be legal.");
+  assertTest(guard.candidateAvailable, "override candidate must be available.");
+  assertTest(guard.experimentalOverridePrepared, "override guard must prepare experimental override.");
+  assertTest(!guard.overrideAppliedToLiveSelection, "override guard must not apply to live selection.");
+  assertTest(guard.diagnosticOnly, "override guard must be diagnostic-only.");
+  assertTest(!guard.canMutateScore, "override guard must not mutate score.");
+  assertTest(!guard.canMutateScoringEvents, "override guard must not mutate scoring events.");
+  assertTest(!guard.canMutateRouteSuccessRates, "override guard must not mutate route success rates.");
+  assertTest(!guard.canDriveProductionFullMatchSelection, "override guard must not drive production full-match selection.");
+  assertTest(!guard.canDriveProductionRouteResolution, "override guard must not drive production route resolution.");
+  assertTest(!guard.canDriveNormalLiveMiniMatchResolution, "override guard must not drive normal live mini-match resolution.");
+  assertTest(!guard.canCreateScoringEvents, "override guard must not create scoring events.");
+
+  return [
+    "not_available controlled route source returns no override guard",
+    "available controlled route source returns live selection override guard",
+    "override candidate is chain-context-forward-progress-sh",
+    "override action is FORWARD_PROGRESS",
+    "override receiver is control-space-hunter",
+    "override target zone is Z4-HSR",
+    "override candidate is legal and available",
+    "experimentalOverridePrepared is true",
+    "overrideAppliedToLiveSelection is false",
+    "override guard is diagnostic-only",
+    "override guard cannot mutate score, scoring events, route success rates, or create scoring events",
+    "override guard cannot drive production or normal live mini-match resolution",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchLiveSelectionOverrideGuard();
+
+  console.log("fullMatchLiveSelectionOverrideGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchLiveSelectionOverrideGuardGuard.test.ts
+
+```ts
+import type { FullMatchControlledMiniMatchRouteSource } from "./fullMatchControlledMiniMatchRouteSource";
+import {
+  liveSelectionOverrideGuardCannotDriveNormalLiveResolution,
+  liveSelectionOverrideGuardCannotMutateScore,
+  liveSelectionOverrideGuardFromControlledRouteSource,
+  validateLiveSelectionOverrideGuard,
+} from "./liveSelectionOverrideGuardFromControlledRouteSource";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function controlledRouteSourceOverride(
+  overrides: Partial<FullMatchControlledMiniMatchRouteSource>,
+): FullMatchControlledMiniMatchRouteSource {
+  return {
+    status: "available",
+    scope: "experimental_controlled_minimatch_route_source",
+    origin: "segment_route_input",
+    segmentLabel: "segment-1",
+    chainId: "sequence-1-multi-action-chain",
+    candidateId: "chain-context-forward-progress-sh",
+    actionType: "FORWARD_PROGRESS",
+    receiverId: "control-space-hunter",
+    targetZone: "Z4-HSR",
+    sourceBaseScore: 82,
+    sourceInfluenceDelta: 5,
+    sourceInfluencedScore: 87,
+    candidateLegal: true,
+    candidateAvailable: true,
+    rejectedClosedCandidateCount: 1,
+    rejectedUnavailableCandidateCount: 1,
+    diagnosticOnly: true,
+    experimentalControlledRouteSource: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveLiveMiniMatchResolution: false,
+    tags: [],
+    warnings: [],
+    ...overrides,
+  };
+}
+
+export function validateFullMatchLiveSelectionOverrideGuardGuard(): readonly string[] {
+  const legalGuard = liveSelectionOverrideGuardFromControlledRouteSource({
+    controlledRouteSource: controlledRouteSourceOverride({}),
+  });
+  const illegalGuard = liveSelectionOverrideGuardFromControlledRouteSource({
+    controlledRouteSource: controlledRouteSourceOverride({
+      candidateId: "chain-context-closed-central-force",
+      candidateLegal: false,
+    }),
+  });
+  const unavailableGuard = liveSelectionOverrideGuardFromControlledRouteSource({
+    controlledRouteSource: controlledRouteSourceOverride({
+      candidateId: "chain-context-unavailable-switch",
+      candidateAvailable: false,
+    }),
+  });
+  const { candidateId: _removedCandidateId, ...missingCandidateSource } = controlledRouteSourceOverride({});
+  const missingGuard = liveSelectionOverrideGuardFromControlledRouteSource({
+    controlledRouteSource: missingCandidateSource,
+  });
+
+  assertTest(legalGuard.status === "available", "legal controlled route source must produce available live selection override guard.");
+  assertTest(illegalGuard.status !== "available", "CLOSED/illegal candidate cannot become available live selection override guard.");
+  assertTest(unavailableGuard.status !== "available", "unavailable candidate cannot become available live selection override guard.");
+  assertTest(missingGuard.status !== "available", "missing candidate cannot become available live selection override guard.");
+  assertTest(validateLiveSelectionOverrideGuard(legalGuard).length === 0, "legal live selection override guard validation must pass.");
+  assertTest(validateLiveSelectionOverrideGuard(illegalGuard).length > 0, "illegal live selection override guard validation must warn.");
+  assertTest(liveSelectionOverrideGuardCannotMutateScore(legalGuard), "override guard cannot mutate score surfaces.");
+  assertTest(liveSelectionOverrideGuardCannotDriveNormalLiveResolution(legalGuard), "override guard cannot drive production or normal live mini-match resolution.");
+  assertTest(!legalGuard.canCreateScoringEvents, "override guard cannot create scoring events.");
+  assertTest(!legalGuard.canMutateRouteSuccessRates, "override guard cannot mutate route success rates.");
+
+  return [
+    "legal controlled route source creates available live selection override guard",
+    "CLOSED candidate cannot become live selection override",
+    "unavailable candidate cannot become live selection override",
+    "missing candidate returns blocked or failed live selection override guard",
+    "candidate must be legal and available",
+    "override guard cannot drive production full-match selection",
+    "override guard cannot drive production route resolution",
+    "override guard cannot drive normal live mini-match resolution",
+    "override guard cannot create scoring events",
+    "override guard cannot mutate route success rates",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchLiveSelectionOverrideGuardGuard();
+
+  console.log("fullMatchLiveSelectionOverrideGuardGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -9167,6 +9828,83 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalLiveSelectionOverrideGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchLiveSelectionOverrideGuardSignature } from "./fullMatchLiveSelectionOverrideGuardSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalLiveSelectionOverrideGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchLiveSelectionOverrideGuardSignature(defaultReport);
+  const experimentalSignature = fullMatchLiveSelectionOverrideGuardSignature(experimentalReport);
+  const overrideFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("override de selection live experimental"),
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.liveSelectionOverrideGuardTagCount === 0, "default runFullMatch must not expose live selection override guard tags.");
+  assertTest(experimentalSignature.controlledMiniMatchRouteSourceTagCount > 0, "experimental runFullMatch must still expose controlled route source tags.");
+  assertTest(experimentalSignature.liveSelectionOverrideGuardTagCount > 0, "experimental runFullMatch must expose live selection override guard tags.");
+  assertTest(experimentalSignature.overrideCandidateId === "chain-context-forward-progress-sh", "override signature must expose candidate.");
+  assertTest(experimentalSignature.overrideActionType === "FORWARD_PROGRESS", "override signature must expose action.");
+  assertTest(experimentalSignature.overrideReceiverId === "control-space-hunter", "override signature must expose receiver.");
+  assertTest(experimentalSignature.overrideTargetZone === "Z4-HSR", "override signature must expose target zone.");
+  assertTest(experimentalSignature.candidateLegal, "override candidate must be legal.");
+  assertTest(experimentalSignature.candidateAvailable, "override candidate must be available.");
+  assertTest(experimentalSignature.rejectedClosedCandidateCount >= 1, "override signature must expose closed rejection count.");
+  assertTest(experimentalSignature.rejectedUnavailableCandidateCount >= 1, "override signature must expose unavailable rejection count.");
+  assertTest(!experimentalSignature.overrideAppliedToLiveSelection, "override must not be applied to live selection.");
+  assertTest(overrideFact !== undefined, "experimental report must include live selection override guard evidence.");
+  assertTest(overrideFact?.internalTags.includes("live_selection_override_guard_diagnostic_only") ?? false, "override evidence must be diagnostic-only.");
+  assertTest(overrideFact?.internalTags.includes("live_selection_override_applied_false") ?? false, "override evidence must say not applied.");
+  assertTest(overrideFact?.internalTags.includes("live_selection_override_guard_normal_live_resolution_forbidden") ?? false, "override evidence must forbid normal live mini-match resolution.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention live selection override guard.");
+  assertTest(diagnosis?.summary.includes("Il reste volontairement non applique") ?? false, "coach diagnosis must say override is not applied.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DIAGNOSTIC_ONLY"), "experimental limitations must mark override guard diagnostic-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_NOT_APPLIED_TO_LIVE_SELECTION"), "experimental limitations must say override is not applied.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_NORMAL_LIVE_MINIMATCH_RESOLUTION"), "experimental limitations must forbid normal live mini-match resolution.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
+  assertTest(!visibleText.includes("simulation experimental"), "coach copy must not contain the stale wording 'simulation experimental'.");
+
+  return [
+    "default runFullMatch has no live selection override guard tags",
+    "experimental runFullMatch has live selection override guard tags",
+    "experimental report includes live selection override guard evidence",
+    "experimental coach diagnosis mentions live selection override guard",
+    "live selection override guard is diagnostic-only",
+    "override is not applied to live selection",
+    "override cannot drive normal live mini-match route resolution",
+    "normal full-match is not claimed as production chain-driven",
+    "previous wording simulation experimental is absent",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalLiveSelectionOverrideGuard();
+
+  console.log("runFullMatchExperimentalLiveSelectionOverrideGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -9548,6 +10286,81 @@ if (require.main === module) {
   const checks = validateRunFullMatchControlledMiniMatchRouteSourceScoringGuard();
 
   console.log("runFullMatchControlledMiniMatchRouteSourceScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchLiveSelectionOverrideGuardScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchLiveSelectionOverrideGuardSignature } from "./fullMatchLiveSelectionOverrideGuardSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const signature = fullMatchLiveSelectionOverrideGuardSignature(report);
+
+  return `${signature.score.home}-${signature.score.away}:${signature.scoringEventCount}:${signature.scoreChangeTotal}:${signature.timelineEventCount}`;
+}
+
+export function validateRunFullMatchLiveSelectionOverrideGuardScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const experimentalSignature = fullMatchLiveSelectionOverrideGuardSignature(experimentalReport);
+
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "default and experimental score signatures must remain equal.");
+  assertTest(experimentalSignature.scoreMutationCount === 0, "override guard must not mutate score.");
+  assertTest(experimentalSignature.scoringEventsMutationCount === 0, "override guard must not mutate scoring events.");
+  assertTest(experimentalSignature.scoringEventCreationCount === 0, "override guard must not create scoring events.");
+  assertTest(experimentalSignature.routeSuccessRateMutationCount === 0, "override guard must not mutate route success rates.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "override guard must not mutate production route resolution.");
+  assertTest(experimentalSignature.normalLiveMiniMatchResolutionMutationCount === 0, "override guard must not mutate normal live mini-match resolution.");
+  assertTest(!experimentalSignature.overrideAppliedToLiveSelection, "override guard must remain unapplied.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORE"), "override guard limitation must forbid score mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORING_EVENTS"), "override guard limitation must forbid scoring event mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_CREATE_SCORING_EVENTS"), "override guard limitation must forbid scoring event creation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES"), "override guard limitation must forbid route success mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION"), "override guard limitation must forbid production route resolution.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_NORMAL_LIVE_MINIMATCH_RESOLUTION"), "override guard limitation must forbid normal live mini-match resolution.");
+  assertTest(experimentalReport.evidenceFacts.some((fact) =>
+    fact.internalTags.includes("live_selection_override_guard_score_mutation_forbidden") &&
+    fact.internalTags.includes("live_selection_override_guard_scoring_events_mutation_forbidden") &&
+    fact.internalTags.includes("live_selection_override_guard_scoring_event_creation_forbidden") &&
+    fact.internalTags.includes("live_selection_override_guard_route_success_mutation_forbidden") &&
+    fact.internalTags.includes("live_selection_override_guard_production_resolution_forbidden") &&
+    fact.internalTags.includes("live_selection_override_guard_normal_live_resolution_forbidden"),
+  ), "override guard evidence must forbid score, scoring-event, route-success, production-resolution, normal-live-resolution, and scoring-event-creation mutation.");
+
+  return [
+    "default and experimental final scores remain equal",
+    "default and experimental scoring event counts remain equal",
+    "default and experimental score_change totals remain equal",
+    "timeline event count remains equal or only metadata differs",
+    "no scoring events are deleted/capped/rewritten/fabricated",
+    "no new scoring events are created by override guard",
+    "route success rates are not mutated",
+    "production route resolution is not mutated",
+    "normal live mini-match route resolution is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchLiveSelectionOverrideGuardScoringGuard();
+
+  console.log("runFullMatchLiveSelectionOverrideGuardScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -10092,6 +10905,69 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3g.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3G(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORE"), "override guard must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORING_EVENTS"), "override guard must not mutate scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_CREATE_SCORING_EVENTS"), "override guard must not create scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES"), "override guard must not mutate route success rates.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION"), "override guard must not drive production route resolution.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_NORMAL_LIVE_MINIMATCH_RESOLUTION"), "override guard must not drive normal live mini-match resolution.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "no scoring event creation from override guard",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3G();
+
+  console.log("scoringGuard.3g tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -10421,6 +11297,62 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3F();
 
   console.log("sourceOfTruthGuards.3f tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3g.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3G(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3G();
+
+  console.log("sourceOfTruthGuards.3g tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -11429,6 +12361,7 @@ import type { FullMatchShadowRouteSelectionResult } from "../fullMatch/fullMatch
 import type { FullMatchControlledSegmentSelectionResult } from "../fullMatch/fullMatchControlledSegmentSelection";
 import type { FullMatchSegmentRouteInput } from "../fullMatch/fullMatchSegmentRouteInput";
 import type { FullMatchControlledMiniMatchRouteSource } from "../fullMatch/fullMatchControlledMiniMatchRouteSource";
+import type { FullMatchLiveSelectionOverrideGuard } from "../fullMatch/fullMatchLiveSelectionOverrideGuard";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -11447,6 +12380,7 @@ export interface MiniMatchTimelineSegment {
   readonly controlledSegmentSelection?: FullMatchControlledSegmentSelectionResult;
   readonly segmentRouteInput?: FullMatchSegmentRouteInput;
   readonly controlledMiniMatchRouteSource?: FullMatchControlledMiniMatchRouteSource;
+  readonly liveSelectionOverrideGuard?: FullMatchLiveSelectionOverrideGuard;
 }
 
 export interface MatchReportBuilderInput {
@@ -11683,6 +12617,41 @@ function controlledMiniMatchRouteSourceReason(source: FullMatchControlledMiniMat
   return ` Experimental controlled mini-match route source available: ${source.actionType ?? "none"} to ${source.receiverId ?? "none"} in ${source.targetZone ?? "none"} from ${source.candidateId ?? "none"}. Diagnostic-only; does not drive live mini-match resolution, production route resolution, score, scoring events, or route success rates.`;
 }
 
+function liveSelectionOverrideGuardTags(guard: FullMatchLiveSelectionOverrideGuard | undefined): readonly string[] {
+  if (guard === undefined || guard.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_live_selection_override_guard",
+    "live_selection_override_guard_experimental",
+    "live_selection_override_guard_diagnostic_only",
+    ...(guard.overrideCandidateId === undefined ? [] : [`live_selection_override_candidate_${guard.overrideCandidateId}`]),
+    ...(guard.overrideActionType === undefined ? [] : [`live_selection_override_action_${guard.overrideActionType}`]),
+    ...(guard.overrideReceiverId === undefined ? [] : [`live_selection_override_receiver_${guard.overrideReceiverId}`]),
+    ...(guard.overrideTargetZone === undefined ? [] : [`live_selection_override_zone_${guard.overrideTargetZone}`]),
+    `live_selection_override_applied_${guard.overrideAppliedToLiveSelection ? "true" : "false"}`,
+    "live_selection_override_score_mutation_forbidden",
+    "live_selection_override_scoring_events_mutation_forbidden",
+    "live_selection_override_route_success_mutation_forbidden",
+    "live_selection_override_production_fullmatch_forbidden",
+    "live_selection_override_production_resolution_forbidden",
+    "live_selection_override_normal_live_resolution_forbidden",
+    "live_selection_override_scoring_event_creation_forbidden",
+    "live_selection_override_closed_candidates_rejected",
+    "live_selection_override_unavailable_candidates_rejected",
+    ...guard.tags,
+  ];
+}
+
+function liveSelectionOverrideGuardReason(guard: FullMatchLiveSelectionOverrideGuard | undefined): string {
+  if (guard === undefined || guard.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental live selection override guard available: ${guard.overrideActionType ?? "none"} to ${guard.overrideReceiverId ?? "none"} in ${guard.overrideTargetZone ?? "none"} from ${guard.overrideCandidateId ?? "none"}. Diagnostic-only and not applied; does not drive normal live mini-match resolution, production route resolution, score, scoring events, scoring-event creation, or route success rates.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -11724,7 +12693,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -11748,6 +12717,7 @@ function kickoffEvent(input: {
       ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
       ...segmentRouteInputTags(input.segment.segmentRouteInput),
       ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
+      ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
     ],
     narrativeWeight: 5,
   };
@@ -11806,6 +12776,7 @@ function sequenceRecordToMatchEvent(input: {
     ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
     ...segmentRouteInputTags(input.segment.segmentRouteInput),
     ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
+    ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -11830,7 +12801,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -11893,7 +12864,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -11927,6 +12898,7 @@ function scoringEventToMatchEvent(input: {
       ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
       ...segmentRouteInputTags(input.segment.segmentRouteInput),
       ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
+      ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
     ],
     narrativeWeight: 70,
   };
@@ -12616,6 +13588,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
       return "training_recommendation";
   }
 }
@@ -12652,6 +13625,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Input de route segmentaire workbench experimental";
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
       return "Source de route controlee mini-match experimentale";
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
+      return "Garde d'override de selection live experimental";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -12710,6 +13685,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -12735,6 +13711,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
     "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT",
     "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -13846,6 +14823,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 47;
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
       return 46;
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
+      return 45;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -13892,6 +14871,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire l'input de route segmentaire workbench experimental";
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
       return "Relire la source de route controlee mini-match experimentale";
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
+      return "Relire le garde d'override de selection live experimental";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -15149,7 +16130,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
   | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
-  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE";
+  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"
+  | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -15400,6 +16382,31 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotOverride: [
       "live score",
       "live mini-match route resolution",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD: {
+    scope: "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
+    canProve: [
+      "experimental controlled mini-match route source prepared a guarded live selection override candidate",
+      "live selection override guard rejected closed and unavailable candidates",
+      "live selection override guard remained diagnostic-only and unapplied",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "normal live mini-match route resolution",
       "production route resolution",
       "production route selection",
       "full-match batch economy",

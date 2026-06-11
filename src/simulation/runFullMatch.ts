@@ -62,6 +62,8 @@ import { segmentRouteInputFromControlledSelection } from "./fullMatch/segmentRou
 import type { FullMatchSegmentRouteInput } from "./fullMatch/fullMatchSegmentRouteInput";
 import { controlledMiniMatchRouteSourceFromSegmentRouteInput } from "./fullMatch/controlledMiniMatchRouteSourceFromSegmentRouteInput";
 import type { FullMatchControlledMiniMatchRouteSource } from "./fullMatch/fullMatchControlledMiniMatchRouteSource";
+import { liveSelectionOverrideGuardFromControlledRouteSource } from "./fullMatch/liveSelectionOverrideGuardFromControlledRouteSource";
+import type { FullMatchLiveSelectionOverrideGuard } from "./fullMatch/fullMatchLiveSelectionOverrideGuard";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -418,6 +420,27 @@ function controlledMiniMatchRouteSourceLimitations(source: FullMatchControlledMi
     "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
     "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION",
     "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function liveSelectionOverrideGuardLimitations(guard: FullMatchLiveSelectionOverrideGuard): readonly string[] {
+  if (guard.status === "not_available") {
+    return ["FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_EXPERIMENTAL",
+    `FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_STATUS_${guard.status.toUpperCase()}`,
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DIAGNOSTIC_ONLY",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_NOT_APPLIED_TO_LIVE_SELECTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_CREATE_SCORING_EVENTS",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_DRIVE_NORMAL_LIVE_MINIMATCH_RESOLUTION",
+    "FULLMATCH_LIVE_SELECTION_OVERRIDE_GUARD_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -836,6 +859,78 @@ function controlledMiniMatchRouteSourceEvidenceFact(input: {
   };
 }
 
+function liveSelectionOverrideGuardEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly guard: FullMatchLiveSelectionOverrideGuard;
+}): MatchReportEvidenceFact | null {
+  if (input.guard.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_live_selection_override_guard")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-live-selection-override-guard`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.guard.overrideTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental live selection override guard ${input.guard.status}: origin ${input.guard.origin}, ` +
+      `override candidate ${input.guard.overrideCandidateId ?? "none"} (${input.guard.overrideActionType ?? "none"}) ` +
+      `to receiver ${input.guard.overrideReceiverId ?? "none"} in ${input.guard.overrideTargetZone ?? "none"}, ` +
+      `sourceBaseScore=${input.guard.sourceBaseScore ?? 0}, sourceInfluenceDelta=${input.guard.sourceInfluenceDelta ?? 0}, ` +
+      `sourceInfluencedScore=${input.guard.sourceInfluencedScore ?? 0}, candidateLegal=${input.guard.candidateLegal}, ` +
+      `candidateAvailable=${input.guard.candidateAvailable}, closedRejected=${input.guard.rejectedClosedCandidateCount}, ` +
+      `unavailableRejected=${input.guard.rejectedUnavailableCandidateCount}, experimentalOverridePrepared=${input.guard.experimentalOverridePrepared}, ` +
+      `overrideAppliedToLiveSelection=${input.guard.overrideAppliedToLiveSelection}, diagnosticOnly=${input.guard.diagnosticOnly}, ` +
+      `canMutateScore=${input.guard.canMutateScore}, canMutateScoringEvents=${input.guard.canMutateScoringEvents}, ` +
+      `canMutateRouteSuccessRates=${input.guard.canMutateRouteSuccessRates}, canDriveProductionFullMatchSelection=${input.guard.canDriveProductionFullMatchSelection}, ` +
+      `canDriveProductionRouteResolution=${input.guard.canDriveProductionRouteResolution}, ` +
+      `canDriveNormalLiveMiniMatchResolution=${input.guard.canDriveNormalLiveMiniMatchResolution}, canCreateScoringEvents=${input.guard.canCreateScoringEvents}.`,
+    confidence: input.guard.status === "available" ? "medium" : "low",
+    strength: input.guard.status === "available" ? 66 : 22,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_live_selection_override_guard",
+      "live_selection_override_guard_experimental",
+      "live_selection_override_guard_diagnostic_only",
+      "live_selection_override_guard_score_mutation_forbidden",
+      "live_selection_override_guard_scoring_events_mutation_forbidden",
+      "live_selection_override_guard_route_success_mutation_forbidden",
+      "live_selection_override_guard_production_fullmatch_forbidden",
+      "live_selection_override_guard_production_resolution_forbidden",
+      "live_selection_override_guard_normal_live_resolution_forbidden",
+      "live_selection_override_guard_scoring_event_creation_forbidden",
+      "live_selection_override_guard_closed_candidates_rejected",
+      "live_selection_override_guard_unavailable_candidates_rejected",
+      ...(input.guard.chainId === undefined ? [] : [`live_selection_override_chain_id_${input.guard.chainId}`]),
+      ...(input.guard.overrideCandidateId === undefined ? [] : [`live_selection_override_candidate_${input.guard.overrideCandidateId}`]),
+      ...(input.guard.overrideActionType === undefined ? [] : [`live_selection_override_action_${input.guard.overrideActionType}`]),
+      ...(input.guard.overrideReceiverId === undefined ? [] : [`live_selection_override_receiver_${input.guard.overrideReceiverId}`]),
+      ...(input.guard.overrideTargetZone === undefined ? [] : [`live_selection_override_zone_${input.guard.overrideTargetZone}`]),
+      `live_selection_override_candidate_legal_${input.guard.candidateLegal ? "true" : "false"}`,
+      `live_selection_override_candidate_available_${input.guard.candidateAvailable ? "true" : "false"}`,
+      `live_selection_override_closed_rejected_count_${input.guard.rejectedClosedCandidateCount}`,
+      `live_selection_override_unavailable_rejected_count_${input.guard.rejectedUnavailableCandidateCount}`,
+      `live_selection_override_applied_${input.guard.overrideAppliedToLiveSelection ? "true" : "false"}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      "scoring_event_creation_count_0",
+      "route_success_mutation_count_0",
+      "production_route_resolution_mutation_count_0",
+      "normal_live_minimatch_resolution_mutation_count_0",
+      ...input.guard.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -846,6 +941,7 @@ function withFullMatchGroundingDiagnosis(
   controlledSegmentSelection: FullMatchControlledSegmentSelectionResult,
   segmentRouteInput: FullMatchSegmentRouteInput,
   controlledMiniMatchRouteSource: FullMatchControlledMiniMatchRouteSource,
+  liveSelectionOverrideGuard: FullMatchLiveSelectionOverrideGuard,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -856,12 +952,13 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_shadow_route_selection") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_selection") ||
     fact.internalTags.includes("workbench_chain_segment_route_input") ||
-    fact.internalTags.includes("workbench_chain_controlled_minimatch_route_source")
+    fact.internalTags.includes("workbench_chain_controlled_minimatch_route_source") ||
+    fact.internalTags.includes("workbench_chain_live_selection_override_guard")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match experimental sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cette source vient du SegmentRouteInput, lui-meme issu de la selection controlee workbench. Elle reste cantonnee au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution live du mini-match, le score, les evenements de score, ni les taux de succes des routes ; elle ne pilote pas encore la resolution reelle du full-match. Les routes fermees ou indisponibles restent rejetees avant la creation de cette source controlee. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match, en mode experimental, sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. La selection controlee experimentale ne pilote pas encore la resolution reelle du full-match. La source de route controlee pour mini-match ne pilote pas encore la resolution live du mini-match. Le moteur prepare maintenant un override de selection live experimental pour le premier segment : ${liveSelectionOverrideGuard.overrideActionType ?? controlledMiniMatchRouteSource.actionType ?? "none"} vers ${liveSelectionOverrideGuard.overrideReceiverId ?? controlledMiniMatchRouteSource.receiverId ?? "none"} en ${liveSelectionOverrideGuard.overrideTargetZone ?? controlledMiniMatchRouteSource.targetZone ?? "none"}. Cet override vient de la source de route controlee issue du SegmentRouteInput. Il reste volontairement non applique : il ne pilote pas encore la resolution live, le score, les evenements de score, ni les taux de succes des routes. Cette source et cet override restent cantonnes au diagnostic sans modifier le score ni les evenements ; ils ne pilotent pas encore la resolution reelle du full-match. Les routes fermees ou indisponibles restent rejetees avant la preparation de cet override. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -924,6 +1021,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const controlledMiniMatchRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
     segmentRouteInput,
   });
+  const liveSelectionOverrideGuard = liveSelectionOverrideGuardFromControlledRouteSource({
+    controlledRouteSource: controlledMiniMatchRouteSource,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -968,6 +1068,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && controlledSegmentSelection.status !== "not_available" ? { controlledSegmentSelection } : {}),
           ...(index === 0 && segmentRouteInput.status !== "not_available" ? { segmentRouteInput } : {}),
           ...(index === 0 && controlledMiniMatchRouteSource.status !== "not_available" ? { controlledMiniMatchRouteSource } : {}),
+          ...(index === 0 && liveSelectionOverrideGuard.status !== "not_available" ? { liveSelectionOverrideGuard } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -1041,6 +1142,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...controlledSegmentSelectionLimitations(controlledSegmentSelection),
       ...segmentRouteInputLimitations(segmentRouteInput),
       ...controlledMiniMatchRouteSourceLimitations(controlledMiniMatchRouteSource),
+      ...liveSelectionOverrideGuardLimitations(liveSelectionOverrideGuard),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -1078,6 +1180,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     routeSource: controlledMiniMatchRouteSource,
   });
+  const liveSelectionOverrideGuardFact = liveSelectionOverrideGuardEvidenceFact({
+    report,
+    matchInput: input,
+    guard: liveSelectionOverrideGuard,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -1086,6 +1193,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(controlledSelectionFact === null ? [] : [controlledSelectionFact]),
     ...(segmentRouteInputFact === null ? [] : [segmentRouteInputFact]),
     ...(controlledRouteSourceFact === null ? [] : [controlledRouteSourceFact]),
+    ...(liveSelectionOverrideGuardFact === null ? [] : [liveSelectionOverrideGuardFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1104,5 +1212,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     controlledSegmentSelection,
     segmentRouteInput,
     controlledMiniMatchRouteSource,
+    liveSelectionOverrideGuard,
   );
 }

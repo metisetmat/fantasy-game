@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3G - Controlled Route Source to Live Selection Override Guards. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -409,7 +409,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
   | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
-  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE";
+  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"
+  | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

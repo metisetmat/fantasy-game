@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T14:56:03.536Z
-Task/sprint: Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source
+Generated: 2026-06-11T15:45:35.189Z
+Task/sprint: Sprint 3G - Controlled Route Source to Live Selection Override Guards
 Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -17,8 +17,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3f.md
-- validation.fullmatch-workbench-chain-replay-3f.md
+- fullmatch-workbench-chain-replay-3g.md
+- validation.fullmatch-workbench-chain-replay-3g.md
 - README.md
 
 ## Bundle Files
