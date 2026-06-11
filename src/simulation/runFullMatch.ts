@@ -45,6 +45,10 @@ import {
 } from "./fullMatch/fullMatchRouteSelectionMode";
 import { consumeWorkbenchChainForFullMatch } from "./fullMatch/consumeWorkbenchChainForFullMatch";
 import type { FullMatchChainConsumptionResult } from "./fullMatch/fullMatchChainConsumption";
+import {
+  chainConsumptionToSegmentContext,
+  type FullMatchChainSegmentContext,
+} from "./fullMatch/fullMatchChainSegmentContext";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -303,6 +307,21 @@ function chainConsumptionLimitations(consumption: FullMatchChainConsumptionResul
   ];
 }
 
+function chainSegmentContextLimitations(context: FullMatchChainSegmentContext): readonly string[] {
+  if (context.status === "not_available") {
+    return ["FULLMATCH_CHAIN_SEGMENT_CONTEXT_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_SEGMENT_CONTEXT_STATUS_${context.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_ATTACHED_TO_SEGMENT_1",
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORING_EVENTS",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -349,14 +368,71 @@ function chainConsumptionEvidenceFact(input: {
   };
 }
 
-function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput, chainConsumption: FullMatchChainConsumptionResult): MatchReport {
+function chainSegmentContextEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly context: FullMatchChainSegmentContext;
+}): MatchReportEvidenceFact | null {
+  if (input.context.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.eventId.includes(`${input.context.segmentLabel ?? "segment-1"}-`) &&
+    event.tags.includes("workbench_chain_context")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-segment-context`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.context.finalZone ?? "Z4-HSR"],
+    summary:
+      `Experimental segment context ${input.context.status}: segment ${input.context.segmentLabel ?? "segment-1"} ` +
+      `uses chain ${input.context.chainId ?? "none"}, final carrier ${input.context.finalCarrierId ?? "none"} ` +
+      `at ${input.context.finalZone ?? "none"}, consumed steps ${input.context.consumedStepCount}, ` +
+      `spatial steps ${input.context.spatialSelectionStepCount}, diagnosticOnly=${input.context.diagnosticOnly}, ` +
+      `canMutateScore=${input.context.canMutateScore}, canMutateScoringEvents=${input.context.canMutateScoringEvents}.`,
+    confidence: input.context.confidence === "none" ? "low" : input.context.confidence,
+    strength: input.context.status === "available" ? 60 : 30,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_segment_context",
+      "chain_context_segment_1",
+      "chain_context_diagnostic_only",
+      "chain_context_score_mutation_forbidden",
+      "chain_context_scoring_events_mutation_forbidden",
+      ...(input.context.chainId === undefined ? [] : [`chain_context_chain_id_${input.context.chainId}`]),
+      ...(input.context.finalCarrierId === undefined ? [] : [`chain_context_final_carrier_${input.context.finalCarrierId}`]),
+      ...(input.context.finalZone === undefined ? [] : [`chain_context_final_zone_${input.context.finalZone}`]),
+      `chain_context_consumed_steps_${input.context.consumedStepCount}`,
+      `chain_context_spatial_steps_${input.context.spatialSelectionStepCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
+function withFullMatchGroundingDiagnosis(
+  report: MatchReport,
+  input: MatchInput,
+  chainConsumption: FullMatchChainConsumptionResult,
+  chainSegmentContext: FullMatchChainSegmentContext,
+): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
-  const chainFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("workbench_chain_consumption"));
+  const chainFacts = report.evidenceFacts.filter((fact) =>
+    fact.internalTags.includes("workbench_chain_consumption") ||
+    fact.internalTags.includes("workbench_chain_segment_context")
+  );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : "Le moteur a consomme une chaine workbench visuelle sur le premier segment, mais cette consommation reste experimentale et ne modifie pas encore la resolution complete du match.";
+    : `Le premier segment dispose maintenant d'un contexte experimental issu de la chaine workbench : porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"}. Ce contexte ameliore l'ancrage tactique du diagnostic, mais ne modifie pas encore la resolution ni le score.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -396,6 +472,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     routeSelectionMode,
     segmentLabel: "segment-1",
   });
+  const chainSegmentContext = chainConsumptionToSegmentContext(chainConsumption);
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -434,6 +511,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           includeKickoff: index === 0,
           segmentState,
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
+          ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -501,6 +579,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       `Full-match route selection mode: ${routeSelectionMode}.`,
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
       ...chainConsumptionLimitations(chainConsumption),
+      ...chainSegmentContextLimitations(chainSegmentContext),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -508,12 +587,26 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     consumption: chainConsumption,
   });
+  const chainContextFact = chainSegmentContextEvidenceFact({
+    report,
+    matchInput: input,
+    context: chainSegmentContext,
+  });
   const reportWithChainEvidence = chainFact === null
     ? report
     : {
         ...report,
-        evidenceFacts: [...report.evidenceFacts, chainFact],
+        evidenceFacts: [
+          ...report.evidenceFacts,
+          chainFact,
+          ...(chainContextFact === null ? [] : [chainContextFact]),
+        ],
       };
 
-  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(reportWithChainEvidence, input), input, chainConsumption);
+  return withFullMatchGroundingDiagnosis(
+    withHarnessSanityDiagnosis(reportWithChainEvidence, input),
+    input,
+    chainConsumption,
+    chainSegmentContext,
+  );
 }

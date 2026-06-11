@@ -8,7 +8,8 @@ export type MatchReportEvidenceCategory =
   | "MOMENTUM_SHIFT"
   | "TACTICAL_PLAN_SIGNAL"
   | "HARNESS_PLAUSIBILITY_WARNING"
-  | "WORKBENCH_CHAIN_CONSUMPTION";
+  | "WORKBENCH_CHAIN_CONSUMPTION"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

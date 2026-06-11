@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag",
+  name: "Sprint 3A - Experimental Chain Influence on Segment Context",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -12,8 +12,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-2z.md",
-    "validation.fullmatch-workbench-chain-replay-2z.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -31,14 +31,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 2Z share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-2z.md": "documents experimental full-match chain consumption behind the opt-in flag",
-    "validation.fullmatch-workbench-chain-replay-2z.md": "validates experimental chain consumption, no score mutation, feature flag default, and source-of-truth invariants",
-    "README.md": "compact reviewer orientation for the 2Z share pack",
-    "manifest.md": "compatibility manifest listing the 2Z share pack files",
+    "validation.share-pack.md": "proves the 3A share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-3a.md": "documents experimental chain influence on segment context behind the opt-in flag",
+    "validation.fullmatch-workbench-chain-replay-3a.md": "validates segment context influence, no score mutation, feature flag default, and source-of-truth invariants",
+    "README.md": "compact reviewer orientation for the 3A share pack",
+    "manifest.md": "compatibility manifest listing the 3A share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
+    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, segment context influence, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
     "bundle__reports.md": "bundles coach report renderer, summary utilities, copy quality utilities, guards, and share-pack updater",
   },
 };
