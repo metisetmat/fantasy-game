@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3C - Experimental Chain Context to Shadow Route Selection. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -152,6 +152,8 @@ import {
 import type { FullMatchChainRouteCandidateInfluenceResult } from "./fullMatch/fullMatchChainRouteCandidateInfluence";
 import { selectShadowRouteFromInfluencedCandidates } from "./fullMatch/selectShadowRouteFromInfluencedCandidates";
 import type { FullMatchShadowRouteSelectionResult } from "./fullMatch/fullMatchShadowRouteSelection";
+import { controlledSegmentSelectionFromShadow } from "./fullMatch/controlledSegmentSelectionFromShadow";
+import type { FullMatchControlledSegmentSelectionResult } from "./fullMatch/fullMatchControlledSegmentSelection";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -457,6 +459,23 @@ function shadowRouteSelectionLimitations(selection: FullMatchShadowRouteSelectio
   ];
 }
 
+function controlledSegmentSelectionLimitations(selection: FullMatchControlledSegmentSelectionResult): readonly string[] {
+  if (selection.status === "not_available") {
+    return ["FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_EXPERIMENTAL",
+    `FULLMATCH_CONTROLLED_SEGMENT_SELECTION_STATUS_${selection.status.toUpperCase()}`,
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -674,6 +693,69 @@ function shadowRouteSelectionEvidenceFact(input: {
   };
 }
 
+function controlledSegmentSelectionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly selection: FullMatchControlledSegmentSelectionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.selection.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_controlled_segment_selection")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-controlled-segment-selection`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.selection.selectedTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental controlled segment selection ${input.selection.status}: shadow candidate ${input.selection.selectedCandidateId ?? "none"} ` +
+      `(${input.selection.selectedActionType ?? "none"}) to receiver ${input.selection.selectedReceiverId ?? "none"} ` +
+      `in ${input.selection.selectedTargetZone ?? "none"}, baseScore=${input.selection.selectedBaseScore ?? 0}, ` +
+      `influenceDelta=${input.selection.selectedInfluenceDelta ?? 0}, influencedScore=${input.selection.selectedInfluencedScore ?? 0}, ` +
+      `selectedLegal=${input.selection.selectedCandidateLegal}, selectedAvailable=${input.selection.selectedCandidateAvailable}, ` +
+      `closedRejected=${input.selection.rejectedClosedCandidateCount}, unavailableRejected=${input.selection.rejectedUnavailableCandidateCount}, ` +
+      `diagnosticOnly=${input.selection.diagnosticOnly}, experimentalControlledSelection=${input.selection.experimentalControlledSelection}, ` +
+      `canMutateScore=${input.selection.canMutateScore}, canMutateScoringEvents=${input.selection.canMutateScoringEvents}, ` +
+      `canMutateRouteSuccessRates=${input.selection.canMutateRouteSuccessRates}, ` +
+      `canDriveProductionFullMatchSelection=${input.selection.canDriveProductionFullMatchSelection}.`,
+    confidence: input.selection.status === "available" ? "medium" : "low",
+    strength: input.selection.status === "available" ? 64 : 25,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_controlled_segment_selection",
+      "controlled_segment_selection_experimental",
+      "controlled_segment_selection_diagnostic_only",
+      "controlled_segment_selection_score_mutation_forbidden",
+      "controlled_segment_selection_scoring_events_mutation_forbidden",
+      "controlled_segment_selection_route_success_mutation_forbidden",
+      "controlled_segment_selection_production_fullmatch_forbidden",
+      "controlled_segment_selection_closed_candidates_rejected",
+      "controlled_segment_selection_unavailable_candidates_rejected",
+      ...(input.selection.chainId === undefined ? [] : [`controlled_segment_selection_chain_id_${input.selection.chainId}`]),
+      ...(input.selection.selectedCandidateId === undefined ? [] : [`controlled_segment_selection_candidate_${input.selection.selectedCandidateId}`]),
+      ...(input.selection.selectedActionType === undefined ? [] : [`controlled_segment_selection_action_${input.selection.selectedActionType}`]),
+      ...(input.selection.selectedReceiverId === undefined ? [] : [`controlled_segment_selection_receiver_${input.selection.selectedReceiverId}`]),
+      ...(input.selection.selectedTargetZone === undefined ? [] : [`controlled_segment_selection_zone_${input.selection.selectedTargetZone}`]),
+      `controlled_segment_selection_selected_legal_${input.selection.selectedCandidateLegal ? "true" : "false"}`,
+      `controlled_segment_selection_selected_available_${input.selection.selectedCandidateAvailable ? "true" : "false"}`,
+      `controlled_segment_selection_closed_rejected_count_${input.selection.rejectedClosedCandidateCount}`,
+      `controlled_segment_selection_unavailable_rejected_count_${input.selection.rejectedUnavailableCandidateCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      "route_success_mutation_count_0",
+      ...input.selection.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -681,6 +763,7 @@ function withFullMatchGroundingDiagnosis(
   chainSegmentContext: FullMatchChainSegmentContext,
   routeCandidateInfluence: FullMatchChainRouteCandidateInfluenceResult,
   shadowRouteSelection: FullMatchShadowRouteSelectionResult,
+  controlledSegmentSelection: FullMatchControlledSegmentSelectionResult,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -688,12 +771,13 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_consumption") ||
     fact.internalTags.includes("workbench_chain_segment_context") ||
     fact.internalTags.includes("workbench_chain_route_candidate_influence") ||
-    fact.internalTags.includes("workbench_chain_shadow_route_selection")
+    fact.internalTags.includes("workbench_chain_shadow_route_selection") ||
+    fact.internalTags.includes("workbench_chain_controlled_segment_selection")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench ne pilote pas encore le match, mais il produit maintenant une selection shadow. Avec le contexte de chaine, l'option diagnostique preferee devient ${shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${shadowRouteSelection.shadowSelectionTargetZone ?? "none"}, alors que la selection de reference/proxy reste ${shadowRouteSelection.productionSelectionActionType ?? "none"} via ${shadowRouteSelection.productionSelectionCandidateId ?? "none"}. Cette divergence est informative : elle montre ce que le moteur choisirait si le contexte workbench influencait reellement la selection, sans modifier le score ni les evenements. Les options fermees ou indisponibles restent rejetees avant la selection shadow. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench produit maintenant une selection shadow puis une selection controlee experimentale pour le premier segment : ${controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cette selection vient de la shadow selection workbench, mais elle reste cantonnee au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution reelle du full-match, le score, les evenements de score, ni les taux de succes des routes. Les routes fermees ou indisponibles restent rejetees avant cette selection controlee. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -747,6 +831,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       productionSelectionCandidateId: routeCandidateInfluence.selectedCandidateBefore,
     }),
   });
+  const controlledSegmentSelection = controlledSegmentSelectionFromShadow({
+    shadowSelection: shadowRouteSelection,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -788,6 +875,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
           ...(index === 0 && routeCandidateInfluence.status !== "not_available" ? { routeCandidateInfluence } : {}),
           ...(index === 0 && shadowRouteSelection.status !== "not_available" ? { shadowRouteSelection } : {}),
+          ...(index === 0 && controlledSegmentSelection.status !== "not_available" ? { controlledSegmentSelection } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -858,6 +946,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...chainSegmentContextLimitations(chainSegmentContext),
       ...routeCandidateInfluenceLimitations(routeCandidateInfluence),
       ...shadowRouteSelectionLimitations(shadowRouteSelection),
+      ...controlledSegmentSelectionLimitations(controlledSegmentSelection),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -880,11 +969,17 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     selection: shadowRouteSelection,
   });
+  const controlledSelectionFact = controlledSegmentSelectionEvidenceFact({
+    report,
+    matchInput: input,
+    selection: controlledSegmentSelection,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
     ...(routeInfluenceFact === null ? [] : [routeInfluenceFact]),
     ...(shadowSelectionFact === null ? [] : [shadowSelectionFact]),
+    ...(controlledSelectionFact === null ? [] : [controlledSelectionFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -900,6 +995,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     chainSegmentContext,
     routeCandidateInfluence,
     shadowRouteSelection,
+    controlledSegmentSelection,
   );
 }
 ```
@@ -3192,6 +3288,295 @@ export function fullMatchShadowRouteSelectionSignature(report: MatchReport): Ful
     unavailableCandidateRejectedCount: numberFromTag(report, "shadow_route_selection_unavailable_rejected_count_"),
     scoreMutationCount: numberFromTag(report, "score_mutation_count_"),
     scoringEventsMutationCount: numberFromTag(report, "scoring_events_mutation_count_"),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchControlledSegmentSelection.ts
+
+```ts
+export type FullMatchControlledSegmentSelectionStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type FullMatchControlledSegmentSelectionScope =
+  | "experimental_controlled_segment_selection"
+  | "production_fullmatch_selection_forbidden";
+
+export type ControlledSegmentSelectionSource =
+  | "none"
+  | "shadow_route_selection";
+
+export type FullMatchControlledSegmentSelectionResult = {
+  readonly status: FullMatchControlledSegmentSelectionStatus;
+  readonly scope: FullMatchControlledSegmentSelectionScope;
+  readonly source: ControlledSegmentSelectionSource;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly selectedCandidateId?: string;
+  readonly selectedActionType?: string;
+  readonly selectedReceiverId?: string;
+  readonly selectedTargetZone?: string;
+  readonly selectedBaseScore?: number;
+  readonly selectedInfluenceDelta?: number;
+  readonly selectedInfluencedScore?: number;
+  readonly selectedCandidateLegal: boolean;
+  readonly selectedCandidateAvailable: boolean;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly experimentalControlledSelection: boolean;
+  readonly canMutateScore: false;
+  readonly canMutateScoringEvents: false;
+  readonly canMutateRouteSuccessRates: false;
+  readonly canDriveProductionFullMatchSelection: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyControlledSegmentSelection(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): FullMatchControlledSegmentSelectionResult {
+  return {
+    status: "not_available",
+    scope: "production_fullmatch_selection_forbidden",
+    source: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    selectedCandidateLegal: false,
+    selectedCandidateAvailable: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    experimentalControlledSelection: false,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/controlledSegmentSelectionFromShadow.ts
+
+```ts
+import type { FullMatchShadowRouteSelectionResult } from "./fullMatchShadowRouteSelection";
+import {
+  emptyControlledSegmentSelection,
+  type FullMatchControlledSegmentSelectionResult,
+} from "./fullMatchControlledSegmentSelection";
+
+export function controlledSegmentSelectionCannotMutateScore(
+  selection: FullMatchControlledSegmentSelectionResult,
+): boolean {
+  return !selection.canMutateScore && !selection.canMutateScoringEvents && !selection.canMutateRouteSuccessRates;
+}
+
+export function controlledSegmentSelectionCannotDriveProduction(
+  selection: FullMatchControlledSegmentSelectionResult,
+): boolean {
+  return !selection.canDriveProductionFullMatchSelection;
+}
+
+export function validateControlledSegmentSelection(
+  selection: FullMatchControlledSegmentSelectionResult,
+): readonly string[] {
+  const warnings = [
+    ...(selection.status === "available" && selection.selectedCandidateId === undefined ? ["CONTROLLED_SELECTION_MISSING_CANDIDATE"] : []),
+    ...(selection.status === "available" && !selection.selectedCandidateLegal ? ["CONTROLLED_SELECTION_ILLEGAL_CANDIDATE"] : []),
+    ...(selection.status === "available" && !selection.selectedCandidateAvailable ? ["CONTROLLED_SELECTION_UNAVAILABLE_CANDIDATE"] : []),
+    ...(!controlledSegmentSelectionCannotMutateScore(selection) ? ["CONTROLLED_SELECTION_MUTATION_FORBIDDEN_BREACH"] : []),
+    ...(!controlledSegmentSelectionCannotDriveProduction(selection) ? ["CONTROLLED_SELECTION_PRODUCTION_FORBIDDEN_BREACH"] : []),
+  ];
+
+  return warnings;
+}
+
+function availableControlledSelectionFromShadow(
+  shadowSelection: FullMatchShadowRouteSelectionResult,
+): FullMatchControlledSegmentSelectionResult {
+  const selectedCandidateLegal = shadowSelection.selectedCandidateLegal;
+  const selectedCandidateAvailable = shadowSelection.selectedCandidateAvailable;
+
+  if (
+    shadowSelection.shadowSelectionCandidateId === undefined ||
+    shadowSelection.shadowSelectionActionType === undefined ||
+    shadowSelection.shadowSelectionReceiverId === undefined ||
+    shadowSelection.shadowSelectionTargetZone === undefined ||
+    !selectedCandidateLegal ||
+    !selectedCandidateAvailable
+  ) {
+    return {
+      status: "failed",
+      scope: "production_fullmatch_selection_forbidden",
+      source: "shadow_route_selection",
+      ...(shadowSelection.segmentLabel === undefined ? {} : { segmentLabel: shadowSelection.segmentLabel }),
+      ...(shadowSelection.chainId === undefined ? {} : { chainId: shadowSelection.chainId }),
+      selectedCandidateLegal,
+      selectedCandidateAvailable,
+      rejectedClosedCandidateCount: shadowSelection.closedCandidateRejectedCount,
+      rejectedUnavailableCandidateCount: shadowSelection.unavailableCandidateRejectedCount,
+      diagnosticOnly: true,
+      experimentalControlledSelection: true,
+      canMutateScore: false,
+      canMutateScoringEvents: false,
+      canMutateRouteSuccessRates: false,
+      canDriveProductionFullMatchSelection: false,
+      tags: [],
+      warnings: [...shadowSelection.warnings, "CONTROLLED_SEGMENT_SELECTION_FAILED_GUARD"],
+    };
+  }
+
+  return {
+    status: shadowSelection.status,
+    scope: "experimental_controlled_segment_selection",
+    source: "shadow_route_selection",
+    ...(shadowSelection.segmentLabel === undefined ? {} : { segmentLabel: shadowSelection.segmentLabel }),
+    ...(shadowSelection.chainId === undefined ? {} : { chainId: shadowSelection.chainId }),
+    selectedCandidateId: shadowSelection.shadowSelectionCandidateId,
+    selectedActionType: shadowSelection.shadowSelectionActionType,
+    selectedReceiverId: shadowSelection.shadowSelectionReceiverId,
+    selectedTargetZone: shadowSelection.shadowSelectionTargetZone,
+    ...(shadowSelection.shadowSelectionBaseScore === undefined ? {} : { selectedBaseScore: shadowSelection.shadowSelectionBaseScore }),
+    ...(shadowSelection.shadowSelectionInfluenceDelta === undefined ? {} : { selectedInfluenceDelta: shadowSelection.shadowSelectionInfluenceDelta }),
+    ...(shadowSelection.shadowSelectionInfluencedScore === undefined ? {} : { selectedInfluencedScore: shadowSelection.shadowSelectionInfluencedScore }),
+    selectedCandidateLegal,
+    selectedCandidateAvailable,
+    rejectedClosedCandidateCount: shadowSelection.closedCandidateRejectedCount,
+    rejectedUnavailableCandidateCount: shadowSelection.unavailableCandidateRejectedCount,
+    diagnosticOnly: true,
+    experimentalControlledSelection: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    tags: [
+      "workbench_chain_controlled_segment_selection",
+      "controlled_segment_selection_experimental",
+      "controlled_segment_selection_diagnostic_only",
+      `controlled_segment_selection_candidate_${shadowSelection.shadowSelectionCandidateId}`,
+      `controlled_segment_selection_action_${shadowSelection.shadowSelectionActionType}`,
+      `controlled_segment_selection_receiver_${shadowSelection.shadowSelectionReceiverId}`,
+      `controlled_segment_selection_zone_${shadowSelection.shadowSelectionTargetZone}`,
+      "controlled_segment_selection_score_mutation_forbidden",
+      "controlled_segment_selection_scoring_events_mutation_forbidden",
+      "controlled_segment_selection_route_success_mutation_forbidden",
+      "controlled_segment_selection_production_fullmatch_forbidden",
+      "controlled_segment_selection_closed_candidates_rejected",
+      "controlled_segment_selection_unavailable_candidates_rejected",
+      ...(shadowSelection.chainId === undefined ? [] : [`controlled_segment_selection_chain_id_${shadowSelection.chainId}`]),
+    ],
+    warnings: shadowSelection.warnings,
+  };
+}
+
+export function controlledSegmentSelectionFromShadow(input: {
+  readonly shadowSelection: FullMatchShadowRouteSelectionResult;
+}): FullMatchControlledSegmentSelectionResult {
+  if (input.shadowSelection.status === "not_available") {
+    return emptyControlledSegmentSelection({
+      ...(input.shadowSelection.segmentLabel === undefined ? {} : { segmentLabel: input.shadowSelection.segmentLabel }),
+      ...(input.shadowSelection.chainId === undefined ? {} : { chainId: input.shadowSelection.chainId }),
+      warnings: input.shadowSelection.warnings,
+    });
+  }
+
+  const selection = availableControlledSelectionFromShadow(input.shadowSelection);
+  const validationWarnings = validateControlledSegmentSelection(selection);
+
+  if (validationWarnings.length === 0) {
+    return selection;
+  }
+
+  return {
+    ...selection,
+    status: selection.status === "available" ? "failed" : selection.status,
+    warnings: [...selection.warnings, ...validationWarnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchControlledSegmentSelectionSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type FullMatchControlledSegmentSelectionSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly shadowRouteSelectionTagCount: number;
+  readonly controlledSegmentSelectionTagCount: number;
+  readonly controlledSelectionCandidateId?: string;
+  readonly controlledSelectionActionType?: string;
+  readonly controlledSelectionReceiverId?: string;
+  readonly controlledSelectionTargetZone?: string;
+  readonly selectedCandidateLegal: boolean;
+  readonly selectedCandidateAvailable: boolean;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly scoreMutationCount: number;
+  readonly scoringEventsMutationCount: number;
+  readonly routeSuccessRateMutationCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+export function fullMatchControlledSegmentSelectionSignature(report: MatchReport): FullMatchControlledSegmentSelectionSignature {
+  const controlledSelectionCandidateId = suffixFromTag(report, "controlled_segment_selection_candidate_");
+  const controlledSelectionActionType = suffixFromTag(report, "controlled_segment_selection_action_");
+  const controlledSelectionReceiverId = suffixFromTag(report, "controlled_segment_selection_receiver_");
+  const controlledSelectionTargetZone = suffixFromTag(report, "controlled_segment_selection_zone_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    shadowRouteSelectionTagCount: countTag(report, "workbench_chain_shadow_route_selection"),
+    controlledSegmentSelectionTagCount: countTag(report, "workbench_chain_controlled_segment_selection"),
+    ...(controlledSelectionCandidateId === undefined ? {} : { controlledSelectionCandidateId }),
+    ...(controlledSelectionActionType === undefined ? {} : { controlledSelectionActionType }),
+    ...(controlledSelectionReceiverId === undefined ? {} : { controlledSelectionReceiverId }),
+    ...(controlledSelectionTargetZone === undefined ? {} : { controlledSelectionTargetZone }),
+    selectedCandidateLegal: report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_segment_selection_selected_legal_true")),
+    selectedCandidateAvailable: report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_segment_selection_selected_available_true")),
+    rejectedClosedCandidateCount: numberFromTag(report, "controlled_segment_selection_closed_rejected_count_"),
+    rejectedUnavailableCandidateCount: numberFromTag(report, "controlled_segment_selection_unavailable_rejected_count_"),
+    scoreMutationCount: numberFromTag(report, "score_mutation_count_"),
+    scoringEventsMutationCount: numberFromTag(report, "scoring_events_mutation_count_"),
+    routeSuccessRateMutationCount: numberFromTag(report, "route_success_mutation_count_"),
   };
 }
 ```
@@ -6911,6 +7296,177 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchControlledSegmentSelection.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+import { selectShadowRouteFromInfluencedCandidates } from "./selectShadowRouteFromInfluencedCandidates";
+import { controlledSegmentSelectionFromShadow } from "./controlledSegmentSelectionFromShadow";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function controlledSelectionForMode(routeSelectionMode: "segment_harness" | "workbench_chain_replay_experimental") {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const context = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode,
+    segmentLabel: "segment-1",
+  }));
+  const influence = applyChainContextToRouteCandidates({
+    segmentContext: context,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: context,
+    }),
+  });
+  const shadowSelection = selectShadowRouteFromInfluencedCandidates({
+    influence,
+    ...(influence.selectedCandidateBefore === undefined ? {} : { productionSelectionCandidateId: influence.selectedCandidateBefore }),
+  });
+
+  return controlledSegmentSelectionFromShadow({ shadowSelection });
+}
+
+export function validateFullMatchControlledSegmentSelection(): readonly string[] {
+  const unavailable = controlledSelectionForMode("segment_harness");
+  const selection = controlledSelectionForMode("workbench_chain_replay_experimental");
+
+  assertTest(unavailable.status === "not_available", "default route mode must not expose controlled segment selection.");
+  assertTest(selection.status === "available", "experimental shadow selection must become controlled segment selection.");
+  assertTest(selection.source === "shadow_route_selection", "controlled selection source must be shadow_route_selection.");
+  assertTest(selection.scope === "experimental_controlled_segment_selection", "controlled selection scope must remain experimental.");
+  assertTest(selection.selectedCandidateId === "chain-context-forward-progress-sh", "controlled candidate must be chain-context-forward-progress-sh.");
+  assertTest(selection.selectedActionType === "FORWARD_PROGRESS", "controlled action must be FORWARD_PROGRESS.");
+  assertTest(selection.selectedReceiverId === "control-space-hunter", "controlled receiver must be control-space-hunter.");
+  assertTest(selection.selectedTargetZone === "Z4-HSR", "controlled target zone must be Z4-HSR.");
+  assertTest(selection.selectedBaseScore === 82, "controlled selection must expose base score 82.");
+  assertTest(selection.selectedInfluenceDelta === 5, "controlled selection must expose influence delta 5.");
+  assertTest(selection.selectedInfluencedScore === 87, "controlled selection must expose influenced score 87.");
+  assertTest(selection.selectedCandidateLegal, "controlled selected candidate must be legal.");
+  assertTest(selection.selectedCandidateAvailable, "controlled selected candidate must be available.");
+  assertTest(selection.rejectedClosedCandidateCount >= 1, "controlled selection must reject at least one closed candidate.");
+  assertTest(selection.rejectedUnavailableCandidateCount >= 1, "controlled selection must reject at least one unavailable candidate.");
+  assertTest(selection.diagnosticOnly, "controlled selection must be diagnostic-only.");
+  assertTest(!selection.canMutateScore, "controlled selection must not mutate score.");
+  assertTest(!selection.canMutateScoringEvents, "controlled selection must not mutate scoring events.");
+  assertTest(!selection.canMutateRouteSuccessRates, "controlled selection must not mutate route success rates.");
+  assertTest(!selection.canDriveProductionFullMatchSelection, "controlled selection must not drive production full-match selection.");
+
+  return [
+    "default route mode exposes no controlled segment selection",
+    "experimental shadow selection becomes controlled segment selection",
+    "controlled candidate is chain-context-forward-progress-sh",
+    "controlled action is FORWARD_PROGRESS",
+    "controlled receiver is control-space-hunter",
+    "controlled target zone is Z4-HSR",
+    "controlled selected candidate is legal and available",
+    "closed and unavailable candidates remain rejected",
+    "controlled selection is diagnostic-only",
+    "controlled selection cannot mutate score, scoring events, or route success rates",
+    "controlled selection cannot drive production full-match selection",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchControlledSegmentSelection();
+
+  console.log("fullMatchControlledSegmentSelection tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchControlledSegmentSelectionGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+import { selectShadowRouteFromInfluencedCandidates } from "./selectShadowRouteFromInfluencedCandidates";
+import {
+  controlledSegmentSelectionCannotDriveProduction,
+  controlledSegmentSelectionCannotMutateScore,
+  controlledSegmentSelectionFromShadow,
+  validateControlledSegmentSelection,
+} from "./controlledSegmentSelectionFromShadow";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchControlledSegmentSelectionGuard(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const context = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+  }));
+  const influence = applyChainContextToRouteCandidates({
+    segmentContext: context,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: context,
+    }),
+  });
+  const shadowSelection = selectShadowRouteFromInfluencedCandidates({
+    influence,
+    ...(influence.selectedCandidateBefore === undefined ? {} : { productionSelectionCandidateId: influence.selectedCandidateBefore }),
+  });
+  const selection = controlledSegmentSelectionFromShadow({ shadowSelection });
+  const closedCandidate = influence.influences.find((candidate) => candidate.candidateId === "chain-context-closed-central-force");
+  const unavailableCandidate = influence.influences.find((candidate) => candidate.candidateId === "chain-context-unavailable-switch");
+
+  assertTest(closedCandidate !== undefined, "closed diagnostic candidate must be present.");
+  assertTest(unavailableCandidate !== undefined, "unavailable diagnostic candidate must be present.");
+  assertTest(selection.selectedCandidateId !== closedCandidate?.candidateId, "controlled selection must not select a closed candidate.");
+  assertTest(selection.selectedCandidateId !== unavailableCandidate?.candidateId, "controlled selection must not select an unavailable candidate.");
+  assertTest(selection.selectedCandidateLegal, "controlled selected candidate must be legal.");
+  assertTest(selection.selectedCandidateAvailable, "controlled selected candidate must be available.");
+  assertTest(selection.rejectedClosedCandidateCount >= 1, "closed candidates must be counted as rejected.");
+  assertTest(selection.rejectedUnavailableCandidateCount >= 1, "unavailable candidates must be counted as rejected.");
+  assertTest(controlledSegmentSelectionCannotMutateScore(selection), "controlled selection cannot mutate score surfaces.");
+  assertTest(controlledSegmentSelectionCannotDriveProduction(selection), "controlled selection cannot drive production.");
+  assertTest(validateControlledSegmentSelection(selection).length === 0, "controlled selection validation must pass.");
+
+  return [
+    "closed candidate cannot be selected",
+    "unavailable candidate cannot be selected",
+    "selected candidate is legal",
+    "selected candidate is available",
+    "closed candidates are counted as rejected",
+    "unavailable candidates are counted as rejected",
+    "controlled selection cannot mutate score surfaces",
+    "controlled selection cannot drive production",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchControlledSegmentSelectionGuard();
+
+  console.log("fullMatchControlledSegmentSelectionGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -7174,6 +7730,74 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalControlledSegmentSelection.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchControlledSegmentSelectionSignature } from "./fullMatchControlledSegmentSelectionSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalControlledSegmentSelection(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchControlledSegmentSelectionSignature(defaultReport);
+  const experimentalSignature = fullMatchControlledSegmentSelectionSignature(experimentalReport);
+  const controlledFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("selection controlee experimentale"),
+  );
+
+  assertTest(defaultSignature.controlledSegmentSelectionTagCount === 0, "default runFullMatch must not expose controlled selection tags.");
+  assertTest(experimentalSignature.shadowRouteSelectionTagCount > 0, "experimental runFullMatch must still expose shadow route selection tags.");
+  assertTest(experimentalSignature.controlledSegmentSelectionTagCount > 0, "experimental runFullMatch must expose controlled selection tags.");
+  assertTest(experimentalSignature.controlledSelectionCandidateId === "chain-context-forward-progress-sh", "controlled signature must expose selected candidate.");
+  assertTest(experimentalSignature.controlledSelectionActionType === "FORWARD_PROGRESS", "controlled signature must expose selected action.");
+  assertTest(experimentalSignature.controlledSelectionReceiverId === "control-space-hunter", "controlled signature must expose selected receiver.");
+  assertTest(experimentalSignature.controlledSelectionTargetZone === "Z4-HSR", "controlled signature must expose selected target zone.");
+  assertTest(experimentalSignature.selectedCandidateLegal, "controlled selected candidate must be legal.");
+  assertTest(experimentalSignature.selectedCandidateAvailable, "controlled selected candidate must be available.");
+  assertTest(experimentalSignature.rejectedClosedCandidateCount >= 1, "controlled signature must expose closed rejection count.");
+  assertTest(experimentalSignature.rejectedUnavailableCandidateCount >= 1, "controlled signature must expose unavailable rejection count.");
+  assertTest(controlledFact !== undefined, "experimental report must include controlled segment selection evidence.");
+  assertTest(controlledFact?.internalTags.includes("controlled_segment_selection_diagnostic_only") ?? false, "controlled evidence must be diagnostic-only.");
+  assertTest(controlledFact?.internalTags.includes("controlled_segment_selection_production_fullmatch_forbidden") ?? false, "controlled evidence must forbid production full-match selection.");
+  assertTest(controlledFact?.summary.includes("chain-context-forward-progress-sh") ?? false, "controlled evidence must include selected candidate.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention controlled segment selection.");
+  assertTest(diagnosis?.summary.includes("ne pilote pas encore la resolution reelle du full-match") ?? false, "coach diagnosis must state controlled selection is not production-driving.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DIAGNOSTIC_ONLY"), "experimental limitations must mark controlled selection diagnostic-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION"), "experimental limitations must forbid production full-match selection.");
+
+  return [
+    "default runFullMatch has no controlled segment selection tags",
+    "experimental runFullMatch has controlled segment selection tags",
+    "experimental report includes controlled segment selection evidence",
+    "controlled selection exposes candidate, action, receiver, and target zone",
+    "controlled selection is legal and available",
+    "closed and unavailable candidates remain rejected",
+    "experimental coach diagnosis mentions controlled segment selection",
+    "controlled selection is diagnostic-only and production-forbidden",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalControlledSegmentSelection();
+
+  console.log("runFullMatchExperimentalControlledSegmentSelection tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -7352,6 +7976,70 @@ if (require.main === module) {
   const checks = validateRunFullMatchShadowRouteSelectionScoringGuard();
 
   console.log("runFullMatchShadowRouteSelectionScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchControlledSegmentSelectionScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchControlledSegmentSelectionSignature } from "./fullMatchControlledSegmentSelectionSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const signature = fullMatchControlledSegmentSelectionSignature(report);
+
+  return `${signature.score.home}-${signature.score.away}:${signature.scoringEventCount}:${signature.scoreChangeTotal}:${signature.timelineEventCount}`;
+}
+
+export function validateRunFullMatchControlledSegmentSelectionScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const experimentalSignature = fullMatchControlledSegmentSelectionSignature(experimentalReport);
+
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "default and experimental score signatures must remain equal.");
+  assertTest(experimentalSignature.scoreMutationCount === 0, "controlled selection must not mutate score.");
+  assertTest(experimentalSignature.scoringEventsMutationCount === 0, "controlled selection must not mutate scoring events.");
+  assertTest(experimentalSignature.routeSuccessRateMutationCount === 0, "controlled selection must not mutate route success rates.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORE"), "controlled selection limitation must forbid score mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS"), "controlled selection limitation must forbid scoring event mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES"), "controlled selection limitation must forbid route success mutation.");
+  assertTest(experimentalReport.evidenceFacts.some((fact) =>
+    fact.internalTags.includes("controlled_segment_selection_score_mutation_forbidden") &&
+    fact.internalTags.includes("controlled_segment_selection_scoring_events_mutation_forbidden") &&
+    fact.internalTags.includes("controlled_segment_selection_route_success_mutation_forbidden"),
+  ), "controlled selection evidence must forbid score, scoring-event, and route-success mutation.");
+
+  return [
+    "default and experimental final scores remain equal",
+    "default and experimental scoring event counts remain equal",
+    "default and experimental score_change totals remain equal",
+    "timeline event count remains equal or only metadata differs",
+    "controlled selection does not mutate score",
+    "controlled selection does not mutate scoring events",
+    "controlled selection does not mutate route success rates",
+    "no scoring events are deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchControlledSegmentSelectionScoringGuard();
+
+  console.log("runFullMatchControlledSegmentSelectionScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -7705,6 +8393,71 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3d.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3D(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORE"), "controlled selection must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS"), "controlled selection must not mutate scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES"), "controlled selection must not mutate route success rates.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION"), "controlled selection must not drive production full-match selection.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_segment_selection_score_mutation_forbidden")), "score mutation must be forbidden in controlled selection evidence.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_segment_selection_scoring_events_mutation_forbidden")), "scoring event mutation must be forbidden in controlled selection evidence.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_segment_selection_route_success_mutation_forbidden")), "route success mutation must be forbidden in controlled selection evidence.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "controlled selection does not mutate score, scoring events, or route success rates",
+    "controlled selection cannot drive production full-match selection",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3D();
+
+  console.log("scoringGuard.3d tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -7882,6 +8635,52 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3C();
 
   console.log("sourceOfTruthGuards.3c tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3d.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3D(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3D();
+
+  console.log("sourceOfTruthGuards.3d tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -8887,6 +9686,7 @@ import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInf
 import type { FullMatchChainSegmentContext } from "../fullMatch/fullMatchChainSegmentContext";
 import type { FullMatchChainRouteCandidateInfluenceResult } from "../fullMatch/fullMatchChainRouteCandidateInfluence";
 import type { FullMatchShadowRouteSelectionResult } from "../fullMatch/fullMatchShadowRouteSelection";
+import type { FullMatchControlledSegmentSelectionResult } from "../fullMatch/fullMatchControlledSegmentSelection";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -8902,6 +9702,7 @@ export interface MiniMatchTimelineSegment {
   readonly chainSegmentContext?: FullMatchChainSegmentContext;
   readonly routeCandidateInfluence?: FullMatchChainRouteCandidateInfluenceResult;
   readonly shadowRouteSelection?: FullMatchShadowRouteSelectionResult;
+  readonly controlledSegmentSelection?: FullMatchControlledSegmentSelectionResult;
 }
 
 export interface MatchReportBuilderInput {
@@ -9042,6 +9843,37 @@ function shadowRouteSelectionReason(selection: FullMatchShadowRouteSelectionResu
   return ` Experimental shadow route selection available: production proxy ${selection.productionSelectionCandidateId ?? "none"} vs shadow ${selection.shadowSelectionCandidateId ?? "none"} (${selection.shadowSelectionActionType ?? "none"}). ${selection.explanation} Diagnostic-only; does not drive production selection.`;
 }
 
+function controlledSegmentSelectionTags(selection: FullMatchControlledSegmentSelectionResult | undefined): readonly string[] {
+  if (selection === undefined || selection.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_controlled_segment_selection",
+    "controlled_segment_selection_experimental",
+    "controlled_segment_selection_diagnostic_only",
+    ...(selection.selectedCandidateId === undefined ? [] : [`controlled_segment_selection_candidate_${selection.selectedCandidateId}`]),
+    ...(selection.selectedActionType === undefined ? [] : [`controlled_segment_selection_action_${selection.selectedActionType}`]),
+    ...(selection.selectedReceiverId === undefined ? [] : [`controlled_segment_selection_receiver_${selection.selectedReceiverId}`]),
+    ...(selection.selectedTargetZone === undefined ? [] : [`controlled_segment_selection_zone_${selection.selectedTargetZone}`]),
+    "controlled_segment_selection_score_mutation_forbidden",
+    "controlled_segment_selection_scoring_events_mutation_forbidden",
+    "controlled_segment_selection_route_success_mutation_forbidden",
+    "controlled_segment_selection_production_fullmatch_forbidden",
+    "controlled_segment_selection_closed_candidates_rejected",
+    "controlled_segment_selection_unavailable_candidates_rejected",
+    ...selection.tags,
+  ];
+}
+
+function controlledSegmentSelectionReason(selection: FullMatchControlledSegmentSelectionResult | undefined): string {
+  if (selection === undefined || selection.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental controlled segment selection available: ${selection.selectedActionType ?? "none"} via ${selection.selectedCandidateId ?? "none"} to ${selection.selectedReceiverId ?? "none"} in ${selection.selectedTargetZone ?? "none"}. Diagnostic-only; does not drive production full-match selection, score, scoring events, or route success rates.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -9083,7 +9915,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -9104,6 +9936,7 @@ function kickoffEvent(input: {
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
       ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
       ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
+      ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
     ],
     narrativeWeight: 5,
   };
@@ -9159,6 +9992,7 @@ function sequenceRecordToMatchEvent(input: {
     ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
     ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
+    ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -9183,7 +10017,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -9246,7 +10080,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -9277,6 +10111,7 @@ function scoringEventToMatchEvent(input: {
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
       ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
       ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
+      ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
     ],
     narrativeWeight: 70,
   };
@@ -9963,6 +10798,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
       return "training_recommendation";
   }
 }
@@ -9993,6 +10829,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Influence candidate-route workbench experimentale";
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
       return "Selection shadow de route workbench experimentale";
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
+      return "Selection controlee de segment workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -10048,6 +10886,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -10070,6 +10909,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
     "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -11175,6 +12015,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 50;
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
       return 49;
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
+      return 48;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -11215,6 +12057,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire l'influence candidate-route workbench experimentale";
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
       return "Relire la selection shadow de route workbench experimentale";
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
+      return "Relire la selection controlee de segment workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -12469,7 +13313,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_CONSUMPTION"
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
   | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
-  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION";
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -12649,6 +13494,27 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "global scoring balance",
       "production route selection quality",
       "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
+    canProve: [
+      "experimental shadow route selection was exposed as controlled segment metadata",
+      "controlled selection rejected closed and unavailable candidates",
+      "controlled selection remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
     ],
     cannotOverride: [
       "live score",
