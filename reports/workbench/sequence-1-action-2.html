@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sequence 1 Action 2 Tactical Workbench</title>
+  <style>
+    :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #eef2f7; color: #0f172a; }
+    body { margin: 0; background: #eef2f7; }
+    main { width: min(100%, 1180px); margin: 0 auto; padding: 18px; }
+    h1 { margin: 0 0 10px; font-size: 28px; letter-spacing: 0; }
+    .meta, .grid, .ranked { display: grid; gap: 10px; }
+    .meta { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 14px; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    section, .pitch { background: #fff; border: 1px solid #d8dee9; border-radius: 10px; padding: 14px; }
+    h2 { margin: 0 0 8px; font-size: 18px; }
+    svg { width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; }
+    .zone { fill: #fff; stroke: #cbd5e1; }
+    .selected { stroke: #111827; stroke-width: 5; marker-end: url(#arrow); }
+    .target { fill: #f59e0b; opacity: 0.28; }
+    .pressure { fill: #7c3aed; opacity: 0.12; stroke: #7c3aed; stroke-width: 3; stroke-dasharray: 8 6; }
+    .player { stroke: #fff; stroke-width: 3; }
+    .control { fill: #2563eb; }
+    .blitz { fill: #dc2626; }
+    .carrier { stroke: #facc15; stroke-width: 6; }
+    text { font-weight: 800; fill: #0f172a; }
+    .initials { fill: #fff; font-size: 14px; text-anchor: middle; dominant-baseline: central; }
+    .ranked article { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc; }
+    .ranked article[data-selected="true"] { background: #fff7ed; border-color: #fdba74; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sequence 1 - Action 2 Tactical Workbench</h1>
+    <div class="meta">
+      <section><strong>Possession</strong><br />CONTROL</section>
+      <section><strong>Ball carrier</strong><br />CONTROL ML</section>
+      <section><strong>Ball zone</strong><br />Z3-HSL</section>
+      <section><strong>Selected action</strong><br />ML -> PM / CENTRAL_RECONNECT</section>
+    </div>
+    <div class="grid">
+      <section class="pitch">
+        <h2>BEFORE pitch</h2>
+        <svg viewBox="0 0 900 420" data-workbench-frame="before" data-render-mode="COACH_READABLE">
+          <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#111827" /></marker></defs>
+          <rect class="zone target" x="370" y="160" width="120" height="80" data-zone="Z3-C" />
+          <ellipse class="pressure" cx="330" cy="135" rx="95" ry="70" />
+          <line class="selected" x1="310" y1="125" x2="430" y2="200" />
+          <g id="before-player-control-tempo-half" data-truth-type="real-player-position" data-player-id="control-tempo-half" data-team-id="control" data-role="tempo_half" data-initials="TH" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player control" cx="260" cy="115" r="20" /><text class="initials" x="260" y="115">TH</text></g>
+          <g id="before-player-control-mobile-lock" data-truth-type="real-player-position" data-player-id="control-mobile-lock" data-team-id="control" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player control carrier" cx="310" cy="125" r="22" /><text class="initials" x="310" y="125">ML</text></g>
+          <g id="before-player-control-playmaker" data-truth-type="real-player-position" data-player-id="control-playmaker" data-team-id="control" data-role="playmaker" data-initials="PM" data-real-zone="Z2-C" data-rendered-zone="Z2-C" data-projected-zone="Z2-C"><circle class="player control" cx="430" cy="200" r="20" /><text class="initials" x="430" y="200">PM</text></g>
+          <g id="before-player-control-hook-link" data-truth-type="real-player-position" data-player-id="control-hook-link" data-team-id="control" data-role="hook_link" data-initials="HL" data-real-zone="Z3-CL" data-rendered-zone="Z3-CL offset" data-projected-zone="Z3-HSL"><circle class="player control" cx="260" cy="80" r="18" /><text class="initials" x="260" y="80">HL</text></g>
+          <g id="before-player-control-forward-leader" data-truth-type="real-player-position" data-player-id="control-forward-leader" data-team-id="control" data-role="forward_leader" data-initials="FL" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C"><circle class="player control" cx="540" cy="200" r="18" /><text class="initials" x="540" y="200">FL</text></g>
+          <g id="before-player-control-goalkeeper-free-safety" data-truth-type="real-player-position" data-player-id="control-goalkeeper-free-safety" data-team-id="control" data-role="goalkeeper_free_safety" data-initials="GK" data-real-zone="Z1-C" data-rendered-zone="Z1-C" data-projected-zone="Z1-C"><circle class="player control" cx="95" cy="200" r="18" /><text class="initials" x="95" y="200">GK</text></g>
+          <g id="before-player-control-space-hunter" data-truth-type="real-player-position" data-player-id="control-space-hunter" data-team-id="control" data-role="space_hunter" data-initials="SH" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C"><circle class="player control" cx="565" cy="245" r="18" /><text class="initials" x="565" y="245">SH</text></g>
+          <g id="before-player-control-pivot" data-truth-type="real-player-position" data-player-id="control-pivot" data-team-id="control" data-role="pivot" data-initials="PV" data-real-zone="Z2-HSL" data-rendered-zone="Z2-HSL offset" data-projected-zone="Z2-HSL"><circle class="player control" cx="210" cy="145" r="18" /><text class="initials" x="210" y="145">PV</text></g>
+          <g id="before-player-control-left-piston" data-truth-type="real-player-position" data-player-id="control-left-piston" data-team-id="control" data-role="left_piston" data-initials="LP" data-real-zone="Z2-CL" data-rendered-zone="Z2-CL" data-projected-zone="Z2-CL"><circle class="player control" cx="200" cy="60" r="18" /><text class="initials" x="200" y="60">LP</text></g>
+          <g id="before-player-control-right-piston" data-truth-type="real-player-position" data-player-id="control-right-piston" data-team-id="control" data-role="right_piston" data-initials="RP" data-real-zone="Z2-HSR" data-rendered-zone="Z2-HSR" data-projected-zone="Z2-CR"><circle class="player control" cx="220" cy="295" r="18" /><text class="initials" x="220" y="295">RP</text></g>
+          <g id="before-player-blitz-mobile-lock" data-truth-type="real-player-position" data-player-id="blitz-mobile-lock" data-team-id="blitz" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player blitz" cx="335" cy="105" r="18" /><text class="initials" x="335" y="105">ML</text></g>
+          <g id="before-player-blitz-space-hunter" data-truth-type="real-player-position" data-player-id="blitz-space-hunter" data-team-id="blitz" data-role="space_hunter" data-initials="SH" data-real-zone="Z3-C" data-rendered-zone="Z3-C" data-projected-zone="Z3-C"><circle class="player blitz" cx="450" cy="180" r="18" /><text class="initials" x="450" y="180">SH</text></g>
+          <g id="before-player-blitz-pivot" data-truth-type="real-player-position" data-player-id="blitz-pivot" data-team-id="blitz" data-role="pivot" data-initials="PV" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player blitz" cx="365" cy="135" r="18" /><text class="initials" x="365" y="135">PV</text></g>
+        </svg>
+      </section>
+      <section class="pitch">
+        <h2>AFTER pitch</h2>
+        <svg viewBox="0 0 900 420" data-workbench-frame="after" data-render-mode="COACH_READABLE">
+          <rect class="zone target" x="370" y="160" width="120" height="80" data-zone="Z3-C" />
+          <g id="after-player-control-mobile-lock" data-truth-type="real-player-position" data-player-id="control-mobile-lock" data-team-id="control" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player control" cx="310" cy="125" r="20" /><text class="initials" x="310" y="125">ML</text></g>
+          <g id="after-player-control-playmaker" data-truth-type="real-player-position" data-player-id="control-playmaker" data-team-id="control" data-role="playmaker" data-initials="PM" data-real-zone="Z3-C" data-rendered-zone="Z3-C" data-projected-zone="Z3-C"><circle class="player control carrier" cx="430" cy="200" r="22" /><text class="initials" x="430" y="200">PM</text></g>
+          <g id="after-player-control-hook-link" data-truth-type="real-player-position" data-player-id="control-hook-link" data-team-id="control" data-role="hook_link" data-initials="HL" data-real-zone="Z3-CL" data-rendered-zone="Z3-CL offset" data-projected-zone="Z3-HSL"><circle class="player control" cx="260" cy="80" r="18" /><text class="initials" x="260" y="80">HL</text></g>
+          <g id="after-player-control-forward-leader" data-truth-type="real-player-position" data-player-id="control-forward-leader" data-team-id="control" data-role="forward_leader" data-initials="FL" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C"><circle class="player control" cx="540" cy="200" r="18" /><text class="initials" x="540" y="200">FL</text></g>
+          <g id="after-player-control-space-hunter" data-truth-type="real-player-position" data-player-id="control-space-hunter" data-team-id="control" data-role="space_hunter" data-initials="SH" data-real-zone="Z4-C" data-rendered-zone="Z4-C offset" data-projected-zone="Z4-C"><circle class="player control" cx="565" cy="245" r="18" /><text class="initials" x="565" y="245">SH</text></g>
+          <g id="after-player-control-pivot" data-truth-type="real-player-position" data-player-id="control-pivot" data-team-id="control" data-role="pivot" data-initials="PV" data-real-zone="Z2-HSL" data-rendered-zone="Z2-HSL offset" data-projected-zone="Z2-HSL"><circle class="player control" cx="210" cy="145" r="18" /><text class="initials" x="210" y="145">PV</text></g>
+          <g id="after-player-blitz-mobile-lock" data-truth-type="real-player-position" data-player-id="blitz-mobile-lock" data-team-id="blitz" data-role="mobile_lock" data-initials="ML" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player blitz" cx="335" cy="105" r="18" /><text class="initials" x="335" y="105">ML</text></g>
+          <g id="after-player-blitz-space-hunter" data-truth-type="real-player-position" data-player-id="blitz-space-hunter" data-team-id="blitz" data-role="space_hunter" data-initials="SH" data-real-zone="Z3-C" data-rendered-zone="Z3-C" data-projected-zone="Z3-C"><circle class="player blitz" cx="450" cy="180" r="18" /><text class="initials" x="450" y="180">SH</text></g>
+          <g id="after-player-blitz-pivot" data-truth-type="real-player-position" data-player-id="blitz-pivot" data-team-id="blitz" data-role="pivot" data-initials="PV" data-real-zone="Z3-HSL" data-rendered-zone="Z3-HSL offset" data-projected-zone="Z3-HSL"><circle class="player blitz" cx="365" cy="135" r="18" /><text class="initials" x="365" y="135">PV</text></g>
+        </svg>
+      </section>
+    </div>
+    <section>
+      <h2>Selected Action</h2>
+      <p data-selected-actor="control-mobile-lock" data-selected-receiver="control-playmaker" data-action-type="CENTRAL_RECONNECT" data-from-zone="Z3-HSL" data-target-zone="Z3-C" data-after-zone="Z3-C">CONTROL ML reconnects centrally to PM. PM receives in Z3-C and becomes the next carrier.</p>
+    </section>
+    <section class="ranked">
+      <h2>Ranked Options</h2>
+      <article data-rank="1" data-selected="true">CENTRAL_RECONNECT to PM at Z3-C. Lane OPEN. Score 84.</article>
+      <article data-rank="2" data-selected="false">FORWARD_PROGRESS to FL at Z4-C. Lane CONTESTED. Score 75.</article>
+      <article data-rank="3" data-selected="false">SAFE_RECYCLE to PV at Z2-HSL. Lane OPEN. Score 70.</article>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import type { TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { sequence1Action2WorkbenchTruth } from "./fixtures/sequence1Action2.fixture";
+import { sequence1Action3WorkbenchTruth } from "./fixtures/sequence1Action3.fixture";
 
 function attributeValue(fragment: string, attribute: string): string | undefined {
   const match = new RegExp(`${attribute}="([^"]+)"`).exec(fragment);
@@ -46,6 +48,50 @@ export function extractSequenceOneActionOneWorkbenchTruthFromHtml(path: string):
     afterPlayerPositions: afterPositions.map((position) => ({
       ...position,
       isBallCarrier: position.playerId === "control-mobile-lock",
+    })),
+  };
+}
+
+export function extractSequenceOneActionTwoWorkbenchTruthFromHtml(path: string): typeof sequence1Action2WorkbenchTruth {
+  const html = readFileSync(path, "utf8");
+  const beforePositions = extractWorkbenchPlayerPositions(html, "before");
+  const afterPositions = extractWorkbenchPlayerPositions(html, "after");
+
+  if (beforePositions.length < 10 || afterPositions.length < 8) {
+    return sequence1Action2WorkbenchTruth;
+  }
+
+  return {
+    ...sequence1Action2WorkbenchTruth,
+    playerPositions: beforePositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-mobile-lock",
+    })),
+    afterPlayerPositions: afterPositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-playmaker",
+    })),
+  };
+}
+
+export function extractSequenceOneActionThreeWorkbenchTruthFromHtml(path: string): typeof sequence1Action3WorkbenchTruth {
+  const html = readFileSync(path, "utf8");
+  const beforePositions = extractWorkbenchPlayerPositions(html, "before");
+  const afterPositions = extractWorkbenchPlayerPositions(html, "after");
+
+  if (beforePositions.length < 10 || afterPositions.length < 8) {
+    return sequence1Action3WorkbenchTruth;
+  }
+
+  return {
+    ...sequence1Action3WorkbenchTruth,
+    playerPositions: beforePositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-playmaker",
+    })),
+    afterPlayerPositions: afterPositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-space-hunter",
     })),
   };
 }
