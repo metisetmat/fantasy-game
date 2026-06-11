@@ -144,6 +144,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3c.md"));
   const fullMatchWorkbenchChainReplay3D = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3d.md"));
   const fullMatchWorkbenchChainReplay3DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3d.md"));
+  const fullMatchWorkbenchChainReplay3E = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3e.md"));
+  const fullMatchWorkbenchChainReplay3EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3e.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1774,6 +1776,83 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3EExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3e.md",
+    "validation.fullmatch-workbench-chain-replay-3e.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3EForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+  ];
+  const sprint3EChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3E", activeConfig.sprintName === "Sprint 3E - Controlled Segment Selection to Segment Route Input", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 16", filesOnDisk.length === 16, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 16", allowlistedFiles.length === 16, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3EForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3EForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3EExpectedFiles.every((file) => requiredCopied(file)), sprint3EExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3E", manifest.includes("Sprint 3E - Controlled Segment Selection to Segment Route Input") && detailedManifest.includes("Sprint 3E - Controlled Segment Selection to Segment Route Input"), "Sprint 3E visible"),
+    check("README is Sprint 3E oriented", readme.includes("# Sprint 3E Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3e.md"), "README current"),
+    check("3E report included", fullMatchWorkbenchChainReplay3E.includes("# FullMatch Workbench Chain Replay 3E") && fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput status: available"), "3E doc included"),
+    check("3E validation is PASS", fullMatchWorkbenchChainReplay3EValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput status is available"), "3E validation PASS"),
+    check("SegmentRouteInput candidate visible", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput candidate is chain-context-forward-progress-sh"), "SegmentRouteInput candidate visible"),
+    check("SegmentRouteInput action visible", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput action: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput action is FORWARD_PROGRESS"), "SegmentRouteInput action visible"),
+    check("SegmentRouteInput receiver and zone visible", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput target zone: Z4-HSR"), "SegmentRouteInput receiver/zone visible"),
+    check("SegmentRouteInput source scores visible", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput source base score: 82") && fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput source influence delta: 5") && fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput source influenced score: 87"), "SegmentRouteInput source scores visible"),
+    check("SegmentRouteInput contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchSegmentRouteInput.ts") && bundleSimulation.includes("FullMatchSegmentRouteInput"), "SegmentRouteInput contract bundled"),
+    check("SegmentRouteInput converter bundled", bundleSimulation.includes("src/simulation/fullMatch/segmentRouteInputFromControlledSelection.ts") && bundleSimulation.includes("segmentRouteInputFromControlledSelection"), "SegmentRouteInput converter bundled"),
+    check("SegmentRouteInput signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchSegmentRouteInputSignature.ts") && bundleSimulation.includes("FullMatchSegmentRouteInputSignature"), "SegmentRouteInput signature bundled"),
+    check("SegmentRouteInput tests bundled", bundleSimulation.includes("fullMatchSegmentRouteInput.test.ts") && bundleSimulation.includes("fullMatchSegmentRouteInputGuard.test.ts"), "3E SegmentRouteInput tests bundled"),
+    check("3E runFullMatch SegmentRouteInput tests bundled", bundleSimulation.includes("runFullMatchExperimentalSegmentRouteInput.test.ts") && bundleSimulation.includes("runFullMatchSegmentRouteInputScoringGuard.test.ts"), "3E full-match tests bundled"),
+    check("3E scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3e.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3e.test.ts"), "3E guards bundled"),
+    check("SegmentRouteInput evidence included", fullMatchWorkbenchChainReplay3E.includes("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT") && bundleSimulation.includes("category: \"WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT\""), "SegmentRouteInput evidence visible"),
+    check("closed candidates remain rejected", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput rejected closed candidate count: 1") && fullMatchWorkbenchChainReplay3EValidation.includes("CLOSED candidates remain unselectable"), "closed route rejected"),
+    check("unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput rejected unavailable candidate count: 1") && fullMatchWorkbenchChainReplay3EValidation.includes("unavailable candidates remain unselectable"), "unavailable route rejected"),
+    check("SegmentRouteInput candidate legal and available", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput candidate legal: true") && fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput candidate available: true"), "SegmentRouteInput candidate valid"),
+    check("default SegmentRouteInput absent", fullMatchWorkbenchChainReplay3E.includes("default SegmentRouteInput tag count: 0"), "default SegmentRouteInput clean"),
+    check("experimental SegmentRouteInput present", fullMatchWorkbenchChainReplay3E.includes("experimental SegmentRouteInput tag count: greater than 0"), "experimental SegmentRouteInput visible"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3E.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3EValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("SegmentRouteInput cannot mutate score", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput can mutate score: false") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput cannot mutate score"), "score mutation forbidden"),
+    check("SegmentRouteInput cannot mutate scoring events", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput can mutate scoring events: false") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("SegmentRouteInput cannot mutate route success rates", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput can mutate route success rates: false") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput cannot mutate route success rates"), "route success mutation forbidden"),
+    check("SegmentRouteInput cannot drive production full-match", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput can drive production full-match selection: false") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput cannot drive production full-match selection"), "production full-match forbidden"),
+    check("SegmentRouteInput cannot drive production route resolution", fullMatchWorkbenchChainReplay3E.includes("SegmentRouteInput can drive production route resolution: false") && fullMatchWorkbenchChainReplay3EValidation.includes("SegmentRouteInput cannot drive production route resolution"), "production route resolution forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3EValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3EValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3EValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3E.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3E.includes("CONFIRM_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT") && fullMatchWorkbenchChainReplay3E.includes("CONFIRM_SEGMENT_ROUTE_INPUT_DOES_NOT_DRIVE_PRODUCTION_RESOLUTION") && fullMatchWorkbenchChainReplay3E.includes("PREPARE_SEGMENT_ROUTE_INPUT_TO_CONTROLLED_MINIMATCH_ROUTE_SOURCE"), "3E recommendations visible"),
+  ];
+
   const sprint3DExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2607,6 +2686,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3E - Controlled Segment Selection to Segment Route Input")
+      ? sprint3EChecks
     : activeConfig.sprintName.includes("Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection")
       ? sprint3DChecks
     : activeConfig.sprintName.includes("Sprint 3C - Experimental Chain Context to Shadow Route Selection")
