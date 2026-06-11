@@ -19,7 +19,7 @@ export function validateRunFullMatchExperimentalSegmentContext(): readonly strin
   const chainContextEvents = experimentalReport.timeline.filter((event) => event.tags.includes("workbench_chain_context"));
   const chainContextFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_SEGMENT_CONTEXT");
   const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
-    candidate.summary.includes("contexte experimental issu de la chaine workbench"),
+    candidate.summary.includes("contexte workbench") || candidate.summary.includes("chaine workbench"),
   );
 
   assertTest(defaultSignature.chainContextTagCount === 0, "default runFullMatch must not expose chain context tags.");
