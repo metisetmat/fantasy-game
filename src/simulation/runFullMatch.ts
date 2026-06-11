@@ -49,6 +49,11 @@ import {
   chainConsumptionToSegmentContext,
   type FullMatchChainSegmentContext,
 } from "./fullMatch/fullMatchChainSegmentContext";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./fullMatch/applyChainContextToRouteCandidates";
+import type { FullMatchChainRouteCandidateInfluenceResult } from "./fullMatch/fullMatchChainRouteCandidateInfluence";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -322,6 +327,22 @@ function chainSegmentContextLimitations(context: FullMatchChainSegmentContext): 
   ];
 }
 
+function routeCandidateInfluenceLimitations(influence: FullMatchChainRouteCandidateInfluenceResult): readonly string[] {
+  if (influence.status === "not_available") {
+    return ["FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_STATUS_${influence.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_OVERRIDE_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -417,22 +438,84 @@ function chainSegmentContextEvidenceFact(input: {
   };
 }
 
+function routeCandidateInfluenceEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly influence: FullMatchChainRouteCandidateInfluenceResult;
+}): MatchReportEvidenceFact | null {
+  if (input.influence.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_route_candidate_influence")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-route-candidate-influence`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.influence.finalZone ?? "Z4-HSR"],
+    summary:
+      `Experimental route candidate influence ${input.influence.status}: segment ${input.influence.segmentLabel ?? "segment-1"} ` +
+      `uses chain ${input.influence.chainId ?? "none"}, final carrier ${input.influence.finalCarrierId ?? "none"} ` +
+      `at ${input.influence.finalZone ?? "none"}, candidates ${input.influence.candidateCount}, influenced ${input.influence.influencedCandidateCount}, ` +
+      `positive deltas ${input.influence.positiveDeltaCount}, negative deltas ${input.influence.negativeDeltaCount}, ` +
+      `closed boosts blocked ${input.influence.illegalCandidateBoostBlockedCount}, unavailable boosts blocked ${input.influence.unavailableCandidateBoostBlockedCount}, ` +
+      `diagnostic selection ${input.influence.selectedCandidateBefore ?? "none"} -> ${input.influence.selectedCandidateAfterDiagnostic ?? "none"}, ` +
+      `selectionChanged=${input.influence.diagnosticSelectionChanged}, diagnosticOnly=${input.influence.diagnosticOnly}, ` +
+      `canMutateScore=${input.influence.canMutateScore}, canMutateScoringEvents=${input.influence.canMutateScoringEvents}, ` +
+      `canDriveProductionSelection=${input.influence.canDriveProductionSelection}.`,
+    confidence: input.influence.status === "available" ? "medium" : "low",
+    strength: input.influence.status === "available" ? 58 : 28,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_route_candidate_influence",
+      "route_candidate_influence_diagnostic_only",
+      "route_candidate_influence_segment_1",
+      "route_candidate_influence_score_mutation_forbidden",
+      "route_candidate_influence_scoring_events_mutation_forbidden",
+      "route_candidate_influence_production_selection_forbidden",
+      "route_candidate_influence_closed_override_blocked",
+      "route_candidate_influence_unavailable_override_blocked",
+      ...(input.influence.chainId === undefined ? [] : [`route_candidate_influence_chain_id_${input.influence.chainId}`]),
+      ...(input.influence.finalCarrierId === undefined ? [] : [`route_candidate_influence_final_carrier_${input.influence.finalCarrierId}`]),
+      ...(input.influence.finalZone === undefined ? [] : [`route_candidate_influence_final_zone_${input.influence.finalZone}`]),
+      `route_candidate_influence_candidate_count_${input.influence.candidateCount}`,
+      `route_candidate_influence_influenced_count_${input.influence.influencedCandidateCount}`,
+      `route_candidate_influence_positive_delta_count_${input.influence.positiveDeltaCount}`,
+      `route_candidate_influence_negative_delta_count_${input.influence.negativeDeltaCount}`,
+      `route_candidate_influence_illegal_boost_blocked_count_${input.influence.illegalCandidateBoostBlockedCount}`,
+      `route_candidate_influence_unavailable_boost_blocked_count_${input.influence.unavailableCandidateBoostBlockedCount}`,
+      `route_candidate_influence_selection_changed_${input.influence.diagnosticSelectionChanged ? "true" : "false"}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
   chainConsumption: FullMatchChainConsumptionResult,
   chainSegmentContext: FullMatchChainSegmentContext,
+  routeCandidateInfluence: FullMatchChainRouteCandidateInfluenceResult,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
   const chainFacts = report.evidenceFacts.filter((fact) =>
     fact.internalTags.includes("workbench_chain_consumption") ||
-    fact.internalTags.includes("workbench_chain_segment_context")
+    fact.internalTags.includes("workbench_chain_segment_context") ||
+    fact.internalTags.includes("workbench_chain_route_candidate_influence")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le premier segment dispose maintenant d'un contexte experimental issu de la chaine workbench : porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"}. Ce contexte ameliore l'ancrage tactique du diagnostic, mais ne modifie pas encore la resolution ni le score.`;
+    : `Le contexte workbench du premier segment est maintenant utilise pour influencer le classement diagnostique des options de route. Le porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"} favorise les options compatibles avec cette continuite, mais cette influence reste experimentale, bornee, et ne modifie pas encore la resolution ni le score. Les options fermees ou indisponibles restent bloquees meme si le contexte de chaine leur donnerait un bonus theorique. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -473,6 +556,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     segmentLabel: "segment-1",
   });
   const chainSegmentContext = chainConsumptionToSegmentContext(chainConsumption);
+  const routeCandidateInfluence = applyChainContextToRouteCandidates({
+    segmentContext: chainSegmentContext,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext,
+    }),
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -512,6 +602,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           segmentState,
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
           ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
+          ...(index === 0 && routeCandidateInfluence.status !== "not_available" ? { routeCandidateInfluence } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -580,6 +671,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
       ...chainConsumptionLimitations(chainConsumption),
       ...chainSegmentContextLimitations(chainSegmentContext),
+      ...routeCandidateInfluenceLimitations(routeCandidateInfluence),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -592,15 +684,21 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     context: chainSegmentContext,
   });
-  const reportWithChainEvidence = chainFact === null
+  const routeInfluenceFact = routeCandidateInfluenceEvidenceFact({
+    report,
+    matchInput: input,
+    influence: routeCandidateInfluence,
+  });
+  const chainEvidenceFacts = [
+    ...(chainFact === null ? [] : [chainFact]),
+    ...(chainContextFact === null ? [] : [chainContextFact]),
+    ...(routeInfluenceFact === null ? [] : [routeInfluenceFact]),
+  ];
+  const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
     : {
         ...report,
-        evidenceFacts: [
-          ...report.evidenceFacts,
-          chainFact,
-          ...(chainContextFact === null ? [] : [chainContextFact]),
-        ],
+        evidenceFacts: [...report.evidenceFacts, ...chainEvidenceFacts],
       };
 
   return withFullMatchGroundingDiagnosis(
@@ -608,5 +706,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     input,
     chainConsumption,
     chainSegmentContext,
+    routeCandidateInfluence,
   );
 }

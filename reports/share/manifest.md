@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T11:56:01.185Z
-Task/sprint: Sprint 3A - Experimental Chain Influence on Segment Context
+Generated: 2026-06-11T12:28:30.730Z
+Task/sprint: Sprint 3B - Experimental Chain Context to Route Candidate Influence
 Final file count: 16
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -15,8 +15,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3a.md
-- validation.fullmatch-workbench-chain-replay-3a.md
+- fullmatch-workbench-chain-replay-3b.md
+- validation.fullmatch-workbench-chain-replay-3b.md
 - README.md
 
 ## Bundle Files

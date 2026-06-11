@@ -29,6 +29,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 52;
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return 51;
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+      return 50;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -65,6 +67,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la consommation workbench experimentale";
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return "Relire le contexte segmentaire workbench experimental";
+    case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+      return "Relire l'influence candidate-route workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

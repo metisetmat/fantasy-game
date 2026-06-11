@@ -5,7 +5,9 @@ export type MatchEvidenceScope =
   | "BATCH_DIAGNOSTIC_PROJECTION"
   | "LIVE_SCORING_STREAM"
   | "REPORT_RENDERING_ONLY"
-  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
+  | "WORKBENCH_CHAIN_CONSUMPTION"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
+  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -115,6 +117,26 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     globalScoringEconomyVerdictAllowed: false,
   },
+  WORKBENCH_CHAIN_CONSUMPTION: {
+    scope: "WORKBENCH_CHAIN_CONSUMPTION",
+    canProve: [
+      "experimental workbench chain was consumed behind an opt-in flag",
+      "visual chain steps were replayed for diagnostic grounding",
+      "chain consumption remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "full-match batch economy",
+      "scoring constants",
+      "production route selection",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
   WORKBENCH_CHAIN_SEGMENT_CONTEXT: {
     scope: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     canProve: [
@@ -129,6 +151,26 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotOverride: [
       "live score",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE: {
+    scope: "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    canProve: [
+      "experimental chain context influenced diagnostic route candidate scores",
+      "closed and unavailable route candidates remained blocked",
+      "diagnostic selection changes were shadow-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
       "full-match batch economy",
       "scoring constants",
     ],
