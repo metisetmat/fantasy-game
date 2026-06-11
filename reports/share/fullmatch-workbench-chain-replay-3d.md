@@ -1,13 +1,14 @@
-# FullMatch Workbench Chain Replay 3C
+# FullMatch Workbench Chain Replay 3D
 
-Sprint 3C converts the experimental chain-influenced route candidates into a complete shadow route selection behind the opt-in workbench_chain_replay_experimental flag. This is a shadow decision audit only: it does not mutate score, scoring events, production route selection, or route success rates.
+Sprint 3D converts the experimental shadow route selection into controlled segment selection metadata behind the opt-in workbench_chain_replay_experimental flag. This controlled selection is experimental and diagnostic-only: it does not mutate score, scoring events, production full-match selection, or route success rates.
 
-## Sprint 3C Summary
+## Sprint 3D Summary
 - Visual chain replay: validated.
 - Experimental full-match chain consumption: validated.
 - Experimental segment context influence: validated.
 - Experimental route candidate influence: validated.
 - Experimental shadow route selection: diagnostic-only.
+- Experimental controlled segment selection: diagnostic-only.
 - Normal full-match: still segment_harness by default.
 - Scoring economy: unchanged and still validated only by batch/full-match economy.
 
@@ -100,6 +101,27 @@ Sprint 3C converts the experimental chain-influenced route candidates into a com
 - shadow route selection can drive production selection: false.
 - shadow selection explanation: present.
 
+## Experimental Controlled Segment Selection
+- controlled segment selection status: available.
+- controlled segment selection scope: experimental_controlled_segment_selection.
+- controlled selection source: shadow_route_selection.
+- controlled selected candidate: chain-context-forward-progress-sh.
+- controlled selected action: FORWARD_PROGRESS.
+- controlled selected receiver: control-space-hunter.
+- controlled selected target zone: Z4-HSR.
+- controlled selected base score: 82.
+- controlled selected influence delta: 5.
+- controlled selected influenced score: 87.
+- controlled selected candidate legal: true.
+- controlled selected candidate available: true.
+- controlled closed candidate rejected count: 1.
+- controlled unavailable candidate rejected count: 1.
+- controlled segment selection diagnosticOnly: true.
+- controlled segment selection can mutate score: false.
+- controlled segment selection can mutate scoring events: false.
+- controlled segment selection can mutate route success rates: false.
+- controlled segment selection can drive production full-match selection: false.
+
 ## Default vs Experimental Signature
 - default chain consumption count: 0.
 - experimental chain consumption count: 1.
@@ -110,6 +132,8 @@ Sprint 3C converts the experimental chain-influenced route candidates into a com
 - experimental influenced candidate count: greater than 0.
 - default shadow route selection tag count: 0.
 - experimental shadow route selection tag count: greater than 0.
+- default controlled segment selection tag count: 0.
+- experimental controlled segment selection tag count: greater than 0.
 - production selection candidate in experimental signature: chain-context-safe-recycle-pv.
 - shadow selection candidate in experimental signature: chain-context-forward-progress-sh.
 - shadow selection changed from production in experimental signature: true.
@@ -119,6 +143,7 @@ Sprint 3C converts the experimental chain-influenced route candidates into a com
 - default and experimental timeline event counts remain equal: YES.
 - score mutation count: 0.
 - scoring events mutation count: 0.
+- route success rate mutation count: 0.
 - final score remains derived only from score_change consequences.
 
 ## Diagnostics And Coach Visibility
@@ -130,15 +155,20 @@ Sprint 3C converts the experimental chain-influenced route candidates into a com
 - experimental report limitations include FULLMATCH_SHADOW_ROUTE_SELECTION_DIAGNOSTIC_ONLY.
 - experimental report limitations include FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION.
 - experimental report limitations include FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE.
+- experimental report limitations include FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DIAGNOSTIC_ONLY.
+- experimental report limitations include FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION.
+- experimental report limitations include FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE.
 - experimental report evidence includes WORKBENCH_CHAIN_CONSUMPTION.
 - experimental report evidence includes WORKBENCH_CHAIN_SEGMENT_CONTEXT.
 - experimental report evidence includes WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE.
 - experimental report evidence includes WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION.
+- experimental report evidence includes WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION.
 - chain consumption is tagged diagnostic_only_chain_consumption.
 - chain segment context is tagged chain_context_diagnostic_only.
 - route candidate influence is tagged route_candidate_influence_diagnostic_only.
 - shadow route selection is tagged shadow_route_selection_diagnostic_only.
-- coach diagnosis mentions shadow route selection with control-space-hunter at Z4-HSR.
+- controlled segment selection is tagged controlled_segment_selection_diagnostic_only.
+- coach diagnosis mentions controlled segment selection with control-space-hunter at Z4-HSR.
 - prototype fallback status: enabled and observable, but not used to hide replay mismatch.
 
 ## Scoring Guardrails
@@ -154,12 +184,13 @@ Sprint 3C converts the experimental chain-influenced route candidates into a com
 - FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
 
 ## Next Recommendations
-- CONFIRM_EXPERIMENTAL_CHAIN_CONTEXT_TO_SHADOW_ROUTE_SELECTION
-- CONFIRM_SHADOW_SELECTION_IS_DIAGNOSTIC_ONLY
-- CONFIRM_SHADOW_SELECTION_DOES_NOT_DRIVE_PRODUCTION
+- CONFIRM_EXPERIMENTAL_SHADOW_SELECTION_TO_CONTROLLED_SEGMENT_SELECTION
+- CONFIRM_CONTROLLED_SELECTION_IS_DIAGNOSTIC_ONLY
+- CONFIRM_CONTROLLED_SELECTION_DOES_NOT_DRIVE_PRODUCTION_FULLMATCH
 - CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED
 - CONFIRM_DEFAULT_FULLMATCH_UNCHANGED
 - CONFIRM_NO_SCORE_OR_SCORING_EVENT_MUTATION
+- CONFIRM_CONTROLLED_SELECTION_DOES_NOT_MUTATE_ROUTE_SUCCESS_RATES
 - KEEP_SCORING_VALUES_UNCHANGED
 - KEEP_50_MATCH_ECONOMY_REFERENCE
-- PREPARE_EXPERIMENTAL_SHADOW_SELECTION_TO_CONTROLLED_SEGMENT_SELECTION
+- PREPARE_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT
