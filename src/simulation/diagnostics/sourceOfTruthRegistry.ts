@@ -8,7 +8,12 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_CONSUMPTION"
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
   | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
-  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION";
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
+  | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
+  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"
+  | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"
+  | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -191,6 +196,127 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotOverride: [
       "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
+    canProve: [
+      "experimental shadow route selection was exposed as controlled segment metadata",
+      "controlled selection rejected closed and unavailable candidates",
+      "controlled selection remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT: {
+    scope: "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT",
+    canProve: [
+      "experimental controlled segment selection was converted into typed segment route input metadata",
+      "segment route input rejected closed and unavailable candidates",
+      "segment route input remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
+    canProve: [
+      "experimental segment route input was exposed as a controlled mini-match route source",
+      "controlled mini-match route source rejected closed and unavailable candidates",
+      "controlled mini-match route source remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "live mini-match route resolution",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD: {
+    scope: "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
+    canProve: [
+      "experimental controlled mini-match route source prepared a guarded live selection override candidate",
+      "live selection override guard rejected closed and unavailable candidates",
+      "live selection override guard remained diagnostic-only and unapplied",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "normal live mini-match route resolution",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT: {
+    scope: "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT",
+    canProve: [
+      "experimental live selection override was applied inside an isolated mini-match comparison",
+      "isolated override experiment compared baseline and override selections",
+      "isolated override experiment rejected closed and unavailable candidates",
+      "isolated override experiment remained separated from normal live selection and official scoring",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
       "production route selection",
       "full-match batch economy",
       "scoring constants",

@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3C - Experimental Chain Context to Shadow Route Selection. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3H - Isolated MiniMatch Override Experiment. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -406,7 +406,12 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_CONSUMPTION"
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
   | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
-  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION";
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
+  | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
+  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"
+  | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"
+  | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"
