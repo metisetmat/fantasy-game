@@ -13,7 +13,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
   | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"
   | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"
-  | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT";
+  | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -303,6 +304,33 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "isolated override experiment compared baseline and override selections",
       "isolated override experiment rejected closed and unavailable candidates",
       "isolated override experiment remained separated from normal live selection and official scoring",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON",
+    canProve: [
+      "experimental baseline and override segment replay paths were compared in isolation",
+      "controlled replay comparison observed selection, progression, and danger divergence",
+      "controlled replay comparison rejected closed and unavailable candidates",
+      "controlled replay comparison remained separated from normal live selection and official scoring",
     ],
     cannotProve: [
       "global scoring balance",
