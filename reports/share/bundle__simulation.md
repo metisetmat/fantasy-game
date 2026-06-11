@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3A - Experimental Chain Influence on Segment Context. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -141,6 +141,10 @@ import {
 } from "./fullMatch/fullMatchRouteSelectionMode";
 import { consumeWorkbenchChainForFullMatch } from "./fullMatch/consumeWorkbenchChainForFullMatch";
 import type { FullMatchChainConsumptionResult } from "./fullMatch/fullMatchChainConsumption";
+import {
+  chainConsumptionToSegmentContext,
+  type FullMatchChainSegmentContext,
+} from "./fullMatch/fullMatchChainSegmentContext";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -399,6 +403,21 @@ function chainConsumptionLimitations(consumption: FullMatchChainConsumptionResul
   ];
 }
 
+function chainSegmentContextLimitations(context: FullMatchChainSegmentContext): readonly string[] {
+  if (context.status === "not_available") {
+    return ["FULLMATCH_CHAIN_SEGMENT_CONTEXT_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_SEGMENT_CONTEXT_STATUS_${context.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_ATTACHED_TO_SEGMENT_1",
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORING_EVENTS",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -445,14 +464,71 @@ function chainConsumptionEvidenceFact(input: {
   };
 }
 
-function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput, chainConsumption: FullMatchChainConsumptionResult): MatchReport {
+function chainSegmentContextEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly context: FullMatchChainSegmentContext;
+}): MatchReportEvidenceFact | null {
+  if (input.context.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.eventId.includes(`${input.context.segmentLabel ?? "segment-1"}-`) &&
+    event.tags.includes("workbench_chain_context")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-segment-context`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.context.finalZone ?? "Z4-HSR"],
+    summary:
+      `Experimental segment context ${input.context.status}: segment ${input.context.segmentLabel ?? "segment-1"} ` +
+      `uses chain ${input.context.chainId ?? "none"}, final carrier ${input.context.finalCarrierId ?? "none"} ` +
+      `at ${input.context.finalZone ?? "none"}, consumed steps ${input.context.consumedStepCount}, ` +
+      `spatial steps ${input.context.spatialSelectionStepCount}, diagnosticOnly=${input.context.diagnosticOnly}, ` +
+      `canMutateScore=${input.context.canMutateScore}, canMutateScoringEvents=${input.context.canMutateScoringEvents}.`,
+    confidence: input.context.confidence === "none" ? "low" : input.context.confidence,
+    strength: input.context.status === "available" ? 60 : 30,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_segment_context",
+      "chain_context_segment_1",
+      "chain_context_diagnostic_only",
+      "chain_context_score_mutation_forbidden",
+      "chain_context_scoring_events_mutation_forbidden",
+      ...(input.context.chainId === undefined ? [] : [`chain_context_chain_id_${input.context.chainId}`]),
+      ...(input.context.finalCarrierId === undefined ? [] : [`chain_context_final_carrier_${input.context.finalCarrierId}`]),
+      ...(input.context.finalZone === undefined ? [] : [`chain_context_final_zone_${input.context.finalZone}`]),
+      `chain_context_consumed_steps_${input.context.consumedStepCount}`,
+      `chain_context_spatial_steps_${input.context.spatialSelectionStepCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
+function withFullMatchGroundingDiagnosis(
+  report: MatchReport,
+  input: MatchInput,
+  chainConsumption: FullMatchChainConsumptionResult,
+  chainSegmentContext: FullMatchChainSegmentContext,
+): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
-  const chainFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("workbench_chain_consumption"));
+  const chainFacts = report.evidenceFacts.filter((fact) =>
+    fact.internalTags.includes("workbench_chain_consumption") ||
+    fact.internalTags.includes("workbench_chain_segment_context")
+  );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : "Le moteur a consomme une chaine workbench visuelle sur le premier segment, mais cette consommation reste experimentale et ne modifie pas encore la resolution complete du match.";
+    : `Le premier segment dispose maintenant d'un contexte experimental issu de la chaine workbench : porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"}. Ce contexte ameliore l'ancrage tactique du diagnostic, mais ne modifie pas encore la resolution ni le score.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -492,6 +568,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     routeSelectionMode,
     segmentLabel: "segment-1",
   });
+  const chainSegmentContext = chainConsumptionToSegmentContext(chainConsumption);
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -530,6 +607,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           includeKickoff: index === 0,
           segmentState,
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
+          ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -597,6 +675,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       `Full-match route selection mode: ${routeSelectionMode}.`,
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
       ...chainConsumptionLimitations(chainConsumption),
+      ...chainSegmentContextLimitations(chainSegmentContext),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -604,14 +683,28 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     consumption: chainConsumption,
   });
+  const chainContextFact = chainSegmentContextEvidenceFact({
+    report,
+    matchInput: input,
+    context: chainSegmentContext,
+  });
   const reportWithChainEvidence = chainFact === null
     ? report
     : {
         ...report,
-        evidenceFacts: [...report.evidenceFacts, chainFact],
+        evidenceFacts: [
+          ...report.evidenceFacts,
+          chainFact,
+          ...(chainContextFact === null ? [] : [chainContextFact]),
+        ],
       };
 
-  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(reportWithChainEvidence, input), input, chainConsumption);
+  return withFullMatchGroundingDiagnosis(
+    withHarnessSanityDiagnosis(reportWithChainEvidence, input),
+    input,
+    chainConsumption,
+    chainSegmentContext,
+  );
 }
 ```
 
@@ -1944,9 +2037,9 @@ import {
 } from "./fullMatchChainConsumption";
 
 function consumptionStatus(replay: ReturnType<typeof replayWorkbenchChain>): FullMatchChainConsumptionStatus {
-  const expectedSteps = 3;
+  const expectedSteps = replay.totalSteps;
   const fullyPreserved =
-    replay.totalSteps === expectedSteps &&
+    expectedSteps > 0 &&
     replay.visualWorkbenchStepCount === expectedSteps &&
     replay.syntheticStepCount === 0 &&
     replay.hybridStepCount === 0 &&
@@ -2005,6 +2098,167 @@ export function consumeWorkbenchChainForFullMatch(input: {
     replay,
     scoreMutationCount: 0,
     scoringEventsMutationCount: 0,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchChainSegmentContext.ts
+
+```ts
+import type { FullMatchChainConsumptionResult } from "./fullMatchChainConsumption";
+
+export type FullMatchChainSegmentContextStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type FullMatchChainSegmentContext = {
+  readonly status: FullMatchChainSegmentContextStatus;
+  readonly source: "none" | "workbench_chain_consumption";
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly consumedStepCount: number;
+  readonly visualWorkbenchStepCount: number;
+  readonly spatialSelectionStepCount: number;
+  readonly finalCarrierId?: string;
+  readonly finalZone?: string;
+  readonly possessionTeamId?: string;
+  readonly defendingTeamId?: string;
+  readonly confidence: "none" | "low" | "medium";
+  readonly diagnosticOnly: boolean;
+  readonly canMutateScore: false;
+  readonly canMutateScoringEvents: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+function contextStatus(consumption: FullMatchChainConsumptionResult): FullMatchChainSegmentContextStatus {
+  switch (consumption.status) {
+    case "not_requested":
+      return "not_available";
+    case "consumed":
+      return "available";
+    case "partial":
+      return "partial";
+    case "failed":
+      return "failed";
+  }
+}
+
+function contextConfidence(status: FullMatchChainSegmentContextStatus): FullMatchChainSegmentContext["confidence"] {
+  switch (status) {
+    case "not_available":
+      return "none";
+    case "available":
+      return "medium";
+    case "partial":
+    case "failed":
+      return "low";
+  }
+}
+
+function contextTags(input: {
+  readonly status: FullMatchChainSegmentContextStatus;
+  readonly chainId?: string;
+  readonly finalCarrierId?: string;
+  readonly finalZone?: string;
+  readonly consumedStepCount: number;
+  readonly spatialSelectionStepCount: number;
+}): readonly string[] {
+  if (input.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_segment_context",
+    "chain_consumption_diagnostic_only",
+    `chain_context_status_${input.status}`,
+    ...(input.chainId === undefined ? [] : [`chain_id_${input.chainId}`]),
+    ...(input.finalCarrierId === undefined ? [] : [`chain_final_carrier_${input.finalCarrierId}`]),
+    ...(input.finalZone === undefined ? [] : [`chain_final_zone_${input.finalZone}`]),
+    `chain_consumed_steps_${input.consumedStepCount}`,
+    `chain_spatial_steps_${input.spatialSelectionStepCount}`,
+  ];
+}
+
+export function chainConsumptionToSegmentContext(
+  consumption: FullMatchChainConsumptionResult,
+): FullMatchChainSegmentContext {
+  const status = contextStatus(consumption);
+  const finalCarrierId = consumption.finalPropagatedCarrierId;
+  const finalZone = consumption.finalPropagatedZone;
+
+  return {
+    status,
+    source: status === "not_available" ? "none" : "workbench_chain_consumption",
+    ...(consumption.segmentLabel === undefined ? {} : { segmentLabel: consumption.segmentLabel }),
+    ...(consumption.chainId === undefined ? {} : { chainId: consumption.chainId }),
+    consumedStepCount: consumption.consumedStepCount,
+    visualWorkbenchStepCount: consumption.visualWorkbenchStepCount,
+    spatialSelectionStepCount: consumption.spatialSelectionStepCount,
+    ...(finalCarrierId === undefined ? {} : { finalCarrierId }),
+    ...(finalZone === undefined ? {} : { finalZone }),
+    confidence: contextConfidence(status),
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    tags: contextTags({
+      status,
+      consumedStepCount: consumption.consumedStepCount,
+      spatialSelectionStepCount: consumption.spatialSelectionStepCount,
+      ...(consumption.chainId === undefined ? {} : { chainId: consumption.chainId }),
+      ...(finalCarrierId === undefined ? {} : { finalCarrierId }),
+      ...(finalZone === undefined ? {} : { finalZone }),
+    }),
+    warnings: consumption.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchSegmentContextSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type FullMatchSegmentContextSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly chainContextTagCount: number;
+  readonly chainContextFinalCarrier?: string;
+  readonly chainContextFinalZone?: string;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function suffixFromTag(tags: readonly string[], prefix: string): string | undefined {
+  const tag = tags.find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+export function fullMatchSegmentContextSignature(report: MatchReport): FullMatchSegmentContextSignature {
+  const chainContextEvents = report.timeline.filter((event) => event.tags.includes("workbench_chain_context"));
+  const chainContextTags = chainContextEvents.flatMap((event) => event.tags);
+  const chainContextFinalCarrier = suffixFromTag(chainContextTags, "chain_context_final_carrier_");
+  const chainContextFinalZone = suffixFromTag(chainContextTags, "chain_context_final_zone_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    chainContextTagCount: chainContextEvents.length,
+    ...(chainContextFinalCarrier === undefined ? {} : { chainContextFinalCarrier }),
+    ...(chainContextFinalZone === undefined ? {} : { chainContextFinalZone }),
   };
 }
 ```
@@ -5176,6 +5430,7 @@ if (require.main === module) {
 
 ```ts
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { sequence1Action1Chain } from "../grounding/fixtures/sequence1Action1.chain.fixture";
 import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
 
 function assertTest(condition: boolean, message: string): void {
@@ -5196,6 +5451,12 @@ export function validateFullMatchChainConsumption(): readonly string[] {
     routeSelectionMode: "workbench_chain_replay_experimental",
     segmentLabel: "segment-1",
   });
+  const consumedOneStepChain = consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+    chain: sequence1Action1Chain,
+  });
 
   assertTest(disabled.status === "not_requested", "segment_harness must return status not_requested.");
   assertTest(consumed.status === "consumed", "experimental mode must consume the visual chain.");
@@ -5209,6 +5470,10 @@ export function validateFullMatchChainConsumption(): readonly string[] {
   assertTest(consumed.scoreMutationCount === 0, "scoreMutationCount must be 0.");
   assertTest(consumed.scoringEventsMutationCount === 0, "scoringEventsMutationCount must be 0.");
   assertTest(consumed.mismatchWarningCount === 0, "valid chain mismatch warning count must be 0.");
+  assertTest(consumedOneStepChain.status === "consumed", "valid one-step chain must be consumed.");
+  assertTest(consumedOneStepChain.consumedStepCount === 1, "valid one-step chain consumed step count must be 1.");
+  assertTest(consumedOneStepChain.visualWorkbenchStepCount === 1, "valid one-step chain visual step count must be 1.");
+  assertTest(consumedOneStepChain.spatialSelectionStepCount === 1, "valid one-step chain spatial selection step count must be 1.");
 
   return [
     "segment_harness returns status not_requested",
@@ -5223,6 +5488,8 @@ export function validateFullMatchChainConsumption(): readonly string[] {
     "scoreMutationCount is 0",
     "scoringEventsMutationCount is 0",
     "mismatch warning count is 0 for valid chain",
+    "valid one-step chain is consumed",
+    "valid one-step chain uses its actual replay step count",
   ];
 }
 
@@ -5286,6 +5553,99 @@ if (require.main === module) {
   const checks = validateFullMatchChainConsumptionMismatch();
 
   console.log("fullMatchChainConsumptionMismatch tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchChainSegmentContext.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { sequence1MultiActionChain } from "../grounding/fixtures/sequence1MultiAction.chain.fixture";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import { disabledFullMatchChainConsumption, type FullMatchChainConsumptionResult } from "./fullMatchChainConsumption";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchChainSegmentContext(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const disabled = chainConsumptionToSegmentContext(disabledFullMatchChainConsumption());
+  const consumed = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+  }));
+  const partial = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+    chain: {
+      ...sequence1MultiActionChain,
+      chainId: "sequence-1-multi-action-partial-context-test",
+      steps: sequence1MultiActionChain.steps.map((step) =>
+        step.stepIndex === 2 ? { ...step, expectedActorId: "control-hook-link" } : step,
+      ),
+    },
+  }));
+  const failedConsumption: FullMatchChainConsumptionResult = {
+    ...disabledFullMatchChainConsumption(),
+    mode: "experimental_first_segment",
+    status: "failed",
+    chainId: "failed-chain",
+    segmentLabel: "segment-1",
+    consumedStepCount: 3,
+    visualWorkbenchStepCount: 3,
+    spatialSelectionStepCount: 2,
+    finalPropagatedCarrierId: "control-space-hunter",
+    finalPropagatedZone: "Z4-HSR",
+    warnings: ["guard failed"],
+  };
+  const failed = chainConsumptionToSegmentContext(failedConsumption);
+
+  assertTest(disabled.status === "not_available", "not_requested consumption must map to not_available.");
+  assertTest(disabled.source === "none", "not_available context source must be none.");
+  assertTest(consumed.status === "available", "consumed chain must map to available context.");
+  assertTest(consumed.source === "workbench_chain_consumption", "available context source must be chain consumption.");
+  assertTest(consumed.finalCarrierId === "control-space-hunter", "available context final carrier must be SH.");
+  assertTest(consumed.finalZone === "Z4-HSR", "available context final zone must be Z4-HSR.");
+  assertTest(consumed.diagnosticOnly, "available context must be diagnostic-only.");
+  assertTest(!consumed.canMutateScore, "segment context must not mutate score.");
+  assertTest(!consumed.canMutateScoringEvents, "segment context must not mutate scoring events.");
+  assertTest(consumed.tags.includes("workbench_chain_segment_context"), "context tag must be present.");
+  assertTest(consumed.tags.includes("chain_final_carrier_control-space-hunter"), "final carrier tag must be present.");
+  assertTest(consumed.tags.includes("chain_final_zone_Z4-HSR"), "final zone tag must be present.");
+  assertTest(consumed.tags.includes("chain_consumed_steps_3"), "consumed steps tag must be present.");
+  assertTest(consumed.tags.includes("chain_spatial_steps_3"), "spatial steps tag must be present.");
+  assertTest(partial.status === "partial", "partial consumption must map to partial context.");
+  assertTest(partial.confidence === "low", "partial context confidence must be low.");
+  assertTest(failed.status === "failed", "failed consumption must map to failed context.");
+  assertTest(failed.confidence === "low", "failed context confidence must be low.");
+
+  return [
+    "not_requested consumption maps to not_available context",
+    "consumed chain consumption maps to available context",
+    "available context exposes final carrier control-space-hunter",
+    "available context exposes final zone Z4-HSR",
+    "available context is diagnostic-only",
+    "available context cannot mutate score",
+    "available context cannot mutate scoring events",
+    "chain segment context tags are present",
+    "partial consumption maps to partial context",
+    "failed consumption maps to failed context",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchChainSegmentContext();
+
+  console.log("fullMatchChainSegmentContext tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -5366,6 +5726,133 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalSegmentContext.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchSegmentContextSignature } from "./fullMatchSegmentContextSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalSegmentContext(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchSegmentContextSignature(defaultReport);
+  const experimentalSignature = fullMatchSegmentContextSignature(experimentalReport);
+  const chainContextEvents = experimentalReport.timeline.filter((event) => event.tags.includes("workbench_chain_context"));
+  const chainContextFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("contexte experimental issu de la chaine workbench"),
+  );
+
+  assertTest(defaultSignature.chainContextTagCount === 0, "default runFullMatch must not expose chain context tags.");
+  assertTest(defaultSignature.chainContextFinalCarrier === undefined, "default signature must not expose chain final carrier.");
+  assertTest(defaultSignature.chainContextFinalZone === undefined, "default signature must not expose chain final zone.");
+  assertTest(experimentalSignature.chainContextTagCount > 0, "experimental timeline must expose chain context tags.");
+  assertTest(experimentalSignature.chainContextFinalCarrier === "control-space-hunter", "experimental signature must expose final carrier.");
+  assertTest(experimentalSignature.chainContextFinalZone === "Z4-HSR", "experimental signature must expose final zone.");
+  assertTest(chainContextEvents.every((event) => event.eventId.includes("-segment-1-")), "chain context must be attached to segment-1 only.");
+  assertTest(chainContextEvents.some((event) => (event.tacticalContext.reason ?? "").includes("control-space-hunter at Z4-HSR")), "segment-1 tactical context must mention final carrier and zone.");
+  assertTest(chainContextFact !== undefined, "experimental report must include chain segment context evidence.");
+  assertTest(chainContextFact?.summary.includes("sequence-1-multi-action-chain") ?? false, "chain context evidence must include chain id.");
+  assertTest(chainContextFact?.internalTags.includes("chain_context_final_carrier_control-space-hunter") ?? false, "chain context evidence must include final carrier tag.");
+  assertTest(chainContextFact?.internalTags.includes("chain_context_final_zone_Z4-HSR") ?? false, "chain context evidence must include final zone tag.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention chain context.");
+  assertTest(diagnosis?.summary.includes("control-space-hunter") ?? false, "experimental coach diagnosis must mention final carrier.");
+  assertTest(diagnosis?.summary.includes("Z4-HSR") ?? false, "experimental coach diagnosis must mention final zone.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_ATTACHED_TO_SEGMENT_1"), "experimental limitations must expose segment context attachment.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
+
+  return [
+    "default runFullMatch does not expose chain context tags",
+    "experimental runFullMatch exposes chain context tags on segment-1 events",
+    "experimental segment context includes chain id sequence-1-multi-action-chain",
+    "experimental segment context includes final carrier control-space-hunter",
+    "experimental segment context includes final zone Z4-HSR",
+    "experimental report includes chain segment context evidence",
+    "experimental coach diagnosis mentions experimental chain context",
+    "normal full-match is not falsely claimed as production chain-driven",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalSegmentContext();
+
+  console.log("runFullMatchExperimentalSegmentContext tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchSegmentContextSignature } from "./fullMatchSegmentContextSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const signature = fullMatchSegmentContextSignature(report);
+
+  return `${signature.score.home}-${signature.score.away}:${signature.scoringEventCount}:${signature.scoreChangeTotal}:${signature.timelineEventCount}`;
+}
+
+export function validateRunFullMatchSegmentContextScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchSegmentContextSignature(defaultReport);
+  const experimentalSignature = fullMatchSegmentContextSignature(experimentalReport);
+
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "default and experimental score signatures must remain equal.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "scoring event counts must remain equal.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "score_change totals must remain equal.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "timeline event counts must remain equal.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORE"), "segment context must not mutate score.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORING_EVENTS"), "segment context must not mutate scoring events.");
+  assertTest(experimentalReport.evidenceFacts.some((fact) =>
+    fact.internalTags.includes("chain_context_score_mutation_forbidden") &&
+    fact.internalTags.includes("chain_context_scoring_events_mutation_forbidden"),
+  ), "chain context evidence must forbid score and scoring-event mutation.");
+
+  return [
+    "default and experimental final scores are equal",
+    "default and experimental scoring event counts are equal",
+    "default and experimental score_change totals are equal",
+    "default and experimental timeline event counts are equal",
+    "no scoring event is deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchSegmentContextScoringGuard();
+
+  console.log("runFullMatchSegmentContextScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchDefaultRegression.test.ts
 
 ```ts
@@ -5414,6 +5901,57 @@ if (require.main === module) {
   const checks = validateRunFullMatchDefaultRegression();
 
   console.log("runFullMatchDefaultRegression tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchDefaultStillSegmentHarness.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchSegmentContextSignature } from "./fullMatchSegmentContextSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function signature(report: ReturnType<typeof runFullMatch>): string {
+  const segmentSignature = fullMatchSegmentContextSignature(report);
+
+  return `${segmentSignature.score.home}-${segmentSignature.score.away}:${segmentSignature.scoringEventCount}:${segmentSignature.scoreChangeTotal}`;
+}
+
+export function validateRunFullMatchDefaultStillSegmentHarness(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const implicitDefault = runFullMatch(input);
+  const explicitDefault = runFullMatch(input, { routeSelectionMode: "segment_harness" });
+  const implicitSignature = fullMatchSegmentContextSignature(implicitDefault);
+
+  assertTest(signature(implicitDefault) === signature(explicitDefault), "implicit default and explicit segment_harness must match.");
+  assertTest(implicitDefault.reportMeta.limitations.includes("Full-match route selection mode: segment_harness."), "default must remain segment_harness.");
+  assertTest(implicitDefault.reportMeta.limitations.includes("FULLMATCH_CHAIN_CONSUMPTION_DISABLED_BY_DEFAULT"), "default must disable chain consumption.");
+  assertTest(implicitDefault.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_DISABLED_BY_DEFAULT"), "default must disable chain segment context.");
+  assertTest(!implicitDefault.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_ATTACHED_TO_SEGMENT_1"), "default must not attach chain segment context.");
+  assertTest(implicitSignature.chainContextTagCount === 0, "default timeline must not include experimental chain context tags.");
+  assertTest(!implicitDefault.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_SEGMENT_CONTEXT"), "default report must not include chain segment context evidence.");
+
+  return [
+    "runFullMatch(input) remains segment_harness",
+    "runFullMatch(input, segment_harness) remains identical in score signature",
+    "default report limitations include disabled chain context",
+    "default report does not include experimental chain segment context",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchDefaultStillSegmentHarness();
+
+  console.log("runFullMatchDefaultStillSegmentHarness tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -5480,6 +6018,66 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3a.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3A(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORE"), "chain segment context must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_DID_NOT_MUTATE_SCORING_EVENTS"), "chain segment context must not mutate scoring events.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("chain_context_score_mutation_forbidden")), "score mutation must be forbidden in evidence.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("chain_context_scoring_events_mutation_forbidden")), "scoring event mutation must be forbidden in evidence.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3A();
+
+  console.log("scoringGuard.3a tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -5518,6 +6116,51 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards2Z();
 
   console.log("sourceOfTruthGuards.2z tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3a.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3A(): readonly string[] {
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("BATCH_DIAGNOSTIC_PROJECTION");
+  mustRejectGlobalEconomy("LIVE_SCORING_STREAM");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3A();
+
+  console.log("sourceOfTruthGuards.3a tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -6520,6 +7163,7 @@ import {
   type FullMatchSegmentState,
 } from "../fullMatch/fullMatchSegmentState";
 import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInfluence";
+import type { FullMatchChainSegmentContext } from "../fullMatch/fullMatchChainSegmentContext";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -6532,6 +7176,7 @@ export interface MiniMatchTimelineSegment {
   readonly includeKickoff: boolean;
   readonly segmentState?: FullMatchSegmentState;
   readonly segmentInfluence?: FullMatchSegmentInfluence;
+  readonly chainSegmentContext?: FullMatchChainSegmentContext;
 }
 
 export interface MatchReportBuilderInput {
@@ -6582,6 +7227,35 @@ function segmentInfluenceTags(influence: FullMatchSegmentInfluence | undefined):
   return tags;
 }
 
+function chainSegmentContextTags(context: FullMatchChainSegmentContext | undefined): readonly string[] {
+  if (context === undefined || context.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_context",
+    "chain_context_diagnostic_only",
+    "chain_context_segment_1",
+    "chain_context_score_mutation_forbidden",
+    "chain_context_scoring_events_mutation_forbidden",
+    ...(context.chainId === undefined ? [] : [`chain_context_chain_id_${context.chainId}`]),
+    ...(context.finalCarrierId === undefined ? [] : [`chain_context_final_carrier_${context.finalCarrierId}`]),
+    ...(context.finalZone === undefined ? [] : [`chain_context_final_zone_${context.finalZone}`]),
+    `chain_context_status_${context.status}`,
+    `chain_context_consumed_steps_${context.consumedStepCount}`,
+    `chain_context_spatial_steps_${context.spatialSelectionStepCount}`,
+    ...context.tags,
+  ];
+}
+
+function chainSegmentContextReason(context: FullMatchChainSegmentContext | undefined): string {
+  if (context === undefined || context.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental workbench-chain context available: final carrier ${context.finalCarrierId ?? "none"} at ${context.finalZone ?? "none"} after ${context.chainId ?? "unknown-chain"}. Diagnostic-only; does not mutate score.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -6623,7 +7297,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -6641,6 +7315,7 @@ function kickoffEvent(input: {
       "temporary_control_blitz_mapping",
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
+      ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ],
     narrativeWeight: 5,
   };
@@ -6693,6 +7368,7 @@ function sequenceRecordToMatchEvent(input: {
     ...input.influence.tags,
     ...segmentStateTags,
     ...segmentInfluenceTags(input.segment.segmentInfluence),
+    ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -6717,7 +7393,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -6780,7 +7456,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -6808,6 +7484,7 @@ function scoringEventToMatchEvent(input: {
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...segmentInfluenceTags(input.segment.segmentInfluence),
+      ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ],
     narrativeWeight: 70,
   };
@@ -7491,6 +8168,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "TACTICAL_PLAN_SIGNAL":
     case "HARNESS_PLAUSIBILITY_WARNING":
     case "WORKBENCH_CHAIN_CONSUMPTION":
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return "training_recommendation";
   }
 }
@@ -7515,6 +8193,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Le plan de match laisse un signal lisible";
     case "WORKBENCH_CHAIN_CONSUMPTION":
       return "Consommation workbench experimentale";
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
+      return "Contexte segmentaire workbench experimental";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -7567,6 +8247,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "MOMENTUM_SHIFT":
     case "TACTICAL_PLAN_SIGNAL":
     case "WORKBENCH_CHAIN_CONSUMPTION":
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -7586,6 +8267,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "MOMENTUM_SHIFT",
     "TACTICAL_PLAN_SIGNAL",
     "WORKBENCH_CHAIN_CONSUMPTION",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -8685,6 +9367,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 55;
     case "WORKBENCH_CHAIN_CONSUMPTION":
       return 52;
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
+      return 51;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -8719,6 +9403,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le plan de match dans les zones visibles";
     case "WORKBENCH_CHAIN_CONSUMPTION":
       return "Relire la consommation workbench experimentale";
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
+      return "Relire le contexte segmentaire workbench experimental";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -9969,7 +10655,8 @@ export type MatchEvidenceScope =
   | "FULL_MATCH_BATCH_ECONOMY"
   | "BATCH_DIAGNOSTIC_PROJECTION"
   | "LIVE_SCORING_STREAM"
-  | "REPORT_RENDERING_ONLY";
+  | "REPORT_RENDERING_ONLY"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -10076,6 +10763,25 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotProve: [
       "engine scoring incoherence",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SEGMENT_CONTEXT: {
+    scope: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
+    canProve: [
+      "experimental workbench chain context was attached to a segment",
+      "diagnostic timeline tags were emitted",
+      "chain final carrier and zone were exposed as metadata",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "full-match batch economy",
+      "scoring constants",
     ],
     globalScoringEconomyVerdictAllowed: false,
   },

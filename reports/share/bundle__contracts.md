@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3A - Experimental Chain Influence on Segment Context. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -403,7 +403,8 @@ export type MatchReportEvidenceCategory =
   | "MOMENTUM_SHIFT"
   | "TACTICAL_PLAN_SIGNAL"
   | "HARNESS_PLAUSIBILITY_WARNING"
-  | "WORKBENCH_CHAIN_CONSUMPTION";
+  | "WORKBENCH_CHAIN_CONSUMPTION"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"
