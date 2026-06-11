@@ -140,6 +140,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3AValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3a.md"));
   const fullMatchWorkbenchChainReplay3B = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3b.md"));
   const fullMatchWorkbenchChainReplay3BValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3b.md"));
+  const fullMatchWorkbenchChainReplay3C = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3c.md"));
+  const fullMatchWorkbenchChainReplay3CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3c.md"));
+  const fullMatchWorkbenchChainReplay3D = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3d.md"));
+  const fullMatchWorkbenchChainReplay3DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3d.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1770,6 +1774,164 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3DExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3DForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+  ];
+  const sprint3DChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3D", activeConfig.sprintName === "Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 16", filesOnDisk.length === 16, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 16", allowlistedFiles.length === 16, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3DForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3DForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3DExpectedFiles.every((file) => requiredCopied(file)), sprint3DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3D", manifest.includes("Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection") && detailedManifest.includes("Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection"), "Sprint 3D visible"),
+    check("README is Sprint 3D oriented", readme.includes("# Sprint 3D Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3d.md"), "README current"),
+    check("3D report included", fullMatchWorkbenchChainReplay3D.includes("# FullMatch Workbench Chain Replay 3D") && fullMatchWorkbenchChainReplay3D.includes("controlled segment selection status: available"), "3D doc included"),
+    check("3D validation is PASS", fullMatchWorkbenchChainReplay3DValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled segment selection status is available"), "3D validation PASS"),
+    check("controlled selected candidate visible", fullMatchWorkbenchChainReplay3D.includes("controlled selected candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled selected candidate is chain-context-forward-progress-sh"), "controlled candidate visible"),
+    check("controlled selected action visible", fullMatchWorkbenchChainReplay3D.includes("controlled selected action: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled selected action is FORWARD_PROGRESS"), "controlled action visible"),
+    check("controlled receiver and zone visible", fullMatchWorkbenchChainReplay3D.includes("controlled selected receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3D.includes("controlled selected target zone: Z4-HSR"), "controlled receiver/zone visible"),
+    check("controlled selection contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchControlledSegmentSelection.ts") && bundleSimulation.includes("FullMatchControlledSegmentSelectionResult"), "controlled contract bundled"),
+    check("controlled adapter bundled", bundleSimulation.includes("src/simulation/fullMatch/controlledSegmentSelectionFromShadow.ts") && bundleSimulation.includes("controlledSegmentSelectionFromShadow"), "controlled adapter bundled"),
+    check("controlled signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchControlledSegmentSelectionSignature.ts") && bundleSimulation.includes("FullMatchControlledSegmentSelectionSignature"), "controlled signature bundled"),
+    check("controlled tests bundled", bundleSimulation.includes("fullMatchControlledSegmentSelection.test.ts") && bundleSimulation.includes("fullMatchControlledSegmentSelectionGuard.test.ts"), "3D controlled tests bundled"),
+    check("3D runFullMatch controlled tests bundled", bundleSimulation.includes("runFullMatchExperimentalControlledSegmentSelection.test.ts") && bundleSimulation.includes("runFullMatchControlledSegmentSelectionScoringGuard.test.ts"), "3D full-match tests bundled"),
+    check("3D scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3d.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3d.test.ts"), "3D guards bundled"),
+    check("controlled selection evidence included", fullMatchWorkbenchChainReplay3D.includes("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION") && bundleSimulation.includes("category: \"WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION\""), "controlled evidence visible"),
+    check("closed candidates remain rejected", fullMatchWorkbenchChainReplay3D.includes("controlled closed candidate rejected count: 1") && fullMatchWorkbenchChainReplay3DValidation.includes("CLOSED candidates remain unselectable"), "closed route rejected"),
+    check("unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3D.includes("controlled unavailable candidate rejected count: 1") && fullMatchWorkbenchChainReplay3DValidation.includes("unavailable candidates remain unselectable"), "unavailable route rejected"),
+    check("selected controlled candidate legal and available", fullMatchWorkbenchChainReplay3D.includes("controlled selected candidate legal: true") && fullMatchWorkbenchChainReplay3D.includes("controlled selected candidate available: true"), "selected controlled candidate valid"),
+    check("default controlled selection absent", fullMatchWorkbenchChainReplay3D.includes("default controlled segment selection tag count: 0"), "default controlled clean"),
+    check("experimental controlled selection present", fullMatchWorkbenchChainReplay3D.includes("experimental controlled segment selection tag count: greater than 0"), "experimental controlled visible"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3D.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3DValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("controlled selection cannot mutate score", fullMatchWorkbenchChainReplay3D.includes("controlled segment selection can mutate score: false") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled segment selection cannot mutate score"), "score mutation forbidden"),
+    check("controlled selection cannot mutate scoring events", fullMatchWorkbenchChainReplay3D.includes("controlled segment selection can mutate scoring events: false") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled segment selection cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("controlled selection cannot mutate route success rates", fullMatchWorkbenchChainReplay3D.includes("controlled segment selection can mutate route success rates: false") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled segment selection cannot mutate route success rates"), "route success mutation forbidden"),
+    check("controlled selection cannot drive production full-match", fullMatchWorkbenchChainReplay3D.includes("controlled segment selection can drive production full-match selection: false") && fullMatchWorkbenchChainReplay3DValidation.includes("controlled segment selection cannot drive production full-match selection"), "production full-match forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3DValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3DValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3DValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3D.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3D.includes("CONFIRM_EXPERIMENTAL_SHADOW_SELECTION_TO_CONTROLLED_SEGMENT_SELECTION") && fullMatchWorkbenchChainReplay3D.includes("CONFIRM_CONTROLLED_SELECTION_DOES_NOT_DRIVE_PRODUCTION_FULLMATCH") && fullMatchWorkbenchChainReplay3D.includes("PREPARE_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT"), "3D recommendations visible"),
+  ];
+
+  const sprint3CExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3CForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+    "fullmatch-workbench-chain-replay-2y.md",
+    "validation.fullmatch-workbench-chain-replay-2y.md",
+    "fullmatch-workbench-chain-replay-2x.md",
+    "validation.fullmatch-workbench-chain-replay-2x.md",
+    "fullmatch-workbench-chain-replay.md",
+    "validation.fullmatch-workbench-chain-replay.md",
+    "bundle__docs.md",
+  ];
+  const sprint3CChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3C", activeConfig.sprintName === "Sprint 3C - Experimental Chain Context to Shadow Route Selection", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 16", filesOnDisk.length === 16, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 16", allowlistedFiles.length === 16, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3CForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3CForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3CExpectedFiles.every((file) => requiredCopied(file)), sprint3CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3C", manifest.includes("Sprint 3C - Experimental Chain Context to Shadow Route Selection") && detailedManifest.includes("Sprint 3C - Experimental Chain Context to Shadow Route Selection"), "Sprint 3C visible"),
+    check("README is Sprint 3C oriented", readme.includes("# Sprint 3C Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3c.md"), "README current"),
+    check("sequence workbench artifacts copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionTwoWorkbench.includes("Sequence 1 Action 2 Tactical Workbench") && sequenceOneActionThreeWorkbench.includes("Sequence 1 Action 3 Tactical Workbench"), "three workbench artifacts copied"),
+    check("3C report included", fullMatchWorkbenchChainReplay3C.includes("# FullMatch Workbench Chain Replay 3C") && fullMatchWorkbenchChainReplay3C.includes("shadow route selection status: available"), "3C doc included"),
+    check("3C validation is PASS", fullMatchWorkbenchChainReplay3CValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow route selection status is available"), "3C validation PASS"),
+    check("production selection proxy visible", fullMatchWorkbenchChainReplay3C.includes("production selection proxy: chain-context-safe-recycle-pv") && fullMatchWorkbenchChainReplay3CValidation.includes("production selection proxy is chain-context-safe-recycle-pv"), "production proxy visible"),
+    check("shadow selection candidate visible", fullMatchWorkbenchChainReplay3C.includes("shadow selection candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow selection candidate is chain-context-forward-progress-sh"), "shadow candidate visible"),
+    check("shadow selection action visible", fullMatchWorkbenchChainReplay3C.includes("shadow selection action type: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow selection action is FORWARD_PROGRESS"), "shadow action visible"),
+    check("shadow receiver and zone visible", fullMatchWorkbenchChainReplay3C.includes("shadow selection receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3C.includes("shadow selection target zone: Z4-HSR"), "shadow receiver/zone visible"),
+    check("shadow route selection contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchShadowRouteSelection.ts") && bundleSimulation.includes("FullMatchShadowRouteSelectionResult"), "shadow selection contract bundled"),
+    check("shadow selector bundled", bundleSimulation.includes("src/simulation/fullMatch/selectShadowRouteFromInfluencedCandidates.ts") && bundleSimulation.includes("selectShadowRouteFromInfluencedCandidates"), "shadow selector bundled"),
+    check("shadow selection signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchShadowRouteSelectionSignature.ts") && bundleSimulation.includes("FullMatchShadowRouteSelectionSignature"), "shadow signature bundled"),
+    check("matchReportBuilder shadow wiring bundled", bundleSimulation.includes("src/simulation/adapters/matchReportBuilder.ts") && bundleSimulation.includes("shadowRouteSelectionTags") && bundleSimulation.includes("shadowRouteSelectionReason"), "builder shadow wiring bundled"),
+    check("runFullMatch shadow wiring bundled", bundleSimulation.includes("selectShadowRouteFromInfluencedCandidates") && bundleSimulation.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION"), "runFullMatch shadow wiring bundled"),
+    check("closed candidates remain rejected", fullMatchWorkbenchChainReplay3C.includes("closed candidate rejected count: 1") && fullMatchWorkbenchChainReplay3CValidation.includes("CLOSED candidates remain unselectable"), "closed route rejected"),
+    check("unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3C.includes("unavailable candidate rejected count: 1") && fullMatchWorkbenchChainReplay3CValidation.includes("unavailable candidates remain unselectable"), "unavailable route rejected"),
+    check("selected shadow candidate legal and available", fullMatchWorkbenchChainReplay3C.includes("selected shadow candidate legal: true") && fullMatchWorkbenchChainReplay3C.includes("selected shadow candidate available: true"), "selected shadow candidate valid"),
+    check("shadow explanation present", fullMatchWorkbenchChainReplay3C.includes("shadow selection explanation: present") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow selection explanation is present"), "shadow explanation visible"),
+    check("shadow evidence included", fullMatchWorkbenchChainReplay3C.includes("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION") && bundleSimulation.includes("category: \"WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION\""), "shadow evidence visible"),
+    check("3C shadow tests bundled", bundleSimulation.includes("fullMatchShadowRouteSelection.test.ts") && bundleSimulation.includes("fullMatchShadowRouteSelectionGuard.test.ts"), "3C shadow tests bundled"),
+    check("3C runFullMatch shadow tests bundled", bundleSimulation.includes("runFullMatchExperimentalShadowRouteSelection.test.ts") && bundleSimulation.includes("runFullMatchShadowRouteSelectionScoringGuard.test.ts"), "3C full-match tests bundled"),
+    check("3C scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3c.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3c.test.ts"), "3C guards bundled"),
+    check("coach diagnosis mentions shadow selection", fullMatchWorkbenchChainReplay3C.includes("coach diagnosis mentions shadow route selection") && bundleSimulation.includes("selection shadow"), "coach diagnosis visible"),
+    check("default mode remains segment_harness", fullMatchWorkbenchChainReplay3C.includes("default full-match mode: segment_harness") && bundleSimulation.includes("DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE"), "default mode visible"),
+    check("experimental mode remains opt-in", fullMatchWorkbenchChainReplay3C.includes("experimental mode active by default: NO") && bundleSimulation.includes("workbench_chain_replay_experimental"), "experimental opt-in visible"),
+    check("normal full-match not production chain-driven", fullMatchWorkbenchChainReplay3C.includes("normal full-match chain-driven claim status: NO") && bundleSimulation.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match guarded"),
+    check("default shadow selection absent", fullMatchWorkbenchChainReplay3C.includes("default shadow route selection tag count: 0") || fullMatchWorkbenchChainReplay3C.includes("default shadow selection tag count: 0"), "default shadow clean"),
+    check("experimental shadow selection present", fullMatchWorkbenchChainReplay3C.includes("experimental shadow route selection tag count: greater than 0") || fullMatchWorkbenchChainReplay3C.includes("experimental shadow selection tag count: greater than 0"), "experimental shadow visible"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3C.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3CValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("shadow selection cannot mutate score", fullMatchWorkbenchChainReplay3C.includes("shadow route selection can mutate score: false") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow route selection cannot mutate score"), "score mutation forbidden"),
+    check("shadow selection cannot mutate scoring events", fullMatchWorkbenchChainReplay3C.includes("shadow route selection can mutate scoring events: false") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow route selection cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("shadow selection cannot drive production selection", fullMatchWorkbenchChainReplay3C.includes("shadow route selection can drive production selection: false") && fullMatchWorkbenchChainReplay3CValidation.includes("shadow route selection cannot drive production selection"), "production selection forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3CValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3CValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3CValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3C.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3C.includes("CONFIRM_EXPERIMENTAL_CHAIN_CONTEXT_TO_SHADOW_ROUTE_SELECTION") && fullMatchWorkbenchChainReplay3C.includes("CONFIRM_SHADOW_SELECTION_DOES_NOT_DRIVE_PRODUCTION") && fullMatchWorkbenchChainReplay3C.includes("PREPARE_EXPERIMENTAL_SHADOW_SELECTION_TO_CONTROLLED_SEGMENT_SELECTION"), "3C recommendations visible"),
+  ];
   const sprint3BExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2445,6 +2607,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection")
+      ? sprint3DChecks
+    : activeConfig.sprintName.includes("Sprint 3C - Experimental Chain Context to Shadow Route Selection")
+      ? sprint3CChecks
     : activeConfig.sprintName.includes("Sprint 3B - Experimental Chain Context to Route Candidate Influence")
       ? sprint3BChecks
     : activeConfig.sprintName.includes("Sprint 3A - Experimental Chain Influence on Segment Context")
