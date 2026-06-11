@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2T - Attribute-Driven Route Ranking. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2U - Selection-Driving Attribute Ranking. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

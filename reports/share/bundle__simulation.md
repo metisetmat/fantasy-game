@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2T - Attribute-Driven Route Ranking. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2U - Selection-Driving Attribute Ranking. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -1131,7 +1131,7 @@ export function analyzeRosterToMiniMatchGap(input: {
     workbenchPositionsCanSeedSpatialContext: true,
     miniMatchConsumesSpatialContextMetadata: "PARTIAL",
     attributeInfluenceLayerExists: true,
-    routeRankingAttributeInfluenceMode: "metadata_only",
+    routeRankingAttributeInfluenceMode: "candidate_modifier",
     remainingPrototypeDominance: "HIGH",
     rosterDrivesMiniMatchPlayerPositions: true,
     startersDriveActivePlayers: true,
@@ -1145,7 +1145,7 @@ export function analyzeRosterToMiniMatchGap(input: {
       "Sprint 2S can convert TeamSnapshot.roster into typed SpatialTeamContext.",
       "Sprint 2S can seed SpatialTeamContext positions from workbench truth.",
       "MiniMatchInput can carry SpatialMatchContext metadata and bounded route attribute influence summaries.",
-      "PlayerSnapshot roles and attributes now adjust candidate metadata, but final selection is not yet end-to-end attribute-driven.",
+      "PlayerSnapshot roles and attributes can now evaluate candidate_modifier selection under guardrails, but normal full-match selection is not yet end-to-end attribute-driven.",
       "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
       "CONTROL/BLITZ prototype teams remain a dominant source of mini-match tactical behavior.",
     ],
@@ -1153,8 +1153,9 @@ export function analyzeRosterToMiniMatchGap(input: {
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
-      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
+      "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
+      "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
+      "PREPARE_PROTOTYPE_SELECTION_REPLACEMENT",
     ],
   };
 }
@@ -1484,8 +1485,8 @@ import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
 import { runMiniMatch } from "../miniMatch";
 import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
-import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
-import type { RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
+import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
+import type { AttributeAdjustedSelectionResult, RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
 
 export type WorkbenchReplaySeedResult = {
   readonly fixtureId: string;
@@ -1501,6 +1502,11 @@ export type WorkbenchReplaySeedResult = {
   readonly selectedCandidateAttributeAdjustedScore?: number;
   readonly selectedCandidateInfluences?: readonly RouteAttributeInfluence[];
   readonly routeRankingUsesRealAttributes: RouteRankingAttributeUsage;
+  readonly attributeRankingMode: "metadata_only" | "candidate_modifier";
+  readonly metadataOnlySelectionResult?: AttributeAdjustedSelectionResult;
+  readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
+  readonly selectedBy?: "base_score" | "attribute_adjusted_score";
+  readonly selectionChangedByAttributes: boolean;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -1707,6 +1713,20 @@ export function runWorkbenchReplaySeed(input: {
   const selectedCandidate =
     attributeCandidates.find((candidate) => candidate.receiverId === selectedAction.receiverId) ??
     attributeCandidates.find((candidate) => candidate.actionType === selectedAction.actionType);
+  const metadataOnlySelectionResult = selectAttributeAdjustedCandidate({
+    candidates: attributeCandidates,
+    mode: "metadata_only",
+    spatialContext: beforeContext,
+    workbench: input.workbench,
+    ...(selectedCandidate === undefined ? {} : { baseSelectedCandidateId: selectedCandidate.candidateId }),
+  });
+  const candidateModifierSelectionResult = selectAttributeAdjustedCandidate({
+    candidates: attributeCandidates,
+    mode: "candidate_modifier",
+    spatialContext: beforeContext,
+    workbench: input.workbench,
+    ...(selectedCandidate === undefined ? {} : { baseSelectedCandidateId: selectedCandidate.candidateId }),
+  });
   const miniMatch = runMiniMatch({
     teamA: prototypeForTeam(input.matchInput.homeTeam.teamId),
     teamB: prototypeForTeam(input.matchInput.awayTeam.teamId),
@@ -1744,6 +1764,11 @@ export function runWorkbenchReplaySeed(input: {
     ...(selectedCandidate === undefined ? {} : { selectedCandidateAttributeAdjustedScore: selectedCandidate.attributeAdjustedScore }),
     ...(selectedCandidate === undefined ? {} : { selectedCandidateInfluences: selectedCandidate.attributeInfluences }),
     routeRankingUsesRealAttributes: "PARTIAL",
+    attributeRankingMode: "candidate_modifier",
+    metadataOnlySelectionResult,
+    attributeSelectionResult: candidateModifierSelectionResult,
+    selectedBy: candidateModifierSelectionResult.selectedBy,
+    selectionChangedByAttributes: candidateModifierSelectionResult.selectionChanged,
     missingTruths,
     lossyMappings,
     recommendations: [
@@ -1796,6 +1821,7 @@ export type RouteCandidateAttributeContext = {
   readonly targetZone: ZoneId;
   readonly actionType: string;
   readonly laneState?: string;
+  readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW";
   readonly baseScore: number;
   readonly attributeInfluences: readonly RouteAttributeInfluence[];
   readonly attributeAdjustedScore: number;
@@ -2117,6 +2143,7 @@ export type RouteCandidateInput = {
   readonly targetZone: ZoneId;
   readonly actionType: string;
   readonly laneState?: string;
+  readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW";
   readonly baseScore: number;
   readonly baseRisk?: number;
 };
@@ -2147,6 +2174,7 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
       targetZone: candidate.targetZone,
       actionType: candidate.actionType,
       ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
       baseScore: candidate.baseScore,
       attributeInfluences: [],
       attributeAdjustedScore: candidate.baseScore,
@@ -2169,6 +2197,7 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
         targetZone: candidate.targetZone,
         actionType: candidate.actionType,
         ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+        ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
         baseScore: candidate.baseScore,
         attributeInfluences: [],
         attributeAdjustedScore: candidate.baseScore,
@@ -2193,6 +2222,7 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
       targetZone: candidate.targetZone,
       actionType: candidate.actionType,
       ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
       baseScore: candidate.baseScore,
       attributeInfluences: influences,
       attributeAdjustedScore: applyRouteAttributeInfluence({
@@ -2201,6 +2231,452 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
       }),
     };
   });
+}
+```
+
+## File: src/simulation/routeRanking/routeRankingMode.ts
+
+```ts
+export type RouteRankingAttributeMode =
+  | "off"
+  | "metadata_only"
+  | "candidate_modifier"
+  | "selection_driving";
+
+export type RouteRankingModeConfig = {
+  readonly attributeMode: RouteRankingAttributeMode;
+  readonly preserveLegality: true;
+  readonly maxAttributeAdjustment: number;
+  readonly allowAttributeSelectionFlip: boolean;
+};
+
+export const DEFAULT_ROUTE_RANKING_MODE_CONFIG: RouteRankingModeConfig = {
+  attributeMode: "metadata_only",
+  preserveLegality: true,
+  maxAttributeAdjustment: 12,
+  allowAttributeSelectionFlip: false,
+};
+
+export function createRouteRankingModeConfig(
+  attributeMode: RouteRankingAttributeMode | undefined,
+): RouteRankingModeConfig {
+  if (attributeMode === "candidate_modifier" || attributeMode === "selection_driving") {
+    return {
+      attributeMode,
+      preserveLegality: true,
+      maxAttributeAdjustment: 12,
+      allowAttributeSelectionFlip: true,
+    };
+  }
+
+  return {
+    ...DEFAULT_ROUTE_RANKING_MODE_CONFIG,
+    attributeMode: attributeMode ?? DEFAULT_ROUTE_RANKING_MODE_CONFIG.attributeMode,
+  };
+}
+```
+
+## File: src/simulation/routeRanking/attributeDrivenSelectionGuard.ts
+
+```ts
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { SpatialMatchContext } from "../spatialContext";
+import type { RouteCandidateAttributeContext } from "./routeAttributeInfluenceTypes";
+
+export type AttributeDrivenSelectionBlockedReason =
+  | "CLOSED_LANE_NOT_OVERRIDABLE"
+  | "CANDIDATE_NOT_AVAILABLE_NOW"
+  | "ATTRIBUTE_ADJUSTMENT_OUT_OF_BOUNDS"
+  | "MISSING_ACTOR_IN_SPATIAL_CONTEXT"
+  | "MISSING_RECEIVER_IN_SPATIAL_CONTEXT"
+  | "WORKBENCH_TRUTH_VIOLATION";
+
+export type AttributeDrivenSelectionGuardResult = {
+  readonly valid: boolean;
+  readonly blockedReasons: readonly AttributeDrivenSelectionBlockedReason[];
+  readonly warnings: readonly string[];
+};
+
+function allPlayers(context: SpatialMatchContext) {
+  return [...context.home.players, ...context.away.players];
+}
+
+function matchesWorkbenchTruth(
+  candidate: RouteCandidateAttributeContext,
+  workbench: TacticalWorkbenchFrame,
+): boolean {
+  return (
+    candidate.actorId === workbench.selectedAction.actorId &&
+    candidate.actionType === workbench.selectedAction.actionType &&
+    candidate.receiverId === workbench.selectedAction.receiverId &&
+    candidate.fromZone === workbench.selectedAction.fromZone &&
+    candidate.targetZone === workbench.selectedAction.targetZone
+  );
+}
+
+export function guardAttributeDrivenSelection(input: {
+  readonly candidate: RouteCandidateAttributeContext;
+  readonly spatialContext?: SpatialMatchContext;
+  readonly baseSelectedCandidateId?: string;
+  readonly workbench?: TacticalWorkbenchFrame;
+  readonly maxAttributeAdjustment: number;
+  readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW";
+}): AttributeDrivenSelectionGuardResult {
+  const blockedReasons: AttributeDrivenSelectionBlockedReason[] = [];
+  const warnings: string[] = [];
+  const adjustment = input.candidate.attributeAdjustedScore - input.candidate.baseScore;
+  const isBaseSelection = input.baseSelectedCandidateId === input.candidate.candidateId;
+
+  if (Math.abs(adjustment) > input.maxAttributeAdjustment) {
+    blockedReasons.push("ATTRIBUTE_ADJUSTMENT_OUT_OF_BOUNDS");
+  }
+
+  if (!isBaseSelection && input.candidate.laneState === "CLOSED") {
+    blockedReasons.push("CLOSED_LANE_NOT_OVERRIDABLE");
+  }
+
+  if (!isBaseSelection && input.availability === "NOT_AVAILABLE_NOW") {
+    blockedReasons.push("CANDIDATE_NOT_AVAILABLE_NOW");
+  }
+
+  if (input.spatialContext !== undefined) {
+    const players = allPlayers(input.spatialContext);
+    const actor = players.find((player) => player.playerId === input.candidate.actorId);
+    const receiver = players.find((player) => player.playerId === input.candidate.receiverId);
+
+    if (actor === undefined) {
+      blockedReasons.push("MISSING_ACTOR_IN_SPATIAL_CONTEXT");
+    }
+
+    if (input.candidate.receiverId !== undefined && receiver === undefined) {
+      blockedReasons.push("MISSING_RECEIVER_IN_SPATIAL_CONTEXT");
+    }
+  }
+
+  if (!isBaseSelection && input.workbench !== undefined && !matchesWorkbenchTruth(input.candidate, input.workbench)) {
+    blockedReasons.push("WORKBENCH_TRUTH_VIOLATION");
+  }
+
+  if (input.candidate.laneState === "CLOSED") {
+    warnings.push("CLOSED lane remains closed; attributes cannot open it.");
+  }
+
+  if (input.availability === "NOT_AVAILABLE_NOW") {
+    warnings.push("Candidate is not available now and cannot be promoted by attributes.");
+  }
+
+  return {
+    valid: blockedReasons.length === 0,
+    blockedReasons,
+    warnings,
+  };
+}
+```
+
+## File: src/simulation/routeRanking/selectAttributeAdjustedCandidate.ts
+
+```ts
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { SpatialMatchContext } from "../spatialContext";
+import { guardAttributeDrivenSelection, type AttributeDrivenSelectionGuardResult } from "./attributeDrivenSelectionGuard";
+import type { RouteCandidateAttributeContext } from "./routeAttributeInfluenceTypes";
+import { createRouteRankingModeConfig, type RouteRankingAttributeMode, type RouteRankingModeConfig } from "./routeRankingMode";
+
+export type AttributeAdjustedSelectionResult = {
+  readonly mode: RouteRankingAttributeMode;
+  readonly selectedCandidateId: string;
+  readonly selectedBy: "base_score" | "attribute_adjusted_score";
+  readonly baseSelectedCandidateId?: string;
+  readonly selectionChanged: boolean;
+  readonly selectedCandidateBaseScore: number;
+  readonly selectedCandidateAdjustedScore: number;
+  readonly guard: AttributeDrivenSelectionGuardResult;
+  readonly explanation: string;
+};
+
+export type AttributeSelectionCandidate = RouteCandidateAttributeContext & {
+  readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW";
+};
+
+function topByBaseScore(candidates: readonly AttributeSelectionCandidate[]): AttributeSelectionCandidate {
+  const selected = [...candidates].sort((a, b) => b.baseScore - a.baseScore || a.candidateId.localeCompare(b.candidateId))[0];
+
+  if (selected === undefined) {
+    throw new Error("Attribute-adjusted selection requires at least one candidate.");
+  }
+
+  return selected;
+}
+
+function candidateById(
+  candidates: readonly AttributeSelectionCandidate[],
+  candidateId: string | undefined,
+): AttributeSelectionCandidate | undefined {
+  return candidateId === undefined ? undefined : candidates.find((candidate) => candidate.candidateId === candidateId);
+}
+
+function resultFromCandidate(input: {
+  readonly mode: RouteRankingAttributeMode;
+  readonly candidate: AttributeSelectionCandidate;
+  readonly selectedBy: "base_score" | "attribute_adjusted_score";
+  readonly baseSelectedCandidate: AttributeSelectionCandidate;
+  readonly guard: AttributeDrivenSelectionGuardResult;
+  readonly explanation: string;
+}): AttributeAdjustedSelectionResult {
+  return {
+    mode: input.mode,
+    selectedCandidateId: input.candidate.candidateId,
+    selectedBy: input.selectedBy,
+    baseSelectedCandidateId: input.baseSelectedCandidate.candidateId,
+    selectionChanged: input.candidate.candidateId !== input.baseSelectedCandidate.candidateId,
+    selectedCandidateBaseScore: input.candidate.baseScore,
+    selectedCandidateAdjustedScore: input.candidate.attributeAdjustedScore,
+    guard: input.guard,
+    explanation: input.explanation,
+  };
+}
+
+export function selectAttributeAdjustedCandidate(input: {
+  readonly candidates: readonly AttributeSelectionCandidate[];
+  readonly mode?: RouteRankingAttributeMode;
+  readonly modeConfig?: RouteRankingModeConfig;
+  readonly spatialContext?: SpatialMatchContext;
+  readonly workbench?: TacticalWorkbenchFrame;
+  readonly baseSelectedCandidateId?: string;
+}): AttributeAdjustedSelectionResult {
+  const modeConfig = input.modeConfig ?? createRouteRankingModeConfig(input.mode);
+  const mode = modeConfig.attributeMode;
+  const baseSelectedCandidate = candidateById(input.candidates, input.baseSelectedCandidateId) ?? topByBaseScore(input.candidates);
+  const baseGuard = guardAttributeDrivenSelection({
+    candidate: baseSelectedCandidate,
+    ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
+    baseSelectedCandidateId: baseSelectedCandidate.candidateId,
+    ...(input.workbench === undefined ? {} : { workbench: input.workbench }),
+    maxAttributeAdjustment: modeConfig.maxAttributeAdjustment,
+    ...(baseSelectedCandidate.availability === undefined ? {} : { availability: baseSelectedCandidate.availability }),
+  });
+
+  if (mode === "off" || mode === "metadata_only" || input.spatialContext === undefined || !modeConfig.allowAttributeSelectionFlip) {
+    return resultFromCandidate({
+      mode,
+      candidate: baseSelectedCandidate,
+      selectedBy: "base_score",
+      baseSelectedCandidate,
+      guard: baseGuard,
+      explanation:
+        mode === "metadata_only"
+          ? "metadata_only computes adjusted scores but keeps the base selected candidate."
+          : "attribute ranking mode does not authorize selection changes.",
+    });
+  }
+
+  const candidatesByAdjustedScore = [...input.candidates].sort((a, b) =>
+    b.attributeAdjustedScore - a.attributeAdjustedScore ||
+    b.baseScore - a.baseScore ||
+    a.candidateId.localeCompare(b.candidateId),
+  );
+  const blockedReasons: string[] = [];
+
+  for (const candidate of candidatesByAdjustedScore) {
+    const guard = guardAttributeDrivenSelection({
+      candidate,
+      ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
+      baseSelectedCandidateId: baseSelectedCandidate.candidateId,
+      ...(input.workbench === undefined ? {} : { workbench: input.workbench }),
+      maxAttributeAdjustment: modeConfig.maxAttributeAdjustment,
+      ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
+    });
+
+    if (!guard.valid) {
+      blockedReasons.push(`${candidate.candidateId}:${guard.blockedReasons.join("/")}`);
+      continue;
+    }
+
+    return resultFromCandidate({
+      mode,
+      candidate,
+      selectedBy: candidate.candidateId === baseSelectedCandidate.candidateId ? "base_score" : "attribute_adjusted_score",
+      baseSelectedCandidate,
+      guard,
+      explanation:
+        candidate.candidateId === baseSelectedCandidate.candidateId
+          ? "attribute-adjusted ranking kept the base selected candidate after guard checks."
+          : "attribute-adjusted ranking selected a different legal candidate after guard checks.",
+    });
+  }
+
+  return resultFromCandidate({
+    mode,
+    candidate: baseSelectedCandidate,
+    selectedBy: "base_score",
+    baseSelectedCandidate,
+    guard: {
+      valid: true,
+      blockedReasons: [],
+      warnings: [`attribute selection fell back to base candidate; blocked candidates: ${blockedReasons.join(", ")}`],
+    },
+    explanation: "attribute-adjusted candidates were blocked by guardrails, so selection fell back to the base candidate.",
+  });
+}
+```
+
+## File: src/simulation/routeRanking/fixtures/attributeRankingContrast.fixture.ts
+
+```ts
+import type { PlayerId, TeamId } from "../../../core/ids";
+import type { ZoneId } from "../../../core/zones";
+import type { SpatialMatchContext, SpatialPlayerContext } from "../../spatialContext";
+import type { RouteCandidateInput } from "../applySpatialAttributeInfluenceToCandidates";
+
+function player(input: {
+  readonly playerId: PlayerId;
+  readonly speed: number;
+  readonly handPlay: number;
+  readonly intelligence: number;
+  readonly mental: number;
+  readonly condition: number;
+  readonly freshness: number;
+}): SpatialPlayerContext {
+  return {
+    playerId: input.playerId,
+    teamId: "control",
+    role: "contrast_role",
+    displayRole: "Contrast Role",
+    zone: "Z4-HSL",
+    isStarter: true,
+    isGoalkeeper: false,
+    isBallCarrier: input.playerId === "contrast-actor",
+    currentCondition: input.condition,
+    mentalFreshness: input.freshness,
+    attributes: {
+      speed: input.speed,
+      power: 74,
+      endurance: 78,
+      handPlay: input.handPlay,
+      footPlayDribble: input.speed,
+      footPlayPassingShooting: 72,
+      intelligence: input.intelligence,
+      mental: input.mental,
+    },
+    tacticalFunctions: input.playerId === "elite-runner" ? ["weak_side_runner"] : ["support_balance"],
+  };
+}
+
+export const attributeRankingContrastSpatialContext: SpatialMatchContext = {
+  matchId: "attribute-ranking-contrast",
+  possessionTeamId: "control",
+  defendingTeamId: "blitz",
+  ballCarrierId: "contrast-actor",
+  ballZone: "Z4-HSL",
+  attackingDirection: "LEFT_TO_RIGHT",
+  sourceWorkbenchFrameId: "attribute-ranking-contrast",
+  home: {
+    teamId: "control",
+    name: "CONTROL",
+    goalkeeperId: "contrast-gk",
+    starters: ["contrast-actor", "safe-receiver", "elite-runner", "contrast-gk"],
+    activePlayerIds: ["contrast-actor", "safe-receiver", "elite-runner", "contrast-gk"],
+    shapeSource: "team_snapshot_default",
+    tacticalPlanSummary: "contrast fixture",
+    knownLimitations: [],
+    players: [
+      player({
+        playerId: "contrast-actor",
+        speed: 72,
+        handPlay: 84,
+        intelligence: 86,
+        mental: 84,
+        condition: 90,
+        freshness: 90,
+      }),
+      player({
+        playerId: "safe-receiver",
+        speed: 54,
+        handPlay: 54,
+        intelligence: 55,
+        mental: 55,
+        condition: 72,
+        freshness: 70,
+      }),
+      player({
+        playerId: "elite-runner",
+        speed: 96,
+        handPlay: 82,
+        intelligence: 90,
+        mental: 88,
+        condition: 94,
+        freshness: 94,
+      }),
+      {
+        ...player({
+          playerId: "contrast-gk",
+          speed: 50,
+          handPlay: 88,
+          intelligence: 80,
+          mental: 84,
+          condition: 92,
+          freshness: 92,
+        }),
+        isGoalkeeper: true,
+      },
+    ],
+  },
+  away: {
+    teamId: "blitz",
+    name: "BLITZ",
+    goalkeeperId: "blitz-gk",
+    starters: ["blitz-gk"],
+    activePlayerIds: ["blitz-gk"],
+    shapeSource: "team_snapshot_default",
+    tacticalPlanSummary: "contrast fixture",
+    knownLimitations: [],
+    players: [],
+  },
+};
+
+export function legalContrastCandidates(): readonly RouteCandidateInput[] {
+  return [
+    {
+      candidateId: "safe-recycle",
+      actorId: "contrast-actor",
+      receiverId: "safe-receiver",
+      teamId: "control" as TeamId,
+      fromZone: "Z4-HSL" as ZoneId,
+      targetZone: "Z3-C" as ZoneId,
+      actionType: "SUPPORT_CLUSTER_RECYCLE",
+      laneState: "CONTESTED",
+      baseScore: 80,
+      baseRisk: 25,
+    },
+    {
+      candidateId: "elite-weak-side",
+      actorId: "contrast-actor",
+      receiverId: "elite-runner",
+      teamId: "control" as TeamId,
+      fromZone: "Z4-HSL" as ZoneId,
+      targetZone: "Z5-HSR" as ZoneId,
+      actionType: "WEAK_SIDE_SWITCH",
+      laneState: "OPEN",
+      baseScore: 77,
+      baseRisk: 35,
+    },
+  ];
+}
+
+export function closedLaneContrastCandidates(): readonly RouteCandidateInput[] {
+  return legalContrastCandidates().map((candidate) =>
+    candidate.candidateId === "elite-weak-side"
+      ? { ...candidate, laneState: "CLOSED" }
+      : candidate,
+  );
+}
+
+export function unavailableContrastCandidates(): readonly (RouteCandidateInput & { readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW" })[] {
+  return legalContrastCandidates().map((candidate) =>
+    candidate.candidateId === "elite-weak-side"
+      ? { ...candidate, availability: "NOT_AVAILABLE_NOW" }
+      : candidate,
+  );
 }
 ```
 
@@ -2215,8 +2691,10 @@ export type FullMatchGroundingWarning =
   | "WORKBENCH_REPLAY_SEED_AVAILABLE"
   | "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION"
   | "ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE"
-  | "ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL"
-  | "PROTOTYPE_SELECTION_STILL_DOMINANT"
+  | "ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE"
+  | "ATTRIBUTE_SELECTION_GUARD_ACTIVE"
+  | "ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE"
+  | "PROTOTYPE_SELECTION_STILL_PARTIAL"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
 
@@ -2240,8 +2718,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "WORKBENCH_REPLAY_SEED_AVAILABLE",
     "TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION",
     "ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE",
-    "ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL",
-    "PROTOTYPE_SELECTION_STILL_DOMINANT",
+    "ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE",
+    "ATTRIBUTE_SELECTION_GUARD_ACTIVE",
+    "ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE",
+    "PROTOTYPE_SELECTION_STILL_PARTIAL",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
 
@@ -2256,15 +2736,16 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and route candidates can receive bounded attribute influence, but the harness does not yet replay the full workbench sequence chain or drive final selection from real player attributes.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and route candidates can be evaluated through guarded candidate_modifier attribute selection, but the harness does not yet replay the full workbench sequence chain or make real player attributes authoritative for every final choice.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
       "CONFIRM_MINIMATCH_SPATIAL_CONTEXT_PARTIAL",
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
+      "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
+      "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
-      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
+      "PREPARE_PROTOTYPE_SELECTION_REPLACEMENT",
       "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };
@@ -2377,7 +2858,7 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   assertTest(analysis.startersDriveActivePlayers, "TeamSnapshot.starters must now drive adapter-level active player IDs.");
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
   assertTest(analysis.attributeInfluenceLayerExists, "attribute influence layer must be reported as available.");
-  assertTest(analysis.routeRankingAttributeInfluenceMode === "metadata_only", "attribute influence mode must be metadata_only.");
+  assertTest(analysis.routeRankingAttributeInfluenceMode === "candidate_modifier", "attribute influence mode must be candidate_modifier.");
   assertTest(analysis.visibleAttributesDriveRouteRanking === "PARTIAL", "visible attributes must reduce ranking gap to PARTIAL.");
   assertTest(analysis.remainingPrototypeDominance === "HIGH", "remaining prototype dominance must be reported honestly.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
@@ -2388,7 +2869,7 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
     "TeamSnapshot roster and starters now drive adapter-level spatial context",
     "workbench positions can seed spatial context",
     "route attribute influence layer exists",
-    "visible attributes drive route ranking partially",
+    "visible attributes drive candidate_modifier route ranking partially",
     "prototype dominance is still documented",
     "lost player identity is listed",
   ];
@@ -2520,6 +3001,11 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.selectedActionRepresented, "SUPPORT_CLUSTER_RECYCLE selected action must be represented.");
   assertTest(result.attributeInfluenceApplied, "replay seed must apply route attribute influence.");
   assertTest(result.routeRankingUsesRealAttributes === "PARTIAL", "replay seed must report attribute route ranking as PARTIAL.");
+  assertTest(result.attributeRankingMode === "candidate_modifier", "replay seed must evaluate candidate_modifier mode.");
+  assertTest(result.metadataOnlySelectionResult?.selectedCandidateId === "rank-1", "metadata_only replay selection must keep base rank-1.");
+  assertTest(result.attributeSelectionResult?.selectedCandidateId === "rank-1", "candidate_modifier replay selection must preserve TH -> ML for workbench truth.");
+  assertTest(result.selectedBy === "base_score", "sequence-1-action-1 should remain selected by base score after guard checks.");
+  assertTest(!result.selectionChangedByAttributes, "sequence-1-action-1 must not change selection by attributes.");
   assertTest(result.selectedCandidateBaseScore !== undefined, "selected candidate base score must be exposed.");
   assertTest(result.selectedCandidateAttributeAdjustedScore !== undefined, "selected candidate adjusted score must be exposed.");
   assertTest((result.selectedCandidateInfluences ?? []).length > 0, "selected candidate influences must be exposed.");
@@ -2537,6 +3023,8 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "after ball zone Z3-HSL is preserved",
     "selected action type SUPPORT_CLUSTER_RECYCLE is represented",
     "route attribute influence is applied",
+    "candidate_modifier mode is evaluated",
+    "TH -> ML remains selected under candidate_modifier guard",
     "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",
   ];
@@ -2785,6 +3273,287 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/routeRanking/attributeDrivenSelectionGuard.test.ts
+
+```ts
+import { applySpatialAttributeInfluenceToCandidates } from "./applySpatialAttributeInfluenceToCandidates";
+import { guardAttributeDrivenSelection } from "./attributeDrivenSelectionGuard";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { RouteCandidateAttributeContext } from "./routeAttributeInfluenceTypes";
+import {
+  attributeRankingContrastSpatialContext,
+  closedLaneContrastCandidates,
+  legalContrastCandidates,
+  unavailableContrastCandidates,
+} from "./fixtures/attributeRankingContrast.fixture";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateAttributeDrivenSelectionGuard(): readonly string[] {
+  const legalCandidates = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: legalContrastCandidates(),
+  });
+  const closedCandidates = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: closedLaneContrastCandidates(),
+  });
+  const unavailableCandidates = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: unavailableContrastCandidates(),
+  });
+  const legalWeakSide = legalCandidates.find((candidate) => candidate.candidateId === "elite-weak-side");
+  const closedWeakSide = closedCandidates.find((candidate) => candidate.candidateId === "elite-weak-side");
+  const unavailableWeakSide = unavailableCandidates.find((candidate) => candidate.candidateId === "elite-weak-side");
+  const safeRecycle = legalCandidates.find((candidate) => candidate.candidateId === "safe-recycle");
+  const missingActor = legalCandidates[0] === undefined
+    ? undefined
+    : {
+        ...legalCandidates[0],
+        actorId: "missing-actor",
+      };
+
+  assertTest(legalWeakSide !== undefined, "contrast fixture must include legal weak-side candidate.");
+  assertTest(safeRecycle !== undefined, "contrast fixture must include safe recycle candidate.");
+  assertTest(closedWeakSide !== undefined, "contrast fixture must include closed weak-side candidate.");
+  assertTest(unavailableWeakSide !== undefined, "contrast fixture must include unavailable weak-side candidate.");
+
+  if (legalWeakSide !== undefined && closedWeakSide !== undefined && unavailableWeakSide !== undefined && safeRecycle !== undefined) {
+    const shotTargetZone = "Z5-C";
+    const wrongTargetZone = "Z4-HSL";
+    const { receiverId: _safeRecycleReceiverId, ...safeRecycleWithoutReceiver } = safeRecycle;
+    const receiverlessWorkbench: TacticalWorkbenchFrame = {
+      frameId: "receiverless-workbench",
+      sequenceId: "test-sequence",
+      actionId: "test-action",
+      phase: "finishing",
+      possessionTeamId: legalWeakSide.teamId,
+      defendingTeamId: "BLITZ",
+      ballCarrierId: legalWeakSide.actorId,
+      ballZone: legalWeakSide.fromZone,
+      attackingDirection: "left-to-right",
+      playerPositions: [],
+      teamShapeIntents: [],
+      selectedAction: {
+        actorId: legalWeakSide.actorId,
+        fromZone: legalWeakSide.fromZone,
+        targetZone: shotTargetZone,
+        actionType: "SHOT",
+      },
+      rankedOptions: [],
+    };
+    const receiverlessMatchingCandidate: RouteCandidateAttributeContext = {
+      ...safeRecycleWithoutReceiver,
+      candidateId: "receiverless-shot-truth",
+      actorId: legalWeakSide.actorId,
+      fromZone: legalWeakSide.fromZone,
+      targetZone: shotTargetZone,
+      actionType: "SHOT",
+    };
+    const receiverlessWrongReceiverCandidate: RouteCandidateAttributeContext = {
+      ...receiverlessMatchingCandidate,
+      candidateId: "receiverless-shot-wrong-receiver",
+      receiverId: "control-hook-link",
+    };
+    const receiverlessWrongTargetCandidate: RouteCandidateAttributeContext = {
+      ...receiverlessMatchingCandidate,
+      candidateId: "receiverless-shot-wrong-target",
+      targetZone: wrongTargetZone,
+    };
+    const legalGuard = guardAttributeDrivenSelection({
+      candidate: legalWeakSide,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      maxAttributeAdjustment: 12,
+    });
+    const closedGuard = guardAttributeDrivenSelection({
+      candidate: closedWeakSide,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      maxAttributeAdjustment: 12,
+    });
+    const unavailableGuard = guardAttributeDrivenSelection({
+      candidate: unavailableWeakSide,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      maxAttributeAdjustment: 12,
+      availability: "NOT_AVAILABLE_NOW",
+    });
+    const missingActorGuard = missingActor === undefined
+      ? { valid: false, blockedReasons: [], warnings: [] }
+      : guardAttributeDrivenSelection({
+          candidate: missingActor,
+          spatialContext: attributeRankingContrastSpatialContext,
+          baseSelectedCandidateId: "safe-recycle",
+          maxAttributeAdjustment: 12,
+        });
+    const receiverlessMatchGuard = guardAttributeDrivenSelection({
+      candidate: receiverlessMatchingCandidate,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      workbench: receiverlessWorkbench,
+      maxAttributeAdjustment: 12,
+    });
+    const receiverlessWrongReceiverGuard = guardAttributeDrivenSelection({
+      candidate: receiverlessWrongReceiverCandidate,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      workbench: receiverlessWorkbench,
+      maxAttributeAdjustment: 12,
+    });
+    const receiverlessWrongTargetGuard = guardAttributeDrivenSelection({
+      candidate: receiverlessWrongTargetCandidate,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      workbench: receiverlessWorkbench,
+      maxAttributeAdjustment: 12,
+    });
+
+    assertTest(legalGuard.valid, "legal adjusted candidate must pass guard.");
+    assertTest(
+      closedGuard.blockedReasons.includes("CLOSED_LANE_NOT_OVERRIDABLE"),
+      "closed lane must block attribute-driven selection flip.",
+    );
+    assertTest(
+      unavailableGuard.blockedReasons.includes("CANDIDATE_NOT_AVAILABLE_NOW"),
+      "NOT_AVAILABLE_NOW candidate must be blocked.",
+    );
+    assertTest(
+      missingActorGuard.blockedReasons.includes("MISSING_ACTOR_IN_SPATIAL_CONTEXT"),
+      "missing actor must block selection flip.",
+    );
+    assertTest(receiverlessMatchGuard.valid, "receiverless workbench truth candidate must pass exact guard.");
+    assertTest(
+      receiverlessWrongReceiverGuard.blockedReasons.includes("WORKBENCH_TRUTH_VIOLATION"),
+      "receiverless workbench action must reject candidates that add a receiver.",
+    );
+    assertTest(
+      receiverlessWrongTargetGuard.blockedReasons.includes("WORKBENCH_TRUTH_VIOLATION"),
+      "receiverless workbench action must reject candidates with a different target zone.",
+    );
+  }
+
+  return [
+    "legal adjusted candidate passes guard",
+    "closed lane cannot be overridden by attributes",
+    "NOT_AVAILABLE_NOW cannot become selected by attributes",
+    "missing actor blocks attribute-driven selection",
+    "receiverless workbench truth requires exact receiver and target identity",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateAttributeDrivenSelectionGuard();
+
+  console.log("attributeDrivenSelectionGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/routeRanking/selectAttributeAdjustedCandidate.test.ts
+
+```ts
+import { applySpatialAttributeInfluenceToCandidates } from "./applySpatialAttributeInfluenceToCandidates";
+import {
+  attributeRankingContrastSpatialContext,
+  closedLaneContrastCandidates,
+  legalContrastCandidates,
+  unavailableContrastCandidates,
+} from "./fixtures/attributeRankingContrast.fixture";
+import { selectAttributeAdjustedCandidate } from "./selectAttributeAdjustedCandidate";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSelectAttributeAdjustedCandidate(): readonly string[] {
+  const legalAdjusted = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: legalContrastCandidates(),
+  });
+  const closedAdjusted = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: closedLaneContrastCandidates(),
+  });
+  const unavailableAdjusted = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: unavailableContrastCandidates(),
+  });
+  const metadataOnly = selectAttributeAdjustedCandidate({
+    candidates: legalAdjusted,
+    mode: "metadata_only",
+    spatialContext: attributeRankingContrastSpatialContext,
+    baseSelectedCandidateId: "safe-recycle",
+  });
+  const legalFlip = selectAttributeAdjustedCandidate({
+    candidates: legalAdjusted,
+    mode: "candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    baseSelectedCandidateId: "safe-recycle",
+  });
+  const closedBlocked = selectAttributeAdjustedCandidate({
+    candidates: closedAdjusted,
+    mode: "candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    baseSelectedCandidateId: "safe-recycle",
+  });
+  const unavailableBlocked = selectAttributeAdjustedCandidate({
+    candidates: unavailableAdjusted,
+    mode: "candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    baseSelectedCandidateId: "safe-recycle",
+  });
+  const noSpatialContext = selectAttributeAdjustedCandidate({
+    candidates: legalAdjusted,
+    mode: "candidate_modifier",
+    baseSelectedCandidateId: "safe-recycle",
+  });
+
+  assertTest(metadataOnly.selectedCandidateId === "safe-recycle", "metadata_only must keep base selection.");
+  assertTest(metadataOnly.selectedBy === "base_score", "metadata_only must select by base score.");
+  assertTest(legalFlip.selectedCandidateId === "elite-weak-side", "candidate_modifier must allow legal attribute-driven flip.");
+  assertTest(legalFlip.selectedBy === "attribute_adjusted_score", "legal flip must be selected by adjusted score.");
+  assertTest(legalFlip.selectionChanged, "legal flip must report selectionChanged.");
+  assertTest(closedBlocked.selectedCandidateId === "safe-recycle", "closed lane candidate must not overtake base selection.");
+  assertTest(
+    closedBlocked.selectedBy === "base_score",
+    "closed lane fallback must keep base-score selection.",
+  );
+  assertTest(unavailableBlocked.selectedCandidateId === "safe-recycle", "NOT_AVAILABLE_NOW candidate must not overtake base selection.");
+  assertTest(noSpatialContext.selectedCandidateId === "safe-recycle", "no spatialContext must preserve previous behavior.");
+  assertTest(
+    legalAdjusted.every((candidate) => Math.abs(candidate.attributeAdjustedScore - candidate.baseScore) <= 12),
+    "adjustment bound must still be respected.",
+  );
+
+  return [
+    "metadata_only keeps base selection",
+    "candidate_modifier can select by adjusted score",
+    "candidate_modifier cannot select CLOSED lane",
+    "NOT_AVAILABLE_NOW cannot be selected by attributes",
+    "no spatialContext preserves previous behavior",
+    "attribute adjustment bound remains respected",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSelectAttributeAdjustedCandidate();
+
+  console.log("selectAttributeAdjustedCandidate tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/fullMatchGroundingDiagnostics.test.ts
 
 ```ts
@@ -2821,8 +3590,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("SPATIAL_CONTEXT_ADAPTER_AVAILABLE"), "spatial context adapter availability must be emitted.");
   assertTest(diagnostics.warnings.includes("WORKBENCH_REPLAY_SEED_AVAILABLE"), "workbench replay seed availability must be emitted.");
   assertTest(diagnostics.warnings.includes("ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE"), "route attribute influence availability must be emitted.");
-  assertTest(diagnostics.warnings.includes("ROUTE_RANKING_ATTRIBUTE_INFLUENCE_PARTIAL"), "partial route ranking attribute influence must be emitted.");
-  assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_DOMINANT"), "prototype selection dominance must still be emitted.");
+  assertTest(diagnostics.warnings.includes("ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE"), "candidate_modifier availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("ATTRIBUTE_SELECTION_GUARD_ACTIVE"), "attribute selection guard activity must be emitted.");
+  assertTest(diagnostics.warnings.includes("ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE"), "full-match authority limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_PARTIAL"), "prototype selection partiality must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
   assertTest(
@@ -4620,7 +5391,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant etre expliques depuis le SpatialContext. La selection finale reste encore partiellement pilotee par le chemin prototype.";
+    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant modifier une selection candidate sous garde-fous. La selection full-match finale reste encore partiellement pilotee par le chemin prototype.";
 
   return [
     {
@@ -4641,6 +5412,8 @@ function tacticalGroundingGapFacts(input: {
         "workbench_truth_fixture_available",
         "workbench_replay_seed",
         "route_attribute_influence",
+        "candidate_modifier_mode",
+        "attribute_selection_guard",
       ],
     },
     {
@@ -4672,7 +5445,7 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones while applying bounded attribute-adjusted candidate scores.",
+      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones while evaluating metadata_only and candidate_modifier attribute selection. The guard preserves TH -> ML for this fixture.",
       confidence: "low",
       strength: 58,
       coachVisible: false,
@@ -4681,6 +5454,8 @@ function tacticalGroundingGapFacts(input: {
         "workbench_replay_seed_partial",
         "attribute_adjusted_candidate_scores_available",
         "attribute_adjusted_score",
+        "attribute_adjusted_selection",
+        "replay_seed_attribute_selection_partial",
       ],
     },
     {
@@ -4701,10 +5476,11 @@ function tacticalGroundingGapFacts(input: {
         "route_attribute_influence_available",
         "route_attribute_influence",
         "selected_route_attribute_explanation_available",
+        "attribute_candidate_modifier_available",
       ],
     },
     {
-      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap-partial`,
+      factId: `${input.matchInput.matchId}-attribute-selection-guard-available`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -4712,13 +5488,16 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "PlayerSnapshot roles and attributes now influence candidate metadata, but final mini-match selection remains prototype-dominant rather than fully attribute-driven.",
+      summary: "The attribute selection guard can allow a legal adjusted candidate flip while blocking CLOSED lanes and NOT_AVAILABLE_NOW routes; normal full-match selection is still only partially attribute-driven.",
       confidence: "low",
       strength: 61,
       coachVisible: false,
       internalTags: [
         "tactical_grounding_gap",
-        "route_ranking_attribute_gap_partial",
+        "attribute_selection_guard_available",
+        "attribute_selection_flip_possible_when_legal",
+        "closed_lane_not_overridden_by_attributes",
+        "closed_lane_not_overridden",
         "prototype_selection_still_partial",
       ],
     },
@@ -7898,7 +8677,7 @@ import type { TacticalMemoryState } from "../../systems/tacticalMemory";
 import type { RecoverySaturationState } from "../../systems/structure";
 import type { OffensiveMomentumState } from "../../systems/offense/momentum";
 import type { SpatialMatchContext as AdapterSpatialMatchContext } from "../spatialContext/spatialTeamContextTypes";
-import type { RouteAttributeInfluenceMode, RouteRankingAttributeUsage } from "../routeRanking";
+import type { AttributeAdjustedSelectionResult, RouteRankingAttributeMode, RouteRankingAttributeUsage } from "../routeRanking";
 
 export interface MiniMatchInput {
   readonly teamA: PrototypeTeamDefinition;
@@ -7908,6 +8687,7 @@ export interface MiniMatchInput {
   readonly seed?: number;
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
   readonly spatialContext?: AdapterSpatialMatchContext;
+  readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
 }
 
 export interface MiniMatchTeamSegmentInfluence {
@@ -8040,6 +8820,7 @@ export interface MiniMatchContext {
   readonly attackingDirections: readonly TeamDirectionAssignment[];
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
   readonly spatialContext?: AdapterSpatialMatchContext;
+  readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
 }
 
 export interface MiniMatchContinuityState {
@@ -8061,9 +8842,10 @@ export interface MiniMatchSequenceSetup {
   readonly possessionReason: string;
   readonly spatialContextActive: boolean;
   readonly spatialContextSummary?: string;
-  readonly attributeInfluenceMode?: RouteAttributeInfluenceMode;
+  readonly attributeInfluenceMode?: RouteRankingAttributeMode;
   readonly routeRankingUsesRealAttributes?: RouteRankingAttributeUsage;
   readonly attributeInfluenceSummary?: string;
+  readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
   readonly resolveInput: ResolveSequenceInput;
 }
 
@@ -8373,6 +9155,7 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
     }),
     ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
     ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
+    ...(input.routeRankingAttributeMode === undefined ? {} : { routeRankingAttributeMode: input.routeRankingAttributeMode }),
   };
   const influenceAverage = input.segmentInfluence === undefined
     ? 0
@@ -8477,7 +9260,7 @@ import { TacticalPhaseState } from "../../systems/tacticalState";
 import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
 import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
-import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
+import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate, type AttributeAdjustedSelectionResult } from "../routeRanking";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -8698,7 +9481,7 @@ function spatialContextSummary(state: MiniMatchState): string | undefined {
   ].join("; ");
 }
 
-function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
+function attributeSelectionResult(state: MiniMatchState): AttributeAdjustedSelectionResult | undefined {
   const spatialContext = state.context.spatialContext;
 
   if (spatialContext === undefined) {
@@ -8712,10 +9495,10 @@ function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
   const receiver = players.find((player) => player.playerId !== spatialContext.ballCarrierId && !player.isGoalkeeper);
 
   if (actor === undefined) {
-    return "attribute_influence_active; mode=metadata_only; actor=missing; routeRankingUsesRealAttributes=PARTIAL";
+    return undefined;
   }
 
-  const candidate = applySpatialAttributeInfluenceToCandidates({
+  const candidates = applySpatialAttributeInfluenceToCandidates({
     spatialContext,
     pressureLevel: "MEDIUM",
     candidates: [
@@ -8732,25 +9515,35 @@ function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
         baseRisk: 35,
       },
     ],
-  })[0];
+  });
 
-  if (candidate === undefined) {
-    return "attribute_influence_active; mode=metadata_only; candidate=missing; routeRankingUsesRealAttributes=PARTIAL";
+  return selectAttributeAdjustedCandidate({
+    candidates,
+    mode: state.context.routeRankingAttributeMode ?? "metadata_only",
+    spatialContext,
+    baseSelectedCandidateId: "spatial-context-metadata-candidate",
+  });
+}
+
+function attributeInfluenceSummary(result: AttributeAdjustedSelectionResult | undefined): string | undefined {
+  if (result === undefined) {
+    return undefined;
   }
 
-  const reasons = candidate.attributeInfluences
-    .slice(0, 2)
-    .map((influence) => influence.category)
-    .join("/");
+  const modeLabel = result.mode === "candidate_modifier"
+    ? "attribute_selection_mode_candidate_modifier"
+    : `mode=${result.mode}`;
 
   return [
     "attribute_influence_active",
-    "mode=metadata_only",
-    `actor=${actor.playerId}`,
-    `receiver=${receiver?.playerId ?? "none"}`,
-    `base=${candidate.baseScore}`,
-    `adjusted=${candidate.attributeAdjustedScore}`,
-    `reasons=${reasons.length === 0 ? "none" : reasons}`,
+    modeLabel,
+    result.selectionChanged ? "candidate_modifier_evaluated_selection_changed" : "candidate_modifier_evaluated_not_authoritative",
+    `baseSelected=${result.baseSelectedCandidateId ?? "none"}`,
+    `selected=${result.selectedCandidateId}`,
+    `selectedBy=${result.selectedBy}`,
+    `base=${result.selectedCandidateBaseScore}`,
+    `adjusted=${result.selectedCandidateAdjustedScore}`,
+    `blocked=${result.guard.blockedReasons.join("/") || "none"}`,
     "routeRankingUsesRealAttributes=PARTIAL",
   ].join("; ");
 }
@@ -8806,7 +9599,8 @@ export function selectInitialSequenceContext(
   const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
   const startTick = state.context.startTick + sequenceIndex * 10;
   const spatialSummary = spatialContextSummary(state);
-  const attributeSummary = attributeInfluenceSummary(state);
+  const selectionResult = attributeSelectionResult(state);
+  const attributeSummary = attributeInfluenceSummary(selectionResult);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -8821,9 +9615,10 @@ export function selectInitialSequenceContext(
     ...(attributeSummary === undefined
       ? {}
       : {
-          attributeInfluenceMode: "metadata_only" as const,
+          attributeInfluenceMode: state.context.routeRankingAttributeMode ?? "metadata_only" as const,
           routeRankingUsesRealAttributes: "PARTIAL" as const,
           attributeInfluenceSummary: attributeSummary,
+          ...(selectionResult === undefined ? {} : { attributeSelectionResult: selectionResult }),
         }),
     resolveInput: {
       startTick,
@@ -8929,6 +9724,9 @@ export function runMiniMatch(input: MiniMatchInput): MiniMatchResult {
 ```ts
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { adaptMatchInputToMiniMatch } from "../adapters/matchInputToMiniMatch";
+import { sequence1Action1WorkbenchTruth } from "../grounding/fixtures/sequence1Action1.fixture";
+import { createWorkbenchReplayMatchInput } from "../grounding/runWorkbenchReplaySeed";
+import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { runFullMatch } from "../runFullMatch";
 import { runMiniMatch } from "./runMiniMatch";
 import type { MiniMatchSegmentInfluence } from "./types";
@@ -8964,6 +9762,18 @@ export function validateMiniMatchSegmentInfluence(): readonly string[] {
   const adapter = adaptMatchInputToMiniMatch(input);
   const baselineA = runMiniMatch(adapter.miniMatchInput);
   const baselineB = runMiniMatch(adapter.miniMatchInput);
+  const replayInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const replaySpatialContext = workbenchToSpatialMatchContext({
+    matchInput: replayInput,
+    workbench: sequence1Action1WorkbenchTruth,
+    frame: "before",
+  });
+  const candidateModifierMiniMatch = runMiniMatch({
+    ...adapter.miniMatchInput,
+    numberOfSequences: 1,
+    spatialContext: replaySpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+  });
   const influence: MiniMatchSegmentInfluence = {
     segmentIndex: 2,
     scoreState: "close",
@@ -9026,6 +9836,22 @@ export function validateMiniMatchSegmentInfluence(): readonly string[] {
   assertTest(
     baselineA.state.context.spatialContext === undefined,
     "runMiniMatch without spatial context must remain backward compatible.",
+  );
+  assertTest(
+    baselineA.state.context.routeRankingAttributeMode === undefined,
+    "runMiniMatch without explicit routeRankingAttributeMode must preserve previous behavior.",
+  );
+  assertTest(
+    candidateModifierMiniMatch.state.records[0]?.setup.attributeInfluenceMode === "candidate_modifier",
+    "runMiniMatch with spatialContext and candidate_modifier must expose candidate_modifier metadata.",
+  );
+  assertTest(
+    candidateModifierMiniMatch.state.records[0]?.setup.attributeSelectionResult !== undefined,
+    "candidate_modifier metadata must include attribute selection result.",
+  );
+  assertTest(
+    candidateModifierMiniMatch.logs.some((log) => log.text.includes("attribute_selection_mode_candidate_modifier")),
+    "candidate_modifier logs must expose selection mode.",
   );
   assertTest(
     influenced.state.context.segmentInfluence !== undefined,

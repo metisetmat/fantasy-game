@@ -124,6 +124,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const rosterToSpatialContextAdapterValidation = readIfExists(join(shareDirectory, "validation.roster-to-spatial-context-adapter.md"));
   const attributeDrivenRouteRanking = readIfExists(join(shareDirectory, "attribute-driven-route-ranking.md"));
   const attributeDrivenRouteRankingValidation = readIfExists(join(shareDirectory, "validation.attribute-driven-route-ranking.md"));
+  const selectionDrivingAttributeRanking = readIfExists(join(shareDirectory, "selection-driving-attribute-ranking.md"));
+  const selectionDrivingAttributeRankingValidation = readIfExists(join(shareDirectory, "validation.selection-driving-attribute-ranking.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
@@ -1752,6 +1754,68 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint2UExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "validation.share-pack.md",
+    "selection-driving-attribute-ranking.md",
+    "validation.selection-driving-attribute-ranking.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint2UForbiddenLeftovers = [
+    "attribute-driven-route-ranking.md",
+    "validation.attribute-driven-route-ranking.md",
+    "roster-to-spatial-context-adapter.md",
+    "validation.roster-to-spatial-context-adapter.md",
+    "bundle__docs.md",
+  ];
+  const sprint2UChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 2U", activeConfig.sprintName === "Sprint 2U - Selection-Driving Attribute Ranking", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 14", filesOnDisk.length === 14, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 14", allowlistedFiles.length === 14, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint2UForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint2UForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint2UExpectedFiles.every((file) => requiredCopied(file)), sprint2UExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 2U", manifest.includes("Sprint 2U - Selection-Driving Attribute Ranking") && detailedManifest.includes("Sprint 2U - Selection-Driving Attribute Ranking"), "Sprint 2U visible"),
+    check("README is Sprint 2U oriented", readme.includes("# Sprint 2U Share Pack") && readme.includes("selection-driving-attribute-ranking.md"), "README current"),
+    check("workbench artifact copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionOneWorkbench.includes("data-player-id=\"control-tempo-half\""), "sequence workbench copied"),
+    check("selection-driving attribute ranking report included", selectionDrivingAttributeRanking.includes("# Selection-Driving Attribute Ranking") && selectionDrivingAttributeRanking.includes("Can attributes override closed lanes? NO"), "2U doc included"),
+    check("selection-driving attribute ranking validation is PASS", selectionDrivingAttributeRankingValidation.includes("Status: PASS") && selectionDrivingAttributeRankingValidation.includes("candidate_modifier can flip to a legal adjusted candidate"), "2U validation PASS"),
+    check("route ranking mode bundled", bundleSimulation.includes("src/simulation/routeRanking/routeRankingMode.ts") && bundleSimulation.includes("RouteRankingAttributeMode"), "route ranking mode bundled"),
+    check("attribute selection guard bundled", bundleSimulation.includes("src/simulation/routeRanking/attributeDrivenSelectionGuard.ts") && bundleSimulation.includes("CLOSED_LANE_NOT_OVERRIDABLE"), "guard bundled"),
+    check("attribute adjusted selector bundled", bundleSimulation.includes("src/simulation/routeRanking/selectAttributeAdjustedCandidate.ts") && bundleSimulation.includes("selectAttributeAdjustedCandidate"), "selector bundled"),
+    check("contrast fixture bundled", bundleSimulation.includes("src/simulation/routeRanking/fixtures/attributeRankingContrast.fixture.ts") && bundleSimulation.includes("legalContrastCandidates"), "contrast fixture bundled"),
+    check("attribute selection tests bundled", bundleSimulation.includes("attributeDrivenSelectionGuard.test.ts") && bundleSimulation.includes("selectAttributeAdjustedCandidate.test.ts"), "2U tests bundled"),
+    check("replay seed uses candidate_modifier", bundleSimulation.includes("attributeRankingMode: \"candidate_modifier\"") && bundleSimulation.includes("metadataOnlySelectionResult"), "replay seed candidate_modifier visible"),
+    check("mini-match exposes candidate_modifier metadata", bundleSimulation.includes("attribute_selection_mode_candidate_modifier") && bundleSimulation.includes("selectedBy="), "candidate_modifier log visible"),
+    check("closed lane not overridden by attributes", selectionDrivingAttributeRanking.includes("Can attributes override closed lanes? NO") && bundleSimulation.includes("CLOSED_LANE_NOT_OVERRIDABLE"), "closed lane guard visible"),
+    check("legal attribute selection flip possible", selectionDrivingAttributeRanking.includes("CONFIRM_LEGAL_ATTRIBUTE_SELECTION_FLIP") && bundleSimulation.includes("candidate_modifier must allow legal attribute-driven flip"), "legal flip visible"),
+    check("no spatialContext preserves previous behavior", selectionDrivingAttributeRanking.includes("Does no spatialContext preserve previous behavior? YES") && bundleSimulation.includes("no spatialContext must preserve previous behavior"), "backward compatibility visible"),
+    check("route ranking gap is still honest PARTIAL", bundleSimulation.includes("visibleAttributesDriveRouteRanking: \"PARTIAL\"") && bundleSimulation.includes("routeRankingAttributeInfluenceMode: \"candidate_modifier\""), "candidate_modifier PARTIAL visible"),
+    check("full-match grounding diagnostics remain warning-only", bundleSimulation.includes("ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE") && bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false"), "full-match limitation visible"),
+    check("MatchReport attribute guard evidence included", bundleSimulation.includes("attribute_selection_guard_available") && bundleSimulation.includes("closed_lane_not_overridden_by_attributes"), "attribute guard evidence visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", selectionDrivingAttributeRankingValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && selectionDrivingAttributeRankingValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && selectionDrivingAttributeRankingValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", selectionDrivingAttributeRanking.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && selectionDrivingAttributeRanking.includes("Is full-match fully attribute-driven now? NO/PARTIAL"), "single-run warning-only"),
+    check("recommendations visible", selectionDrivingAttributeRanking.includes("CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0") && selectionDrivingAttributeRanking.includes("CONFIRM_ATTRIBUTE_SELECTION_GUARD") && selectionDrivingAttributeRanking.includes("PREPARE_PROTOTYPE_SELECTION_REPLACEMENT"), "2U recommendations visible"),
+  ];
   const sprint2TExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -1860,6 +1924,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 2U - Selection-Driving Attribute Ranking")
+      ? sprint2UChecks
     : activeConfig.sprintName.includes("Sprint 2T - Attribute-Driven Route Ranking")
       ? sprint2TChecks
     : activeConfig.sprintName.includes("Sprint 2S - Roster-to-SpatialContext")

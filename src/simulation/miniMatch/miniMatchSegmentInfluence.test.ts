@@ -1,5 +1,8 @@
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { adaptMatchInputToMiniMatch } from "../adapters/matchInputToMiniMatch";
+import { sequence1Action1WorkbenchTruth } from "../grounding/fixtures/sequence1Action1.fixture";
+import { createWorkbenchReplayMatchInput } from "../grounding/runWorkbenchReplaySeed";
+import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { runFullMatch } from "../runFullMatch";
 import { runMiniMatch } from "./runMiniMatch";
 import type { MiniMatchSegmentInfluence } from "./types";
@@ -35,6 +38,18 @@ export function validateMiniMatchSegmentInfluence(): readonly string[] {
   const adapter = adaptMatchInputToMiniMatch(input);
   const baselineA = runMiniMatch(adapter.miniMatchInput);
   const baselineB = runMiniMatch(adapter.miniMatchInput);
+  const replayInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const replaySpatialContext = workbenchToSpatialMatchContext({
+    matchInput: replayInput,
+    workbench: sequence1Action1WorkbenchTruth,
+    frame: "before",
+  });
+  const candidateModifierMiniMatch = runMiniMatch({
+    ...adapter.miniMatchInput,
+    numberOfSequences: 1,
+    spatialContext: replaySpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+  });
   const influence: MiniMatchSegmentInfluence = {
     segmentIndex: 2,
     scoreState: "close",
@@ -97,6 +112,22 @@ export function validateMiniMatchSegmentInfluence(): readonly string[] {
   assertTest(
     baselineA.state.context.spatialContext === undefined,
     "runMiniMatch without spatial context must remain backward compatible.",
+  );
+  assertTest(
+    baselineA.state.context.routeRankingAttributeMode === undefined,
+    "runMiniMatch without explicit routeRankingAttributeMode must preserve previous behavior.",
+  );
+  assertTest(
+    candidateModifierMiniMatch.state.records[0]?.setup.attributeInfluenceMode === "candidate_modifier",
+    "runMiniMatch with spatialContext and candidate_modifier must expose candidate_modifier metadata.",
+  );
+  assertTest(
+    candidateModifierMiniMatch.state.records[0]?.setup.attributeSelectionResult !== undefined,
+    "candidate_modifier metadata must include attribute selection result.",
+  );
+  assertTest(
+    candidateModifierMiniMatch.logs.some((log) => log.text.includes("attribute_selection_mode_candidate_modifier")),
+    "candidate_modifier logs must expose selection mode.",
   );
   assertTest(
     influenced.state.context.segmentInfluence !== undefined,

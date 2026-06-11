@@ -22,6 +22,11 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.selectedActionRepresented, "SUPPORT_CLUSTER_RECYCLE selected action must be represented.");
   assertTest(result.attributeInfluenceApplied, "replay seed must apply route attribute influence.");
   assertTest(result.routeRankingUsesRealAttributes === "PARTIAL", "replay seed must report attribute route ranking as PARTIAL.");
+  assertTest(result.attributeRankingMode === "candidate_modifier", "replay seed must evaluate candidate_modifier mode.");
+  assertTest(result.metadataOnlySelectionResult?.selectedCandidateId === "rank-1", "metadata_only replay selection must keep base rank-1.");
+  assertTest(result.attributeSelectionResult?.selectedCandidateId === "rank-1", "candidate_modifier replay selection must preserve TH -> ML for workbench truth.");
+  assertTest(result.selectedBy === "base_score", "sequence-1-action-1 should remain selected by base score after guard checks.");
+  assertTest(!result.selectionChangedByAttributes, "sequence-1-action-1 must not change selection by attributes.");
   assertTest(result.selectedCandidateBaseScore !== undefined, "selected candidate base score must be exposed.");
   assertTest(result.selectedCandidateAttributeAdjustedScore !== undefined, "selected candidate adjusted score must be exposed.");
   assertTest((result.selectedCandidateInfluences ?? []).length > 0, "selected candidate influences must be exposed.");
@@ -39,6 +44,8 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "after ball zone Z3-HSL is preserved",
     "selected action type SUPPORT_CLUSTER_RECYCLE is represented",
     "route attribute influence is applied",
+    "candidate_modifier mode is evaluated",
+    "TH -> ML remains selected under candidate_modifier guard",
     "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",
   ];

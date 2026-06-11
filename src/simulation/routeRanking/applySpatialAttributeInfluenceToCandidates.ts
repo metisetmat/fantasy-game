@@ -13,6 +13,7 @@ export type RouteCandidateInput = {
   readonly targetZone: ZoneId;
   readonly actionType: string;
   readonly laneState?: string;
+  readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW";
   readonly baseScore: number;
   readonly baseRisk?: number;
 };
@@ -43,6 +44,7 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
       targetZone: candidate.targetZone,
       actionType: candidate.actionType,
       ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
       baseScore: candidate.baseScore,
       attributeInfluences: [],
       attributeAdjustedScore: candidate.baseScore,
@@ -65,6 +67,7 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
         targetZone: candidate.targetZone,
         actionType: candidate.actionType,
         ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+        ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
         baseScore: candidate.baseScore,
         attributeInfluences: [],
         attributeAdjustedScore: candidate.baseScore,
@@ -89,6 +92,7 @@ export function applySpatialAttributeInfluenceToCandidates(input: {
       targetZone: candidate.targetZone,
       actionType: candidate.actionType,
       ...(candidate.laneState === undefined ? {} : { laneState: candidate.laneState }),
+      ...(candidate.availability === undefined ? {} : { availability: candidate.availability }),
       baseScore: candidate.baseScore,
       attributeInfluences: influences,
       attributeAdjustedScore: applyRouteAttributeInfluence({

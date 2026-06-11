@@ -34,6 +34,7 @@ export type RouteCandidateAttributeContext = {
   readonly targetZone: ZoneId;
   readonly actionType: string;
   readonly laneState?: string;
+  readonly availability?: "AVAILABLE" | "NOT_AVAILABLE_NOW";
   readonly baseScore: number;
   readonly attributeInfluences: readonly RouteAttributeInfluence[];
   readonly attributeAdjustedScore: number;
