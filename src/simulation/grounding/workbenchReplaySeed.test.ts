@@ -26,6 +26,12 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.routeSelectionSource === "spatial_candidate_modifier", "replay seed must use spatial_candidate_modifier route selection source.");
   assertTest(result.miniMatchRouteSelectionResult !== undefined, "replay seed must expose mini-match route selection result.");
   assertTest(result.miniMatchRouteSelectionUsedSpatialResult, "replay seed mini-match route selection must use a valid spatial result.");
+  assertTest(result.workbenchChainReplayAvailable, "replay seed must expose workbench chain replay availability.");
+  assertTest(result.workbenchChainId === "sequence-1-action-1-chain", "replay seed must expose sequence-1-action-1 chain id.");
+  assertTest(
+    result.workbenchChainReplayStatus === "PARTIAL" || result.workbenchChainReplayStatus === "PASS",
+    `workbench chain replay must not fail, received ${result.workbenchChainReplayStatus}.`,
+  );
   assertTest(
     result.miniMatchRouteSelectionResult?.selectedActorId === "control-tempo-half",
     "mini-match route selection must preserve TH actor.",
@@ -57,6 +63,7 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "route attribute influence is applied",
     "candidate_modifier mode is evaluated",
     "spatial_candidate_modifier route selection is evaluated",
+    "workbench chain replay is available",
     "TH -> ML remains selected under candidate_modifier guard",
     "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",

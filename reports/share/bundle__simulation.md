@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2V - Prototype Selection Replacement in MiniMatch. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2W - FullMatch Workbench Chain Replay. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -907,6 +907,404 @@ export const sequence1Action1WorkbenchTruth: TacticalWorkbenchFrame = {
 };
 ```
 
+## File: src/simulation/grounding/workbenchChainTypes.ts
+
+```ts
+import type { TacticalWorkbenchFrame } from "./tacticalWorkbenchTypes";
+
+export type WorkbenchChainId = string;
+
+export type WorkbenchChainStep = {
+  readonly stepIndex: number;
+  readonly frame: TacticalWorkbenchFrame;
+  readonly expectedActorId: string;
+  readonly expectedReceiverId?: string;
+  readonly expectedNewCarrierId?: string;
+  readonly expectedBallZoneBefore: string;
+  readonly expectedBallZoneAfter?: string;
+  readonly expectedActionType: string;
+};
+
+export type WorkbenchChain = {
+  readonly chainId: WorkbenchChainId;
+  readonly description: string;
+  readonly steps: readonly WorkbenchChainStep[];
+  readonly expectedPossessionTeamId: string;
+  readonly expectedDefendingTeamId: string;
+  readonly initialBallCarrierId: string;
+  readonly initialBallZone: string;
+  readonly finalExpectedBallCarrierId?: string;
+  readonly finalExpectedBallZone?: string;
+};
+
+export type WorkbenchChainReplayMode =
+  | "diagnostic_only"
+  | "controlled_minimatch"
+  | "fullmatch_warning_only";
+```
+
+## File: src/simulation/grounding/fixtures/sequence1Action1.chain.fixture.ts
+
+```ts
+import { sequence1Action1WorkbenchTruth } from "./sequence1Action1.fixture";
+import type { WorkbenchChain } from "../workbenchChainTypes";
+
+export const sequence1Action1Chain: WorkbenchChain = {
+  chainId: "sequence-1-action-1-chain",
+  description: "CONTROL first pressure-escape recycle from TH to ML, represented as a stateful workbench chain seed.",
+  expectedPossessionTeamId: "control",
+  expectedDefendingTeamId: "blitz",
+  initialBallCarrierId: "control-tempo-half",
+  initialBallZone: "Z4-HSL",
+  finalExpectedBallCarrierId: "control-mobile-lock",
+  finalExpectedBallZone: "Z3-HSL",
+  steps: [
+    {
+      stepIndex: 0,
+      frame: sequence1Action1WorkbenchTruth,
+      expectedActorId: "control-tempo-half",
+      expectedReceiverId: "control-mobile-lock",
+      expectedNewCarrierId: "control-mobile-lock",
+      expectedBallZoneBefore: "Z4-HSL",
+      expectedBallZoneAfter: "Z3-HSL",
+      expectedActionType: "SUPPORT_CLUSTER_RECYCLE",
+    },
+  ],
+};
+
+// Extension points:
+// - sequence-1-action-2
+// - sequence-1-action-3
+// - sequence-3-action-1 before/after SVG artifacts
+// - full opening possession chain
+```
+
+## File: src/simulation/grounding/fixtures/workbenchChainCatalog.ts
+
+```ts
+import { sequence1Action1Chain } from "./sequence1Action1.chain.fixture";
+
+export const WORKBENCH_CHAIN_CATALOG = [
+  sequence1Action1Chain,
+] as const;
+
+// Future chain catalog entries:
+// - sequence-1-action-2
+// - sequence-1-action-3
+// - sequence-3-action-1
+// - full opening possession chain
+```
+
+## File: src/simulation/grounding/workbenchChainState.ts
+
+```ts
+import type { WorkbenchChain, WorkbenchChainStep } from "./workbenchChainTypes";
+
+export type WorkbenchChainRuntimeState = {
+  readonly stepIndex: number;
+  readonly possessionTeamId: string;
+  readonly defendingTeamId: string;
+  readonly ballCarrierId: string;
+  readonly ballZone: string;
+  readonly previousActionType?: string;
+  readonly appliedSteps: readonly string[];
+  readonly stateWarnings: readonly string[];
+};
+
+export type WorkbenchChainStateWarning =
+  | "WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH"
+  | "WORKBENCH_CHAIN_BALL_ZONE_MISMATCH"
+  | "WORKBENCH_CHAIN_MISSING_AFTER_STATE"
+  | "WORKBENCH_CHAIN_STATE_PROPAGATION_PARTIAL";
+
+export function createInitialWorkbenchChainState(chain: WorkbenchChain): WorkbenchChainRuntimeState {
+  return {
+    stepIndex: 0,
+    possessionTeamId: chain.expectedPossessionTeamId,
+    defendingTeamId: chain.expectedDefendingTeamId,
+    ballCarrierId: chain.initialBallCarrierId,
+    ballZone: chain.initialBallZone,
+    appliedSteps: [],
+    stateWarnings: [],
+  };
+}
+
+function warning(input: {
+  readonly code: WorkbenchChainStateWarning;
+  readonly stepIndex: number;
+  readonly expected: string;
+  readonly actual: string;
+}): string {
+  return `${input.code}: step ${input.stepIndex} expected ${input.expected}, got ${input.actual}.`;
+}
+
+export function applyWorkbenchChainStep(input: {
+  readonly state: WorkbenchChainRuntimeState;
+  readonly step: WorkbenchChainStep;
+}): WorkbenchChainRuntimeState {
+  const warnings: string[] = [];
+
+  if (input.state.ballCarrierId !== input.step.expectedActorId) {
+    warnings.push(warning({
+      code: "WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH",
+      stepIndex: input.step.stepIndex,
+      expected: input.step.expectedActorId,
+      actual: input.state.ballCarrierId,
+    }));
+  }
+
+  if (input.state.ballZone !== input.step.expectedBallZoneBefore) {
+    warnings.push(warning({
+      code: "WORKBENCH_CHAIN_BALL_ZONE_MISMATCH",
+      stepIndex: input.step.stepIndex,
+      expected: input.step.expectedBallZoneBefore,
+      actual: input.state.ballZone,
+    }));
+  }
+
+  if (input.step.expectedNewCarrierId === undefined || input.step.expectedBallZoneAfter === undefined) {
+    warnings.push(`WORKBENCH_CHAIN_MISSING_AFTER_STATE: step ${input.step.stepIndex} cannot fully update chain state.`);
+  }
+
+  if (warnings.length > 0) {
+    warnings.push(`WORKBENCH_CHAIN_STATE_PROPAGATION_PARTIAL: step ${input.step.stepIndex} propagated with warnings.`);
+  }
+
+  return {
+    ...input.state,
+    stepIndex: input.step.stepIndex + 1,
+    ballCarrierId: input.step.expectedNewCarrierId ?? input.state.ballCarrierId,
+    ballZone: input.step.expectedBallZoneAfter ?? input.state.ballZone,
+    previousActionType: input.step.expectedActionType,
+    appliedSteps: [...input.state.appliedSteps, input.step.frame.frameId],
+    stateWarnings: [...input.state.stateWarnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/grounding/workbenchChainReplay.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
+import type { PrototypeTeamDefinition } from "../../data/prototypeTeams";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runMiniMatch } from "../miniMatch";
+import { workbenchToSpatialMatchContext } from "../spatialContext";
+import { applyWorkbenchChainStep, createInitialWorkbenchChainState, type WorkbenchChainRuntimeState } from "./workbenchChainState";
+import type { WorkbenchChain, WorkbenchChainReplayMode } from "./workbenchChainTypes";
+
+export type WorkbenchChainStepReplayResult = {
+  readonly stepIndex: number;
+  readonly frameId: string;
+  readonly routeSelectionSource: string;
+  readonly selectedActionType?: string;
+  readonly selectedActorId?: string;
+  readonly selectedReceiverId?: string;
+  readonly selectedBy?: string;
+  readonly guardValid: boolean;
+  readonly blockedReasons: readonly string[];
+  readonly stateBefore: WorkbenchChainRuntimeState;
+  readonly stateAfter: WorkbenchChainRuntimeState;
+  readonly preservedExpectedAction: boolean;
+  readonly warnings: readonly string[];
+};
+
+export type WorkbenchChainReplayResult = {
+  readonly chainId: string;
+  readonly mode: WorkbenchChainReplayMode;
+  readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly steps: readonly WorkbenchChainStepReplayResult[];
+  readonly finalState: WorkbenchChainRuntimeState;
+  readonly prototypeFallbackUsed: boolean;
+  readonly spatialSelectionUsed: boolean;
+  readonly scoringEventsCreated: 0;
+  readonly scoringEventsDeletedOrCapped: 0;
+  readonly recommendations: readonly string[];
+};
+
+function prototypeForTeam(id: string): PrototypeTeamDefinition {
+  const prototypeId = id === "control" ? PrototypeTeamId.Control : PrototypeTeamId.Blitz;
+  const prototype = PROTOTYPE_TEAMS.find((team) => team.id === prototypeId);
+
+  if (prototype === undefined) {
+    throw new Error(`Missing prototype team ${prototypeId}.`);
+  }
+
+  return prototype;
+}
+
+function scoreFromConsequences(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+function replayControlledStep(input: {
+  readonly matchInput: MatchInput;
+  readonly stateBefore: WorkbenchChainRuntimeState;
+  readonly stateAfter: WorkbenchChainRuntimeState;
+  readonly step: WorkbenchChain["steps"][number];
+  readonly mode: WorkbenchChainReplayMode;
+}): WorkbenchChainStepReplayResult {
+  if (input.mode !== "controlled_minimatch") {
+    return {
+      stepIndex: input.step.stepIndex,
+      frameId: input.step.frame.frameId,
+      routeSelectionSource: input.mode,
+      guardValid: true,
+      blockedReasons: [],
+      stateBefore: input.stateBefore,
+      stateAfter: input.stateAfter,
+      preservedExpectedAction: input.stateAfter.stateWarnings.length === input.stateBefore.stateWarnings.length,
+      warnings: input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length),
+    };
+  }
+
+  const spatialContext = workbenchToSpatialMatchContext({
+    matchInput: input.matchInput,
+    workbench: input.step.frame,
+    frame: "before",
+  });
+  const miniMatch = runMiniMatch({
+    teamA: prototypeForTeam(input.matchInput.homeTeam.teamId),
+    teamB: prototypeForTeam(input.matchInput.awayTeam.teamId),
+    numberOfSequences: 1,
+    seed: 202,
+    spatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    routeSelectionSource: "spatial_candidate_modifier",
+    routeSelectionWorkbench: input.step.frame,
+  });
+  const routeSelection = miniMatch.state.records[0]?.setup.routeSelectionResult;
+  const preservedExpectedAction =
+    routeSelection?.selectedActionType === input.step.expectedActionType &&
+    routeSelection.selectedActorId === input.step.expectedActorId &&
+    routeSelection.selectedReceiverId === input.step.expectedReceiverId;
+
+  return {
+    stepIndex: input.step.stepIndex,
+    frameId: input.step.frame.frameId,
+    routeSelectionSource: routeSelection?.selectionSource ?? "spatial_candidate_modifier",
+    ...(routeSelection?.selectedActionType === undefined ? {} : { selectedActionType: routeSelection.selectedActionType }),
+    ...(routeSelection?.selectedActorId === undefined ? {} : { selectedActorId: routeSelection.selectedActorId }),
+    ...(routeSelection?.selectedReceiverId === undefined ? {} : { selectedReceiverId: routeSelection.selectedReceiverId }),
+    ...(routeSelection?.selectedBy === undefined ? {} : { selectedBy: routeSelection.selectedBy }),
+    guardValid: routeSelection?.guardValid ?? false,
+    blockedReasons: routeSelection?.blockedReasons ?? ["ROUTE_SELECTION_RESULT_MISSING"],
+    stateBefore: input.stateBefore,
+    stateAfter: input.stateAfter,
+    preservedExpectedAction,
+    warnings: input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length),
+  };
+}
+
+function statusFor(input: {
+  readonly mode: WorkbenchChainReplayMode;
+  readonly steps: readonly WorkbenchChainStepReplayResult[];
+  readonly finalState: WorkbenchChainRuntimeState;
+}): WorkbenchChainReplayResult["status"] {
+  if (input.steps.some((step) => !step.guardValid)) {
+    return "FAIL";
+  }
+
+  if (input.mode === "controlled_minimatch" && input.steps.some((step) => !step.preservedExpectedAction)) {
+    return "FAIL";
+  }
+
+  if (input.finalState.stateWarnings.length > 0) {
+    return "PARTIAL";
+  }
+
+  return input.mode === "controlled_minimatch" ? "PARTIAL" : "PASS";
+}
+
+export function replayWorkbenchChain(input: {
+  readonly matchInput: MatchInput;
+  readonly chain: WorkbenchChain;
+  readonly mode: WorkbenchChainReplayMode;
+}): WorkbenchChainReplayResult {
+  if (input.mode === "fullmatch_warning_only") {
+    const report = runFullMatch(input.matchInput);
+    const totalPoints = scoreFromConsequences(report);
+    const initialState = createInitialWorkbenchChainState(input.chain);
+
+    return {
+      chainId: input.chain.chainId,
+      mode: input.mode,
+      status: "PARTIAL",
+      steps: [],
+      finalState: {
+        ...initialState,
+        stateWarnings: [`FULLMATCH_STILL_USES_SEGMENT_HARNESS: observed ${totalPoints} consequence-derived point(s) without consuming chain ${input.chain.chainId}.`],
+      },
+      prototypeFallbackUsed: true,
+      spatialSelectionUsed: false,
+      scoringEventsCreated: 0,
+      scoringEventsDeletedOrCapped: 0,
+      recommendations: [
+        "CONFIRM_NORMAL_FULLMATCH_NOT_CHAIN_DRIVEN",
+        "KEEP_50_MATCH_ECONOMY_REFERENCE",
+        "PREPARE_MULTI_ACTION_WORKBENCH_CHAIN",
+      ],
+    };
+  }
+
+  let runtimeState = createInitialWorkbenchChainState(input.chain);
+  const steps: WorkbenchChainStepReplayResult[] = [];
+
+  for (const step of input.chain.steps) {
+    const stateBefore = runtimeState;
+    const stateAfter = applyWorkbenchChainStep({ state: stateBefore, step });
+    steps.push(replayControlledStep({
+      matchInput: input.matchInput,
+      stateBefore,
+      stateAfter,
+      step,
+      mode: input.mode,
+    }));
+    runtimeState = stateAfter;
+  }
+
+  const spatialSelectionUsed = steps.some((step) => step.routeSelectionSource === "spatial_candidate_modifier" && step.guardValid);
+  const prototypeFallbackUsed = steps.some((step) => step.selectedBy === "prototype" || step.selectedBy === "fallback") || input.mode === "diagnostic_only";
+
+  return {
+    chainId: input.chain.chainId,
+    mode: input.mode,
+    status: statusFor({ mode: input.mode, steps, finalState: runtimeState }),
+    steps,
+    finalState: runtimeState,
+    prototypeFallbackUsed,
+    spatialSelectionUsed,
+    scoringEventsCreated: 0,
+    scoringEventsDeletedOrCapped: 0,
+    recommendations: [
+      "CONFIRM_WORKBENCH_CHAIN_REPLAY_V0",
+      "CONFIRM_CHAIN_STATE_PROPAGATION",
+      ...(input.mode === "controlled_minimatch" ? ["CONFIRM_CONTROLLED_MINIMATCH_CHAIN_REPLAY"] : []),
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "KEEP_SCORING_VALUES_UNCHANGED",
+      "KEEP_50_MATCH_ECONOMY_REFERENCE",
+      "PREPARE_MULTI_ACTION_WORKBENCH_CHAIN",
+      "PREPARE_NORMAL_FULLMATCH_SPATIAL_SELECTION_FLAG",
+    ],
+  };
+}
+
+export function validateWorkbenchChainScoringConstants(): readonly string[] {
+  return [
+    `SHOT_GOAL=${scoringRegistryEntry("SHOT_GOAL").points}`,
+    `TRY_TOUCHDOWN=${scoringRegistryEntry("TRY_TOUCHDOWN").points}`,
+    `CONVERSION_GOAL=${scoringRegistryEntry("CONVERSION_GOAL").points}`,
+    `DROP_GOAL=${scoringRegistryEntry("DROP_GOAL").points}`,
+    `PENALTY_SHOT_ACTIVE=${scoringRegistryEntry("PENALTY_SHOT").active ? "YES" : "NO"}`,
+  ];
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -1502,6 +1900,8 @@ import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./
 import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
 import type { AttributeAdjustedSelectionResult, RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
+import { sequence1Action1Chain } from "./fixtures/sequence1Action1.chain.fixture";
+import { replayWorkbenchChain } from "./workbenchChainReplay";
 
 export type WorkbenchReplaySeedResult = {
   readonly fixtureId: string;
@@ -1525,6 +1925,9 @@ export type WorkbenchReplaySeedResult = {
   readonly routeSelectionSource: MiniMatchRouteSelectionSource;
   readonly miniMatchRouteSelectionResult?: MiniMatchRouteSelectionResult;
   readonly miniMatchRouteSelectionUsedSpatialResult: boolean;
+  readonly workbenchChainReplayAvailable: boolean;
+  readonly workbenchChainReplayStatus?: "PASS" | "PARTIAL" | "FAIL";
+  readonly workbenchChainId?: string;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -1756,10 +2159,15 @@ export function runWorkbenchReplaySeed(input: {
     routeSelectionWorkbench: input.workbench,
   });
   const miniMatchRouteSelectionResult = miniMatch.state.records[0]?.setup.routeSelectionResult;
+  const chainReplay = replayWorkbenchChain({
+    matchInput: input.matchInput,
+    chain: sequence1Action1Chain,
+    mode: "controlled_minimatch",
+  });
   const lossyMappings = [
     "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
     "Route ranking can receive bounded attribute-adjusted candidate scores, but final mini-match selection is not yet fully selection-driving.",
-    `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s), but not a forced workbench action chain.`,
+    `Replay mini-match produced ${miniMatch.state.records.length} sequence record(s); a controlled workbench chain replay is now available, but normal full-match still does not consume it by default.`,
   ];
   const missingTruths = [
     ...beforeContext.home.knownLimitations,
@@ -1796,10 +2204,16 @@ export function runWorkbenchReplaySeed(input: {
     miniMatchRouteSelectionUsedSpatialResult:
       miniMatchRouteSelectionResult?.selectionSource === "spatial_candidate_modifier" &&
       miniMatchRouteSelectionResult.guardValid,
+    workbenchChainReplayAvailable: true,
+    workbenchChainReplayStatus: chainReplay.status,
+    workbenchChainId: chainReplay.chainId,
     missingTruths,
     lossyMappings,
     recommendations: [
       "CONFIRM_WORKBENCH_REPLAY_SEED",
+      "CONFIRM_WORKBENCH_CHAIN_REPLAY_V0",
+      "CONFIRM_CHAIN_STATE_PROPAGATION",
+      "CONFIRM_CONTROLLED_MINIMATCH_CHAIN_REPLAY",
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES",
       "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
@@ -2726,6 +3140,10 @@ export type FullMatchGroundingWarning =
   | "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"
   | "PROTOTYPE_FALLBACK_STILL_ENABLED"
   | "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"
+  | "WORKBENCH_CHAIN_REPLAY_AVAILABLE"
+  | "WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY"
+  | "NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN"
+  | "FULLMATCH_STILL_USES_SEGMENT_HARNESS"
   | "PROTOTYPE_SELECTION_STILL_PARTIAL"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
@@ -2757,6 +3175,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE",
     "PROTOTYPE_FALLBACK_STILL_ENABLED",
     "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN",
+    "WORKBENCH_CHAIN_REPLAY_AVAILABLE",
+    "WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY",
+    "NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN",
+    "FULLMATCH_STILL_USES_SEGMENT_HARNESS",
     "PROTOTYPE_SELECTION_STILL_PARTIAL",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
@@ -2772,7 +3194,7 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and controlled mini-match runs can evaluate guarded spatial route selection, but normal full-match resolution still keeps prototype fallback and does not yet replay the full workbench sequence chain.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context, controlled mini-match runs can evaluate guarded spatial route selection, and a controlled workbench chain replay path exists, but normal full-match resolution still uses the segment harness and does not consume workbench chains by default.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
@@ -2781,6 +3203,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
       "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
       "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
       "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_WORKBENCH_CHAIN_REPLAY_V0",
+      "CONFIRM_CHAIN_STATE_PROPAGATION",
+      "CONFIRM_CONTROLLED_MINIMATCH_CHAIN_REPLAY",
+      "CONFIRM_NORMAL_FULLMATCH_NOT_CHAIN_DRIVEN",
       "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
       "CONFIRM_CONTROLLED_MINIMATCH_SPATIAL_SELECTION",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
@@ -3051,6 +3477,12 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.routeSelectionSource === "spatial_candidate_modifier", "replay seed must use spatial_candidate_modifier route selection source.");
   assertTest(result.miniMatchRouteSelectionResult !== undefined, "replay seed must expose mini-match route selection result.");
   assertTest(result.miniMatchRouteSelectionUsedSpatialResult, "replay seed mini-match route selection must use a valid spatial result.");
+  assertTest(result.workbenchChainReplayAvailable, "replay seed must expose workbench chain replay availability.");
+  assertTest(result.workbenchChainId === "sequence-1-action-1-chain", "replay seed must expose sequence-1-action-1 chain id.");
+  assertTest(
+    result.workbenchChainReplayStatus === "PARTIAL" || result.workbenchChainReplayStatus === "PASS",
+    `workbench chain replay must not fail, received ${result.workbenchChainReplayStatus}.`,
+  );
   assertTest(
     result.miniMatchRouteSelectionResult?.selectedActorId === "control-tempo-half",
     "mini-match route selection must preserve TH actor.",
@@ -3082,6 +3514,7 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "route attribute influence is applied",
     "candidate_modifier mode is evaluated",
     "spatial_candidate_modifier route selection is evaluated",
+    "workbench chain replay is available",
     "TH -> ML remains selected under candidate_modifier guard",
     "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",
@@ -3092,6 +3525,181 @@ if (require.main === module) {
   const checks = validateWorkbenchReplaySeed();
 
   console.log("workbenchReplaySeed tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/workbenchChainState.test.ts
+
+```ts
+import { sequence1Action1Chain } from "./fixtures/sequence1Action1.chain.fixture";
+import { applyWorkbenchChainStep, createInitialWorkbenchChainState } from "./workbenchChainState";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateWorkbenchChainState(): readonly string[] {
+  const initialState = createInitialWorkbenchChainState(sequence1Action1Chain);
+  const step = sequence1Action1Chain.steps[0];
+
+  assertTest(step !== undefined, "sequence-1-action-1 chain must contain one step.");
+  if (step === undefined) {
+    return [];
+  }
+
+  const afterState = applyWorkbenchChainStep({ state: initialState, step });
+  const mismatchedState = applyWorkbenchChainStep({
+    state: {
+      ...initialState,
+      ballCarrierId: "control-hook-link",
+      ballZone: "Z5-C",
+    },
+    step,
+  });
+
+  assertTest(initialState.ballCarrierId === "control-tempo-half", "initial chain state must start with TH.");
+  assertTest(initialState.ballZone === "Z4-HSL", "initial chain state must start in Z4-HSL.");
+  assertTest(afterState.ballCarrierId === "control-mobile-lock", "chain step must update carrier to ML.");
+  assertTest(afterState.ballZone === "Z3-HSL", "chain step must update ball zone to Z3-HSL.");
+  assertTest(afterState.previousActionType === "SUPPORT_CLUSTER_RECYCLE", "chain step must store previous action type.");
+  assertTest(afterState.stateWarnings.length === 0, "valid chain step must not create warnings.");
+  assertTest(
+    mismatchedState.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH")),
+    "carrier mismatch must create warning.",
+  );
+  assertTest(
+    mismatchedState.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_ZONE_MISMATCH")),
+    "ball zone mismatch must create warning.",
+  );
+  assertTest(
+    mismatchedState.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_STATE_PROPAGATION_PARTIAL")),
+    "mismatch must mark propagation partial.",
+  );
+
+  return [
+    "initial chain state is created from sequence-1-action-1",
+    "chain step updates TH to ML",
+    "chain step updates Z4-HSL to Z3-HSL",
+    "carrier mismatch creates warning",
+    "zone mismatch creates warning",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainState();
+
+  console.log("workbenchChainState tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/workbenchChainReplay.test.ts
+
+```ts
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { createWorkbenchReplayMatchInput } from "./runWorkbenchReplaySeed";
+import { sequence1Action1Chain } from "./fixtures/sequence1Action1.chain.fixture";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { replayWorkbenchChain, validateWorkbenchChainScoringConstants } from "./workbenchChainReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(input: ReturnType<typeof runFullMatch>): string {
+  return `${input.score.home}-${input.score.away}:${input.timeline.filter((event) => event.eventType === "scoring").length}`;
+}
+
+export function validateWorkbenchChainReplay(): readonly string[] {
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const diagnostic = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1Action1Chain,
+    mode: "diagnostic_only",
+  });
+  const controlled = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1Action1Chain,
+    mode: "controlled_minimatch",
+  });
+  const wrongExpectedAction = replayWorkbenchChain({
+    matchInput,
+    chain: {
+      ...sequence1Action1Chain,
+      chainId: "sequence-1-action-1-wrong-expected-action-chain",
+      steps: sequence1Action1Chain.steps.map((step) => ({
+        ...step,
+        expectedReceiverId: "control-hook-link",
+      })),
+    },
+    mode: "controlled_minimatch",
+  });
+  const fullMatchBefore = runFullMatch(matchInput);
+  const warningOnly = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1Action1Chain,
+    mode: "fullmatch_warning_only",
+  });
+  const fullMatchAfter = runFullMatch(matchInput);
+
+  assertTest(diagnostic.scoringEventsCreated === 0, "diagnostic_only must create no scoring events.");
+  assertTest(diagnostic.scoringEventsDeletedOrCapped === 0, "diagnostic_only must delete or cap no scoring events.");
+  assertTest(diagnostic.finalState.ballCarrierId === "control-mobile-lock", "diagnostic replay must propagate final carrier ML.");
+  assertTest(diagnostic.finalState.ballZone === "Z3-HSL", "diagnostic replay must propagate final zone Z3-HSL.");
+  assertTest(controlled.spatialSelectionUsed, "controlled_minimatch must use spatial_candidate_modifier.");
+  assertTest(controlled.steps[0]?.routeSelectionSource === "spatial_candidate_modifier", "controlled step must expose spatial route selection source.");
+  assertTest(controlled.steps[0]?.preservedExpectedAction === true, "controlled chain replay must preserve TH -> ML.");
+  assertTest(wrongExpectedAction.steps[0]?.guardValid === true, "wrong expected-action replay must still have a valid route-selection guard.");
+  assertTest(wrongExpectedAction.steps[0]?.preservedExpectedAction === false, "wrong expected-action replay must expose action mismatch.");
+  assertTest(wrongExpectedAction.status === "FAIL", "controlled replay must fail when selected route does not preserve expected chain action.");
+  assertTest(diagnostic.prototypeFallbackUsed, "diagnostic replay must keep prototype fallback observable.");
+  assertTest(
+    controlled.recommendations.includes("CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED"),
+    "controlled replay must keep prototype fallback recommendation visible.",
+  );
+  assertTest(warningOnly.mode === "fullmatch_warning_only", "fullmatch warning-only mode must be explicit.");
+  assertTest(warningOnly.status === "PARTIAL", "fullmatch warning-only replay must stay PARTIAL.");
+  assertTest(
+    scoreSignature(fullMatchBefore) === scoreSignature(fullMatchAfter),
+    "fullmatch_warning_only diagnostics must not alter runFullMatch score.",
+  );
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(
+    validateWorkbenchChainScoringConstants().includes("PENALTY_SHOT_ACTIVE=NO"),
+    "chain scoring constants helper must expose inactive penalty shot.",
+  );
+
+  return [
+    "diagnostic_only creates no scoring events",
+    "diagnostic replay propagates TH to ML",
+    "diagnostic replay propagates Z4-HSL to Z3-HSL",
+    "controlled_minimatch uses spatial_candidate_modifier",
+    "controlled_minimatch preserves TH -> ML",
+    "controlled_minimatch fails when expected chain action is not preserved",
+    "prototype fallback remains enabled",
+    "fullmatch_warning_only does not alter runFullMatch score",
+    "scoring constants remain unchanged",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainReplay();
+
+  console.log("workbenchChainReplay tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -3655,6 +4263,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"), "controlled mini-match spatial selection availability must be emitted.");
   assertTest(diagnostics.warnings.includes("PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback warning must be emitted.");
   assertTest(diagnostics.warnings.includes("NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"), "normal full-match limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("WORKBENCH_CHAIN_REPLAY_AVAILABLE"), "workbench chain replay availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY"), "workbench chain controlled-only warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN"), "normal full-match chain limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("FULLMATCH_STILL_USES_SEGMENT_HARNESS"), "segment harness warning must be emitted.");
   assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_PARTIAL"), "prototype selection partiality must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
@@ -3682,6 +4294,8 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
     "partial full-match grounding warning is emitted",
     "spatial context adapter availability is emitted",
     "workbench replay seed availability is emitted",
+    "workbench chain replay availability is emitted",
+    "normal full-match chain limitation is emitted",
     "grounding evidence facts are attached",
     "scoring events are not mutated",
     "final score remains derived from score_change",
@@ -5453,7 +6067,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le mini-match dispose maintenant d'un chemin controle ou les candidats issus du SpatialContext peuvent etre classes par score ajuste d'attributs, avec fallback prototype si les garde-fous bloquent la selection.";
+    "Le moteur peut maintenant rejouer une chaine workbench controlee en conservant l'etat spatial attendu, mais le full-match normal reste encore un harnais par segments et ne consomme pas cette chaine par defaut.";
 
   return [
     {
@@ -5477,6 +6091,10 @@ function tacticalGroundingGapFacts(input: {
         "candidate_modifier_mode",
         "attribute_selection_guard",
         "spatial_route_selection",
+        "workbench_chain_replay",
+        "controlled_chain_only",
+        "fullmatch_not_chain_driven",
+        "segment_harness_still_active",
         "prototype_fallback",
         "controlled_minimatch_only",
       ],
@@ -5595,6 +6213,30 @@ function tacticalGroundingGapFacts(input: {
       ],
     },
     {
+      factId: `${input.matchInput.matchId}-workbench-chain-replay-available`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary: "A WorkbenchChain contract can now represent sequence-1-action-1, propagate TH -> ML and Z4-HSL -> Z3-HSL, and drive a controlled mini-match route-selection replay without creating scoring truth.",
+      confidence: "low",
+      strength: 64,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "workbench_chain_replay_available",
+        "controlled_chain_replay_passed",
+        "workbench_chain_replay",
+        "controlled_chain_only",
+        "fullmatch_not_chain_driven",
+        "segment_harness_still_active",
+        "normal_fullmatch_not_chain_replay_driven",
+      ],
+    },
+    {
       factId: `${input.matchInput.matchId}-full-match-partial-workbench-grounding`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
@@ -5611,6 +6253,8 @@ function tacticalGroundingGapFacts(input: {
         "tactical_grounding_gap",
         "full_match_partially_workbench_grounded",
         "fullmatch_not_yet_replaying_workbench_sequence_chain",
+        "normal_fullmatch_not_chain_replay_driven",
+        "segment_harness_still_active",
       ],
     },
   ];

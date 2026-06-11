@@ -13,6 +13,10 @@ export type FullMatchGroundingWarning =
   | "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"
   | "PROTOTYPE_FALLBACK_STILL_ENABLED"
   | "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"
+  | "WORKBENCH_CHAIN_REPLAY_AVAILABLE"
+  | "WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY"
+  | "NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN"
+  | "FULLMATCH_STILL_USES_SEGMENT_HARNESS"
   | "PROTOTYPE_SELECTION_STILL_PARTIAL"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
@@ -44,6 +48,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE",
     "PROTOTYPE_FALLBACK_STILL_ENABLED",
     "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN",
+    "WORKBENCH_CHAIN_REPLAY_AVAILABLE",
+    "WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY",
+    "NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN",
+    "FULLMATCH_STILL_USES_SEGMENT_HARNESS",
     "PROTOTYPE_SELECTION_STILL_PARTIAL",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
@@ -59,7 +67,7 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and controlled mini-match runs can evaluate guarded spatial route selection, but normal full-match resolution still keeps prototype fallback and does not yet replay the full workbench sequence chain.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context, controlled mini-match runs can evaluate guarded spatial route selection, and a controlled workbench chain replay path exists, but normal full-match resolution still uses the segment harness and does not consume workbench chains by default.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
@@ -68,6 +76,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
       "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
       "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
       "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_WORKBENCH_CHAIN_REPLAY_V0",
+      "CONFIRM_CHAIN_STATE_PROPAGATION",
+      "CONFIRM_CONTROLLED_MINIMATCH_CHAIN_REPLAY",
+      "CONFIRM_NORMAL_FULLMATCH_NOT_CHAIN_DRIVEN",
       "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
       "CONFIRM_CONTROLLED_MINIMATCH_SPATIAL_SELECTION",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
