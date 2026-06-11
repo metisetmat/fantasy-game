@@ -27,6 +27,18 @@ export function validateWorkbenchChainReplay(): readonly string[] {
     chain: sequence1Action1Chain,
     mode: "controlled_minimatch",
   });
+  const wrongExpectedAction = replayWorkbenchChain({
+    matchInput,
+    chain: {
+      ...sequence1Action1Chain,
+      chainId: "sequence-1-action-1-wrong-expected-action-chain",
+      steps: sequence1Action1Chain.steps.map((step) => ({
+        ...step,
+        expectedReceiverId: "control-hook-link",
+      })),
+    },
+    mode: "controlled_minimatch",
+  });
   const fullMatchBefore = runFullMatch(matchInput);
   const warningOnly = replayWorkbenchChain({
     matchInput,
@@ -42,6 +54,9 @@ export function validateWorkbenchChainReplay(): readonly string[] {
   assertTest(controlled.spatialSelectionUsed, "controlled_minimatch must use spatial_candidate_modifier.");
   assertTest(controlled.steps[0]?.routeSelectionSource === "spatial_candidate_modifier", "controlled step must expose spatial route selection source.");
   assertTest(controlled.steps[0]?.preservedExpectedAction === true, "controlled chain replay must preserve TH -> ML.");
+  assertTest(wrongExpectedAction.steps[0]?.guardValid === true, "wrong expected-action replay must still have a valid route-selection guard.");
+  assertTest(wrongExpectedAction.steps[0]?.preservedExpectedAction === false, "wrong expected-action replay must expose action mismatch.");
+  assertTest(wrongExpectedAction.status === "FAIL", "controlled replay must fail when selected route does not preserve expected chain action.");
   assertTest(diagnostic.prototypeFallbackUsed, "diagnostic replay must keep prototype fallback observable.");
   assertTest(
     controlled.recommendations.includes("CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED"),
@@ -69,6 +84,7 @@ export function validateWorkbenchChainReplay(): readonly string[] {
     "diagnostic replay propagates Z4-HSL to Z3-HSL",
     "controlled_minimatch uses spatial_candidate_modifier",
     "controlled_minimatch preserves TH -> ML",
+    "controlled_minimatch fails when expected chain action is not preserved",
     "prototype fallback remains enabled",
     "fullmatch_warning_only does not alter runFullMatch score",
     "scoring constants remain unchanged",

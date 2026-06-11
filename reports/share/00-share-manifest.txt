@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-11T09:05:40.380Z
+Generated timestamp: 2026-06-11T09:22:44.471Z
 Task/sprint name: Sprint 2W - FullMatch Workbench Chain Replay
 Final file count: 14
 
@@ -132,17 +132,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M package.json
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidenceBuilder.ts
- M src/simulation/diagnostics/fullMatchGroundingDiagnostics.test.ts
- M src/simulation/diagnostics/fullMatchGroundingDiagnostics.ts
- M src/simulation/grounding/runWorkbenchReplaySeed.ts
- M src/simulation/grounding/workbenchReplaySeed.test.ts
-?? src/simulation/grounding/fixtures/sequence1Action1.chain.fixture.ts
-?? src/simulation/grounding/fixtures/workbenchChainCatalog.ts
-?? src/simulation/grounding/workbenchChainReplay.test.ts
-?? src/simulation/grounding/workbenchChainReplay.ts
-?? src/simulation/grounding/workbenchChainState.test.ts
-?? src/simulation/grounding/workbenchChainState.ts
-?? src/simulation/grounding/workbenchChainTypes.ts
+ M src/simulation/grounding/workbenchChainReplay.test.ts
+ M src/simulation/grounding/workbenchChainReplay.ts

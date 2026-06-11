@@ -123,6 +123,10 @@ function statusFor(input: {
     return "FAIL";
   }
 
+  if (input.mode === "controlled_minimatch" && input.steps.some((step) => !step.preservedExpectedAction)) {
+    return "FAIL";
+  }
+
   if (input.finalState.stateWarnings.length > 0) {
     return "PARTIAL";
   }
