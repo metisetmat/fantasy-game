@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-11T11:17:50.941Z
+Generated timestamp: 2026-06-11T11:33:33.019Z
 Task/sprint name: Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag
 Final file count: 16
 
@@ -154,17 +154,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M package.json
- M src/contracts/matchReportEvidence.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/runFullMatch.ts
-?? src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
-?? src/simulation/fullMatch/consumeWorkbenchChainForFullMatch.ts
-?? src/simulation/fullMatch/fullMatchChainConsumption.test.ts
-?? src/simulation/fullMatch/fullMatchChainConsumption.ts
-?? src/simulation/fullMatch/fullMatchChainConsumptionMismatch.test.ts
-?? src/simulation/fullMatch/runFullMatchDefaultRegression.test.ts
-?? src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
-?? src/simulation/fullMatch/scoringGuard.2z.test.ts
+ M src/simulation/fullMatch/consumeWorkbenchChainForFullMatch.ts
+ M src/simulation/fullMatch/fullMatchChainConsumption.test.ts

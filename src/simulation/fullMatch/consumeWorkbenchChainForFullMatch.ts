@@ -10,9 +10,9 @@ import {
 } from "./fullMatchChainConsumption";
 
 function consumptionStatus(replay: ReturnType<typeof replayWorkbenchChain>): FullMatchChainConsumptionStatus {
-  const expectedSteps = 3;
+  const expectedSteps = replay.totalSteps;
   const fullyPreserved =
-    replay.totalSteps === expectedSteps &&
+    expectedSteps > 0 &&
     replay.visualWorkbenchStepCount === expectedSteps &&
     replay.syntheticStepCount === 0 &&
     replay.hybridStepCount === 0 &&

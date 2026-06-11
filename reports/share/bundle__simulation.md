@@ -1944,9 +1944,9 @@ import {
 } from "./fullMatchChainConsumption";
 
 function consumptionStatus(replay: ReturnType<typeof replayWorkbenchChain>): FullMatchChainConsumptionStatus {
-  const expectedSteps = 3;
+  const expectedSteps = replay.totalSteps;
   const fullyPreserved =
-    replay.totalSteps === expectedSteps &&
+    expectedSteps > 0 &&
     replay.visualWorkbenchStepCount === expectedSteps &&
     replay.syntheticStepCount === 0 &&
     replay.hybridStepCount === 0 &&
@@ -5176,6 +5176,7 @@ if (require.main === module) {
 
 ```ts
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { sequence1Action1Chain } from "../grounding/fixtures/sequence1Action1.chain.fixture";
 import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
 
 function assertTest(condition: boolean, message: string): void {
@@ -5196,6 +5197,12 @@ export function validateFullMatchChainConsumption(): readonly string[] {
     routeSelectionMode: "workbench_chain_replay_experimental",
     segmentLabel: "segment-1",
   });
+  const consumedOneStepChain = consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+    chain: sequence1Action1Chain,
+  });
 
   assertTest(disabled.status === "not_requested", "segment_harness must return status not_requested.");
   assertTest(consumed.status === "consumed", "experimental mode must consume the visual chain.");
@@ -5209,6 +5216,10 @@ export function validateFullMatchChainConsumption(): readonly string[] {
   assertTest(consumed.scoreMutationCount === 0, "scoreMutationCount must be 0.");
   assertTest(consumed.scoringEventsMutationCount === 0, "scoringEventsMutationCount must be 0.");
   assertTest(consumed.mismatchWarningCount === 0, "valid chain mismatch warning count must be 0.");
+  assertTest(consumedOneStepChain.status === "consumed", "valid one-step chain must be consumed.");
+  assertTest(consumedOneStepChain.consumedStepCount === 1, "valid one-step chain consumed step count must be 1.");
+  assertTest(consumedOneStepChain.visualWorkbenchStepCount === 1, "valid one-step chain visual step count must be 1.");
+  assertTest(consumedOneStepChain.spatialSelectionStepCount === 1, "valid one-step chain spatial selection step count must be 1.");
 
   return [
     "segment_harness returns status not_requested",
@@ -5223,6 +5234,8 @@ export function validateFullMatchChainConsumption(): readonly string[] {
     "scoreMutationCount is 0",
     "scoringEventsMutationCount is 0",
     "mismatch warning count is 0 for valid chain",
+    "valid one-step chain is consumed",
+    "valid one-step chain uses its actual replay step count",
   ];
 }
 
