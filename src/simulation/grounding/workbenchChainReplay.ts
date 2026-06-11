@@ -6,16 +6,27 @@ import { runFullMatch } from "../runFullMatch";
 import { runMiniMatch } from "../miniMatch";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { applyWorkbenchChainStep, createInitialWorkbenchChainState, type WorkbenchChainRuntimeState } from "./workbenchChainState";
-import type { WorkbenchChain, WorkbenchChainReplayMode } from "./workbenchChainTypes";
+import type { WorkbenchChain, WorkbenchChainReplayMode, WorkbenchChainStepSource } from "./workbenchChainTypes";
 
 export type WorkbenchChainStepReplayResult = {
   readonly stepIndex: number;
   readonly frameId: string;
+  readonly stepSource: WorkbenchChainStepSource;
   readonly routeSelectionSource: string;
   readonly selectedActionType?: string;
+  readonly expectedActionType: string;
   readonly selectedActorId?: string;
+  readonly expectedActorId: string;
   readonly selectedReceiverId?: string;
+  readonly expectedReceiverId?: string;
   readonly selectedBy?: string;
+  readonly actorPreserved: boolean;
+  readonly receiverPreserved: boolean;
+  readonly actionTypePreserved: boolean;
+  readonly ballCarrierBeforePreserved: boolean;
+  readonly ballZoneBeforePreserved: boolean;
+  readonly ballCarrierAfterPreserved: boolean;
+  readonly ballZoneAfterPreserved: boolean;
   readonly guardValid: boolean;
   readonly blockedReasons: readonly string[];
   readonly stateBefore: WorkbenchChainRuntimeState;
@@ -29,9 +40,17 @@ export type WorkbenchChainReplayResult = {
   readonly mode: WorkbenchChainReplayMode;
   readonly status: "PASS" | "PARTIAL" | "FAIL";
   readonly totalSteps: number;
+  readonly visualWorkbenchStepCount: number;
+  readonly syntheticStepCount: number;
+  readonly hybridStepCount: number;
   readonly propagatedStepCount: number;
   readonly mismatchWarningCount: number;
   readonly spatialSelectionStepCount: number;
+  readonly preservedActorStepCount: number;
+  readonly preservedReceiverStepCount: number;
+  readonly preservedActionTypeStepCount: number;
+  readonly preservedBeforeStateStepCount: number;
+  readonly preservedAfterStateStepCount: number;
   readonly steps: readonly WorkbenchChainStepReplayResult[];
   readonly finalState: WorkbenchChainRuntimeState;
   readonly prototypeFallbackUsed: boolean;
@@ -66,17 +85,45 @@ function replayControlledStep(input: {
   readonly step: WorkbenchChain["steps"][number];
   readonly mode: WorkbenchChainReplayMode;
 }): WorkbenchChainStepReplayResult {
+  const frameSelectedAction = input.step.frame.selectedAction;
+  const stepWarnings = input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length);
+  const baseSelectedActionType = frameSelectedAction.actionType;
+  const baseSelectedActorId = frameSelectedAction.actorId;
+  const baseSelectedReceiverId = frameSelectedAction.receiverId;
+  const ballCarrierBeforePreserved = input.stateBefore.ballCarrierId === input.step.expectedActorId;
+  const ballZoneBeforePreserved = input.stateBefore.ballZone === input.step.expectedBallZoneBefore;
+  const ballCarrierAfterPreserved = input.step.expectedNewCarrierId === undefined
+    ? false
+    : input.stateAfter.ballCarrierId === input.step.expectedNewCarrierId;
+  const ballZoneAfterPreserved = input.step.expectedBallZoneAfter === undefined
+    ? false
+    : input.stateAfter.ballZone === input.step.expectedBallZoneAfter;
+
   if (input.mode !== "controlled_minimatch") {
     return {
       stepIndex: input.step.stepIndex,
       frameId: input.step.frame.frameId,
+      stepSource: input.step.stepSource,
       routeSelectionSource: input.mode,
+      selectedActionType: baseSelectedActionType,
+      expectedActionType: input.step.expectedActionType,
+      selectedActorId: baseSelectedActorId,
+      expectedActorId: input.step.expectedActorId,
+      ...(baseSelectedReceiverId === undefined ? {} : { selectedReceiverId: baseSelectedReceiverId }),
+      ...(input.step.expectedReceiverId === undefined ? {} : { expectedReceiverId: input.step.expectedReceiverId }),
+      actorPreserved: baseSelectedActorId === input.step.expectedActorId,
+      receiverPreserved: baseSelectedReceiverId === input.step.expectedReceiverId,
+      actionTypePreserved: baseSelectedActionType === input.step.expectedActionType,
+      ballCarrierBeforePreserved,
+      ballZoneBeforePreserved,
+      ballCarrierAfterPreserved,
+      ballZoneAfterPreserved,
       guardValid: true,
       blockedReasons: [],
       stateBefore: input.stateBefore,
       stateAfter: input.stateAfter,
       preservedExpectedAction: input.stateAfter.stateWarnings.length === input.stateBefore.stateWarnings.length,
-      warnings: input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length),
+      warnings: stepWarnings,
     };
   }
 
@@ -100,21 +147,35 @@ function replayControlledStep(input: {
     routeSelection?.selectedActionType === input.step.expectedActionType &&
     routeSelection.selectedActorId === input.step.expectedActorId &&
     routeSelection.selectedReceiverId === input.step.expectedReceiverId;
+  const selectedActionType = routeSelection?.selectedActionType ?? baseSelectedActionType;
+  const selectedActorId = routeSelection?.selectedActorId ?? baseSelectedActorId;
+  const selectedReceiverId = routeSelection?.selectedReceiverId ?? baseSelectedReceiverId;
 
   return {
     stepIndex: input.step.stepIndex,
     frameId: input.step.frame.frameId,
+    stepSource: input.step.stepSource,
     routeSelectionSource: routeSelection?.selectionSource ?? "spatial_candidate_modifier",
-    ...(routeSelection?.selectedActionType === undefined ? {} : { selectedActionType: routeSelection.selectedActionType }),
-    ...(routeSelection?.selectedActorId === undefined ? {} : { selectedActorId: routeSelection.selectedActorId }),
-    ...(routeSelection?.selectedReceiverId === undefined ? {} : { selectedReceiverId: routeSelection.selectedReceiverId }),
+    selectedActionType,
+    expectedActionType: input.step.expectedActionType,
+    selectedActorId,
+    expectedActorId: input.step.expectedActorId,
+    ...(selectedReceiverId === undefined ? {} : { selectedReceiverId }),
+    ...(input.step.expectedReceiverId === undefined ? {} : { expectedReceiverId: input.step.expectedReceiverId }),
     ...(routeSelection?.selectedBy === undefined ? {} : { selectedBy: routeSelection.selectedBy }),
+    actorPreserved: selectedActorId === input.step.expectedActorId,
+    receiverPreserved: selectedReceiverId === input.step.expectedReceiverId,
+    actionTypePreserved: selectedActionType === input.step.expectedActionType,
+    ballCarrierBeforePreserved,
+    ballZoneBeforePreserved,
+    ballCarrierAfterPreserved,
+    ballZoneAfterPreserved,
     guardValid: routeSelection?.guardValid ?? false,
     blockedReasons: routeSelection?.blockedReasons ?? ["ROUTE_SELECTION_RESULT_MISSING"],
     stateBefore: input.stateBefore,
     stateAfter: input.stateAfter,
     preservedExpectedAction,
-    warnings: input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length),
+    warnings: stepWarnings,
   };
 }
 
@@ -153,9 +214,17 @@ export function replayWorkbenchChain(input: {
       mode: input.mode,
       status: "PARTIAL",
       totalSteps: input.chain.steps.length,
+      visualWorkbenchStepCount: input.chain.steps.filter((step) => step.stepSource.source === "visual_workbench_truth").length,
+      syntheticStepCount: input.chain.steps.filter((step) => step.stepSource.source === "synthetic_continuation").length,
+      hybridStepCount: input.chain.steps.filter((step) => step.stepSource.source === "hybrid_chain").length,
       propagatedStepCount: 0,
       mismatchWarningCount: 0,
       spatialSelectionStepCount: 0,
+      preservedActorStepCount: 0,
+      preservedReceiverStepCount: 0,
+      preservedActionTypeStepCount: 0,
+      preservedBeforeStateStepCount: 0,
+      preservedAfterStateStepCount: 0,
       steps: [],
       finalState: {
         ...initialState,
@@ -201,9 +270,17 @@ export function replayWorkbenchChain(input: {
     mode: input.mode,
     status: statusFor({ mode: input.mode, steps, finalState: runtimeState }),
     totalSteps: input.chain.steps.length,
+    visualWorkbenchStepCount: input.chain.steps.filter((step) => step.stepSource.source === "visual_workbench_truth").length,
+    syntheticStepCount: input.chain.steps.filter((step) => step.stepSource.source === "synthetic_continuation").length,
+    hybridStepCount: input.chain.steps.filter((step) => step.stepSource.source === "hybrid_chain").length,
     propagatedStepCount: steps.filter((step) => step.stateAfter.stepIndex === step.stepIndex + 1).length,
     mismatchWarningCount,
     spatialSelectionStepCount,
+    preservedActorStepCount: steps.filter((step) => step.actorPreserved).length,
+    preservedReceiverStepCount: steps.filter((step) => step.receiverPreserved).length,
+    preservedActionTypeStepCount: steps.filter((step) => step.actionTypePreserved).length,
+    preservedBeforeStateStepCount: steps.filter((step) => step.ballCarrierBeforePreserved && step.ballZoneBeforePreserved).length,
+    preservedAfterStateStepCount: steps.filter((step) => step.ballCarrierAfterPreserved && step.ballZoneAfterPreserved).length,
     steps,
     finalState: runtimeState,
     prototypeFallbackUsed,
