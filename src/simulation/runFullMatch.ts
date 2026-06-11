@@ -1,4 +1,5 @@
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import type { MatchReportWarning } from "../contracts/matchReportWarnings";
 import {
   coachFacingHarnessWarningSummary,
@@ -42,6 +43,8 @@ import {
   resolveFullMatchRouteSelectionMode,
   type FullMatchOptions,
 } from "./fullMatch/fullMatchRouteSelectionMode";
+import { consumeWorkbenchChainForFullMatch } from "./fullMatch/consumeWorkbenchChainForFullMatch";
+import type { FullMatchChainConsumptionResult } from "./fullMatch/fullMatchChainConsumption";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -280,21 +283,90 @@ function withHarnessSanityDiagnosis(report: MatchReport, input: MatchInput): Mat
   };
 }
 
-function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput): MatchReport {
+function chainConsumptionLimitations(consumption: FullMatchChainConsumptionResult): readonly string[] {
+  if (consumption.status === "not_requested") {
+    return [
+      "FULLMATCH_CHAIN_CONSUMPTION_DISABLED_BY_DEFAULT",
+      "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS",
+    ];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_CONSUMPTION_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_CONSUMPTION_STATUS_${consumption.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_CONSUMED_FOR_SEGMENT_1",
+    "FULLMATCH_CHAIN_CONSUMPTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_CONSUMPTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_CONSUMPTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    ...(consumption.status === "partial" ? ["FULLMATCH_CHAIN_CONSUMPTION_PARTIAL"] : []),
+    ...consumption.warnings,
+  ];
+}
+
+function chainConsumptionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly consumption: FullMatchChainConsumptionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.consumption.status === "not_requested") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-consumption`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONSUMPTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.consumption.finalPropagatedZone ?? "Z4-HSR"],
+    summary:
+      `Experimental chain consumption ${input.consumption.status}: chain ${input.consumption.chainId ?? "none"} ` +
+      `on ${input.consumption.segmentLabel ?? "segment-1"} consumed ${input.consumption.consumedStepCount} step(s), ` +
+      `${input.consumption.visualWorkbenchStepCount} visual step(s), ${input.consumption.spatialSelectionStepCount} spatial selection step(s), ` +
+      `final carrier ${input.consumption.finalPropagatedCarrierId ?? "none"} at ${input.consumption.finalPropagatedZone ?? "none"}, ` +
+      `scoreMutationCount=${input.consumption.scoreMutationCount}, scoringEventsMutationCount=${input.consumption.scoringEventsMutationCount}.`,
+    confidence: input.consumption.status === "consumed" ? "medium" : "low",
+    strength: input.consumption.status === "consumed" ? 65 : 35,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_consumption",
+      "workbench_chain_experimental",
+      "fullmatch_chain_consumed",
+      "diagnostic_only_chain_consumption",
+      `chain_id_${input.consumption.chainId ?? "none"}`,
+      `segment_${input.consumption.segmentLabel ?? "segment-1"}`,
+      `consumed_steps_${input.consumption.consumedStepCount}`,
+      `visual_steps_${input.consumption.visualWorkbenchStepCount}`,
+      `spatial_steps_${input.consumption.spatialSelectionStepCount}`,
+      `mismatch_warnings_${input.consumption.mismatchWarningCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
+function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput, chainConsumption: FullMatchChainConsumptionResult): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
+  const chainFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("workbench_chain_consumption"));
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
+  const chainSummary = chainConsumption.status === "not_requested"
+    ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
+    : "Le moteur a consomme une chaine workbench visuelle sur le premier segment, mais cette consommation reste experimentale et ne modifie pas encore la resolution complete du match.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
     scope: "coach_visible",
     severity: "low",
     title: "Ancrage tactique full-match partiel",
-    coachSummary:
-      "Le moteur sait convertir le roster et une verite workbench en contexte spatial type, mais le full-match ne rejoue pas encore toute la chaine workbench.",
+    coachSummary: chainSummary,
     technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
-    evidenceFactIds: groundingFacts.map((fact) => fact.factId),
-    eventIds,
+    evidenceFactIds: [...groundingFacts, ...chainFacts].map((fact) => fact.factId),
+    eventIds: chainFacts.length > 0 ? [...eventIds, ...chainFacts.flatMap((fact) => fact.eventIds)].slice(0, 8) : eventIds,
     mayInvalidateGlobalScoringEconomy: false,
   };
   const evidenceEvent = report.timeline.find((event) => event.eventType !== "kickoff") ?? report.timeline[0];
@@ -302,8 +374,7 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
     diagnosisId: `${input.matchId}-tactical-grounding-gap`,
     teamId: input.homeTeam.teamId,
     title: "Ancrage workbench maintenant partiel",
-    summary:
-      "Le score du harnais doit etre lu avec prudence : les rosters et positions peuvent etre convertis en contexte spatial, mais les decisions visuelles ne pilotent pas encore toute la resolution mini-match.",
+    summary: chainSummary,
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
@@ -320,6 +391,11 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
 
 export function runFullMatch(input: MatchInput, options?: FullMatchOptions): MatchReport {
   const routeSelectionMode = resolveFullMatchRouteSelectionMode(options);
+  const chainConsumption = consumeWorkbenchChainForFullMatch({
+    matchInput: input,
+    routeSelectionMode,
+    segmentLabel: "segment-1",
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -424,8 +500,20 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       "Harness warnings are warning-only and may not change scoring values.",
       `Full-match route selection mode: ${routeSelectionMode}.`,
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
+      ...chainConsumptionLimitations(chainConsumption),
     ],
   });
+  const chainFact = chainConsumptionEvidenceFact({
+    report,
+    matchInput: input,
+    consumption: chainConsumption,
+  });
+  const reportWithChainEvidence = chainFact === null
+    ? report
+    : {
+        ...report,
+        evidenceFacts: [...report.evidenceFacts, chainFact],
+      };
 
-  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(report, input), input);
+  return withFullMatchGroundingDiagnosis(withHarnessSanityDiagnosis(reportWithChainEvidence, input), input, chainConsumption);
 }

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T10:45:39.659Z
-Task/sprint: Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof
+Generated: 2026-06-11T11:33:33.019Z
+Task/sprint: Sprint 2Z - Experimental FullMatch Chain Consumption Behind Flag
 Final file count: 16
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -15,8 +15,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-2y.md
-- validation.fullmatch-workbench-chain-replay-2y.md
+- fullmatch-workbench-chain-replay-2z.md
+- validation.fullmatch-workbench-chain-replay-2z.md
 - README.md
 
 ## Bundle Files

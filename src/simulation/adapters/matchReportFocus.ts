@@ -25,6 +25,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 60;
     case "TACTICAL_PLAN_SIGNAL":
       return 55;
+    case "WORKBENCH_CHAIN_CONSUMPTION":
+      return 52;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -57,6 +59,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Stabiliser l'élan après les bascules du match";
     case "TACTICAL_PLAN_SIGNAL":
       return "Relire le plan de match dans les zones visibles";
+    case "WORKBENCH_CHAIN_CONSUMPTION":
+      return "Relire la consommation workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
