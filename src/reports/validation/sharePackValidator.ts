@@ -152,6 +152,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3g.md"));
   const fullMatchWorkbenchChainReplay3H = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3h.md"));
   const fullMatchWorkbenchChainReplay3HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3h.md"));
+  const fullMatchWorkbenchChainReplay3I = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3i.md"));
+  const fullMatchWorkbenchChainReplay3IValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3i.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1784,6 +1786,95 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3IExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3i.md",
+    "validation.fullmatch-workbench-chain-replay-3i.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3IForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3h.md",
+    "validation.fullmatch-workbench-chain-replay-3h.md",
+    "fullmatch-workbench-chain-replay-3g.md",
+    "validation.fullmatch-workbench-chain-replay-3g.md",
+    "fullmatch-workbench-chain-replay-3f.md",
+    "validation.fullmatch-workbench-chain-replay-3f.md",
+    "fullmatch-workbench-chain-replay-3e.md",
+    "validation.fullmatch-workbench-chain-replay-3e.md",
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+  ];
+  const sprint3IChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3I", activeConfig.sprintName === "Sprint 3I - Controlled Segment Replay Comparison", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 18", allowlistedFiles.length === 18, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3IForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3IForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3IExpectedFiles.every((file) => requiredCopied(file)), sprint3IExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3I", manifest.includes("Sprint 3I - Controlled Segment Replay Comparison") && detailedManifest.includes("Sprint 3I - Controlled Segment Replay Comparison"), "Sprint 3I visible"),
+    check("README is Sprint 3I oriented", readme.includes("# Sprint 3I Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3i.md"), "README current"),
+    check("default and experimental coach reports copied", (coachDefaultHtml.includes("<!doctype html>") || coachDefaultHtml.includes("<html")) && (coachExperimentalHtml.includes("<!doctype html>") || coachExperimentalHtml.includes("<html")), "coach HTML variants copied"),
+    check("3I report included", fullMatchWorkbenchChainReplay3I.includes("# FullMatch Workbench Chain Replay 3I") && fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison status: available"), "3I doc included"),
+    check("3I validation is PASS", fullMatchWorkbenchChainReplay3IValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled segment replay comparison status is available"), "3I validation PASS"),
+    check("controlled replay origin visible", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison origin: isolated_minimatch_override_experiment"), "origin visible"),
+    check("baseline candidate/action/receiver/zone visible", fullMatchWorkbenchChainReplay3I.includes("baseline candidate: chain-context-safe-recycle-pv") && fullMatchWorkbenchChainReplay3I.includes("baseline action: SAFE_RECYCLE") && fullMatchWorkbenchChainReplay3I.includes("baseline receiver: control-pivot") && fullMatchWorkbenchChainReplay3I.includes("baseline zone: Z2-HSL"), "baseline visible"),
+    check("override candidate/action/receiver/zone visible", fullMatchWorkbenchChainReplay3I.includes("override candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3I.includes("override action: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3I.includes("override receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3I.includes("override zone: Z4-HSR"), "override visible"),
+    check("replay divergence fields visible", fullMatchWorkbenchChainReplay3I.includes("selection divergence observed: true") && fullMatchWorkbenchChainReplay3I.includes("zone progression divergence observed: true") && fullMatchWorkbenchChainReplay3I.includes("danger creation divergence observed: true") && fullMatchWorkbenchChainReplay3I.includes("score divergence observed: false") && fullMatchWorkbenchChainReplay3I.includes("scoring event divergence observed: false"), "divergence fields visible"),
+    check("controlled replay contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchControlledSegmentReplayComparison.ts") && bundleSimulation.includes("FullMatchControlledSegmentReplayComparison"), "3I contract bundled"),
+    check("controlled replay converter bundled", bundleSimulation.includes("src/simulation/fullMatch/controlledSegmentReplayComparisonFromExperiment.ts") && bundleSimulation.includes("controlledSegmentReplayComparisonFromExperiment"), "3I converter bundled"),
+    check("controlled replay comparison helper bundled", bundleSimulation.includes("src/simulation/fullMatch/compareControlledSegmentReplayPaths.ts") && bundleSimulation.includes("compareControlledSegmentReplayPaths"), "3I helper bundled"),
+    check("controlled replay signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchControlledSegmentReplayComparisonSignature.ts") && bundleSimulation.includes("FullMatchControlledSegmentReplayComparisonSignature"), "3I signature bundled"),
+    check("controlled replay tests bundled", bundleSimulation.includes("compareControlledSegmentReplayPaths.test.ts") && bundleSimulation.includes("fullMatchControlledSegmentReplayComparison.test.ts") && bundleSimulation.includes("fullMatchControlledSegmentReplayComparisonGuard.test.ts"), "3I unit tests bundled"),
+    check("3I runFullMatch controlled replay tests bundled", bundleSimulation.includes("runFullMatchExperimentalControlledSegmentReplayComparison.test.ts") && bundleSimulation.includes("runFullMatchControlledSegmentReplayComparisonScoringGuard.test.ts"), "3I full-match tests bundled"),
+    check("3I scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3i.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3i.test.ts"), "3I guards bundled"),
+    check("controlled replay evidence included", fullMatchWorkbenchChainReplay3I.includes("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON") && bundleSimulation.includes("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"), "3I evidence visible"),
+    check("closed and unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3I.includes("rejected closed candidate count: 1") && fullMatchWorkbenchChainReplay3I.includes("rejected unavailable candidate count: 1"), "blocked routes rejected"),
+    check("default controlled replay absent", fullMatchWorkbenchChainReplay3I.includes("default controlled segment replay comparison tag count: 0"), "default comparison clean"),
+    check("experimental controlled replay present", fullMatchWorkbenchChainReplay3I.includes("experimental controlled segment replay comparison tag count: greater than 0"), "experimental comparison visible"),
+    check("replay is isolated-only", fullMatchWorkbenchChainReplay3I.includes("replayAppliedOnlyInIsolatedComparison: true") && fullMatchWorkbenchChainReplay3I.includes("replayAppliedToNormalLiveSelection: false"), "isolated replay visible"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3I.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3IValidation.includes("default and experimental normal score signatures remain equal"), "score signatures equal"),
+    check("controlled replay cannot mutate normal score", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison can mutate normal score: false") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled replay comparison cannot mutate normal full-match score"), "normal score mutation forbidden"),
+    check("controlled replay cannot mutate normal scoring events", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison can mutate normal scoring events: false") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled replay comparison cannot mutate normal full-match scoring events"), "normal scoring event mutation forbidden"),
+    check("controlled replay cannot create production scoring events", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison can create production scoring events: false") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled replay comparison cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("controlled replay cannot mutate production route resolution", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison can mutate production route resolution: false") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled replay comparison cannot mutate production route resolution"), "production route forbidden"),
+    check("controlled replay cannot mutate global route success", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison can mutate global route success rates: false") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled replay comparison cannot mutate global route success rates"), "global route success forbidden"),
+    check("controlled replay cannot claim global economy", fullMatchWorkbenchChainReplay3I.includes("controlled segment replay comparison can claim global economy: false") && fullMatchWorkbenchChainReplay3IValidation.includes("controlled replay comparison cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3I.includes("stale coach wording status: absent") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3IValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3IValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3IValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3I.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3I.includes("CONFIRM_ISOLATED_OVERRIDE_EXPERIMENT_TO_CONTROLLED_SEGMENT_REPLAY_COMPARISON") && fullMatchWorkbenchChainReplay3I.includes("CONFIRM_REPLAY_COMPARISON_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS") && fullMatchWorkbenchChainReplay3I.includes("PREPARE_CONTROLLED_SEGMENT_REPLAY_COMPARISON_TO_REAL_ISOLATED_REPLAY_ENGINE"), "3I recommendations visible"),
+  ];
   const sprint3HExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2961,6 +3052,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3I - Controlled Segment Replay Comparison")
+      ? sprint3IChecks
     : activeConfig.sprintName.includes("Sprint 3H - Isolated MiniMatch Override Experiment")
       ? sprint3HChecks
     : activeConfig.sprintName.includes("Sprint 3G - Controlled Route Source to Live Selection Override Guards")
