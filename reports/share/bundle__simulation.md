@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2X - Multi-Action Workbench Chain + Experimental FullMatch Feature Flag Skeleton. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -915,6 +915,260 @@ export const sequence1Action1WorkbenchTruth: TacticalWorkbenchFrame = {
 };
 ```
 
+## File: src/simulation/grounding/fixtures/sequence1Action2.fixture.ts
+
+```ts
+import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "../tacticalWorkbenchTypes";
+import { sequence1Action1AfterPositions } from "./sequence1Action1.fixture";
+
+function withCarrier(
+  positions: readonly TacticalWorkbenchPlayerPosition[],
+  carrierId: string,
+  carrierZone: string,
+): readonly TacticalWorkbenchPlayerPosition[] {
+  return positions.map((position) => ({
+    ...position,
+    realZone: position.playerId === carrierId ? carrierZone : position.realZone,
+    ...(position.playerId === carrierId
+      ? { projectedZone: carrierZone }
+      : position.projectedZone === undefined ? {} : { projectedZone: position.projectedZone }),
+    ...(position.playerId === carrierId ? { isBallCarrier: true } : {}),
+    ...(position.playerId !== carrierId && position.isBallCarrier ? { isBallCarrier: false } : {}),
+  }));
+}
+
+export const sequence1Action2BeforePositions: readonly TacticalWorkbenchPlayerPosition[] = withCarrier(
+  sequence1Action1AfterPositions,
+  "control-mobile-lock",
+  "Z3-HSL",
+);
+
+export const sequence1Action2AfterPositions: readonly TacticalWorkbenchPlayerPosition[] = withCarrier(
+  sequence1Action2BeforePositions,
+  "control-playmaker",
+  "Z3-C",
+);
+
+export const sequence1Action2WorkbenchTruth: TacticalWorkbenchFrame = {
+  frameId: "sequence-1-action-2",
+  sequenceId: "sequence-1",
+  actionId: "action-2",
+  phase: "CONTROLLED_CONTINUATION",
+  possessionTeamId: "control",
+  defendingTeamId: "blitz",
+  ballCarrierId: "control-mobile-lock",
+  ballZone: "Z3-HSL",
+  attackingDirection: "LEFT_TO_RIGHT",
+  playerPositions: sequence1Action2BeforePositions,
+  afterPlayerPositions: sequence1Action2AfterPositions,
+  teamShapeIntents: [
+    {
+      teamId: "control",
+      frame: "before",
+      intent: "central reconnection after the first pressure escape",
+      evidence: ["ML@Z3-HSL", "PM@Z2-C", "PV@Z2-HSL"],
+    },
+    {
+      teamId: "control",
+      frame: "after",
+      intent: "central support restored for the next forward action",
+      evidence: ["PM@Z3-C", "SH@Z4-C", "HL@Z3-CL"],
+    },
+    {
+      teamId: "blitz",
+      frame: "before",
+      intent: "compact pressure around the left half-space recycle",
+      evidence: ["BLITZ ML@Z3-HSL", "BLITZ PV@Z3-HSL"],
+    },
+    {
+      teamId: "blitz",
+      frame: "after",
+      intent: "central lane compression after CONTROL reconnects",
+      evidence: ["BLITZ SH@Z3-C", "BLITZ ML@Z3-HSL"],
+    },
+  ],
+  selectedAction: {
+    actorId: "control-mobile-lock",
+    receiverId: "control-playmaker",
+    newCarrierId: "control-playmaker",
+    fromZone: "Z3-HSL",
+    targetZone: "Z3-C",
+    actualReceptionZone: "Z3-C",
+    actionType: "CENTRAL_RECONNECT",
+    actionSubtype: "SAFE_CONTINUITY",
+    transferType: "PASS",
+    possessionResult: "CONTROL_RETAINED",
+  },
+  rankedOptions: [
+    {
+      rank: 1,
+      actionType: "CENTRAL_RECONNECT",
+      receiverId: "control-playmaker",
+      targetZone: "Z3-C",
+      laneState: "OPEN",
+      risk: "LOW",
+      score: 84,
+      finalSelectionScore: 84,
+      selected: true,
+    },
+    {
+      rank: 2,
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-forward-leader",
+      targetZone: "Z4-C",
+      laneState: "CONTESTED",
+      risk: "MEDIUM",
+      score: 75,
+      finalSelectionScore: 75,
+      selected: false,
+    },
+    {
+      rank: 3,
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      laneState: "OPEN",
+      risk: "LOW",
+      score: 70,
+      finalSelectionScore: 70,
+      selected: false,
+    },
+  ],
+  afterState: {
+    newCarrierId: "control-playmaker",
+    ballZone: "Z3-C",
+    possessionResult: "CONTROL_RETAINED",
+  },
+};
+```
+
+## File: src/simulation/grounding/fixtures/sequence1Action3.fixture.ts
+
+```ts
+import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "../tacticalWorkbenchTypes";
+import { sequence1Action2AfterPositions } from "./sequence1Action2.fixture";
+
+function withCarrier(
+  positions: readonly TacticalWorkbenchPlayerPosition[],
+  carrierId: string,
+  carrierZone: string,
+): readonly TacticalWorkbenchPlayerPosition[] {
+  return positions.map((position) => ({
+    ...position,
+    realZone: position.playerId === carrierId ? carrierZone : position.realZone,
+    ...(position.playerId === carrierId
+      ? { projectedZone: carrierZone }
+      : position.projectedZone === undefined ? {} : { projectedZone: position.projectedZone }),
+    ...(position.playerId === carrierId ? { isBallCarrier: true } : {}),
+    ...(position.playerId !== carrierId && position.isBallCarrier ? { isBallCarrier: false } : {}),
+  }));
+}
+
+export const sequence1Action3BeforePositions: readonly TacticalWorkbenchPlayerPosition[] = withCarrier(
+  sequence1Action2AfterPositions,
+  "control-playmaker",
+  "Z3-C",
+);
+
+export const sequence1Action3AfterPositions: readonly TacticalWorkbenchPlayerPosition[] = withCarrier(
+  sequence1Action3BeforePositions,
+  "control-space-hunter",
+  "Z4-HSR",
+);
+
+export const sequence1Action3WorkbenchTruth: TacticalWorkbenchFrame = {
+  frameId: "sequence-1-action-3",
+  sequenceId: "sequence-1",
+  actionId: "action-3",
+  phase: "STRUCTURE_ADVANCEMENT",
+  possessionTeamId: "control",
+  defendingTeamId: "blitz",
+  ballCarrierId: "control-playmaker",
+  ballZone: "Z3-C",
+  attackingDirection: "LEFT_TO_RIGHT",
+  playerPositions: sequence1Action3BeforePositions,
+  afterPlayerPositions: sequence1Action3AfterPositions,
+  teamShapeIntents: [
+    {
+      teamId: "control",
+      frame: "before",
+      intent: "central platform ready to advance into the right half-space",
+      evidence: ["PM@Z3-C", "SH@Z4-C", "RP@Z2-HSR"],
+    },
+    {
+      teamId: "control",
+      frame: "after",
+      intent: "forward support line reached without abandoning rest defense",
+      evidence: ["SH@Z4-HSR", "PM@Z3-C", "PV@Z2-HSL"],
+    },
+    {
+      teamId: "blitz",
+      frame: "before",
+      intent: "central pressure narrows the immediate rebuild lane",
+      evidence: ["BLITZ SH@Z3-C", "BLITZ ML@Z3-HSL"],
+    },
+    {
+      teamId: "blitz",
+      frame: "after",
+      intent: "right half-space response after CONTROL progresses",
+      evidence: ["BLITZ SH@Z3-C", "BLITZ RP@Z5-C"],
+    },
+  ],
+  selectedAction: {
+    actorId: "control-playmaker",
+    receiverId: "control-space-hunter",
+    newCarrierId: "control-space-hunter",
+    fromZone: "Z3-C",
+    targetZone: "Z4-HSR",
+    actualReceptionZone: "Z4-HSR",
+    actionType: "FORWARD_PROGRESS",
+    actionSubtype: "SUPPORT_ADVANCE",
+    transferType: "PASS",
+    possessionResult: "CONTROL_RETAINED",
+  },
+  rankedOptions: [
+    {
+      rank: 1,
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      laneState: "OPEN",
+      risk: "MEDIUM",
+      score: 86,
+      finalSelectionScore: 86,
+      selected: true,
+    },
+    {
+      rank: 2,
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      laneState: "OPEN",
+      risk: "LOW",
+      score: 73,
+      finalSelectionScore: 73,
+      selected: false,
+    },
+    {
+      rank: 3,
+      actionType: "WEAK_SIDE_SWITCH",
+      receiverId: "control-right-piston",
+      targetZone: "Z3-HSR",
+      laneState: "CONTESTED",
+      risk: "MEDIUM",
+      score: 71,
+      finalSelectionScore: 71,
+      selected: false,
+    },
+  ],
+  afterState: {
+    newCarrierId: "control-space-hunter",
+    ballZone: "Z4-HSR",
+    possessionResult: "CONTROL_RETAINED",
+  },
+};
+```
+
 ## File: src/simulation/grounding/workbenchChainTypes.ts
 
 ```ts
@@ -1007,186 +1261,28 @@ export const sequence1Action1Chain: WorkbenchChain = {
 ## File: src/simulation/grounding/fixtures/sequence1MultiAction.chain.fixture.ts
 
 ```ts
-import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition, TacticalWorkbenchRankedOption } from "../tacticalWorkbenchTypes";
 import type { WorkbenchChain, WorkbenchChainStepSource } from "../workbenchChainTypes";
 import { sequence1Action1Chain } from "./sequence1Action1.chain.fixture";
-import { sequence1Action1AfterPositions, sequence1Action1WorkbenchTruth } from "./sequence1Action1.fixture";
+import { sequence1Action2WorkbenchTruth } from "./sequence1Action2.fixture";
+import { sequence1Action3WorkbenchTruth } from "./sequence1Action3.fixture";
 
-function withCarrier(
-  positions: readonly TacticalWorkbenchPlayerPosition[],
-  carrierId: string,
-  carrierZone: string,
-): readonly TacticalWorkbenchPlayerPosition[] {
-  return positions.map((position) => ({
-    ...position,
-    realZone: position.playerId === carrierId ? carrierZone : position.realZone,
-    ...(position.playerId === carrierId
-      ? { projectedZone: carrierZone }
-      : position.projectedZone === undefined ? {} : { projectedZone: position.projectedZone }),
-    ...(position.playerId === carrierId ? { isBallCarrier: true } : {}),
-    ...(position.playerId !== carrierId && position.isBallCarrier ? { isBallCarrier: false } : {}),
-  }));
-}
-
-function selectedOption(input: {
-  readonly actionType: string;
-  readonly receiverId: string;
-  readonly targetZone: string;
-  readonly score: number;
-}): TacticalWorkbenchRankedOption {
+function visualSource(artifactId: string, note: string): WorkbenchChainStepSource {
   return {
-    rank: 1,
-    actionType: input.actionType,
-    receiverId: input.receiverId,
-    targetZone: input.targetZone,
-    laneState: "CONTESTED",
-    risk: "LOW",
-    score: input.score,
-    finalSelectionScore: input.score,
-    selected: true,
+    source: "visual_workbench_truth",
+    sourceArtifactId: artifactId,
+    sourceNote: note,
   };
 }
 
-const syntheticSource = (note: string): WorkbenchChainStepSource => ({
-  source: "synthetic_continuation",
-  sourceNote: note,
-});
-
-const step1Before = withCarrier(sequence1Action1AfterPositions, "control-mobile-lock", "Z3-HSL");
-const step1After = withCarrier(step1Before, "control-playmaker", "Z3-C");
-const step2Before = step1After;
-const step2After = withCarrier(step2Before, "control-space-hunter", "Z4-HSR");
 const visualStep0 = sequence1Action1Chain.steps[0];
 
 if (visualStep0 === undefined) {
   throw new Error("sequence1Action1Chain must expose step 0 for the multi-action chain.");
 }
 
-const sequence1Action2SyntheticFrame: TacticalWorkbenchFrame = {
-  ...sequence1Action1WorkbenchTruth,
-  frameId: "sequence-1-action-2-synthetic-continuation",
-  actionId: "action-2-synthetic-continuation",
-  phase: "CONTROLLED_CONTINUATION",
-  ballCarrierId: "control-mobile-lock",
-  ballZone: "Z3-HSL",
-  playerPositions: step1Before,
-  afterPlayerPositions: step1After,
-  teamShapeIntents: [
-    {
-      teamId: "control",
-      frame: "before",
-      intent: "synthetic central reconnection continuation",
-      evidence: ["ML@Z3-HSL", "PM@Z3-C"],
-    },
-    {
-      teamId: "control",
-      frame: "after",
-      intent: "central support restored for next progression",
-      evidence: ["PM@Z3-C"],
-    },
-  ],
-  selectedAction: {
-    actorId: "control-mobile-lock",
-    receiverId: "control-playmaker",
-    newCarrierId: "control-playmaker",
-    fromZone: "Z3-HSL",
-    targetZone: "Z3-C",
-    actualReceptionZone: "Z3-C",
-    actionType: "CENTRAL_RECONNECT",
-    actionSubtype: "SAFE_CONTINUITY",
-    transferType: "PASS",
-    possessionResult: "CONTROL_RETAINED",
-  },
-  rankedOptions: [
-    selectedOption({
-      actionType: "CENTRAL_RECONNECT",
-      receiverId: "control-playmaker",
-      targetZone: "Z3-C",
-      score: 82,
-    }),
-    {
-      rank: 2,
-      actionType: "FORWARD_PROGRESS",
-      receiverId: "control-forward-leader",
-      targetZone: "Z4-C",
-      laneState: "CONTESTED",
-      risk: "MEDIUM",
-      score: 75,
-      finalSelectionScore: 75,
-      selected: false,
-    },
-  ],
-  afterState: {
-    newCarrierId: "control-playmaker",
-    ballZone: "Z3-C",
-    possessionResult: "CONTROL_RETAINED",
-  },
-};
-
-const sequence1Action3SyntheticFrame: TacticalWorkbenchFrame = {
-  ...sequence1Action1WorkbenchTruth,
-  frameId: "sequence-1-action-3-synthetic-continuation",
-  actionId: "action-3-synthetic-continuation",
-  phase: "STRUCTURE_ADVANCEMENT",
-  ballCarrierId: "control-playmaker",
-  ballZone: "Z3-C",
-  playerPositions: step2Before,
-  afterPlayerPositions: step2After,
-  teamShapeIntents: [
-    {
-      teamId: "control",
-      frame: "before",
-      intent: "synthetic forward support advance",
-      evidence: ["PM@Z3-C", "SH@Z4-HSR"],
-    },
-    {
-      teamId: "control",
-      frame: "after",
-      intent: "advanced receiver prepared on the right half-space",
-      evidence: ["SH@Z4-HSR"],
-    },
-  ],
-  selectedAction: {
-    actorId: "control-playmaker",
-    receiverId: "control-space-hunter",
-    newCarrierId: "control-space-hunter",
-    fromZone: "Z3-C",
-    targetZone: "Z4-HSR",
-    actualReceptionZone: "Z4-HSR",
-    actionType: "FORWARD_PROGRESS",
-    actionSubtype: "SUPPORT_ADVANCE",
-    transferType: "PASS",
-    possessionResult: "CONTROL_RETAINED",
-  },
-  rankedOptions: [
-    selectedOption({
-      actionType: "FORWARD_PROGRESS",
-      receiverId: "control-space-hunter",
-      targetZone: "Z4-HSR",
-      score: 84,
-    }),
-    {
-      rank: 2,
-      actionType: "SAFE_RECYCLE",
-      receiverId: "control-pivot",
-      targetZone: "Z2-HSL",
-      laneState: "CONTESTED",
-      risk: "LOW",
-      score: 73,
-      finalSelectionScore: 73,
-      selected: false,
-    },
-  ],
-  afterState: {
-    newCarrierId: "control-space-hunter",
-    ballZone: "Z4-HSR",
-    possessionResult: "CONTROL_RETAINED",
-  },
-};
-
 export const sequence1MultiActionChain: WorkbenchChain = {
   chainId: "sequence-1-multi-action-chain",
-  description: "Hybrid chain: visual sequence-1-action-1 truth followed by synthetic typed continuation steps for central reconnection and forward support advance.",
+  description: "Visual chain: Sequence 1 Action 1, Action 2, and Action 3 are all backed by visual workbench truth artifacts.",
   expectedPossessionTeamId: "control",
   expectedDefendingTeamId: "blitz",
   initialBallCarrierId: "control-tempo-half",
@@ -1197,8 +1293,11 @@ export const sequence1MultiActionChain: WorkbenchChain = {
     visualStep0,
     {
       stepIndex: 1,
-      frame: sequence1Action2SyntheticFrame,
-      stepSource: syntheticSource("Synthetic typed continuation only; not backed by a visual workbench artifact yet."),
+      frame: sequence1Action2WorkbenchTruth,
+      stepSource: visualSource(
+        "reports/workbench/sequence-1-action-2.html",
+        "Backed by the Sequence 1 Action 2 visual workbench artifact.",
+      ),
       expectedActorId: "control-mobile-lock",
       expectedReceiverId: "control-playmaker",
       expectedNewCarrierId: "control-playmaker",
@@ -1208,8 +1307,11 @@ export const sequence1MultiActionChain: WorkbenchChain = {
     },
     {
       stepIndex: 2,
-      frame: sequence1Action3SyntheticFrame,
-      stepSource: syntheticSource("Synthetic typed continuation only; future sprint should replace it with a real visual workbench artifact."),
+      frame: sequence1Action3WorkbenchTruth,
+      stepSource: visualSource(
+        "reports/workbench/sequence-1-action-3.html",
+        "Backed by the Sequence 1 Action 3 visual workbench artifact.",
+      ),
       expectedActorId: "control-playmaker",
       expectedReceiverId: "control-space-hunter",
       expectedNewCarrierId: "control-space-hunter",
@@ -1337,16 +1439,27 @@ import { runFullMatch } from "../runFullMatch";
 import { runMiniMatch } from "../miniMatch";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { applyWorkbenchChainStep, createInitialWorkbenchChainState, type WorkbenchChainRuntimeState } from "./workbenchChainState";
-import type { WorkbenchChain, WorkbenchChainReplayMode } from "./workbenchChainTypes";
+import type { WorkbenchChain, WorkbenchChainReplayMode, WorkbenchChainStepSource } from "./workbenchChainTypes";
 
 export type WorkbenchChainStepReplayResult = {
   readonly stepIndex: number;
   readonly frameId: string;
+  readonly stepSource: WorkbenchChainStepSource;
   readonly routeSelectionSource: string;
   readonly selectedActionType?: string;
+  readonly expectedActionType: string;
   readonly selectedActorId?: string;
+  readonly expectedActorId: string;
   readonly selectedReceiverId?: string;
+  readonly expectedReceiverId?: string;
   readonly selectedBy?: string;
+  readonly actorPreserved: boolean;
+  readonly receiverPreserved: boolean;
+  readonly actionTypePreserved: boolean;
+  readonly ballCarrierBeforePreserved: boolean;
+  readonly ballZoneBeforePreserved: boolean;
+  readonly ballCarrierAfterPreserved: boolean;
+  readonly ballZoneAfterPreserved: boolean;
   readonly guardValid: boolean;
   readonly blockedReasons: readonly string[];
   readonly stateBefore: WorkbenchChainRuntimeState;
@@ -1360,9 +1473,17 @@ export type WorkbenchChainReplayResult = {
   readonly mode: WorkbenchChainReplayMode;
   readonly status: "PASS" | "PARTIAL" | "FAIL";
   readonly totalSteps: number;
+  readonly visualWorkbenchStepCount: number;
+  readonly syntheticStepCount: number;
+  readonly hybridStepCount: number;
   readonly propagatedStepCount: number;
   readonly mismatchWarningCount: number;
   readonly spatialSelectionStepCount: number;
+  readonly preservedActorStepCount: number;
+  readonly preservedReceiverStepCount: number;
+  readonly preservedActionTypeStepCount: number;
+  readonly preservedBeforeStateStepCount: number;
+  readonly preservedAfterStateStepCount: number;
   readonly steps: readonly WorkbenchChainStepReplayResult[];
   readonly finalState: WorkbenchChainRuntimeState;
   readonly prototypeFallbackUsed: boolean;
@@ -1397,17 +1518,45 @@ function replayControlledStep(input: {
   readonly step: WorkbenchChain["steps"][number];
   readonly mode: WorkbenchChainReplayMode;
 }): WorkbenchChainStepReplayResult {
+  const frameSelectedAction = input.step.frame.selectedAction;
+  const stepWarnings = input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length);
+  const baseSelectedActionType = frameSelectedAction.actionType;
+  const baseSelectedActorId = frameSelectedAction.actorId;
+  const baseSelectedReceiverId = frameSelectedAction.receiverId;
+  const ballCarrierBeforePreserved = input.stateBefore.ballCarrierId === input.step.expectedActorId;
+  const ballZoneBeforePreserved = input.stateBefore.ballZone === input.step.expectedBallZoneBefore;
+  const ballCarrierAfterPreserved = input.step.expectedNewCarrierId === undefined
+    ? false
+    : input.stateAfter.ballCarrierId === input.step.expectedNewCarrierId;
+  const ballZoneAfterPreserved = input.step.expectedBallZoneAfter === undefined
+    ? false
+    : input.stateAfter.ballZone === input.step.expectedBallZoneAfter;
+
   if (input.mode !== "controlled_minimatch") {
     return {
       stepIndex: input.step.stepIndex,
       frameId: input.step.frame.frameId,
+      stepSource: input.step.stepSource,
       routeSelectionSource: input.mode,
+      selectedActionType: baseSelectedActionType,
+      expectedActionType: input.step.expectedActionType,
+      selectedActorId: baseSelectedActorId,
+      expectedActorId: input.step.expectedActorId,
+      ...(baseSelectedReceiverId === undefined ? {} : { selectedReceiverId: baseSelectedReceiverId }),
+      ...(input.step.expectedReceiverId === undefined ? {} : { expectedReceiverId: input.step.expectedReceiverId }),
+      actorPreserved: baseSelectedActorId === input.step.expectedActorId,
+      receiverPreserved: baseSelectedReceiverId === input.step.expectedReceiverId,
+      actionTypePreserved: baseSelectedActionType === input.step.expectedActionType,
+      ballCarrierBeforePreserved,
+      ballZoneBeforePreserved,
+      ballCarrierAfterPreserved,
+      ballZoneAfterPreserved,
       guardValid: true,
       blockedReasons: [],
       stateBefore: input.stateBefore,
       stateAfter: input.stateAfter,
       preservedExpectedAction: input.stateAfter.stateWarnings.length === input.stateBefore.stateWarnings.length,
-      warnings: input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length),
+      warnings: stepWarnings,
     };
   }
 
@@ -1431,21 +1580,35 @@ function replayControlledStep(input: {
     routeSelection?.selectedActionType === input.step.expectedActionType &&
     routeSelection.selectedActorId === input.step.expectedActorId &&
     routeSelection.selectedReceiverId === input.step.expectedReceiverId;
+  const selectedActionType = routeSelection?.selectedActionType ?? baseSelectedActionType;
+  const selectedActorId = routeSelection?.selectedActorId ?? baseSelectedActorId;
+  const selectedReceiverId = routeSelection?.selectedReceiverId ?? baseSelectedReceiverId;
 
   return {
     stepIndex: input.step.stepIndex,
     frameId: input.step.frame.frameId,
+    stepSource: input.step.stepSource,
     routeSelectionSource: routeSelection?.selectionSource ?? "spatial_candidate_modifier",
-    ...(routeSelection?.selectedActionType === undefined ? {} : { selectedActionType: routeSelection.selectedActionType }),
-    ...(routeSelection?.selectedActorId === undefined ? {} : { selectedActorId: routeSelection.selectedActorId }),
-    ...(routeSelection?.selectedReceiverId === undefined ? {} : { selectedReceiverId: routeSelection.selectedReceiverId }),
+    selectedActionType,
+    expectedActionType: input.step.expectedActionType,
+    selectedActorId,
+    expectedActorId: input.step.expectedActorId,
+    ...(selectedReceiverId === undefined ? {} : { selectedReceiverId }),
+    ...(input.step.expectedReceiverId === undefined ? {} : { expectedReceiverId: input.step.expectedReceiverId }),
     ...(routeSelection?.selectedBy === undefined ? {} : { selectedBy: routeSelection.selectedBy }),
+    actorPreserved: selectedActorId === input.step.expectedActorId,
+    receiverPreserved: selectedReceiverId === input.step.expectedReceiverId,
+    actionTypePreserved: selectedActionType === input.step.expectedActionType,
+    ballCarrierBeforePreserved,
+    ballZoneBeforePreserved,
+    ballCarrierAfterPreserved,
+    ballZoneAfterPreserved,
     guardValid: routeSelection?.guardValid ?? false,
     blockedReasons: routeSelection?.blockedReasons ?? ["ROUTE_SELECTION_RESULT_MISSING"],
     stateBefore: input.stateBefore,
     stateAfter: input.stateAfter,
     preservedExpectedAction,
-    warnings: input.stateAfter.stateWarnings.slice(input.stateBefore.stateWarnings.length),
+    warnings: stepWarnings,
   };
 }
 
@@ -1484,9 +1647,17 @@ export function replayWorkbenchChain(input: {
       mode: input.mode,
       status: "PARTIAL",
       totalSteps: input.chain.steps.length,
+      visualWorkbenchStepCount: input.chain.steps.filter((step) => step.stepSource.source === "visual_workbench_truth").length,
+      syntheticStepCount: input.chain.steps.filter((step) => step.stepSource.source === "synthetic_continuation").length,
+      hybridStepCount: input.chain.steps.filter((step) => step.stepSource.source === "hybrid_chain").length,
       propagatedStepCount: 0,
       mismatchWarningCount: 0,
       spatialSelectionStepCount: 0,
+      preservedActorStepCount: 0,
+      preservedReceiverStepCount: 0,
+      preservedActionTypeStepCount: 0,
+      preservedBeforeStateStepCount: 0,
+      preservedAfterStateStepCount: 0,
       steps: [],
       finalState: {
         ...initialState,
@@ -1532,9 +1703,17 @@ export function replayWorkbenchChain(input: {
     mode: input.mode,
     status: statusFor({ mode: input.mode, steps, finalState: runtimeState }),
     totalSteps: input.chain.steps.length,
+    visualWorkbenchStepCount: input.chain.steps.filter((step) => step.stepSource.source === "visual_workbench_truth").length,
+    syntheticStepCount: input.chain.steps.filter((step) => step.stepSource.source === "synthetic_continuation").length,
+    hybridStepCount: input.chain.steps.filter((step) => step.stepSource.source === "hybrid_chain").length,
     propagatedStepCount: steps.filter((step) => step.stateAfter.stepIndex === step.stepIndex + 1).length,
     mismatchWarningCount,
     spatialSelectionStepCount,
+    preservedActorStepCount: steps.filter((step) => step.actorPreserved).length,
+    preservedReceiverStepCount: steps.filter((step) => step.receiverPreserved).length,
+    preservedActionTypeStepCount: steps.filter((step) => step.actionTypePreserved).length,
+    preservedBeforeStateStepCount: steps.filter((step) => step.ballCarrierBeforePreserved && step.ballZoneBeforePreserved).length,
+    preservedAfterStateStepCount: steps.filter((step) => step.ballCarrierAfterPreserved && step.ballZoneAfterPreserved).length,
     steps,
     finalState: runtimeState,
     prototypeFallbackUsed,
@@ -1607,6 +1786,8 @@ export function fullMatchRouteSelectionModeDiagnostics(mode: FullMatchRouteSelec
 import { readFileSync } from "node:fs";
 import type { TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { sequence1Action2WorkbenchTruth } from "./fixtures/sequence1Action2.fixture";
+import { sequence1Action3WorkbenchTruth } from "./fixtures/sequence1Action3.fixture";
 
 function attributeValue(fragment: string, attribute: string): string | undefined {
   const match = new RegExp(`${attribute}="([^"]+)"`).exec(fragment);
@@ -1655,6 +1836,50 @@ export function extractSequenceOneActionOneWorkbenchTruthFromHtml(path: string):
     })),
   };
 }
+
+export function extractSequenceOneActionTwoWorkbenchTruthFromHtml(path: string): typeof sequence1Action2WorkbenchTruth {
+  const html = readFileSync(path, "utf8");
+  const beforePositions = extractWorkbenchPlayerPositions(html, "before");
+  const afterPositions = extractWorkbenchPlayerPositions(html, "after");
+
+  if (beforePositions.length < 10 || afterPositions.length < 8) {
+    return sequence1Action2WorkbenchTruth;
+  }
+
+  return {
+    ...sequence1Action2WorkbenchTruth,
+    playerPositions: beforePositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-mobile-lock",
+    })),
+    afterPlayerPositions: afterPositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-playmaker",
+    })),
+  };
+}
+
+export function extractSequenceOneActionThreeWorkbenchTruthFromHtml(path: string): typeof sequence1Action3WorkbenchTruth {
+  const html = readFileSync(path, "utf8");
+  const beforePositions = extractWorkbenchPlayerPositions(html, "before");
+  const afterPositions = extractWorkbenchPlayerPositions(html, "after");
+
+  if (beforePositions.length < 10 || afterPositions.length < 8) {
+    return sequence1Action3WorkbenchTruth;
+  }
+
+  return {
+    ...sequence1Action3WorkbenchTruth,
+    playerPositions: beforePositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-playmaker",
+    })),
+    afterPlayerPositions: afterPositions.map((position) => ({
+      ...position,
+      isBallCarrier: position.playerId === "control-space-hunter",
+    })),
+  };
+}
 ```
 
 ## File: src/simulation/grounding/tacticalWorkbenchContractGuard.ts
@@ -1662,6 +1887,9 @@ export function extractSequenceOneActionOneWorkbenchTruthFromHtml(path: string):
 ```ts
 import type { TacticalWorkbenchFrame } from "./tacticalWorkbenchTypes";
 import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { sequence1Action2WorkbenchTruth } from "./fixtures/sequence1Action2.fixture";
+import { sequence1Action3WorkbenchTruth } from "./fixtures/sequence1Action3.fixture";
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
 
 function assertGuard(condition: boolean, message: string): void {
   if (!condition) {
@@ -1723,8 +1951,95 @@ export function validateSequenceOneActionOneWorkbenchTruth(
   ];
 }
 
+export function validateSequenceOneActionTwoWorkbenchTruth(
+  frame: TacticalWorkbenchFrame = sequence1Action2WorkbenchTruth,
+): readonly string[] {
+  assertGuard(frame.frameId === "sequence-1-action-2", "frame must be sequence-1-action-2.");
+  assertGuard(frame.ballCarrierId === "control-mobile-lock", "before ball carrier must be CONTROL ML.");
+  assertGuard(frame.ballZone === "Z3-HSL", "before ball zone must be Z3-HSL.");
+  assertGuard(frame.selectedAction.actorId === "control-mobile-lock", "selected action decision actor must be CONTROL ML.");
+  assertGuard(frame.selectedAction.receiverId === "control-playmaker", "selected receiver must be CONTROL PM.");
+  assertGuard(frame.selectedAction.newCarrierId === "control-playmaker", "new carrier after action must be CONTROL PM.");
+  assertGuard(frame.selectedAction.fromZone === "Z3-HSL", "selected action from zone must be Z3-HSL.");
+  assertGuard(frame.selectedAction.actualReceptionZone === "Z3-C", "actual reception zone must be Z3-C.");
+  assertGuard(frame.afterState?.ballZone === "Z3-C", "actual ball zone after action must be Z3-C.");
+  assertGuard(frame.selectedAction.actionType === "CENTRAL_RECONNECT", "selected action type must be CENTRAL_RECONNECT.");
+  assertGuard(playerExists(frame, "control-mobile-lock", "Z3-HSL"), "CONTROL ML must exist at real zone Z3-HSL before action.");
+  assertGuard(afterPlayerExists(frame, "control-playmaker", "Z3-C"), "CONTROL PM must exist at real zone Z3-C after action.");
+  assertGuard(renderedZonesStayDistinctFromRealOffsets(frame), "real zones and rendered offset zones must not be confused.");
+
+  return [
+    "sequence-1-action-2 visual truth exists",
+    "selected action is ML -> PM",
+    "ball transition is Z3-HSL -> Z3-C",
+    "new carrier after action is CONTROL PM",
+    "real zones and rendered-offset zones remain distinct",
+  ];
+}
+
+export function validateSequenceOneActionThreeWorkbenchTruth(
+  frame: TacticalWorkbenchFrame = sequence1Action3WorkbenchTruth,
+): readonly string[] {
+  assertGuard(frame.frameId === "sequence-1-action-3", "frame must be sequence-1-action-3.");
+  assertGuard(frame.ballCarrierId === "control-playmaker", "before ball carrier must be CONTROL PM.");
+  assertGuard(frame.ballZone === "Z3-C", "before ball zone must be Z3-C.");
+  assertGuard(frame.selectedAction.actorId === "control-playmaker", "selected action decision actor must be CONTROL PM.");
+  assertGuard(frame.selectedAction.receiverId === "control-space-hunter", "selected receiver must be CONTROL SH.");
+  assertGuard(frame.selectedAction.newCarrierId === "control-space-hunter", "new carrier after action must be CONTROL SH.");
+  assertGuard(frame.selectedAction.fromZone === "Z3-C", "selected action from zone must be Z3-C.");
+  assertGuard(frame.selectedAction.actualReceptionZone === "Z4-HSR", "actual reception zone must be Z4-HSR.");
+  assertGuard(frame.afterState?.ballZone === "Z4-HSR", "actual ball zone after action must be Z4-HSR.");
+  assertGuard(frame.selectedAction.actionType === "FORWARD_PROGRESS", "selected action type must be FORWARD_PROGRESS.");
+  assertGuard(playerExists(frame, "control-playmaker", "Z3-C"), "CONTROL PM must exist at real zone Z3-C before action.");
+  assertGuard(afterPlayerExists(frame, "control-space-hunter", "Z4-HSR"), "CONTROL SH must exist at real zone Z4-HSR after action.");
+  assertGuard(renderedZonesStayDistinctFromRealOffsets(frame), "real zones and rendered offset zones must not be confused.");
+
+  return [
+    "sequence-1-action-3 visual truth exists",
+    "selected action is PM -> SH",
+    "ball transition is Z3-C -> Z4-HSR",
+    "new carrier after action is CONTROL SH",
+    "real zones and rendered-offset zones remain distinct",
+  ];
+}
+
+export function validateSequenceOneMultiActionWorkbenchChainTruth(): readonly string[] {
+  const step0 = sequence1MultiActionChain.steps[0];
+  const step1 = sequence1MultiActionChain.steps[1];
+  const step2 = sequence1MultiActionChain.steps[2];
+
+  if (step0 === undefined || step1 === undefined || step2 === undefined) {
+    throw new Error("multi-action chain must expose three steps.");
+  }
+
+  assertGuard(sequence1MultiActionChain.steps.length === 3, "multi-action chain must contain exactly three steps.");
+  assertGuard(step0.stepSource.source === "visual_workbench_truth", "step 0 must use visual workbench truth.");
+  assertGuard(step1.stepSource.source === "visual_workbench_truth", "step 1 must use visual workbench truth.");
+  assertGuard(step2.stepSource.source === "visual_workbench_truth", "step 2 must use visual workbench truth.");
+  assertGuard(!sequence1MultiActionChain.steps.some((step) => step.stepSource.source === "synthetic_continuation"), "no synthetic continuation may remain in the PASS chain.");
+  assertGuard(step0.expectedNewCarrierId === step1.expectedActorId, "step 0 after carrier must match step 1 before actor.");
+  assertGuard(step0.expectedBallZoneAfter === step1.expectedBallZoneBefore, "step 0 after zone must match step 1 before zone.");
+  assertGuard(step1.expectedNewCarrierId === step2.expectedActorId, "step 1 after carrier must match step 2 before actor.");
+  assertGuard(step1.expectedBallZoneAfter === step2.expectedBallZoneBefore, "step 1 after zone must match step 2 before zone.");
+  assertGuard(step2.expectedNewCarrierId === sequence1MultiActionChain.finalExpectedBallCarrierId, "step 2 after carrier must match final expected carrier.");
+  assertGuard(step2.expectedBallZoneAfter === sequence1MultiActionChain.finalExpectedBallZone, "step 2 after zone must match final expected zone.");
+
+  return [
+    "multi-action chain exposes three visual workbench steps",
+    "Step 0 after state matches Step 1 before state",
+    "Step 1 after state matches Step 2 before state",
+    "Step 2 after state matches final chain expected state",
+    "no synthetic_continuation remains in PASS path",
+  ];
+}
+
 if (require.main === module) {
-  const checks = validateSequenceOneActionOneWorkbenchTruth();
+  const checks = [
+    ...validateSequenceOneActionOneWorkbenchTruth(),
+    ...validateSequenceOneActionTwoWorkbenchTruth(),
+    ...validateSequenceOneActionThreeWorkbenchTruth(),
+    ...validateSequenceOneMultiActionWorkbenchChainTruth(),
+  ];
 
   console.log("tacticalWorkbenchContractGuard passed.");
   for (const check of checks) {
@@ -3554,6 +3869,69 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/grounding/tacticalWorkbenchContractGuard.multiActionVisual.test.ts
+
+```ts
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import {
+  extractSequenceOneActionThreeWorkbenchTruthFromHtml,
+  extractSequenceOneActionTwoWorkbenchTruthFromHtml,
+} from "./extractWorkbenchTruth";
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
+import {
+  validateSequenceOneActionThreeWorkbenchTruth,
+  validateSequenceOneActionTwoWorkbenchTruth,
+  validateSequenceOneMultiActionWorkbenchChainTruth,
+} from "./tacticalWorkbenchContractGuard";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function workbenchPath(file: string): string {
+  return join(__dirname, "..", "..", "..", "reports", "workbench", file);
+}
+
+export function validateTacticalWorkbenchContractGuardMultiActionVisual(): readonly string[] {
+  const action2Path = workbenchPath("sequence-1-action-2.html");
+  const action3Path = workbenchPath("sequence-1-action-3.html");
+  const action2 = extractSequenceOneActionTwoWorkbenchTruthFromHtml(action2Path);
+  const action3 = extractSequenceOneActionThreeWorkbenchTruthFromHtml(action3Path);
+  const checks = [
+    ...validateSequenceOneActionTwoWorkbenchTruth(action2),
+    ...validateSequenceOneActionThreeWorkbenchTruth(action3),
+    ...validateSequenceOneMultiActionWorkbenchChainTruth(),
+  ];
+
+  assertTest(existsSync(action2Path), "sequence-1-action-2 visual truth artifact must exist.");
+  assertTest(existsSync(action3Path), "sequence-1-action-3 visual truth artifact must exist.");
+  assertTest(action2.selectedAction.actorId === "control-mobile-lock", "sequence-1-action-2 selected actor must be ML.");
+  assertTest(action2.selectedAction.receiverId === "control-playmaker", "sequence-1-action-2 selected receiver must be PM.");
+  assertTest(action2.ballZone === "Z3-HSL" && action2.afterState?.ballZone === "Z3-C", "sequence-1-action-2 must transition Z3-HSL -> Z3-C.");
+  assertTest(action3.selectedAction.actorId === "control-playmaker", "sequence-1-action-3 selected actor must be PM.");
+  assertTest(action3.selectedAction.receiverId === "control-space-hunter", "sequence-1-action-3 selected receiver must be SH.");
+  assertTest(action3.ballZone === "Z3-C" && action3.afterState?.ballZone === "Z4-HSR", "sequence-1-action-3 must transition Z3-C -> Z4-HSR.");
+  assertTest(action2.playerPositions.some((player) => player.renderedZone !== undefined && player.renderedZone !== player.realZone), "action 2 must keep rendered offsets distinct.");
+  assertTest(action3.playerPositions.some((player) => player.renderedZone !== undefined && player.renderedZone !== player.realZone), "action 3 must keep rendered offsets distinct.");
+  assertTest(sequence1MultiActionChain.steps.every((step) => step.stepSource.source === "visual_workbench_truth"), "all chain steps must be visual workbench truth.");
+  assertTest(!sequence1MultiActionChain.steps.some((step) => step.stepSource.source === "synthetic_continuation"), "no synthetic_continuation may remain.");
+
+  return checks;
+}
+
+if (require.main === module) {
+  const checks = validateTacticalWorkbenchContractGuardMultiActionVisual();
+
+  console.log("tacticalWorkbenchContractGuard.multiActionVisual tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/grounding/miniMatchWorkbenchAlignment.test.ts
 
 ```ts
@@ -3972,6 +4350,61 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/grounding/workbenchChainState.visualMultiAction.test.ts
+
+```ts
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
+import { applyWorkbenchChainStep, createInitialWorkbenchChainState } from "./workbenchChainState";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateWorkbenchChainStateVisualMultiAction(): readonly string[] {
+  const [step0, step1, step2] = sequence1MultiActionChain.steps;
+
+  if (step0 === undefined || step1 === undefined || step2 === undefined) {
+    throw new Error("visual multi-action chain must expose three steps.");
+  }
+
+  const initial = createInitialWorkbenchChainState(sequence1MultiActionChain);
+  const afterStep0 = applyWorkbenchChainStep({ state: initial, step: step0 });
+  const afterStep1 = applyWorkbenchChainStep({ state: afterStep0, step: step1 });
+  const afterStep2 = applyWorkbenchChainStep({ state: afterStep1, step: step2 });
+
+  assertTest(initial.ballCarrierId === "control-tempo-half" && initial.ballZone === "Z4-HSL", "initial state must start with TH at Z4-HSL.");
+  assertTest(afterStep0.ballCarrierId === "control-mobile-lock" && afterStep0.ballZone === "Z3-HSL", "Step 0 must propagate TH -> ML and Z4-HSL -> Z3-HSL.");
+  assertTest(afterStep0.ballCarrierId === step1.expectedActorId && afterStep0.ballZone === step1.expectedBallZoneBefore, "Step 1 must consume ML at Z3-HSL.");
+  assertTest(afterStep1.ballCarrierId === "control-playmaker" && afterStep1.ballZone === "Z3-C", "Step 1 must propagate ML -> PM and Z3-HSL -> Z3-C.");
+  assertTest(afterStep1.ballCarrierId === step2.expectedActorId && afterStep1.ballZone === step2.expectedBallZoneBefore, "Step 2 must consume PM at Z3-C.");
+  assertTest(afterStep2.ballCarrierId === "control-space-hunter" && afterStep2.ballZone === "Z4-HSR", "Step 2 must propagate PM -> SH and Z3-C -> Z4-HSR.");
+  assertTest(afterStep2.ballCarrierId === sequence1MultiActionChain.finalExpectedBallCarrierId, "final carrier must be SH.");
+  assertTest(afterStep2.ballZone === sequence1MultiActionChain.finalExpectedBallZone, "final zone must be Z4-HSR.");
+  assertTest(afterStep2.stateWarnings.length === 0, "valid visual chain must have zero propagation warnings.");
+
+  return [
+    "Step 0 propagates TH -> ML and Z4-HSL -> Z3-HSL",
+    "Step 1 consumes ML and Z3-HSL",
+    "Step 1 propagates ML -> PM and Z3-HSL -> Z3-C",
+    "Step 2 consumes PM and Z3-C",
+    "Step 2 propagates PM -> SH and Z3-C -> Z4-HSR",
+    "final state is SH at Z4-HSR",
+    "valid chain has zero propagation warnings",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainStateVisualMultiAction();
+
+  console.log("workbenchChainState.visualMultiAction tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/grounding/workbenchChainReplay.test.ts
 
 ```ts
@@ -4163,6 +4596,169 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/grounding/workbenchChainReplay.visualMultiAction.test.ts
+
+```ts
+import { runFullMatch } from "../runFullMatch";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
+import { createWorkbenchReplayMatchInput } from "./runWorkbenchReplaySeed";
+import { replayWorkbenchChain } from "./workbenchChainReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoringEventCount(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline.filter((event) => event.eventType === "scoring").length;
+}
+
+export function validateWorkbenchChainReplayVisualMultiAction(): readonly string[] {
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const diagnostic = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1MultiActionChain,
+    mode: "diagnostic_only",
+  });
+  const controlled = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1MultiActionChain,
+    mode: "controlled_minimatch",
+  });
+  const fullMatchBefore = runFullMatch(matchInput);
+  const fullMatchAfter = runFullMatch(matchInput);
+
+  assertTest(diagnostic.totalSteps === 3, "diagnostic_only must replay all 3 visual steps.");
+  assertTest(diagnostic.scoringEventsCreated === 0, "diagnostic_only must create 0 scoring events.");
+  assertTest(controlled.totalSteps === 3, "controlled_minimatch must attempt all 3 steps.");
+  assertTest(controlled.visualWorkbenchStepCount === 3, "controlled replay must use visual workbench truth for 3 steps.");
+  assertTest(controlled.syntheticStepCount === 0, "controlled replay must have 0 synthetic steps.");
+  assertTest(controlled.hybridStepCount === 0, "controlled replay must have 0 hybrid steps.");
+  assertTest(controlled.spatialSelectionStepCount === 3, "controlled_minimatch must use spatial_candidate_modifier for 3/3 steps.");
+  assertTest(controlled.steps.every((step) => step.guardValid), "guardValid must be true for 3/3 steps.");
+  assertTest(controlled.preservedActorStepCount === 3, "selected actor must be preserved for 3/3 steps.");
+  assertTest(controlled.preservedReceiverStepCount === 3, "selected receiver must be preserved for 3/3 steps.");
+  assertTest(controlled.preservedActionTypeStepCount === 3, "selected action type must be preserved for 3/3 steps.");
+  assertTest(controlled.preservedBeforeStateStepCount === 3, "before state must be preserved for 3/3 steps.");
+  assertTest(controlled.preservedAfterStateStepCount === 3, "after state must be preserved for 3/3 steps.");
+  assertTest(controlled.recommendations.includes("CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback must remain observable.");
+  assertTest(controlled.mismatchWarningCount === 0, "valid controlled replay must have zero mismatch warnings.");
+  assertTest(controlled.scoringEventsCreated === 0, "controlled replay must create no scoring events.");
+  assertTest(controlled.scoringEventsDeletedOrCapped === 0, "controlled replay must not delete or cap scoring events.");
+  assertTest(scoringEventCount(fullMatchBefore) === scoringEventCount(fullMatchAfter), "controlled replay must not rewrite or fabricate scoring events.");
+
+  return [
+    "diagnostic_only replays all 3 visual steps",
+    "diagnostic_only creates 0 scoring events",
+    "controlled_minimatch attempts all 3 steps",
+    "controlled_minimatch spatial selection step count is 3",
+    "guardValid is true for 3/3 steps",
+    "selected actor preserved for 3/3 steps",
+    "selected receiver preserved for 3/3 steps",
+    "selected action type preserved for 3/3 steps",
+    "before state preserved for 3/3 steps",
+    "after state preserved for 3/3 steps",
+    "prototype fallback remains available and observable",
+    "no scoring events are created, deleted, capped, rewritten, or fabricated",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainReplayVisualMultiAction();
+
+  console.log("workbenchChainReplay.visualMultiAction tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/workbenchChainReplay.visualMismatch.test.ts
+
+```ts
+import { runFullMatch } from "../runFullMatch";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
+import { createWorkbenchReplayMatchInput } from "./runWorkbenchReplaySeed";
+import { replayWorkbenchChain } from "./workbenchChainReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoringEventCount(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline.filter((event) => event.eventType === "scoring").length;
+}
+
+export function validateWorkbenchChainReplayVisualMismatch(): readonly string[] {
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const actorMismatchChain = {
+    ...sequence1MultiActionChain,
+    chainId: "sequence-1-visual-actor-mismatch-chain",
+    steps: sequence1MultiActionChain.steps.map((step) =>
+      step.stepIndex === 2
+        ? { ...step, expectedActorId: "control-hook-link" }
+        : step,
+    ),
+  };
+  const zoneMismatchChain = {
+    ...sequence1MultiActionChain,
+    chainId: "sequence-1-visual-zone-mismatch-chain",
+    steps: sequence1MultiActionChain.steps.map((step) =>
+      step.stepIndex === 2
+        ? { ...step, expectedBallZoneBefore: "Z5-C" }
+        : step,
+    ),
+  };
+  const actorMismatch = replayWorkbenchChain({
+    matchInput,
+    chain: actorMismatchChain,
+    mode: "diagnostic_only",
+  });
+  const zoneMismatch = replayWorkbenchChain({
+    matchInput,
+    chain: zoneMismatchChain,
+    mode: "diagnostic_only",
+  });
+  const fullMatchBefore = runFullMatch(matchInput);
+  const fullMatchAfter = runFullMatch(matchInput);
+
+  assertTest(actorMismatch.status === "PARTIAL", "actor mismatch chain must return PARTIAL, not PASS.");
+  assertTest(zoneMismatch.status === "PARTIAL", "zone mismatch chain must return PARTIAL, not PASS.");
+  assertTest(
+    actorMismatch.finalState.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH")),
+    "breaking Step 2 expectedActorId must create WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH.",
+  );
+  assertTest(
+    zoneMismatch.finalState.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_ZONE_MISMATCH")),
+    "breaking Step 2 expectedBallZoneBefore must create WORKBENCH_CHAIN_BALL_ZONE_MISMATCH.",
+  );
+  assertTest(actorMismatch.mismatchWarningCount > 0, "actor mismatch warning count must be visible.");
+  assertTest(zoneMismatch.mismatchWarningCount > 0, "zone mismatch warning count must be visible.");
+  assertTest(scoringEventCount(fullMatchBefore) === scoringEventCount(fullMatchAfter), "mismatch replay must not mutate scoring.");
+
+  return [
+    "breaking Step 2 expectedActorId creates WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH",
+    "breaking Step 2 expectedBallZoneBefore creates WORKBENCH_CHAIN_BALL_ZONE_MISMATCH",
+    "mismatch chain returns PARTIAL, not PASS",
+    "mismatch chain does not mutate scoring",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainReplayVisualMismatch();
+
+  console.log("workbenchChainReplay.visualMismatch tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/fullMatchRouteSelectionMode.test.ts
 
 ```ts
@@ -4254,6 +4850,93 @@ if (require.main === module) {
   const checks = validateFullMatchRouteSelectionMode();
 
   console.log("fullMatchRouteSelectionMode tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchRouteSelectionMode.guard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { assertCanMakeGlobalScoringEconomyClaim } from "../diagnostics/sourceOfTruthGuards";
+import { runFullMatch } from "../runFullMatch";
+import {
+  DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE,
+  resolveFullMatchRouteSelectionMode,
+} from "./fullMatchRouteSelectionMode";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoringEvents(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline.filter((event) => event.eventType === "scoring").length;
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  return `${report.score.home}-${report.score.away}:${scoringEvents(report)}`;
+}
+
+function scoreFromConsequences(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateFullMatchRouteSelectionModeGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const explicitDefaultReport = runFullMatch(input, { routeSelectionMode: "segment_harness" });
+  const experimentalReport = runFullMatch(input, { routeSelectionMode: "workbench_chain_replay_experimental" });
+
+  assertTest(DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE === "segment_harness", "default runFullMatch mode must be segment_harness.");
+  assertTest(resolveFullMatchRouteSelectionMode({}) === "segment_harness", "empty options must resolve to segment_harness.");
+  assertTest(
+    resolveFullMatchRouteSelectionMode({ routeSelectionMode: "workbench_chain_replay_experimental" }) === "workbench_chain_replay_experimental",
+    "experimental mode must be opt-in only.",
+  );
+  assertTest(scoreSignature(defaultReport) === scoreSignature(explicitDefaultReport), "explicit default must equal previous default behavior.");
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "experimental mode must not mutate score.");
+  assertTest(scoringEvents(defaultReport) === scoringEvents(experimentalReport), "experimental mode must not mutate scoring event count.");
+  assertTest(scoreFromConsequences(defaultReport) === scoreFromConsequences(experimentalReport), "final score must still derive only from score_change.");
+  assertTest(
+    experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"),
+    "report limitations must not claim normal full-match is chain-driven.",
+  );
+  try {
+    assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_HARNESS_SINGLE_RUN");
+    throw new Error("FULL_MATCH_HARNESS_SINGLE_RUN must not be global economy proof.");
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), "single full-match must remain warning-only evidence.");
+  }
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+
+  return [
+    "default runFullMatch mode is segment_harness",
+    "experimental mode is opt-in only",
+    "default score equals previous default behavior",
+    "experimental mode does not mutate score",
+    "experimental mode does not mutate scoring event count",
+    "report limitations do not claim normal full-match is chain-driven",
+    "single full-match remains warning-only evidence",
+    "scoring constants remain unchanged",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchRouteSelectionModeGuard();
+
+  console.log("fullMatchRouteSelectionMode.guard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
