@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T16:24:31.323Z
-Task/sprint: Sprint 3H - Isolated MiniMatch Override Experiment
+Generated: 2026-06-11T17:55:14.976Z
+Task/sprint: Sprint 3I - Controlled Segment Replay Comparison
 Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -17,8 +17,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3h.md
-- validation.fullmatch-workbench-chain-replay-3h.md
+- fullmatch-workbench-chain-replay-3i.md
+- validation.fullmatch-workbench-chain-replay-3i.md
 - README.md
 
 ## Bundle Files
