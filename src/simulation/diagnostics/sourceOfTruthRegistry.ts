@@ -15,7 +15,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"
   | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"
-  | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY";
+  | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
+  | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -360,6 +361,34 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "real isolated replay observed selection, carrier, progression, and danger divergence",
       "real isolated replay rejected closed and unavailable candidates",
       "real isolated replay remained separated from official timeline, normal live selection, and official scoring",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
+    canProve: [
+      "experimental baseline and override routes were resolved inside an isolated sandbox",
+      "sandbox route outcomes exposed pressure, reception, risk, danger, and scoring-opportunity probabilities",
+      "sandbox resolution rejected closed and unavailable candidates",
+      "sandbox resolution remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
     ],
     cannotProve: [
       "global scoring balance",

@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3J - Real Isolated Replay Engine. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3K - Controlled Route Resolution Sandbox. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -413,7 +413,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"
   | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"
-  | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY";
+  | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
+  | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

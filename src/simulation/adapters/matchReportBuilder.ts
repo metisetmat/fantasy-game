@@ -42,6 +42,7 @@ import type { FullMatchLiveSelectionOverrideGuard } from "../fullMatch/fullMatch
 import type { FullMatchIsolatedMiniMatchOverrideExperiment } from "../fullMatch/fullMatchIsolatedMiniMatchOverrideExperiment";
 import type { FullMatchControlledSegmentReplayComparison } from "../fullMatch/fullMatchControlledSegmentReplayComparison";
 import type { FullMatchRealIsolatedSegmentReplay } from "../fullMatch/fullMatchRealIsolatedSegmentReplay";
+import type { ControlledRouteResolutionSandbox } from "../fullMatch/controlledRouteResolutionSandbox";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -64,6 +65,7 @@ export interface MiniMatchTimelineSegment {
   readonly isolatedMiniMatchOverrideExperiment?: FullMatchIsolatedMiniMatchOverrideExperiment;
   readonly controlledSegmentReplayComparison?: FullMatchControlledSegmentReplayComparison;
   readonly realIsolatedSegmentReplay?: FullMatchRealIsolatedSegmentReplay;
+  readonly controlledRouteResolutionSandbox?: ControlledRouteResolutionSandbox;
 }
 
 export interface MatchReportBuilderInput {
@@ -477,6 +479,67 @@ function realIsolatedSegmentReplayReason(replay: FullMatchRealIsolatedSegmentRep
   return ` Real isolated segment replay available: baseline generated ${replay.baselineEventCount} isolated event(s) for ${replay.baseline.actionType ?? "none"} to ${replay.baseline.receiverId ?? "none"} in ${replay.baseline.targetZone ?? "none"}; override generated ${replay.overrideEventCount} isolated event(s) for ${replay.override.actionType ?? "none"} to ${replay.override.receiverId ?? "none"} in ${replay.override.targetZone ?? "none"}. These isolated replay events are experimental-only metadata and are not official MatchEvents, not inserted into the official timeline, and cannot mutate official score, official scoring events, production route resolution, or global economy proof.`;
 }
 
+function controlledRouteResolutionSandboxTags(
+  sandbox: ControlledRouteResolutionSandbox | undefined,
+): readonly string[] {
+  if (sandbox === undefined || sandbox.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_controlled_route_resolution_sandbox",
+    "controlled_route_resolution_sandbox",
+    ...(sandbox.baseline.candidateId === undefined ? [] : [`sandbox_baseline_candidate_${sandbox.baseline.candidateId}`]),
+    ...(sandbox.baseline.actionType === undefined ? [] : [`sandbox_baseline_action_${sandbox.baseline.actionType}`]),
+    ...(sandbox.baseline.receiverId === undefined ? [] : [`sandbox_baseline_receiver_${sandbox.baseline.receiverId}`]),
+    ...(sandbox.baseline.targetZone === undefined ? [] : [`sandbox_baseline_zone_${sandbox.baseline.targetZone}`]),
+    `sandbox_baseline_outcome_${sandbox.baseline.outcome}`,
+    ...(sandbox.override.candidateId === undefined ? [] : [`sandbox_override_candidate_${sandbox.override.candidateId}`]),
+    ...(sandbox.override.actionType === undefined ? [] : [`sandbox_override_action_${sandbox.override.actionType}`]),
+    ...(sandbox.override.receiverId === undefined ? [] : [`sandbox_override_receiver_${sandbox.override.receiverId}`]),
+    ...(sandbox.override.targetZone === undefined ? [] : [`sandbox_override_zone_${sandbox.override.targetZone}`]),
+    `sandbox_override_outcome_${sandbox.override.outcome}`,
+    `sandbox_baseline_resolved_${sandbox.baselineResolved ? "true" : "false"}`,
+    `sandbox_override_resolved_${sandbox.overrideResolved ? "true" : "false"}`,
+    `sandbox_selection_divergence_${sandbox.selectionDivergenceObserved ? "true" : "false"}`,
+    `sandbox_carrier_divergence_${sandbox.carrierDivergenceObserved ? "true" : "false"}`,
+    `sandbox_zone_progression_divergence_${sandbox.zoneProgressionDivergenceObserved ? "true" : "false"}`,
+    `sandbox_danger_creation_divergence_${sandbox.dangerCreationDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_opportunity_divergence_${sandbox.scoringOpportunityDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_event_divergence_${sandbox.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `sandbox_score_divergence_${sandbox.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    `sandbox_applied_only_in_isolated_resolution_${sandbox.sandboxAppliedOnlyInIsolatedResolution ? "true" : "false"}`,
+    `sandbox_applied_to_normal_live_${sandbox.sandboxAppliedToNormalLiveSelection ? "true" : "false"}`,
+    "sandbox_official_timeline_injection_forbidden",
+    "sandbox_official_score_mutation_forbidden",
+    "sandbox_official_scoring_events_mutation_forbidden",
+    "sandbox_production_scoring_event_creation_forbidden",
+    "sandbox_production_resolution_forbidden",
+    "sandbox_global_route_success_mutation_forbidden",
+    "sandbox_global_economy_claim_forbidden",
+    "sandbox_closed_candidates_rejected",
+    "sandbox_unavailable_candidates_rejected",
+    "sandbox_events_injected_into_official_timeline_count_0",
+    "sandbox_official_score_mutation_count_0",
+    "sandbox_official_scoring_event_mutation_count_0",
+    "sandbox_production_scoring_event_creation_count_0",
+    "sandbox_production_route_resolution_mutation_count_0",
+    "sandbox_global_route_success_mutation_count_0",
+    "sandbox_global_economy_claim_count_0",
+    ...sandbox.tags,
+  ];
+}
+
+function controlledRouteResolutionSandboxReason(
+  sandbox: ControlledRouteResolutionSandbox | undefined,
+): string {
+  if (sandbox === undefined || sandbox.status === "not_available") {
+    return "";
+  }
+
+  return ` Controlled route resolution sandbox available: baseline ${sandbox.baseline.outcome} for ${sandbox.baseline.actionType ?? "none"} to ${sandbox.baseline.receiverId ?? "none"} in ${sandbox.baseline.targetZone ?? "none"} with danger probability ${sandbox.baseline.dangerProbability}/100; override ${sandbox.override.outcome} for ${sandbox.override.actionType ?? "none"} to ${sandbox.override.receiverId ?? "none"} in ${sandbox.override.targetZone ?? "none"} with danger probability ${sandbox.override.dangerProbability}/100. Sandbox results are isolated-only, not official MatchEvents, not applied to normal live selection, and cannot mutate official score, official scoring events, production route resolution, route success rates, or global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -518,7 +581,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -546,6 +609,7 @@ function kickoffEvent(input: {
       ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
       ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
       ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+      ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
     ],
     narrativeWeight: 5,
   };
@@ -608,6 +672,7 @@ function sequenceRecordToMatchEvent(input: {
     ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
     ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
     ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+    ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -632,7 +697,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -695,7 +760,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -733,6 +798,7 @@ function scoringEventToMatchEvent(input: {
       ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
       ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
       ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+      ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
     ],
     narrativeWeight: 70,
   };
