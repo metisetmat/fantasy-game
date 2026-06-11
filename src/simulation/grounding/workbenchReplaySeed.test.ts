@@ -23,6 +23,17 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.attributeInfluenceApplied, "replay seed must apply route attribute influence.");
   assertTest(result.routeRankingUsesRealAttributes === "PARTIAL", "replay seed must report attribute route ranking as PARTIAL.");
   assertTest(result.attributeRankingMode === "candidate_modifier", "replay seed must evaluate candidate_modifier mode.");
+  assertTest(result.routeSelectionSource === "spatial_candidate_modifier", "replay seed must use spatial_candidate_modifier route selection source.");
+  assertTest(result.miniMatchRouteSelectionResult !== undefined, "replay seed must expose mini-match route selection result.");
+  assertTest(result.miniMatchRouteSelectionUsedSpatialResult, "replay seed mini-match route selection must use a valid spatial result.");
+  assertTest(
+    result.miniMatchRouteSelectionResult?.selectedActorId === "control-tempo-half",
+    "mini-match route selection must preserve TH actor.",
+  );
+  assertTest(
+    result.miniMatchRouteSelectionResult?.selectedReceiverId === "control-mobile-lock",
+    "mini-match route selection must preserve TH -> ML receiver.",
+  );
   assertTest(result.metadataOnlySelectionResult?.selectedCandidateId === "rank-1", "metadata_only replay selection must keep base rank-1.");
   assertTest(result.attributeSelectionResult?.selectedCandidateId === "rank-1", "candidate_modifier replay selection must preserve TH -> ML for workbench truth.");
   assertTest(result.selectedBy === "base_score", "sequence-1-action-1 should remain selected by base score after guard checks.");
@@ -45,6 +56,7 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "selected action type SUPPORT_CLUSTER_RECYCLE is represented",
     "route attribute influence is applied",
     "candidate_modifier mode is evaluated",
+    "spatial_candidate_modifier route selection is evaluated",
     "TH -> ML remains selected under candidate_modifier guard",
     "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",

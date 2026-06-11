@@ -9,6 +9,10 @@ export type FullMatchGroundingWarning =
   | "ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE"
   | "ATTRIBUTE_SELECTION_GUARD_ACTIVE"
   | "ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE"
+  | "SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE"
+  | "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"
+  | "PROTOTYPE_FALLBACK_STILL_ENABLED"
+  | "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"
   | "PROTOTYPE_SELECTION_STILL_PARTIAL"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
@@ -36,6 +40,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE",
     "ATTRIBUTE_SELECTION_GUARD_ACTIVE",
     "ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE",
+    "SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE",
+    "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE",
+    "PROTOTYPE_FALLBACK_STILL_ENABLED",
+    "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN",
     "PROTOTYPE_SELECTION_STILL_PARTIAL",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
@@ -51,7 +59,7 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and route candidates can be evaluated through guarded candidate_modifier attribute selection, but the harness does not yet replay the full workbench sequence chain or make real player attributes authoritative for every final choice.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and controlled mini-match runs can evaluate guarded spatial route selection, but normal full-match resolution still keeps prototype fallback and does not yet replay the full workbench sequence chain.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
@@ -59,8 +67,11 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
       "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
+      "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "CONFIRM_CONTROLLED_MINIMATCH_SPATIAL_SELECTION",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
-      "PREPARE_PROTOTYPE_SELECTION_REPLACEMENT",
+      "PREPARE_NORMAL_FULLMATCH_SPATIAL_SELECTION_FLAG",
       "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };

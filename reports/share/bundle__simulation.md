@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2U - Selection-Driving Attribute Ranking. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2V - Prototype Selection Replacement in MiniMatch. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -1102,6 +1102,11 @@ export type RosterToMiniMatchGapAnalysis = {
   readonly miniMatchConsumesSpatialContextMetadata: "YES" | "PARTIAL" | "NO";
   readonly attributeInfluenceLayerExists: boolean;
   readonly routeRankingAttributeInfluenceMode: "metadata_only" | "candidate_modifier" | "selection_driving";
+  readonly selectionSource: "prototype" | "spatial_candidate_modifier" | "spatial_selection_driving";
+  readonly spatialSelectionPathExists: boolean;
+  readonly prototypeFallbackStillEnabled: boolean;
+  readonly normalFullMatchUsesSpatialSelection: boolean;
+  readonly controlledMiniMatchUsesSpatialSelection: boolean;
   readonly remainingPrototypeDominance: "HIGH" | "MEDIUM" | "LOW";
   readonly rosterDrivesMiniMatchPlayerPositions: boolean;
   readonly startersDriveActivePlayers: boolean;
@@ -1132,6 +1137,11 @@ export function analyzeRosterToMiniMatchGap(input: {
     miniMatchConsumesSpatialContextMetadata: "PARTIAL",
     attributeInfluenceLayerExists: true,
     routeRankingAttributeInfluenceMode: "candidate_modifier",
+    selectionSource: "spatial_candidate_modifier",
+    spatialSelectionPathExists: true,
+    prototypeFallbackStillEnabled: true,
+    normalFullMatchUsesSpatialSelection: false,
+    controlledMiniMatchUsesSpatialSelection: true,
     remainingPrototypeDominance: "HIGH",
     rosterDrivesMiniMatchPlayerPositions: true,
     startersDriveActivePlayers: true,
@@ -1145,7 +1155,8 @@ export function analyzeRosterToMiniMatchGap(input: {
       "Sprint 2S can convert TeamSnapshot.roster into typed SpatialTeamContext.",
       "Sprint 2S can seed SpatialTeamContext positions from workbench truth.",
       "MiniMatchInput can carry SpatialMatchContext metadata and bounded route attribute influence summaries.",
-      "PlayerSnapshot roles and attributes can now evaluate candidate_modifier selection under guardrails, but normal full-match selection is not yet end-to-end attribute-driven.",
+      "PlayerSnapshot roles and attributes can now evaluate candidate_modifier selection under guardrails through a controlled mini-match route selection source.",
+      "Prototype fallback remains enabled and normal full-match selection is not yet spatial-selection-driven by default.",
       "TacticalPlan contributes tags and context, but not full spatial team shape resolution.",
       "CONTROL/BLITZ prototype teams remain a dominant source of mini-match tactical behavior.",
     ],
@@ -1155,7 +1166,10 @@ export function analyzeRosterToMiniMatchGap(input: {
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
       "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
-      "PREPARE_PROTOTYPE_SELECTION_REPLACEMENT",
+      "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "CONFIRM_CONTROLLED_MINIMATCH_SPATIAL_SELECTION",
+      "PREPARE_NORMAL_FULLMATCH_SPATIAL_SELECTION_FLAG",
     ],
   };
 }
@@ -1483,6 +1497,7 @@ import type { ZoneId } from "../../core/zones";
 import { PlayerRole } from "../../models/player";
 import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
 import { runMiniMatch } from "../miniMatch";
+import type { MiniMatchRouteSelectionResult, MiniMatchRouteSelectionSource } from "../miniMatch";
 import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
 import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
@@ -1507,6 +1522,9 @@ export type WorkbenchReplaySeedResult = {
   readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
   readonly selectedBy?: "base_score" | "attribute_adjusted_score";
   readonly selectionChangedByAttributes: boolean;
+  readonly routeSelectionSource: MiniMatchRouteSelectionSource;
+  readonly miniMatchRouteSelectionResult?: MiniMatchRouteSelectionResult;
+  readonly miniMatchRouteSelectionUsedSpatialResult: boolean;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -1623,7 +1641,7 @@ const replayPlan: TacticalPlan = {
 export function createWorkbenchReplayMatchInput(workbench: TacticalWorkbenchFrame): MatchInput {
   return {
     matchId: `${workbench.frameId}-replay-seed`,
-    seed: "workbench-replay-seed",
+    seed: "sequence-1-action-1-replay-seed",
     homeTeam: teamFromWorkbench({ workbench, teamId: "control", name: "CONTROL" }),
     awayTeam: teamFromWorkbench({ workbench, teamId: "blitz", name: "BLITZ" }),
     homePlan: replayPlan,
@@ -1733,7 +1751,11 @@ export function runWorkbenchReplaySeed(input: {
     numberOfSequences: 1,
     seed: 202,
     spatialContext: beforeContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    routeSelectionSource: "spatial_candidate_modifier",
+    routeSelectionWorkbench: input.workbench,
   });
+  const miniMatchRouteSelectionResult = miniMatch.state.records[0]?.setup.routeSelectionResult;
   const lossyMappings = [
     "Mini-match receives spatial context metadata but still resolves actions through prototype team behavior.",
     "Route ranking can receive bounded attribute-adjusted candidate scores, but final mini-match selection is not yet fully selection-driving.",
@@ -1769,14 +1791,20 @@ export function runWorkbenchReplaySeed(input: {
     attributeSelectionResult: candidateModifierSelectionResult,
     selectedBy: candidateModifierSelectionResult.selectedBy,
     selectionChangedByAttributes: candidateModifierSelectionResult.selectionChanged,
+    routeSelectionSource: "spatial_candidate_modifier",
+    ...(miniMatchRouteSelectionResult === undefined ? {} : { miniMatchRouteSelectionResult }),
+    miniMatchRouteSelectionUsedSpatialResult:
+      miniMatchRouteSelectionResult?.selectionSource === "spatial_candidate_modifier" &&
+      miniMatchRouteSelectionResult.guardValid,
     missingTruths,
     lossyMappings,
     recommendations: [
       "CONFIRM_WORKBENCH_REPLAY_SEED",
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_ATTRIBUTE_ADJUSTED_CANDIDATE_SCORES",
-      "CONFIRM_ROUTE_RANKING_ATTRIBUTE_GAP_REDUCED",
-      "PREPARE_SELECTION_DRIVING_ATTRIBUTE_RANKING",
+      "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };
 }
@@ -2694,6 +2722,10 @@ export type FullMatchGroundingWarning =
   | "ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE"
   | "ATTRIBUTE_SELECTION_GUARD_ACTIVE"
   | "ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE"
+  | "SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE"
+  | "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"
+  | "PROTOTYPE_FALLBACK_STILL_ENABLED"
+  | "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"
   | "PROTOTYPE_SELECTION_STILL_PARTIAL"
   | "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN"
   | "FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED";
@@ -2721,6 +2753,10 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     "ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE",
     "ATTRIBUTE_SELECTION_GUARD_ACTIVE",
     "ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE",
+    "SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE",
+    "CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE",
+    "PROTOTYPE_FALLBACK_STILL_ENABLED",
+    "NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN",
     "PROTOTYPE_SELECTION_STILL_PARTIAL",
     "FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN",
   ];
@@ -2736,7 +2772,7 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
     scoreUnchanged: true,
     scoringEventsMutated: false,
     summary:
-      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and route candidates can be evaluated through guarded candidate_modifier attribute selection, but the harness does not yet replay the full workbench sequence chain or make real player attributes authoritative for every final choice.",
+      "Full-match is now partially grounded: roster/workbench truth can become typed spatial context and controlled mini-match runs can evaluate guarded spatial route selection, but normal full-match resolution still keeps prototype fallback and does not yet replay the full workbench sequence chain.",
     recommendation: [
       "CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER",
       "CONFIRM_WORKBENCH_REPLAY_SEED",
@@ -2744,8 +2780,11 @@ export function analyzeFullMatchGroundingDiagnostics(report: MatchReport): FullM
       "CONFIRM_ROUTE_ATTRIBUTE_INFLUENCE_LAYER",
       "CONFIRM_SELECTION_DRIVING_ATTRIBUTE_RANKING_V0",
       "CONFIRM_ATTRIBUTE_SELECTION_GUARD",
+      "CONFIRM_SPATIAL_ROUTE_SELECTION_PATH",
+      "CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED",
+      "CONFIRM_CONTROLLED_MINIMATCH_SPATIAL_SELECTION",
       "KEEP_50_MATCH_ECONOMY_REFERENCE",
-      "PREPARE_PROTOTYPE_SELECTION_REPLACEMENT",
+      "PREPARE_NORMAL_FULLMATCH_SPATIAL_SELECTION_FLAG",
       "PREPARE_FULLMATCH_WORKBENCH_CHAIN_REPLAY",
     ],
   };
@@ -2859,6 +2898,11 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
   assertTest(!analysis.playerRolesDriveActionResolution, "PlayerSnapshot.role must not be reported as driving action resolution yet.");
   assertTest(analysis.attributeInfluenceLayerExists, "attribute influence layer must be reported as available.");
   assertTest(analysis.routeRankingAttributeInfluenceMode === "candidate_modifier", "attribute influence mode must be candidate_modifier.");
+  assertTest(analysis.selectionSource === "spatial_candidate_modifier", "selection source must report spatial_candidate_modifier availability.");
+  assertTest(analysis.spatialSelectionPathExists, "spatial selection path must exist.");
+  assertTest(analysis.prototypeFallbackStillEnabled, "prototype fallback must remain enabled.");
+  assertTest(!analysis.normalFullMatchUsesSpatialSelection, "normal full-match must not be reported as spatial-selection-driven yet.");
+  assertTest(analysis.controlledMiniMatchUsesSpatialSelection, "controlled mini-match must use spatial route selection.");
   assertTest(analysis.visibleAttributesDriveRouteRanking === "PARTIAL", "visible attributes must reduce ranking gap to PARTIAL.");
   assertTest(analysis.remainingPrototypeDominance === "HIGH", "remaining prototype dominance must be reported honestly.");
   assertTest(analysis.prototypesStillDominant, "CONTROL/BLITZ prototypes must be identified as dominant.");
@@ -2869,6 +2913,8 @@ export function validateRosterToMiniMatchGapAnalysis(): readonly string[] {
     "TeamSnapshot roster and starters now drive adapter-level spatial context",
     "workbench positions can seed spatial context",
     "route attribute influence layer exists",
+    "controlled spatial route selection path exists",
+    "prototype fallback remains enabled",
     "visible attributes drive candidate_modifier route ranking partially",
     "prototype dominance is still documented",
     "lost player identity is listed",
@@ -3002,6 +3048,17 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
   assertTest(result.attributeInfluenceApplied, "replay seed must apply route attribute influence.");
   assertTest(result.routeRankingUsesRealAttributes === "PARTIAL", "replay seed must report attribute route ranking as PARTIAL.");
   assertTest(result.attributeRankingMode === "candidate_modifier", "replay seed must evaluate candidate_modifier mode.");
+  assertTest(result.routeSelectionSource === "spatial_candidate_modifier", "replay seed must use spatial_candidate_modifier route selection source.");
+  assertTest(result.miniMatchRouteSelectionResult !== undefined, "replay seed must expose mini-match route selection result.");
+  assertTest(result.miniMatchRouteSelectionUsedSpatialResult, "replay seed mini-match route selection must use a valid spatial result.");
+  assertTest(
+    result.miniMatchRouteSelectionResult?.selectedActorId === "control-tempo-half",
+    "mini-match route selection must preserve TH actor.",
+  );
+  assertTest(
+    result.miniMatchRouteSelectionResult?.selectedReceiverId === "control-mobile-lock",
+    "mini-match route selection must preserve TH -> ML receiver.",
+  );
   assertTest(result.metadataOnlySelectionResult?.selectedCandidateId === "rank-1", "metadata_only replay selection must keep base rank-1.");
   assertTest(result.attributeSelectionResult?.selectedCandidateId === "rank-1", "candidate_modifier replay selection must preserve TH -> ML for workbench truth.");
   assertTest(result.selectedBy === "base_score", "sequence-1-action-1 should remain selected by base score after guard checks.");
@@ -3024,6 +3081,7 @@ export function validateWorkbenchReplaySeed(): readonly string[] {
     "selected action type SUPPORT_CLUSTER_RECYCLE is represented",
     "route attribute influence is applied",
     "candidate_modifier mode is evaluated",
+    "spatial_candidate_modifier route selection is evaluated",
     "TH -> ML remains selected under candidate_modifier guard",
     "selected candidate base and adjusted scores are exposed",
     "replay seed is PARTIAL and honest",
@@ -3593,6 +3651,10 @@ export function validateFullMatchGroundingDiagnostics(): readonly string[] {
   assertTest(diagnostics.warnings.includes("ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE"), "candidate_modifier availability must be emitted.");
   assertTest(diagnostics.warnings.includes("ATTRIBUTE_SELECTION_GUARD_ACTIVE"), "attribute selection guard activity must be emitted.");
   assertTest(diagnostics.warnings.includes("ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE"), "full-match authority limitation must be emitted.");
+  assertTest(diagnostics.warnings.includes("SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE"), "spatial route selection path availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE"), "controlled mini-match spatial selection availability must be emitted.");
+  assertTest(diagnostics.warnings.includes("PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback warning must be emitted.");
+  assertTest(diagnostics.warnings.includes("NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN"), "normal full-match limitation must be emitted.");
   assertTest(diagnostics.warnings.includes("PROTOTYPE_SELECTION_STILL_PARTIAL"), "prototype selection partiality must still be emitted.");
   assertTest(!diagnostics.mayInvalidateGlobalScoringEconomy, "grounding diagnostics must not invalidate global economy.");
   assertTest(!diagnostics.scoringEventsMutated, "grounding diagnostics must not mutate scoring events.");
@@ -5391,7 +5453,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant modifier une selection candidate sous garde-fous. La selection full-match finale reste encore partiellement pilotee par le chemin prototype.";
+    "Le mini-match dispose maintenant d'un chemin controle ou les candidats issus du SpatialContext peuvent etre classes par score ajuste d'attributs, avec fallback prototype si les garde-fous bloquent la selection.";
 
   return [
     {
@@ -5414,6 +5476,9 @@ function tacticalGroundingGapFacts(input: {
         "route_attribute_influence",
         "candidate_modifier_mode",
         "attribute_selection_guard",
+        "spatial_route_selection",
+        "prototype_fallback",
+        "controlled_minimatch_only",
       ],
     },
     {
@@ -5456,6 +5521,7 @@ function tacticalGroundingGapFacts(input: {
         "attribute_adjusted_score",
         "attribute_adjusted_selection",
         "replay_seed_attribute_selection_partial",
+        "controlled_minimatch_spatial_selection_available",
       ],
     },
     {
@@ -5477,6 +5543,32 @@ function tacticalGroundingGapFacts(input: {
         "route_attribute_influence",
         "selected_route_attribute_explanation_available",
         "attribute_candidate_modifier_available",
+        "attribute_guarded_candidate_modifier_available",
+      ],
+    },
+    {
+      factId: `${input.matchInput.matchId}-spatial-route-selection-path-available`,
+      matchId: input.matchInput.matchId,
+      teamId: event.teamId,
+      opponentTeamId: event.opponentTeamId,
+      category: "TACTICAL_PLAN_SIGNAL",
+      scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      eventIds,
+      affectedZones,
+      summary:
+        "A controlled mini-match path can map SpatialContext route candidates, apply attribute-adjusted ranking, preserve legality, and fall back to prototype selection when guardrails block the spatial choice.",
+      confidence: "low",
+      strength: 63,
+      coachVisible: false,
+      internalTags: [
+        "tactical_grounding_gap",
+        "spatial_route_selection_path_available",
+        "spatial_route_selection",
+        "prototype_fallback_still_enabled",
+        "prototype_fallback",
+        "attribute_guard",
+        "controlled_minimatch_only",
+        "fullmatch_not_default_spatial_selection",
       ],
     },
     {
@@ -5499,6 +5591,7 @@ function tacticalGroundingGapFacts(input: {
         "closed_lane_not_overridden_by_attributes",
         "closed_lane_not_overridden",
         "prototype_selection_still_partial",
+        "normal_fullmatch_selection_still_partial",
       ],
     },
     {
@@ -8678,6 +8771,9 @@ import type { RecoverySaturationState } from "../../systems/structure";
 import type { OffensiveMomentumState } from "../../systems/offense/momentum";
 import type { SpatialMatchContext as AdapterSpatialMatchContext } from "../spatialContext/spatialTeamContextTypes";
 import type { AttributeAdjustedSelectionResult, RouteRankingAttributeMode, RouteRankingAttributeUsage } from "../routeRanking";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { MiniMatchRouteSelectionSource } from "./miniMatchRouteSelectionMode";
+import type { MiniMatchRouteSelectionResult } from "./miniMatchRouteSelection";
 
 export interface MiniMatchInput {
   readonly teamA: PrototypeTeamDefinition;
@@ -8688,6 +8784,8 @@ export interface MiniMatchInput {
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
   readonly spatialContext?: AdapterSpatialMatchContext;
   readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
+  readonly routeSelectionSource?: MiniMatchRouteSelectionSource;
+  readonly routeSelectionWorkbench?: TacticalWorkbenchFrame;
 }
 
 export interface MiniMatchTeamSegmentInfluence {
@@ -8821,6 +8919,8 @@ export interface MiniMatchContext {
   readonly segmentInfluence?: MiniMatchSegmentInfluence;
   readonly spatialContext?: AdapterSpatialMatchContext;
   readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
+  readonly routeSelectionSource?: MiniMatchRouteSelectionSource;
+  readonly routeSelectionWorkbench?: TacticalWorkbenchFrame;
 }
 
 export interface MiniMatchContinuityState {
@@ -8846,6 +8946,8 @@ export interface MiniMatchSequenceSetup {
   readonly routeRankingUsesRealAttributes?: RouteRankingAttributeUsage;
   readonly attributeInfluenceSummary?: string;
   readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
+  readonly routeSelectionResult?: MiniMatchRouteSelectionResult;
+  readonly routeSelectionSummary?: string;
   readonly resolveInput: ResolveSequenceInput;
 }
 
@@ -9156,6 +9258,8 @@ export function createMiniMatchContext(input: MiniMatchInput): MiniMatchState {
     ...(input.segmentInfluence === undefined ? {} : { segmentInfluence: input.segmentInfluence }),
     ...(input.spatialContext === undefined ? {} : { spatialContext: input.spatialContext }),
     ...(input.routeRankingAttributeMode === undefined ? {} : { routeRankingAttributeMode: input.routeRankingAttributeMode }),
+    ...(input.routeSelectionSource === undefined ? {} : { routeSelectionSource: input.routeSelectionSource }),
+    ...(input.routeSelectionWorkbench === undefined ? {} : { routeSelectionWorkbench: input.routeSelectionWorkbench }),
   };
   const influenceAverage = input.segmentInfluence === undefined
     ? 0
@@ -9234,6 +9338,409 @@ export function createMiniMatchTeamContext(
 }
 ```
 
+## File: src/simulation/miniMatch/miniMatchRouteSelectionMode.ts
+
+```ts
+export type MiniMatchRouteSelectionSource =
+  | "prototype"
+  | "spatial_candidate_modifier"
+  | "spatial_selection_driving";
+
+export type MiniMatchRouteSelectionMode = {
+  readonly source: MiniMatchRouteSelectionSource;
+  readonly preservePrototypeFallback: boolean;
+  readonly preserveLegality: true;
+  readonly allowSelectionChange: boolean;
+};
+
+export const DEFAULT_MINI_MATCH_ROUTE_SELECTION_MODE: MiniMatchRouteSelectionMode = {
+  source: "prototype",
+  preservePrototypeFallback: true,
+  preserveLegality: true,
+  allowSelectionChange: false,
+};
+
+export function createMiniMatchRouteSelectionMode(
+  source: MiniMatchRouteSelectionSource | undefined,
+): MiniMatchRouteSelectionMode {
+  if (source === "spatial_candidate_modifier" || source === "spatial_selection_driving") {
+    return {
+      source,
+      preservePrototypeFallback: true,
+      preserveLegality: true,
+      allowSelectionChange: true,
+    };
+  }
+
+  return DEFAULT_MINI_MATCH_ROUTE_SELECTION_MODE;
+}
+```
+
+## File: src/simulation/miniMatch/spatialCandidateGeneration.ts
+
+```ts
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { SpatialMatchContext, SpatialPlayerContext } from "../spatialContext";
+
+export type SpatialRouteCandidate = {
+  readonly candidateId: string;
+  readonly actionType: string;
+  readonly actorId: PlayerId;
+  readonly receiverId?: PlayerId;
+  readonly teamId: TeamId;
+  readonly fromZone: ZoneId;
+  readonly targetZone: ZoneId;
+  readonly laneState: "OPEN" | "CONTESTED" | "CLOSED";
+  readonly availability: "AVAILABLE" | "NOT_AVAILABLE_NOW";
+  readonly baseScore: number;
+  readonly source: "workbench_ranked_option" | "spatial_player_option" | "prototype_mapped_option";
+  readonly reason: string;
+};
+
+function possessionPlayers(context: SpatialMatchContext): readonly SpatialPlayerContext[] {
+  return context.possessionTeamId === context.home.teamId ? context.home.players : context.away.players;
+}
+
+function laneStateFromOption(laneState: string | undefined): "OPEN" | "CONTESTED" | "CLOSED" {
+  if (laneState === "OPEN" || laneState === "CONTESTED" || laneState === "CLOSED") {
+    return laneState;
+  }
+
+  return "CONTESTED";
+}
+
+function candidateScoreForPlayer(player: SpatialPlayerContext, index: number): number {
+  const handPlay = player.attributes.handPlay ?? 60;
+  const intelligence = player.attributes.intelligence ?? 60;
+  const condition = player.currentCondition;
+
+  return Math.max(20, Math.min(92, Math.round((handPlay + intelligence + condition) / 3) - index * 3));
+}
+
+export function generateSpatialRouteCandidates(input: {
+  readonly spatialContext: SpatialMatchContext;
+  readonly possessionTeamId: TeamId;
+  readonly ballCarrierId: PlayerId;
+  readonly ballZone: ZoneId;
+  readonly pressureLevel: string;
+  readonly workbench?: TacticalWorkbenchFrame;
+  readonly prototypeCandidates?: readonly SpatialRouteCandidate[];
+}): readonly SpatialRouteCandidate[] {
+  const workbench = input.workbench;
+
+  if (workbench !== undefined && workbench.rankedOptions.length > 0) {
+    return workbench.rankedOptions.map((option) => ({
+      candidateId: `workbench-rank-${option.rank}`,
+      actionType: option.actionType,
+      actorId: workbench.selectedAction.actorId as PlayerId,
+      ...(option.receiverId === undefined ? {} : { receiverId: option.receiverId as PlayerId }),
+      teamId: workbench.possessionTeamId as TeamId,
+      fromZone: workbench.selectedAction.fromZone as ZoneId,
+      targetZone: option.targetZone as ZoneId,
+      laneState: laneStateFromOption(option.laneState),
+      availability: "AVAILABLE",
+      baseScore: option.finalSelectionScore ?? option.score ?? 50,
+      source: "workbench_ranked_option",
+      reason: `Mapped from workbench ranked option ${option.rank}.`,
+    }));
+  }
+
+  const players = possessionPlayers(input.spatialContext);
+  const actor = players.find((player) => player.playerId === input.ballCarrierId);
+  const receivers = players
+    .filter((player) => player.playerId !== input.ballCarrierId && !player.isGoalkeeper)
+    .slice(0, 4);
+
+  if (actor === undefined || receivers.length === 0) {
+    return input.prototypeCandidates ?? [];
+  }
+
+  const candidates = receivers.map((receiver, index): SpatialRouteCandidate => {
+    const actionType = index === 0
+      ? "SUPPORT_CLUSTER_RECYCLE"
+      : receiver.tacticalFunctions.includes("weak_side_runner")
+        ? "WEAK_SIDE_SWITCH"
+        : index === 1
+          ? "FORWARD_PROGRESS"
+          : "SAFE_RECYCLE";
+
+    return {
+      candidateId: `spatial-${actionType.toLowerCase()}-${receiver.playerId}`,
+      actionType,
+      actorId: actor.playerId,
+      receiverId: receiver.playerId,
+      teamId: actor.teamId,
+      fromZone: input.ballZone,
+      targetZone: receiver.zone,
+      laneState: input.pressureLevel === "HIGH" && index > 2 ? "CONTESTED" : "OPEN",
+      availability: "AVAILABLE",
+      baseScore: candidateScoreForPlayer(receiver, index),
+      source: "spatial_player_option",
+      reason: `Generated from ${receiver.displayRole} support option in ${receiver.zone}.`,
+    };
+  });
+
+  return [
+    ...candidates,
+    ...(input.prototypeCandidates ?? []),
+  ];
+}
+```
+
+## File: src/simulation/miniMatch/prototypeToSpatialCandidateMapper.ts
+
+```ts
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+import type { SpatialMatchContext } from "../spatialContext";
+import type { SpatialRouteCandidate } from "./spatialCandidateGeneration";
+
+export type PrototypeRouteCandidateContext = {
+  readonly candidateId: string;
+  readonly actionType: string;
+  readonly baseScore: number;
+  readonly targetZone?: ZoneId;
+  readonly receiverId?: PlayerId;
+};
+
+export type PrototypeToSpatialCandidateMappingResult = {
+  readonly candidates: readonly SpatialRouteCandidate[];
+  readonly lossyMappings: readonly string[];
+};
+
+function possessionPlayers(context: SpatialMatchContext) {
+  return context.possessionTeamId === context.home.teamId ? context.home.players : context.away.players;
+}
+
+export function mapPrototypeToSpatialCandidates(input: {
+  readonly spatialContext?: SpatialMatchContext;
+  readonly currentBallCarrierId: PlayerId;
+  readonly currentBallZone: ZoneId;
+  readonly currentPossessionTeamId: TeamId;
+  readonly prototypeCandidates?: readonly PrototypeRouteCandidateContext[];
+}): PrototypeToSpatialCandidateMappingResult {
+  const prototypeCandidates = input.prototypeCandidates ?? [
+    {
+      candidateId: "prototype-current-route",
+      actionType: "SUPPORT_CLUSTER_RECYCLE",
+      baseScore: 55,
+      targetZone: input.currentBallZone,
+    },
+  ];
+
+  if (input.spatialContext === undefined) {
+    return {
+      candidates: prototypeCandidates.map((candidate): SpatialRouteCandidate => ({
+        candidateId: candidate.candidateId,
+        actionType: candidate.actionType,
+        actorId: input.currentBallCarrierId,
+        ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+        teamId: input.currentPossessionTeamId,
+        fromZone: input.currentBallZone,
+        targetZone: candidate.targetZone ?? input.currentBallZone,
+        laneState: "CONTESTED",
+        availability: "AVAILABLE",
+        baseScore: candidate.baseScore,
+        source: "prototype_mapped_option",
+        reason: "Mapped from current prototype route context without trusted spatial possession context.",
+      })),
+      lossyMappings: ["No SpatialMatchContext available; prototype route remains fallback only."],
+    };
+  }
+
+  const players = possessionPlayers(input.spatialContext);
+  const actor = players.find((player) => player.playerId === input.currentBallCarrierId);
+  const fallbackReceiver = players.find((player) => player.playerId !== input.currentBallCarrierId && !player.isGoalkeeper);
+  const lossyMappings: string[] = [];
+
+  if (actor === undefined) {
+    return {
+      candidates: [],
+      lossyMappings: ["Prototype route actor could not be resolved in SpatialMatchContext."],
+    };
+  }
+
+  const candidates = prototypeCandidates.map((candidate): SpatialRouteCandidate => {
+    if (candidate.receiverId === undefined && fallbackReceiver === undefined) {
+      lossyMappings.push(`${candidate.candidateId} has no receiver and no spatial fallback receiver.`);
+    }
+
+    return {
+      candidateId: candidate.candidateId,
+      actionType: candidate.actionType,
+      actorId: actor.playerId,
+      ...(candidate.receiverId === undefined && fallbackReceiver === undefined
+        ? {}
+        : { receiverId: (candidate.receiverId ?? fallbackReceiver?.playerId) as PlayerId }),
+      teamId: actor.teamId,
+      fromZone: input.currentBallZone,
+      targetZone: candidate.targetZone ?? fallbackReceiver?.zone ?? input.currentBallZone,
+      laneState: "CONTESTED",
+      availability: "AVAILABLE",
+      baseScore: candidate.baseScore,
+      source: "prototype_mapped_option",
+      reason: "Mapped from current prototype route context for guarded spatial comparison.",
+    };
+  });
+
+  return {
+    candidates,
+    lossyMappings,
+  };
+}
+```
+
+## File: src/simulation/miniMatch/miniMatchRouteSelection.ts
+
+```ts
+import type { PlayerId } from "../../core/ids";
+import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
+import type { RouteRankingAttributeMode, RouteRankingAttributeUsage } from "../routeRanking";
+import type { SpatialMatchContext } from "../spatialContext";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import { createMiniMatchRouteSelectionMode, type MiniMatchRouteSelectionSource } from "./miniMatchRouteSelectionMode";
+import type { SpatialRouteCandidate } from "./spatialCandidateGeneration";
+
+export type MiniMatchRouteSelectionResult = {
+  readonly selectionSource: MiniMatchRouteSelectionSource;
+  readonly selectedCandidateId: string;
+  readonly selectedActionType: string;
+  readonly selectedActorId?: PlayerId;
+  readonly selectedReceiverId?: PlayerId;
+  readonly selectedBy: "prototype" | "base_score" | "attribute_adjusted_score" | "fallback";
+  readonly selectionChangedFromPrototype: boolean;
+  readonly guardValid: boolean;
+  readonly blockedReasons: readonly string[];
+  readonly baseScore?: number;
+  readonly attributeAdjustedScore?: number;
+  readonly routeRankingUsesRealAttributes: RouteRankingAttributeUsage;
+  readonly notes: readonly string[];
+};
+
+function prototypeResult(input: {
+  readonly source: MiniMatchRouteSelectionSource;
+  readonly prototypeCandidate: SpatialRouteCandidate;
+  readonly selectedBy: "prototype" | "fallback";
+  readonly notes: readonly string[];
+}): MiniMatchRouteSelectionResult {
+  return {
+    selectionSource: input.source,
+    selectedCandidateId: input.prototypeCandidate.candidateId,
+    selectedActionType: input.prototypeCandidate.actionType,
+    selectedActorId: input.prototypeCandidate.actorId,
+    ...(input.prototypeCandidate.receiverId === undefined ? {} : { selectedReceiverId: input.prototypeCandidate.receiverId }),
+    selectedBy: input.selectedBy,
+    selectionChangedFromPrototype: false,
+    guardValid: true,
+    blockedReasons: [],
+    baseScore: input.prototypeCandidate.baseScore,
+    attributeAdjustedScore: input.prototypeCandidate.baseScore,
+    routeRankingUsesRealAttributes: "NO",
+    notes: input.notes,
+  };
+}
+
+export function selectMiniMatchRoute(input: {
+  readonly selectionSource?: MiniMatchRouteSelectionSource;
+  readonly spatialContext?: SpatialMatchContext;
+  readonly routeRankingAttributeMode?: RouteRankingAttributeMode;
+  readonly candidates: readonly SpatialRouteCandidate[];
+  readonly prototypeCandidateId: string;
+  readonly pressureLevel?: string;
+  readonly workbench?: TacticalWorkbenchFrame;
+}): MiniMatchRouteSelectionResult {
+  const mode = createMiniMatchRouteSelectionMode(input.selectionSource);
+  const prototypeCandidate = input.candidates.find((candidate) => candidate.candidateId === input.prototypeCandidateId) ?? input.candidates[0];
+
+  if (prototypeCandidate === undefined) {
+    return {
+      selectionSource: mode.source,
+      selectedCandidateId: "prototype-missing",
+      selectedActionType: "SUPPORT_CLUSTER_RECYCLE",
+      selectedBy: "fallback",
+      selectionChangedFromPrototype: false,
+      guardValid: false,
+      blockedReasons: ["NO_CANDIDATES_AVAILABLE"],
+      routeRankingUsesRealAttributes: "NO",
+      notes: ["No route candidates were available; prototype fallback remains required."],
+    };
+  }
+
+  if (mode.source === "prototype" || input.spatialContext === undefined || !mode.allowSelectionChange) {
+    return prototypeResult({
+      source: mode.source,
+      prototypeCandidate,
+      selectedBy: "prototype",
+      notes: input.spatialContext === undefined
+        ? ["No SpatialMatchContext available; preserving prototype route selection."]
+        : ["Route selection mode preserves prototype behavior."],
+    });
+  }
+
+  const adjustedCandidates = applySpatialAttributeInfluenceToCandidates({
+    spatialContext: input.spatialContext,
+    candidates: input.candidates.map((candidate) => ({
+      candidateId: candidate.candidateId,
+      actorId: candidate.actorId,
+      ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+      teamId: candidate.teamId,
+      fromZone: candidate.fromZone,
+      targetZone: candidate.targetZone,
+      actionType: candidate.actionType,
+      laneState: candidate.laneState,
+      availability: candidate.availability,
+      baseScore: candidate.baseScore,
+      baseRisk: candidate.laneState === "CLOSED" ? 90 : candidate.laneState === "CONTESTED" ? 45 : 20,
+    })),
+    ...(input.pressureLevel === undefined ? {} : { pressureLevel: input.pressureLevel }),
+  });
+  const selected = selectAttributeAdjustedCandidate({
+    candidates: adjustedCandidates,
+    mode: input.routeRankingAttributeMode ?? "candidate_modifier",
+    spatialContext: input.spatialContext,
+    ...(input.workbench === undefined ? {} : { workbench: input.workbench }),
+    baseSelectedCandidateId: prototypeCandidate.candidateId,
+  });
+  const selectedCandidate = adjustedCandidates.find((candidate) => candidate.candidateId === selected.selectedCandidateId) ?? adjustedCandidates[0];
+  const attributeSelectorUsedFallback = selected.guard.warnings.some((warning) =>
+    warning.includes("fell back to base candidate"),
+  );
+
+  if (selectedCandidate === undefined || !selected.guard.valid || attributeSelectorUsedFallback) {
+    return prototypeResult({
+      source: mode.source,
+      prototypeCandidate,
+      selectedBy: "fallback",
+      notes: [
+        "Attribute-adjusted route selection failed guard checks; prototype fallback preserved.",
+        ...selected.guard.blockedReasons,
+      ],
+    });
+  }
+
+  return {
+    selectionSource: mode.source,
+    selectedCandidateId: selectedCandidate.candidateId,
+    selectedActionType: selectedCandidate.actionType,
+    selectedActorId: selectedCandidate.actorId,
+    ...(selectedCandidate.receiverId === undefined ? {} : { selectedReceiverId: selectedCandidate.receiverId }),
+    selectedBy: selected.selectedBy,
+    selectionChangedFromPrototype: selectedCandidate.candidateId !== prototypeCandidate.candidateId,
+    guardValid: selected.guard.valid,
+    blockedReasons: selected.guard.blockedReasons,
+    baseScore: selected.selectedCandidateBaseScore,
+    attributeAdjustedScore: selected.selectedCandidateAdjustedScore,
+    routeRankingUsesRealAttributes: "PARTIAL",
+    notes: [
+      selected.explanation,
+      "Prototype fallback remains enabled for blocked or lossy mappings.",
+    ],
+  };
+}
+```
+
 ## File: src/simulation/miniMatch/selectInitialSequenceContext.ts
 
 ```ts
@@ -9261,6 +9768,9 @@ import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
 import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
 import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate, type AttributeAdjustedSelectionResult } from "../routeRanking";
+import { generateSpatialRouteCandidates, type SpatialRouteCandidate } from "./spatialCandidateGeneration";
+import { mapPrototypeToSpatialCandidates } from "./prototypeToSpatialCandidateMapper";
+import { selectMiniMatchRoute, type MiniMatchRouteSelectionResult } from "./miniMatchRouteSelection";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -9548,6 +10058,92 @@ function attributeInfluenceSummary(result: AttributeAdjustedSelectionResult | un
   ].join("; ");
 }
 
+function prototypeCandidateIdFromWorkbench(state: MiniMatchState): string {
+  const selectedOption = state.context.routeSelectionWorkbench?.rankedOptions.find((option) => option.selected);
+
+  return selectedOption === undefined ? "prototype-current-route" : `workbench-rank-${selectedOption.rank}`;
+}
+
+function routeSelectionResult(input: {
+  readonly state: MiniMatchState;
+  readonly possessionTeam: SpatialTeamContext;
+  readonly activeZone: ZoneId;
+  readonly pressureLevel: PressureLevel;
+}): MiniMatchRouteSelectionResult | undefined {
+  const spatialContext = input.state.context.spatialContext;
+  const spatialContextMatchesPossession = spatialContext === undefined
+    || spatialContext.possessionTeamId === input.possessionTeam.teamId;
+  const trustedSpatialContext = spatialContextMatchesPossession ? spatialContext : undefined;
+  const staleSpatialContextNotes = spatialContext !== undefined && !spatialContextMatchesPossession
+    ? [
+        [
+          "SpatialMatchContext possession team did not match current mini-match possession;",
+          "skipped spatial route generation and preserved prototype fallback.",
+        ].join(" "),
+      ]
+    : [];
+
+  if (spatialContext === undefined && input.state.context.routeSelectionSource === undefined) {
+    return undefined;
+  }
+
+  const currentBallCarrierId = trustedSpatialContext?.ballCarrierId ?? input.possessionTeam.players[0]?.id;
+
+  if (currentBallCarrierId === undefined) {
+    return undefined;
+  }
+
+  const mappedPrototype = mapPrototypeToSpatialCandidates({
+    ...(trustedSpatialContext === undefined ? {} : { spatialContext: trustedSpatialContext }),
+    currentBallCarrierId,
+    currentBallZone: trustedSpatialContext?.ballZone ?? input.activeZone,
+    currentPossessionTeamId: trustedSpatialContext?.possessionTeamId ?? input.possessionTeam.teamId,
+  });
+  const spatialCandidates: readonly SpatialRouteCandidate[] = trustedSpatialContext === undefined
+    ? mappedPrototype.candidates
+    : generateSpatialRouteCandidates({
+        spatialContext: trustedSpatialContext,
+        possessionTeamId: trustedSpatialContext.possessionTeamId,
+        ballCarrierId: trustedSpatialContext.ballCarrierId,
+        ballZone: trustedSpatialContext.ballZone,
+        pressureLevel: input.pressureLevel.toUpperCase(),
+        ...(input.state.context.routeSelectionWorkbench === undefined ? {} : { workbench: input.state.context.routeSelectionWorkbench }),
+        prototypeCandidates: mappedPrototype.candidates,
+      });
+  const selected = selectMiniMatchRoute({
+    ...(trustedSpatialContext === undefined ? {} : { spatialContext: trustedSpatialContext }),
+    ...(input.state.context.routeSelectionSource === undefined ? {} : { selectionSource: input.state.context.routeSelectionSource }),
+    ...(input.state.context.routeRankingAttributeMode === undefined ? {} : { routeRankingAttributeMode: input.state.context.routeRankingAttributeMode }),
+    candidates: spatialCandidates,
+    prototypeCandidateId: prototypeCandidateIdFromWorkbench(input.state),
+    pressureLevel: input.pressureLevel.toUpperCase(),
+    ...(input.state.context.routeSelectionWorkbench === undefined ? {} : { workbench: input.state.context.routeSelectionWorkbench }),
+  });
+
+  return {
+    ...selected,
+    notes: [...selected.notes, ...mappedPrototype.lossyMappings, ...staleSpatialContextNotes],
+  };
+}
+
+function routeSelectionSummary(result: MiniMatchRouteSelectionResult | undefined): string | undefined {
+  if (result === undefined) {
+    return undefined;
+  }
+
+  return [
+    "route_selection_active",
+    `source=${result.selectionSource}`,
+    `selected=${result.selectedCandidateId}`,
+    `action=${result.selectedActionType}`,
+    `selectedBy=${result.selectedBy}`,
+    `changed=${result.selectionChangedFromPrototype ? "YES" : "NO"}`,
+    `guard=${result.guardValid ? "PASS" : "FAIL"}`,
+    `blocked=${result.blockedReasons.join("/") || "none"}`,
+    `routeRankingUsesRealAttributes=${result.routeRankingUsesRealAttributes}`,
+  ].join("; ");
+}
+
 export function selectInitialSequenceContext(
   state: MiniMatchState,
   sequenceIndex: number,
@@ -9601,6 +10197,8 @@ export function selectInitialSequenceContext(
   const spatialSummary = spatialContextSummary(state);
   const selectionResult = attributeSelectionResult(state);
   const attributeSummary = attributeInfluenceSummary(selectionResult);
+  const routeResult = routeSelectionResult({ state, possessionTeam, activeZone, pressureLevel });
+  const routeSummary = routeSelectionSummary(routeResult);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -9619,6 +10217,12 @@ export function selectInitialSequenceContext(
           routeRankingUsesRealAttributes: "PARTIAL" as const,
           attributeInfluenceSummary: attributeSummary,
           ...(selectionResult === undefined ? {} : { attributeSelectionResult: selectionResult }),
+        }),
+    ...(routeSummary === undefined
+      ? {}
+      : {
+          routeSelectionSummary: routeSummary,
+          ...(routeResult === undefined ? {} : { routeSelectionResult: routeResult }),
         }),
     resolveInput: {
       startTick,
@@ -9893,6 +10497,242 @@ if (require.main === module) {
   const checks = validateMiniMatchSegmentInfluence();
 
   console.log("miniMatchSegmentInfluence tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/miniMatch/miniMatchSpatialSelection.test.ts
+
+```ts
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { adaptMatchInputToMiniMatch } from "../adapters/matchInputToMiniMatch";
+import { sequence1Action1WorkbenchTruth } from "../grounding/fixtures/sequence1Action1.fixture";
+import { createWorkbenchReplayMatchInput } from "../grounding/runWorkbenchReplaySeed";
+import { workbenchToSpatialMatchContext } from "../spatialContext";
+import { runMiniMatch } from "./runMiniMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMiniMatchSpatialSelection(): readonly string[] {
+  const replayInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const adapter = adaptMatchInputToMiniMatch(replayInput);
+  const replaySpatialContext = workbenchToSpatialMatchContext({
+    matchInput: replayInput,
+    workbench: sequence1Action1WorkbenchTruth,
+    frame: "before",
+  });
+  const baseline = runMiniMatch({
+    ...adapter.miniMatchInput,
+    numberOfSequences: 1,
+  });
+  const controlled = runMiniMatch({
+    ...adapter.miniMatchInput,
+    numberOfSequences: 1,
+    spatialContext: replaySpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    routeSelectionSource: "spatial_candidate_modifier",
+    routeSelectionWorkbench: sequence1Action1WorkbenchTruth,
+  });
+  const stalePossessionContext = {
+    ...replaySpatialContext,
+    possessionTeamId: replaySpatialContext.defendingTeamId,
+    defendingTeamId: replaySpatialContext.possessionTeamId,
+  };
+  const stalePossessionControlled = runMiniMatch({
+    ...adapter.miniMatchInput,
+    numberOfSequences: 1,
+    spatialContext: stalePossessionContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    routeSelectionSource: "spatial_candidate_modifier",
+    routeSelectionWorkbench: sequence1Action1WorkbenchTruth,
+  });
+  const selection = controlled.state.records[0]?.setup.routeSelectionResult;
+  const staleSelection = stalePossessionControlled.state.records[0]?.setup.routeSelectionResult;
+  const baselineScoringEvents = baseline.state.scoringEvents.length;
+  const controlledScoringEvents = controlled.state.scoringEvents.length;
+
+  assertTest(selection !== undefined, "controlled mini-match must expose route selection result.");
+  if (selection !== undefined) {
+    assertTest(selection.selectionSource === "spatial_candidate_modifier", "selection source must be spatial_candidate_modifier.");
+    assertTest(selection.guardValid, "controlled route selection guard must be valid.");
+    assertTest(selection.selectedActionType.length > 0, "selected action type must be populated.");
+    assertTest(
+      selection.selectedActorId === sequence1Action1WorkbenchTruth.selectedAction.actorId,
+      "TH actor must remain preserved in replay context.",
+    );
+    assertTest(
+      selection.selectedReceiverId === sequence1Action1WorkbenchTruth.selectedAction.receiverId,
+      "TH -> ML receiver must remain preserved in replay context.",
+    );
+  }
+  assertTest(
+    controlled.logs.some((log) => log.text.includes("Route selection metadata: route_selection_active")),
+    "controlled mini-match logs must expose route selection metadata.",
+  );
+  assertTest(
+    controlledScoringEvents === baselineScoringEvents,
+    "route selection metadata must not add scoring events by itself.",
+  );
+  assertTest(staleSelection !== undefined, "stale spatial possession context must still expose route selection metadata.");
+  if (staleSelection !== undefined) {
+    assertTest(
+      staleSelection.selectedBy === "prototype",
+      "stale spatial possession context must preserve prototype route selection.",
+    );
+    assertTest(
+      staleSelection.routeRankingUsesRealAttributes === "NO",
+      "stale spatial possession context must not apply attribute-adjusted route selection.",
+    );
+    assertTest(
+      staleSelection.notes.some((note) => note.includes("possession team did not match current mini-match possession")),
+      "stale spatial possession context must explain why spatial route generation was skipped.",
+    );
+  }
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+
+  return [
+    "controlled mini-match exposes route selection result",
+    "selection source is spatial_candidate_modifier",
+    "route selection guard is valid",
+    "TH -> ML remains preserved",
+    "stale spatial possession context falls back to prototype selection",
+    "route selection does not add scoring events by itself",
+    "scoring constants remain unchanged",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMiniMatchSpatialSelection();
+
+  console.log("miniMatchSpatialSelection tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/miniMatch/miniMatchSpatialSelectionContrast.test.ts
+
+```ts
+import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
+import {
+  attributeRankingContrastSpatialContext,
+  closedLaneContrastCandidates,
+  legalContrastCandidates,
+  unavailableContrastCandidates,
+} from "../routeRanking/fixtures/attributeRankingContrast.fixture";
+import { selectMiniMatchRoute } from "./miniMatchRouteSelection";
+import type { SpatialRouteCandidate } from "./spatialCandidateGeneration";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function candidatesFromAdjusted(
+  candidates: ReturnType<typeof applySpatialAttributeInfluenceToCandidates>,
+): readonly SpatialRouteCandidate[] {
+  return candidates.map((candidate) => ({
+    candidateId: candidate.candidateId,
+    actionType: candidate.actionType,
+    actorId: candidate.actorId,
+    ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+    teamId: candidate.teamId,
+    fromZone: candidate.fromZone,
+    targetZone: candidate.targetZone,
+    laneState: candidate.laneState === "OPEN" || candidate.laneState === "CLOSED" ? candidate.laneState : "CONTESTED",
+    availability: candidate.availability ?? "AVAILABLE",
+    baseScore: candidate.baseScore,
+    source: "spatial_player_option",
+    reason: "contrast fixture candidate",
+  }));
+}
+
+export function validateMiniMatchSpatialSelectionContrast(): readonly string[] {
+  const legal = candidatesFromAdjusted(applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: legalContrastCandidates(),
+  }));
+  const closed = candidatesFromAdjusted(applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: closedLaneContrastCandidates(),
+  }));
+  const unavailable = candidatesFromAdjusted(applySpatialAttributeInfluenceToCandidates({
+    spatialContext: attributeRankingContrastSpatialContext,
+    candidates: unavailableContrastCandidates(),
+  }));
+  const allBlocked: readonly SpatialRouteCandidate[] = closed.map((candidate) => ({
+    ...candidate,
+    actorId: "missing-actor",
+    laneState: "CLOSED",
+    availability: candidate.candidateId === "safe-recycle" ? "NOT_AVAILABLE_NOW" : candidate.availability,
+  }));
+  const legalSelection = selectMiniMatchRoute({
+    selectionSource: "spatial_candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    candidates: legal,
+    prototypeCandidateId: "safe-recycle",
+    pressureLevel: "MEDIUM",
+  });
+  const closedSelection = selectMiniMatchRoute({
+    selectionSource: "spatial_candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    candidates: closed,
+    prototypeCandidateId: "safe-recycle",
+    pressureLevel: "MEDIUM",
+  });
+  const unavailableSelection = selectMiniMatchRoute({
+    selectionSource: "spatial_candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    candidates: unavailable,
+    prototypeCandidateId: "safe-recycle",
+    pressureLevel: "MEDIUM",
+  });
+  const fallbackSelection = selectMiniMatchRoute({
+    selectionSource: "spatial_candidate_modifier",
+    spatialContext: attributeRankingContrastSpatialContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    candidates: allBlocked,
+    prototypeCandidateId: "safe-recycle",
+    pressureLevel: "MEDIUM",
+  });
+
+  assertTest(legalSelection.selectedCandidateId === "elite-weak-side", "legal attribute-boosted candidate must win.");
+  assertTest(legalSelection.selectedBy === "attribute_adjusted_score", "legal winner must be selected by adjusted score.");
+  assertTest(closedSelection.selectedCandidateId === "safe-recycle", "closed candidate must not win.");
+  assertTest(unavailableSelection.selectedCandidateId === "safe-recycle", "unavailable candidate must not win.");
+  assertTest(fallbackSelection.selectedBy === "fallback", "all-blocked spatial selections must fall back to prototype.");
+  assertTest(
+    fallbackSelection.selectedCandidateId === "safe-recycle",
+    "fallback must preserve prototype candidate identity.",
+  );
+
+  return [
+    "legal attribute-boosted candidate can win",
+    "closed route cannot win",
+    "unavailable route cannot win",
+    "guard-blocked spatial selections fall back to prototype",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMiniMatchSpatialSelectionContrast();
+
+  console.log("miniMatchSpatialSelectionContrast tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }

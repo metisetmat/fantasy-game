@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 2U - Selection-Driving Attribute Ranking",
+  name: "Sprint 2V - Prototype Selection Replacement in MiniMatch",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -10,8 +10,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "scoring-events-summary.md",
     "sequence-1-action-1.html",
     "validation.share-pack.md",
-    "selection-driving-attribute-ranking.md",
-    "validation.selection-driving-attribute-ranking.md",
+    "prototype-selection-replacement.md",
+    "validation.prototype-selection-replacement.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -22,19 +22,19 @@ export const currentSprint: CurrentSharePackConfig = {
   optionalFiles: [],
   excludedByDefault: [],
   fileReasons: {
-    "package.json": "records npm scripts and route attribute selection guard wiring",
+    "package.json": "records npm scripts and mini-match spatial route selection guard wiring",
     "tsconfig.json": "records the TypeScript compiler setup for route ranking work",
-    "coach-report.latest.html": "latest generated coach HTML sample with guarded attribute selection evidence",
+    "coach-report.latest.html": "latest generated coach HTML sample with controlled spatial route selection evidence",
     "scoring-events-summary.md": "live scoring summary proving scoring values and score events remain intact",
     "sequence-1-action-1.html": "first-class workbench artifact used as tactical truth fixture and replay seed",
-    "validation.share-pack.md": "proves the 2U share pack is current, complete, and below 20 files",
-    "selection-driving-attribute-ranking.md": "documents guarded candidate_modifier selection, legal flip proof, and remaining PARTIAL full-match status",
-    "validation.selection-driving-attribute-ranking.md": "validates route ranking modes, attribute selection guardrails, replay seed, and contrast fixture",
-    "README.md": "compact reviewer orientation for the 2U share pack",
-    "manifest.md": "compatibility manifest listing the 2U share pack files",
+    "validation.share-pack.md": "proves the 2V share pack is current, complete, and below 20 files",
+    "prototype-selection-replacement.md": "documents controlled mini-match spatial route selection and prototype fallback status",
+    "validation.prototype-selection-replacement.md": "validates mini-match route selection source, candidate generation, fallback, guardrails, and source-of-truth invariants",
+    "README.md": "compact reviewer orientation for the 2V share pack",
+    "manifest.md": "compatibility manifest listing the 2V share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles route ranking influence, selection guard, contrast fixture, spatial context adapters, replay seed, grounding diagnostics, mini/full-match wiring, and tests",
+    "bundle__simulation.md": "bundles mini-match spatial route selection, prototype mapping, route ranking influence, selection guard, contrast fixture, replay seed, grounding diagnostics, and tests",
     "bundle__reports.md": "bundles coach report renderer, summary utilities, copy quality utilities, guards, and share-pack updater",
   },
 };
