@@ -1,14 +1,15 @@
-# FullMatch Workbench Chain Replay 3D
+# FullMatch Workbench Chain Replay 3E
 
-Sprint 3D converts the experimental shadow route selection into controlled segment selection metadata behind the opt-in workbench_chain_replay_experimental flag. This controlled selection is experimental and diagnostic-only: it does not mutate score, scoring events, production full-match selection, or route success rates.
+Sprint 3E converts the experimental controlled segment selection into a typed SegmentRouteInput for segment-1 behind the opt-in workbench_chain_replay_experimental flag. This input is visible in diagnostics and evidence, but remains diagnostic-only: it does not mutate score, scoring events, production full-match selection, route resolution, or route success rates.
 
-## Sprint 3D Summary
+## Sprint 3E Summary
 - Visual chain replay: validated.
 - Experimental full-match chain consumption: validated.
 - Experimental segment context influence: validated.
 - Experimental route candidate influence: validated.
 - Experimental shadow route selection: diagnostic-only.
 - Experimental controlled segment selection: diagnostic-only.
+- Experimental SegmentRouteInput: available and diagnostic-only.
 - Normal full-match: still segment_harness by default.
 - Scoring economy: unchanged and still validated only by batch/full-match economy.
 
@@ -122,6 +123,32 @@ Sprint 3D converts the experimental shadow route selection into controlled segme
 - controlled segment selection can mutate route success rates: false.
 - controlled segment selection can drive production full-match selection: false.
 
+## Experimental Segment Route Input
+- SegmentRouteInput status: available.
+- SegmentRouteInput scope: experimental_segment_route_input.
+- SegmentRouteInput source: controlled_segment_selection.
+- SegmentRouteInput segment: segment-1.
+- SegmentRouteInput candidate: chain-context-forward-progress-sh.
+- SegmentRouteInput action: FORWARD_PROGRESS.
+- SegmentRouteInput receiver: control-space-hunter.
+- SegmentRouteInput target zone: Z4-HSR.
+- SegmentRouteInput source base score: 82.
+- SegmentRouteInput source influence delta: 5.
+- SegmentRouteInput source influenced score: 87.
+- SegmentRouteInput candidate legal: true.
+- SegmentRouteInput candidate available: true.
+- SegmentRouteInput rejected closed candidate count: 1.
+- SegmentRouteInput rejected unavailable candidate count: 1.
+- SegmentRouteInput diagnosticOnly: true.
+- SegmentRouteInput experimentalRouteInput: true.
+- SegmentRouteInput can mutate score: false.
+- SegmentRouteInput can mutate scoring events: false.
+- SegmentRouteInput can mutate route success rates: false.
+- SegmentRouteInput can drive production full-match selection: false.
+- SegmentRouteInput can drive production route resolution: false.
+- SegmentRouteInput represents CLOSED candidates: NO.
+- SegmentRouteInput represents unavailable candidates: NO.
+
 ## Default vs Experimental Signature
 - default chain consumption count: 0.
 - experimental chain consumption count: 1.
@@ -134,8 +161,14 @@ Sprint 3D converts the experimental shadow route selection into controlled segme
 - experimental shadow route selection tag count: greater than 0.
 - default controlled segment selection tag count: 0.
 - experimental controlled segment selection tag count: greater than 0.
+- default SegmentRouteInput tag count: 0.
+- experimental SegmentRouteInput tag count: greater than 0.
 - production selection candidate in experimental signature: chain-context-safe-recycle-pv.
 - shadow selection candidate in experimental signature: chain-context-forward-progress-sh.
+- SegmentRouteInput candidate in experimental signature: chain-context-forward-progress-sh.
+- SegmentRouteInput action in experimental signature: FORWARD_PROGRESS.
+- SegmentRouteInput receiver in experimental signature: control-space-hunter.
+- SegmentRouteInput zone in experimental signature: Z4-HSR.
 - shadow selection changed from production in experimental signature: true.
 - default and experimental score signatures remain equal for now: YES.
 - default and experimental scoring event counts remain equal: YES.
@@ -158,17 +191,23 @@ Sprint 3D converts the experimental shadow route selection into controlled segme
 - experimental report limitations include FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DIAGNOSTIC_ONLY.
 - experimental report limitations include FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION.
 - experimental report limitations include FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE.
+- experimental report limitations include FULLMATCH_SEGMENT_ROUTE_INPUT_DIAGNOSTIC_ONLY.
+- experimental report limitations include FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION.
+- experimental report limitations include FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION.
+- experimental report limitations include FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE.
 - experimental report evidence includes WORKBENCH_CHAIN_CONSUMPTION.
 - experimental report evidence includes WORKBENCH_CHAIN_SEGMENT_CONTEXT.
 - experimental report evidence includes WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE.
 - experimental report evidence includes WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION.
 - experimental report evidence includes WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION.
+- experimental report evidence includes WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT.
 - chain consumption is tagged diagnostic_only_chain_consumption.
 - chain segment context is tagged chain_context_diagnostic_only.
 - route candidate influence is tagged route_candidate_influence_diagnostic_only.
 - shadow route selection is tagged shadow_route_selection_diagnostic_only.
 - controlled segment selection is tagged controlled_segment_selection_diagnostic_only.
-- coach diagnosis mentions controlled segment selection with control-space-hunter at Z4-HSR.
+- SegmentRouteInput is tagged segment_route_input_diagnostic_only.
+- coach diagnosis mentions controlled segment selection and SegmentRouteInput with control-space-hunter at Z4-HSR.
 - prototype fallback status: enabled and observable, but not used to hide replay mismatch.
 
 ## Scoring Guardrails
@@ -184,13 +223,13 @@ Sprint 3D converts the experimental shadow route selection into controlled segme
 - FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
 
 ## Next Recommendations
-- CONFIRM_EXPERIMENTAL_SHADOW_SELECTION_TO_CONTROLLED_SEGMENT_SELECTION
-- CONFIRM_CONTROLLED_SELECTION_IS_DIAGNOSTIC_ONLY
-- CONFIRM_CONTROLLED_SELECTION_DOES_NOT_DRIVE_PRODUCTION_FULLMATCH
+- CONFIRM_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT
+- CONFIRM_SEGMENT_ROUTE_INPUT_IS_DIAGNOSTIC_ONLY
+- CONFIRM_SEGMENT_ROUTE_INPUT_DOES_NOT_DRIVE_PRODUCTION_RESOLUTION
 - CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED
 - CONFIRM_DEFAULT_FULLMATCH_UNCHANGED
 - CONFIRM_NO_SCORE_OR_SCORING_EVENT_MUTATION
-- CONFIRM_CONTROLLED_SELECTION_DOES_NOT_MUTATE_ROUTE_SUCCESS_RATES
+- CONFIRM_SEGMENT_ROUTE_INPUT_DOES_NOT_MUTATE_ROUTE_SUCCESS_RATES
 - KEEP_SCORING_VALUES_UNCHANGED
 - KEEP_50_MATCH_ECONOMY_REFERENCE
-- PREPARE_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT
+- PREPARE_SEGMENT_ROUTE_INPUT_TO_CONTROLLED_MINIMATCH_ROUTE_SOURCE

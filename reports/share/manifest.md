@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T13:37:06.186Z
-Task/sprint: Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection
+Generated: 2026-06-11T14:16:22.457Z
+Task/sprint: Sprint 3E - Controlled Segment Selection to Segment Route Input
 Final file count: 16
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -15,8 +15,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3d.md
-- validation.fullmatch-workbench-chain-replay-3d.md
+- fullmatch-workbench-chain-replay-3e.md
+- validation.fullmatch-workbench-chain-replay-3e.md
 - README.md
 
 ## Bundle Files

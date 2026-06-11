@@ -9,7 +9,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
   | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
   | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
-  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION";
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
+  | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -213,6 +214,29 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotOverride: [
       "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT: {
+    scope: "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT",
+    canProve: [
+      "experimental controlled segment selection was converted into typed segment route input metadata",
+      "segment route input rejected closed and unavailable candidates",
+      "segment route input remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route resolution",
       "production route selection",
       "full-match batch economy",
       "scoring constants",

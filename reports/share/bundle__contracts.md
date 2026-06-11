@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3E - Controlled Segment Selection to Segment Route Input. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -407,7 +407,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
   | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
   | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
-  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION";
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
+  | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 3D Validation
+# FullMatch Workbench Chain Replay 3E Validation
 
 Status: PASS
 
@@ -12,6 +12,9 @@ Status: PASS
 - PASS: controlled segment selection status is available.
 - PASS: controlled segment selection is diagnostic-only.
 - PASS: controlled segment selection source is shadow_route_selection.
+- PASS: SegmentRouteInput status is available.
+- PASS: SegmentRouteInput source is controlled_segment_selection.
+- PASS: SegmentRouteInput is attached to segment-1 only.
 - PASS: shadow route selection cannot mutate score.
 - PASS: shadow route selection cannot mutate scoring events.
 - PASS: shadow route selection cannot drive production selection.
@@ -19,6 +22,11 @@ Status: PASS
 - PASS: controlled segment selection cannot mutate scoring events.
 - PASS: controlled segment selection cannot mutate route success rates.
 - PASS: controlled segment selection cannot drive production full-match selection.
+- PASS: SegmentRouteInput cannot mutate score.
+- PASS: SegmentRouteInput cannot mutate scoring events.
+- PASS: SegmentRouteInput cannot mutate route success rates.
+- PASS: SegmentRouteInput cannot drive production full-match selection.
+- PASS: SegmentRouteInput cannot drive production route resolution.
 - PASS: production selection proxy is chain-context-safe-recycle-pv.
 - PASS: shadow selection candidate is chain-context-forward-progress-sh.
 - PASS: shadow selection action is FORWARD_PROGRESS.
@@ -28,6 +36,13 @@ Status: PASS
 - PASS: controlled selected action is FORWARD_PROGRESS.
 - PASS: controlled selected receiver is control-space-hunter.
 - PASS: controlled selected zone is Z4-HSR.
+- PASS: SegmentRouteInput candidate is chain-context-forward-progress-sh.
+- PASS: SegmentRouteInput action is FORWARD_PROGRESS.
+- PASS: SegmentRouteInput receiver is control-space-hunter.
+- PASS: SegmentRouteInput zone is Z4-HSR.
+- PASS: SegmentRouteInput source base score is 82.
+- PASS: SegmentRouteInput source influence delta is 5.
+- PASS: SegmentRouteInput source influenced score is 87.
 - PASS: shadow selection changed from production.
 - PASS: shadow selection explanation is present.
 - PASS: CLOSED candidates remain unselectable.
@@ -36,12 +51,16 @@ Status: PASS
 - PASS: selected shadow candidate is available.
 - PASS: selected controlled candidate is legal.
 - PASS: selected controlled candidate is available.
+- PASS: SegmentRouteInput candidate is legal.
+- PASS: SegmentRouteInput candidate is available.
 - PASS: experimental timeline/report includes shadow route selection tags.
 - PASS: default timeline/report has no shadow route selection tags.
 - PASS: experimental report includes shadow route selection evidence.
 - PASS: experimental report includes controlled segment selection evidence.
+- PASS: experimental report includes SegmentRouteInput evidence.
 - PASS: experimental coach diagnosis mentions shadow route selection.
 - PASS: experimental coach diagnosis mentions controlled segment selection.
+- PASS: experimental coach diagnosis mentions SegmentRouteInput.
 - PASS: normal full-match is not falsely claimed as chain-driven.
 - PASS: default and experimental score signatures remain equal.
 - PASS: default and experimental scoring event counts remain equal.
@@ -59,12 +78,21 @@ Status: PASS
 - experimental shadow selection tag count: greater than 0
 - default controlled segment selection tag count: 0
 - experimental controlled segment selection tag count: greater than 0
+- default SegmentRouteInput tag count: 0
+- experimental SegmentRouteInput tag count: greater than 0
 - production selection candidate: chain-context-safe-recycle-pv
 - shadow selection candidate: chain-context-forward-progress-sh
 - controlled selected candidate: chain-context-forward-progress-sh
 - controlled selected action: FORWARD_PROGRESS
 - controlled selected receiver: control-space-hunter
 - controlled selected target zone: Z4-HSR
+- SegmentRouteInput candidate: chain-context-forward-progress-sh
+- SegmentRouteInput action: FORWARD_PROGRESS
+- SegmentRouteInput receiver: control-space-hunter
+- SegmentRouteInput target zone: Z4-HSR
+- SegmentRouteInput source base score: 82
+- SegmentRouteInput source influence delta: 5
+- SegmentRouteInput source influenced score: 87
 - shadow selection changed: true
 - eligible candidate count: 2
 - blocked candidate count: 2
@@ -73,6 +101,7 @@ Status: PASS
 - score mutation count: 0
 - scoring event mutation count: 0
 - route success rate mutation count: 0
+- production route resolution mutation count: 0
 - default scoring event count: unchanged
 - experimental scoring event count: unchanged
 - default score_change total: unchanged
@@ -82,13 +111,13 @@ Status: PASS
 - share file count: 16
 
 ## Recommendation
-- CONFIRM_EXPERIMENTAL_SHADOW_SELECTION_TO_CONTROLLED_SEGMENT_SELECTION
-- CONFIRM_CONTROLLED_SELECTION_IS_DIAGNOSTIC_ONLY
-- CONFIRM_CONTROLLED_SELECTION_DOES_NOT_DRIVE_PRODUCTION_FULLMATCH
+- CONFIRM_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT
+- CONFIRM_SEGMENT_ROUTE_INPUT_IS_DIAGNOSTIC_ONLY
+- CONFIRM_SEGMENT_ROUTE_INPUT_DOES_NOT_DRIVE_PRODUCTION_RESOLUTION
 - CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED
 - CONFIRM_DEFAULT_FULLMATCH_UNCHANGED
 - CONFIRM_NO_SCORE_OR_SCORING_EVENT_MUTATION
-- CONFIRM_CONTROLLED_SELECTION_DOES_NOT_MUTATE_ROUTE_SUCCESS_RATES
+- CONFIRM_SEGMENT_ROUTE_INPUT_DOES_NOT_MUTATE_ROUTE_SUCCESS_RATES
 - KEEP_SCORING_VALUES_UNCHANGED
 - KEEP_50_MATCH_ECONOMY_REFERENCE
-- PREPARE_CONTROLLED_SEGMENT_SELECTION_TO_SEGMENT_ROUTE_INPUT
+- PREPARE_SEGMENT_ROUTE_INPUT_TO_CONTROLLED_MINIMATCH_ROUTE_SOURCE
