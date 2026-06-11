@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3B - Experimental Chain Context to Route Candidate Influence. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3C - Experimental Chain Context to Shadow Route Selection. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -150,6 +150,8 @@ import {
   buildDiagnosticRouteCandidatesForSegment,
 } from "./fullMatch/applyChainContextToRouteCandidates";
 import type { FullMatchChainRouteCandidateInfluenceResult } from "./fullMatch/fullMatchChainRouteCandidateInfluence";
+import { selectShadowRouteFromInfluencedCandidates } from "./fullMatch/selectShadowRouteFromInfluencedCandidates";
+import type { FullMatchShadowRouteSelectionResult } from "./fullMatch/fullMatchShadowRouteSelection";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -439,6 +441,22 @@ function routeCandidateInfluenceLimitations(influence: FullMatchChainRouteCandid
   ];
 }
 
+function shadowRouteSelectionLimitations(selection: FullMatchShadowRouteSelectionResult): readonly string[] {
+  if (selection.status === "not_available") {
+    return ["FULLMATCH_SHADOW_ROUTE_SELECTION_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_EXPERIMENTAL",
+    `FULLMATCH_SHADOW_ROUTE_SELECTION_STATUS_${selection.status.toUpperCase()}`,
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -594,24 +612,88 @@ function routeCandidateInfluenceEvidenceFact(input: {
   };
 }
 
+function shadowRouteSelectionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly selection: FullMatchShadowRouteSelectionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.selection.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_shadow_route_selection")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-shadow-route-selection`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.selection.shadowSelectionTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental shadow route selection ${input.selection.status}: production proxy ${input.selection.productionSelectionCandidateId ?? "none"} ` +
+      `(${input.selection.productionSelectionActionType ?? "none"}) compared with shadow ${input.selection.shadowSelectionCandidateId ?? "none"} ` +
+      `(${input.selection.shadowSelectionActionType ?? "none"}) to receiver ${input.selection.shadowSelectionReceiverId ?? "none"} ` +
+      `in ${input.selection.shadowSelectionTargetZone ?? "none"}, baseScore=${input.selection.shadowSelectionBaseScore ?? 0}, ` +
+      `influenceDelta=${input.selection.shadowSelectionInfluenceDelta ?? 0}, influencedScore=${input.selection.shadowSelectionInfluencedScore ?? 0}, ` +
+      `selectionChanged=${input.selection.shadowSelectionChangedFromProduction}, closedRejected=${input.selection.closedCandidateRejectedCount}, ` +
+      `unavailableRejected=${input.selection.unavailableCandidateRejectedCount}, diagnosticOnly=${input.selection.diagnosticOnly}, ` +
+      `canMutateScore=${input.selection.canMutateScore}, canMutateScoringEvents=${input.selection.canMutateScoringEvents}, ` +
+      `canDriveProductionSelection=${input.selection.canDriveProductionSelection}. ${input.selection.explanation}`,
+    confidence: input.selection.status === "available" ? "medium" : "low",
+    strength: input.selection.status === "available" ? 62 : 30,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_shadow_route_selection",
+      "shadow_route_selection_diagnostic_only",
+      "shadow_route_selection_production_forbidden",
+      "shadow_route_selection_score_mutation_forbidden",
+      "shadow_route_selection_scoring_events_mutation_forbidden",
+      "shadow_route_selection_closed_candidates_rejected",
+      "shadow_route_selection_unavailable_candidates_rejected",
+      ...(input.selection.chainId === undefined ? [] : [`shadow_route_selection_chain_id_${input.selection.chainId}`]),
+      ...(input.selection.productionSelectionCandidateId === undefined ? [] : [`shadow_route_selection_production_candidate_${input.selection.productionSelectionCandidateId}`]),
+      ...(input.selection.shadowSelectionCandidateId === undefined ? [] : [`shadow_route_selection_candidate_${input.selection.shadowSelectionCandidateId}`]),
+      ...(input.selection.shadowSelectionActionType === undefined ? [] : [`shadow_route_selection_action_${input.selection.shadowSelectionActionType}`]),
+      ...(input.selection.shadowSelectionReceiverId === undefined ? [] : [`shadow_route_selection_receiver_${input.selection.shadowSelectionReceiverId}`]),
+      ...(input.selection.shadowSelectionTargetZone === undefined ? [] : [`shadow_route_selection_zone_${input.selection.shadowSelectionTargetZone}`]),
+      `shadow_route_selection_changed_${input.selection.shadowSelectionChangedFromProduction ? "true" : "false"}`,
+      `shadow_route_selection_candidate_count_${input.selection.candidateCount}`,
+      `shadow_route_selection_eligible_count_${input.selection.eligibleCandidateCount}`,
+      `shadow_route_selection_blocked_count_${input.selection.blockedCandidateCount}`,
+      `shadow_route_selection_closed_rejected_count_${input.selection.closedCandidateRejectedCount}`,
+      `shadow_route_selection_unavailable_rejected_count_${input.selection.unavailableCandidateRejectedCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      ...input.selection.differenceReasons.map((reason) => `shadow_route_selection_reason_${reason}`),
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
   chainConsumption: FullMatchChainConsumptionResult,
   chainSegmentContext: FullMatchChainSegmentContext,
   routeCandidateInfluence: FullMatchChainRouteCandidateInfluenceResult,
+  shadowRouteSelection: FullMatchShadowRouteSelectionResult,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
   const chainFacts = report.evidenceFacts.filter((fact) =>
     fact.internalTags.includes("workbench_chain_consumption") ||
     fact.internalTags.includes("workbench_chain_segment_context") ||
-    fact.internalTags.includes("workbench_chain_route_candidate_influence")
+    fact.internalTags.includes("workbench_chain_route_candidate_influence") ||
+    fact.internalTags.includes("workbench_chain_shadow_route_selection")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench du premier segment est maintenant utilise pour influencer le classement diagnostique des options de route. Le porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"} favorise les options compatibles avec cette continuite, mais cette influence reste experimentale, bornee, et ne modifie pas encore la resolution ni le score. Les options fermees ou indisponibles restent bloquees meme si le contexte de chaine leur donnerait un bonus theorique. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench ne pilote pas encore le match, mais il produit maintenant une selection shadow. Avec le contexte de chaine, l'option diagnostique preferee devient ${shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${shadowRouteSelection.shadowSelectionTargetZone ?? "none"}, alors que la selection de reference/proxy reste ${shadowRouteSelection.productionSelectionActionType ?? "none"} via ${shadowRouteSelection.productionSelectionCandidateId ?? "none"}. Cette divergence est informative : elle montre ce que le moteur choisirait si le contexte workbench influencait reellement la selection, sans modifier le score ni les evenements. Les options fermees ou indisponibles restent rejetees avant la selection shadow. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -659,6 +741,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       chainSegmentContext,
     }),
   });
+  const shadowRouteSelection = selectShadowRouteFromInfluencedCandidates({
+    influence: routeCandidateInfluence,
+    ...(routeCandidateInfluence.selectedCandidateBefore === undefined ? {} : {
+      productionSelectionCandidateId: routeCandidateInfluence.selectedCandidateBefore,
+    }),
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -699,6 +787,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
           ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
           ...(index === 0 && routeCandidateInfluence.status !== "not_available" ? { routeCandidateInfluence } : {}),
+          ...(index === 0 && shadowRouteSelection.status !== "not_available" ? { shadowRouteSelection } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -768,6 +857,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...chainConsumptionLimitations(chainConsumption),
       ...chainSegmentContextLimitations(chainSegmentContext),
       ...routeCandidateInfluenceLimitations(routeCandidateInfluence),
+      ...shadowRouteSelectionLimitations(shadowRouteSelection),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -785,10 +875,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     influence: routeCandidateInfluence,
   });
+  const shadowSelectionFact = shadowRouteSelectionEvidenceFact({
+    report,
+    matchInput: input,
+    selection: shadowRouteSelection,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
     ...(routeInfluenceFact === null ? [] : [routeInfluenceFact]),
+    ...(shadowSelectionFact === null ? [] : [shadowSelectionFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -803,6 +899,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     chainConsumption,
     chainSegmentContext,
     routeCandidateInfluence,
+    shadowRouteSelection,
   );
 }
 ```
@@ -2758,6 +2855,343 @@ export function fullMatchRouteCandidateInfluenceSignature(report: MatchReport): 
     diagnosticSelectionChanged: report.evidenceFacts.some((fact) => fact.internalTags.includes("route_candidate_influence_selection_changed_true")),
     scoreMutationCount: numberFromEvidenceTag(report, "score_mutation_count_"),
     scoringEventsMutationCount: numberFromEvidenceTag(report, "scoring_events_mutation_count_"),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchShadowRouteSelection.ts
+
+```ts
+import type { ChainRouteCandidateInfluence } from "./fullMatchChainRouteCandidateInfluence";
+
+export type FullMatchShadowRouteSelectionStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type FullMatchShadowRouteSelectionScope =
+  | "diagnostic_shadow_selection"
+  | "production_selection_forbidden";
+
+export type ShadowRouteSelectionDifferenceReason =
+  | "CHAIN_CONTEXT_FAVORED_CONTINUITY"
+  | "CHAIN_CONTEXT_FAVORED_FINAL_CARRIER"
+  | "CHAIN_CONTEXT_FAVORED_FINAL_ZONE"
+  | "PRODUCTION_SELECTION_IGNORES_CHAIN_CONTEXT"
+  | "PRODUCTION_SELECTION_FROM_SEGMENT_HARNESS"
+  | "NO_DIAGNOSTIC_DIFFERENCE";
+
+export type FullMatchShadowRouteSelectionResult = {
+  readonly status: FullMatchShadowRouteSelectionStatus;
+  readonly scope: FullMatchShadowRouteSelectionScope;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly diagnosticOnly: boolean;
+  readonly canMutateScore: false;
+  readonly canMutateScoringEvents: false;
+  readonly canDriveProductionSelection: false;
+  readonly productionSelectionCandidateId?: string;
+  readonly productionSelectionActionType?: string;
+  readonly productionSelectionReceiverId?: string;
+  readonly productionSelectionTargetZone?: string;
+  readonly shadowSelectionCandidateId?: string;
+  readonly shadowSelectionActionType?: string;
+  readonly shadowSelectionReceiverId?: string;
+  readonly shadowSelectionTargetZone?: string;
+  readonly shadowSelectionBaseScore?: number;
+  readonly shadowSelectionInfluenceDelta?: number;
+  readonly shadowSelectionInfluencedScore?: number;
+  readonly candidateCount: number;
+  readonly eligibleCandidateCount: number;
+  readonly blockedCandidateCount: number;
+  readonly closedCandidateRejectedCount: number;
+  readonly unavailableCandidateRejectedCount: number;
+  readonly shadowSelectionChangedFromProduction: boolean;
+  readonly differenceReasons: readonly ShadowRouteSelectionDifferenceReason[];
+  readonly explanation: string;
+  readonly selectedCandidateLegal: boolean;
+  readonly selectedCandidateAvailable: boolean;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyShadowRouteSelection(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): FullMatchShadowRouteSelectionResult {
+  return {
+    status: "not_available",
+    scope: "production_selection_forbidden",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canDriveProductionSelection: false,
+    candidateCount: 0,
+    eligibleCandidateCount: 0,
+    blockedCandidateCount: 0,
+    closedCandidateRejectedCount: 0,
+    unavailableCandidateRejectedCount: 0,
+    shadowSelectionChangedFromProduction: false,
+    differenceReasons: ["NO_DIAGNOSTIC_DIFFERENCE"],
+    explanation: "Shadow route selection is not available because route candidate influence is not available.",
+    selectedCandidateLegal: false,
+    selectedCandidateAvailable: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+
+export function candidateIdentity(candidate: ChainRouteCandidateInfluence | undefined): {
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+} {
+  if (candidate === undefined) {
+    return {};
+  }
+
+  return {
+    candidateId: candidate.candidateId,
+    actionType: candidate.actionType,
+    ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+    ...(candidate.targetZone === undefined ? {} : { targetZone: candidate.targetZone }),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/selectShadowRouteFromInfluencedCandidates.ts
+
+```ts
+import type { ChainRouteCandidateInfluence, FullMatchChainRouteCandidateInfluenceResult } from "./fullMatchChainRouteCandidateInfluence";
+import {
+  candidateIdentity,
+  emptyShadowRouteSelection,
+  type FullMatchShadowRouteSelectionResult,
+  type ShadowRouteSelectionDifferenceReason,
+} from "./fullMatchShadowRouteSelection";
+
+export function eligibleForShadowSelection(candidate: ChainRouteCandidateInfluence): boolean {
+  return candidate.legalBeforeInfluence && candidate.availableBeforeInfluence && candidate.selectableAfterInfluence;
+}
+
+export function assertShadowSelectionDoesNotDriveProduction(selection: FullMatchShadowRouteSelectionResult): void {
+  if (selection.canDriveProductionSelection) {
+    throw new Error("Shadow route selection must never drive production selection.");
+  }
+}
+
+export function shadowSelectionCannotOverrideAvailability(selection: FullMatchShadowRouteSelectionResult): boolean {
+  return selection.selectedCandidateLegal && selection.selectedCandidateAvailable && !selection.canDriveProductionSelection;
+}
+
+function sortEligibleCandidates(
+  candidates: readonly ChainRouteCandidateInfluence[],
+): readonly ChainRouteCandidateInfluence[] {
+  return [...candidates].sort((a, b) =>
+    b.influencedScore - a.influencedScore ||
+    b.influenceDelta - a.influenceDelta ||
+    b.baseScore - a.baseScore ||
+    a.candidateId.localeCompare(b.candidateId),
+  );
+}
+
+function differenceReasons(input: {
+  readonly influence: FullMatchChainRouteCandidateInfluenceResult;
+  readonly productionCandidate: ChainRouteCandidateInfluence | undefined;
+  readonly shadowCandidate: ChainRouteCandidateInfluence | undefined;
+}): readonly ShadowRouteSelectionDifferenceReason[] {
+  if (input.shadowCandidate === undefined || input.productionCandidate?.candidateId === input.shadowCandidate.candidateId) {
+    return ["NO_DIAGNOSTIC_DIFFERENCE"];
+  }
+
+  return [
+    ...(input.shadowCandidate.actionType === "FORWARD_PROGRESS" || input.shadowCandidate.actionType === "WEAK_SIDE_SWITCH" || input.shadowCandidate.actionType === "CARRY_OR_HOLD"
+      ? ["CHAIN_CONTEXT_FAVORED_CONTINUITY" as const]
+      : []),
+    ...(input.shadowCandidate.receiverId === input.influence.finalCarrierId
+      ? ["CHAIN_CONTEXT_FAVORED_FINAL_CARRIER" as const]
+      : []),
+    ...(input.shadowCandidate.targetZone === input.influence.finalZone
+      ? ["CHAIN_CONTEXT_FAVORED_FINAL_ZONE" as const]
+      : []),
+    "PRODUCTION_SELECTION_IGNORES_CHAIN_CONTEXT",
+    "PRODUCTION_SELECTION_FROM_SEGMENT_HARNESS",
+  ];
+}
+
+function explanation(input: {
+  readonly productionCandidate: ChainRouteCandidateInfluence | undefined;
+  readonly shadowCandidate: ChainRouteCandidateInfluence | undefined;
+  readonly changed: boolean;
+}): string {
+  if (input.shadowCandidate === undefined) {
+    return "No legal and available candidate was eligible for shadow route selection.";
+  }
+
+  if (!input.changed) {
+    return `Shadow route selection matches the production proxy ${input.shadowCandidate.candidateId}; no diagnostic difference is visible.`;
+  }
+
+  return `Shadow route selection prefers ${input.shadowCandidate.actionType} via ${input.shadowCandidate.candidateId} because chain context raises its influenced score to ${input.shadowCandidate.influencedScore}. The production selection proxy remains ${input.productionCandidate?.candidateId ?? "none"}, so this is an audit difference only and cannot drive production selection.`;
+}
+
+export function selectShadowRouteFromInfluencedCandidates(input: {
+  readonly influence: FullMatchChainRouteCandidateInfluenceResult;
+  readonly productionSelectionCandidateId?: string;
+}): FullMatchShadowRouteSelectionResult {
+  if (input.influence.status === "not_available") {
+    return emptyShadowRouteSelection({
+      ...(input.influence.segmentLabel === undefined ? {} : { segmentLabel: input.influence.segmentLabel }),
+      ...(input.influence.chainId === undefined ? {} : { chainId: input.influence.chainId }),
+      warnings: input.influence.warnings,
+    });
+  }
+
+  const eligible = sortEligibleCandidates(input.influence.influences.filter(eligibleForShadowSelection));
+  const shadowCandidate = eligible[0];
+  const productionCandidate = input.influence.influences.find((candidate) => candidate.candidateId === input.productionSelectionCandidateId);
+  const productionIdentity = candidateIdentity(productionCandidate);
+  const shadowSelectionChangedFromProduction = shadowCandidate?.candidateId !== input.productionSelectionCandidateId;
+  const closedCandidateRejectedCount = input.influence.influences.filter((candidate) => !candidate.legalBeforeInfluence).length;
+  const unavailableCandidateRejectedCount = input.influence.influences.filter((candidate) => !candidate.availableBeforeInfluence).length;
+  const blockedCandidateCount = input.influence.influences.length - eligible.length;
+  const reasons = differenceReasons({
+    influence: input.influence,
+    productionCandidate,
+    shadowCandidate,
+  });
+  const result: FullMatchShadowRouteSelectionResult = {
+    status: input.influence.status,
+    scope: "diagnostic_shadow_selection",
+    ...(input.influence.segmentLabel === undefined ? {} : { segmentLabel: input.influence.segmentLabel }),
+    ...(input.influence.chainId === undefined ? {} : { chainId: input.influence.chainId }),
+    diagnosticOnly: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canDriveProductionSelection: false,
+    ...(productionIdentity.candidateId === undefined ? {} : { productionSelectionCandidateId: productionIdentity.candidateId }),
+    ...(productionIdentity.actionType === undefined ? {} : { productionSelectionActionType: productionIdentity.actionType }),
+    ...(productionIdentity.receiverId === undefined ? {} : { productionSelectionReceiverId: productionIdentity.receiverId }),
+    ...(productionIdentity.targetZone === undefined ? {} : { productionSelectionTargetZone: productionIdentity.targetZone }),
+    ...(shadowCandidate === undefined ? {} : {
+      shadowSelectionCandidateId: shadowCandidate.candidateId,
+      shadowSelectionActionType: shadowCandidate.actionType,
+      shadowSelectionBaseScore: shadowCandidate.baseScore,
+      shadowSelectionInfluenceDelta: shadowCandidate.influenceDelta,
+      shadowSelectionInfluencedScore: shadowCandidate.influencedScore,
+    }),
+    ...(shadowCandidate?.receiverId === undefined ? {} : { shadowSelectionReceiverId: shadowCandidate.receiverId }),
+    ...(shadowCandidate?.targetZone === undefined ? {} : { shadowSelectionTargetZone: shadowCandidate.targetZone }),
+    candidateCount: input.influence.candidateCount,
+    eligibleCandidateCount: eligible.length,
+    blockedCandidateCount,
+    closedCandidateRejectedCount,
+    unavailableCandidateRejectedCount,
+    shadowSelectionChangedFromProduction,
+    differenceReasons: reasons,
+    explanation: explanation({
+      productionCandidate,
+      shadowCandidate,
+      changed: shadowSelectionChangedFromProduction,
+    }),
+    selectedCandidateLegal: shadowCandidate?.legalBeforeInfluence ?? false,
+    selectedCandidateAvailable: shadowCandidate?.availableBeforeInfluence ?? false,
+    tags: [
+      "workbench_chain_shadow_route_selection",
+      "shadow_route_selection_diagnostic_only",
+      `shadow_route_selection_changed_${shadowSelectionChangedFromProduction ? "true" : "false"}`,
+      ...(shadowCandidate === undefined ? [] : [
+        `shadow_route_selection_candidate_${shadowCandidate.candidateId}`,
+        `shadow_route_selection_action_${shadowCandidate.actionType}`,
+      ]),
+      ...(shadowCandidate?.receiverId === undefined ? [] : [`shadow_route_selection_receiver_${shadowCandidate.receiverId}`]),
+      ...(shadowCandidate?.targetZone === undefined ? [] : [`shadow_route_selection_zone_${shadowCandidate.targetZone}`]),
+      "shadow_route_selection_production_forbidden",
+      "shadow_route_selection_score_mutation_forbidden",
+      "shadow_route_selection_scoring_events_mutation_forbidden",
+      "shadow_route_selection_closed_candidates_rejected",
+      "shadow_route_selection_unavailable_candidates_rejected",
+      ...(input.influence.chainId === undefined ? [] : [`shadow_route_selection_chain_id_${input.influence.chainId}`]),
+    ],
+    warnings: input.influence.warnings,
+  };
+
+  assertShadowSelectionDoesNotDriveProduction(result);
+
+  return result;
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchShadowRouteSelectionSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type FullMatchShadowRouteSelectionSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly routeCandidateInfluenceTagCount: number;
+  readonly shadowRouteSelectionTagCount: number;
+  readonly productionSelectionCandidateId?: string;
+  readonly shadowSelectionCandidateId?: string;
+  readonly shadowSelectionChangedFromProduction: boolean;
+  readonly closedCandidateRejectedCount: number;
+  readonly unavailableCandidateRejectedCount: number;
+  readonly scoreMutationCount: number;
+  readonly scoringEventsMutationCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+export function fullMatchShadowRouteSelectionSignature(report: MatchReport): FullMatchShadowRouteSelectionSignature {
+  const productionSelectionCandidateId = suffixFromTag(report, "shadow_route_selection_production_candidate_");
+  const shadowSelectionCandidateId = suffixFromTag(report, "shadow_route_selection_candidate_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    routeCandidateInfluenceTagCount: countTag(report, "workbench_chain_route_candidate_influence"),
+    shadowRouteSelectionTagCount: countTag(report, "workbench_chain_shadow_route_selection"),
+    ...(productionSelectionCandidateId === undefined ? {} : { productionSelectionCandidateId }),
+    ...(shadowSelectionCandidateId === undefined ? {} : { shadowSelectionCandidateId }),
+    shadowSelectionChangedFromProduction: report.evidenceFacts.some((fact) => fact.internalTags.includes("shadow_route_selection_changed_true")),
+    closedCandidateRejectedCount: numberFromTag(report, "shadow_route_selection_closed_rejected_count_"),
+    unavailableCandidateRejectedCount: numberFromTag(report, "shadow_route_selection_unavailable_rejected_count_"),
+    scoreMutationCount: numberFromTag(report, "score_mutation_count_"),
+    scoringEventsMutationCount: numberFromTag(report, "scoring_events_mutation_count_"),
   };
 }
 ```
@@ -6312,6 +6746,171 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchShadowRouteSelection.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+import { selectShadowRouteFromInfluencedCandidates } from "./selectShadowRouteFromInfluencedCandidates";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function influenceForMode(routeSelectionMode: "segment_harness" | "workbench_chain_replay_experimental") {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const context = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode,
+    segmentLabel: "segment-1",
+  }));
+
+  return applyChainContextToRouteCandidates({
+    segmentContext: context,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: context,
+    }),
+  });
+}
+
+export function validateFullMatchShadowRouteSelection(): readonly string[] {
+  const unavailable = selectShadowRouteFromInfluencedCandidates({
+    influence: influenceForMode("segment_harness"),
+  });
+  const influence = influenceForMode("workbench_chain_replay_experimental");
+  const selection = selectShadowRouteFromInfluencedCandidates({
+    influence,
+    ...(influence.selectedCandidateBefore === undefined ? {} : { productionSelectionCandidateId: influence.selectedCandidateBefore }),
+  });
+
+  assertTest(unavailable.status === "not_available", "not_available route influence must return no shadow selection.");
+  assertTest(selection.status === "available", "available route influence must return shadow selection.");
+  assertTest(selection.shadowSelectionCandidateId === "chain-context-forward-progress-sh", "shadow candidate must be chain-context-forward-progress-sh.");
+  assertTest(selection.shadowSelectionActionType === "FORWARD_PROGRESS", "shadow action must be FORWARD_PROGRESS.");
+  assertTest(selection.shadowSelectionReceiverId === "control-space-hunter", "shadow receiver must be control-space-hunter.");
+  assertTest(selection.shadowSelectionTargetZone === "Z4-HSR", "shadow target zone must be Z4-HSR.");
+  assertTest(selection.productionSelectionCandidateId === "chain-context-safe-recycle-pv", "production proxy must be chain-context-safe-recycle-pv.");
+  assertTest(selection.shadowSelectionChangedFromProduction, "shadow selection must differ from production proxy.");
+  assertTest(selection.explanation.length > 0, "shadow selection explanation must be present.");
+  assertTest(selection.diagnosticOnly, "shadow selection must be diagnostic-only.");
+  assertTest(!selection.canMutateScore, "shadow selection must not mutate score.");
+  assertTest(!selection.canMutateScoringEvents, "shadow selection must not mutate scoring events.");
+  assertTest(!selection.canDriveProductionSelection, "shadow selection must not drive production selection.");
+
+  return [
+    "not_available route influence returns no shadow selection",
+    "available route influence returns shadow selection",
+    "selected shadow candidate is chain-context-forward-progress-sh",
+    "selected action type is FORWARD_PROGRESS",
+    "selected receiver is control-space-hunter",
+    "selected target zone is Z4-HSR",
+    "production selection proxy is chain-context-safe-recycle-pv",
+    "shadow selection changed from production is true",
+    "explanation is present",
+    "diagnosticOnly = true",
+    "canMutateScore = false",
+    "canMutateScoringEvents = false",
+    "canDriveProductionSelection = false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchShadowRouteSelection();
+
+  console.log("fullMatchShadowRouteSelection tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchShadowRouteSelectionGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+import {
+  assertShadowSelectionDoesNotDriveProduction,
+  eligibleForShadowSelection,
+  selectShadowRouteFromInfluencedCandidates,
+  shadowSelectionCannotOverrideAvailability,
+} from "./selectShadowRouteFromInfluencedCandidates";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchShadowRouteSelectionGuard(): readonly string[] {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const context = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    segmentLabel: "segment-1",
+  }));
+  const influence = applyChainContextToRouteCandidates({
+    segmentContext: context,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: context,
+    }),
+  });
+  const selection = selectShadowRouteFromInfluencedCandidates({
+    influence,
+    ...(influence.selectedCandidateBefore === undefined ? {} : { productionSelectionCandidateId: influence.selectedCandidateBefore }),
+  });
+  const closedCandidate = influence.influences.find((candidate) => candidate.candidateId === "chain-context-closed-central-force");
+  const unavailableCandidate = influence.influences.find((candidate) => candidate.candidateId === "chain-context-unavailable-switch");
+
+  assertTest(closedCandidate !== undefined, "closed diagnostic candidate must be present.");
+  assertTest(unavailableCandidate !== undefined, "unavailable diagnostic candidate must be present.");
+  assertTest(closedCandidate !== undefined && !eligibleForShadowSelection(closedCandidate), "CLOSED candidate cannot be eligible for shadow selection.");
+  assertTest(unavailableCandidate !== undefined && !eligibleForShadowSelection(unavailableCandidate), "unavailable candidate cannot be eligible for shadow selection.");
+  assertTest(selection.selectedCandidateLegal, "selected candidate must be legal.");
+  assertTest(selection.selectedCandidateAvailable, "selected candidate must be available.");
+  assertTest(selection.closedCandidateRejectedCount >= 1, "closedCandidateRejectedCount must be >= 1.");
+  assertTest(selection.unavailableCandidateRejectedCount >= 1, "unavailableCandidateRejectedCount must be >= 1.");
+  assertTest(selection.shadowSelectionCandidateId !== closedCandidate?.candidateId, "selected shadow candidate must not be closed.");
+  assertTest(selection.shadowSelectionCandidateId !== unavailableCandidate?.candidateId, "selected shadow candidate must not be unavailable.");
+  assertShadowSelectionDoesNotDriveProduction(selection);
+  assertTest(shadowSelectionCannotOverrideAvailability(selection), "shadow selection cannot override availability.");
+
+  return [
+    "CLOSED candidate cannot be selected",
+    "unavailable candidate cannot be selected",
+    "selected candidate is legal",
+    "selected candidate is available",
+    "closedCandidateRejectedCount >= 1",
+    "unavailableCandidateRejectedCount >= 1",
+    "selected shadow candidate is never a blocked candidate",
+    "shadow selection cannot drive production",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchShadowRouteSelectionGuard();
+
+  console.log("fullMatchShadowRouteSelectionGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -6476,7 +7075,7 @@ export function validateRunFullMatchExperimentalRouteCandidateInfluence(): reado
   const experimentalSignature = fullMatchRouteCandidateInfluenceSignature(experimentalReport);
   const routeInfluenceFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
   const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
-    candidate.summary.includes("influencer le classement diagnostique des options de route"),
+    candidate.summary.includes("selection shadow") || candidate.summary.includes("Influence candidates"),
   );
 
   assertTest(defaultSignature.routeCandidateInfluenceTagCount === 0, "default runFullMatch must not expose route candidate influence tags.");
@@ -6488,7 +7087,7 @@ export function validateRunFullMatchExperimentalRouteCandidateInfluence(): reado
   assertTest(routeInfluenceFact?.summary.includes("control-space-hunter") ?? false, "route influence evidence must include final carrier.");
   assertTest(routeInfluenceFact?.summary.includes("Z4-HSR") ?? false, "route influence evidence must include final zone.");
   assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention route candidate influence.");
-  assertTest(diagnosis?.summary.includes("ne modifie pas encore la resolution ni le score") ?? false, "coach diagnosis must state diagnostic influence does not mutate resolution or score.");
+  assertTest(diagnosis?.summary.includes("sans modifier le score ni les evenements") || diagnosis?.summary.includes("ne modifie pas encore la resolution ni le score") || false, "coach diagnosis must state diagnostic influence does not mutate resolution or score.");
   assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DIAGNOSTIC_ONLY"), "experimental limitations must mark route influence diagnostic-only.");
   assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION"), "experimental limitations must forbid production selection.");
   assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
@@ -6507,6 +7106,68 @@ if (require.main === module) {
   const checks = validateRunFullMatchExperimentalRouteCandidateInfluence();
 
   console.log("runFullMatchExperimentalRouteCandidateInfluence tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchExperimentalShadowRouteSelection.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchShadowRouteSelectionSignature } from "./fullMatchShadowRouteSelectionSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalShadowRouteSelection(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchShadowRouteSelectionSignature(defaultReport);
+  const experimentalSignature = fullMatchShadowRouteSelectionSignature(experimentalReport);
+  const shadowFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("selection shadow"),
+  );
+
+  assertTest(defaultSignature.shadowRouteSelectionTagCount === 0, "default runFullMatch must not expose shadow route selection tags.");
+  assertTest(experimentalSignature.shadowRouteSelectionTagCount > 0, "experimental runFullMatch must expose shadow route selection tags.");
+  assertTest(experimentalSignature.productionSelectionCandidateId === "chain-context-safe-recycle-pv", "experimental signature must expose production proxy.");
+  assertTest(experimentalSignature.shadowSelectionCandidateId === "chain-context-forward-progress-sh", "experimental signature must expose shadow candidate.");
+  assertTest(experimentalSignature.shadowSelectionChangedFromProduction, "experimental signature must expose changed selection.");
+  assertTest(shadowFact !== undefined, "experimental report must include shadow route selection evidence.");
+  assertTest(shadowFact?.internalTags.includes("shadow_route_selection_diagnostic_only") ?? false, "shadow evidence must be diagnostic-only.");
+  assertTest(shadowFact?.internalTags.includes("shadow_route_selection_production_forbidden") ?? false, "shadow evidence must forbid production selection.");
+  assertTest(shadowFact?.summary.includes("chain-context-forward-progress-sh") ?? false, "shadow evidence must include shadow candidate.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention shadow route selection.");
+  assertTest(diagnosis?.summary.includes("sans modifier le score ni les evenements") ?? false, "coach diagnosis must state score/events are unchanged.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_DIAGNOSTIC_ONLY"), "experimental limitations must mark shadow selection diagnostic-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION"), "experimental limitations must forbid production selection.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
+
+  return [
+    "default runFullMatch has no shadow route selection tags",
+    "experimental runFullMatch has shadow route selection tags",
+    "experimental report includes shadow route selection evidence",
+    "experimental coach diagnosis mentions shadow route selection",
+    "experimental report says shadow selection is diagnostic-only",
+    "experimental report says shadow selection cannot drive production selection",
+    "normal full-match is not claimed as production chain-driven",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalShadowRouteSelection();
+
+  console.log("runFullMatchExperimentalShadowRouteSelection tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -6629,6 +7290,68 @@ if (require.main === module) {
   const checks = validateRunFullMatchRouteCandidateInfluenceScoringGuard();
 
   console.log("runFullMatchRouteCandidateInfluenceScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchShadowRouteSelectionScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchShadowRouteSelectionSignature } from "./fullMatchShadowRouteSelectionSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const signature = fullMatchShadowRouteSelectionSignature(report);
+
+  return `${signature.score.home}-${signature.score.away}:${signature.scoringEventCount}:${signature.scoreChangeTotal}:${signature.timelineEventCount}`;
+}
+
+export function validateRunFullMatchShadowRouteSelectionScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchShadowRouteSelectionSignature(defaultReport);
+  const experimentalSignature = fullMatchShadowRouteSelectionSignature(experimentalReport);
+
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "default and experimental score signatures must remain equal.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "scoring event counts must remain equal.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "score_change totals must remain equal.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "timeline event counts must remain equal.");
+  assertTest(experimentalSignature.scoreMutationCount === 0, "shadow selection must not mutate score.");
+  assertTest(experimentalSignature.scoringEventsMutationCount === 0, "shadow selection must not mutate scoring events.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORE"), "shadow selection limitation must forbid score mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS"), "shadow selection limitation must forbid scoring event mutation.");
+  assertTest(experimentalReport.evidenceFacts.some((fact) =>
+    fact.internalTags.includes("shadow_route_selection_score_mutation_forbidden") &&
+    fact.internalTags.includes("shadow_route_selection_scoring_events_mutation_forbidden"),
+  ), "shadow selection evidence must forbid score and scoring-event mutation.");
+
+  return [
+    "default and experimental final scores remain equal",
+    "default and experimental scoring event counts remain equal",
+    "default and experimental score_change totals remain equal",
+    "timeline event count remains equal or only metadata differs",
+    "no scoring events are deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchShadowRouteSelectionScoringGuard();
+
+  console.log("runFullMatchShadowRouteSelectionScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -6921,6 +7644,67 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3c.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3C(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORE"), "shadow route selection must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS"), "shadow route selection must not mutate scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION"), "shadow route selection must not drive production selection.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("shadow_route_selection_score_mutation_forbidden")), "score mutation must be forbidden in shadow selection evidence.");
+  assertTest(report.evidenceFacts.some((fact) => fact.internalTags.includes("shadow_route_selection_scoring_events_mutation_forbidden")), "scoring event mutation must be forbidden in shadow selection evidence.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3C();
+
+  console.log("scoringGuard.3c tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -7050,6 +7834,54 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3B();
 
   console.log("sourceOfTruthGuards.3b tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3c.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3C(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3C();
+
+  console.log("sourceOfTruthGuards.3c tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -8054,6 +8886,7 @@ import {
 import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInfluence";
 import type { FullMatchChainSegmentContext } from "../fullMatch/fullMatchChainSegmentContext";
 import type { FullMatchChainRouteCandidateInfluenceResult } from "../fullMatch/fullMatchChainRouteCandidateInfluence";
+import type { FullMatchShadowRouteSelectionResult } from "../fullMatch/fullMatchShadowRouteSelection";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -8068,6 +8901,7 @@ export interface MiniMatchTimelineSegment {
   readonly segmentInfluence?: FullMatchSegmentInfluence;
   readonly chainSegmentContext?: FullMatchChainSegmentContext;
   readonly routeCandidateInfluence?: FullMatchChainRouteCandidateInfluenceResult;
+  readonly shadowRouteSelection?: FullMatchShadowRouteSelectionResult;
 }
 
 export interface MatchReportBuilderInput {
@@ -8178,6 +9012,36 @@ function routeCandidateInfluenceReason(influence: FullMatchChainRouteCandidateIn
   return ` Experimental route-candidate influence available: ${influence.influencedCandidateCount}/${influence.candidateCount} diagnostic candidates receive bounded deltas; closed or unavailable routes remain blocked. Diagnostic-only; does not drive production selection.`;
 }
 
+function shadowRouteSelectionTags(selection: FullMatchShadowRouteSelectionResult | undefined): readonly string[] {
+  if (selection === undefined || selection.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_shadow_route_selection",
+    "shadow_route_selection_diagnostic_only",
+    `shadow_route_selection_changed_${selection.shadowSelectionChangedFromProduction ? "true" : "false"}`,
+    ...(selection.shadowSelectionCandidateId === undefined ? [] : [`shadow_route_selection_candidate_${selection.shadowSelectionCandidateId}`]),
+    ...(selection.shadowSelectionActionType === undefined ? [] : [`shadow_route_selection_action_${selection.shadowSelectionActionType}`]),
+    ...(selection.shadowSelectionReceiverId === undefined ? [] : [`shadow_route_selection_receiver_${selection.shadowSelectionReceiverId}`]),
+    ...(selection.shadowSelectionTargetZone === undefined ? [] : [`shadow_route_selection_zone_${selection.shadowSelectionTargetZone}`]),
+    "shadow_route_selection_production_forbidden",
+    "shadow_route_selection_score_mutation_forbidden",
+    "shadow_route_selection_scoring_events_mutation_forbidden",
+    "shadow_route_selection_closed_candidates_rejected",
+    "shadow_route_selection_unavailable_candidates_rejected",
+    ...selection.tags,
+  ];
+}
+
+function shadowRouteSelectionReason(selection: FullMatchShadowRouteSelectionResult | undefined): string {
+  if (selection === undefined || selection.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental shadow route selection available: production proxy ${selection.productionSelectionCandidateId ?? "none"} vs shadow ${selection.shadowSelectionCandidateId ?? "none"} (${selection.shadowSelectionActionType ?? "none"}). ${selection.explanation} Diagnostic-only; does not drive production selection.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -8219,7 +9083,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -8239,6 +9103,7 @@ function kickoffEvent(input: {
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
       ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
+      ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
     ],
     narrativeWeight: 5,
   };
@@ -8293,6 +9158,7 @@ function sequenceRecordToMatchEvent(input: {
     ...segmentInfluenceTags(input.segment.segmentInfluence),
     ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
+    ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -8317,7 +9183,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -8380,7 +9246,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -8410,6 +9276,7 @@ function scoringEventToMatchEvent(input: {
       ...segmentInfluenceTags(input.segment.segmentInfluence),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
       ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
+      ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
     ],
     narrativeWeight: 70,
   };
@@ -9095,6 +9962,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_CONSUMPTION":
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+    case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
       return "training_recommendation";
   }
 }
@@ -9123,6 +9991,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Contexte segmentaire workbench experimental";
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
       return "Influence candidate-route workbench experimentale";
+    case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
+      return "Selection shadow de route workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -9177,6 +10047,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_CONSUMPTION":
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
+    case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -9198,6 +10069,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_CONSUMPTION",
     "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -10301,6 +11173,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 51;
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
       return 50;
+    case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
+      return 49;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -10339,6 +11213,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le contexte segmentaire workbench experimental";
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
       return "Relire l'influence candidate-route workbench experimentale";
+    case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
+      return "Relire la selection shadow de route workbench experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -11592,7 +12468,8 @@ export type MatchEvidenceScope =
   | "REPORT_RENDERING_ONLY"
   | "WORKBENCH_CHAIN_CONSUMPTION"
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
-  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE";
+  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -11747,6 +12624,26 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "experimental chain context influenced diagnostic route candidate scores",
       "closed and unavailable route candidates remained blocked",
       "diagnostic selection changes were shadow-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION: {
+    scope: "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    canProve: [
+      "experimental chain context produced a diagnostic shadow route selection",
+      "shadow selection rejected closed and unavailable candidates",
+      "shadow selection comparison remained production-forbidden",
     ],
     cannotProve: [
       "global scoring balance",
