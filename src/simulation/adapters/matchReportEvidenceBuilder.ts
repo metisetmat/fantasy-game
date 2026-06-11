@@ -170,7 +170,7 @@ function tacticalGroundingGapFacts(input: {
   const eventIds = fullMatchEvents.slice(0, 6).map((candidate) => candidate.eventId);
   const affectedZones = topZones(fullMatchEvents, 3);
   const summary =
-    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant etre expliques depuis le SpatialContext. La selection finale reste encore partiellement pilotee par le chemin prototype.";
+    "Le moteur commence a relier les attributs reels des joueurs aux options de route : securite de passe, qualite de reception, soutien et risque peuvent maintenant modifier une selection candidate sous garde-fous. La selection full-match finale reste encore partiellement pilotee par le chemin prototype.";
 
   return [
     {
@@ -191,6 +191,8 @@ function tacticalGroundingGapFacts(input: {
         "workbench_truth_fixture_available",
         "workbench_replay_seed",
         "route_attribute_influence",
+        "candidate_modifier_mode",
+        "attribute_selection_guard",
       ],
     },
     {
@@ -222,7 +224,7 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones while applying bounded attribute-adjusted candidate scores.",
+      summary: "The sequence-1-action-1 replay seed can preserve TH, ML, the new carrier, and the before/after ball zones while evaluating metadata_only and candidate_modifier attribute selection. The guard preserves TH -> ML for this fixture.",
       confidence: "low",
       strength: 58,
       coachVisible: false,
@@ -231,6 +233,8 @@ function tacticalGroundingGapFacts(input: {
         "workbench_replay_seed_partial",
         "attribute_adjusted_candidate_scores_available",
         "attribute_adjusted_score",
+        "attribute_adjusted_selection",
+        "replay_seed_attribute_selection_partial",
       ],
     },
     {
@@ -251,10 +255,11 @@ function tacticalGroundingGapFacts(input: {
         "route_attribute_influence_available",
         "route_attribute_influence",
         "selected_route_attribute_explanation_available",
+        "attribute_candidate_modifier_available",
       ],
     },
     {
-      factId: `${input.matchInput.matchId}-route-ranking-attribute-gap-partial`,
+      factId: `${input.matchInput.matchId}-attribute-selection-guard-available`,
       matchId: input.matchInput.matchId,
       teamId: event.teamId,
       opponentTeamId: event.opponentTeamId,
@@ -262,13 +267,16 @@ function tacticalGroundingGapFacts(input: {
       scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
       eventIds,
       affectedZones,
-      summary: "PlayerSnapshot roles and attributes now influence candidate metadata, but final mini-match selection remains prototype-dominant rather than fully attribute-driven.",
+      summary: "The attribute selection guard can allow a legal adjusted candidate flip while blocking CLOSED lanes and NOT_AVAILABLE_NOW routes; normal full-match selection is still only partially attribute-driven.",
       confidence: "low",
       strength: 61,
       coachVisible: false,
       internalTags: [
         "tactical_grounding_gap",
-        "route_ranking_attribute_gap_partial",
+        "attribute_selection_guard_available",
+        "attribute_selection_flip_possible_when_legal",
+        "closed_lane_not_overridden_by_attributes",
+        "closed_lane_not_overridden",
         "prototype_selection_still_partial",
       ],
     },

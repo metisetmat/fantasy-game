@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T06:28:00.579Z
-Task/sprint: Sprint 2T - Attribute-Driven Route Ranking
+Generated: 2026-06-11T06:53:02.518Z
+Task/sprint: Sprint 2U - Selection-Driving Attribute Ranking
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -13,8 +13,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - validation.share-pack.md
-- attribute-driven-route-ranking.md
-- validation.attribute-driven-route-ranking.md
+- selection-driving-attribute-ranking.md
+- validation.selection-driving-attribute-ranking.md
 - README.md
 
 ## Bundle Files

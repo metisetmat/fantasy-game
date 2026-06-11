@@ -6,8 +6,8 @@ import { PROTOTYPE_TEAMS, PrototypeTeamId } from "../../data/prototypeTeams";
 import { runMiniMatch } from "../miniMatch";
 import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition } from "./tacticalWorkbenchTypes";
 import { workbenchToSpatialMatchContext } from "../spatialContext";
-import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
-import type { RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
+import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate } from "../routeRanking";
+import type { AttributeAdjustedSelectionResult, RouteAttributeInfluence, RouteRankingAttributeUsage } from "../routeRanking";
 
 export type WorkbenchReplaySeedResult = {
   readonly fixtureId: string;
@@ -23,6 +23,11 @@ export type WorkbenchReplaySeedResult = {
   readonly selectedCandidateAttributeAdjustedScore?: number;
   readonly selectedCandidateInfluences?: readonly RouteAttributeInfluence[];
   readonly routeRankingUsesRealAttributes: RouteRankingAttributeUsage;
+  readonly attributeRankingMode: "metadata_only" | "candidate_modifier";
+  readonly metadataOnlySelectionResult?: AttributeAdjustedSelectionResult;
+  readonly attributeSelectionResult?: AttributeAdjustedSelectionResult;
+  readonly selectedBy?: "base_score" | "attribute_adjusted_score";
+  readonly selectionChangedByAttributes: boolean;
   readonly missingTruths: readonly string[];
   readonly lossyMappings: readonly string[];
   readonly recommendations: readonly string[];
@@ -229,6 +234,20 @@ export function runWorkbenchReplaySeed(input: {
   const selectedCandidate =
     attributeCandidates.find((candidate) => candidate.receiverId === selectedAction.receiverId) ??
     attributeCandidates.find((candidate) => candidate.actionType === selectedAction.actionType);
+  const metadataOnlySelectionResult = selectAttributeAdjustedCandidate({
+    candidates: attributeCandidates,
+    mode: "metadata_only",
+    spatialContext: beforeContext,
+    workbench: input.workbench,
+    ...(selectedCandidate === undefined ? {} : { baseSelectedCandidateId: selectedCandidate.candidateId }),
+  });
+  const candidateModifierSelectionResult = selectAttributeAdjustedCandidate({
+    candidates: attributeCandidates,
+    mode: "candidate_modifier",
+    spatialContext: beforeContext,
+    workbench: input.workbench,
+    ...(selectedCandidate === undefined ? {} : { baseSelectedCandidateId: selectedCandidate.candidateId }),
+  });
   const miniMatch = runMiniMatch({
     teamA: prototypeForTeam(input.matchInput.homeTeam.teamId),
     teamB: prototypeForTeam(input.matchInput.awayTeam.teamId),
@@ -266,6 +285,11 @@ export function runWorkbenchReplaySeed(input: {
     ...(selectedCandidate === undefined ? {} : { selectedCandidateAttributeAdjustedScore: selectedCandidate.attributeAdjustedScore }),
     ...(selectedCandidate === undefined ? {} : { selectedCandidateInfluences: selectedCandidate.attributeInfluences }),
     routeRankingUsesRealAttributes: "PARTIAL",
+    attributeRankingMode: "candidate_modifier",
+    metadataOnlySelectionResult,
+    attributeSelectionResult: candidateModifierSelectionResult,
+    selectedBy: candidateModifierSelectionResult.selectedBy,
+    selectionChangedByAttributes: candidateModifierSelectionResult.selectionChanged,
     missingTruths,
     lossyMappings,
     recommendations: [

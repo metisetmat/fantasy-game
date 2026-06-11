@@ -21,7 +21,7 @@ import { TacticalPhaseState } from "../../systems/tacticalState";
 import { createDeterministicSeed, seededRandom } from "../../systems/matchLoop";
 import { createMiniMatchTeamContext } from "./createMiniMatchContext";
 import type { MiniMatchSequenceSetup, MiniMatchState, MiniMatchTeamSegmentInfluence } from "./types";
-import { applySpatialAttributeInfluenceToCandidates } from "../routeRanking";
+import { applySpatialAttributeInfluenceToCandidates, selectAttributeAdjustedCandidate, type AttributeAdjustedSelectionResult } from "../routeRanking";
 
 const ACTIVE_ZONE_CYCLE: readonly ZoneId[] = [
   createZoneId(LongitudinalZone.Midfield, LateralCorridor.LeftHalfSpace),
@@ -242,7 +242,7 @@ function spatialContextSummary(state: MiniMatchState): string | undefined {
   ].join("; ");
 }
 
-function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
+function attributeSelectionResult(state: MiniMatchState): AttributeAdjustedSelectionResult | undefined {
   const spatialContext = state.context.spatialContext;
 
   if (spatialContext === undefined) {
@@ -256,10 +256,10 @@ function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
   const receiver = players.find((player) => player.playerId !== spatialContext.ballCarrierId && !player.isGoalkeeper);
 
   if (actor === undefined) {
-    return "attribute_influence_active; mode=metadata_only; actor=missing; routeRankingUsesRealAttributes=PARTIAL";
+    return undefined;
   }
 
-  const candidate = applySpatialAttributeInfluenceToCandidates({
+  const candidates = applySpatialAttributeInfluenceToCandidates({
     spatialContext,
     pressureLevel: "MEDIUM",
     candidates: [
@@ -276,25 +276,35 @@ function attributeInfluenceSummary(state: MiniMatchState): string | undefined {
         baseRisk: 35,
       },
     ],
-  })[0];
+  });
 
-  if (candidate === undefined) {
-    return "attribute_influence_active; mode=metadata_only; candidate=missing; routeRankingUsesRealAttributes=PARTIAL";
+  return selectAttributeAdjustedCandidate({
+    candidates,
+    mode: state.context.routeRankingAttributeMode ?? "metadata_only",
+    spatialContext,
+    baseSelectedCandidateId: "spatial-context-metadata-candidate",
+  });
+}
+
+function attributeInfluenceSummary(result: AttributeAdjustedSelectionResult | undefined): string | undefined {
+  if (result === undefined) {
+    return undefined;
   }
 
-  const reasons = candidate.attributeInfluences
-    .slice(0, 2)
-    .map((influence) => influence.category)
-    .join("/");
+  const modeLabel = result.mode === "candidate_modifier"
+    ? "attribute_selection_mode_candidate_modifier"
+    : `mode=${result.mode}`;
 
   return [
     "attribute_influence_active",
-    "mode=metadata_only",
-    `actor=${actor.playerId}`,
-    `receiver=${receiver?.playerId ?? "none"}`,
-    `base=${candidate.baseScore}`,
-    `adjusted=${candidate.attributeAdjustedScore}`,
-    `reasons=${reasons.length === 0 ? "none" : reasons}`,
+    modeLabel,
+    result.selectionChanged ? "candidate_modifier_evaluated_selection_changed" : "candidate_modifier_evaluated_not_authoritative",
+    `baseSelected=${result.baseSelectedCandidateId ?? "none"}`,
+    `selected=${result.selectedCandidateId}`,
+    `selectedBy=${result.selectedBy}`,
+    `base=${result.selectedCandidateBaseScore}`,
+    `adjusted=${result.selectedCandidateAdjustedScore}`,
+    `blocked=${result.guard.blockedReasons.join("/") || "none"}`,
     "routeRankingUsesRealAttributes=PARTIAL",
   ].join("; ");
 }
@@ -350,7 +360,8 @@ export function selectInitialSequenceContext(
   const snapshot = createSpatialSnapshot(possessionTeam, pressingTeam);
   const startTick = state.context.startTick + sequenceIndex * 10;
   const spatialSummary = spatialContextSummary(state);
-  const attributeSummary = attributeInfluenceSummary(state);
+  const selectionResult = attributeSelectionResult(state);
+  const attributeSummary = attributeInfluenceSummary(selectionResult);
 
   return {
     sequenceNumber: sequenceIndex + 1,
@@ -365,9 +376,10 @@ export function selectInitialSequenceContext(
     ...(attributeSummary === undefined
       ? {}
       : {
-          attributeInfluenceMode: "metadata_only" as const,
+          attributeInfluenceMode: state.context.routeRankingAttributeMode ?? "metadata_only" as const,
           routeRankingUsesRealAttributes: "PARTIAL" as const,
           attributeInfluenceSummary: attributeSummary,
+          ...(selectionResult === undefined ? {} : { attributeSelectionResult: selectionResult }),
         }),
     resolveInput: {
       startTick,
