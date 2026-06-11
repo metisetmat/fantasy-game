@@ -37,6 +37,7 @@ import type { FullMatchChainRouteCandidateInfluenceResult } from "../fullMatch/f
 import type { FullMatchShadowRouteSelectionResult } from "../fullMatch/fullMatchShadowRouteSelection";
 import type { FullMatchControlledSegmentSelectionResult } from "../fullMatch/fullMatchControlledSegmentSelection";
 import type { FullMatchSegmentRouteInput } from "../fullMatch/fullMatchSegmentRouteInput";
+import type { FullMatchControlledMiniMatchRouteSource } from "../fullMatch/fullMatchControlledMiniMatchRouteSource";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -54,6 +55,7 @@ export interface MiniMatchTimelineSegment {
   readonly shadowRouteSelection?: FullMatchShadowRouteSelectionResult;
   readonly controlledSegmentSelection?: FullMatchControlledSegmentSelectionResult;
   readonly segmentRouteInput?: FullMatchSegmentRouteInput;
+  readonly controlledMiniMatchRouteSource?: FullMatchControlledMiniMatchRouteSource;
 }
 
 export interface MatchReportBuilderInput {
@@ -257,6 +259,39 @@ function segmentRouteInputReason(input: FullMatchSegmentRouteInput | undefined):
   return ` Experimental segment route input available: ${input.actionType ?? "none"} to ${input.receiverId ?? "none"} in ${input.targetZone ?? "none"} from ${input.candidateId ?? "none"}. Diagnostic-only; does not drive production route resolution, score, scoring events, or route success rates.`;
 }
 
+function controlledMiniMatchRouteSourceTags(source: FullMatchControlledMiniMatchRouteSource | undefined): readonly string[] {
+  if (source === undefined || source.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_controlled_minimatch_route_source",
+    "controlled_minimatch_route_source_experimental",
+    "controlled_minimatch_route_source_diagnostic_only",
+    ...(source.candidateId === undefined ? [] : [`controlled_minimatch_route_source_candidate_${source.candidateId}`]),
+    ...(source.actionType === undefined ? [] : [`controlled_minimatch_route_source_action_${source.actionType}`]),
+    ...(source.receiverId === undefined ? [] : [`controlled_minimatch_route_source_receiver_${source.receiverId}`]),
+    ...(source.targetZone === undefined ? [] : [`controlled_minimatch_route_source_zone_${source.targetZone}`]),
+    "controlled_minimatch_route_source_score_mutation_forbidden",
+    "controlled_minimatch_route_source_scoring_events_mutation_forbidden",
+    "controlled_minimatch_route_source_route_success_mutation_forbidden",
+    "controlled_minimatch_route_source_production_fullmatch_forbidden",
+    "controlled_minimatch_route_source_production_resolution_forbidden",
+    "controlled_minimatch_route_source_live_resolution_forbidden",
+    "controlled_minimatch_route_source_closed_candidates_rejected",
+    "controlled_minimatch_route_source_unavailable_candidates_rejected",
+    ...source.tags,
+  ];
+}
+
+function controlledMiniMatchRouteSourceReason(source: FullMatchControlledMiniMatchRouteSource | undefined): string {
+  if (source === undefined || source.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental controlled mini-match route source available: ${source.actionType ?? "none"} to ${source.receiverId ?? "none"} in ${source.targetZone ?? "none"} from ${source.candidateId ?? "none"}. Diagnostic-only; does not drive live mini-match resolution, production route resolution, score, scoring events, or route success rates.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -298,7 +333,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -321,6 +356,7 @@ function kickoffEvent(input: {
       ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
       ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
       ...segmentRouteInputTags(input.segment.segmentRouteInput),
+      ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
     ],
     narrativeWeight: 5,
   };
@@ -378,6 +414,7 @@ function sequenceRecordToMatchEvent(input: {
     ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
     ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
     ...segmentRouteInputTags(input.segment.segmentRouteInput),
+    ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -402,7 +439,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -465,7 +502,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -498,6 +535,7 @@ function scoringEventToMatchEvent(input: {
       ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
       ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
       ...segmentRouteInputTags(input.segment.segmentRouteInput),
+      ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
     ],
     narrativeWeight: 70,
   };

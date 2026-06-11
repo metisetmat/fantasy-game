@@ -37,6 +37,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 48;
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
       return 47;
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+      return 46;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -81,6 +83,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la selection controlee de segment workbench experimentale";
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
       return "Relire l'input de route segmentaire workbench experimental";
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+      return "Relire la source de route controlee mini-match experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

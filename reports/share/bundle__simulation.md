@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3E - Controlled Segment Selection to Segment Route Input. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -156,6 +156,8 @@ import { controlledSegmentSelectionFromShadow } from "./fullMatch/controlledSegm
 import type { FullMatchControlledSegmentSelectionResult } from "./fullMatch/fullMatchControlledSegmentSelection";
 import { segmentRouteInputFromControlledSelection } from "./fullMatch/segmentRouteInputFromControlledSelection";
 import type { FullMatchSegmentRouteInput } from "./fullMatch/fullMatchSegmentRouteInput";
+import { controlledMiniMatchRouteSourceFromSegmentRouteInput } from "./fullMatch/controlledMiniMatchRouteSourceFromSegmentRouteInput";
+import type { FullMatchControlledMiniMatchRouteSource } from "./fullMatch/fullMatchControlledMiniMatchRouteSource";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -493,6 +495,25 @@ function segmentRouteInputLimitations(input: FullMatchSegmentRouteInput): readon
     "FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
     "FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
     "FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function controlledMiniMatchRouteSourceLimitations(source: FullMatchControlledMiniMatchRouteSource): readonly string[] {
+  if (source.status === "not_available") {
+    return ["FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_EXPERIMENTAL",
+    `FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_STATUS_${source.status.toUpperCase()}`,
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -842,6 +863,75 @@ function segmentRouteInputEvidenceFact(input: {
   };
 }
 
+function controlledMiniMatchRouteSourceEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly routeSource: FullMatchControlledMiniMatchRouteSource;
+}): MatchReportEvidenceFact | null {
+  if (input.routeSource.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_controlled_minimatch_route_source")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-controlled-minimatch-route-source`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.routeSource.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental controlled mini-match route source ${input.routeSource.status}: origin ${input.routeSource.origin}, ` +
+      `candidate ${input.routeSource.candidateId ?? "none"} (${input.routeSource.actionType ?? "none"}) ` +
+      `to receiver ${input.routeSource.receiverId ?? "none"} in ${input.routeSource.targetZone ?? "none"}, ` +
+      `sourceBaseScore=${input.routeSource.sourceBaseScore ?? 0}, sourceInfluenceDelta=${input.routeSource.sourceInfluenceDelta ?? 0}, ` +
+      `sourceInfluencedScore=${input.routeSource.sourceInfluencedScore ?? 0}, candidateLegal=${input.routeSource.candidateLegal}, ` +
+      `candidateAvailable=${input.routeSource.candidateAvailable}, closedRejected=${input.routeSource.rejectedClosedCandidateCount}, ` +
+      `unavailableRejected=${input.routeSource.rejectedUnavailableCandidateCount}, diagnosticOnly=${input.routeSource.diagnosticOnly}, ` +
+      `experimentalControlledRouteSource=${input.routeSource.experimentalControlledRouteSource}, canMutateScore=${input.routeSource.canMutateScore}, ` +
+      `canMutateScoringEvents=${input.routeSource.canMutateScoringEvents}, canMutateRouteSuccessRates=${input.routeSource.canMutateRouteSuccessRates}, ` +
+      `canDriveProductionFullMatchSelection=${input.routeSource.canDriveProductionFullMatchSelection}, ` +
+      `canDriveProductionRouteResolution=${input.routeSource.canDriveProductionRouteResolution}, ` +
+      `canDriveLiveMiniMatchResolution=${input.routeSource.canDriveLiveMiniMatchResolution}.`,
+    confidence: input.routeSource.status === "available" ? "medium" : "low",
+    strength: input.routeSource.status === "available" ? 68 : 25,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_controlled_minimatch_route_source",
+      "controlled_minimatch_route_source_experimental",
+      "controlled_minimatch_route_source_diagnostic_only",
+      "controlled_minimatch_route_source_score_mutation_forbidden",
+      "controlled_minimatch_route_source_scoring_events_mutation_forbidden",
+      "controlled_minimatch_route_source_route_success_mutation_forbidden",
+      "controlled_minimatch_route_source_production_fullmatch_forbidden",
+      "controlled_minimatch_route_source_production_resolution_forbidden",
+      "controlled_minimatch_route_source_live_resolution_forbidden",
+      "controlled_minimatch_route_source_closed_candidates_rejected",
+      "controlled_minimatch_route_source_unavailable_candidates_rejected",
+      ...(input.routeSource.chainId === undefined ? [] : [`controlled_minimatch_route_source_chain_id_${input.routeSource.chainId}`]),
+      ...(input.routeSource.candidateId === undefined ? [] : [`controlled_minimatch_route_source_candidate_${input.routeSource.candidateId}`]),
+      ...(input.routeSource.actionType === undefined ? [] : [`controlled_minimatch_route_source_action_${input.routeSource.actionType}`]),
+      ...(input.routeSource.receiverId === undefined ? [] : [`controlled_minimatch_route_source_receiver_${input.routeSource.receiverId}`]),
+      ...(input.routeSource.targetZone === undefined ? [] : [`controlled_minimatch_route_source_zone_${input.routeSource.targetZone}`]),
+      `controlled_minimatch_route_source_candidate_legal_${input.routeSource.candidateLegal ? "true" : "false"}`,
+      `controlled_minimatch_route_source_candidate_available_${input.routeSource.candidateAvailable ? "true" : "false"}`,
+      `controlled_minimatch_route_source_closed_rejected_count_${input.routeSource.rejectedClosedCandidateCount}`,
+      `controlled_minimatch_route_source_unavailable_rejected_count_${input.routeSource.rejectedUnavailableCandidateCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      "route_success_mutation_count_0",
+      "production_route_resolution_mutation_count_0",
+      "live_minimatch_resolution_mutation_count_0",
+      ...input.routeSource.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -851,6 +941,7 @@ function withFullMatchGroundingDiagnosis(
   shadowRouteSelection: FullMatchShadowRouteSelectionResult,
   controlledSegmentSelection: FullMatchControlledSegmentSelectionResult,
   segmentRouteInput: FullMatchSegmentRouteInput,
+  controlledMiniMatchRouteSource: FullMatchControlledMiniMatchRouteSource,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -860,12 +951,13 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_route_candidate_influence") ||
     fact.internalTags.includes("workbench_chain_shadow_route_selection") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_selection") ||
-    fact.internalTags.includes("workbench_chain_segment_route_input")
+    fact.internalTags.includes("workbench_chain_segment_route_input") ||
+    fact.internalTags.includes("workbench_chain_controlled_minimatch_route_source")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis le moteur dispose maintenant d'un input de route experimental pour le premier segment : ${segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cet input vient de la selection controlee issue de la shadow selection, mais il reste cantonne au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution reelle du full-match, le score, les evenements de score, ni les taux de succes des routes. Les routes fermees ou indisponibles restent rejetees avant la creation de cet input. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match experimental sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cette source vient du SegmentRouteInput, lui-meme issu de la selection controlee workbench. Elle reste cantonnee au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution live du mini-match, le score, les evenements de score, ni les taux de succes des routes ; elle ne pilote pas encore la resolution reelle du full-match. Les routes fermees ou indisponibles restent rejetees avant la creation de cette source controlee. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -925,6 +1017,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const segmentRouteInput = segmentRouteInputFromControlledSelection({
     controlledSelection: controlledSegmentSelection,
   });
+  const controlledMiniMatchRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
+    segmentRouteInput,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -968,6 +1063,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && shadowRouteSelection.status !== "not_available" ? { shadowRouteSelection } : {}),
           ...(index === 0 && controlledSegmentSelection.status !== "not_available" ? { controlledSegmentSelection } : {}),
           ...(index === 0 && segmentRouteInput.status !== "not_available" ? { segmentRouteInput } : {}),
+          ...(index === 0 && controlledMiniMatchRouteSource.status !== "not_available" ? { controlledMiniMatchRouteSource } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -1040,6 +1136,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...shadowRouteSelectionLimitations(shadowRouteSelection),
       ...controlledSegmentSelectionLimitations(controlledSegmentSelection),
       ...segmentRouteInputLimitations(segmentRouteInput),
+      ...controlledMiniMatchRouteSourceLimitations(controlledMiniMatchRouteSource),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -1072,6 +1169,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     routeInput: segmentRouteInput,
   });
+  const controlledRouteSourceFact = controlledMiniMatchRouteSourceEvidenceFact({
+    report,
+    matchInput: input,
+    routeSource: controlledMiniMatchRouteSource,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -1079,6 +1181,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(shadowSelectionFact === null ? [] : [shadowSelectionFact]),
     ...(controlledSelectionFact === null ? [] : [controlledSelectionFact]),
     ...(segmentRouteInputFact === null ? [] : [segmentRouteInputFact]),
+    ...(controlledRouteSourceFact === null ? [] : [controlledRouteSourceFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1096,6 +1199,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     shadowRouteSelection,
     controlledSegmentSelection,
     segmentRouteInput,
+    controlledMiniMatchRouteSource,
   );
 }
 ```
@@ -3983,6 +4087,328 @@ export function fullMatchSegmentRouteInputSignature(report: MatchReport): FullMa
     scoringEventsMutationCount: numberFromTag(report, "scoring_events_mutation_count_"),
     routeSuccessRateMutationCount: numberFromTag(report, "route_success_mutation_count_"),
     productionRouteResolutionMutationCount: numberFromTag(report, "production_route_resolution_mutation_count_"),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchControlledMiniMatchRouteSource.ts
+
+```ts
+export type FullMatchControlledMiniMatchRouteSourceStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type FullMatchControlledMiniMatchRouteSourceScope =
+  | "experimental_controlled_minimatch_route_source"
+  | "production_route_resolution_forbidden";
+
+export type FullMatchControlledMiniMatchRouteSourceOrigin =
+  | "none"
+  | "segment_route_input";
+
+export type FullMatchControlledMiniMatchRouteSource = {
+  readonly status: FullMatchControlledMiniMatchRouteSourceStatus;
+  readonly scope: FullMatchControlledMiniMatchRouteSourceScope;
+  readonly origin: FullMatchControlledMiniMatchRouteSourceOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly sourceBaseScore?: number;
+  readonly sourceInfluenceDelta?: number;
+  readonly sourceInfluencedScore?: number;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly experimentalControlledRouteSource: boolean;
+  readonly canMutateScore: false;
+  readonly canMutateScoringEvents: false;
+  readonly canMutateRouteSuccessRates: false;
+  readonly canDriveProductionFullMatchSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canDriveLiveMiniMatchResolution: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyControlledMiniMatchRouteSource(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): FullMatchControlledMiniMatchRouteSource {
+  return {
+    status: "not_available",
+    scope: "production_route_resolution_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    candidateLegal: false,
+    candidateAvailable: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    experimentalControlledRouteSource: false,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveLiveMiniMatchResolution: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/controlledMiniMatchRouteSourceFromSegmentRouteInput.ts
+
+```ts
+import type { FullMatchSegmentRouteInput } from "./fullMatchSegmentRouteInput";
+import {
+  emptyControlledMiniMatchRouteSource,
+  type FullMatchControlledMiniMatchRouteSource,
+} from "./fullMatchControlledMiniMatchRouteSource";
+
+export function controlledMiniMatchRouteSourceCannotMutateScore(
+  source: FullMatchControlledMiniMatchRouteSource,
+): boolean {
+  return !source.canMutateScore && !source.canMutateScoringEvents && !source.canMutateRouteSuccessRates;
+}
+
+export function controlledMiniMatchRouteSourceCannotDriveLiveMiniMatchResolution(
+  source: FullMatchControlledMiniMatchRouteSource,
+): boolean {
+  return (
+    !source.canDriveProductionFullMatchSelection &&
+    !source.canDriveProductionRouteResolution &&
+    !source.canDriveLiveMiniMatchResolution
+  );
+}
+
+export function validateControlledMiniMatchRouteSource(
+  source: FullMatchControlledMiniMatchRouteSource,
+): readonly string[] {
+  const shouldValidateCandidate = source.status !== "not_available";
+
+  return [
+    ...(shouldValidateCandidate && source.candidateId === undefined ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_MISSING_CANDIDATE"] : []),
+    ...(shouldValidateCandidate && source.actionType === undefined ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_MISSING_ACTION"] : []),
+    ...(shouldValidateCandidate && source.receiverId === undefined ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_MISSING_RECEIVER"] : []),
+    ...(shouldValidateCandidate && source.targetZone === undefined ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_MISSING_TARGET_ZONE"] : []),
+    ...(shouldValidateCandidate && !source.candidateLegal ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_ILLEGAL_CANDIDATE"] : []),
+    ...(shouldValidateCandidate && !source.candidateAvailable ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_UNAVAILABLE_CANDIDATE"] : []),
+    ...(!controlledMiniMatchRouteSourceCannotMutateScore(source) ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_MUTATION_FORBIDDEN_BREACH"] : []),
+    ...(!controlledMiniMatchRouteSourceCannotDriveLiveMiniMatchResolution(source) ? ["CONTROLLED_MINIMATCH_ROUTE_SOURCE_LIVE_RESOLUTION_FORBIDDEN_BREACH"] : []),
+  ];
+}
+
+function failedControlledMiniMatchRouteSourceFromSegmentRouteInput(
+  segmentRouteInput: FullMatchSegmentRouteInput,
+): FullMatchControlledMiniMatchRouteSource {
+  return {
+    status: "failed",
+    scope: "production_route_resolution_forbidden",
+    origin: "segment_route_input",
+    ...(segmentRouteInput.segmentLabel === undefined ? {} : { segmentLabel: segmentRouteInput.segmentLabel }),
+    ...(segmentRouteInput.chainId === undefined ? {} : { chainId: segmentRouteInput.chainId }),
+    ...(segmentRouteInput.candidateId === undefined ? {} : { candidateId: segmentRouteInput.candidateId }),
+    ...(segmentRouteInput.actionType === undefined ? {} : { actionType: segmentRouteInput.actionType }),
+    ...(segmentRouteInput.receiverId === undefined ? {} : { receiverId: segmentRouteInput.receiverId }),
+    ...(segmentRouteInput.targetZone === undefined ? {} : { targetZone: segmentRouteInput.targetZone }),
+    ...(segmentRouteInput.sourceBaseScore === undefined ? {} : { sourceBaseScore: segmentRouteInput.sourceBaseScore }),
+    ...(segmentRouteInput.sourceInfluenceDelta === undefined ? {} : { sourceInfluenceDelta: segmentRouteInput.sourceInfluenceDelta }),
+    ...(segmentRouteInput.sourceInfluencedScore === undefined ? {} : { sourceInfluencedScore: segmentRouteInput.sourceInfluencedScore }),
+    candidateLegal: segmentRouteInput.candidateLegal,
+    candidateAvailable: segmentRouteInput.candidateAvailable,
+    rejectedClosedCandidateCount: segmentRouteInput.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: segmentRouteInput.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    experimentalControlledRouteSource: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveLiveMiniMatchResolution: false,
+    tags: [],
+    warnings: [...segmentRouteInput.warnings, "CONTROLLED_MINIMATCH_ROUTE_SOURCE_FAILED_GUARD"],
+  };
+}
+
+function availableControlledMiniMatchRouteSourceFromSegmentRouteInput(
+  segmentRouteInput: FullMatchSegmentRouteInput,
+): FullMatchControlledMiniMatchRouteSource {
+  if (
+    segmentRouteInput.candidateId === undefined ||
+    segmentRouteInput.actionType === undefined ||
+    segmentRouteInput.receiverId === undefined ||
+    segmentRouteInput.targetZone === undefined ||
+    !segmentRouteInput.candidateLegal ||
+    !segmentRouteInput.candidateAvailable
+  ) {
+    return failedControlledMiniMatchRouteSourceFromSegmentRouteInput(segmentRouteInput);
+  }
+
+  return {
+    status: "available",
+    scope: "experimental_controlled_minimatch_route_source",
+    origin: "segment_route_input",
+    ...(segmentRouteInput.segmentLabel === undefined ? {} : { segmentLabel: segmentRouteInput.segmentLabel }),
+    ...(segmentRouteInput.chainId === undefined ? {} : { chainId: segmentRouteInput.chainId }),
+    candidateId: segmentRouteInput.candidateId,
+    actionType: segmentRouteInput.actionType,
+    receiverId: segmentRouteInput.receiverId,
+    targetZone: segmentRouteInput.targetZone,
+    ...(segmentRouteInput.sourceBaseScore === undefined ? {} : { sourceBaseScore: segmentRouteInput.sourceBaseScore }),
+    ...(segmentRouteInput.sourceInfluenceDelta === undefined ? {} : { sourceInfluenceDelta: segmentRouteInput.sourceInfluenceDelta }),
+    ...(segmentRouteInput.sourceInfluencedScore === undefined ? {} : { sourceInfluencedScore: segmentRouteInput.sourceInfluencedScore }),
+    candidateLegal: segmentRouteInput.candidateLegal,
+    candidateAvailable: segmentRouteInput.candidateAvailable,
+    rejectedClosedCandidateCount: segmentRouteInput.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: segmentRouteInput.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    experimentalControlledRouteSource: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    canDriveLiveMiniMatchResolution: false,
+    tags: [
+      "workbench_chain_controlled_minimatch_route_source",
+      "controlled_minimatch_route_source_experimental",
+      "controlled_minimatch_route_source_diagnostic_only",
+      `controlled_minimatch_route_source_candidate_${segmentRouteInput.candidateId}`,
+      `controlled_minimatch_route_source_action_${segmentRouteInput.actionType}`,
+      `controlled_minimatch_route_source_receiver_${segmentRouteInput.receiverId}`,
+      `controlled_minimatch_route_source_zone_${segmentRouteInput.targetZone}`,
+      "controlled_minimatch_route_source_score_mutation_forbidden",
+      "controlled_minimatch_route_source_scoring_events_mutation_forbidden",
+      "controlled_minimatch_route_source_route_success_mutation_forbidden",
+      "controlled_minimatch_route_source_production_fullmatch_forbidden",
+      "controlled_minimatch_route_source_production_resolution_forbidden",
+      "controlled_minimatch_route_source_live_resolution_forbidden",
+      "controlled_minimatch_route_source_closed_candidates_rejected",
+      "controlled_minimatch_route_source_unavailable_candidates_rejected",
+      ...(segmentRouteInput.chainId === undefined ? [] : [`controlled_minimatch_route_source_chain_id_${segmentRouteInput.chainId}`]),
+    ],
+    warnings: segmentRouteInput.warnings,
+  };
+}
+
+export function controlledMiniMatchRouteSourceFromSegmentRouteInput(input: {
+  readonly segmentRouteInput: FullMatchSegmentRouteInput;
+}): FullMatchControlledMiniMatchRouteSource {
+  if (input.segmentRouteInput.status === "not_available") {
+    return emptyControlledMiniMatchRouteSource({
+      ...(input.segmentRouteInput.segmentLabel === undefined ? {} : { segmentLabel: input.segmentRouteInput.segmentLabel }),
+      ...(input.segmentRouteInput.chainId === undefined ? {} : { chainId: input.segmentRouteInput.chainId }),
+      warnings: input.segmentRouteInput.warnings,
+    });
+  }
+
+  const routeSource = availableControlledMiniMatchRouteSourceFromSegmentRouteInput(input.segmentRouteInput);
+  const validationWarnings = validateControlledMiniMatchRouteSource(routeSource);
+
+  if (validationWarnings.length === 0) {
+    return routeSource;
+  }
+
+  return {
+    ...routeSource,
+    status: routeSource.status === "available" ? "failed" : routeSource.status,
+    warnings: [...routeSource.warnings, ...validationWarnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchControlledMiniMatchRouteSourceSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type FullMatchControlledMiniMatchRouteSourceSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly segmentRouteInputTagCount: number;
+  readonly controlledMiniMatchRouteSourceTagCount: number;
+  readonly routeSourceCandidateId?: string;
+  readonly routeSourceActionType?: string;
+  readonly routeSourceReceiverId?: string;
+  readonly routeSourceTargetZone?: string;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly scoreMutationCount: number;
+  readonly scoringEventsMutationCount: number;
+  readonly routeSuccessRateMutationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly liveMiniMatchResolutionMutationCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+export function fullMatchControlledMiniMatchRouteSourceSignature(
+  report: MatchReport,
+): FullMatchControlledMiniMatchRouteSourceSignature {
+  const routeSourceCandidateId = suffixFromTag(report, "controlled_minimatch_route_source_candidate_");
+  const routeSourceActionType = suffixFromTag(report, "controlled_minimatch_route_source_action_");
+  const routeSourceReceiverId = suffixFromTag(report, "controlled_minimatch_route_source_receiver_");
+  const routeSourceTargetZone = suffixFromTag(report, "controlled_minimatch_route_source_zone_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    segmentRouteInputTagCount: countTag(report, "workbench_chain_segment_route_input"),
+    controlledMiniMatchRouteSourceTagCount: countTag(report, "workbench_chain_controlled_minimatch_route_source"),
+    ...(routeSourceCandidateId === undefined ? {} : { routeSourceCandidateId }),
+    ...(routeSourceActionType === undefined ? {} : { routeSourceActionType }),
+    ...(routeSourceReceiverId === undefined ? {} : { routeSourceReceiverId }),
+    ...(routeSourceTargetZone === undefined ? {} : { routeSourceTargetZone }),
+    candidateLegal: report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_minimatch_route_source_candidate_legal_true")),
+    candidateAvailable: report.evidenceFacts.some((fact) => fact.internalTags.includes("controlled_minimatch_route_source_candidate_available_true")),
+    rejectedClosedCandidateCount: numberFromTag(report, "controlled_minimatch_route_source_closed_rejected_count_"),
+    rejectedUnavailableCandidateCount: numberFromTag(report, "controlled_minimatch_route_source_unavailable_rejected_count_"),
+    scoreMutationCount: numberFromTag(report, "score_mutation_count_"),
+    scoringEventsMutationCount: numberFromTag(report, "scoring_events_mutation_count_"),
+    routeSuccessRateMutationCount: numberFromTag(report, "route_success_mutation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(report, "production_route_resolution_mutation_count_"),
+    liveMiniMatchResolutionMutationCount: numberFromTag(report, "live_minimatch_resolution_mutation_count_"),
   };
 }
 ```
@@ -8069,6 +8495,207 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/fullMatchControlledMiniMatchRouteSource.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { consumeWorkbenchChainForFullMatch } from "./consumeWorkbenchChainForFullMatch";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./applyChainContextToRouteCandidates";
+import { chainConsumptionToSegmentContext } from "./fullMatchChainSegmentContext";
+import { selectShadowRouteFromInfluencedCandidates } from "./selectShadowRouteFromInfluencedCandidates";
+import { controlledSegmentSelectionFromShadow } from "./controlledSegmentSelectionFromShadow";
+import { segmentRouteInputFromControlledSelection } from "./segmentRouteInputFromControlledSelection";
+import { controlledMiniMatchRouteSourceFromSegmentRouteInput } from "./controlledMiniMatchRouteSourceFromSegmentRouteInput";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function routeSourceForMode(routeSelectionMode: "segment_harness" | "workbench_chain_replay_experimental") {
+  const matchInput = engineToCoachPublicContractFixtures.matchInputFixture;
+  const context = chainConsumptionToSegmentContext(consumeWorkbenchChainForFullMatch({
+    matchInput,
+    routeSelectionMode,
+    segmentLabel: "segment-1",
+  }));
+  const influence = applyChainContextToRouteCandidates({
+    segmentContext: context,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext: context,
+    }),
+  });
+  const shadowSelection = selectShadowRouteFromInfluencedCandidates({
+    influence,
+    ...(influence.selectedCandidateBefore === undefined ? {} : { productionSelectionCandidateId: influence.selectedCandidateBefore }),
+  });
+  const controlledSelection = controlledSegmentSelectionFromShadow({ shadowSelection });
+  const segmentRouteInput = segmentRouteInputFromControlledSelection({ controlledSelection });
+
+  return controlledMiniMatchRouteSourceFromSegmentRouteInput({ segmentRouteInput });
+}
+
+export function validateFullMatchControlledMiniMatchRouteSource(): readonly string[] {
+  const unavailable = routeSourceForMode("segment_harness");
+  const routeSource = routeSourceForMode("workbench_chain_replay_experimental");
+
+  assertTest(unavailable.status === "not_available", "default route mode must not expose controlled mini-match route source.");
+  assertTest(routeSource.status === "available", "available SegmentRouteInput must return controlled mini-match route source.");
+  assertTest(routeSource.origin === "segment_route_input", "controlled route source origin must be segment_route_input.");
+  assertTest(routeSource.scope === "experimental_controlled_minimatch_route_source", "controlled route source scope must remain experimental.");
+  assertTest(routeSource.candidateId === "chain-context-forward-progress-sh", "controlled route source candidate must be chain-context-forward-progress-sh.");
+  assertTest(routeSource.actionType === "FORWARD_PROGRESS", "controlled route source action must be FORWARD_PROGRESS.");
+  assertTest(routeSource.receiverId === "control-space-hunter", "controlled route source receiver must be control-space-hunter.");
+  assertTest(routeSource.targetZone === "Z4-HSR", "controlled route source target zone must be Z4-HSR.");
+  assertTest(routeSource.sourceBaseScore === 82, "controlled route source must expose source base score 82.");
+  assertTest(routeSource.sourceInfluenceDelta === 5, "controlled route source must expose source influence delta 5.");
+  assertTest(routeSource.sourceInfluencedScore === 87, "controlled route source must expose source influenced score 87.");
+  assertTest(routeSource.candidateLegal, "controlled route source candidate must be legal.");
+  assertTest(routeSource.candidateAvailable, "controlled route source candidate must be available.");
+  assertTest(routeSource.diagnosticOnly, "controlled route source must be diagnostic-only.");
+  assertTest(routeSource.experimentalControlledRouteSource, "controlled route source must be marked experimental.");
+  assertTest(!routeSource.canMutateScore, "controlled route source must not mutate score.");
+  assertTest(!routeSource.canMutateScoringEvents, "controlled route source must not mutate scoring events.");
+  assertTest(!routeSource.canMutateRouteSuccessRates, "controlled route source must not mutate route success rates.");
+  assertTest(!routeSource.canDriveProductionFullMatchSelection, "controlled route source must not drive production full-match selection.");
+  assertTest(!routeSource.canDriveProductionRouteResolution, "controlled route source must not drive production route resolution.");
+  assertTest(!routeSource.canDriveLiveMiniMatchResolution, "controlled route source must not drive live mini-match resolution.");
+
+  return [
+    "not_available SegmentRouteInput returns no controlled route source",
+    "available SegmentRouteInput returns controlled mini-match route source",
+    "controlled route source origin is segment_route_input",
+    "controlled route source candidate is chain-context-forward-progress-sh",
+    "controlled route source action is FORWARD_PROGRESS",
+    "controlled route source receiver is control-space-hunter",
+    "controlled route source target zone is Z4-HSR",
+    "controlled route source source scores are exposed",
+    "controlled route source candidate is legal and available",
+    "controlled route source is diagnostic-only and experimental",
+    "controlled route source cannot mutate score, scoring events, or route success rates",
+    "controlled route source cannot drive production or live mini-match resolution",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchControlledMiniMatchRouteSource();
+
+  console.log("fullMatchControlledMiniMatchRouteSource tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchControlledMiniMatchRouteSourceGuard.test.ts
+
+```ts
+import type { FullMatchSegmentRouteInput } from "./fullMatchSegmentRouteInput";
+import {
+  controlledMiniMatchRouteSourceCannotDriveLiveMiniMatchResolution,
+  controlledMiniMatchRouteSourceCannotMutateScore,
+  controlledMiniMatchRouteSourceFromSegmentRouteInput,
+  validateControlledMiniMatchRouteSource,
+} from "./controlledMiniMatchRouteSourceFromSegmentRouteInput";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function segmentRouteInputOverride(
+  overrides: Partial<FullMatchSegmentRouteInput>,
+): FullMatchSegmentRouteInput {
+  return {
+    status: "available",
+    scope: "experimental_segment_route_input",
+    source: "controlled_segment_selection",
+    segmentLabel: "segment-1",
+    chainId: "sequence-1-multi-action-chain",
+    candidateId: "chain-context-forward-progress-sh",
+    actionType: "FORWARD_PROGRESS",
+    receiverId: "control-space-hunter",
+    targetZone: "Z4-HSR",
+    sourceBaseScore: 82,
+    sourceInfluenceDelta: 5,
+    sourceInfluencedScore: 87,
+    candidateLegal: true,
+    candidateAvailable: true,
+    rejectedClosedCandidateCount: 1,
+    rejectedUnavailableCandidateCount: 1,
+    diagnosticOnly: true,
+    experimentalRouteInput: true,
+    canMutateScore: false,
+    canMutateScoringEvents: false,
+    canMutateRouteSuccessRates: false,
+    canDriveProductionFullMatchSelection: false,
+    canDriveProductionRouteResolution: false,
+    tags: [],
+    warnings: [],
+    ...overrides,
+  };
+}
+
+export function validateFullMatchControlledMiniMatchRouteSourceGuard(): readonly string[] {
+  const legalRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
+    segmentRouteInput: segmentRouteInputOverride({}),
+  });
+  const illegalRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
+    segmentRouteInput: segmentRouteInputOverride({
+      candidateId: "chain-context-closed-central-force",
+      candidateLegal: false,
+    }),
+  });
+  const unavailableRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
+    segmentRouteInput: segmentRouteInputOverride({
+      candidateId: "chain-context-unavailable-switch",
+      candidateAvailable: false,
+    }),
+  });
+  const { candidateId: _removedCandidateId, ...missingCandidateInput } = segmentRouteInputOverride({});
+  const missingRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
+    segmentRouteInput: missingCandidateInput,
+  });
+
+  assertTest(legalRouteSource.status === "available", "legal SegmentRouteInput must produce available controlled mini-match route source.");
+  assertTest(illegalRouteSource.status !== "available", "CLOSED/illegal candidate cannot become available controlled mini-match route source.");
+  assertTest(unavailableRouteSource.status !== "available", "unavailable candidate cannot become available controlled mini-match route source.");
+  assertTest(missingRouteSource.status !== "available", "missing candidate cannot become available controlled mini-match route source.");
+  assertTest(validateControlledMiniMatchRouteSource(legalRouteSource).length === 0, "legal controlled route source validation must pass.");
+  assertTest(validateControlledMiniMatchRouteSource(illegalRouteSource).length > 0, "illegal controlled route source validation must warn.");
+  assertTest(controlledMiniMatchRouteSourceCannotMutateScore(legalRouteSource), "controlled route source cannot mutate score surfaces.");
+  assertTest(controlledMiniMatchRouteSourceCannotDriveLiveMiniMatchResolution(legalRouteSource), "controlled route source cannot drive production or live mini-match resolution.");
+  assertTest(!legalRouteSource.canMutateRouteSuccessRates, "controlled route source cannot mutate route success rates.");
+
+  return [
+    "legal SegmentRouteInput creates available controlled mini-match route source",
+    "CLOSED candidate cannot become controlled mini-match route source",
+    "unavailable candidate cannot become controlled mini-match route source",
+    "missing selected candidate returns failed or partial controlled route source",
+    "candidate must be legal and available",
+    "controlled route source cannot drive production full-match selection",
+    "controlled route source cannot drive production route resolution",
+    "controlled route source cannot drive live mini-match resolution",
+    "controlled route source cannot mutate route success rates",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchControlledMiniMatchRouteSourceGuard();
+
+  console.log("fullMatchControlledMiniMatchRouteSourceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -8470,6 +9097,76 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalControlledMiniMatchRouteSource.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchControlledMiniMatchRouteSourceSignature } from "./fullMatchControlledMiniMatchRouteSourceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalControlledMiniMatchRouteSource(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = fullMatchControlledMiniMatchRouteSourceSignature(defaultReport);
+  const experimentalSignature = fullMatchControlledMiniMatchRouteSourceSignature(experimentalReport);
+  const routeSourceFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("source de route controlee pour mini-match"),
+  );
+
+  assertTest(defaultSignature.controlledMiniMatchRouteSourceTagCount === 0, "default runFullMatch must not expose controlled mini-match route source tags.");
+  assertTest(experimentalSignature.segmentRouteInputTagCount > 0, "experimental runFullMatch must still expose SegmentRouteInput tags.");
+  assertTest(experimentalSignature.controlledMiniMatchRouteSourceTagCount > 0, "experimental runFullMatch must expose controlled mini-match route source tags.");
+  assertTest(experimentalSignature.routeSourceCandidateId === "chain-context-forward-progress-sh", "controlled route source signature must expose candidate.");
+  assertTest(experimentalSignature.routeSourceActionType === "FORWARD_PROGRESS", "controlled route source signature must expose action.");
+  assertTest(experimentalSignature.routeSourceReceiverId === "control-space-hunter", "controlled route source signature must expose receiver.");
+  assertTest(experimentalSignature.routeSourceTargetZone === "Z4-HSR", "controlled route source signature must expose target zone.");
+  assertTest(experimentalSignature.candidateLegal, "controlled route source candidate must be legal.");
+  assertTest(experimentalSignature.candidateAvailable, "controlled route source candidate must be available.");
+  assertTest(experimentalSignature.rejectedClosedCandidateCount >= 1, "controlled route source signature must expose closed rejection count.");
+  assertTest(experimentalSignature.rejectedUnavailableCandidateCount >= 1, "controlled route source signature must expose unavailable rejection count.");
+  assertTest(routeSourceFact !== undefined, "experimental report must include controlled mini-match route source evidence.");
+  assertTest(routeSourceFact?.internalTags.includes("controlled_minimatch_route_source_diagnostic_only") ?? false, "controlled route source evidence must be diagnostic-only.");
+  assertTest(routeSourceFact?.internalTags.includes("controlled_minimatch_route_source_live_resolution_forbidden") ?? false, "controlled route source evidence must forbid live mini-match resolution.");
+  assertTest(routeSourceFact?.summary.includes("segment_route_input") ?? false, "controlled route source evidence must include SegmentRouteInput origin.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention controlled mini-match route source.");
+  assertTest(diagnosis?.summary.includes("ne pilote pas encore la resolution live du mini-match") ?? false, "coach diagnosis must state controlled route source is not live-driving.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DIAGNOSTIC_ONLY"), "experimental limitations must mark controlled route source diagnostic-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION"), "experimental limitations must forbid live mini-match resolution.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
+
+  return [
+    "default runFullMatch has no controlled mini-match route source tags",
+    "experimental runFullMatch has controlled mini-match route source tags",
+    "experimental report includes controlled mini-match route source evidence",
+    "controlled mini-match route source exposes candidate, action, receiver, and target zone",
+    "controlled mini-match route source is legal and available",
+    "closed and unavailable candidates remain rejected",
+    "experimental coach diagnosis mentions controlled mini-match route source",
+    "controlled mini-match route source is diagnostic-only and live-resolution forbidden",
+    "normal full-match is not claimed as production chain-driven",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalControlledMiniMatchRouteSource();
+
+  console.log("runFullMatchExperimentalControlledMiniMatchRouteSource tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -8779,6 +9476,78 @@ if (require.main === module) {
   const checks = validateRunFullMatchSegmentRouteInputScoringGuard();
 
   console.log("runFullMatchSegmentRouteInputScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchControlledMiniMatchRouteSourceScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { fullMatchControlledMiniMatchRouteSourceSignature } from "./fullMatchControlledMiniMatchRouteSourceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const signature = fullMatchControlledMiniMatchRouteSourceSignature(report);
+
+  return `${signature.score.home}-${signature.score.away}:${signature.scoringEventCount}:${signature.scoreChangeTotal}:${signature.timelineEventCount}`;
+}
+
+export function validateRunFullMatchControlledMiniMatchRouteSourceScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const experimentalSignature = fullMatchControlledMiniMatchRouteSourceSignature(experimentalReport);
+
+  assertTest(scoreSignature(defaultReport) === scoreSignature(experimentalReport), "default and experimental score signatures must remain equal.");
+  assertTest(experimentalSignature.scoreMutationCount === 0, "controlled route source must not mutate score.");
+  assertTest(experimentalSignature.scoringEventsMutationCount === 0, "controlled route source must not mutate scoring events.");
+  assertTest(experimentalSignature.routeSuccessRateMutationCount === 0, "controlled route source must not mutate route success rates.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "controlled route source must not mutate production route resolution.");
+  assertTest(experimentalSignature.liveMiniMatchResolutionMutationCount === 0, "controlled route source must not mutate live mini-match resolution.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORE"), "controlled route source limitation must forbid score mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORING_EVENTS"), "controlled route source limitation must forbid scoring event mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES"), "controlled route source limitation must forbid route success mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION"), "controlled route source limitation must forbid production route resolution.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION"), "controlled route source limitation must forbid live mini-match resolution.");
+  assertTest(experimentalReport.evidenceFacts.some((fact) =>
+    fact.internalTags.includes("controlled_minimatch_route_source_score_mutation_forbidden") &&
+    fact.internalTags.includes("controlled_minimatch_route_source_scoring_events_mutation_forbidden") &&
+    fact.internalTags.includes("controlled_minimatch_route_source_route_success_mutation_forbidden") &&
+    fact.internalTags.includes("controlled_minimatch_route_source_production_resolution_forbidden") &&
+    fact.internalTags.includes("controlled_minimatch_route_source_live_resolution_forbidden"),
+  ), "controlled route source evidence must forbid score, scoring-event, route-success, production-resolution, and live-resolution mutation.");
+
+  return [
+    "default and experimental final scores remain equal",
+    "default and experimental scoring event counts remain equal",
+    "default and experimental score_change totals remain equal",
+    "timeline event count remains equal or only metadata differs",
+    "controlled route source does not mutate score",
+    "controlled route source does not mutate scoring events",
+    "controlled route source does not mutate route success rates",
+    "controlled route source does not mutate production route resolution",
+    "controlled route source does not mutate live mini-match route resolution",
+    "no scoring events are deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchControlledMiniMatchRouteSourceScoringGuard();
+
+  console.log("runFullMatchControlledMiniMatchRouteSourceScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -9259,6 +10028,70 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3f.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3F(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "final score must derive only from score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORE"), "controlled route source must not mutate score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORING_EVENTS"), "controlled route source must not mutate scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES"), "controlled route source must not mutate route success rates.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION"), "controlled route source must not drive production route resolution.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION"), "controlled route source must not drive live mini-match resolution.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "final score still derives only from score_change",
+    "controlled mini-match route source does not mutate score, scoring events, or route success rates",
+    "controlled mini-match route source cannot drive production route resolution",
+    "controlled mini-match route source cannot drive live mini-match resolution",
+    "no scoring events deleted/capped/rewritten/fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3F();
+
+  console.log("scoringGuard.3f tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -9534,6 +10367,60 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3E();
 
   console.log("sourceOfTruthGuards.3e tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3f.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3F(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3F();
+
+  console.log("sourceOfTruthGuards.3f tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -10541,6 +11428,7 @@ import type { FullMatchChainRouteCandidateInfluenceResult } from "../fullMatch/f
 import type { FullMatchShadowRouteSelectionResult } from "../fullMatch/fullMatchShadowRouteSelection";
 import type { FullMatchControlledSegmentSelectionResult } from "../fullMatch/fullMatchControlledSegmentSelection";
 import type { FullMatchSegmentRouteInput } from "../fullMatch/fullMatchSegmentRouteInput";
+import type { FullMatchControlledMiniMatchRouteSource } from "../fullMatch/fullMatchControlledMiniMatchRouteSource";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -10558,6 +11446,7 @@ export interface MiniMatchTimelineSegment {
   readonly shadowRouteSelection?: FullMatchShadowRouteSelectionResult;
   readonly controlledSegmentSelection?: FullMatchControlledSegmentSelectionResult;
   readonly segmentRouteInput?: FullMatchSegmentRouteInput;
+  readonly controlledMiniMatchRouteSource?: FullMatchControlledMiniMatchRouteSource;
 }
 
 export interface MatchReportBuilderInput {
@@ -10761,6 +11650,39 @@ function segmentRouteInputReason(input: FullMatchSegmentRouteInput | undefined):
   return ` Experimental segment route input available: ${input.actionType ?? "none"} to ${input.receiverId ?? "none"} in ${input.targetZone ?? "none"} from ${input.candidateId ?? "none"}. Diagnostic-only; does not drive production route resolution, score, scoring events, or route success rates.`;
 }
 
+function controlledMiniMatchRouteSourceTags(source: FullMatchControlledMiniMatchRouteSource | undefined): readonly string[] {
+  if (source === undefined || source.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_controlled_minimatch_route_source",
+    "controlled_minimatch_route_source_experimental",
+    "controlled_minimatch_route_source_diagnostic_only",
+    ...(source.candidateId === undefined ? [] : [`controlled_minimatch_route_source_candidate_${source.candidateId}`]),
+    ...(source.actionType === undefined ? [] : [`controlled_minimatch_route_source_action_${source.actionType}`]),
+    ...(source.receiverId === undefined ? [] : [`controlled_minimatch_route_source_receiver_${source.receiverId}`]),
+    ...(source.targetZone === undefined ? [] : [`controlled_minimatch_route_source_zone_${source.targetZone}`]),
+    "controlled_minimatch_route_source_score_mutation_forbidden",
+    "controlled_minimatch_route_source_scoring_events_mutation_forbidden",
+    "controlled_minimatch_route_source_route_success_mutation_forbidden",
+    "controlled_minimatch_route_source_production_fullmatch_forbidden",
+    "controlled_minimatch_route_source_production_resolution_forbidden",
+    "controlled_minimatch_route_source_live_resolution_forbidden",
+    "controlled_minimatch_route_source_closed_candidates_rejected",
+    "controlled_minimatch_route_source_unavailable_candidates_rejected",
+    ...source.tags,
+  ];
+}
+
+function controlledMiniMatchRouteSourceReason(source: FullMatchControlledMiniMatchRouteSource | undefined): string {
+  if (source === undefined || source.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental controlled mini-match route source available: ${source.actionType ?? "none"} to ${source.receiverId ?? "none"} in ${source.targetZone ?? "none"} from ${source.candidateId ?? "none"}. Diagnostic-only; does not drive live mini-match resolution, production route resolution, score, scoring events, or route success rates.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -10802,7 +11724,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -10825,6 +11747,7 @@ function kickoffEvent(input: {
       ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
       ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
       ...segmentRouteInputTags(input.segment.segmentRouteInput),
+      ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
     ],
     narrativeWeight: 5,
   };
@@ -10882,6 +11805,7 @@ function sequenceRecordToMatchEvent(input: {
     ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
     ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
     ...segmentRouteInputTags(input.segment.segmentRouteInput),
+    ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -10906,7 +11830,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -10969,7 +11893,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -11002,6 +11926,7 @@ function scoringEventToMatchEvent(input: {
       ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
       ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
       ...segmentRouteInputTags(input.segment.segmentRouteInput),
+      ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
     ],
     narrativeWeight: 70,
   };
@@ -11690,6 +12615,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
       return "training_recommendation";
   }
 }
@@ -11724,6 +12650,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Selection controlee de segment workbench experimentale";
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
       return "Input de route segmentaire workbench experimental";
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+      return "Source de route controlee mini-match experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -11781,6 +12709,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -11805,6 +12734,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
     "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
     "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -12914,6 +13844,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 48;
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
       return 47;
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+      return 46;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -12958,6 +13890,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la selection controlee de segment workbench experimentale";
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
       return "Relire l'input de route segmentaire workbench experimental";
+    case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+      return "Relire la source de route controlee mini-match experimentale";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -14214,7 +15148,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
   | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
-  | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT";
+  | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
+  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -14440,6 +15375,31 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotOverride: [
       "live score",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
+    canProve: [
+      "experimental segment route input was exposed as a controlled mini-match route source",
+      "controlled mini-match route source rejected closed and unavailable candidates",
+      "controlled mini-match route source remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "live mini-match route resolution",
       "production route resolution",
       "production route selection",
       "full-match batch economy",

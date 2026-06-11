@@ -146,10 +146,14 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3d.md"));
   const fullMatchWorkbenchChainReplay3E = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3e.md"));
   const fullMatchWorkbenchChainReplay3EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3e.md"));
+  const fullMatchWorkbenchChainReplay3F = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3f.md"));
+  const fullMatchWorkbenchChainReplay3FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3f.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
   const coachHtml = readIfExists(join(shareDirectory, "coach-report.latest.html"));
+  const coachDefaultHtml = readIfExists(join(shareDirectory, "coach-report.default.html"));
+  const coachExperimentalHtml = readIfExists(join(shareDirectory, "coach-report.experimental.html"));
   const bundleContracts = readIfExists(join(shareDirectory, "bundle__contracts.md"));
   const bundleSimulation = readIfExists(join(shareDirectory, "bundle__simulation.md"));
   const bundleReports = readIfExists(join(shareDirectory, "bundle__reports.md"));
@@ -1776,6 +1780,90 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3FExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3f.md",
+    "validation.fullmatch-workbench-chain-replay-3f.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3FForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3e.md",
+    "validation.fullmatch-workbench-chain-replay-3e.md",
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+  ];
+  const sprint3FChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3F", activeConfig.sprintName === "Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 18", allowlistedFiles.length === 18, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3FForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3FForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3FExpectedFiles.every((file) => requiredCopied(file)), sprint3FExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3F", manifest.includes("Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source") && detailedManifest.includes("Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source"), "Sprint 3F visible"),
+    check("README is Sprint 3F oriented", readme.includes("# Sprint 3F Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3f.md"), "README current"),
+    check("default and experimental coach reports copied", (coachDefaultHtml.includes("<!doctype html>") || coachDefaultHtml.includes("<html")) && (coachExperimentalHtml.includes("<!doctype html>") || coachExperimentalHtml.includes("<html")), "coach HTML variants copied"),
+    check("3F report included", fullMatchWorkbenchChainReplay3F.includes("# FullMatch Workbench Chain Replay 3F") && fullMatchWorkbenchChainReplay3F.includes("experimental controlled mini-match route source status: available"), "3F doc included"),
+    check("3F validation is PASS", fullMatchWorkbenchChainReplay3FValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled mini-match route source status is available"), "3F validation PASS"),
+    check("controlled route source origin visible", fullMatchWorkbenchChainReplay3F.includes("controlled mini-match route source origin: segment_route_input") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled mini-match route source origin is segment_route_input"), "origin visible"),
+    check("controlled route source candidate visible", fullMatchWorkbenchChainReplay3F.includes("controlled route source candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source candidate is chain-context-forward-progress-sh"), "candidate visible"),
+    check("controlled route source action visible", fullMatchWorkbenchChainReplay3F.includes("controlled route source action: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source action is FORWARD_PROGRESS"), "action visible"),
+    check("controlled route source receiver and zone visible", fullMatchWorkbenchChainReplay3F.includes("controlled route source receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3F.includes("controlled route source target zone: Z4-HSR"), "receiver/zone visible"),
+    check("controlled route source source scores visible", fullMatchWorkbenchChainReplay3F.includes("controlled route source source base score: 82") && fullMatchWorkbenchChainReplay3F.includes("controlled route source source influence delta: 5") && fullMatchWorkbenchChainReplay3F.includes("controlled route source source influenced score: 87"), "source scores visible"),
+    check("controlled route source contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchControlledMiniMatchRouteSource.ts") && bundleSimulation.includes("FullMatchControlledMiniMatchRouteSource"), "3F contract bundled"),
+    check("controlled route source converter bundled", bundleSimulation.includes("src/simulation/fullMatch/controlledMiniMatchRouteSourceFromSegmentRouteInput.ts") && bundleSimulation.includes("controlledMiniMatchRouteSourceFromSegmentRouteInput"), "3F converter bundled"),
+    check("controlled route source signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchControlledMiniMatchRouteSourceSignature.ts") && bundleSimulation.includes("FullMatchControlledMiniMatchRouteSourceSignature"), "3F signature bundled"),
+    check("controlled route source tests bundled", bundleSimulation.includes("fullMatchControlledMiniMatchRouteSource.test.ts") && bundleSimulation.includes("fullMatchControlledMiniMatchRouteSourceGuard.test.ts"), "3F route source tests bundled"),
+    check("3F runFullMatch controlled route source tests bundled", bundleSimulation.includes("runFullMatchExperimentalControlledMiniMatchRouteSource.test.ts") && bundleSimulation.includes("runFullMatchControlledMiniMatchRouteSourceScoringGuard.test.ts"), "3F full-match tests bundled"),
+    check("3F scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3f.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3f.test.ts"), "3F guards bundled"),
+    check("controlled route source evidence included", fullMatchWorkbenchChainReplay3F.includes("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE") && bundleSimulation.includes("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"), "3F evidence visible"),
+    check("closed candidates remain rejected", fullMatchWorkbenchChainReplay3F.includes("controlled route source rejected closed candidate count: 1") && fullMatchWorkbenchChainReplay3FValidation.includes("CLOSED candidates remain unselectable"), "closed route rejected"),
+    check("unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3F.includes("controlled route source rejected unavailable candidate count: 1") && fullMatchWorkbenchChainReplay3FValidation.includes("unavailable candidates remain unselectable"), "unavailable route rejected"),
+    check("controlled route source candidate legal and available", fullMatchWorkbenchChainReplay3F.includes("controlled route source candidate legal: true") && fullMatchWorkbenchChainReplay3F.includes("controlled route source candidate available: true"), "candidate valid"),
+    check("default controlled route source absent", fullMatchWorkbenchChainReplay3F.includes("default controlled mini-match route source tag count: 0"), "default route source clean"),
+    check("experimental controlled route source present", fullMatchWorkbenchChainReplay3F.includes("experimental controlled mini-match route source tag count: greater than 0"), "experimental route source visible"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3F.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3FValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("controlled route source cannot mutate score", fullMatchWorkbenchChainReplay3F.includes("controlled route source can mutate score: false") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source cannot mutate score"), "score mutation forbidden"),
+    check("controlled route source cannot mutate scoring events", fullMatchWorkbenchChainReplay3F.includes("controlled route source can mutate scoring events: false") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("controlled route source cannot mutate route success rates", fullMatchWorkbenchChainReplay3F.includes("controlled route source can mutate route success rates: false") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source cannot mutate route success rates"), "route success mutation forbidden"),
+    check("controlled route source cannot drive production full-match", fullMatchWorkbenchChainReplay3F.includes("controlled route source can drive production full-match selection: false") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source cannot drive production full-match selection"), "production full-match forbidden"),
+    check("controlled route source cannot drive production route resolution", fullMatchWorkbenchChainReplay3F.includes("controlled route source can drive production route resolution: false") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source cannot drive production route resolution"), "production route forbidden"),
+    check("controlled route source cannot drive live mini-match resolution", fullMatchWorkbenchChainReplay3F.includes("controlled route source can drive live mini-match resolution: false") && fullMatchWorkbenchChainReplay3FValidation.includes("controlled route source cannot drive live mini-match resolution"), "live mini-match forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3FValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3FValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3FValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3F.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3F.includes("CONFIRM_SEGMENT_ROUTE_INPUT_TO_CONTROLLED_MINIMATCH_ROUTE_SOURCE") && fullMatchWorkbenchChainReplay3F.includes("CONFIRM_CONTROLLED_ROUTE_SOURCE_DOES_NOT_DRIVE_LIVE_MINIMATCH_RESOLUTION") && fullMatchWorkbenchChainReplay3F.includes("PREPARE_CONTROLLED_MINIMATCH_ROUTE_SOURCE_TO_LIVE_ROUTE_SELECTION_GUARDS"), "3F recommendations visible"),
+  ];
+
   const sprint3EExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2686,6 +2774,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source")
+      ? sprint3FChecks
     : activeConfig.sprintName.includes("Sprint 3E - Controlled Segment Selection to Segment Route Input")
       ? sprint3EChecks
     : activeConfig.sprintName.includes("Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection")

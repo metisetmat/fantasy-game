@@ -1,8 +1,8 @@
 # Share Pack
 
-Generated: 2026-06-11T14:16:22.457Z
-Task/sprint: Sprint 3E - Controlled Segment Selection to Segment Route Input
-Final file count: 16
+Generated: 2026-06-11T14:56:03.536Z
+Task/sprint: Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source
+Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
 
@@ -10,13 +10,15 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - package.json
 - tsconfig.json
 - coach-report.latest.html
+- coach-report.default.html
+- coach-report.experimental.html
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3e.md
-- validation.fullmatch-workbench-chain-replay-3e.md
+- fullmatch-workbench-chain-replay-3f.md
+- validation.fullmatch-workbench-chain-replay-3f.md
 - README.md
 
 ## Bundle Files
