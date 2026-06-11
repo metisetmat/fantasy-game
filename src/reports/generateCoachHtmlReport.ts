@@ -5,23 +5,38 @@ import { runFullMatch } from "../simulation/runFullMatch";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 
 function writeLatestCoachReport(): void {
-  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
   const reportsDirectory = join(process.cwd(), "reports");
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
     join(reportsDirectory, "match-report.latest.json"),
-    `${JSON.stringify(report, null, 2)}\n`,
+    `${JSON.stringify(defaultReport, null, 2)}\n`,
     "utf8",
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.latest.html"),
-    renderHtmlCoachReport(report),
+    renderHtmlCoachReport(defaultReport),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "coach-report.default.html"),
+    renderHtmlCoachReport(defaultReport),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "coach-report.experimental.html"),
+    renderHtmlCoachReport(experimentalReport),
     "utf8",
   );
 
   console.log("Generated reports/match-report.latest.json");
   console.log("Generated reports/coach-report.latest.html");
+  console.log("Generated reports/coach-report.default.html");
+  console.log("Generated reports/coach-report.experimental.html");
 }
 
 if (require.main === module) {

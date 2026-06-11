@@ -60,6 +60,8 @@ import { controlledSegmentSelectionFromShadow } from "./fullMatch/controlledSegm
 import type { FullMatchControlledSegmentSelectionResult } from "./fullMatch/fullMatchControlledSegmentSelection";
 import { segmentRouteInputFromControlledSelection } from "./fullMatch/segmentRouteInputFromControlledSelection";
 import type { FullMatchSegmentRouteInput } from "./fullMatch/fullMatchSegmentRouteInput";
+import { controlledMiniMatchRouteSourceFromSegmentRouteInput } from "./fullMatch/controlledMiniMatchRouteSourceFromSegmentRouteInput";
+import type { FullMatchControlledMiniMatchRouteSource } from "./fullMatch/fullMatchControlledMiniMatchRouteSource";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -397,6 +399,25 @@ function segmentRouteInputLimitations(input: FullMatchSegmentRouteInput): readon
     "FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
     "FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
     "FULLMATCH_SEGMENT_ROUTE_INPUT_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function controlledMiniMatchRouteSourceLimitations(source: FullMatchControlledMiniMatchRouteSource): readonly string[] {
+  if (source.status === "not_available") {
+    return ["FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_EXPERIMENTAL",
+    `FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_STATUS_${source.status.toUpperCase()}`,
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_DRIVE_LIVE_MINIMATCH_RESOLUTION",
+    "FULLMATCH_CONTROLLED_MINIMATCH_ROUTE_SOURCE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -746,6 +767,75 @@ function segmentRouteInputEvidenceFact(input: {
   };
 }
 
+function controlledMiniMatchRouteSourceEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly routeSource: FullMatchControlledMiniMatchRouteSource;
+}): MatchReportEvidenceFact | null {
+  if (input.routeSource.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_controlled_minimatch_route_source")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-controlled-minimatch-route-source`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.routeSource.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental controlled mini-match route source ${input.routeSource.status}: origin ${input.routeSource.origin}, ` +
+      `candidate ${input.routeSource.candidateId ?? "none"} (${input.routeSource.actionType ?? "none"}) ` +
+      `to receiver ${input.routeSource.receiverId ?? "none"} in ${input.routeSource.targetZone ?? "none"}, ` +
+      `sourceBaseScore=${input.routeSource.sourceBaseScore ?? 0}, sourceInfluenceDelta=${input.routeSource.sourceInfluenceDelta ?? 0}, ` +
+      `sourceInfluencedScore=${input.routeSource.sourceInfluencedScore ?? 0}, candidateLegal=${input.routeSource.candidateLegal}, ` +
+      `candidateAvailable=${input.routeSource.candidateAvailable}, closedRejected=${input.routeSource.rejectedClosedCandidateCount}, ` +
+      `unavailableRejected=${input.routeSource.rejectedUnavailableCandidateCount}, diagnosticOnly=${input.routeSource.diagnosticOnly}, ` +
+      `experimentalControlledRouteSource=${input.routeSource.experimentalControlledRouteSource}, canMutateScore=${input.routeSource.canMutateScore}, ` +
+      `canMutateScoringEvents=${input.routeSource.canMutateScoringEvents}, canMutateRouteSuccessRates=${input.routeSource.canMutateRouteSuccessRates}, ` +
+      `canDriveProductionFullMatchSelection=${input.routeSource.canDriveProductionFullMatchSelection}, ` +
+      `canDriveProductionRouteResolution=${input.routeSource.canDriveProductionRouteResolution}, ` +
+      `canDriveLiveMiniMatchResolution=${input.routeSource.canDriveLiveMiniMatchResolution}.`,
+    confidence: input.routeSource.status === "available" ? "medium" : "low",
+    strength: input.routeSource.status === "available" ? 68 : 25,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_controlled_minimatch_route_source",
+      "controlled_minimatch_route_source_experimental",
+      "controlled_minimatch_route_source_diagnostic_only",
+      "controlled_minimatch_route_source_score_mutation_forbidden",
+      "controlled_minimatch_route_source_scoring_events_mutation_forbidden",
+      "controlled_minimatch_route_source_route_success_mutation_forbidden",
+      "controlled_minimatch_route_source_production_fullmatch_forbidden",
+      "controlled_minimatch_route_source_production_resolution_forbidden",
+      "controlled_minimatch_route_source_live_resolution_forbidden",
+      "controlled_minimatch_route_source_closed_candidates_rejected",
+      "controlled_minimatch_route_source_unavailable_candidates_rejected",
+      ...(input.routeSource.chainId === undefined ? [] : [`controlled_minimatch_route_source_chain_id_${input.routeSource.chainId}`]),
+      ...(input.routeSource.candidateId === undefined ? [] : [`controlled_minimatch_route_source_candidate_${input.routeSource.candidateId}`]),
+      ...(input.routeSource.actionType === undefined ? [] : [`controlled_minimatch_route_source_action_${input.routeSource.actionType}`]),
+      ...(input.routeSource.receiverId === undefined ? [] : [`controlled_minimatch_route_source_receiver_${input.routeSource.receiverId}`]),
+      ...(input.routeSource.targetZone === undefined ? [] : [`controlled_minimatch_route_source_zone_${input.routeSource.targetZone}`]),
+      `controlled_minimatch_route_source_candidate_legal_${input.routeSource.candidateLegal ? "true" : "false"}`,
+      `controlled_minimatch_route_source_candidate_available_${input.routeSource.candidateAvailable ? "true" : "false"}`,
+      `controlled_minimatch_route_source_closed_rejected_count_${input.routeSource.rejectedClosedCandidateCount}`,
+      `controlled_minimatch_route_source_unavailable_rejected_count_${input.routeSource.rejectedUnavailableCandidateCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      "route_success_mutation_count_0",
+      "production_route_resolution_mutation_count_0",
+      "live_minimatch_resolution_mutation_count_0",
+      ...input.routeSource.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -755,6 +845,7 @@ function withFullMatchGroundingDiagnosis(
   shadowRouteSelection: FullMatchShadowRouteSelectionResult,
   controlledSegmentSelection: FullMatchControlledSegmentSelectionResult,
   segmentRouteInput: FullMatchSegmentRouteInput,
+  controlledMiniMatchRouteSource: FullMatchControlledMiniMatchRouteSource,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -764,12 +855,13 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_route_candidate_influence") ||
     fact.internalTags.includes("workbench_chain_shadow_route_selection") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_selection") ||
-    fact.internalTags.includes("workbench_chain_segment_route_input")
+    fact.internalTags.includes("workbench_chain_segment_route_input") ||
+    fact.internalTags.includes("workbench_chain_controlled_minimatch_route_source")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis le moteur dispose maintenant d'un input de route experimental pour le premier segment : ${segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cet input vient de la selection controlee issue de la shadow selection, mais il reste cantonne au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution reelle du full-match, le score, les evenements de score, ni les taux de succes des routes. Les routes fermees ou indisponibles restent rejetees avant la creation de cet input. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match experimental sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cette source vient du SegmentRouteInput, lui-meme issu de la selection controlee workbench. Elle reste cantonnee au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution live du mini-match, le score, les evenements de score, ni les taux de succes des routes ; elle ne pilote pas encore la resolution reelle du full-match. Les routes fermees ou indisponibles restent rejetees avant la creation de cette source controlee. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -829,6 +921,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const segmentRouteInput = segmentRouteInputFromControlledSelection({
     controlledSelection: controlledSegmentSelection,
   });
+  const controlledMiniMatchRouteSource = controlledMiniMatchRouteSourceFromSegmentRouteInput({
+    segmentRouteInput,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -872,6 +967,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && shadowRouteSelection.status !== "not_available" ? { shadowRouteSelection } : {}),
           ...(index === 0 && controlledSegmentSelection.status !== "not_available" ? { controlledSegmentSelection } : {}),
           ...(index === 0 && segmentRouteInput.status !== "not_available" ? { segmentRouteInput } : {}),
+          ...(index === 0 && controlledMiniMatchRouteSource.status !== "not_available" ? { controlledMiniMatchRouteSource } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -944,6 +1040,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...shadowRouteSelectionLimitations(shadowRouteSelection),
       ...controlledSegmentSelectionLimitations(controlledSegmentSelection),
       ...segmentRouteInputLimitations(segmentRouteInput),
+      ...controlledMiniMatchRouteSourceLimitations(controlledMiniMatchRouteSource),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -976,6 +1073,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     routeInput: segmentRouteInput,
   });
+  const controlledRouteSourceFact = controlledMiniMatchRouteSourceEvidenceFact({
+    report,
+    matchInput: input,
+    routeSource: controlledMiniMatchRouteSource,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -983,6 +1085,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(shadowSelectionFact === null ? [] : [shadowSelectionFact]),
     ...(controlledSelectionFact === null ? [] : [controlledSelectionFact]),
     ...(segmentRouteInputFact === null ? [] : [segmentRouteInputFact]),
+    ...(controlledRouteSourceFact === null ? [] : [controlledRouteSourceFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1000,5 +1103,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     shadowRouteSelection,
     controlledSegmentSelection,
     segmentRouteInput,
+    controlledMiniMatchRouteSource,
   );
 }
