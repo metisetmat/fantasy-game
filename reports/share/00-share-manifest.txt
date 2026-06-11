@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-11T06:53:02.518Z
+Generated timestamp: 2026-06-11T07:10:28.721Z
 Task/sprint name: Sprint 2U - Selection-Driving Attribute Ranking
 Final file count: 14
 
@@ -119,25 +119,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M package.json
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidenceBuilder.ts
- M src/simulation/diagnostics/fullMatchGroundingDiagnostics.test.ts
- M src/simulation/diagnostics/fullMatchGroundingDiagnostics.ts
- M src/simulation/grounding/rosterToMiniMatchGapAnalysis.test.ts
- M src/simulation/grounding/rosterToMiniMatchGapAnalysis.ts
- M src/simulation/grounding/runWorkbenchReplaySeed.ts
- M src/simulation/grounding/workbenchReplaySeed.test.ts
- M src/simulation/miniMatch/createMiniMatchContext.ts
- M src/simulation/miniMatch/miniMatchSegmentInfluence.test.ts
- M src/simulation/miniMatch/selectInitialSequenceContext.ts
- M src/simulation/miniMatch/types.ts
- M src/simulation/routeRanking/applySpatialAttributeInfluenceToCandidates.ts
- M src/simulation/routeRanking/index.ts
- M src/simulation/routeRanking/routeAttributeInfluenceTypes.ts
-?? src/simulation/routeRanking/attributeDrivenSelectionGuard.test.ts
-?? src/simulation/routeRanking/attributeDrivenSelectionGuard.ts
-?? src/simulation/routeRanking/fixtures/
-?? src/simulation/routeRanking/routeRankingMode.ts
-?? src/simulation/routeRanking/selectAttributeAdjustedCandidate.test.ts
-?? src/simulation/routeRanking/selectAttributeAdjustedCandidate.ts
+ M src/simulation/routeRanking/attributeDrivenSelectionGuard.test.ts
+ M src/simulation/routeRanking/attributeDrivenSelectionGuard.ts

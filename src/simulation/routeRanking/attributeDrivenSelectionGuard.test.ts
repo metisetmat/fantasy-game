@@ -1,5 +1,7 @@
 import { applySpatialAttributeInfluenceToCandidates } from "./applySpatialAttributeInfluenceToCandidates";
 import { guardAttributeDrivenSelection } from "./attributeDrivenSelectionGuard";
+import type { TacticalWorkbenchFrame } from "../grounding/tacticalWorkbenchTypes";
+import type { RouteCandidateAttributeContext } from "./routeAttributeInfluenceTypes";
 import {
   attributeRankingContrastSpatialContext,
   closedLaneContrastCandidates,
@@ -29,6 +31,7 @@ export function validateAttributeDrivenSelectionGuard(): readonly string[] {
   const legalWeakSide = legalCandidates.find((candidate) => candidate.candidateId === "elite-weak-side");
   const closedWeakSide = closedCandidates.find((candidate) => candidate.candidateId === "elite-weak-side");
   const unavailableWeakSide = unavailableCandidates.find((candidate) => candidate.candidateId === "elite-weak-side");
+  const safeRecycle = legalCandidates.find((candidate) => candidate.candidateId === "safe-recycle");
   const missingActor = legalCandidates[0] === undefined
     ? undefined
     : {
@@ -37,10 +40,52 @@ export function validateAttributeDrivenSelectionGuard(): readonly string[] {
       };
 
   assertTest(legalWeakSide !== undefined, "contrast fixture must include legal weak-side candidate.");
+  assertTest(safeRecycle !== undefined, "contrast fixture must include safe recycle candidate.");
   assertTest(closedWeakSide !== undefined, "contrast fixture must include closed weak-side candidate.");
   assertTest(unavailableWeakSide !== undefined, "contrast fixture must include unavailable weak-side candidate.");
 
-  if (legalWeakSide !== undefined && closedWeakSide !== undefined && unavailableWeakSide !== undefined) {
+  if (legalWeakSide !== undefined && closedWeakSide !== undefined && unavailableWeakSide !== undefined && safeRecycle !== undefined) {
+    const shotTargetZone = "Z5-C";
+    const wrongTargetZone = "Z4-HSL";
+    const { receiverId: _safeRecycleReceiverId, ...safeRecycleWithoutReceiver } = safeRecycle;
+    const receiverlessWorkbench: TacticalWorkbenchFrame = {
+      frameId: "receiverless-workbench",
+      sequenceId: "test-sequence",
+      actionId: "test-action",
+      phase: "finishing",
+      possessionTeamId: legalWeakSide.teamId,
+      defendingTeamId: "BLITZ",
+      ballCarrierId: legalWeakSide.actorId,
+      ballZone: legalWeakSide.fromZone,
+      attackingDirection: "left-to-right",
+      playerPositions: [],
+      teamShapeIntents: [],
+      selectedAction: {
+        actorId: legalWeakSide.actorId,
+        fromZone: legalWeakSide.fromZone,
+        targetZone: shotTargetZone,
+        actionType: "SHOT",
+      },
+      rankedOptions: [],
+    };
+    const receiverlessMatchingCandidate: RouteCandidateAttributeContext = {
+      ...safeRecycleWithoutReceiver,
+      candidateId: "receiverless-shot-truth",
+      actorId: legalWeakSide.actorId,
+      fromZone: legalWeakSide.fromZone,
+      targetZone: shotTargetZone,
+      actionType: "SHOT",
+    };
+    const receiverlessWrongReceiverCandidate: RouteCandidateAttributeContext = {
+      ...receiverlessMatchingCandidate,
+      candidateId: "receiverless-shot-wrong-receiver",
+      receiverId: "control-hook-link",
+    };
+    const receiverlessWrongTargetCandidate: RouteCandidateAttributeContext = {
+      ...receiverlessMatchingCandidate,
+      candidateId: "receiverless-shot-wrong-target",
+      targetZone: wrongTargetZone,
+    };
     const legalGuard = guardAttributeDrivenSelection({
       candidate: legalWeakSide,
       spatialContext: attributeRankingContrastSpatialContext,
@@ -68,6 +113,27 @@ export function validateAttributeDrivenSelectionGuard(): readonly string[] {
           baseSelectedCandidateId: "safe-recycle",
           maxAttributeAdjustment: 12,
         });
+    const receiverlessMatchGuard = guardAttributeDrivenSelection({
+      candidate: receiverlessMatchingCandidate,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      workbench: receiverlessWorkbench,
+      maxAttributeAdjustment: 12,
+    });
+    const receiverlessWrongReceiverGuard = guardAttributeDrivenSelection({
+      candidate: receiverlessWrongReceiverCandidate,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      workbench: receiverlessWorkbench,
+      maxAttributeAdjustment: 12,
+    });
+    const receiverlessWrongTargetGuard = guardAttributeDrivenSelection({
+      candidate: receiverlessWrongTargetCandidate,
+      spatialContext: attributeRankingContrastSpatialContext,
+      baseSelectedCandidateId: "safe-recycle",
+      workbench: receiverlessWorkbench,
+      maxAttributeAdjustment: 12,
+    });
 
     assertTest(legalGuard.valid, "legal adjusted candidate must pass guard.");
     assertTest(
@@ -82,6 +148,15 @@ export function validateAttributeDrivenSelectionGuard(): readonly string[] {
       missingActorGuard.blockedReasons.includes("MISSING_ACTOR_IN_SPATIAL_CONTEXT"),
       "missing actor must block selection flip.",
     );
+    assertTest(receiverlessMatchGuard.valid, "receiverless workbench truth candidate must pass exact guard.");
+    assertTest(
+      receiverlessWrongReceiverGuard.blockedReasons.includes("WORKBENCH_TRUTH_VIOLATION"),
+      "receiverless workbench action must reject candidates that add a receiver.",
+    );
+    assertTest(
+      receiverlessWrongTargetGuard.blockedReasons.includes("WORKBENCH_TRUTH_VIOLATION"),
+      "receiverless workbench action must reject candidates with a different target zone.",
+    );
   }
 
   return [
@@ -89,6 +164,7 @@ export function validateAttributeDrivenSelectionGuard(): readonly string[] {
     "closed lane cannot be overridden by attributes",
     "NOT_AVAILABLE_NOW cannot become selected by attributes",
     "missing actor blocks attribute-driven selection",
+    "receiverless workbench truth requires exact receiver and target identity",
   ];
 }
 

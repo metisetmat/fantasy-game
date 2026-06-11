@@ -27,7 +27,9 @@ function matchesWorkbenchTruth(
   return (
     candidate.actorId === workbench.selectedAction.actorId &&
     candidate.actionType === workbench.selectedAction.actionType &&
-    (workbench.selectedAction.receiverId === undefined || candidate.receiverId === workbench.selectedAction.receiverId)
+    candidate.receiverId === workbench.selectedAction.receiverId &&
+    candidate.fromZone === workbench.selectedAction.fromZone &&
+    candidate.targetZone === workbench.selectedAction.targetZone
   );
 }
 
