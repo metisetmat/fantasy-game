@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 2W - FullMatch Workbench Chain Replay",
+  name: "Sprint 2X - Multi-Action Workbench Chain + Experimental FullMatch Feature Flag Skeleton",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -10,8 +10,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "scoring-events-summary.md",
     "sequence-1-action-1.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay.md",
-    "validation.fullmatch-workbench-chain-replay.md",
+    "fullmatch-workbench-chain-replay-2x.md",
+    "validation.fullmatch-workbench-chain-replay-2x.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -22,19 +22,19 @@ export const currentSprint: CurrentSharePackConfig = {
   optionalFiles: [],
   excludedByDefault: [],
   fileReasons: {
-    "package.json": "records npm scripts and WorkbenchChain replay test wiring",
+    "package.json": "records npm scripts and multi-action WorkbenchChain replay test wiring",
     "tsconfig.json": "records the TypeScript compiler setup for route ranking work",
     "coach-report.latest.html": "latest generated coach HTML sample with controlled chain replay grounding evidence",
     "scoring-events-summary.md": "live scoring summary proving scoring values and score events remain intact",
     "sequence-1-action-1.html": "first-class workbench artifact used as tactical truth fixture and replay seed",
-    "validation.share-pack.md": "proves the 2W share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay.md": "documents WorkbenchChain contract, state propagation, controlled mini-match chain replay, and normal full-match limitation",
-    "validation.fullmatch-workbench-chain-replay.md": "validates chain state propagation, replay modes, fallback, guardrails, and source-of-truth invariants",
-    "README.md": "compact reviewer orientation for the 2W share pack",
-    "manifest.md": "compatibility manifest listing the 2W share pack files",
+    "validation.share-pack.md": "proves the 2X share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-2x.md": "documents multi-action WorkbenchChain replay, synthetic continuation status, and disabled full-match flag skeleton",
+    "validation.fullmatch-workbench-chain-replay-2x.md": "validates multi-step propagation, replay modes, fallback, feature flag default, and source-of-truth invariants",
+    "README.md": "compact reviewer orientation for the 2X share pack",
+    "manifest.md": "compatibility manifest listing the 2X share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles WorkbenchChain contracts/replay/tests, mini-match spatial route selection, prototype mapping, route ranking influence, replay seed, grounding diagnostics, and tests",
+    "bundle__simulation.md": "bundles multi-action WorkbenchChain fixtures/replay/tests, full-match feature flag skeleton, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
     "bundle__reports.md": "bundles coach report renderer, summary utilities, copy quality utilities, guards, and share-pack updater",
   },
 };

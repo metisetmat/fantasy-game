@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T09:22:44.471Z
-Task/sprint: Sprint 2W - FullMatch Workbench Chain Replay
+Generated: 2026-06-11T09:42:59.731Z
+Task/sprint: Sprint 2X - Multi-Action Workbench Chain + Experimental FullMatch Feature Flag Skeleton
 Final file count: 14
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -13,8 +13,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay.md
-- validation.fullmatch-workbench-chain-replay.md
+- fullmatch-workbench-chain-replay-2x.md
+- validation.fullmatch-workbench-chain-replay-2x.md
 - README.md
 
 ## Bundle Files

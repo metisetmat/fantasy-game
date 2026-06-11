@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 2W - FullMatch Workbench Chain Replay. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2X - Multi-Action Workbench Chain + Experimental FullMatch Feature Flag Skeleton. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -133,6 +133,11 @@ import {
   createFullMatchSegmentInfluence,
   type FullMatchSegmentInfluence,
 } from "./fullMatch/fullMatchSegmentInfluence";
+import {
+  fullMatchRouteSelectionModeDiagnostics,
+  resolveFullMatchRouteSelectionMode,
+  type FullMatchOptions,
+} from "./fullMatch/fullMatchRouteSelectionMode";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -409,7 +414,8 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
   };
 }
 
-export function runFullMatch(input: MatchInput): MatchReport {
+export function runFullMatch(input: MatchInput, options?: FullMatchOptions): MatchReport {
+  const routeSelectionMode = resolveFullMatchRouteSelectionMode(options);
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -512,6 +518,8 @@ export function runFullMatch(input: MatchInput): MatchReport {
     limitations: [
       "runFullMatch is a deterministic harness sample and cannot invalidate the 50-match economy.",
       "Harness warnings are warning-only and may not change scoring values.",
+      `Full-match route selection mode: ${routeSelectionMode}.`,
+      ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
     ],
   });
 
@@ -914,9 +922,21 @@ import type { TacticalWorkbenchFrame } from "./tacticalWorkbenchTypes";
 
 export type WorkbenchChainId = string;
 
+export type WorkbenchChainSource =
+  | "visual_workbench_truth"
+  | "synthetic_continuation"
+  | "hybrid_chain";
+
+export type WorkbenchChainStepSource = {
+  readonly source: WorkbenchChainSource;
+  readonly sourceArtifactId?: string;
+  readonly sourceNote: string;
+};
+
 export type WorkbenchChainStep = {
   readonly stepIndex: number;
   readonly frame: TacticalWorkbenchFrame;
+  readonly stepSource: WorkbenchChainStepSource;
   readonly expectedActorId: string;
   readonly expectedReceiverId?: string;
   readonly expectedNewCarrierId?: string;
@@ -962,6 +982,11 @@ export const sequence1Action1Chain: WorkbenchChain = {
     {
       stepIndex: 0,
       frame: sequence1Action1WorkbenchTruth,
+      stepSource: {
+        source: "visual_workbench_truth",
+        sourceArtifactId: "reports/workbench/sequence-1-action-1.html",
+        sourceNote: "Backed by the Sequence 1 Action 1 visual workbench artifact.",
+      },
       expectedActorId: "control-tempo-half",
       expectedReceiverId: "control-mobile-lock",
       expectedNewCarrierId: "control-mobile-lock",
@@ -979,13 +1004,232 @@ export const sequence1Action1Chain: WorkbenchChain = {
 // - full opening possession chain
 ```
 
+## File: src/simulation/grounding/fixtures/sequence1MultiAction.chain.fixture.ts
+
+```ts
+import type { TacticalWorkbenchFrame, TacticalWorkbenchPlayerPosition, TacticalWorkbenchRankedOption } from "../tacticalWorkbenchTypes";
+import type { WorkbenchChain, WorkbenchChainStepSource } from "../workbenchChainTypes";
+import { sequence1Action1Chain } from "./sequence1Action1.chain.fixture";
+import { sequence1Action1AfterPositions, sequence1Action1WorkbenchTruth } from "./sequence1Action1.fixture";
+
+function withCarrier(
+  positions: readonly TacticalWorkbenchPlayerPosition[],
+  carrierId: string,
+  carrierZone: string,
+): readonly TacticalWorkbenchPlayerPosition[] {
+  return positions.map((position) => ({
+    ...position,
+    realZone: position.playerId === carrierId ? carrierZone : position.realZone,
+    ...(position.playerId === carrierId
+      ? { projectedZone: carrierZone }
+      : position.projectedZone === undefined ? {} : { projectedZone: position.projectedZone }),
+    ...(position.playerId === carrierId ? { isBallCarrier: true } : {}),
+    ...(position.playerId !== carrierId && position.isBallCarrier ? { isBallCarrier: false } : {}),
+  }));
+}
+
+function selectedOption(input: {
+  readonly actionType: string;
+  readonly receiverId: string;
+  readonly targetZone: string;
+  readonly score: number;
+}): TacticalWorkbenchRankedOption {
+  return {
+    rank: 1,
+    actionType: input.actionType,
+    receiverId: input.receiverId,
+    targetZone: input.targetZone,
+    laneState: "CONTESTED",
+    risk: "LOW",
+    score: input.score,
+    finalSelectionScore: input.score,
+    selected: true,
+  };
+}
+
+const syntheticSource = (note: string): WorkbenchChainStepSource => ({
+  source: "synthetic_continuation",
+  sourceNote: note,
+});
+
+const step1Before = withCarrier(sequence1Action1AfterPositions, "control-mobile-lock", "Z3-HSL");
+const step1After = withCarrier(step1Before, "control-playmaker", "Z3-C");
+const step2Before = step1After;
+const step2After = withCarrier(step2Before, "control-space-hunter", "Z4-HSR");
+const visualStep0 = sequence1Action1Chain.steps[0];
+
+if (visualStep0 === undefined) {
+  throw new Error("sequence1Action1Chain must expose step 0 for the multi-action chain.");
+}
+
+const sequence1Action2SyntheticFrame: TacticalWorkbenchFrame = {
+  ...sequence1Action1WorkbenchTruth,
+  frameId: "sequence-1-action-2-synthetic-continuation",
+  actionId: "action-2-synthetic-continuation",
+  phase: "CONTROLLED_CONTINUATION",
+  ballCarrierId: "control-mobile-lock",
+  ballZone: "Z3-HSL",
+  playerPositions: step1Before,
+  afterPlayerPositions: step1After,
+  teamShapeIntents: [
+    {
+      teamId: "control",
+      frame: "before",
+      intent: "synthetic central reconnection continuation",
+      evidence: ["ML@Z3-HSL", "PM@Z3-C"],
+    },
+    {
+      teamId: "control",
+      frame: "after",
+      intent: "central support restored for next progression",
+      evidence: ["PM@Z3-C"],
+    },
+  ],
+  selectedAction: {
+    actorId: "control-mobile-lock",
+    receiverId: "control-playmaker",
+    newCarrierId: "control-playmaker",
+    fromZone: "Z3-HSL",
+    targetZone: "Z3-C",
+    actualReceptionZone: "Z3-C",
+    actionType: "CENTRAL_RECONNECT",
+    actionSubtype: "SAFE_CONTINUITY",
+    transferType: "PASS",
+    possessionResult: "CONTROL_RETAINED",
+  },
+  rankedOptions: [
+    selectedOption({
+      actionType: "CENTRAL_RECONNECT",
+      receiverId: "control-playmaker",
+      targetZone: "Z3-C",
+      score: 82,
+    }),
+    {
+      rank: 2,
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-forward-leader",
+      targetZone: "Z4-C",
+      laneState: "CONTESTED",
+      risk: "MEDIUM",
+      score: 75,
+      finalSelectionScore: 75,
+      selected: false,
+    },
+  ],
+  afterState: {
+    newCarrierId: "control-playmaker",
+    ballZone: "Z3-C",
+    possessionResult: "CONTROL_RETAINED",
+  },
+};
+
+const sequence1Action3SyntheticFrame: TacticalWorkbenchFrame = {
+  ...sequence1Action1WorkbenchTruth,
+  frameId: "sequence-1-action-3-synthetic-continuation",
+  actionId: "action-3-synthetic-continuation",
+  phase: "STRUCTURE_ADVANCEMENT",
+  ballCarrierId: "control-playmaker",
+  ballZone: "Z3-C",
+  playerPositions: step2Before,
+  afterPlayerPositions: step2After,
+  teamShapeIntents: [
+    {
+      teamId: "control",
+      frame: "before",
+      intent: "synthetic forward support advance",
+      evidence: ["PM@Z3-C", "SH@Z4-HSR"],
+    },
+    {
+      teamId: "control",
+      frame: "after",
+      intent: "advanced receiver prepared on the right half-space",
+      evidence: ["SH@Z4-HSR"],
+    },
+  ],
+  selectedAction: {
+    actorId: "control-playmaker",
+    receiverId: "control-space-hunter",
+    newCarrierId: "control-space-hunter",
+    fromZone: "Z3-C",
+    targetZone: "Z4-HSR",
+    actualReceptionZone: "Z4-HSR",
+    actionType: "FORWARD_PROGRESS",
+    actionSubtype: "SUPPORT_ADVANCE",
+    transferType: "PASS",
+    possessionResult: "CONTROL_RETAINED",
+  },
+  rankedOptions: [
+    selectedOption({
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      score: 84,
+    }),
+    {
+      rank: 2,
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      laneState: "CONTESTED",
+      risk: "LOW",
+      score: 73,
+      finalSelectionScore: 73,
+      selected: false,
+    },
+  ],
+  afterState: {
+    newCarrierId: "control-space-hunter",
+    ballZone: "Z4-HSR",
+    possessionResult: "CONTROL_RETAINED",
+  },
+};
+
+export const sequence1MultiActionChain: WorkbenchChain = {
+  chainId: "sequence-1-multi-action-chain",
+  description: "Hybrid chain: visual sequence-1-action-1 truth followed by synthetic typed continuation steps for central reconnection and forward support advance.",
+  expectedPossessionTeamId: "control",
+  expectedDefendingTeamId: "blitz",
+  initialBallCarrierId: "control-tempo-half",
+  initialBallZone: "Z4-HSL",
+  finalExpectedBallCarrierId: "control-space-hunter",
+  finalExpectedBallZone: "Z4-HSR",
+  steps: [
+    visualStep0,
+    {
+      stepIndex: 1,
+      frame: sequence1Action2SyntheticFrame,
+      stepSource: syntheticSource("Synthetic typed continuation only; not backed by a visual workbench artifact yet."),
+      expectedActorId: "control-mobile-lock",
+      expectedReceiverId: "control-playmaker",
+      expectedNewCarrierId: "control-playmaker",
+      expectedBallZoneBefore: "Z3-HSL",
+      expectedBallZoneAfter: "Z3-C",
+      expectedActionType: "CENTRAL_RECONNECT",
+    },
+    {
+      stepIndex: 2,
+      frame: sequence1Action3SyntheticFrame,
+      stepSource: syntheticSource("Synthetic typed continuation only; future sprint should replace it with a real visual workbench artifact."),
+      expectedActorId: "control-playmaker",
+      expectedReceiverId: "control-space-hunter",
+      expectedNewCarrierId: "control-space-hunter",
+      expectedBallZoneBefore: "Z3-C",
+      expectedBallZoneAfter: "Z4-HSR",
+      expectedActionType: "FORWARD_PROGRESS",
+    },
+  ],
+};
+```
+
 ## File: src/simulation/grounding/fixtures/workbenchChainCatalog.ts
 
 ```ts
 import { sequence1Action1Chain } from "./sequence1Action1.chain.fixture";
+import { sequence1MultiActionChain } from "./sequence1MultiAction.chain.fixture";
 
 export const WORKBENCH_CHAIN_CATALOG = [
   sequence1Action1Chain,
+  sequence1MultiActionChain,
 ] as const;
 
 // Future chain catalog entries:
@@ -1115,6 +1359,10 @@ export type WorkbenchChainReplayResult = {
   readonly chainId: string;
   readonly mode: WorkbenchChainReplayMode;
   readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly totalSteps: number;
+  readonly propagatedStepCount: number;
+  readonly mismatchWarningCount: number;
+  readonly spatialSelectionStepCount: number;
   readonly steps: readonly WorkbenchChainStepReplayResult[];
   readonly finalState: WorkbenchChainRuntimeState;
   readonly prototypeFallbackUsed: boolean;
@@ -1235,6 +1483,10 @@ export function replayWorkbenchChain(input: {
       chainId: input.chain.chainId,
       mode: input.mode,
       status: "PARTIAL",
+      totalSteps: input.chain.steps.length,
+      propagatedStepCount: 0,
+      mismatchWarningCount: 0,
+      spatialSelectionStepCount: 0,
       steps: [],
       finalState: {
         ...initialState,
@@ -1269,12 +1521,20 @@ export function replayWorkbenchChain(input: {
   }
 
   const spatialSelectionUsed = steps.some((step) => step.routeSelectionSource === "spatial_candidate_modifier" && step.guardValid);
+  const spatialSelectionStepCount = steps.filter((step) => step.routeSelectionSource === "spatial_candidate_modifier" && step.guardValid).length;
   const prototypeFallbackUsed = steps.some((step) => step.selectedBy === "prototype" || step.selectedBy === "fallback") || input.mode === "diagnostic_only";
+  const mismatchWarningCount = runtimeState.stateWarnings.filter((warning) =>
+    warning.includes("WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH") || warning.includes("WORKBENCH_CHAIN_BALL_ZONE_MISMATCH")
+  ).length;
 
   return {
     chainId: input.chain.chainId,
     mode: input.mode,
     status: statusFor({ mode: input.mode, steps, finalState: runtimeState }),
+    totalSteps: input.chain.steps.length,
+    propagatedStepCount: steps.filter((step) => step.stateAfter.stepIndex === step.stepIndex + 1).length,
+    mismatchWarningCount,
+    spatialSelectionStepCount,
     steps,
     finalState: runtimeState,
     prototypeFallbackUsed,
@@ -1301,6 +1561,42 @@ export function validateWorkbenchChainScoringConstants(): readonly string[] {
     `CONVERSION_GOAL=${scoringRegistryEntry("CONVERSION_GOAL").points}`,
     `DROP_GOAL=${scoringRegistryEntry("DROP_GOAL").points}`,
     `PENALTY_SHOT_ACTIVE=${scoringRegistryEntry("PENALTY_SHOT").active ? "YES" : "NO"}`,
+  ];
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchRouteSelectionMode.ts
+
+```ts
+export type FullMatchRouteSelectionMode =
+  | "segment_harness"
+  | "workbench_chain_replay_experimental";
+
+export type FullMatchOptions = {
+  readonly routeSelectionMode?: FullMatchRouteSelectionMode;
+};
+
+export const DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE: FullMatchRouteSelectionMode = "segment_harness";
+
+export function resolveFullMatchRouteSelectionMode(
+  options: FullMatchOptions | undefined,
+): FullMatchRouteSelectionMode {
+  return options?.routeSelectionMode ?? DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE;
+}
+
+export function fullMatchRouteSelectionModeDiagnostics(mode: FullMatchRouteSelectionMode): readonly string[] {
+  if (mode === "workbench_chain_replay_experimental") {
+    return [
+      "FULLMATCH_CHAIN_REPLAY_FLAG_AVAILABLE",
+      "FULLMATCH_CHAIN_REPLAY_EXPERIMENTAL_NOT_PRODUCTION_READY",
+      "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+    ];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_REPLAY_FLAG_AVAILABLE",
+    "FULLMATCH_CHAIN_REPLAY_FLAG_DISABLED_BY_DEFAULT",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
 ```
@@ -3600,6 +3896,82 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/grounding/workbenchChainState.multiAction.test.ts
+
+```ts
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
+import { applyWorkbenchChainStep, createInitialWorkbenchChainState } from "./workbenchChainState";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateWorkbenchChainStateMultiAction(): readonly string[] {
+  const initialState = createInitialWorkbenchChainState(sequence1MultiActionChain);
+  const [step0, step1, step2] = sequence1MultiActionChain.steps;
+
+  assertTest(step0 !== undefined && step1 !== undefined && step2 !== undefined, "multi-action chain must contain three steps.");
+  if (step0 === undefined || step1 === undefined || step2 === undefined) {
+    return [];
+  }
+
+  const afterStep0 = applyWorkbenchChainStep({ state: initialState, step: step0 });
+  const afterStep1 = applyWorkbenchChainStep({ state: afterStep0, step: step1 });
+  const afterStep2 = applyWorkbenchChainStep({ state: afterStep1, step: step2 });
+  const mismatchStep1 = applyWorkbenchChainStep({
+    state: {
+      ...afterStep0,
+      ballCarrierId: "control-hook-link",
+      ballZone: "Z4-C",
+    },
+    step: step1,
+  });
+
+  assertTest(sequence1MultiActionChain.steps.length >= 2, "multi-action chain must have at least two steps.");
+  assertTest(afterStep0.ballCarrierId === "control-mobile-lock", "Step 0 must propagate TH -> ML.");
+  assertTest(afterStep0.ballZone === "Z3-HSL", "Step 0 must propagate Z4-HSL -> Z3-HSL.");
+  assertTest(step1.expectedActorId === afterStep0.ballCarrierId, "Step 1 must consume ML from Step 0.");
+  assertTest(step1.expectedBallZoneBefore === afterStep0.ballZone, "Step 1 must consume Step 0 zone.");
+  assertTest(afterStep1.ballCarrierId === "control-playmaker", "Step 1 must propagate ML -> PM.");
+  assertTest(step2.expectedActorId === afterStep1.ballCarrierId, "Step 2 must consume PM from Step 1.");
+  assertTest(step2.expectedBallZoneBefore === afterStep1.ballZone, "Step 2 must consume Step 1 zone.");
+  assertTest(afterStep2.ballCarrierId === sequence1MultiActionChain.finalExpectedBallCarrierId, "final carrier must match chain expectation.");
+  assertTest(afterStep2.ballZone === sequence1MultiActionChain.finalExpectedBallZone, "final zone must match chain expectation.");
+  assertTest(
+    mismatchStep1.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH")),
+    "Step 1 carrier mismatch must create warning.",
+  );
+  assertTest(
+    mismatchStep1.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_BALL_ZONE_MISMATCH")),
+    "Step 1 zone mismatch must create warning.",
+  );
+  assertTest(
+    mismatchStep1.stateWarnings.some((warning) => warning.includes("WORKBENCH_CHAIN_STATE_PROPAGATION_PARTIAL")),
+    "Step 1 mismatch must mark propagation partial.",
+  );
+
+  return [
+    "multi-action chain initializes correctly",
+    "Step 0 propagates TH -> ML",
+    "Step 1 consumes propagated ML state",
+    "Step 2 consumes propagated PM state",
+    "final state matches expected carrier and zone",
+    "Step 1 mismatch creates propagation warnings",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainStateMultiAction();
+
+  console.log("workbenchChainState.multiAction tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/grounding/workbenchChainReplay.test.ts
 
 ```ts
@@ -3700,6 +4072,188 @@ if (require.main === module) {
   const checks = validateWorkbenchChainReplay();
 
   console.log("workbenchChainReplay tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/grounding/workbenchChainReplay.multiAction.test.ts
+
+```ts
+import { runFullMatch } from "../runFullMatch";
+import { createWorkbenchReplayMatchInput } from "./runWorkbenchReplaySeed";
+import { sequence1MultiActionChain } from "./fixtures/sequence1MultiAction.chain.fixture";
+import { sequence1Action1WorkbenchTruth } from "./fixtures/sequence1Action1.fixture";
+import { replayWorkbenchChain } from "./workbenchChainReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoringEventCount(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline.filter((event) => event.eventType === "scoring").length;
+}
+
+export function validateWorkbenchChainReplayMultiAction(): readonly string[] {
+  const matchInput = createWorkbenchReplayMatchInput(sequence1Action1WorkbenchTruth);
+  const diagnostic = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1MultiActionChain,
+    mode: "diagnostic_only",
+  });
+  const controlled = replayWorkbenchChain({
+    matchInput,
+    chain: sequence1MultiActionChain,
+    mode: "controlled_minimatch",
+  });
+  const mismatchChain = {
+    ...sequence1MultiActionChain,
+    chainId: "sequence-1-multi-action-mismatch-chain",
+    steps: sequence1MultiActionChain.steps.map((step) =>
+      step.stepIndex === 1
+        ? { ...step, expectedActorId: "control-hook-link" }
+        : step,
+    ),
+  };
+  const mismatch = replayWorkbenchChain({
+    matchInput,
+    chain: mismatchChain,
+    mode: "diagnostic_only",
+  });
+  const fullMatchBefore = runFullMatch(matchInput);
+  const fullMatchAfter = runFullMatch(matchInput);
+
+  assertTest(diagnostic.totalSteps === sequence1MultiActionChain.steps.length, "diagnostic_only must replay all chain steps.");
+  assertTest(diagnostic.totalSteps >= 2, "multi-action replay must contain at least two steps.");
+  assertTest(diagnostic.propagatedStepCount === diagnostic.totalSteps, "diagnostic_only must propagate every valid step.");
+  assertTest(diagnostic.scoringEventsCreated === 0, "diagnostic_only must create no scoring events.");
+  assertTest(diagnostic.finalState.ballCarrierId === sequence1MultiActionChain.finalExpectedBallCarrierId, "diagnostic replay final carrier must match expectation.");
+  assertTest(diagnostic.finalState.ballZone === sequence1MultiActionChain.finalExpectedBallZone, "diagnostic replay final zone must match expectation.");
+  assertTest(controlled.totalSteps === sequence1MultiActionChain.steps.length, "controlled_minimatch must attempt each chain step.");
+  assertTest(controlled.spatialSelectionStepCount >= 1, "controlled_minimatch must expose spatial_candidate_modifier for at least one step.");
+  assertTest(controlled.spatialSelectionUsed, "controlled_minimatch must use spatial selection.");
+  assertTest(controlled.recommendations.includes("CONFIRM_PROTOTYPE_FALLBACK_STILL_ENABLED"), "prototype fallback must remain visible.");
+  assertTest(diagnostic.finalState.stateWarnings.length === 0, "valid multi-step replay must have no propagation warnings.");
+  assertTest(mismatch.status === "PARTIAL", "mismatch diagnostic replay must return PARTIAL, not PASS.");
+  assertTest(mismatch.mismatchWarningCount > 0, "mismatch replay must count mismatch warnings.");
+  assertTest(scoringEventCount(fullMatchBefore) === scoringEventCount(fullMatchAfter), "mismatch chain replay must not alter scoring events.");
+
+  return [
+    "diagnostic_only replays all multi-action steps",
+    "diagnostic_only creates 0 scoring events",
+    "controlled_minimatch attempts every chain step",
+    "controlled_minimatch exposes spatial_candidate_modifier",
+    "prototype fallback remains visible",
+    "valid multi-step replay has no warnings",
+    "mismatch chain replay returns PARTIAL",
+    "mismatch chain does not alter scoring events",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateWorkbenchChainReplayMultiAction();
+
+  console.log("workbenchChainReplay.multiAction tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/fullMatchRouteSelectionMode.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import {
+  DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE,
+  fullMatchRouteSelectionModeDiagnostics,
+  resolveFullMatchRouteSelectionMode,
+} from "./fullMatchRouteSelectionMode";
+import { assertCanMakeGlobalScoringEconomyClaim } from "../diagnostics/sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreSignature(report: ReturnType<typeof runFullMatch>): string {
+  const scoringEvents = report.timeline.filter((event) => event.eventType === "scoring").length;
+
+  return `${report.score.home}-${report.score.away}:${scoringEvents}`;
+}
+
+function scoreFromConsequences(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+export function validateFullMatchRouteSelectionMode(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+
+  assertTest(DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE === "segment_harness", "default route selection mode must be segment_harness.");
+  assertTest(resolveFullMatchRouteSelectionMode(undefined) === "segment_harness", "missing full-match options must resolve to segment_harness.");
+  assertTest(
+    resolveFullMatchRouteSelectionMode({ routeSelectionMode: "workbench_chain_replay_experimental" }) === "workbench_chain_replay_experimental",
+    "experimental full-match route selection flag must be available.",
+  );
+  assertTest(
+    fullMatchRouteSelectionModeDiagnostics("segment_harness").includes("FULLMATCH_CHAIN_REPLAY_FLAG_DISABLED_BY_DEFAULT"),
+    "default diagnostics must say the chain replay flag is disabled by default.",
+  );
+  assertTest(
+    experimentalReport.reportMeta.limitations.includes("Full-match route selection mode: workbench_chain_replay_experimental."),
+    "experimental report must expose flag mode in limitations.",
+  );
+  assertTest(
+    defaultReport.reportMeta.limitations.includes("Full-match route selection mode: segment_harness."),
+    "default report must expose segment harness mode.",
+  );
+  assertTest(
+    scoreSignature(defaultReport) === scoreSignature(experimentalReport),
+    "experimental flag skeleton must not mutate score or scoring event count.",
+  );
+  assertTest(scoreFromConsequences(defaultReport) === defaultReport.score.home + defaultReport.score.away, "default score must derive from score_change consequences.");
+  assertTest(scoreFromConsequences(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "experimental score must derive from score_change consequences.");
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+
+  try {
+    assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_HARNESS_SINGLE_RUN");
+    throw new Error("FULL_MATCH_HARNESS_SINGLE_RUN must not be global economy proof.");
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), "50-match economy must remain the global reference.");
+  }
+
+  return [
+    "default runFullMatch mode remains segment_harness",
+    "experimental full-match chain replay flag exists",
+    "experimental mode is not default",
+    "experimental flag does not mutate score or scoring events",
+    "score remains derived from score_change consequences",
+    "scoring constants remain unchanged",
+    "50-match economy remains the global reference",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchRouteSelectionMode();
+
+  console.log("fullMatchRouteSelectionMode tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
