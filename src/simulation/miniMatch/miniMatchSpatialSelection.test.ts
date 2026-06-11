@@ -31,7 +31,21 @@ export function validateMiniMatchSpatialSelection(): readonly string[] {
     routeSelectionSource: "spatial_candidate_modifier",
     routeSelectionWorkbench: sequence1Action1WorkbenchTruth,
   });
+  const stalePossessionContext = {
+    ...replaySpatialContext,
+    possessionTeamId: replaySpatialContext.defendingTeamId,
+    defendingTeamId: replaySpatialContext.possessionTeamId,
+  };
+  const stalePossessionControlled = runMiniMatch({
+    ...adapter.miniMatchInput,
+    numberOfSequences: 1,
+    spatialContext: stalePossessionContext,
+    routeRankingAttributeMode: "candidate_modifier",
+    routeSelectionSource: "spatial_candidate_modifier",
+    routeSelectionWorkbench: sequence1Action1WorkbenchTruth,
+  });
   const selection = controlled.state.records[0]?.setup.routeSelectionResult;
+  const staleSelection = stalePossessionControlled.state.records[0]?.setup.routeSelectionResult;
   const baselineScoringEvents = baseline.state.scoringEvents.length;
   const controlledScoringEvents = controlled.state.scoringEvents.length;
 
@@ -57,6 +71,21 @@ export function validateMiniMatchSpatialSelection(): readonly string[] {
     controlledScoringEvents === baselineScoringEvents,
     "route selection metadata must not add scoring events by itself.",
   );
+  assertTest(staleSelection !== undefined, "stale spatial possession context must still expose route selection metadata.");
+  if (staleSelection !== undefined) {
+    assertTest(
+      staleSelection.selectedBy === "prototype",
+      "stale spatial possession context must preserve prototype route selection.",
+    );
+    assertTest(
+      staleSelection.routeRankingUsesRealAttributes === "NO",
+      "stale spatial possession context must not apply attribute-adjusted route selection.",
+    );
+    assertTest(
+      staleSelection.notes.some((note) => note.includes("possession team did not match current mini-match possession")),
+      "stale spatial possession context must explain why spatial route generation was skipped.",
+    );
+  }
   assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
   assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
   assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
@@ -68,6 +97,7 @@ export function validateMiniMatchSpatialSelection(): readonly string[] {
     "selection source is spatial_candidate_modifier",
     "route selection guard is valid",
     "TH -> ML remains preserved",
+    "stale spatial possession context falls back to prototype selection",
     "route selection does not add scoring events by itself",
     "scoring constants remain unchanged",
   ];

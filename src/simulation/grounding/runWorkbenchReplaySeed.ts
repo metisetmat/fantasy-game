@@ -148,7 +148,7 @@ const replayPlan: TacticalPlan = {
 export function createWorkbenchReplayMatchInput(workbench: TacticalWorkbenchFrame): MatchInput {
   return {
     matchId: `${workbench.frameId}-replay-seed`,
-    seed: "workbench-replay-seed",
+    seed: "sequence-1-action-1-replay-seed",
     homeTeam: teamFromWorkbench({ workbench, teamId: "control", name: "CONTROL" }),
     awayTeam: teamFromWorkbench({ workbench, teamId: "blitz", name: "BLITZ" }),
     homePlan: replayPlan,

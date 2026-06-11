@@ -325,36 +325,47 @@ function routeSelectionResult(input: {
   readonly pressureLevel: PressureLevel;
 }): MiniMatchRouteSelectionResult | undefined {
   const spatialContext = input.state.context.spatialContext;
+  const spatialContextMatchesPossession = spatialContext === undefined
+    || spatialContext.possessionTeamId === input.possessionTeam.teamId;
+  const trustedSpatialContext = spatialContextMatchesPossession ? spatialContext : undefined;
+  const staleSpatialContextNotes = spatialContext !== undefined && !spatialContextMatchesPossession
+    ? [
+        [
+          "SpatialMatchContext possession team did not match current mini-match possession;",
+          "skipped spatial route generation and preserved prototype fallback.",
+        ].join(" "),
+      ]
+    : [];
 
   if (spatialContext === undefined && input.state.context.routeSelectionSource === undefined) {
     return undefined;
   }
 
-  const currentBallCarrierId = spatialContext?.ballCarrierId ?? input.possessionTeam.players[0]?.id;
+  const currentBallCarrierId = trustedSpatialContext?.ballCarrierId ?? input.possessionTeam.players[0]?.id;
 
   if (currentBallCarrierId === undefined) {
     return undefined;
   }
 
   const mappedPrototype = mapPrototypeToSpatialCandidates({
-    ...(spatialContext === undefined ? {} : { spatialContext }),
+    ...(trustedSpatialContext === undefined ? {} : { spatialContext: trustedSpatialContext }),
     currentBallCarrierId,
-    currentBallZone: spatialContext?.ballZone ?? input.activeZone,
-    currentPossessionTeamId: spatialContext?.possessionTeamId ?? input.possessionTeam.teamId,
+    currentBallZone: trustedSpatialContext?.ballZone ?? input.activeZone,
+    currentPossessionTeamId: trustedSpatialContext?.possessionTeamId ?? input.possessionTeam.teamId,
   });
-  const spatialCandidates: readonly SpatialRouteCandidate[] = spatialContext === undefined
+  const spatialCandidates: readonly SpatialRouteCandidate[] = trustedSpatialContext === undefined
     ? mappedPrototype.candidates
     : generateSpatialRouteCandidates({
-        spatialContext,
-        possessionTeamId: spatialContext.possessionTeamId,
-        ballCarrierId: spatialContext.ballCarrierId,
-        ballZone: spatialContext.ballZone,
+        spatialContext: trustedSpatialContext,
+        possessionTeamId: trustedSpatialContext.possessionTeamId,
+        ballCarrierId: trustedSpatialContext.ballCarrierId,
+        ballZone: trustedSpatialContext.ballZone,
         pressureLevel: input.pressureLevel.toUpperCase(),
         ...(input.state.context.routeSelectionWorkbench === undefined ? {} : { workbench: input.state.context.routeSelectionWorkbench }),
         prototypeCandidates: mappedPrototype.candidates,
       });
   const selected = selectMiniMatchRoute({
-    ...(spatialContext === undefined ? {} : { spatialContext }),
+    ...(trustedSpatialContext === undefined ? {} : { spatialContext: trustedSpatialContext }),
     ...(input.state.context.routeSelectionSource === undefined ? {} : { selectionSource: input.state.context.routeSelectionSource }),
     ...(input.state.context.routeRankingAttributeMode === undefined ? {} : { routeRankingAttributeMode: input.state.context.routeRankingAttributeMode }),
     candidates: spatialCandidates,
@@ -365,7 +376,7 @@ function routeSelectionResult(input: {
 
   return {
     ...selected,
-    notes: [...selected.notes, ...mappedPrototype.lossyMappings],
+    notes: [...selected.notes, ...mappedPrototype.lossyMappings, ...staleSpatialContextNotes],
   };
 }
 

@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-11T08:17:08.906Z
+Generated timestamp: 2026-06-11T08:38:11.914Z
 Task/sprint name: Sprint 2V - Prototype Selection Replacement in MiniMatch
 Final file count: 14
 
@@ -125,23 +125,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M package.json
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidenceBuilder.ts
- M src/simulation/diagnostics/fullMatchGroundingDiagnostics.test.ts
- M src/simulation/diagnostics/fullMatchGroundingDiagnostics.ts
- M src/simulation/grounding/rosterToMiniMatchGapAnalysis.test.ts
- M src/simulation/grounding/rosterToMiniMatchGapAnalysis.ts
  M src/simulation/grounding/runWorkbenchReplaySeed.ts
- M src/simulation/grounding/workbenchReplaySeed.test.ts
- M src/simulation/miniMatch/createMiniMatchContext.ts
- M src/simulation/miniMatch/index.ts
- M src/simulation/miniMatch/logging.ts
+ M src/simulation/miniMatch/miniMatchSpatialSelection.test.ts
+ M src/simulation/miniMatch/prototypeToSpatialCandidateMapper.ts
  M src/simulation/miniMatch/selectInitialSequenceContext.ts
- M src/simulation/miniMatch/types.ts
-?? src/simulation/miniMatch/miniMatchRouteSelection.ts
-?? src/simulation/miniMatch/miniMatchRouteSelectionMode.ts
-?? src/simulation/miniMatch/miniMatchSpatialSelection.test.ts
-?? src/simulation/miniMatch/miniMatchSpatialSelectionContrast.test.ts
-?? src/simulation/miniMatch/prototypeToSpatialCandidateMapper.ts
-?? src/simulation/miniMatch/spatialCandidateGeneration.ts

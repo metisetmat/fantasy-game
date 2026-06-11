@@ -38,7 +38,20 @@ export function mapPrototypeToSpatialCandidates(input: {
 
   if (input.spatialContext === undefined) {
     return {
-      candidates: [],
+      candidates: prototypeCandidates.map((candidate): SpatialRouteCandidate => ({
+        candidateId: candidate.candidateId,
+        actionType: candidate.actionType,
+        actorId: input.currentBallCarrierId,
+        ...(candidate.receiverId === undefined ? {} : { receiverId: candidate.receiverId }),
+        teamId: input.currentPossessionTeamId,
+        fromZone: input.currentBallZone,
+        targetZone: candidate.targetZone ?? input.currentBallZone,
+        laneState: "CONTESTED",
+        availability: "AVAILABLE",
+        baseScore: candidate.baseScore,
+        source: "prototype_mapped_option",
+        reason: "Mapped from current prototype route context without trusted spatial possession context.",
+      })),
       lossyMappings: ["No SpatialMatchContext available; prototype route remains fallback only."],
     };
   }
