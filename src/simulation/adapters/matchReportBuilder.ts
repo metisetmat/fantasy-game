@@ -32,6 +32,7 @@ import {
   type FullMatchSegmentState,
 } from "../fullMatch/fullMatchSegmentState";
 import type { FullMatchSegmentInfluence } from "../fullMatch/fullMatchSegmentInfluence";
+import type { FullMatchChainSegmentContext } from "../fullMatch/fullMatchChainSegmentContext";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -44,6 +45,7 @@ export interface MiniMatchTimelineSegment {
   readonly includeKickoff: boolean;
   readonly segmentState?: FullMatchSegmentState;
   readonly segmentInfluence?: FullMatchSegmentInfluence;
+  readonly chainSegmentContext?: FullMatchChainSegmentContext;
 }
 
 export interface MatchReportBuilderInput {
@@ -94,6 +96,35 @@ function segmentInfluenceTags(influence: FullMatchSegmentInfluence | undefined):
   return tags;
 }
 
+function chainSegmentContextTags(context: FullMatchChainSegmentContext | undefined): readonly string[] {
+  if (context === undefined || context.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_context",
+    "chain_context_diagnostic_only",
+    "chain_context_segment_1",
+    "chain_context_score_mutation_forbidden",
+    "chain_context_scoring_events_mutation_forbidden",
+    ...(context.chainId === undefined ? [] : [`chain_context_chain_id_${context.chainId}`]),
+    ...(context.finalCarrierId === undefined ? [] : [`chain_context_final_carrier_${context.finalCarrierId}`]),
+    ...(context.finalZone === undefined ? [] : [`chain_context_final_zone_${context.finalZone}`]),
+    `chain_context_status_${context.status}`,
+    `chain_context_consumed_steps_${context.consumedStepCount}`,
+    `chain_context_spatial_steps_${context.spatialSelectionStepCount}`,
+    ...context.tags,
+  ];
+}
+
+function chainSegmentContextReason(context: FullMatchChainSegmentContext | undefined): string {
+  if (context === undefined || context.status === "not_available") {
+    return "";
+  }
+
+  return ` Experimental workbench-chain context available: final carrier ${context.finalCarrierId ?? "none"} at ${context.finalZone ?? "none"} after ${context.chainId ?? "unknown-chain"}. Diagnostic-only; does not mutate score.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -135,7 +166,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -153,6 +184,7 @@ function kickoffEvent(input: {
       "temporary_control_blitz_mapping",
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
+      ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ],
     narrativeWeight: 5,
   };
@@ -205,6 +237,7 @@ function sequenceRecordToMatchEvent(input: {
     ...input.influence.tags,
     ...segmentStateTags,
     ...segmentInfluenceTags(input.segment.segmentInfluence),
+    ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -229,7 +262,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -292,7 +325,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -320,6 +353,7 @@ function scoringEventToMatchEvent(input: {
       ...input.influence.tags,
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...segmentInfluenceTags(input.segment.segmentInfluence),
+      ...chainSegmentContextTags(input.segment.chainSegmentContext),
     ],
     narrativeWeight: 70,
   };

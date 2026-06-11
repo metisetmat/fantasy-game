@@ -4,7 +4,8 @@ export type MatchEvidenceScope =
   | "FULL_MATCH_BATCH_ECONOMY"
   | "BATCH_DIAGNOSTIC_PROJECTION"
   | "LIVE_SCORING_STREAM"
-  | "REPORT_RENDERING_ONLY";
+  | "REPORT_RENDERING_ONLY"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -111,6 +112,25 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotProve: [
       "engine scoring incoherence",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SEGMENT_CONTEXT: {
+    scope: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
+    canProve: [
+      "experimental workbench chain context was attached to a segment",
+      "diagnostic timeline tags were emitted",
+      "chain final carrier and zone were exposed as metadata",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "full-match batch economy",
+      "scoring constants",
     ],
     globalScoringEconomyVerdictAllowed: false,
   },

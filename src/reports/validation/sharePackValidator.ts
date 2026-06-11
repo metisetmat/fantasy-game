@@ -136,6 +136,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay2YValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-2y.md"));
   const fullMatchWorkbenchChainReplay2Z = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-2z.md"));
   const fullMatchWorkbenchChainReplay2ZValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-2z.md"));
+  const fullMatchWorkbenchChainReplay3A = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3a.md"));
+  const fullMatchWorkbenchChainReplay3AValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3a.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1766,6 +1768,81 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3AExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3AForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+    "fullmatch-workbench-chain-replay-2y.md",
+    "validation.fullmatch-workbench-chain-replay-2y.md",
+    "fullmatch-workbench-chain-replay-2x.md",
+    "validation.fullmatch-workbench-chain-replay-2x.md",
+    "fullmatch-workbench-chain-replay.md",
+    "validation.fullmatch-workbench-chain-replay.md",
+    "bundle__docs.md",
+  ];
+  const sprint3AChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3A", activeConfig.sprintName === "Sprint 3A - Experimental Chain Influence on Segment Context", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 16", filesOnDisk.length === 16, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 16", allowlistedFiles.length === 16, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3AForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3AForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3AExpectedFiles.every((file) => requiredCopied(file)), sprint3AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3A", manifest.includes("Sprint 3A - Experimental Chain Influence on Segment Context") && detailedManifest.includes("Sprint 3A - Experimental Chain Influence on Segment Context"), "Sprint 3A visible"),
+    check("README is Sprint 3A oriented", readme.includes("# Sprint 3A Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3a.md"), "README current"),
+    check("sequence workbench artifacts copied", sequenceOneActionOneWorkbench.includes("Sequence 1 Action 1 Tactical Workbench") && sequenceOneActionTwoWorkbench.includes("Sequence 1 Action 2 Tactical Workbench") && sequenceOneActionThreeWorkbench.includes("Sequence 1 Action 3 Tactical Workbench"), "three workbench artifacts copied"),
+    check("3A report included", fullMatchWorkbenchChainReplay3A.includes("# FullMatch Workbench Chain Replay 3A") && fullMatchWorkbenchChainReplay3A.includes("chain segment context status: available"), "3A doc included"),
+    check("3A validation is PASS", fullMatchWorkbenchChainReplay3AValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3AValidation.includes("chain consumption maps to segment context"), "3A validation PASS"),
+    check("segment context final carrier visible", fullMatchWorkbenchChainReplay3A.includes("segment context final carrier: control-space-hunter") && fullMatchWorkbenchChainReplay3AValidation.includes("segment context final carrier is control-space-hunter"), "final carrier visible"),
+    check("segment context final zone visible", fullMatchWorkbenchChainReplay3A.includes("segment context final zone: Z4-HSR") && fullMatchWorkbenchChainReplay3AValidation.includes("segment context final zone is Z4-HSR"), "final zone visible"),
+    check("segment context attached to segment-1", fullMatchWorkbenchChainReplay3A.includes("segment context attached to: segment-1") && fullMatchWorkbenchChainReplay3AValidation.includes("segment context is attached to segment-1 only"), "segment-1 attachment visible"),
+    check("default timeline has no chain context tags", fullMatchWorkbenchChainReplay3A.includes("default chain context tags present in timeline: NO") && fullMatchWorkbenchChainReplay3AValidation.includes("default timeline has no chain context tags"), "default clean"),
+    check("experimental timeline has chain context tags", fullMatchWorkbenchChainReplay3A.includes("experimental chain context tags present in timeline: YES") && fullMatchWorkbenchChainReplay3AValidation.includes("segment context tags are present in experimental timeline"), "experimental tags visible"),
+    check("chain segment context contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchChainSegmentContext.ts") && bundleSimulation.includes("FullMatchChainSegmentContext"), "segment context contract bundled"),
+    check("segment context signature helper bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchSegmentContextSignature.ts") && bundleSimulation.includes("FullMatchSegmentContextSignature"), "signature helper bundled"),
+    check("matchReportBuilder segment context wiring bundled", bundleSimulation.includes("src/simulation/adapters/matchReportBuilder.ts") && bundleSimulation.includes("chainSegmentContextTags") && bundleSimulation.includes("chainSegmentContextReason"), "builder wiring bundled"),
+    check("runFullMatch segment context wiring bundled", bundleSimulation.includes("chainConsumptionToSegmentContext") && bundleSimulation.includes("FULLMATCH_CHAIN_SEGMENT_CONTEXT_ATTACHED_TO_SEGMENT_1"), "runFullMatch wiring bundled"),
+    check("3A mapping test bundled", bundleSimulation.includes("fullMatchChainSegmentContext.test.ts") && bundleSimulation.includes("consumed chain consumption maps to available context"), "mapping test bundled"),
+    check("3A experimental segment context test bundled", bundleSimulation.includes("runFullMatchExperimentalSegmentContext.test.ts") && bundleSimulation.includes("experimental runFullMatch exposes chain context tags on segment-1 events"), "experimental context test bundled"),
+    check("3A scoring guard bundled", bundleSimulation.includes("runFullMatchSegmentContextScoringGuard.test.ts") && bundleSimulation.includes("scoringGuard.3a.test.ts"), "3A scoring guards bundled"),
+    check("3A source-of-truth guard bundled", bundleSimulation.includes("sourceOfTruthGuards.3a.test.ts") && bundleSimulation.includes("WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims"), "source-of-truth 3A test bundled"),
+    check("experimental report includes chain segment context evidence", fullMatchWorkbenchChainReplay3A.includes("WORKBENCH_CHAIN_SEGMENT_CONTEXT") && bundleSimulation.includes("category: \"WORKBENCH_CHAIN_SEGMENT_CONTEXT\""), "segment evidence visible"),
+    check("coach diagnosis mentions chain context", fullMatchWorkbenchChainReplay3A.includes("coach diagnosis mentions experimental chain context") && bundleSimulation.includes("contexte experimental issu de la chaine workbench"), "coach diagnosis visible"),
+    check("default mode remains segment_harness", fullMatchWorkbenchChainReplay3A.includes("default full-match mode: segment_harness") && bundleSimulation.includes("DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE"), "default mode visible"),
+    check("experimental mode remains opt-in", fullMatchWorkbenchChainReplay3A.includes("experimental mode active by default: NO") && bundleSimulation.includes("workbench_chain_replay_experimental"), "experimental opt-in visible"),
+    check("normal full-match not production chain-driven", fullMatchWorkbenchChainReplay3A.includes("normal full-match chain-driven claim status: NO") && bundleSimulation.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match guarded"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3A.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3AValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("segment context cannot mutate score", fullMatchWorkbenchChainReplay3A.includes("segment context can mutate score: false") && fullMatchWorkbenchChainReplay3AValidation.includes("segment context cannot mutate score"), "score mutation forbidden"),
+    check("segment context cannot mutate scoring events", fullMatchWorkbenchChainReplay3A.includes("segment context can mutate scoring events: false") && fullMatchWorkbenchChainReplay3AValidation.includes("segment context cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3AValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3AValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3A.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3A.includes("CONFIRM_EXPERIMENTAL_CHAIN_INFLUENCE_ON_SEGMENT_CONTEXT") && fullMatchWorkbenchChainReplay3A.includes("CONFIRM_SEGMENT_CONTEXT_IS_DIAGNOSTIC_ONLY") && fullMatchWorkbenchChainReplay3A.includes("PREPARE_EXPERIMENTAL_CHAIN_CONTEXT_TO_ROUTE_CANDIDATE_INFLUENCE"), "3A recommendations visible"),
+  ];
   const sprint2ZExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2284,6 +2361,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3A - Experimental Chain Influence on Segment Context")
+      ? sprint3AChecks
     : activeConfig.sprintName.includes("Sprint 2Z - Experimental FullMatch Chain Consumption")
       ? sprint2ZChecks
     : activeConfig.sprintName.includes("Sprint 2Y - Visual Workbench Expansion")

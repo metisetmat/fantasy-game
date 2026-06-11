@@ -331,6 +331,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "TACTICAL_PLAN_SIGNAL":
     case "HARNESS_PLAUSIBILITY_WARNING":
     case "WORKBENCH_CHAIN_CONSUMPTION":
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
       return "training_recommendation";
   }
 }
@@ -355,6 +356,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Le plan de match laisse un signal lisible";
     case "WORKBENCH_CHAIN_CONSUMPTION":
       return "Consommation workbench experimentale";
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
+      return "Contexte segmentaire workbench experimental";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -407,6 +410,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "MOMENTUM_SHIFT":
     case "TACTICAL_PLAN_SIGNAL":
     case "WORKBENCH_CHAIN_CONSUMPTION":
+    case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -426,6 +430,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "MOMENTUM_SHIFT",
     "TACTICAL_PLAN_SIGNAL",
     "WORKBENCH_CHAIN_CONSUMPTION",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
