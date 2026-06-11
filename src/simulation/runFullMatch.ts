@@ -54,6 +54,8 @@ import {
   buildDiagnosticRouteCandidatesForSegment,
 } from "./fullMatch/applyChainContextToRouteCandidates";
 import type { FullMatchChainRouteCandidateInfluenceResult } from "./fullMatch/fullMatchChainRouteCandidateInfluence";
+import { selectShadowRouteFromInfluencedCandidates } from "./fullMatch/selectShadowRouteFromInfluencedCandidates";
+import type { FullMatchShadowRouteSelectionResult } from "./fullMatch/fullMatchShadowRouteSelection";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -343,6 +345,22 @@ function routeCandidateInfluenceLimitations(influence: FullMatchChainRouteCandid
   ];
 }
 
+function shadowRouteSelectionLimitations(selection: FullMatchShadowRouteSelectionResult): readonly string[] {
+  if (selection.status === "not_available") {
+    return ["FULLMATCH_SHADOW_ROUTE_SELECTION_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_EXPERIMENTAL",
+    `FULLMATCH_SHADOW_ROUTE_SELECTION_STATUS_${selection.status.toUpperCase()}`,
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -498,24 +516,88 @@ function routeCandidateInfluenceEvidenceFact(input: {
   };
 }
 
+function shadowRouteSelectionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly selection: FullMatchShadowRouteSelectionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.selection.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_shadow_route_selection")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-shadow-route-selection`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.selection.shadowSelectionTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental shadow route selection ${input.selection.status}: production proxy ${input.selection.productionSelectionCandidateId ?? "none"} ` +
+      `(${input.selection.productionSelectionActionType ?? "none"}) compared with shadow ${input.selection.shadowSelectionCandidateId ?? "none"} ` +
+      `(${input.selection.shadowSelectionActionType ?? "none"}) to receiver ${input.selection.shadowSelectionReceiverId ?? "none"} ` +
+      `in ${input.selection.shadowSelectionTargetZone ?? "none"}, baseScore=${input.selection.shadowSelectionBaseScore ?? 0}, ` +
+      `influenceDelta=${input.selection.shadowSelectionInfluenceDelta ?? 0}, influencedScore=${input.selection.shadowSelectionInfluencedScore ?? 0}, ` +
+      `selectionChanged=${input.selection.shadowSelectionChangedFromProduction}, closedRejected=${input.selection.closedCandidateRejectedCount}, ` +
+      `unavailableRejected=${input.selection.unavailableCandidateRejectedCount}, diagnosticOnly=${input.selection.diagnosticOnly}, ` +
+      `canMutateScore=${input.selection.canMutateScore}, canMutateScoringEvents=${input.selection.canMutateScoringEvents}, ` +
+      `canDriveProductionSelection=${input.selection.canDriveProductionSelection}. ${input.selection.explanation}`,
+    confidence: input.selection.status === "available" ? "medium" : "low",
+    strength: input.selection.status === "available" ? 62 : 30,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_shadow_route_selection",
+      "shadow_route_selection_diagnostic_only",
+      "shadow_route_selection_production_forbidden",
+      "shadow_route_selection_score_mutation_forbidden",
+      "shadow_route_selection_scoring_events_mutation_forbidden",
+      "shadow_route_selection_closed_candidates_rejected",
+      "shadow_route_selection_unavailable_candidates_rejected",
+      ...(input.selection.chainId === undefined ? [] : [`shadow_route_selection_chain_id_${input.selection.chainId}`]),
+      ...(input.selection.productionSelectionCandidateId === undefined ? [] : [`shadow_route_selection_production_candidate_${input.selection.productionSelectionCandidateId}`]),
+      ...(input.selection.shadowSelectionCandidateId === undefined ? [] : [`shadow_route_selection_candidate_${input.selection.shadowSelectionCandidateId}`]),
+      ...(input.selection.shadowSelectionActionType === undefined ? [] : [`shadow_route_selection_action_${input.selection.shadowSelectionActionType}`]),
+      ...(input.selection.shadowSelectionReceiverId === undefined ? [] : [`shadow_route_selection_receiver_${input.selection.shadowSelectionReceiverId}`]),
+      ...(input.selection.shadowSelectionTargetZone === undefined ? [] : [`shadow_route_selection_zone_${input.selection.shadowSelectionTargetZone}`]),
+      `shadow_route_selection_changed_${input.selection.shadowSelectionChangedFromProduction ? "true" : "false"}`,
+      `shadow_route_selection_candidate_count_${input.selection.candidateCount}`,
+      `shadow_route_selection_eligible_count_${input.selection.eligibleCandidateCount}`,
+      `shadow_route_selection_blocked_count_${input.selection.blockedCandidateCount}`,
+      `shadow_route_selection_closed_rejected_count_${input.selection.closedCandidateRejectedCount}`,
+      `shadow_route_selection_unavailable_rejected_count_${input.selection.unavailableCandidateRejectedCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      ...input.selection.differenceReasons.map((reason) => `shadow_route_selection_reason_${reason}`),
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
   chainConsumption: FullMatchChainConsumptionResult,
   chainSegmentContext: FullMatchChainSegmentContext,
   routeCandidateInfluence: FullMatchChainRouteCandidateInfluenceResult,
+  shadowRouteSelection: FullMatchShadowRouteSelectionResult,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
   const chainFacts = report.evidenceFacts.filter((fact) =>
     fact.internalTags.includes("workbench_chain_consumption") ||
     fact.internalTags.includes("workbench_chain_segment_context") ||
-    fact.internalTags.includes("workbench_chain_route_candidate_influence")
+    fact.internalTags.includes("workbench_chain_route_candidate_influence") ||
+    fact.internalTags.includes("workbench_chain_shadow_route_selection")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench du premier segment est maintenant utilise pour influencer le classement diagnostique des options de route. Le porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"} favorise les options compatibles avec cette continuite, mais cette influence reste experimentale, bornee, et ne modifie pas encore la resolution ni le score. Les options fermees ou indisponibles restent bloquees meme si le contexte de chaine leur donnerait un bonus theorique. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench ne pilote pas encore le match, mais il produit maintenant une selection shadow. Avec le contexte de chaine, l'option diagnostique preferee devient ${shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${shadowRouteSelection.shadowSelectionTargetZone ?? "none"}, alors que la selection de reference/proxy reste ${shadowRouteSelection.productionSelectionActionType ?? "none"} via ${shadowRouteSelection.productionSelectionCandidateId ?? "none"}. Cette divergence est informative : elle montre ce que le moteur choisirait si le contexte workbench influencait reellement la selection, sans modifier le score ni les evenements. Les options fermees ou indisponibles restent rejetees avant la selection shadow. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -563,6 +645,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       chainSegmentContext,
     }),
   });
+  const shadowRouteSelection = selectShadowRouteFromInfluencedCandidates({
+    influence: routeCandidateInfluence,
+    ...(routeCandidateInfluence.selectedCandidateBefore === undefined ? {} : {
+      productionSelectionCandidateId: routeCandidateInfluence.selectedCandidateBefore,
+    }),
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -603,6 +691,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
           ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
           ...(index === 0 && routeCandidateInfluence.status !== "not_available" ? { routeCandidateInfluence } : {}),
+          ...(index === 0 && shadowRouteSelection.status !== "not_available" ? { shadowRouteSelection } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -672,6 +761,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...chainConsumptionLimitations(chainConsumption),
       ...chainSegmentContextLimitations(chainSegmentContext),
       ...routeCandidateInfluenceLimitations(routeCandidateInfluence),
+      ...shadowRouteSelectionLimitations(shadowRouteSelection),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -689,10 +779,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     influence: routeCandidateInfluence,
   });
+  const shadowSelectionFact = shadowRouteSelectionEvidenceFact({
+    report,
+    matchInput: input,
+    selection: shadowRouteSelection,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
     ...(routeInfluenceFact === null ? [] : [routeInfluenceFact]),
+    ...(shadowSelectionFact === null ? [] : [shadowSelectionFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -707,5 +803,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     chainConsumption,
     chainSegmentContext,
     routeCandidateInfluence,
+    shadowRouteSelection,
   );
 }
