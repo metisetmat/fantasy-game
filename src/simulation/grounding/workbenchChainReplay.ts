@@ -28,6 +28,10 @@ export type WorkbenchChainReplayResult = {
   readonly chainId: string;
   readonly mode: WorkbenchChainReplayMode;
   readonly status: "PASS" | "PARTIAL" | "FAIL";
+  readonly totalSteps: number;
+  readonly propagatedStepCount: number;
+  readonly mismatchWarningCount: number;
+  readonly spatialSelectionStepCount: number;
   readonly steps: readonly WorkbenchChainStepReplayResult[];
   readonly finalState: WorkbenchChainRuntimeState;
   readonly prototypeFallbackUsed: boolean;
@@ -148,6 +152,10 @@ export function replayWorkbenchChain(input: {
       chainId: input.chain.chainId,
       mode: input.mode,
       status: "PARTIAL",
+      totalSteps: input.chain.steps.length,
+      propagatedStepCount: 0,
+      mismatchWarningCount: 0,
+      spatialSelectionStepCount: 0,
       steps: [],
       finalState: {
         ...initialState,
@@ -182,12 +190,20 @@ export function replayWorkbenchChain(input: {
   }
 
   const spatialSelectionUsed = steps.some((step) => step.routeSelectionSource === "spatial_candidate_modifier" && step.guardValid);
+  const spatialSelectionStepCount = steps.filter((step) => step.routeSelectionSource === "spatial_candidate_modifier" && step.guardValid).length;
   const prototypeFallbackUsed = steps.some((step) => step.selectedBy === "prototype" || step.selectedBy === "fallback") || input.mode === "diagnostic_only";
+  const mismatchWarningCount = runtimeState.stateWarnings.filter((warning) =>
+    warning.includes("WORKBENCH_CHAIN_BALL_CARRIER_MISMATCH") || warning.includes("WORKBENCH_CHAIN_BALL_ZONE_MISMATCH")
+  ).length;
 
   return {
     chainId: input.chain.chainId,
     mode: input.mode,
     status: statusFor({ mode: input.mode, steps, finalState: runtimeState }),
+    totalSteps: input.chain.steps.length,
+    propagatedStepCount: steps.filter((step) => step.stateAfter.stepIndex === step.stepIndex + 1).length,
+    mismatchWarningCount,
+    spatialSelectionStepCount,
     steps,
     finalState: runtimeState,
     prototypeFallbackUsed,

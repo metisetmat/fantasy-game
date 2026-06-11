@@ -14,6 +14,11 @@ export const sequence1Action1Chain: WorkbenchChain = {
     {
       stepIndex: 0,
       frame: sequence1Action1WorkbenchTruth,
+      stepSource: {
+        source: "visual_workbench_truth",
+        sourceArtifactId: "reports/workbench/sequence-1-action-1.html",
+        sourceNote: "Backed by the Sequence 1 Action 1 visual workbench artifact.",
+      },
       expectedActorId: "control-tempo-half",
       expectedReceiverId: "control-mobile-lock",
       expectedNewCarrierId: "control-mobile-lock",

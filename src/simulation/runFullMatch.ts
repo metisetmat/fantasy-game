@@ -37,6 +37,11 @@ import {
   createFullMatchSegmentInfluence,
   type FullMatchSegmentInfluence,
 } from "./fullMatch/fullMatchSegmentInfluence";
+import {
+  fullMatchRouteSelectionModeDiagnostics,
+  resolveFullMatchRouteSelectionMode,
+  type FullMatchOptions,
+} from "./fullMatch/fullMatchRouteSelectionMode";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -313,7 +318,8 @@ function withFullMatchGroundingDiagnosis(report: MatchReport, input: MatchInput)
   };
 }
 
-export function runFullMatch(input: MatchInput): MatchReport {
+export function runFullMatch(input: MatchInput, options?: FullMatchOptions): MatchReport {
+  const routeSelectionMode = resolveFullMatchRouteSelectionMode(options);
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -416,6 +422,8 @@ export function runFullMatch(input: MatchInput): MatchReport {
     limitations: [
       "runFullMatch is a deterministic harness sample and cannot invalidate the 50-match economy.",
       "Harness warnings are warning-only and may not change scoring values.",
+      `Full-match route selection mode: ${routeSelectionMode}.`,
+      ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
     ],
   });
 

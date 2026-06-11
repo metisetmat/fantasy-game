@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 2W - FullMatch Workbench Chain Replay. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 2X - Multi-Action Workbench Chain + Experimental FullMatch Feature Flag Skeleton. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

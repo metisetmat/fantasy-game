@@ -2,9 +2,21 @@ import type { TacticalWorkbenchFrame } from "./tacticalWorkbenchTypes";
 
 export type WorkbenchChainId = string;
 
+export type WorkbenchChainSource =
+  | "visual_workbench_truth"
+  | "synthetic_continuation"
+  | "hybrid_chain";
+
+export type WorkbenchChainStepSource = {
+  readonly source: WorkbenchChainSource;
+  readonly sourceArtifactId?: string;
+  readonly sourceNote: string;
+};
+
 export type WorkbenchChainStep = {
   readonly stepIndex: number;
   readonly frame: TacticalWorkbenchFrame;
+  readonly stepSource: WorkbenchChainStepSource;
   readonly expectedActorId: string;
   readonly expectedReceiverId?: string;
   readonly expectedNewCarrierId?: string;
