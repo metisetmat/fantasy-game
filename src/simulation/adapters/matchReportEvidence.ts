@@ -337,6 +337,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
       return "training_recommendation";
   }
 }
@@ -373,6 +374,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Input de route segmentaire workbench experimental";
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
       return "Source de route controlee mini-match experimentale";
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
+      return "Garde d'override de selection live experimental";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -431,6 +434,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
+    case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -456,6 +460,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
     "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT",
     "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];

@@ -11,7 +11,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION"
   | "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT"
-  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE";
+  | "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE"
+  | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -262,6 +263,31 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotOverride: [
       "live score",
       "live mini-match route resolution",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD: {
+    scope: "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD",
+    canProve: [
+      "experimental controlled mini-match route source prepared a guarded live selection override candidate",
+      "live selection override guard rejected closed and unavailable candidates",
+      "live selection override guard remained diagnostic-only and unapplied",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "normal live mini-match route resolution",
       "production route resolution",
       "production route selection",
       "full-match batch economy",

@@ -148,6 +148,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3e.md"));
   const fullMatchWorkbenchChainReplay3F = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3f.md"));
   const fullMatchWorkbenchChainReplay3FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3f.md"));
+  const fullMatchWorkbenchChainReplay3G = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3g.md"));
+  const fullMatchWorkbenchChainReplay3GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3g.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1780,6 +1782,95 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3GExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3g.md",
+    "validation.fullmatch-workbench-chain-replay-3g.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3GForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3f.md",
+    "validation.fullmatch-workbench-chain-replay-3f.md",
+    "fullmatch-workbench-chain-replay-3e.md",
+    "validation.fullmatch-workbench-chain-replay-3e.md",
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
+    "fullmatch-workbench-chain-replay-3c.md",
+    "validation.fullmatch-workbench-chain-replay-3c.md",
+    "fullmatch-workbench-chain-replay-3b.md",
+    "validation.fullmatch-workbench-chain-replay-3b.md",
+    "fullmatch-workbench-chain-replay-3a.md",
+    "validation.fullmatch-workbench-chain-replay-3a.md",
+    "fullmatch-workbench-chain-replay-2z.md",
+    "validation.fullmatch-workbench-chain-replay-2z.md",
+  ];
+  const sprint3GChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3G", activeConfig.sprintName === "Sprint 3G - Controlled Route Source to Live Selection Override Guards", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("minimal allowlist count is 18", allowlistedFiles.length === 18, `${allowlistedFiles.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3GForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3GForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3GExpectedFiles.every((file) => requiredCopied(file)), sprint3GExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3G", manifest.includes("Sprint 3G - Controlled Route Source to Live Selection Override Guards") && detailedManifest.includes("Sprint 3G - Controlled Route Source to Live Selection Override Guards"), "Sprint 3G visible"),
+    check("README is Sprint 3G oriented", readme.includes("# Sprint 3G Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3g.md"), "README current"),
+    check("default and experimental coach reports copied", (coachDefaultHtml.includes("<!doctype html>") || coachDefaultHtml.includes("<html")) && (coachExperimentalHtml.includes("<!doctype html>") || coachExperimentalHtml.includes("<html")), "coach HTML variants copied"),
+    check("3G report included", fullMatchWorkbenchChainReplay3G.includes("# FullMatch Workbench Chain Replay 3G") && fullMatchWorkbenchChainReplay3G.includes("live selection override guard status: available"), "3G doc included"),
+    check("3G validation is PASS", fullMatchWorkbenchChainReplay3GValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3GValidation.includes("live selection override guard status is available"), "3G validation PASS"),
+    check("live override origin visible", fullMatchWorkbenchChainReplay3G.includes("live selection override guard origin: controlled_minimatch_route_source") && fullMatchWorkbenchChainReplay3GValidation.includes("live selection override guard origin is controlled_minimatch_route_source"), "origin visible"),
+    check("override candidate visible", fullMatchWorkbenchChainReplay3G.includes("override candidate: chain-context-forward-progress-sh") && fullMatchWorkbenchChainReplay3GValidation.includes("override candidate is chain-context-forward-progress-sh"), "candidate visible"),
+    check("override action visible", fullMatchWorkbenchChainReplay3G.includes("override action type: FORWARD_PROGRESS") && fullMatchWorkbenchChainReplay3GValidation.includes("override action is FORWARD_PROGRESS"), "action visible"),
+    check("override receiver and zone visible", fullMatchWorkbenchChainReplay3G.includes("override receiver: control-space-hunter") && fullMatchWorkbenchChainReplay3G.includes("override target zone: Z4-HSR"), "receiver/zone visible"),
+    check("override source scores visible", fullMatchWorkbenchChainReplay3G.includes("source base score: 82") && fullMatchWorkbenchChainReplay3G.includes("source influence delta: 5") && fullMatchWorkbenchChainReplay3G.includes("source influenced score: 87"), "source scores visible"),
+    check("live override guard contract bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchLiveSelectionOverrideGuard.ts") && bundleSimulation.includes("FullMatchLiveSelectionOverrideGuard"), "3G contract bundled"),
+    check("live override guard converter bundled", bundleSimulation.includes("src/simulation/fullMatch/liveSelectionOverrideGuardFromControlledRouteSource.ts") && bundleSimulation.includes("liveSelectionOverrideGuardFromControlledRouteSource"), "3G converter bundled"),
+    check("live override guard signature bundled", bundleSimulation.includes("src/simulation/fullMatch/fullMatchLiveSelectionOverrideGuardSignature.ts") && bundleSimulation.includes("FullMatchLiveSelectionOverrideGuardSignature"), "3G signature bundled"),
+    check("live override guard tests bundled", bundleSimulation.includes("fullMatchLiveSelectionOverrideGuard.test.ts") && bundleSimulation.includes("fullMatchLiveSelectionOverrideGuardGuard.test.ts"), "3G override guard tests bundled"),
+    check("3G runFullMatch live override tests bundled", bundleSimulation.includes("runFullMatchExperimentalLiveSelectionOverrideGuard.test.ts") && bundleSimulation.includes("runFullMatchLiveSelectionOverrideGuardScoringGuard.test.ts"), "3G full-match tests bundled"),
+    check("3G scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3g.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3g.test.ts"), "3G guards bundled"),
+    check("live override guard evidence included", fullMatchWorkbenchChainReplay3G.includes("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD") && bundleSimulation.includes("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"), "3G evidence visible"),
+    check("closed candidates remain rejected", fullMatchWorkbenchChainReplay3G.includes("rejected closed candidate count: 1") && fullMatchWorkbenchChainReplay3GValidation.includes("CLOSED candidates remain unselectable"), "closed route rejected"),
+    check("unavailable candidates remain rejected", fullMatchWorkbenchChainReplay3G.includes("rejected unavailable candidate count: 1") && fullMatchWorkbenchChainReplay3GValidation.includes("unavailable candidates remain unselectable"), "unavailable route rejected"),
+    check("override candidate legal and available", fullMatchWorkbenchChainReplay3G.includes("candidate legal: true") && fullMatchWorkbenchChainReplay3G.includes("candidate available: true"), "candidate valid"),
+    check("default live override guard absent", fullMatchWorkbenchChainReplay3G.includes("default live selection override guard tag count: 0"), "default guard clean"),
+    check("experimental live override guard present", fullMatchWorkbenchChainReplay3G.includes("experimental live selection override guard tag count: greater than 0"), "experimental guard visible"),
+    check("override is not applied", fullMatchWorkbenchChainReplay3G.includes("overrideAppliedToLiveSelection: false") && fullMatchWorkbenchChainReplay3GValidation.includes("overrideAppliedToLiveSelection is false"), "override unapplied"),
+    check("default and experimental score signatures remain equal", fullMatchWorkbenchChainReplay3G.includes("default and experimental score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3GValidation.includes("default and experimental score signatures remain equal"), "score signatures equal"),
+    check("live override guard cannot mutate score", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can mutate score: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot mutate score"), "score mutation forbidden"),
+    check("live override guard cannot mutate scoring events", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can mutate scoring events: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot mutate scoring events"), "scoring event mutation forbidden"),
+    check("live override guard cannot create scoring events", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can create scoring events: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot create scoring events"), "scoring event creation forbidden"),
+    check("live override guard cannot mutate route success rates", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can mutate route success rates: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot mutate route success rates"), "route success mutation forbidden"),
+    check("live override guard cannot drive production full-match", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can drive production full-match selection: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot drive production full-match selection"), "production full-match forbidden"),
+    check("live override guard cannot drive production route resolution", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can drive production route resolution: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot drive production route resolution"), "production route forbidden"),
+    check("live override guard cannot drive normal live mini-match resolution", fullMatchWorkbenchChainReplay3G.includes("live selection override guard can drive normal live mini-match resolution: false") && fullMatchWorkbenchChainReplay3GValidation.includes("override guard cannot drive normal live mini-match resolution"), "normal live mini-match forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3G.includes("stale coach wording status: absent") && !coachExperimentalHtml.includes("simulation experimental"), "coach copy clean"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no scoring events deleted or capped", fullMatchWorkbenchChainReplay3GValidation.includes("no scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3GValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3GValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3G.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3G.includes("CONFIRM_CONTROLLED_ROUTE_SOURCE_TO_LIVE_SELECTION_OVERRIDE_GUARDS") && fullMatchWorkbenchChainReplay3G.includes("CONFIRM_OVERRIDE_GUARD_DOES_NOT_CREATE_SCORING_EVENTS") && fullMatchWorkbenchChainReplay3G.includes("PREPARE_LIVE_SELECTION_OVERRIDE_GUARD_TO_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"), "3G recommendations visible"),
+  ];
+
   const sprint3FExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2774,6 +2865,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3G - Controlled Route Source to Live Selection Override Guards")
+      ? sprint3GChecks
     : activeConfig.sprintName.includes("Sprint 3F - SegmentRouteInput to Controlled MiniMatch Route Source")
       ? sprint3FChecks
     : activeConfig.sprintName.includes("Sprint 3E - Controlled Segment Selection to Segment Route Input")
