@@ -1,0 +1,118 @@
+# FullMatch Workbench Chain Replay 3Q Validation
+
+Status: PASS
+
+## Checks
+- PASS: runFullMatch default remains segment_harness.
+- PASS: workbench_chain_replay_experimental remains opt-in.
+- PASS: goalkeeper response model remains available.
+- PASS: rebound second chance model status is available.
+- PASS: rebound second chance model origin is goalkeeper_response_model_sandbox.
+- PASS: baseline rebound outcome is NO_REBOUND.
+- PASS: baseline ball loose state is none.
+- PASS: baseline second chance created is false.
+- PASS: override goalkeeper response type is PARRIED_SAVE.
+- PASS: override source rebound state is safe_deflection.
+- PASS: override rebound outcome is SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE or SAFE_DEFLECTION.
+- PASS: override ball loose state is safe_area or contested.
+- PASS: override recovery team candidate is goalkeeper_team or contested.
+- PASS: second chance probability is present.
+- PASS: current fixture second chance created is false.
+- PASS: rebound outcome divergence is observed.
+- PASS: ball loose state divergence is observed.
+- PASS: recovery team divergence is observed.
+- PASS: sandbox match event created count is 0.
+- PASS: sandbox scoring event created count is 0.
+- PASS: sandbox score delta total is 0.
+- PASS: official possession mutation count is 0.
+- PASS: model applies only in sandbox.
+- PASS: model is not applied to normal live selection.
+- PASS: rebound second chance model is isolated-only.
+- PASS: rebound second chance model is not inserted into official timeline.
+- PASS: CLOSED candidates remain rejected.
+- PASS: unavailable candidates remain rejected.
+- PASS: rebound second chance model cannot mutate official score.
+- PASS: rebound second chance model cannot mutate official scoring events.
+- PASS: rebound second chance model cannot mutate official possession.
+- PASS: rebound second chance model cannot create production scoring events.
+- PASS: rebound second chance model cannot mutate production route resolution.
+- PASS: rebound second chance model cannot mutate global route success rates.
+- PASS: rebound second chance model cannot claim global economy.
+- PASS: experimental timeline/report includes rebound second chance tags.
+- PASS: default timeline/report has no rebound second chance tags.
+- PASS: experimental report includes rebound second chance evidence.
+- PASS: experimental coach diagnosis mentions rebound / second chance sandbox.
+- PASS: coach copy avoids stale wording.
+- PASS: normal full-match is not falsely claimed as production chain-driven.
+- PASS: default and experimental official score signatures remain equal.
+- PASS: default and experimental official scoring event counts remain equal.
+- PASS: default and experimental official score_change totals remain equal.
+- PASS: FULL_MATCH_HARNESS_SINGLE_RUN remains warning-only.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains the global economy reference.
+- PASS: scoring constants unchanged.
+- PASS: no production scoring events deleted or capped.
+- PASS: MatchBonusEvent unchanged.
+- PASS: batch/live separation preserved.
+- PASS: explicit exhaustive test command is available.
+
+## Counts
+- default rebound second chance tag count: 0
+- experimental rebound second chance tag count: 9
+- goalkeeper response model status: available
+- rebound second chance model status: available
+- rebound second chance model origin: goalkeeper_response_model_sandbox
+- baseline rebound outcome: NO_REBOUND
+- baseline ball loose state: none
+- baseline second chance created: false
+- override goalkeeper response type: PARRIED_SAVE
+- override source rebound state: safe_deflection
+- override rebound outcome: SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE
+- override ball loose state: safe_area
+- override recovery team candidate: goalkeeper_team
+- override next sandbox possession candidate: goalkeeper_team
+- attacking proximity score: 61
+- defensive recovery score: 77
+- rebound danger score: 4
+- second chance probability: 4
+- second chance created: false
+- rebound outcome divergence observed: true
+- ball loose state divergence observed: true
+- recovery team divergence observed: true
+- second chance probability observed: true
+- second chance creation divergence observed: false
+- sandbox match event created count: 0
+- sandbox scoring event created count: 0
+- sandbox score delta total: 0
+- official possession mutation count: 0
+- modelAppliedOnlyInSandbox: true
+- modelAppliedToNormalLiveSelection: false
+- rejected closed candidate count: 1
+- rejected unavailable candidate count: 1
+- sandbox rebound injected into official timeline count: 0
+- official score mutation count: 0
+- official scoring event mutation count: 0
+- production scoring event creation count: 0
+- production route resolution mutation count: 0
+- global route success mutation count: 0
+- global economy claim count: 0
+- default official scoring event count: unchanged
+- experimental official scoring event count: unchanged
+- default official score_change total: unchanged
+- experimental official score_change total: unchanged
+- scoring constants changed: 0
+- production scoring events deleted or capped: 0
+- share file count: 18
+- exhaustive test command: npm run test:all
+
+## Recommendation
+- CONFIRM_GOALKEEPER_RESPONSE_MODEL_TO_REBOUND_SECOND_CHANCE_SANDBOX.
+- CONFIRM_REBOUND_SECOND_CHANCE_MODEL_IS_ISOLATED_ONLY.
+- CONFIRM_REBOUND_SECOND_CHANCE_MODEL_IS_NOT_AN_OFFICIAL_MATCH_EVENT.
+- CONFIRM_REBOUND_SECOND_CHANCE_MODEL_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS.
+- CONFIRM_REBOUND_SECOND_CHANCE_MODEL_DOES_NOT_MUTATE_OFFICIAL_POSSESSION.
+- CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED.
+- CONFIRM_DEFAULT_FULLMATCH_UNCHANGED.
+- CONFIRM_NO_OFFICIAL_SCORE_OR_SCORING_EVENT_MUTATION.
+- KEEP_SCORING_VALUES_UNCHANGED.
+- KEEP_50_MATCH_ECONOMY_REFERENCE.
+- PREPARE_REBOUND_SECOND_CHANCE_SANDBOX_TO_MULTI_ACTION_CONTINUATION_SANDBOX.

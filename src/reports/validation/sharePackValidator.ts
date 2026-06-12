@@ -168,6 +168,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3o.md"));
   const fullMatchWorkbenchChainReplay3P = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3p.md"));
   const fullMatchWorkbenchChainReplay3PValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3p.md"));
+  const fullMatchWorkbenchChainReplay3Q = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3q.md"));
+  const fullMatchWorkbenchChainReplay3QValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3q.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1800,6 +1802,81 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3QExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3q.md",
+    "validation.fullmatch-workbench-chain-replay-3q.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3QForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3p.md",
+    "validation.fullmatch-workbench-chain-replay-3p.md",
+    "fullmatch-workbench-chain-replay-3o.md",
+    "validation.fullmatch-workbench-chain-replay-3o.md",
+    "fullmatch-workbench-chain-replay-3n.md",
+    "validation.fullmatch-workbench-chain-replay-3n.md",
+  ];
+  const sprint3QChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3Q", activeConfig.sprintName === "Sprint 3Q - Rebound & Second Chance Sandbox", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3QForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3QForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3QExpectedFiles.every((file) => requiredCopied(file)), sprint3QExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3Q", manifest.includes("Sprint 3Q - Rebound & Second Chance Sandbox") && detailedManifest.includes("Sprint 3Q - Rebound & Second Chance Sandbox"), "visible"),
+    check("README is Sprint 3Q oriented", readme.includes("# Sprint 3Q Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3q.md"), "README current"),
+    check("3Q report included", fullMatchWorkbenchChainReplay3Q.includes("# FullMatch Workbench Chain Replay 3Q") && fullMatchWorkbenchChainReplay3Q.includes("rebound second chance model status: available"), "3Q doc included"),
+    check("3Q validation is PASS", fullMatchWorkbenchChainReplay3QValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3QValidation.includes("rebound second chance model status is available"), "3Q validation PASS"),
+    check("baseline rebound fields visible", fullMatchWorkbenchChainReplay3Q.includes("baseline rebound outcome: NO_REBOUND") && fullMatchWorkbenchChainReplay3Q.includes("baseline ball loose state: none") && fullMatchWorkbenchChainReplay3Q.includes("baseline second chance created: false"), "baseline fields visible"),
+    check("override rebound fields visible", fullMatchWorkbenchChainReplay3Q.includes("override goalkeeper response type: PARRIED_SAVE") && fullMatchWorkbenchChainReplay3Q.includes("override source rebound state: safe_deflection") && fullMatchWorkbenchChainReplay3Q.includes("override rebound outcome: SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE") && fullMatchWorkbenchChainReplay3Q.includes("override ball loose state: safe_area") && fullMatchWorkbenchChainReplay3Q.includes("override recovery team candidate: goalkeeper_team"), "override fields visible"),
+    check("second chance scores visible", fullMatchWorkbenchChainReplay3Q.includes("attacking proximity score: 61") && fullMatchWorkbenchChainReplay3Q.includes("defensive recovery score: 77") && fullMatchWorkbenchChainReplay3Q.includes("rebound danger score: 4") && fullMatchWorkbenchChainReplay3Q.includes("second chance probability: 4"), "second chance scores visible"),
+    check("current fixture creates no second chance", fullMatchWorkbenchChainReplay3Q.includes("override second chance created: false") && fullMatchWorkbenchChainReplay3QValidation.includes("current fixture second chance created is false"), "no second chance created"),
+    check("rebound divergence fields visible", fullMatchWorkbenchChainReplay3Q.includes("rebound outcome divergence observed: true") && fullMatchWorkbenchChainReplay3Q.includes("ball loose state divergence observed: true") && fullMatchWorkbenchChainReplay3Q.includes("recovery team divergence observed: true"), "rebound divergences visible"),
+    check("rebound sandbox creates no events or score", fullMatchWorkbenchChainReplay3Q.includes("sandbox match event created count: 0") && fullMatchWorkbenchChainReplay3Q.includes("sandbox scoring event created count: 0") && fullMatchWorkbenchChainReplay3Q.includes("sandbox score delta total: 0"), "no sandbox event or score"),
+    check("rebound sandbox does not mutate possession", fullMatchWorkbenchChainReplay3Q.includes("official possession mutation count: 0") && fullMatchWorkbenchChainReplay3QValidation.includes("rebound second chance model cannot mutate official possession"), "official possession mutation forbidden"),
+    check("rebound second chance contract bundled", bundleSimulation.includes("src/simulation/fullMatch/reboundSecondChanceSandbox.ts") && bundleSimulation.includes("ReboundSecondChanceModel"), "3Q contract bundled"),
+    check("rebound context extraction bundled", bundleSimulation.includes("src/simulation/fullMatch/extractReboundContext.ts") && bundleSimulation.includes("extractReboundContext"), "3Q context bundled"),
+    check("rebound resolver bundled", bundleSimulation.includes("src/simulation/fullMatch/resolveReboundSecondChance.ts") && bundleSimulation.includes("resolveReboundSecondChance"), "3Q resolver bundled"),
+    check("rebound converter bundled", bundleSimulation.includes("src/simulation/fullMatch/reboundSecondChanceFromGoalkeeperResponse.ts") && bundleSimulation.includes("reboundSecondChanceFromGoalkeeperResponse"), "3Q converter bundled"),
+    check("rebound comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareReboundSecondChance.ts") && bundleSimulation.includes("compareReboundSecondChance"), "3Q comparison bundled"),
+    check("rebound signature bundled", bundleSimulation.includes("src/simulation/fullMatch/reboundSecondChanceSignature.ts") && bundleSimulation.includes("reboundSecondChanceSignature"), "3Q signature bundled"),
+    check("rebound tests bundled", bundleSimulation.includes("reboundSecondChanceSandbox.test.ts") && bundleSimulation.includes("compareReboundSecondChance.test.ts") && bundleSimulation.includes("runFullMatchExperimentalReboundSecondChance.test.ts"), "3Q tests bundled"),
+    check("3Q scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3q.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3q.test.ts"), "3Q guards bundled"),
+    check("rebound second chance evidence included", fullMatchWorkbenchChainReplay3Q.includes("WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX") && bundleSimulation.includes("WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"), "3Q evidence visible"),
+    check("rebound sandbox is isolated-only", fullMatchWorkbenchChainReplay3Q.includes("modelAppliedOnlyInSandbox: true") && fullMatchWorkbenchChainReplay3Q.includes("modelAppliedToNormalLiveSelection: false"), "rebound sandbox isolated"),
+    check("default and experimental official score signatures remain equal", fullMatchWorkbenchChainReplay3Q.includes("default vs experimental official score signature: equal") && fullMatchWorkbenchChainReplay3QValidation.includes("default and experimental official score signatures remain equal"), "score signatures equal"),
+    check("rebound sandbox cannot mutate official score", fullMatchWorkbenchChainReplay3Q.includes("official score mutation count: 0") && fullMatchWorkbenchChainReplay3QValidation.includes("rebound second chance model cannot mutate official score"), "official score mutation forbidden"),
+    check("rebound sandbox cannot create production scoring events", fullMatchWorkbenchChainReplay3Q.includes("production scoring event creation count: 0") && fullMatchWorkbenchChainReplay3QValidation.includes("rebound second chance model cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("rebound sandbox cannot claim global economy", fullMatchWorkbenchChainReplay3Q.includes("global economy claim count: 0") && fullMatchWorkbenchChainReplay3QValidation.includes("rebound second chance model cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3Q.includes("coach copy wording status: no stale production wording") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3QValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3QValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3QValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3QValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3Q.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3Q.includes("CONFIRM_GOALKEEPER_RESPONSE_MODEL_TO_REBOUND_SECOND_CHANCE_SANDBOX") && fullMatchWorkbenchChainReplay3Q.includes("CONFIRM_REBOUND_SECOND_CHANCE_MODEL_IS_ISOLATED_ONLY") && fullMatchWorkbenchChainReplay3Q.includes("PREPARE_REBOUND_SECOND_CHANCE_SANDBOX_TO_MULTI_ACTION_CONTINUATION_SANDBOX"), "3Q recommendations visible"),
+  ];
+
   const sprint3PExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3597,6 +3674,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3Q - Rebound & Second Chance Sandbox")
+      ? sprint3QChecks
     : activeConfig.sprintName.includes("Sprint 3P - Goalkeeper Response Model")
       ? sprint3PChecks
     : activeConfig.sprintName.includes("Sprint 3O - Attribute-Driven Shot Resolution Sandbox")
