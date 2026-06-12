@@ -57,6 +57,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 38;
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
       return 37;
+    case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
+      return 36;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -121,6 +123,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la resolution sandbox d'evenement de scoring";
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
       return "Relire la resolution de tir attributaire sandbox";
+    case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
+      return "Relire le modele de reponse gardien sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
