@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 3M Validation
+# FullMatch Workbench Chain Replay 3N Validation
 
 Status: PASS
 
@@ -8,44 +8,43 @@ Status: PASS
 - PASS: controlled route resolution sandbox remains available.
 - PASS: sandbox scoring opportunity model status is available.
 - PASS: sandbox scoring event candidate model status is available.
-- PASS: sandbox scoring event candidate model origin is sandbox_scoring_opportunity_model.
+- PASS: sandbox scoring event resolution model status is available.
+- PASS: sandbox scoring event resolution model origin is sandbox_scoring_event_candidate.
 - PASS: baseline opportunity type is no_opportunity.
 - PASS: baseline scoring candidate type is NO_SCORING_EVENT.
-- PASS: baseline scoring candidate family is none.
-- PASS: baseline scoring candidate probability is 0.
-- PASS: baseline conversion probability is 0.
-- PASS: baseline scoring candidate created is false.
+- PASS: baseline resolution type is NO_SCORE_ATTEMPT.
+- PASS: baseline shot attempt created is false.
+- PASS: baseline shot quality is 0.
+- PASS: baseline goalkeeper response is not_applicable.
 - PASS: override opportunity type is half_chance.
 - PASS: override scoring candidate type is SHOT_CANDIDATE.
-- PASS: override scoring candidate family is shot.
-- PASS: override scoring candidate probability is 24.
-- PASS: override conversion probability is 14.
-- PASS: override scoring candidate created is true.
-- PASS: scoring candidate type divergence is observed.
-- PASS: scoring candidate family divergence is observed.
-- PASS: scoring candidate probability divergence is observed.
-- PASS: scoring candidate creation divergence is observed.
-- PASS: conversion probability divergence is observed.
+- PASS: override resolution type is SHOT_ON_TARGET.
+- PASS: override shot attempt created is true.
+- PASS: override shot quality is greater than baseline.
+- PASS: scoring resolution type divergence is observed.
+- PASS: shot attempt creation divergence is observed.
+- PASS: shot quality divergence is observed.
+- PASS: goalkeeper response divergence is observed.
 - PASS: sandbox scoring event divergence is false.
 - PASS: sandbox score divergence is false.
 - PASS: sandbox scoring event created count is 0.
 - PASS: sandbox score delta total is 0.
 - PASS: model applies only in sandbox.
 - PASS: model is not applied to normal live selection.
-- PASS: sandbox scoring event candidate is isolated-only.
-- PASS: sandbox scoring event candidate is not inserted into official timeline.
+- PASS: sandbox scoring event resolution is isolated-only.
+- PASS: sandbox scoring event resolution is not inserted into official timeline.
 - PASS: CLOSED candidates remain rejected.
 - PASS: unavailable candidates remain rejected.
-- PASS: sandbox scoring event candidate cannot mutate official score.
-- PASS: sandbox scoring event candidate cannot mutate official scoring events.
-- PASS: sandbox scoring event candidate cannot create production scoring events.
-- PASS: sandbox scoring event candidate cannot mutate production route resolution.
-- PASS: sandbox scoring event candidate cannot mutate global route success rates.
-- PASS: sandbox scoring event candidate cannot claim global economy.
-- PASS: experimental timeline/report includes sandbox scoring event candidate tags.
-- PASS: default timeline/report has no sandbox scoring event candidate tags.
-- PASS: experimental report includes sandbox scoring event candidate evidence.
-- PASS: experimental coach diagnosis mentions sandbox scoring event candidate model.
+- PASS: sandbox scoring event resolution cannot mutate official score.
+- PASS: sandbox scoring event resolution cannot mutate official scoring events.
+- PASS: sandbox scoring event resolution cannot create production scoring events.
+- PASS: sandbox scoring event resolution cannot mutate production route resolution.
+- PASS: sandbox scoring event resolution cannot mutate global route success rates.
+- PASS: sandbox scoring event resolution cannot claim global economy.
+- PASS: experimental timeline/report includes sandbox scoring resolution tags.
+- PASS: default timeline/report has no sandbox scoring resolution tags.
+- PASS: experimental report includes sandbox scoring resolution evidence.
+- PASS: experimental coach diagnosis mentions sandbox scoring event resolution.
 - PASS: coach copy avoids stale wording.
 - PASS: normal full-match is not falsely claimed as production chain-driven.
 - PASS: default and experimental official score signatures remain equal.
@@ -60,37 +59,36 @@ Status: PASS
 - PASS: explicit exhaustive test command is available.
 
 ## Counts
-- default sandbox scoring candidate tag count: 0.
-- experimental sandbox scoring candidate tag count: greater than 0.
-- opportunity model status: available.
-- opportunity model origin: controlled_route_resolution_sandbox.
+- default sandbox scoring resolution tag count: 0.
+- experimental sandbox scoring resolution tag count: greater than 0.
+- candidate model status: available.
+- resolution model status: available.
+- resolution model origin: sandbox_scoring_event_candidate.
 - scoring candidate model status: available.
-- scoring candidate model origin: sandbox_scoring_opportunity_model.
 - baseline candidate: chain-context-safe-recycle-pv.
 - baseline route outcome: safe_retention.
 - baseline danger probability: 18.
 - baseline scoring opportunity probability: 5.
 - baseline opportunity type: no_opportunity.
 - baseline scoring candidate type: NO_SCORING_EVENT.
-- baseline scoring candidate family: none.
-- baseline scoring candidate probability: 0.
-- baseline conversion probability: 0.
-- baseline scoring candidate created: false.
+- baseline resolution type: NO_SCORE_ATTEMPT.
+- baseline shot attempt created: false.
+- baseline shot quality: 0.
+- baseline goalkeeper response: not_applicable.
 - override candidate: chain-context-forward-progress-sh.
 - override route outcome: dangerous_progression.
 - override danger probability: 64.
 - override scoring opportunity probability: 24.
 - override opportunity type: half_chance.
 - override scoring candidate type: SHOT_CANDIDATE.
-- override scoring candidate family: shot.
-- override scoring candidate probability: 24.
-- override conversion probability: 14.
-- override scoring candidate created: true.
-- scoring candidate type divergence observed: true.
-- scoring candidate family divergence observed: true.
-- scoring candidate probability divergence observed: true.
-- scoring candidate creation divergence observed: true.
-- conversion probability divergence observed: true.
+- override resolution type: SHOT_ON_TARGET.
+- override shot attempt created: true.
+- override shot quality: 44.
+- override goalkeeper response: not_evaluated.
+- scoring resolution type divergence observed: true.
+- shot attempt creation divergence observed: true.
+- shot quality divergence observed: true.
+- goalkeeper response divergence observed: true.
 - sandbox scoring event divergence observed: false.
 - sandbox score divergence observed: false.
 - sandbox scoring event created count: 0.
@@ -116,13 +114,13 @@ Status: PASS
 - exhaustive test command: npm run test:all.
 
 ## Recommendation
-- CONFIRM_SANDBOX_OPPORTUNITY_MODEL_TO_SANDBOX_SCORING_EVENT_CANDIDATE.
-- CONFIRM_SANDBOX_SCORING_CANDIDATES_ARE_ISOLATED_ONLY.
-- CONFIRM_SANDBOX_SCORING_CANDIDATES_ARE_NOT_OFFICIAL_MATCH_EVENTS.
-- CONFIRM_SANDBOX_SCORING_CANDIDATE_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS.
+- CONFIRM_SANDBOX_SCORING_EVENT_CANDIDATE_TO_SANDBOX_SCORING_EVENT_RESOLUTION.
+- CONFIRM_SANDBOX_SCORING_RESOLUTION_IS_ISOLATED_ONLY.
+- CONFIRM_SANDBOX_SCORING_RESOLUTION_IS_NOT_AN_OFFICIAL_MATCH_EVENT.
+- CONFIRM_SANDBOX_SCORING_RESOLUTION_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS.
 - CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED.
 - CONFIRM_DEFAULT_FULLMATCH_UNCHANGED.
 - CONFIRM_NO_OFFICIAL_SCORE_OR_SCORING_EVENT_MUTATION.
 - KEEP_SCORING_VALUES_UNCHANGED.
 - KEEP_50_MATCH_ECONOMY_REFERENCE.
-- PREPARE_SANDBOX_SCORING_EVENT_CANDIDATE_TO_SANDBOX_SCORING_EVENT_RESOLUTION.
+- PREPARE_SANDBOX_SCORING_EVENT_RESOLUTION_TO_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION.

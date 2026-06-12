@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 3M - Sandbox Scoring Event Candidate
+- current sprint: Sprint 3N - Sandbox Scoring Event Resolution
 - final file count: 18
 - share file count: 18
 - minimal allowlist count: 18
@@ -16,7 +16,7 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Sprint 3M - Sandbox Scoring Event Candidate
+- PASS: current sprint is Sprint 3N - Sandbox Scoring Event Resolution
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 18
 - PASS: final file count is 18 - 18
@@ -25,28 +25,28 @@ Status: PASS
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 3M - visible
-- PASS: README is Sprint 3M oriented - README current
-- PASS: 3M report included - 3M doc included
-- PASS: 3M validation is PASS - 3M validation PASS
-- PASS: baseline candidate fields visible - baseline candidate visible
-- PASS: override candidate fields visible - override candidate visible
-- PASS: candidate divergence fields visible - candidate divergences visible
-- PASS: sandbox candidate creates no scoring event - no sandbox scoring event
-- PASS: sandbox candidate model bundled - 3M contract bundled
-- PASS: sandbox candidate mapper bundled - 3M mapper bundled
-- PASS: sandbox candidate converter bundled - 3M converter bundled
-- PASS: sandbox candidate comparison bundled - 3M comparison bundled
-- PASS: sandbox candidate signature bundled - 3M signature bundled
-- PASS: sandbox candidate tests bundled - 3M unit tests bundled
-- PASS: 3M runFullMatch tests bundled - 3M full-match tests bundled
-- PASS: 3M scoring and source-of-truth guards bundled - 3M guards bundled
-- PASS: sandbox candidate evidence included - 3M evidence visible
-- PASS: sandbox candidate is isolated-only - candidate isolated
+- PASS: manifest lists Sprint 3N - visible
+- PASS: README is Sprint 3N oriented - README current
+- PASS: 3N report included - 3N doc included
+- PASS: 3N validation is PASS - 3N validation PASS
+- PASS: baseline resolution fields visible - baseline resolution visible
+- PASS: override resolution fields visible - override resolution visible
+- PASS: resolution divergence fields visible - resolution divergences visible
+- PASS: sandbox resolution creates no scoring event - no sandbox scoring event
+- PASS: sandbox resolution model bundled - 3N contract bundled
+- PASS: sandbox resolution resolver bundled - 3N resolver bundled
+- PASS: sandbox resolution converter bundled - 3N converter bundled
+- PASS: sandbox resolution comparison bundled - 3N comparison bundled
+- PASS: sandbox resolution signature bundled - 3N signature bundled
+- PASS: sandbox resolution tests bundled - 3N unit tests bundled
+- PASS: 3N runFullMatch tests bundled - 3N full-match tests bundled
+- PASS: 3N scoring and source-of-truth guards bundled - 3N guards bundled
+- PASS: sandbox resolution evidence included - 3N evidence visible
+- PASS: sandbox resolution is isolated-only - resolution isolated
 - PASS: default and experimental official score signatures remain equal - score signatures equal
-- PASS: sandbox candidate cannot mutate official score - official score mutation forbidden
-- PASS: sandbox candidate cannot create production scoring events - production scoring event creation forbidden
-- PASS: sandbox candidate cannot claim global economy - global economy forbidden
+- PASS: sandbox resolution cannot mutate official score - official score mutation forbidden
+- PASS: sandbox resolution cannot create production scoring events - production scoring event creation forbidden
+- PASS: sandbox resolution cannot claim global economy - global economy forbidden
 - PASS: coach copy wording is clean - coach copy clean
 - PASS: explicit exhaustive test command available - test:all visible
 - PASS: scoring constants unchanged - scoring constants visible
@@ -55,7 +55,7 @@ Status: PASS
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: recommendations visible - 3M recommendations visible
+- PASS: recommendations visible - 3N recommendations visible
 
 ## Files
 
@@ -67,7 +67,7 @@ Status: PASS
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.latest.html
-- fullmatch-workbench-chain-replay-3m.md
+- fullmatch-workbench-chain-replay-3n.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -75,5 +75,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-3m.md
+- validation.fullmatch-workbench-chain-replay-3n.md
 - validation.share-pack.md
