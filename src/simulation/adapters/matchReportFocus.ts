@@ -51,6 +51,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 41;
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return 40;
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+      return 39;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -109,6 +111,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la sandbox de resolution controlee de route";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return "Relire le modele sandbox d'opportunite de scoring";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+      return "Relire le candidat sandbox d'evenement de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

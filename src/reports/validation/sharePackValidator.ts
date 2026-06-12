@@ -160,6 +160,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3KValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3k.md"));
   const fullMatchWorkbenchChainReplay3L = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3l.md"));
   const fullMatchWorkbenchChainReplay3LValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3l.md"));
+  const fullMatchWorkbenchChainReplay3M = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3m.md"));
+  const fullMatchWorkbenchChainReplay3MValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3m.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1792,6 +1794,80 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3MExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3m.md",
+    "validation.fullmatch-workbench-chain-replay-3m.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3MForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3l.md",
+    "validation.fullmatch-workbench-chain-replay-3l.md",
+    "fullmatch-workbench-chain-replay-3k.md",
+    "validation.fullmatch-workbench-chain-replay-3k.md",
+    "fullmatch-workbench-chain-replay-3j.md",
+    "validation.fullmatch-workbench-chain-replay-3j.md",
+    "fullmatch-workbench-chain-replay-3i.md",
+    "validation.fullmatch-workbench-chain-replay-3i.md",
+  ];
+  const sprint3MChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3M", activeConfig.sprintName === "Sprint 3M - Sandbox Scoring Event Candidate", "Sandbox Scoring Event Candidate"),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3MForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3MForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3MExpectedFiles.every((file) => requiredCopied(file)), sprint3MExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3M", manifest.includes("Sprint 3M - Sandbox Scoring Event Candidate") && detailedManifest.includes("Sprint 3M - Sandbox Scoring Event Candidate"), "visible"),
+    check("README is Sprint 3M oriented", readme.includes("# Sprint 3M Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3m.md"), "README current"),
+    check("3M report included", fullMatchWorkbenchChainReplay3M.includes("# FullMatch Workbench Chain Replay 3M") && fullMatchWorkbenchChainReplay3M.includes("sandbox scoring event candidate model status: available"), "3M doc included"),
+    check("3M validation is PASS", fullMatchWorkbenchChainReplay3MValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3MValidation.includes("sandbox scoring event candidate model status is available"), "3M validation PASS"),
+    check("baseline candidate fields visible", fullMatchWorkbenchChainReplay3M.includes("baseline opportunity type: no_opportunity") && fullMatchWorkbenchChainReplay3M.includes("baseline scoring candidate type: NO_SCORING_EVENT") && fullMatchWorkbenchChainReplay3M.includes("baseline scoring candidate probability: 0") && fullMatchWorkbenchChainReplay3M.includes("baseline conversion probability: 0") && fullMatchWorkbenchChainReplay3M.includes("baseline scoring candidate created: false"), "baseline candidate visible"),
+    check("override candidate fields visible", fullMatchWorkbenchChainReplay3M.includes("override opportunity type: half_chance") && fullMatchWorkbenchChainReplay3M.includes("override scoring candidate type: SHOT_CANDIDATE") && fullMatchWorkbenchChainReplay3M.includes("override scoring candidate family: shot") && fullMatchWorkbenchChainReplay3M.includes("override scoring candidate probability: 24") && fullMatchWorkbenchChainReplay3M.includes("override conversion probability: 14") && fullMatchWorkbenchChainReplay3M.includes("override scoring candidate created: true"), "override candidate visible"),
+    check("candidate divergence fields visible", fullMatchWorkbenchChainReplay3M.includes("scoring candidate type divergence observed: true") && fullMatchWorkbenchChainReplay3M.includes("scoring candidate family divergence observed: true") && fullMatchWorkbenchChainReplay3M.includes("scoring candidate probability divergence observed: true") && fullMatchWorkbenchChainReplay3M.includes("scoring candidate creation divergence observed: true") && fullMatchWorkbenchChainReplay3M.includes("conversion probability divergence observed: true"), "candidate divergences visible"),
+    check("sandbox candidate creates no scoring event", fullMatchWorkbenchChainReplay3M.includes("sandbox scoring event created count: 0") && fullMatchWorkbenchChainReplay3M.includes("sandbox score delta total: 0"), "no sandbox scoring event"),
+    check("sandbox candidate model bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxScoringEventCandidate.ts") && bundleSimulation.includes("SandboxScoringEventCandidateModel"), "3M contract bundled"),
+    check("sandbox candidate mapper bundled", bundleSimulation.includes("src/simulation/fullMatch/createSandboxScoringEventCandidate.ts") && bundleSimulation.includes("createSandboxScoringEventCandidate"), "3M mapper bundled"),
+    check("sandbox candidate converter bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxScoringEventCandidateModelFromOpportunity.ts") && bundleSimulation.includes("sandboxScoringEventCandidateModelFromOpportunity"), "3M converter bundled"),
+    check("sandbox candidate comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareSandboxScoringEventCandidates.ts") && bundleSimulation.includes("compareSandboxScoringEventCandidates"), "3M comparison bundled"),
+    check("sandbox candidate signature bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxScoringEventCandidateSignature.ts") && bundleSimulation.includes("sandboxScoringEventCandidateSignature"), "3M signature bundled"),
+    check("sandbox candidate tests bundled", bundleSimulation.includes("sandboxScoringEventCandidate.test.ts") && bundleSimulation.includes("sandboxScoringEventCandidateGuard.test.ts") && bundleSimulation.includes("compareSandboxScoringEventCandidates.test.ts"), "3M unit tests bundled"),
+    check("3M runFullMatch tests bundled", bundleSimulation.includes("runFullMatchExperimentalSandboxScoringEventCandidate.test.ts") && bundleSimulation.includes("runFullMatchSandboxScoringEventCandidateScoringGuard.test.ts"), "3M full-match tests bundled"),
+    check("3M scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3m.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3m.test.ts"), "3M guards bundled"),
+    check("sandbox candidate evidence included", fullMatchWorkbenchChainReplay3M.includes("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE") && bundleSimulation.includes("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"), "3M evidence visible"),
+    check("sandbox candidate is isolated-only", fullMatchWorkbenchChainReplay3M.includes("modelAppliedOnlyInSandbox: true") && fullMatchWorkbenchChainReplay3M.includes("modelAppliedToNormalLiveSelection: false"), "candidate isolated"),
+    check("default and experimental official score signatures remain equal", fullMatchWorkbenchChainReplay3M.includes("default and experimental official score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3MValidation.includes("default and experimental official score signatures remain equal"), "score signatures equal"),
+    check("sandbox candidate cannot mutate official score", fullMatchWorkbenchChainReplay3M.includes("sandbox scoring candidate can mutate official score: false") && fullMatchWorkbenchChainReplay3MValidation.includes("sandbox scoring event candidate cannot mutate official score"), "official score mutation forbidden"),
+    check("sandbox candidate cannot create production scoring events", fullMatchWorkbenchChainReplay3M.includes("sandbox scoring candidate can create production scoring events: false") && fullMatchWorkbenchChainReplay3MValidation.includes("sandbox scoring event candidate cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("sandbox candidate cannot claim global economy", fullMatchWorkbenchChainReplay3M.includes("sandbox scoring candidate can claim global economy: false") && fullMatchWorkbenchChainReplay3MValidation.includes("sandbox scoring event candidate cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3M.includes("stale coach wording status: absent") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3MValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3MValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3MValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3MValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3M.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3M.includes("CONFIRM_SANDBOX_OPPORTUNITY_MODEL_TO_SANDBOX_SCORING_EVENT_CANDIDATE") && fullMatchWorkbenchChainReplay3M.includes("CONFIRM_SANDBOX_SCORING_CANDIDATE_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS") && fullMatchWorkbenchChainReplay3M.includes("PREPARE_SANDBOX_SCORING_EVENT_CANDIDATE_TO_SANDBOX_SCORING_EVENT_RESOLUTION"), "3M recommendations visible"),
+  ];
+
   const sprint3LExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3300,6 +3376,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3M - Sandbox Scoring Event Candidate")
+      ? sprint3MChecks
     : activeConfig.sprintName.includes("Sprint 3L - Sandbox Scoring Opportunity Model")
       ? sprint3LChecks
     : activeConfig.sprintName.includes("Sprint 3K - Controlled Route Resolution Sandbox")

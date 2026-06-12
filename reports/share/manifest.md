@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T06:06:26.104Z
-Task/sprint: Sprint 3L - Sandbox Scoring Opportunity Model
+Generated: 2026-06-12T07:12:38.751Z
+Task/sprint: Sprint 3M - Sandbox Scoring Event Candidate
 Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -17,8 +17,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3l.md
-- validation.fullmatch-workbench-chain-replay-3l.md
+- fullmatch-workbench-chain-replay-3m.md
+- validation.fullmatch-workbench-chain-replay-3m.md
 - README.md
 
 ## Bundle Files

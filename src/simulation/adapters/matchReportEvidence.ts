@@ -343,6 +343,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
       return "training_recommendation";
   }
 }
@@ -391,6 +392,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Sandbox de resolution controlee de route";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return "Modele sandbox d'opportunite de scoring";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+      return "Candidat sandbox d'evenement de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -455,6 +458,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -486,6 +490,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY",
     "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
     "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
