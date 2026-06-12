@@ -164,6 +164,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3MValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3m.md"));
   const fullMatchWorkbenchChainReplay3N = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3n.md"));
   const fullMatchWorkbenchChainReplay3NValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3n.md"));
+  const fullMatchWorkbenchChainReplay3O = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3o.md"));
+  const fullMatchWorkbenchChainReplay3OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3o.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1796,6 +1798,78 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3OExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3o.md",
+    "validation.fullmatch-workbench-chain-replay-3o.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3OForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3n.md",
+    "validation.fullmatch-workbench-chain-replay-3n.md",
+    "fullmatch-workbench-chain-replay-3m.md",
+    "validation.fullmatch-workbench-chain-replay-3m.md",
+    "fullmatch-workbench-chain-replay-3l.md",
+    "validation.fullmatch-workbench-chain-replay-3l.md",
+  ];
+  const sprint3OChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3O", activeConfig.sprintName === "Sprint 3O - Attribute-Driven Shot Resolution Sandbox", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 18", filesOnDisk.length === 18, `${filesOnDisk.length}`),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3OForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3OForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3OExpectedFiles.every((file) => requiredCopied(file)), sprint3OExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3O", manifest.includes("Sprint 3O - Attribute-Driven Shot Resolution Sandbox") && detailedManifest.includes("Sprint 3O - Attribute-Driven Shot Resolution Sandbox"), "visible"),
+    check("README is Sprint 3O oriented", readme.includes("# Sprint 3O Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3o.md"), "README current"),
+    check("3O report included", fullMatchWorkbenchChainReplay3O.includes("# FullMatch Workbench Chain Replay 3O") && fullMatchWorkbenchChainReplay3O.includes("attribute-driven shot resolution model status: available"), "3O doc included"),
+    check("3O validation is PASS", fullMatchWorkbenchChainReplay3OValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3OValidation.includes("attribute-driven shot resolution model status is available"), "3O validation PASS"),
+    check("baseline attribute-driven fields visible", fullMatchWorkbenchChainReplay3O.includes("baseline outcome: NO_SCORE_ATTEMPT") && fullMatchWorkbenchChainReplay3O.includes("baseline shot attempt created: false") && fullMatchWorkbenchChainReplay3O.includes("baseline shot quality: 0"), "baseline fields visible"),
+    check("override attribute-driven fields visible", fullMatchWorkbenchChainReplay3O.includes("override scoring candidate type: SHOT_CANDIDATE") && fullMatchWorkbenchChainReplay3O.includes("override shooter id: control-space-hunter") && fullMatchWorkbenchChainReplay3O.includes("override goalkeeper id: blitz-goalkeeper-free-safety") && fullMatchWorkbenchChainReplay3O.includes("override attribute-adjusted shot quality: 53") && fullMatchWorkbenchChainReplay3O.includes("override goalkeeper response quality: 75") && fullMatchWorkbenchChainReplay3O.includes("override outcome: SAVED_BY_GK"), "override fields visible"),
+    check("attribute divergence fields visible", fullMatchWorkbenchChainReplay3O.includes("attribute influence observed: true") && fullMatchWorkbenchChainReplay3O.includes("outcome divergence observed: true") && fullMatchWorkbenchChainReplay3O.includes("shot quality divergence observed: true") && fullMatchWorkbenchChainReplay3O.includes("goalkeeper quality divergence observed: true"), "attribute divergences visible"),
+    check("attribute-driven sandbox creates no scoring event", fullMatchWorkbenchChainReplay3O.includes("sandbox scoring event created count: 0") && fullMatchWorkbenchChainReplay3O.includes("sandbox score delta total: 0"), "no sandbox scoring event"),
+    check("attribute-driven model bundled", bundleSimulation.includes("src/simulation/fullMatch/attributeDrivenShotResolutionSandbox.ts") && bundleSimulation.includes("AttributeDrivenShotResolutionModel"), "3O contract bundled"),
+    check("attribute-driven actor extraction bundled", bundleSimulation.includes("src/simulation/fullMatch/extractShotResolutionActors.ts") && bundleSimulation.includes("extractShotResolutionActors"), "3O extraction bundled"),
+    check("attribute-driven resolver bundled", bundleSimulation.includes("src/simulation/fullMatch/resolveAttributeDrivenShot.ts") && bundleSimulation.includes("resolveAttributeDrivenShot"), "3O resolver bundled"),
+    check("attribute-driven converter bundled", bundleSimulation.includes("src/simulation/fullMatch/attributeDrivenShotResolutionFromSandbox.ts") && bundleSimulation.includes("attributeDrivenShotResolutionFromSandbox"), "3O converter bundled"),
+    check("attribute-driven comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareAttributeDrivenShotResolutions.ts") && bundleSimulation.includes("compareAttributeDrivenShotResolutions"), "3O comparison bundled"),
+    check("attribute-driven signature bundled", bundleSimulation.includes("src/simulation/fullMatch/attributeDrivenShotResolutionSignature.ts") && bundleSimulation.includes("attributeDrivenShotResolutionSignature"), "3O signature bundled"),
+    check("attribute-driven tests bundled", bundleSimulation.includes("attributeDrivenShotResolution.test.ts") && bundleSimulation.includes("compareAttributeDrivenShotResolutions.test.ts") && bundleSimulation.includes("runFullMatchExperimentalAttributeDrivenShotResolution.test.ts"), "3O tests bundled"),
+    check("3O scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3o.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3o.test.ts"), "3O guards bundled"),
+    check("attribute-driven evidence included", fullMatchWorkbenchChainReplay3O.includes("WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX") && bundleSimulation.includes("WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"), "3O evidence visible"),
+    check("attribute-driven sandbox is isolated-only", fullMatchWorkbenchChainReplay3O.includes("modelAppliedOnlyInSandbox: true") && fullMatchWorkbenchChainReplay3O.includes("modelAppliedToNormalLiveSelection: false"), "attribute-driven isolated"),
+    check("default and experimental official score signatures remain equal", fullMatchWorkbenchChainReplay3O.includes("default and experimental official score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3OValidation.includes("default and experimental official score signatures remain equal"), "score signatures equal"),
+    check("attribute-driven sandbox cannot mutate official score", fullMatchWorkbenchChainReplay3O.includes("attribute-driven shot resolution can mutate official score: false") && fullMatchWorkbenchChainReplay3OValidation.includes("attribute-driven shot resolution cannot mutate official score"), "official score mutation forbidden"),
+    check("attribute-driven sandbox cannot create production scoring events", fullMatchWorkbenchChainReplay3O.includes("attribute-driven shot resolution can create production scoring events: false") && fullMatchWorkbenchChainReplay3OValidation.includes("attribute-driven shot resolution cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("attribute-driven sandbox cannot claim global economy", fullMatchWorkbenchChainReplay3O.includes("attribute-driven shot resolution can claim global economy: false") && fullMatchWorkbenchChainReplay3OValidation.includes("attribute-driven shot resolution cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3O.includes("coach copy wording status: absent") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3OValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3OValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3OValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3OValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3O.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3O.includes("CONFIRM_SANDBOX_SCORING_EVENT_RESOLUTION_TO_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION") && fullMatchWorkbenchChainReplay3O.includes("CONFIRM_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_IS_ISOLATED_ONLY") && fullMatchWorkbenchChainReplay3O.includes("PREPARE_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_TO_GOALKEEPER_RESPONSE_MODEL"), "3O recommendations visible"),
+  ];
+
   const sprint3NExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3450,6 +3524,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3O - Attribute-Driven Shot Resolution Sandbox")
+      ? sprint3OChecks
     : activeConfig.sprintName.includes("Sprint 3N - Sandbox Scoring Event Resolution")
       ? sprint3NChecks
     : activeConfig.sprintName.includes("Sprint 3M - Sandbox Scoring Event Candidate")
