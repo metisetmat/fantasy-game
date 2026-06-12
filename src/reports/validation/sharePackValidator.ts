@@ -180,6 +180,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3UValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3u.md"));
   const fullMatchWorkbenchChainReplay3V = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3v.md"));
   const fullMatchWorkbenchChainReplay3VValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3v.md"));
+  const fullMatchWorkbenchChainReplay3W = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3w.md"));
+  const fullMatchWorkbenchChainReplay3WValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3w.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1937,6 +1939,77 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-3t.md",
     "fullmatch-workbench-chain-replay-3s.md",
     "validation.fullmatch-workbench-chain-replay-3s.md",
+  ];
+  const sprint3WExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3w.md",
+    "validation.fullmatch-workbench-chain-replay-3w.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3WForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3v.md",
+    "validation.fullmatch-workbench-chain-replay-3v.md",
+    "fullmatch-workbench-chain-replay-3u.md",
+    "validation.fullmatch-workbench-chain-replay-3u.md",
+    "fullmatch-workbench-chain-replay-3t.md",
+    "validation.fullmatch-workbench-chain-replay-3t.md",
+    "fullmatch-workbench-chain-replay-3s.md",
+    "validation.fullmatch-workbench-chain-replay-3s.md",
+  ];
+  const coachExperimentalVisibleHtml = coachExperimentalHtml.replace(/<details[\s\S]*?<\/details>/g, "");
+  const sprint3WChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 3W", activeConfig.sprintName === "Sprint 3W - Sandbox Decision Panel", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint3WExpectedFiles.every((file) => requiredCopied(file)), sprint3WExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint3WForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3WForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint3WExpectedFiles.every((file) => requiredCopied(file)), sprint3WExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3W", manifest.includes("Sprint 3W - Sandbox Decision Panel") && detailedManifest.includes("Sprint 3W - Sandbox Decision Panel"), "visible"),
+    check("README is Sprint 3W oriented", readme.includes("# Sprint 3W Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3w.md"), "README current"),
+    check("3W report included", fullMatchWorkbenchChainReplay3W.includes("# FullMatch Workbench Chain Replay 3W") && fullMatchWorkbenchChainReplay3W.includes("sandbox decision panel status: available"), "3W doc included"),
+    check("3W validation is PASS", fullMatchWorkbenchChainReplay3WValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3WValidation.includes("sandbox decision panel status is available"), "3W validation PASS"),
+    check("decision panel has four blocks", fullMatchWorkbenchChainReplay3W.includes("sandbox decision panel block count: 4") && fullMatchWorkbenchChainReplay3WValidation.includes("sandbox decision panel has four coach-readable blocks"), "four blocks visible"),
+    check("decision panel blocks visible", fullMatchWorkbenchChainReplay3W.includes("Enseignement coach") && fullMatchWorkbenchChainReplay3W.includes("Option à tester") && fullMatchWorkbenchChainReplay3W.includes("Risque associé") && fullMatchWorkbenchChainReplay3W.includes("Ce qui reste à prouver"), "blocks visible"),
+    check("default report has no sandbox decision panel", !coachDefaultHtml.includes("Panneau de d") && !coachDefaultHtml.includes("sandbox_decision_panel"), "default hidden"),
+    check("experimental report has sandbox decision panel", coachExperimentalHtml.includes("Panneau de d") && coachExperimentalHtml.includes("cision sandbox") && coachExperimentalHtml.includes("Enseignement coach"), "experimental visible"),
+    check("technical panel details moved behind details", coachExperimentalHtml.includes("panneau sandbox") && !coachExperimentalVisibleHtml.includes("canDriveProductionRouteResolution"), "technical details collapsed"),
+    check("panel wording is suggestion-only", coachExperimentalHtml.includes("option coach") && coachExperimentalHtml.includes("ne pilote pas la") && !coachExperimentalVisibleHtml.includes("officiellement meilleure"), "suggestion-only visible"),
+    check("panel cannot drive live selection", fullMatchWorkbenchChainReplay3W.includes("can drive live selection: false") && fullMatchWorkbenchChainReplay3WValidation.includes("cannot drive live selection"), "live selection forbidden"),
+    check("panel cannot drive production route resolution", fullMatchWorkbenchChainReplay3W.includes("can drive production route resolution: false") && fullMatchWorkbenchChainReplay3WValidation.includes("cannot drive production route resolution"), "production route forbidden"),
+    check("official state unchanged", fullMatchWorkbenchChainReplay3W.includes("official timeline unchanged: true") && fullMatchWorkbenchChainReplay3W.includes("official score unchanged: true") && fullMatchWorkbenchChainReplay3W.includes("official possession unchanged: true") && fullMatchWorkbenchChainReplay3W.includes("official scoring events unchanged: true"), "official state unchanged"),
+    check("no production scoring or global economy claim", fullMatchWorkbenchChainReplay3W.includes("production scoring event creation count: 0") && fullMatchWorkbenchChainReplay3W.includes("global economy claim count: 0"), "no production scoring/global economy"),
+    check("sandbox decision panel contract bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxDecisionPanel.ts") && bundleSimulation.includes("SandboxDecisionPanelModel"), "3W contract bundled"),
+    check("sandbox decision panel builder bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxDecisionPanelFromTimelineReview.ts") && bundleSimulation.includes("sandboxDecisionPanelFromTimelineReview"), "3W builder bundled"),
+    check("sandbox decision panel tests bundled", bundleSimulation.includes("sandboxDecisionPanelFromTimelineReview.test.ts") && bundleSimulation.includes("sandboxDecisionPanelGuard.test.ts") && bundleSimulation.includes("scoringGuard.3w.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3w.test.ts"), "3W tests bundled"),
+    check("sandbox decision panel renderer test bundled", bundleReports.includes("coachReportSandboxDecisionPanel.test.ts") && bundleReports.includes("renderSandboxDecisionPanel"), "3W report test bundled"),
+    check("sandbox decision panel evidence included", fullMatchWorkbenchChainReplay3W.includes("WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL") && bundleSimulation.includes("WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"), "3W evidence visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3WValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay3WValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3WValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3WValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3W.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3W.includes("CONFIRM_SANDBOX_DECISION_PANEL_SUGGESTION_ONLY") && fullMatchWorkbenchChainReplay3W.includes("CONFIRM_NO_LIVE_SELECTION_DRIVER") && fullMatchWorkbenchChainReplay3W.includes("PREPARE_SANDBOX_DECISION_PANEL_EVIDENCE_CALIBRATION"), "3W recommendations visible"),
   ];
   const sprint3VChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -4069,6 +4142,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3W - Sandbox Decision Panel")
+      ? sprint3WChecks
     : activeConfig.sprintName.includes("Sprint 3V - Coach-Facing Timeline Review")
       ? sprint3VChecks
     : activeConfig.sprintName.includes("Sprint 3U - Official Timeline Diff View")

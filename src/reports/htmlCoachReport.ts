@@ -358,6 +358,79 @@ function renderTimelineReview(report: MatchReport): string {
     </section>`;
 }
 
+function renderSandboxDecisionPanel(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL" &&
+    candidate.internalTags.includes("sandbox_decision_panel")
+  );
+
+  if (fact === undefined) {
+    return "";
+  }
+
+  const recommendation = tagValue(fact.internalTags, "sandbox_decision_recommendation_") ?? "test_support_around_forward_progress";
+  const blocks = [
+    {
+      title: "Enseignement coach",
+      summary:
+        "Le sandbox suggère que FORWARD_PROGRESS peut créer une situation dangereuse, mais il ne transforme pas cette lecture en vérité officielle.",
+      bullets: [
+        "Le signal sert à formuler une hypothèse de travail.",
+        "La progression doit encore prouver qu'elle produit une seconde action contrôlée.",
+        "La récupération par l'équipe du gardien reste un risque visible.",
+      ],
+    },
+    {
+      title: "Option à tester",
+      summary:
+        "Tester FORWARD_PROGRESS vers control-space-hunter avec un soutien proche autour de Z4-HSR.",
+      bullets: [
+        "Soutenir la réception pour éviter un tir isolé.",
+        "Créer une présence autour du second ballon.",
+        `Recommandation sandbox : ${recommendation}.`,
+      ],
+    },
+    {
+      title: "Risque associé",
+      summary:
+        "Si le soutien arrive trop tard, la route peut donner une réponse gardien favorable à BLITZ plutôt qu'une vraie continuité offensive.",
+      bullets: [
+        "Le danger apparent peut rester stérile.",
+        "Un rebond mal couvert peut sécuriser la possession adverse.",
+        "Cette option ne doit pas piloter la sélection live normale.",
+      ],
+    },
+    {
+      title: "Ce qui reste à prouver",
+      summary:
+        "La même idée doit être testée dans plusieurs contextes avant tout usage production.",
+      bullets: [
+        "Différents profils de gardien.",
+        "Différents niveaux de soutien et de fatigue.",
+        "Aucune conclusion d'économie globale depuis ce panneau.",
+      ],
+    },
+  ];
+  const articles = blocks.map((block) => `
+      <article class="card">
+        <h3>${escapeHtml(block.title)}</h3>
+        <p>${escapeHtml(block.summary)}</p>
+        <ul>${block.bullets.map((bullet) => `<li>${escapeHtml(bullet)}</li>`).join("")}</ul>
+      </article>`).join("");
+
+  return `
+    <section>
+      <h2>Panneau de décision sandbox</h2>
+      <p>Ce panneau propose une option coach à tester. Il ne remplace pas la timeline officielle et ne pilote pas la sélection live.</p>
+      <div class="grid">${articles}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques du panneau sandbox</summary>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -455,6 +528,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const zoneStats = report.zoneStats.map(renderZoneStats).join("");
   const timeline = [...report.timeline].sort(compareTimelineEvents).map(renderTimelineEvent).join("");
   const timelineReview = renderTimelineReview(report);
+  const sandboxDecisionPanel = renderSandboxDecisionPanel(report);
 
   return `<!doctype html>
 <html lang="fr">
@@ -520,6 +594,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     </section>
 
     ${timelineReview}
+    ${sandboxDecisionPanel}
 
     <section>
       <h2>Diagnostic tactique</h2>

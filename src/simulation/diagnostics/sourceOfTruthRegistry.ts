@@ -27,7 +27,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
   | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
-  | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW";
+  | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -732,6 +733,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "official scoring events",
       "production route resolution",
       "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
+    canProve: [
+      "the coach-facing report can expose a sandbox decision suggestion without changing official match state",
+      "the sandbox decision panel remains suggestion-only and cannot drive live selection",
+      "the sandbox decision panel keeps official timeline, score, possession, and scoring events unchanged",
+      "technical sandbox evidence can be converted into coach-readable test options",
+    ],
+    canSuggest: [
+      "coach-facing tactical tests",
+      "risks to monitor before production use",
+      "unproven evidence gaps",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route quality",
+      "normal live selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
       "full-match batch economy",
       "scoring constants",
     ],
