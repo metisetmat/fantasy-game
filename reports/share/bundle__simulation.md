@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3J - Real Isolated Replay Engine. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3L - Sandbox Scoring Opportunity Model. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -166,6 +166,10 @@ import { controlledSegmentReplayComparisonFromExperiment } from "./fullMatch/con
 import type { FullMatchControlledSegmentReplayComparison } from "./fullMatch/fullMatchControlledSegmentReplayComparison";
 import { realIsolatedSegmentReplayFromComparison } from "./fullMatch/realIsolatedSegmentReplayFromComparison";
 import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatch/fullMatchRealIsolatedSegmentReplay";
+import { controlledRouteResolutionSandboxFromReplay } from "./fullMatch/controlledRouteResolutionSandboxFromReplay";
+import type { ControlledRouteResolutionSandbox } from "./fullMatch/controlledRouteResolutionSandbox";
+import { sandboxScoringOpportunityModelFromResolution } from "./fullMatch/sandboxScoringOpportunityModelFromResolution";
+import type { SandboxScoringOpportunityModel } from "./fullMatch/sandboxScoringOpportunityModel";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -615,6 +619,58 @@ function realIsolatedSegmentReplayLimitations(
     "FULLMATCH_REAL_ISOLATED_SEGMENT_REPLAY_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_REAL_ISOLATED_SEGMENT_REPLAY_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_REAL_ISOLATED_SEGMENT_REPLAY_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function controlledRouteResolutionSandboxLimitations(
+  sandbox: ControlledRouteResolutionSandbox,
+): readonly string[] {
+  if (sandbox.status === "not_available") {
+    return ["FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_EXPERIMENTAL",
+    `FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_STATUS_${sandbox.status.toUpperCase()}`,
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_RESULTS_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_APPLIED_ONLY_IN_ISOLATED_RESOLUTION",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_NOT_APPLIED_TO_NORMAL_LIVE_SELECTION",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function sandboxScoringOpportunityModelLimitations(
+  model: SandboxScoringOpportunityModel,
+): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_APPLIED_ONLY_IN_SANDBOX",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_NOT_APPLIED_TO_NORMAL_LIVE_SELECTION",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -1371,6 +1427,162 @@ function realIsolatedSegmentReplayEvidenceFact(input: {
   };
 }
 
+function controlledRouteResolutionSandboxEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly sandbox: ControlledRouteResolutionSandbox;
+}): MatchReportEvidenceFact | null {
+  if (input.sandbox.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_controlled_route_resolution_sandbox")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-controlled-route-resolution-sandbox`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.sandbox.baseline.targetZone ?? "Z2-HSL", input.sandbox.override.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental controlled route resolution sandbox ${input.sandbox.status}: origin ${input.sandbox.origin}, ` +
+      `baseline ${input.sandbox.baseline.candidateId ?? "none"} (${input.sandbox.baseline.actionType ?? "none"}) ` +
+      `to ${input.sandbox.baseline.receiverId ?? "none"} in ${input.sandbox.baseline.targetZone ?? "none"} ` +
+      `resolved=${input.sandbox.baselineResolved}, outcome=${input.sandbox.baseline.outcome}, ` +
+      `defensivePressure=${input.sandbox.baseline.defensivePressure}, receptionQuality=${input.sandbox.baseline.receptionQuality}, ` +
+      `turnoverRisk=${input.sandbox.baseline.turnoverRisk}, dangerProbability=${input.sandbox.baseline.dangerProbability}, ` +
+      `scoringOpportunityProbability=${input.sandbox.baseline.scoringOpportunityProbability}; ` +
+      `override ${input.sandbox.override.candidateId ?? "none"} (${input.sandbox.override.actionType ?? "none"}) ` +
+      `to ${input.sandbox.override.receiverId ?? "none"} in ${input.sandbox.override.targetZone ?? "none"} ` +
+      `resolved=${input.sandbox.overrideResolved}, outcome=${input.sandbox.override.outcome}, ` +
+      `defensivePressure=${input.sandbox.override.defensivePressure}, receptionQuality=${input.sandbox.override.receptionQuality}, ` +
+      `turnoverRisk=${input.sandbox.override.turnoverRisk}, dangerProbability=${input.sandbox.override.dangerProbability}, ` +
+      `scoringOpportunityProbability=${input.sandbox.override.scoringOpportunityProbability}. ` +
+      `selectionDivergence=${input.sandbox.selectionDivergenceObserved}, carrierDivergence=${input.sandbox.carrierDivergenceObserved}, ` +
+      `zoneProgressionDivergence=${input.sandbox.zoneProgressionDivergenceObserved}, dangerCreationDivergence=${input.sandbox.dangerCreationDivergenceObserved}, ` +
+      `scoringOpportunityDivergence=${input.sandbox.scoringOpportunityDivergenceObserved}, ` +
+      `sandboxScoringEventDivergence=${input.sandbox.sandboxScoringEventDivergenceObserved}, sandboxScoreDivergence=${input.sandbox.sandboxScoreDivergenceObserved}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.sandbox.canInjectEventsIntoOfficialTimeline}, ` +
+      `canMutateOfficialScore=${input.sandbox.canMutateOfficialScore}, canMutateOfficialScoringEvents=${input.sandbox.canMutateOfficialScoringEvents}, ` +
+      `canCreateProductionScoringEvents=${input.sandbox.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.sandbox.canClaimGlobalEconomy}.`,
+    confidence: input.sandbox.status === "available" ? "medium" : "low",
+    strength: input.sandbox.status === "available" ? 74 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_controlled_route_resolution_sandbox",
+      "controlled_route_resolution_sandbox",
+      ...(input.sandbox.chainId === undefined ? [] : [`sandbox_chain_id_${input.sandbox.chainId}`]),
+      ...(input.sandbox.baseline.candidateId === undefined ? [] : [`sandbox_baseline_candidate_${input.sandbox.baseline.candidateId}`]),
+      ...(input.sandbox.baseline.actionType === undefined ? [] : [`sandbox_baseline_action_${input.sandbox.baseline.actionType}`]),
+      ...(input.sandbox.baseline.receiverId === undefined ? [] : [`sandbox_baseline_receiver_${input.sandbox.baseline.receiverId}`]),
+      ...(input.sandbox.baseline.targetZone === undefined ? [] : [`sandbox_baseline_zone_${input.sandbox.baseline.targetZone}`]),
+      `sandbox_baseline_outcome_${input.sandbox.baseline.outcome}`,
+      `sandbox_baseline_resolved_${input.sandbox.baselineResolved ? "true" : "false"}`,
+      `sandbox_baseline_defensive_pressure_${input.sandbox.baseline.defensivePressure}`,
+      `sandbox_baseline_reception_quality_${input.sandbox.baseline.receptionQuality}`,
+      `sandbox_baseline_turnover_risk_${input.sandbox.baseline.turnoverRisk}`,
+      `sandbox_baseline_danger_probability_${input.sandbox.baseline.dangerProbability}`,
+      `sandbox_baseline_scoring_opportunity_probability_${input.sandbox.baseline.scoringOpportunityProbability}`,
+      ...(input.sandbox.override.candidateId === undefined ? [] : [`sandbox_override_candidate_${input.sandbox.override.candidateId}`]),
+      ...(input.sandbox.override.actionType === undefined ? [] : [`sandbox_override_action_${input.sandbox.override.actionType}`]),
+      ...(input.sandbox.override.receiverId === undefined ? [] : [`sandbox_override_receiver_${input.sandbox.override.receiverId}`]),
+      ...(input.sandbox.override.targetZone === undefined ? [] : [`sandbox_override_zone_${input.sandbox.override.targetZone}`]),
+      `sandbox_override_outcome_${input.sandbox.override.outcome}`,
+      `sandbox_override_resolved_${input.sandbox.overrideResolved ? "true" : "false"}`,
+      `sandbox_override_defensive_pressure_${input.sandbox.override.defensivePressure}`,
+      `sandbox_override_reception_quality_${input.sandbox.override.receptionQuality}`,
+      `sandbox_override_turnover_risk_${input.sandbox.override.turnoverRisk}`,
+      `sandbox_override_danger_probability_${input.sandbox.override.dangerProbability}`,
+      `sandbox_override_scoring_opportunity_probability_${input.sandbox.override.scoringOpportunityProbability}`,
+      `sandbox_selection_divergence_${input.sandbox.selectionDivergenceObserved ? "true" : "false"}`,
+      `sandbox_carrier_divergence_${input.sandbox.carrierDivergenceObserved ? "true" : "false"}`,
+      `sandbox_zone_progression_divergence_${input.sandbox.zoneProgressionDivergenceObserved ? "true" : "false"}`,
+      `sandbox_danger_creation_divergence_${input.sandbox.dangerCreationDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_opportunity_divergence_${input.sandbox.scoringOpportunityDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_event_divergence_${input.sandbox.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+      `sandbox_score_divergence_${input.sandbox.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+      `sandbox_applied_only_in_isolated_resolution_${input.sandbox.sandboxAppliedOnlyInIsolatedResolution ? "true" : "false"}`,
+      `sandbox_applied_to_normal_live_${input.sandbox.sandboxAppliedToNormalLiveSelection ? "true" : "false"}`,
+      "sandbox_official_timeline_injection_forbidden",
+      "sandbox_official_score_mutation_forbidden",
+      "sandbox_official_scoring_events_mutation_forbidden",
+      "sandbox_production_resolution_forbidden",
+      "sandbox_global_route_success_mutation_forbidden",
+      "sandbox_production_scoring_event_creation_forbidden",
+      "sandbox_global_economy_claim_forbidden",
+      "sandbox_closed_candidates_rejected",
+      "sandbox_unavailable_candidates_rejected",
+      "sandbox_events_injected_into_official_timeline_count_0",
+      "sandbox_official_score_mutation_count_0",
+      "sandbox_official_scoring_event_mutation_count_0",
+      "sandbox_production_scoring_event_creation_count_0",
+      "sandbox_production_route_resolution_mutation_count_0",
+      "sandbox_global_route_success_mutation_count_0",
+      "sandbox_global_economy_claim_count_0",
+      ...input.sandbox.tags,
+    ],
+  };
+}
+
+function sandboxScoringOpportunityModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxScoringOpportunityModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_sandbox_scoring_opportunity_model")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-scoring-opportunity-model`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.baseline.targetZone ?? "Z2-HSL", input.model.override.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental sandbox scoring opportunity model ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline ${input.model.baseline.candidateId ?? "none"} (${input.model.baseline.actionType ?? "none"}) ` +
+      `to ${input.model.baseline.receiverId ?? "none"} in ${input.model.baseline.targetZone ?? "none"} ` +
+      `routeOutcome=${input.model.baseline.routeOutcome ?? "none"}, sourceDangerProbability=${input.model.baseline.sourceDangerProbability}, ` +
+      `sourceScoringOpportunityProbability=${input.model.baseline.sourceScoringOpportunityProbability}, ` +
+      `opportunityType=${input.model.baseline.opportunityType}, opportunityFamily=${input.model.baseline.opportunityFamily}, ` +
+      `opportunityProbability=${input.model.baseline.opportunityProbability}, opportunityCreated=${input.model.baseline.opportunityCreated}; ` +
+      `override ${input.model.override.candidateId ?? "none"} (${input.model.override.actionType ?? "none"}) ` +
+      `to ${input.model.override.receiverId ?? "none"} in ${input.model.override.targetZone ?? "none"} ` +
+      `routeOutcome=${input.model.override.routeOutcome ?? "none"}, sourceDangerProbability=${input.model.override.sourceDangerProbability}, ` +
+      `sourceScoringOpportunityProbability=${input.model.override.sourceScoringOpportunityProbability}, ` +
+      `opportunityType=${input.model.override.opportunityType}, opportunityFamily=${input.model.override.opportunityFamily}, ` +
+      `opportunityProbability=${input.model.override.opportunityProbability}, opportunityCreated=${input.model.override.opportunityCreated}. ` +
+      `typeDivergence=${input.model.opportunityTypeDivergenceObserved}, familyDivergence=${input.model.opportunityFamilyDivergenceObserved}, ` +
+      `probabilityDivergence=${input.model.opportunityProbabilityDivergenceObserved}, creationDivergence=${input.model.opportunityCreationDivergenceObserved}, ` +
+      `sandboxScoringEventDivergence=${input.model.sandboxScoringEventDivergenceObserved}, sandboxScoreDivergence=${input.model.sandboxScoreDivergenceObserved}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, canMutateOfficialScore=${input.model.canMutateOfficialScore}, ` +
+      `canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, ` +
+      `canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 76 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_scoring_opportunity_model",
+      "sandbox_scoring_opportunity_model",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_opportunity_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -1385,6 +1597,8 @@ function withFullMatchGroundingDiagnosis(
   isolatedMiniMatchOverrideExperiment: FullMatchIsolatedMiniMatchOverrideExperiment,
   controlledSegmentReplayComparison: FullMatchControlledSegmentReplayComparison,
   realIsolatedSegmentReplay: FullMatchRealIsolatedSegmentReplay,
+  controlledRouteResolutionSandbox: ControlledRouteResolutionSandbox,
+  sandboxScoringOpportunityModel: SandboxScoringOpportunityModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -1399,19 +1613,25 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_live_selection_override_guard") ||
     fact.internalTags.includes("workbench_chain_isolated_minimatch_override_experiment") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_replay_comparison") ||
-    fact.internalTags.includes("workbench_chain_real_isolated_segment_replay")
+    fact.internalTags.includes("workbench_chain_real_isolated_segment_replay") ||
+    fact.internalTags.includes("workbench_chain_controlled_route_resolution_sandbox") ||
+    fact.internalTags.includes("workbench_chain_sandbox_scoring_opportunity_model")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match, en mode experimental, sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. La selection controlee experimentale ne pilote pas encore la resolution reelle du full-match. La source de route controlee pour mini-match ne pilote pas encore la resolution live du mini-match. Le moteur prepare maintenant un override de selection live experimental pour le premier segment : ${liveSelectionOverrideGuard.overrideActionType ?? controlledMiniMatchRouteSource.actionType ?? "none"} vers ${liveSelectionOverrideGuard.overrideReceiverId ?? controlledMiniMatchRouteSource.receiverId ?? "none"} en ${liveSelectionOverrideGuard.overrideTargetZone ?? controlledMiniMatchRouteSource.targetZone ?? "none"}. Il reste volontairement non applique a la selection live normale. Le moteur applique maintenant l'override uniquement dans une experience mini-match isolee : ${isolatedMiniMatchOverrideExperiment.overrideActionType ?? liveSelectionOverrideGuard.overrideActionType ?? "none"} vers ${isolatedMiniMatchOverrideExperiment.overrideReceiverId ?? liveSelectionOverrideGuard.overrideReceiverId ?? "none"} en ${isolatedMiniMatchOverrideExperiment.overrideTargetZone ?? liveSelectionOverrideGuard.overrideTargetZone ?? "none"}. Le moteur compare maintenant deux replays controles du premier segment : la reference ${controlledSegmentReplayComparison.baseline.actionType ?? isolatedMiniMatchOverrideExperiment.baselineActionType ?? "none"} vers ${controlledSegmentReplayComparison.baseline.receiverId ?? isolatedMiniMatchOverrideExperiment.baselineReceiverId ?? "none"} en ${controlledSegmentReplayComparison.baseline.targetZone ?? isolatedMiniMatchOverrideExperiment.baselineTargetZone ?? "none"} et l'override ${controlledSegmentReplayComparison.override.actionType ?? isolatedMiniMatchOverrideExperiment.overrideActionType ?? "none"} vers ${controlledSegmentReplayComparison.override.receiverId ?? isolatedMiniMatchOverrideExperiment.overrideReceiverId ?? "none"} en ${controlledSegmentReplayComparison.override.targetZone ?? isolatedMiniMatchOverrideExperiment.overrideTargetZone ?? "none"}. Le moteur genere aussi de vrais evenements de replay isole : ${realIsolatedSegmentReplay.baselineEventCount} pour la reference et ${realIsolatedSegmentReplay.overrideEventCount} pour l'override. Ces evenements de replay isole sont experimentaux uniquement : ils ne sont pas des MatchEvents officiels, ne sont pas injectes dans la timeline officielle, ne modifient pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale. Cette comparaison montre une divergence de selection, de porteur, de progression territoriale et de danger, mais elle reste isolee : elle ne modifie pas le full-match normal. L'override n'est pas applique a la selection live normale. Les routes fermees ou indisponibles restent rejetees avant la comparaison. Cette source, ce garde, cette comparaison et ce replay reel isole restent cantonnes au diagnostic sans modifier le score ni les evenements ; ils ne pilotent pas encore la resolution reelle du full-match. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+    : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match, en mode experimental, sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. La selection controlee experimentale ne pilote pas encore la resolution reelle du full-match. La source de route controlee pour mini-match ne pilote pas encore la resolution live du mini-match. Le moteur prepare maintenant un override de selection live experimental pour le premier segment : ${liveSelectionOverrideGuard.overrideActionType ?? controlledMiniMatchRouteSource.actionType ?? "none"} vers ${liveSelectionOverrideGuard.overrideReceiverId ?? controlledMiniMatchRouteSource.receiverId ?? "none"} en ${liveSelectionOverrideGuard.overrideTargetZone ?? controlledMiniMatchRouteSource.targetZone ?? "none"}. Il reste volontairement non applique a la selection live normale. Le moteur applique maintenant l'override uniquement dans une experience mini-match isolee : ${isolatedMiniMatchOverrideExperiment.overrideActionType ?? liveSelectionOverrideGuard.overrideActionType ?? "none"} vers ${isolatedMiniMatchOverrideExperiment.overrideReceiverId ?? liveSelectionOverrideGuard.overrideReceiverId ?? "none"} en ${isolatedMiniMatchOverrideExperiment.overrideTargetZone ?? liveSelectionOverrideGuard.overrideTargetZone ?? "none"}. Le moteur compare maintenant deux replays controles du premier segment : la reference ${controlledSegmentReplayComparison.baseline.actionType ?? isolatedMiniMatchOverrideExperiment.baselineActionType ?? "none"} vers ${controlledSegmentReplayComparison.baseline.receiverId ?? isolatedMiniMatchOverrideExperiment.baselineReceiverId ?? "none"} en ${controlledSegmentReplayComparison.baseline.targetZone ?? isolatedMiniMatchOverrideExperiment.baselineTargetZone ?? "none"} et l'override ${controlledSegmentReplayComparison.override.actionType ?? isolatedMiniMatchOverrideExperiment.overrideActionType ?? "none"} vers ${controlledSegmentReplayComparison.override.receiverId ?? isolatedMiniMatchOverrideExperiment.overrideReceiverId ?? "none"} en ${controlledSegmentReplayComparison.override.targetZone ?? isolatedMiniMatchOverrideExperiment.overrideTargetZone ?? "none"}. Le moteur genere aussi de vrais evenements de replay isole : ${realIsolatedSegmentReplay.baselineEventCount} pour la reference et ${realIsolatedSegmentReplay.overrideEventCount} pour l'override. Il resout maintenant ces deux routes dans une sandbox de resolution controlee : reference ${controlledRouteResolutionSandbox.baseline.outcome} avec danger ${controlledRouteResolutionSandbox.baseline.dangerProbability}/100, override ${controlledRouteResolutionSandbox.override.outcome} avec danger ${controlledRouteResolutionSandbox.override.dangerProbability}/100. Cette sandbox reste strictement isolee : ses resultats ne sont pas des MatchEvents officiels, ne sont pas injectes dans la timeline officielle, ne modifient pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale. Cette comparaison montre une divergence de selection, de porteur, de progression territoriale et de danger, mais elle reste isolee : elle ne modifie pas le full-match normal. L'override n'est pas applique a la selection live normale. Les routes fermees ou indisponibles restent rejetees avant la comparaison et la sandbox. Cette source, ce garde, cette comparaison, ce replay reel isole et cette sandbox restent cantonnes au diagnostic sans modifier le score ni les evenements ; ils ne pilotent pas encore la resolution reelle du full-match. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+  const opportunitySummary = sandboxScoringOpportunityModel.status === "not_available"
+    ? ""
+    : ` Le modele sandbox d'opportunite de scoring classe ensuite la reference en ${sandboxScoringOpportunityModel.baseline.opportunityType} (${sandboxScoringOpportunityModel.baseline.opportunityProbability}/100) et l'override en ${sandboxScoringOpportunityModel.override.opportunityType} (${sandboxScoringOpportunityModel.override.opportunityProbability}/100). Ce signal reste sandbox-only : il ne cree aucun MatchEvent officiel, aucun evenement de score production, ne modifie pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
     scope: "coach_visible",
     severity: "low",
     title: "Ancrage tactique full-match partiel",
-    coachSummary: chainSummary,
+    coachSummary,
     technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
     evidenceFactIds: [...groundingFacts, ...chainFacts].map((fact) => fact.factId),
     eventIds: chainFacts.length > 0 ? [...eventIds, ...chainFacts.flatMap((fact) => fact.eventIds)].slice(0, 8) : eventIds,
@@ -1422,7 +1642,7 @@ function withFullMatchGroundingDiagnosis(
     diagnosisId: `${input.matchId}-tactical-grounding-gap`,
     teamId: input.homeTeam.teamId,
     title: "Ancrage workbench maintenant partiel",
-    summary: chainSummary,
+    summary: coachSummary,
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
@@ -1485,6 +1705,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const realIsolatedSegmentReplay = realIsolatedSegmentReplayFromComparison({
     comparison: controlledSegmentReplayComparison,
   });
+  const controlledRouteResolutionSandbox = controlledRouteResolutionSandboxFromReplay({
+    replay: realIsolatedSegmentReplay,
+  });
+  const sandboxScoringOpportunityModel = sandboxScoringOpportunityModelFromResolution({
+    sandbox: controlledRouteResolutionSandbox,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -1533,6 +1759,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && isolatedMiniMatchOverrideExperiment.status !== "not_available" ? { isolatedMiniMatchOverrideExperiment } : {}),
           ...(index === 0 && controlledSegmentReplayComparison.status !== "not_available" ? { controlledSegmentReplayComparison } : {}),
           ...(index === 0 && realIsolatedSegmentReplay.status !== "not_available" ? { realIsolatedSegmentReplay } : {}),
+          ...(index === 0 && controlledRouteResolutionSandbox.status !== "not_available" ? { controlledRouteResolutionSandbox } : {}),
+          ...(index === 0 && sandboxScoringOpportunityModel.status !== "not_available" ? { sandboxScoringOpportunityModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -1610,6 +1838,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...isolatedMiniMatchOverrideExperimentLimitations(isolatedMiniMatchOverrideExperiment),
       ...controlledSegmentReplayComparisonLimitations(controlledSegmentReplayComparison),
       ...realIsolatedSegmentReplayLimitations(realIsolatedSegmentReplay),
+      ...controlledRouteResolutionSandboxLimitations(controlledRouteResolutionSandbox),
+      ...sandboxScoringOpportunityModelLimitations(sandboxScoringOpportunityModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -1667,6 +1897,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     replay: realIsolatedSegmentReplay,
   });
+  const controlledRouteResolutionSandboxFact = controlledRouteResolutionSandboxEvidenceFact({
+    report,
+    matchInput: input,
+    sandbox: controlledRouteResolutionSandbox,
+  });
+  const sandboxScoringOpportunityModelFact = sandboxScoringOpportunityModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: sandboxScoringOpportunityModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -1679,6 +1919,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(isolatedMiniMatchOverrideExperimentFact === null ? [] : [isolatedMiniMatchOverrideExperimentFact]),
     ...(controlledSegmentReplayComparisonFact === null ? [] : [controlledSegmentReplayComparisonFact]),
     ...(realIsolatedSegmentReplayFact === null ? [] : [realIsolatedSegmentReplayFact]),
+    ...(controlledRouteResolutionSandboxFact === null ? [] : [controlledRouteResolutionSandboxFact]),
+    ...(sandboxScoringOpportunityModelFact === null ? [] : [sandboxScoringOpportunityModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1701,6 +1943,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     isolatedMiniMatchOverrideExperiment,
     controlledSegmentReplayComparison,
     realIsolatedSegmentReplay,
+    controlledRouteResolutionSandbox,
+    sandboxScoringOpportunityModel,
   );
 }
 ```
@@ -7102,6 +7346,1471 @@ export function fullMatchRealIsolatedSegmentReplaySignature(
 }
 ```
 
+## File: src/simulation/fullMatch/controlledRouteResolutionSandbox.ts
+
+```ts
+export type ControlledRouteResolutionSandboxStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type ControlledRouteResolutionSandboxScope =
+  | "controlled_route_resolution_sandbox"
+  | "production_resolution_forbidden";
+
+export type ControlledRouteResolutionSandboxOrigin =
+  | "none"
+  | "real_isolated_segment_replay";
+
+export type ControlledRouteResolutionOutcome =
+  | "safe_retention"
+  | "progressive_retention"
+  | "dangerous_progression"
+  | "turnover"
+  | "failed_reception"
+  | "scoring_opportunity"
+  | "sandbox_score";
+
+export type ControlledRouteResolutionPathResult = {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+  readonly routeResolved: boolean;
+  readonly outcome: ControlledRouteResolutionOutcome;
+  readonly possessionRetained: boolean;
+  readonly resultingCarrierId?: string;
+  readonly resultingZone?: string;
+  readonly defensivePressure: number;
+  readonly receptionQuality: number;
+  readonly turnoverRisk: number;
+  readonly dangerProbability: number;
+  readonly scoringOpportunityProbability: number;
+  readonly dangerCreated: boolean;
+  readonly scoringOpportunityCreated: boolean;
+  readonly sandboxScoringEventCreated: boolean;
+  readonly sandboxScoreDelta: number;
+  readonly isolatedOnly: true;
+  readonly canBecomeOfficialMatchEvent: false;
+  readonly canMutateOfficialScore: false;
+  readonly canCreateOfficialScoringEvent: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type ControlledRouteResolutionSandbox = {
+  readonly status: ControlledRouteResolutionSandboxStatus;
+  readonly scope: ControlledRouteResolutionSandboxScope;
+  readonly origin: ControlledRouteResolutionSandboxOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly baseline: ControlledRouteResolutionPathResult;
+  readonly override: ControlledRouteResolutionPathResult;
+  readonly baselineResolved: boolean;
+  readonly overrideResolved: boolean;
+  readonly selectionDivergenceObserved: boolean;
+  readonly carrierDivergenceObserved: boolean;
+  readonly zoneProgressionDivergenceObserved: boolean;
+  readonly dangerCreationDivergenceObserved: boolean;
+  readonly scoringOpportunityDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly sandboxAppliedOnlyInIsolatedResolution: boolean;
+  readonly sandboxAppliedToNormalLiveSelection: false;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly canInjectEventsIntoOfficialTimeline: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateProductionRouteResolution: false;
+  readonly canMutateGlobalRouteSuccessRates: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly explanation?: string;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyControlledRouteResolutionPathResult(
+  pathId: "baseline" | "override",
+): ControlledRouteResolutionPathResult {
+  return {
+    pathId,
+    candidateLegal: false,
+    candidateAvailable: false,
+    routeResolved: false,
+    outcome: "failed_reception",
+    possessionRetained: false,
+    defensivePressure: 0,
+    receptionQuality: 0,
+    turnoverRisk: 100,
+    dangerProbability: 0,
+    scoringOpportunityProbability: 0,
+    dangerCreated: false,
+    scoringOpportunityCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function emptyControlledRouteResolutionSandbox(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): ControlledRouteResolutionSandbox {
+  return {
+    status: "not_available",
+    scope: "production_resolution_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    baseline: emptyControlledRouteResolutionPathResult("baseline"),
+    override: emptyControlledRouteResolutionPathResult("override"),
+    baselineResolved: false,
+    overrideResolved: false,
+    selectionDivergenceObserved: false,
+    carrierDivergenceObserved: false,
+    zoneProgressionDivergenceObserved: false,
+    dangerCreationDivergenceObserved: false,
+    scoringOpportunityDivergenceObserved: false,
+    sandboxScoringEventDivergenceObserved: false,
+    sandboxScoreDivergenceObserved: false,
+    sandboxAppliedOnlyInIsolatedResolution: false,
+    sandboxAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/resolveControlledRouteInSandbox.ts
+
+```ts
+import type {
+  ControlledRouteResolutionOutcome,
+  ControlledRouteResolutionPathResult,
+} from "./controlledRouteResolutionSandbox";
+
+function blockedPath(input: {
+  readonly pathId: "baseline" | "override";
+  readonly segmentLabel: string;
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+  readonly warning: string;
+}): ControlledRouteResolutionPathResult {
+  return {
+    pathId: input.pathId,
+    ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+    ...(input.actionType === undefined ? {} : { actionType: input.actionType }),
+    ...(input.receiverId === undefined ? {} : { receiverId: input.receiverId }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+    candidateLegal: input.candidateLegal,
+    candidateAvailable: input.candidateAvailable,
+    routeResolved: false,
+    outcome: "failed_reception",
+    possessionRetained: false,
+    defensivePressure: 0,
+    receptionQuality: 0,
+    turnoverRisk: 100,
+    dangerProbability: 0,
+    scoringOpportunityProbability: 0,
+    dangerCreated: false,
+    scoringOpportunityCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    tags: [
+      "controlled_route_resolution_sandbox",
+      "sandbox_route_blocked",
+      `sandbox_path_${input.pathId}`,
+      `sandbox_segment_${input.segmentLabel}`,
+    ],
+    warnings: [input.warning],
+  };
+}
+
+function resolvedPath(input: {
+  readonly pathId: "baseline" | "override";
+  readonly segmentLabel: string;
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly outcome: ControlledRouteResolutionOutcome;
+  readonly defensivePressure: number;
+  readonly receptionQuality: number;
+  readonly turnoverRisk: number;
+  readonly dangerProbability: number;
+  readonly scoringOpportunityProbability: number;
+  readonly dangerCreated: boolean;
+}): ControlledRouteResolutionPathResult {
+  return {
+    pathId: input.pathId,
+    ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+    ...(input.actionType === undefined ? {} : { actionType: input.actionType }),
+    ...(input.receiverId === undefined ? {} : { receiverId: input.receiverId }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+    candidateLegal: true,
+    candidateAvailable: true,
+    routeResolved: true,
+    outcome: input.outcome,
+    possessionRetained: true,
+    ...(input.receiverId === undefined ? {} : { resultingCarrierId: input.receiverId }),
+    ...(input.targetZone === undefined ? {} : { resultingZone: input.targetZone }),
+    defensivePressure: input.defensivePressure,
+    receptionQuality: input.receptionQuality,
+    turnoverRisk: input.turnoverRisk,
+    dangerProbability: input.dangerProbability,
+    scoringOpportunityProbability: input.scoringOpportunityProbability,
+    dangerCreated: input.dangerCreated,
+    scoringOpportunityCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    tags: [
+      "controlled_route_resolution_sandbox",
+      "sandbox_route_resolved",
+      `sandbox_path_${input.pathId}`,
+      `sandbox_segment_${input.segmentLabel}`,
+      `sandbox_action_${input.actionType ?? "none"}`,
+      `sandbox_receiver_${input.receiverId ?? "none"}`,
+      `sandbox_zone_${input.targetZone ?? "none"}`,
+      `sandbox_outcome_${input.outcome}`,
+      "sandbox_result_isolated_only",
+      "sandbox_official_match_event_forbidden",
+      "sandbox_official_score_mutation_forbidden",
+      "sandbox_official_scoring_event_creation_forbidden",
+    ],
+    warnings: [],
+  };
+}
+
+export function resolveControlledRouteInSandbox(input: {
+  readonly pathId: "baseline" | "override";
+  readonly segmentLabel: string;
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+}): ControlledRouteResolutionPathResult {
+  if (!input.candidateLegal) {
+    return blockedPath({
+      ...input,
+      warning: "CONTROLLED_ROUTE_SANDBOX_REJECTED_CLOSED_OR_ILLEGAL_CANDIDATE",
+    });
+  }
+
+  if (!input.candidateAvailable) {
+    return blockedPath({
+      ...input,
+      warning: "CONTROLLED_ROUTE_SANDBOX_REJECTED_UNAVAILABLE_CANDIDATE",
+    });
+  }
+
+  if (
+    input.pathId === "override" &&
+    input.candidateId === "chain-context-forward-progress-sh" &&
+    input.actionType === "FORWARD_PROGRESS" &&
+    input.receiverId === "control-space-hunter" &&
+    input.targetZone === "Z4-HSR"
+  ) {
+    return resolvedPath({
+      ...input,
+      outcome: "dangerous_progression",
+      defensivePressure: 58,
+      receptionQuality: 72,
+      turnoverRisk: 34,
+      dangerProbability: 64,
+      scoringOpportunityProbability: 24,
+      dangerCreated: true,
+    });
+  }
+
+  if (
+    input.pathId === "baseline" &&
+    input.candidateId === "chain-context-safe-recycle-pv" &&
+    input.actionType === "SAFE_RECYCLE" &&
+    input.receiverId === "control-pivot" &&
+    input.targetZone === "Z2-HSL"
+  ) {
+    return resolvedPath({
+      ...input,
+      outcome: "safe_retention",
+      defensivePressure: 31,
+      receptionQuality: 86,
+      turnoverRisk: 12,
+      dangerProbability: 18,
+      scoringOpportunityProbability: 5,
+      dangerCreated: false,
+    });
+  }
+
+  return resolvedPath({
+    ...input,
+    outcome: input.actionType === "FORWARD_PROGRESS" ? "progressive_retention" : "safe_retention",
+    defensivePressure: input.actionType === "FORWARD_PROGRESS" ? 52 : 34,
+    receptionQuality: input.actionType === "FORWARD_PROGRESS" ? 68 : 78,
+    turnoverRisk: input.actionType === "FORWARD_PROGRESS" ? 29 : 16,
+    dangerProbability: input.actionType === "FORWARD_PROGRESS" ? 46 : 19,
+    scoringOpportunityProbability: input.actionType === "FORWARD_PROGRESS" ? 15 : 5,
+    dangerCreated: input.actionType === "FORWARD_PROGRESS",
+  });
+}
+```
+
+## File: src/simulation/fullMatch/controlledRouteResolutionSandboxFromReplay.ts
+
+```ts
+import { compareControlledRouteResolutionSandbox } from "./compareControlledRouteResolutionSandbox";
+import {
+  emptyControlledRouteResolutionSandbox,
+  type ControlledRouteResolutionSandbox,
+} from "./controlledRouteResolutionSandbox";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+import { resolveControlledRouteInSandbox } from "./resolveControlledRouteInSandbox";
+
+export function controlledRouteResolutionSandboxCannotMutateOfficialFullMatch(
+  sandbox: ControlledRouteResolutionSandbox,
+): boolean {
+  const results = [sandbox.baseline, sandbox.override];
+
+  return (
+    !sandbox.canInjectEventsIntoOfficialTimeline &&
+    !sandbox.canMutateOfficialScore &&
+    !sandbox.canMutateOfficialScoringEvents &&
+    !sandbox.canMutateProductionRouteResolution &&
+    !sandbox.canMutateGlobalRouteSuccessRates &&
+    !sandbox.canCreateProductionScoringEvents &&
+    !sandbox.sandboxAppliedToNormalLiveSelection &&
+    results.every((result) =>
+      result.isolatedOnly &&
+      !result.canBecomeOfficialMatchEvent &&
+      !result.canMutateOfficialScore &&
+      !result.canCreateOfficialScoringEvent
+    )
+  );
+}
+
+export function controlledRouteResolutionSandboxCannotClaimGlobalEconomy(
+  sandbox: ControlledRouteResolutionSandbox,
+): boolean {
+  return !sandbox.canClaimGlobalEconomy;
+}
+
+export function validateControlledRouteResolutionSandbox(
+  sandbox: ControlledRouteResolutionSandbox,
+): readonly string[] {
+  const shouldValidate = sandbox.status === "available";
+  const results = [sandbox.baseline, sandbox.override];
+
+  return [
+    ...(shouldValidate && !sandbox.baselineResolved ? ["CONTROLLED_ROUTE_SANDBOX_BASELINE_NOT_RESOLVED"] : []),
+    ...(shouldValidate && !sandbox.overrideResolved ? ["CONTROLLED_ROUTE_SANDBOX_OVERRIDE_NOT_RESOLVED"] : []),
+    ...(shouldValidate && !sandbox.override.candidateLegal ? ["CONTROLLED_ROUTE_SANDBOX_ILLEGAL_OVERRIDE"] : []),
+    ...(shouldValidate && !sandbox.override.candidateAvailable ? ["CONTROLLED_ROUTE_SANDBOX_UNAVAILABLE_OVERRIDE"] : []),
+    ...(shouldValidate && !sandbox.sandboxAppliedOnlyInIsolatedResolution ? ["CONTROLLED_ROUTE_SANDBOX_NOT_ISOLATED"] : []),
+    ...(sandbox.sandboxAppliedToNormalLiveSelection ? ["CONTROLLED_ROUTE_SANDBOX_APPLIED_TO_NORMAL_LIVE"] : []),
+    ...(results.some((result) => !result.isolatedOnly) ? ["CONTROLLED_ROUTE_SANDBOX_RESULT_NOT_ISOLATED_ONLY"] : []),
+    ...(results.some((result) => result.canBecomeOfficialMatchEvent) ? ["CONTROLLED_ROUTE_SANDBOX_RESULT_CAN_BECOME_MATCH_EVENT"] : []),
+    ...(results.some((result) => result.canMutateOfficialScore) ? ["CONTROLLED_ROUTE_SANDBOX_RESULT_CAN_MUTATE_SCORE"] : []),
+    ...(results.some((result) => result.canCreateOfficialScoringEvent) ? ["CONTROLLED_ROUTE_SANDBOX_RESULT_CAN_CREATE_SCORING_EVENT"] : []),
+    ...(!controlledRouteResolutionSandboxCannotMutateOfficialFullMatch(sandbox)
+      ? ["CONTROLLED_ROUTE_SANDBOX_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!controlledRouteResolutionSandboxCannotClaimGlobalEconomy(sandbox)
+      ? ["CONTROLLED_ROUTE_SANDBOX_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+function blockedControlledRouteResolutionSandboxFromReplay(
+  replay: FullMatchRealIsolatedSegmentReplay,
+): ControlledRouteResolutionSandbox {
+  const baseline = resolveControlledRouteInSandbox({
+    pathId: "baseline",
+    segmentLabel: replay.segmentLabel ?? "segment-1",
+    ...(replay.baseline.candidateId === undefined ? {} : { candidateId: replay.baseline.candidateId }),
+    ...(replay.baseline.actionType === undefined ? {} : { actionType: replay.baseline.actionType }),
+    ...(replay.baseline.receiverId === undefined ? {} : { receiverId: replay.baseline.receiverId }),
+    ...(replay.baseline.targetZone === undefined ? {} : { targetZone: replay.baseline.targetZone }),
+    candidateLegal: replay.baseline.candidateLegal,
+    candidateAvailable: replay.baseline.candidateAvailable,
+  });
+  const override = resolveControlledRouteInSandbox({
+    pathId: "override",
+    segmentLabel: replay.segmentLabel ?? "segment-1",
+    ...(replay.override.candidateId === undefined ? {} : { candidateId: replay.override.candidateId }),
+    ...(replay.override.actionType === undefined ? {} : { actionType: replay.override.actionType }),
+    ...(replay.override.receiverId === undefined ? {} : { receiverId: replay.override.receiverId }),
+    ...(replay.override.targetZone === undefined ? {} : { targetZone: replay.override.targetZone }),
+    candidateLegal: replay.override.candidateLegal,
+    candidateAvailable: replay.override.candidateAvailable,
+  });
+
+  return {
+    status: "blocked",
+    scope: "production_resolution_forbidden",
+    origin: "real_isolated_segment_replay",
+    ...(replay.segmentLabel === undefined ? {} : { segmentLabel: replay.segmentLabel }),
+    ...(replay.chainId === undefined ? {} : { chainId: replay.chainId }),
+    baseline,
+    override,
+    baselineResolved: baseline.routeResolved,
+    overrideResolved: override.routeResolved,
+    selectionDivergenceObserved: false,
+    carrierDivergenceObserved: false,
+    zoneProgressionDivergenceObserved: false,
+    dangerCreationDivergenceObserved: false,
+    scoringOpportunityDivergenceObserved: false,
+    sandboxScoringEventDivergenceObserved: false,
+    sandboxScoreDivergenceObserved: false,
+    sandboxAppliedOnlyInIsolatedResolution: false,
+    sandboxAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: replay.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: replay.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [...replay.warnings, "CONTROLLED_ROUTE_RESOLUTION_SANDBOX_BLOCKED"],
+  };
+}
+
+export function controlledRouteResolutionSandboxFromReplay(input: {
+  readonly replay: FullMatchRealIsolatedSegmentReplay;
+}): ControlledRouteResolutionSandbox {
+  if (input.replay.status !== "available") {
+    return emptyControlledRouteResolutionSandbox({
+      ...(input.replay.segmentLabel === undefined ? {} : { segmentLabel: input.replay.segmentLabel }),
+      ...(input.replay.chainId === undefined ? {} : { chainId: input.replay.chainId }),
+      warnings: input.replay.warnings,
+    });
+  }
+
+  if (
+    input.replay.baseline.candidateId === undefined ||
+    input.replay.override.candidateId === undefined ||
+    !input.replay.override.candidateLegal ||
+    !input.replay.override.candidateAvailable
+  ) {
+    return blockedControlledRouteResolutionSandboxFromReplay(input.replay);
+  }
+
+  const segmentLabel = input.replay.segmentLabel ?? "segment-1";
+  const baseline = resolveControlledRouteInSandbox({
+    pathId: "baseline",
+    segmentLabel,
+    candidateId: input.replay.baseline.candidateId,
+    ...(input.replay.baseline.actionType === undefined ? {} : { actionType: input.replay.baseline.actionType }),
+    ...(input.replay.baseline.receiverId === undefined ? {} : { receiverId: input.replay.baseline.receiverId }),
+    ...(input.replay.baseline.targetZone === undefined ? {} : { targetZone: input.replay.baseline.targetZone }),
+    candidateLegal: input.replay.baseline.candidateLegal,
+    candidateAvailable: input.replay.baseline.candidateAvailable,
+  });
+  const override = resolveControlledRouteInSandbox({
+    pathId: "override",
+    segmentLabel,
+    candidateId: input.replay.override.candidateId,
+    ...(input.replay.override.actionType === undefined ? {} : { actionType: input.replay.override.actionType }),
+    ...(input.replay.override.receiverId === undefined ? {} : { receiverId: input.replay.override.receiverId }),
+    ...(input.replay.override.targetZone === undefined ? {} : { targetZone: input.replay.override.targetZone }),
+    candidateLegal: input.replay.override.candidateLegal,
+    candidateAvailable: input.replay.override.candidateAvailable,
+  });
+  const comparison = compareControlledRouteResolutionSandbox({ baseline, override });
+  const result: ControlledRouteResolutionSandbox = {
+    status: "available",
+    scope: "controlled_route_resolution_sandbox",
+    origin: "real_isolated_segment_replay",
+    ...(input.replay.segmentLabel === undefined ? {} : { segmentLabel: input.replay.segmentLabel }),
+    ...(input.replay.chainId === undefined ? {} : { chainId: input.replay.chainId }),
+    baseline,
+    override,
+    baselineResolved: baseline.routeResolved,
+    overrideResolved: override.routeResolved,
+    selectionDivergenceObserved: comparison.selectionDivergenceObserved,
+    carrierDivergenceObserved: comparison.carrierDivergenceObserved,
+    zoneProgressionDivergenceObserved: comparison.zoneProgressionDivergenceObserved,
+    dangerCreationDivergenceObserved: comparison.dangerCreationDivergenceObserved,
+    scoringOpportunityDivergenceObserved: comparison.scoringOpportunityDivergenceObserved,
+    sandboxScoringEventDivergenceObserved: comparison.sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved: comparison.sandboxScoreDivergenceObserved,
+    sandboxAppliedOnlyInIsolatedResolution: true,
+    sandboxAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input.replay.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: input.replay.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    explanation: comparison.explanation,
+    tags: [
+      "workbench_chain_controlled_route_resolution_sandbox",
+      "controlled_route_resolution_sandbox",
+      `sandbox_baseline_candidate_${baseline.candidateId ?? "none"}`,
+      `sandbox_baseline_action_${baseline.actionType ?? "none"}`,
+      `sandbox_baseline_receiver_${baseline.receiverId ?? "none"}`,
+      `sandbox_baseline_zone_${baseline.targetZone ?? "none"}`,
+      `sandbox_baseline_outcome_${baseline.outcome}`,
+      `sandbox_override_candidate_${override.candidateId ?? "none"}`,
+      `sandbox_override_action_${override.actionType ?? "none"}`,
+      `sandbox_override_receiver_${override.receiverId ?? "none"}`,
+      `sandbox_override_zone_${override.targetZone ?? "none"}`,
+      `sandbox_override_outcome_${override.outcome}`,
+      `sandbox_baseline_resolved_${baseline.routeResolved ? "true" : "false"}`,
+      `sandbox_override_resolved_${override.routeResolved ? "true" : "false"}`,
+      `sandbox_selection_divergence_${comparison.selectionDivergenceObserved ? "true" : "false"}`,
+      `sandbox_carrier_divergence_${comparison.carrierDivergenceObserved ? "true" : "false"}`,
+      `sandbox_zone_progression_divergence_${comparison.zoneProgressionDivergenceObserved ? "true" : "false"}`,
+      `sandbox_danger_creation_divergence_${comparison.dangerCreationDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_opportunity_divergence_${comparison.scoringOpportunityDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_event_divergence_${comparison.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+      `sandbox_score_divergence_${comparison.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+      "sandbox_applied_only_in_isolated_resolution_true",
+      "sandbox_applied_to_normal_live_false",
+      "sandbox_official_timeline_injection_forbidden",
+      "sandbox_official_score_mutation_forbidden",
+      "sandbox_official_scoring_events_mutation_forbidden",
+      "sandbox_production_scoring_event_creation_forbidden",
+      "sandbox_production_resolution_forbidden",
+      "sandbox_global_route_success_mutation_forbidden",
+      "sandbox_global_economy_claim_forbidden",
+      "sandbox_closed_candidates_rejected",
+      "sandbox_unavailable_candidates_rejected",
+      ...(input.replay.chainId === undefined ? [] : [`sandbox_chain_id_${input.replay.chainId}`]),
+    ],
+    warnings: [...baseline.warnings, ...override.warnings],
+  };
+  const warnings = validateControlledRouteResolutionSandbox(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/compareControlledRouteResolutionSandbox.ts
+
+```ts
+import type { ControlledRouteResolutionPathResult } from "./controlledRouteResolutionSandbox";
+
+export type ControlledRouteResolutionSandboxComparison = {
+  readonly selectionDivergenceObserved: boolean;
+  readonly carrierDivergenceObserved: boolean;
+  readonly zoneProgressionDivergenceObserved: boolean;
+  readonly dangerCreationDivergenceObserved: boolean;
+  readonly scoringOpportunityDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly explanation: string;
+};
+
+export function compareControlledRouteResolutionSandbox(input: {
+  readonly baseline: ControlledRouteResolutionPathResult;
+  readonly override: ControlledRouteResolutionPathResult;
+}): ControlledRouteResolutionSandboxComparison {
+  const selectionDivergenceObserved = input.baseline.candidateId !== input.override.candidateId ||
+    input.baseline.actionType !== input.override.actionType;
+  const carrierDivergenceObserved = input.baseline.resultingCarrierId !== input.override.resultingCarrierId;
+  const zoneProgressionDivergenceObserved = input.baseline.resultingZone !== input.override.resultingZone;
+  const dangerCreationDivergenceObserved = input.baseline.dangerCreated !== input.override.dangerCreated ||
+    input.override.dangerProbability > input.baseline.dangerProbability;
+  const scoringOpportunityDivergenceObserved =
+    input.baseline.scoringOpportunityCreated !== input.override.scoringOpportunityCreated;
+  const sandboxScoringEventDivergenceObserved =
+    input.baseline.sandboxScoringEventCreated !== input.override.sandboxScoringEventCreated;
+  const sandboxScoreDivergenceObserved = input.baseline.sandboxScoreDelta !== input.override.sandboxScoreDelta;
+
+  return {
+    selectionDivergenceObserved,
+    carrierDivergenceObserved,
+    zoneProgressionDivergenceObserved,
+    dangerCreationDivergenceObserved,
+    scoringOpportunityDivergenceObserved,
+    sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved,
+    explanation:
+      `Sandbox comparison keeps ${input.baseline.actionType ?? "baseline"} as a safer retention route and ` +
+      `${input.override.actionType ?? "override"} as the higher-danger progression route. ` +
+      "It compares isolated route outcomes only and does not alter the official match.",
+  };
+}
+```
+
+## File: src/simulation/fullMatch/controlledRouteResolutionSandboxSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type ControlledRouteResolutionSandboxSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly sandboxTagCount: number;
+  readonly officialSandboxEventCount: number;
+  readonly baselineCandidateId?: string;
+  readonly baselineActionType?: string;
+  readonly baselineReceiverId?: string;
+  readonly baselineTargetZone?: string;
+  readonly baselineOutcome?: string;
+  readonly baselineResolved: boolean;
+  readonly baselineDefensivePressure: number;
+  readonly baselineReceptionQuality: number;
+  readonly baselineTurnoverRisk: number;
+  readonly baselineDangerProbability: number;
+  readonly baselineScoringOpportunityProbability: number;
+  readonly overrideCandidateId?: string;
+  readonly overrideActionType?: string;
+  readonly overrideReceiverId?: string;
+  readonly overrideTargetZone?: string;
+  readonly overrideOutcome?: string;
+  readonly overrideResolved: boolean;
+  readonly overrideDefensivePressure: number;
+  readonly overrideReceptionQuality: number;
+  readonly overrideTurnoverRisk: number;
+  readonly overrideDangerProbability: number;
+  readonly overrideScoringOpportunityProbability: number;
+  readonly selectionDivergenceObserved: boolean;
+  readonly carrierDivergenceObserved: boolean;
+  readonly zoneProgressionDivergenceObserved: boolean;
+  readonly dangerCreationDivergenceObserved: boolean;
+  readonly scoringOpportunityDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly sandboxAppliedOnlyInIsolatedResolution: boolean;
+  readonly sandboxAppliedToNormalLiveSelection: boolean;
+  readonly officialTimelineInjectionCount: number;
+  readonly officialScoreMutationCount: number;
+  readonly officialScoringEventMutationCount: number;
+  readonly productionScoringEventCreationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly globalRouteSuccessRateMutationCount: number;
+  readonly globalEconomyClaimCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+function hasEvidenceTag(report: MatchReport, tag: string): boolean {
+  return report.evidenceFacts.some((fact) => fact.internalTags.includes(tag));
+}
+
+export function controlledRouteResolutionSandboxSignature(
+  report: MatchReport,
+): ControlledRouteResolutionSandboxSignature {
+  const baselineCandidateId = suffixFromTag(report, "sandbox_baseline_candidate_");
+  const baselineActionType = suffixFromTag(report, "sandbox_baseline_action_");
+  const baselineReceiverId = suffixFromTag(report, "sandbox_baseline_receiver_");
+  const baselineTargetZone = suffixFromTag(report, "sandbox_baseline_zone_");
+  const baselineOutcome = suffixFromTag(report, "sandbox_baseline_outcome_");
+  const overrideCandidateId = suffixFromTag(report, "sandbox_override_candidate_");
+  const overrideActionType = suffixFromTag(report, "sandbox_override_action_");
+  const overrideReceiverId = suffixFromTag(report, "sandbox_override_receiver_");
+  const overrideTargetZone = suffixFromTag(report, "sandbox_override_zone_");
+  const overrideOutcome = suffixFromTag(report, "sandbox_override_outcome_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    sandboxTagCount: countTag(report, "workbench_chain_controlled_route_resolution_sandbox"),
+    officialSandboxEventCount: report.timeline.filter((event) => event.eventId.includes("sandbox-route-resolution")).length,
+    ...(baselineCandidateId === undefined ? {} : { baselineCandidateId }),
+    ...(baselineActionType === undefined ? {} : { baselineActionType }),
+    ...(baselineReceiverId === undefined ? {} : { baselineReceiverId }),
+    ...(baselineTargetZone === undefined ? {} : { baselineTargetZone }),
+    ...(baselineOutcome === undefined ? {} : { baselineOutcome }),
+    baselineResolved: hasEvidenceTag(report, "sandbox_baseline_resolved_true"),
+    baselineDefensivePressure: numberFromTag(report, "sandbox_baseline_defensive_pressure_"),
+    baselineReceptionQuality: numberFromTag(report, "sandbox_baseline_reception_quality_"),
+    baselineTurnoverRisk: numberFromTag(report, "sandbox_baseline_turnover_risk_"),
+    baselineDangerProbability: numberFromTag(report, "sandbox_baseline_danger_probability_"),
+    baselineScoringOpportunityProbability: numberFromTag(report, "sandbox_baseline_scoring_opportunity_probability_"),
+    ...(overrideCandidateId === undefined ? {} : { overrideCandidateId }),
+    ...(overrideActionType === undefined ? {} : { overrideActionType }),
+    ...(overrideReceiverId === undefined ? {} : { overrideReceiverId }),
+    ...(overrideTargetZone === undefined ? {} : { overrideTargetZone }),
+    ...(overrideOutcome === undefined ? {} : { overrideOutcome }),
+    overrideResolved: hasEvidenceTag(report, "sandbox_override_resolved_true"),
+    overrideDefensivePressure: numberFromTag(report, "sandbox_override_defensive_pressure_"),
+    overrideReceptionQuality: numberFromTag(report, "sandbox_override_reception_quality_"),
+    overrideTurnoverRisk: numberFromTag(report, "sandbox_override_turnover_risk_"),
+    overrideDangerProbability: numberFromTag(report, "sandbox_override_danger_probability_"),
+    overrideScoringOpportunityProbability: numberFromTag(report, "sandbox_override_scoring_opportunity_probability_"),
+    selectionDivergenceObserved: hasEvidenceTag(report, "sandbox_selection_divergence_true"),
+    carrierDivergenceObserved: hasEvidenceTag(report, "sandbox_carrier_divergence_true"),
+    zoneProgressionDivergenceObserved: hasEvidenceTag(report, "sandbox_zone_progression_divergence_true"),
+    dangerCreationDivergenceObserved: hasEvidenceTag(report, "sandbox_danger_creation_divergence_true"),
+    scoringOpportunityDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_opportunity_divergence_true"),
+    sandboxScoringEventDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_event_divergence_true"),
+    sandboxScoreDivergenceObserved: hasEvidenceTag(report, "sandbox_score_divergence_true"),
+    sandboxAppliedOnlyInIsolatedResolution: hasEvidenceTag(report, "sandbox_applied_only_in_isolated_resolution_true"),
+    sandboxAppliedToNormalLiveSelection: hasEvidenceTag(report, "sandbox_applied_to_normal_live_true"),
+    officialTimelineInjectionCount: numberFromTag(report, "sandbox_events_injected_into_official_timeline_count_"),
+    officialScoreMutationCount: numberFromTag(report, "sandbox_official_score_mutation_count_"),
+    officialScoringEventMutationCount: numberFromTag(report, "sandbox_official_scoring_event_mutation_count_"),
+    productionScoringEventCreationCount: numberFromTag(report, "sandbox_production_scoring_event_creation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(report, "sandbox_production_route_resolution_mutation_count_"),
+    globalRouteSuccessRateMutationCount: numberFromTag(report, "sandbox_global_route_success_mutation_count_"),
+    globalEconomyClaimCount: numberFromTag(report, "sandbox_global_economy_claim_count_"),
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringOpportunityModel.ts
+
+```ts
+export type SandboxScoringOpportunityStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type SandboxScoringOpportunityScope =
+  | "sandbox_scoring_opportunity_model"
+  | "production_scoring_forbidden";
+
+export type SandboxScoringOpportunityOrigin =
+  | "none"
+  | "controlled_route_resolution_sandbox";
+
+export type SandboxScoringOpportunityType =
+  | "no_opportunity"
+  | "half_chance"
+  | "clear_chance"
+  | "try_window"
+  | "shot_window"
+  | "drop_window";
+
+export type SandboxScoringOpportunityFamily =
+  | "none"
+  | "territorial_danger"
+  | "shot"
+  | "try"
+  | "drop"
+  | "mixed";
+
+export type SandboxScoringOpportunityPathResult = {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly routeOutcome?: string;
+  readonly sourceDangerProbability: number;
+  readonly sourceScoringOpportunityProbability: number;
+  readonly turnoverRisk: number;
+  readonly receptionQuality: number;
+  readonly defensivePressure: number;
+  readonly opportunityType: SandboxScoringOpportunityType;
+  readonly opportunityFamily: SandboxScoringOpportunityFamily;
+  readonly opportunityProbability: number;
+  readonly opportunityCreated: boolean;
+  readonly sandboxScoringEventCreated: false;
+  readonly sandboxScoreDelta: 0;
+  readonly isolatedOnly: true;
+  readonly canBecomeOfficialMatchEvent: false;
+  readonly canMutateOfficialScore: false;
+  readonly canCreateOfficialScoringEvent: false;
+  readonly canCreateProductionScoringEvent: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type SandboxScoringOpportunityModel = {
+  readonly status: SandboxScoringOpportunityStatus;
+  readonly scope: SandboxScoringOpportunityScope;
+  readonly origin: SandboxScoringOpportunityOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly baseline: SandboxScoringOpportunityPathResult;
+  readonly override: SandboxScoringOpportunityPathResult;
+  readonly baselineOpportunityCreated: boolean;
+  readonly overrideOpportunityCreated: boolean;
+  readonly opportunityTypeDivergenceObserved: boolean;
+  readonly opportunityFamilyDivergenceObserved: boolean;
+  readonly opportunityProbabilityDivergenceObserved: boolean;
+  readonly opportunityCreationDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly canInjectEventsIntoOfficialTimeline: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateProductionRouteResolution: false;
+  readonly canMutateGlobalRouteSuccessRates: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly explanation?: string;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptySandboxScoringOpportunityPathResult(
+  pathId: "baseline" | "override",
+): SandboxScoringOpportunityPathResult {
+  return {
+    pathId,
+    sourceDangerProbability: 0,
+    sourceScoringOpportunityProbability: 0,
+    turnoverRisk: 100,
+    receptionQuality: 0,
+    defensivePressure: 0,
+    opportunityType: "no_opportunity",
+    opportunityFamily: "none",
+    opportunityProbability: 0,
+    opportunityCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function emptySandboxScoringOpportunityModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): SandboxScoringOpportunityModel {
+  return {
+    status: "not_available",
+    scope: "production_scoring_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    baseline: emptySandboxScoringOpportunityPathResult("baseline"),
+    override: emptySandboxScoringOpportunityPathResult("override"),
+    baselineOpportunityCreated: false,
+    overrideOpportunityCreated: false,
+    opportunityTypeDivergenceObserved: false,
+    opportunityFamilyDivergenceObserved: false,
+    opportunityProbabilityDivergenceObserved: false,
+    opportunityCreationDivergenceObserved: false,
+    sandboxScoringEventDivergenceObserved: false,
+    sandboxScoreDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: false,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/classifySandboxScoringOpportunity.ts
+
+```ts
+import type {
+  SandboxScoringOpportunityFamily,
+  SandboxScoringOpportunityPathResult,
+  SandboxScoringOpportunityType,
+} from "./sandboxScoringOpportunityModel";
+
+function classifyType(input: {
+  readonly actionType?: string;
+  readonly routeOutcome?: string;
+  readonly dangerProbability: number;
+  readonly scoringOpportunityProbability: number;
+  readonly turnoverRisk: number;
+}): SandboxScoringOpportunityType {
+  if (input.actionType === "SAFE_RECYCLE" || input.routeOutcome === "safe_retention") {
+    return input.scoringOpportunityProbability >= 12 && input.dangerProbability >= 35 ? "half_chance" : "no_opportunity";
+  }
+
+  if (input.actionType === "DROP_GOAL_ATTEMPT") {
+    return "drop_window";
+  }
+
+  if (input.actionType === "TRY_TOUCHDOWN_ATTEMPT") {
+    return "try_window";
+  }
+
+  if (input.actionType === "SHOT") {
+    return "shot_window";
+  }
+
+  if (input.scoringOpportunityProbability >= 45 && input.turnoverRisk <= 45) {
+    return "clear_chance";
+  }
+
+  if (input.scoringOpportunityProbability >= 18 && input.dangerProbability >= 55) {
+    return "half_chance";
+  }
+
+  return "no_opportunity";
+}
+
+function familyForType(type: SandboxScoringOpportunityType): SandboxScoringOpportunityFamily {
+  switch (type) {
+    case "drop_window":
+      return "drop";
+    case "shot_window":
+      return "shot";
+    case "try_window":
+      return "try";
+    case "clear_chance":
+    case "half_chance":
+      return "territorial_danger";
+    case "no_opportunity":
+      return "none";
+  }
+}
+
+export function classifySandboxScoringOpportunity(input: {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly routeOutcome?: string;
+  readonly dangerProbability: number;
+  readonly scoringOpportunityProbability: number;
+  readonly turnoverRisk: number;
+  readonly receptionQuality: number;
+  readonly defensivePressure: number;
+}): SandboxScoringOpportunityPathResult {
+  const opportunityType = classifyType(input);
+  const opportunityFamily = familyForType(opportunityType);
+  const opportunityCreated = opportunityType !== "no_opportunity";
+
+  return {
+    pathId: input.pathId,
+    ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+    ...(input.actionType === undefined ? {} : { actionType: input.actionType }),
+    ...(input.receiverId === undefined ? {} : { receiverId: input.receiverId }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+    ...(input.routeOutcome === undefined ? {} : { routeOutcome: input.routeOutcome }),
+    sourceDangerProbability: input.dangerProbability,
+    sourceScoringOpportunityProbability: input.scoringOpportunityProbability,
+    turnoverRisk: input.turnoverRisk,
+    receptionQuality: input.receptionQuality,
+    defensivePressure: input.defensivePressure,
+    opportunityType,
+    opportunityFamily,
+    opportunityProbability: input.scoringOpportunityProbability,
+    opportunityCreated,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    tags: [
+      `sandbox_opportunity_${input.pathId}_candidate_${input.candidateId ?? "none"}`,
+      `sandbox_opportunity_${input.pathId}_action_${input.actionType ?? "none"}`,
+      `sandbox_opportunity_${input.pathId}_receiver_${input.receiverId ?? "none"}`,
+      `sandbox_opportunity_${input.pathId}_zone_${input.targetZone ?? "none"}`,
+      `sandbox_opportunity_${input.pathId}_route_outcome_${input.routeOutcome ?? "none"}`,
+      `sandbox_opportunity_${input.pathId}_type_${opportunityType}`,
+      `sandbox_opportunity_${input.pathId}_family_${opportunityFamily}`,
+      `sandbox_opportunity_${input.pathId}_probability_${input.scoringOpportunityProbability}`,
+      `sandbox_opportunity_${input.pathId}_created_${opportunityCreated ? "true" : "false"}`,
+      `sandbox_opportunity_${input.pathId}_source_danger_probability_${input.dangerProbability}`,
+      `sandbox_opportunity_${input.pathId}_source_scoring_opportunity_probability_${input.scoringOpportunityProbability}`,
+      `sandbox_opportunity_${input.pathId}_turnover_risk_${input.turnoverRisk}`,
+      `sandbox_opportunity_${input.pathId}_reception_quality_${input.receptionQuality}`,
+      `sandbox_opportunity_${input.pathId}_defensive_pressure_${input.defensivePressure}`,
+    ],
+    warnings: [],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringOpportunityModelFromResolution.ts
+
+```ts
+import type { ControlledRouteResolutionPathResult, ControlledRouteResolutionSandbox } from "./controlledRouteResolutionSandbox";
+import { classifySandboxScoringOpportunity } from "./classifySandboxScoringOpportunity";
+import { compareSandboxScoringOpportunities } from "./compareSandboxScoringOpportunities";
+import {
+  emptySandboxScoringOpportunityModel,
+  type SandboxScoringOpportunityModel,
+  type SandboxScoringOpportunityPathResult,
+} from "./sandboxScoringOpportunityModel";
+
+function pathOpportunityFromResolution(
+  path: ControlledRouteResolutionPathResult,
+): SandboxScoringOpportunityPathResult {
+  return classifySandboxScoringOpportunity({
+    pathId: path.pathId,
+    ...(path.candidateId === undefined ? {} : { candidateId: path.candidateId }),
+    ...(path.actionType === undefined ? {} : { actionType: path.actionType }),
+    ...(path.receiverId === undefined ? {} : { receiverId: path.receiverId }),
+    ...(path.targetZone === undefined ? {} : { targetZone: path.targetZone }),
+    routeOutcome: path.outcome,
+    dangerProbability: path.dangerProbability,
+    scoringOpportunityProbability: path.scoringOpportunityProbability,
+    turnoverRisk: path.turnoverRisk,
+    receptionQuality: path.receptionQuality,
+    defensivePressure: path.defensivePressure,
+  });
+}
+
+export function sandboxScoringOpportunityCannotMutateOfficialFullMatch(
+  model: SandboxScoringOpportunityModel,
+): boolean {
+  const results = [model.baseline, model.override];
+
+  return (
+    !model.canInjectEventsIntoOfficialTimeline &&
+    !model.canMutateOfficialScore &&
+    !model.canMutateOfficialScoringEvents &&
+    !model.canMutateProductionRouteResolution &&
+    !model.canMutateGlobalRouteSuccessRates &&
+    !model.canCreateProductionScoringEvents &&
+    !model.modelAppliedToNormalLiveSelection &&
+    results.every((result) =>
+      result.isolatedOnly &&
+      !result.canBecomeOfficialMatchEvent &&
+      !result.canMutateOfficialScore &&
+      !result.canCreateOfficialScoringEvent &&
+      !result.canCreateProductionScoringEvent
+    )
+  );
+}
+
+export function sandboxScoringOpportunityCannotClaimGlobalEconomy(
+  model: SandboxScoringOpportunityModel,
+): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateSandboxScoringOpportunityModel(
+  model: SandboxScoringOpportunityModel,
+): readonly string[] {
+  const shouldValidate = model.status === "available";
+  const results = [model.baseline, model.override];
+
+  return [
+    ...(shouldValidate && model.origin !== "controlled_route_resolution_sandbox"
+      ? ["SANDBOX_OPPORTUNITY_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && model.baseline.opportunityProbability < 0 ? ["SANDBOX_OPPORTUNITY_BASELINE_MISSING"] : []),
+    ...(shouldValidate && model.override.opportunityProbability < 0 ? ["SANDBOX_OPPORTUNITY_OVERRIDE_MISSING"] : []),
+    ...(results.some((result) => result.sandboxScoringEventCreated)
+      ? ["SANDBOX_OPPORTUNITY_CREATED_SANDBOX_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.sandboxScoreDelta !== 0)
+      ? ["SANDBOX_OPPORTUNITY_SCORE_DELTA_NON_ZERO"]
+      : []),
+    ...(shouldValidate && !model.modelAppliedOnlyInSandbox ? ["SANDBOX_OPPORTUNITY_NOT_SANDBOX_ONLY"] : []),
+    ...(model.modelAppliedToNormalLiveSelection ? ["SANDBOX_OPPORTUNITY_APPLIED_TO_NORMAL_LIVE"] : []),
+    ...(results.some((result) => !result.isolatedOnly) ? ["SANDBOX_OPPORTUNITY_RESULT_NOT_ISOLATED"] : []),
+    ...(results.some((result) => result.canBecomeOfficialMatchEvent)
+      ? ["SANDBOX_OPPORTUNITY_RESULT_CAN_BECOME_MATCH_EVENT"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialScore)
+      ? ["SANDBOX_OPPORTUNITY_RESULT_CAN_MUTATE_SCORE"]
+      : []),
+    ...(results.some((result) => result.canCreateOfficialScoringEvent)
+      ? ["SANDBOX_OPPORTUNITY_RESULT_CAN_CREATE_OFFICIAL_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.canCreateProductionScoringEvent)
+      ? ["SANDBOX_OPPORTUNITY_RESULT_CAN_CREATE_PRODUCTION_SCORING_EVENT"]
+      : []),
+    ...(!sandboxScoringOpportunityCannotMutateOfficialFullMatch(model)
+      ? ["SANDBOX_OPPORTUNITY_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!sandboxScoringOpportunityCannotClaimGlobalEconomy(model)
+      ? ["SANDBOX_OPPORTUNITY_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function sandboxScoringOpportunityModelFromResolution(input: {
+  readonly sandbox: ControlledRouteResolutionSandbox;
+}): SandboxScoringOpportunityModel {
+  if (input.sandbox.status !== "available") {
+    return emptySandboxScoringOpportunityModel({
+      ...(input.sandbox.segmentLabel === undefined ? {} : { segmentLabel: input.sandbox.segmentLabel }),
+      ...(input.sandbox.chainId === undefined ? {} : { chainId: input.sandbox.chainId }),
+      warnings: input.sandbox.warnings,
+    });
+  }
+
+  if (!input.sandbox.override.candidateLegal || !input.sandbox.override.candidateAvailable) {
+    return {
+      ...emptySandboxScoringOpportunityModel({
+        ...(input.sandbox.segmentLabel === undefined ? {} : { segmentLabel: input.sandbox.segmentLabel }),
+        ...(input.sandbox.chainId === undefined ? {} : { chainId: input.sandbox.chainId }),
+        warnings: [...input.sandbox.warnings, "SANDBOX_SCORING_OPPORTUNITY_MODEL_BLOCKED"],
+      }),
+      status: "blocked",
+      origin: "controlled_route_resolution_sandbox",
+      rejectedClosedCandidateCount: input.sandbox.rejectedClosedCandidateCount,
+      rejectedUnavailableCandidateCount: input.sandbox.rejectedUnavailableCandidateCount,
+    };
+  }
+
+  const baseline = pathOpportunityFromResolution(input.sandbox.baseline);
+  const override = pathOpportunityFromResolution(input.sandbox.override);
+  const comparison = compareSandboxScoringOpportunities({ baseline, override });
+  const result: SandboxScoringOpportunityModel = {
+    status: "available",
+    scope: "sandbox_scoring_opportunity_model",
+    origin: "controlled_route_resolution_sandbox",
+    ...(input.sandbox.segmentLabel === undefined ? {} : { segmentLabel: input.sandbox.segmentLabel }),
+    ...(input.sandbox.chainId === undefined ? {} : { chainId: input.sandbox.chainId }),
+    baseline,
+    override,
+    baselineOpportunityCreated: baseline.opportunityCreated,
+    overrideOpportunityCreated: override.opportunityCreated,
+    opportunityTypeDivergenceObserved: comparison.opportunityTypeDivergenceObserved,
+    opportunityFamilyDivergenceObserved: comparison.opportunityFamilyDivergenceObserved,
+    opportunityProbabilityDivergenceObserved: comparison.opportunityProbabilityDivergenceObserved,
+    opportunityCreationDivergenceObserved: comparison.opportunityCreationDivergenceObserved,
+    sandboxScoringEventDivergenceObserved: comparison.sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved: comparison.sandboxScoreDivergenceObserved,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input.sandbox.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: input.sandbox.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    explanation: comparison.explanation,
+    tags: [
+      "workbench_chain_sandbox_scoring_opportunity_model",
+      "sandbox_scoring_opportunity_model",
+      "sandbox_opportunity_results_isolated_only",
+      ...baseline.tags,
+      ...override.tags,
+      `sandbox_opportunity_type_divergence_${comparison.opportunityTypeDivergenceObserved ? "true" : "false"}`,
+      `sandbox_opportunity_family_divergence_${comparison.opportunityFamilyDivergenceObserved ? "true" : "false"}`,
+      `sandbox_opportunity_probability_divergence_${comparison.opportunityProbabilityDivergenceObserved ? "true" : "false"}`,
+      `sandbox_opportunity_creation_divergence_${comparison.opportunityCreationDivergenceObserved ? "true" : "false"}`,
+      `sandbox_opportunity_scoring_event_divergence_${comparison.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+      `sandbox_opportunity_score_divergence_${comparison.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+      "sandbox_opportunity_scoring_event_created_false",
+      "sandbox_opportunity_score_delta_0",
+      "sandbox_opportunity_applied_only_in_sandbox_true",
+      "sandbox_opportunity_applied_to_normal_live_false",
+      "sandbox_opportunity_official_timeline_injection_forbidden",
+      "sandbox_opportunity_official_score_mutation_forbidden",
+      "sandbox_opportunity_official_scoring_events_mutation_forbidden",
+      "sandbox_opportunity_production_resolution_forbidden",
+      "sandbox_opportunity_production_scoring_event_creation_forbidden",
+      "sandbox_opportunity_global_route_success_mutation_forbidden",
+      "sandbox_opportunity_global_economy_claim_forbidden",
+      "sandbox_opportunity_closed_candidates_rejected",
+      "sandbox_opportunity_unavailable_candidates_rejected",
+      "sandbox_opportunity_injected_into_official_timeline_count_0",
+      "sandbox_opportunity_official_score_mutation_count_0",
+      "sandbox_opportunity_official_scoring_event_mutation_count_0",
+      "sandbox_opportunity_production_scoring_event_creation_count_0",
+      "sandbox_opportunity_production_route_resolution_mutation_count_0",
+      "sandbox_opportunity_global_route_success_mutation_count_0",
+      "sandbox_opportunity_global_economy_claim_count_0",
+      ...(input.sandbox.chainId === undefined ? [] : [`sandbox_opportunity_chain_id_${input.sandbox.chainId}`]),
+    ],
+    warnings: [...baseline.warnings, ...override.warnings],
+  };
+  const warnings = validateSandboxScoringOpportunityModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/compareSandboxScoringOpportunities.ts
+
+```ts
+import type { SandboxScoringOpportunityPathResult } from "./sandboxScoringOpportunityModel";
+
+export type SandboxScoringOpportunityComparison = {
+  readonly opportunityTypeDivergenceObserved: boolean;
+  readonly opportunityFamilyDivergenceObserved: boolean;
+  readonly opportunityProbabilityDivergenceObserved: boolean;
+  readonly opportunityCreationDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly explanation: string;
+};
+
+export function compareSandboxScoringOpportunities(input: {
+  readonly baseline: SandboxScoringOpportunityPathResult;
+  readonly override: SandboxScoringOpportunityPathResult;
+}): SandboxScoringOpportunityComparison {
+  const opportunityTypeDivergenceObserved = input.baseline.opportunityType !== input.override.opportunityType;
+  const opportunityFamilyDivergenceObserved = input.baseline.opportunityFamily !== input.override.opportunityFamily;
+  const opportunityProbabilityDivergenceObserved = input.baseline.opportunityProbability !== input.override.opportunityProbability;
+  const opportunityCreationDivergenceObserved = input.baseline.opportunityCreated !== input.override.opportunityCreated;
+  const sandboxScoringEventDivergenceObserved =
+    input.baseline.sandboxScoringEventCreated !== input.override.sandboxScoringEventCreated;
+  const sandboxScoreDivergenceObserved = input.baseline.sandboxScoreDelta !== input.override.sandboxScoreDelta;
+
+  return {
+    opportunityTypeDivergenceObserved,
+    opportunityFamilyDivergenceObserved,
+    opportunityProbabilityDivergenceObserved,
+    opportunityCreationDivergenceObserved,
+    sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved,
+    explanation:
+      `The baseline route stays at ${input.baseline.opportunityType} (${input.baseline.opportunityProbability}/100), while the override reaches ${input.override.opportunityType} (${input.override.opportunityProbability}/100). The comparison creates a sandbox-only opportunity signal, not an official scoring event.`,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringOpportunityModelSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type SandboxScoringOpportunityModelSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly opportunityTagCount: number;
+  readonly officialSandboxOpportunityEventCount: number;
+  readonly baselineCandidateId?: string;
+  readonly baselineActionType?: string;
+  readonly baselineReceiverId?: string;
+  readonly baselineTargetZone?: string;
+  readonly baselineRouteOutcome?: string;
+  readonly baselineSourceDangerProbability: number;
+  readonly baselineSourceScoringOpportunityProbability: number;
+  readonly baselineOpportunityType?: string;
+  readonly baselineOpportunityFamily?: string;
+  readonly baselineOpportunityProbability: number;
+  readonly baselineOpportunityCreated: boolean;
+  readonly overrideCandidateId?: string;
+  readonly overrideActionType?: string;
+  readonly overrideReceiverId?: string;
+  readonly overrideTargetZone?: string;
+  readonly overrideRouteOutcome?: string;
+  readonly overrideSourceDangerProbability: number;
+  readonly overrideSourceScoringOpportunityProbability: number;
+  readonly overrideOpportunityType?: string;
+  readonly overrideOpportunityFamily?: string;
+  readonly overrideOpportunityProbability: number;
+  readonly overrideOpportunityCreated: boolean;
+  readonly opportunityTypeDivergenceObserved: boolean;
+  readonly opportunityFamilyDivergenceObserved: boolean;
+  readonly opportunityProbabilityDivergenceObserved: boolean;
+  readonly opportunityCreationDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: boolean;
+  readonly sandboxScoringEventCreatedCount: number;
+  readonly sandboxScoreDeltaTotal: number;
+  readonly officialTimelineInjectionCount: number;
+  readonly officialScoreMutationCount: number;
+  readonly officialScoringEventMutationCount: number;
+  readonly productionScoringEventCreationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly globalRouteSuccessRateMutationCount: number;
+  readonly globalEconomyClaimCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+function hasEvidenceTag(report: MatchReport, tag: string): boolean {
+  return report.evidenceFacts.some((fact) => fact.internalTags.includes(tag));
+}
+
+export function sandboxScoringOpportunityModelSignature(
+  report: MatchReport,
+): SandboxScoringOpportunityModelSignature {
+  const baselineCandidateId = suffixFromTag(report, "sandbox_opportunity_baseline_candidate_");
+  const baselineActionType = suffixFromTag(report, "sandbox_opportunity_baseline_action_");
+  const baselineReceiverId = suffixFromTag(report, "sandbox_opportunity_baseline_receiver_");
+  const baselineTargetZone = suffixFromTag(report, "sandbox_opportunity_baseline_zone_");
+  const baselineRouteOutcome = suffixFromTag(report, "sandbox_opportunity_baseline_route_outcome_");
+  const baselineOpportunityType = suffixFromTag(report, "sandbox_opportunity_baseline_type_");
+  const baselineOpportunityFamily = suffixFromTag(report, "sandbox_opportunity_baseline_family_");
+  const overrideCandidateId = suffixFromTag(report, "sandbox_opportunity_override_candidate_");
+  const overrideActionType = suffixFromTag(report, "sandbox_opportunity_override_action_");
+  const overrideReceiverId = suffixFromTag(report, "sandbox_opportunity_override_receiver_");
+  const overrideTargetZone = suffixFromTag(report, "sandbox_opportunity_override_zone_");
+  const overrideRouteOutcome = suffixFromTag(report, "sandbox_opportunity_override_route_outcome_");
+  const overrideOpportunityType = suffixFromTag(report, "sandbox_opportunity_override_type_");
+  const overrideOpportunityFamily = suffixFromTag(report, "sandbox_opportunity_override_family_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    opportunityTagCount: countTag(report, "workbench_chain_sandbox_scoring_opportunity_model"),
+    officialSandboxOpportunityEventCount: report.timeline.filter((event) =>
+      event.eventId.includes("sandbox-scoring-opportunity")
+    ).length,
+    ...(baselineCandidateId === undefined ? {} : { baselineCandidateId }),
+    ...(baselineActionType === undefined ? {} : { baselineActionType }),
+    ...(baselineReceiverId === undefined ? {} : { baselineReceiverId }),
+    ...(baselineTargetZone === undefined ? {} : { baselineTargetZone }),
+    ...(baselineRouteOutcome === undefined ? {} : { baselineRouteOutcome }),
+    baselineSourceDangerProbability: numberFromTag(report, "sandbox_opportunity_baseline_source_danger_probability_"),
+    baselineSourceScoringOpportunityProbability: numberFromTag(report, "sandbox_opportunity_baseline_source_scoring_opportunity_probability_"),
+    ...(baselineOpportunityType === undefined ? {} : { baselineOpportunityType }),
+    ...(baselineOpportunityFamily === undefined ? {} : { baselineOpportunityFamily }),
+    baselineOpportunityProbability: numberFromTag(report, "sandbox_opportunity_baseline_probability_"),
+    baselineOpportunityCreated: hasEvidenceTag(report, "sandbox_opportunity_baseline_created_true"),
+    ...(overrideCandidateId === undefined ? {} : { overrideCandidateId }),
+    ...(overrideActionType === undefined ? {} : { overrideActionType }),
+    ...(overrideReceiverId === undefined ? {} : { overrideReceiverId }),
+    ...(overrideTargetZone === undefined ? {} : { overrideTargetZone }),
+    ...(overrideRouteOutcome === undefined ? {} : { overrideRouteOutcome }),
+    overrideSourceDangerProbability: numberFromTag(report, "sandbox_opportunity_override_source_danger_probability_"),
+    overrideSourceScoringOpportunityProbability: numberFromTag(report, "sandbox_opportunity_override_source_scoring_opportunity_probability_"),
+    ...(overrideOpportunityType === undefined ? {} : { overrideOpportunityType }),
+    ...(overrideOpportunityFamily === undefined ? {} : { overrideOpportunityFamily }),
+    overrideOpportunityProbability: numberFromTag(report, "sandbox_opportunity_override_probability_"),
+    overrideOpportunityCreated: hasEvidenceTag(report, "sandbox_opportunity_override_created_true"),
+    opportunityTypeDivergenceObserved: hasEvidenceTag(report, "sandbox_opportunity_type_divergence_true"),
+    opportunityFamilyDivergenceObserved: hasEvidenceTag(report, "sandbox_opportunity_family_divergence_true"),
+    opportunityProbabilityDivergenceObserved: hasEvidenceTag(report, "sandbox_opportunity_probability_divergence_true"),
+    opportunityCreationDivergenceObserved: hasEvidenceTag(report, "sandbox_opportunity_creation_divergence_true"),
+    sandboxScoringEventDivergenceObserved: hasEvidenceTag(report, "sandbox_opportunity_scoring_event_divergence_true"),
+    sandboxScoreDivergenceObserved: hasEvidenceTag(report, "sandbox_opportunity_score_divergence_true"),
+    modelAppliedOnlyInSandbox: hasEvidenceTag(report, "sandbox_opportunity_applied_only_in_sandbox_true"),
+    modelAppliedToNormalLiveSelection: hasEvidenceTag(report, "sandbox_opportunity_applied_to_normal_live_true"),
+    sandboxScoringEventCreatedCount: hasEvidenceTag(report, "sandbox_opportunity_scoring_event_created_true") ? 1 : 0,
+    sandboxScoreDeltaTotal: numberFromTag(report, "sandbox_opportunity_score_delta_"),
+    officialTimelineInjectionCount: numberFromTag(report, "sandbox_opportunity_injected_into_official_timeline_count_"),
+    officialScoreMutationCount: numberFromTag(report, "sandbox_opportunity_official_score_mutation_count_"),
+    officialScoringEventMutationCount: numberFromTag(report, "sandbox_opportunity_official_scoring_event_mutation_count_"),
+    productionScoringEventCreationCount: numberFromTag(report, "sandbox_opportunity_production_scoring_event_creation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(report, "sandbox_opportunity_production_route_resolution_mutation_count_"),
+    globalRouteSuccessRateMutationCount: numberFromTag(report, "sandbox_opportunity_global_route_success_mutation_count_"),
+    globalEconomyClaimCount: numberFromTag(report, "sandbox_opportunity_global_economy_claim_count_"),
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -12402,6 +14111,705 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/compareControlledRouteResolutionSandbox.test.ts
+
+```ts
+import { compareControlledRouteResolutionSandbox } from "./compareControlledRouteResolutionSandbox";
+import { resolveControlledRouteInSandbox } from "./resolveControlledRouteInSandbox";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCompareControlledRouteResolutionSandbox(): readonly string[] {
+  const baseline = resolveControlledRouteInSandbox({
+    pathId: "baseline",
+    segmentLabel: "segment-1",
+    candidateId: "chain-context-safe-recycle-pv",
+    actionType: "SAFE_RECYCLE",
+    receiverId: "control-pivot",
+    targetZone: "Z2-HSL",
+    candidateLegal: true,
+    candidateAvailable: true,
+  });
+  const override = resolveControlledRouteInSandbox({
+    pathId: "override",
+    segmentLabel: "segment-1",
+    candidateId: "chain-context-forward-progress-sh",
+    actionType: "FORWARD_PROGRESS",
+    receiverId: "control-space-hunter",
+    targetZone: "Z4-HSR",
+    candidateLegal: true,
+    candidateAvailable: true,
+  });
+  const comparison = compareControlledRouteResolutionSandbox({ baseline, override });
+
+  assertTest(comparison.selectionDivergenceObserved, "selection divergence must be true.");
+  assertTest(comparison.carrierDivergenceObserved, "carrier divergence must be true.");
+  assertTest(comparison.zoneProgressionDivergenceObserved, "zone progression divergence must be true.");
+  assertTest(comparison.dangerCreationDivergenceObserved, "danger creation divergence must be true.");
+  assertTest(override.dangerProbability > baseline.dangerProbability, "override must create higher danger than baseline.");
+  assertTest(!comparison.scoringOpportunityDivergenceObserved, "scoring opportunity divergence remains false.");
+  assertTest(!comparison.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence remains false.");
+  assertTest(!comparison.sandboxScoreDivergenceObserved, "sandbox score divergence remains false.");
+  assertTest(comparison.explanation.length > 20, "comparison explanation must be present.");
+
+  return [
+    "SAFE_RECYCLE baseline vs FORWARD_PROGRESS override creates selection divergence",
+    "resulting carrier divergence is true",
+    "resulting zone divergence is true",
+    "zone progression divergence is true",
+    "override creates higher danger than baseline",
+    "scoring opportunity divergence remains false",
+    "sandbox score divergence remains false",
+    "sandbox scoring event divergence remains false",
+    "explanation is present and coach-readable",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCompareControlledRouteResolutionSandbox();
+
+  console.log("compareControlledRouteResolutionSandbox tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/controlledRouteResolutionSandbox.test.ts
+
+```ts
+import { controlledRouteResolutionSandboxFromReplay } from "./controlledRouteResolutionSandboxFromReplay";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function replayFixture(): FullMatchRealIsolatedSegmentReplay {
+  return {
+    status: "available",
+    scope: "real_isolated_segment_replay",
+    origin: "controlled_segment_replay_comparison",
+    segmentLabel: "segment-1",
+    chainId: "sequence-1-multi-action-chain",
+    baseline: {
+      pathId: "baseline",
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 4,
+      resultingCarrierId: "control-pivot",
+      resultingZone: "Z2-HSL",
+      warnings: [],
+    },
+    override: {
+      pathId: "override",
+      candidateId: "chain-context-forward-progress-sh",
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 5,
+      resultingCarrierId: "control-space-hunter",
+      resultingZone: "Z4-HSR",
+      warnings: [],
+    },
+    baselineEventCount: 4,
+    overrideEventCount: 5,
+    selectionDivergenceObserved: true,
+    possessionContinuityDivergenceObserved: false,
+    carrierDivergenceObserved: true,
+    zoneProgressionDivergenceObserved: true,
+    dangerCreationDivergenceObserved: true,
+    scoringOpportunityDivergenceObserved: false,
+    isolatedTimelineDivergenceObserved: true,
+    isolatedScoringEventDivergenceObserved: false,
+    isolatedScoreDivergenceObserved: false,
+    replayAppliedOnlyInIsolatedEngine: true,
+    replayAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 1,
+    rejectedUnavailableCandidateCount: 1,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateControlledRouteResolutionSandbox(): readonly string[] {
+  const sandbox = controlledRouteResolutionSandboxFromReplay({ replay: replayFixture() });
+
+  assertTest(sandbox.status === "available", "controlled route resolution sandbox must be available.");
+  assertTest(sandbox.origin === "real_isolated_segment_replay", "sandbox origin must be real isolated replay.");
+  assertTest(sandbox.segmentLabel === "segment-1", "sandbox must attach to segment-1.");
+  assertTest(sandbox.baseline.candidateId === "chain-context-safe-recycle-pv", "baseline candidate mismatch.");
+  assertTest(sandbox.baseline.actionType === "SAFE_RECYCLE", "baseline action mismatch.");
+  assertTest(sandbox.baseline.receiverId === "control-pivot", "baseline receiver mismatch.");
+  assertTest(sandbox.baseline.targetZone === "Z2-HSL", "baseline zone mismatch.");
+  assertTest(sandbox.baseline.routeResolved, "baseline route must resolve.");
+  assertTest(sandbox.baseline.outcome === "safe_retention", "baseline outcome must be safe_retention.");
+  assertTest(sandbox.baseline.resultingCarrierId === "control-pivot", "baseline resulting carrier mismatch.");
+  assertTest(sandbox.baseline.resultingZone === "Z2-HSL", "baseline resulting zone mismatch.");
+  assertTest(sandbox.override.candidateId === "chain-context-forward-progress-sh", "override candidate mismatch.");
+  assertTest(sandbox.override.actionType === "FORWARD_PROGRESS", "override action mismatch.");
+  assertTest(sandbox.override.receiverId === "control-space-hunter", "override receiver mismatch.");
+  assertTest(sandbox.override.targetZone === "Z4-HSR", "override zone mismatch.");
+  assertTest(sandbox.override.routeResolved, "override route must resolve.");
+  assertTest(sandbox.override.outcome === "dangerous_progression", "override outcome must be dangerous_progression.");
+  assertTest(sandbox.override.resultingCarrierId === "control-space-hunter", "override resulting carrier mismatch.");
+  assertTest(sandbox.override.resultingZone === "Z4-HSR", "override resulting zone mismatch.");
+  assertTest(sandbox.override.dangerProbability > sandbox.baseline.dangerProbability, "override must carry higher danger probability.");
+  assertTest(sandbox.override.turnoverRisk >= sandbox.baseline.turnoverRisk, "override turnover risk must be >= baseline.");
+  assertTest(sandbox.override.scoringOpportunityProbability >= sandbox.baseline.scoringOpportunityProbability, "override scoring opportunity probability must be >= baseline.");
+  assertTest(sandbox.selectionDivergenceObserved, "selection divergence must be observed.");
+  assertTest(sandbox.carrierDivergenceObserved, "carrier divergence must be observed.");
+  assertTest(sandbox.zoneProgressionDivergenceObserved, "zone progression divergence must be observed.");
+  assertTest(sandbox.dangerCreationDivergenceObserved, "danger creation divergence must be observed.");
+  assertTest(!sandbox.scoringOpportunityDivergenceObserved, "scoring opportunity divergence should remain false.");
+  assertTest(!sandbox.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence should remain false.");
+  assertTest(!sandbox.sandboxScoreDivergenceObserved, "sandbox score divergence should remain false.");
+  assertTest(sandbox.sandboxAppliedOnlyInIsolatedResolution, "sandbox must apply only in isolated resolution.");
+  assertTest(!sandbox.sandboxAppliedToNormalLiveSelection, "sandbox must not apply to normal live selection.");
+  assertTest(sandbox.diagnosticOnly, "sandbox must be diagnostic-only.");
+  assertTest(!sandbox.canInjectEventsIntoOfficialTimeline, "sandbox cannot inject official timeline events.");
+  assertTest(!sandbox.canMutateOfficialScore, "sandbox cannot mutate official score.");
+  assertTest(!sandbox.canMutateOfficialScoringEvents, "sandbox cannot mutate official scoring events.");
+  assertTest(!sandbox.canCreateProductionScoringEvents, "sandbox cannot create production scoring events.");
+  assertTest(!sandbox.canClaimGlobalEconomy, "sandbox cannot claim global economy.");
+
+  return [
+    "controlled route resolution sandbox status is available",
+    "sandbox origin is real_isolated_segment_replay",
+    "baseline route resolves as safe_retention",
+    "override route resolves as dangerous_progression",
+    "override danger probability is greater than baseline",
+    "sandbox remains isolated-only and diagnostic-only",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateControlledRouteResolutionSandbox();
+
+  console.log("controlledRouteResolutionSandbox tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/controlledRouteResolutionSandboxGuard.test.ts
+
+```ts
+import { controlledRouteResolutionSandboxFromReplay } from "./controlledRouteResolutionSandboxFromReplay";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function replayWithOverride(input: {
+  readonly candidateId?: string;
+  readonly candidateLegal: boolean;
+  readonly candidateAvailable: boolean;
+}): FullMatchRealIsolatedSegmentReplay {
+  return {
+    status: "available",
+    scope: "real_isolated_segment_replay",
+    origin: "controlled_segment_replay_comparison",
+    segmentLabel: "segment-1",
+    baseline: {
+      pathId: "baseline",
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 4,
+      warnings: [],
+    },
+    override: {
+      pathId: "override",
+      ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      candidateLegal: input.candidateLegal,
+      candidateAvailable: input.candidateAvailable,
+      events: [],
+      eventCount: 5,
+      warnings: [],
+    },
+    baselineEventCount: 4,
+    overrideEventCount: 5,
+    selectionDivergenceObserved: true,
+    possessionContinuityDivergenceObserved: false,
+    carrierDivergenceObserved: true,
+    zoneProgressionDivergenceObserved: true,
+    dangerCreationDivergenceObserved: true,
+    scoringOpportunityDivergenceObserved: false,
+    isolatedTimelineDivergenceObserved: true,
+    isolatedScoringEventDivergenceObserved: false,
+    isolatedScoreDivergenceObserved: false,
+    replayAppliedOnlyInIsolatedEngine: true,
+    replayAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 1,
+    rejectedUnavailableCandidateCount: 1,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateControlledRouteResolutionSandboxGuard(): readonly string[] {
+  const closed = controlledRouteResolutionSandboxFromReplay({
+    replay: replayWithOverride({
+      candidateId: "chain-context-forward-progress-sh",
+      candidateLegal: false,
+      candidateAvailable: true,
+    }),
+  });
+  const unavailable = controlledRouteResolutionSandboxFromReplay({
+    replay: replayWithOverride({
+      candidateId: "chain-context-forward-progress-sh",
+      candidateLegal: true,
+      candidateAvailable: false,
+    }),
+  });
+  const missing = controlledRouteResolutionSandboxFromReplay({
+    replay: replayWithOverride({
+      candidateLegal: true,
+      candidateAvailable: true,
+    }),
+  });
+
+  for (const sandbox of [closed, unavailable, missing]) {
+    assertTest(sandbox.status !== "available", "blocked sandbox must not be available.");
+    assertTest(!sandbox.canInjectEventsIntoOfficialTimeline, "sandbox cannot inject events into official timeline.");
+    assertTest(!sandbox.canMutateOfficialScore, "sandbox cannot mutate official score.");
+    assertTest(!sandbox.canMutateOfficialScoringEvents, "sandbox cannot mutate official scoring events.");
+    assertTest(!sandbox.canCreateProductionScoringEvents, "sandbox cannot create production scoring events.");
+    assertTest(!sandbox.canMutateProductionRouteResolution, "sandbox cannot mutate production route resolution.");
+    assertTest(!sandbox.canMutateGlobalRouteSuccessRates, "sandbox cannot mutate global route success rates.");
+    assertTest(!sandbox.canClaimGlobalEconomy, "sandbox cannot claim global economy.");
+  }
+
+  return [
+    "CLOSED override candidate cannot produce available sandbox",
+    "unavailable override candidate cannot produce available sandbox",
+    "missing override candidate returns blocked or failed",
+    "sandbox cannot mutate official or production outputs",
+    "sandbox cannot claim global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateControlledRouteResolutionSandboxGuard();
+
+  console.log("controlledRouteResolutionSandboxGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringOpportunityModel.test.ts
+
+```ts
+import { controlledRouteResolutionSandboxFromReplay } from "./controlledRouteResolutionSandboxFromReplay";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+import { sandboxScoringOpportunityModelFromResolution } from "./sandboxScoringOpportunityModelFromResolution";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function replayFixture(): FullMatchRealIsolatedSegmentReplay {
+  return {
+    status: "available",
+    scope: "real_isolated_segment_replay",
+    origin: "controlled_segment_replay_comparison",
+    segmentLabel: "segment-1",
+    chainId: "sequence-1-multi-action-chain",
+    baseline: {
+      pathId: "baseline",
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 4,
+      resultingCarrierId: "control-pivot",
+      resultingZone: "Z2-HSL",
+      warnings: [],
+    },
+    override: {
+      pathId: "override",
+      candidateId: "chain-context-forward-progress-sh",
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 5,
+      resultingCarrierId: "control-space-hunter",
+      resultingZone: "Z4-HSR",
+      warnings: [],
+    },
+    baselineEventCount: 4,
+    overrideEventCount: 5,
+    selectionDivergenceObserved: true,
+    possessionContinuityDivergenceObserved: false,
+    carrierDivergenceObserved: true,
+    zoneProgressionDivergenceObserved: true,
+    dangerCreationDivergenceObserved: true,
+    scoringOpportunityDivergenceObserved: false,
+    isolatedTimelineDivergenceObserved: true,
+    isolatedScoringEventDivergenceObserved: false,
+    isolatedScoreDivergenceObserved: false,
+    replayAppliedOnlyInIsolatedEngine: true,
+    replayAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 1,
+    rejectedUnavailableCandidateCount: 1,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateSandboxScoringOpportunityModel(): readonly string[] {
+  const sandbox = controlledRouteResolutionSandboxFromReplay({ replay: replayFixture() });
+  const model = sandboxScoringOpportunityModelFromResolution({ sandbox });
+
+  assertTest(model.status === "available", "sandbox opportunity model must be available.");
+  assertTest(model.origin === "controlled_route_resolution_sandbox", "opportunity model origin mismatch.");
+  assertTest(model.segmentLabel === "segment-1", "opportunity model must attach to segment-1.");
+  assertTest(model.baseline.candidateId === "chain-context-safe-recycle-pv", "baseline candidate mismatch.");
+  assertTest(model.baseline.actionType === "SAFE_RECYCLE", "baseline action mismatch.");
+  assertTest(model.baseline.receiverId === "control-pivot", "baseline receiver mismatch.");
+  assertTest(model.baseline.targetZone === "Z2-HSL", "baseline target zone mismatch.");
+  assertTest(model.baseline.routeOutcome === "safe_retention", "baseline route outcome mismatch.");
+  assertTest(model.baseline.sourceDangerProbability === 18, "baseline source danger probability must be 18.");
+  assertTest(model.baseline.sourceScoringOpportunityProbability === 5, "baseline source scoring opportunity probability must be 5.");
+  assertTest(model.baseline.opportunityType === "no_opportunity", "baseline opportunity type must be no_opportunity.");
+  assertTest(model.baseline.opportunityFamily === "none", "baseline opportunity family must be none.");
+  assertTest(model.baseline.opportunityProbability === 5, "baseline opportunity probability must be 5.");
+  assertTest(!model.baseline.opportunityCreated, "baseline opportunity must not be created.");
+  assertTest(model.override.candidateId === "chain-context-forward-progress-sh", "override candidate mismatch.");
+  assertTest(model.override.actionType === "FORWARD_PROGRESS", "override action mismatch.");
+  assertTest(model.override.receiverId === "control-space-hunter", "override receiver mismatch.");
+  assertTest(model.override.targetZone === "Z4-HSR", "override target zone mismatch.");
+  assertTest(model.override.routeOutcome === "dangerous_progression", "override route outcome mismatch.");
+  assertTest(model.override.sourceDangerProbability === 64, "override source danger probability must be 64.");
+  assertTest(model.override.sourceScoringOpportunityProbability === 24, "override source scoring opportunity probability must be 24.");
+  assertTest(model.override.opportunityType === "half_chance", "override opportunity type must be half_chance.");
+  assertTest(model.override.opportunityFamily === "territorial_danger", "override opportunity family must be territorial_danger.");
+  assertTest(model.override.opportunityProbability === 24, "override opportunity probability must be 24.");
+  assertTest(model.override.opportunityCreated, "override opportunity must be created.");
+  assertTest(model.opportunityTypeDivergenceObserved, "opportunity type divergence must be observed.");
+  assertTest(model.opportunityFamilyDivergenceObserved, "opportunity family divergence must be observed.");
+  assertTest(model.opportunityProbabilityDivergenceObserved, "opportunity probability divergence must be observed.");
+  assertTest(model.opportunityCreationDivergenceObserved, "opportunity creation divergence must be observed.");
+  assertTest(!model.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!model.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(model.modelAppliedOnlyInSandbox, "model must apply only in sandbox.");
+  assertTest(!model.modelAppliedToNormalLiveSelection, "model must not apply to normal live selection.");
+  assertTest(!model.baseline.sandboxScoringEventCreated, "baseline must not create sandbox scoring event.");
+  assertTest(!model.override.sandboxScoringEventCreated, "override must not create sandbox scoring event.");
+  assertTest(model.baseline.sandboxScoreDelta === 0, "baseline sandbox score delta must remain 0.");
+  assertTest(model.override.sandboxScoreDelta === 0, "override sandbox score delta must remain 0.");
+  assertTest(!model.canInjectEventsIntoOfficialTimeline, "model cannot inject events into official timeline.");
+  assertTest(!model.canMutateOfficialScore, "model cannot mutate official score.");
+  assertTest(!model.canMutateOfficialScoringEvents, "model cannot mutate official scoring events.");
+  assertTest(!model.canCreateProductionScoringEvents, "model cannot create production scoring events.");
+  assertTest(!model.canClaimGlobalEconomy, "model cannot claim global economy.");
+
+  return [
+    "sandbox scoring opportunity model status is available",
+    "baseline opportunity type is no_opportunity",
+    "override opportunity type is half_chance",
+    "opportunity divergences are observed",
+    "sandbox opportunity creates no scoring event and no score delta",
+    "sandbox opportunity remains isolated-only",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxScoringOpportunityModel();
+
+  console.log("sandboxScoringOpportunityModel tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringOpportunityModelGuard.test.ts
+
+```ts
+import { controlledRouteResolutionSandboxFromReplay } from "./controlledRouteResolutionSandboxFromReplay";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+import {
+  sandboxScoringOpportunityCannotClaimGlobalEconomy,
+  sandboxScoringOpportunityCannotMutateOfficialFullMatch,
+  sandboxScoringOpportunityModelFromResolution,
+} from "./sandboxScoringOpportunityModelFromResolution";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function replayFixture(input?: {
+  readonly overrideCandidateLegal?: boolean;
+  readonly overrideCandidateAvailable?: boolean;
+  readonly overrideCandidateId?: string;
+}): FullMatchRealIsolatedSegmentReplay {
+  return {
+    status: "available",
+    scope: "real_isolated_segment_replay",
+    origin: "controlled_segment_replay_comparison",
+    segmentLabel: "segment-1",
+    baseline: {
+      pathId: "baseline",
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 4,
+      warnings: [],
+    },
+    override: {
+      pathId: "override",
+      ...(input?.overrideCandidateId === undefined ? {} : { candidateId: input.overrideCandidateId }),
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      candidateLegal: input?.overrideCandidateLegal ?? true,
+      candidateAvailable: input?.overrideCandidateAvailable ?? true,
+      events: [],
+      eventCount: 5,
+      warnings: [],
+    },
+    baselineEventCount: 4,
+    overrideEventCount: 5,
+    selectionDivergenceObserved: true,
+    possessionContinuityDivergenceObserved: false,
+    carrierDivergenceObserved: true,
+    zoneProgressionDivergenceObserved: true,
+    dangerCreationDivergenceObserved: true,
+    scoringOpportunityDivergenceObserved: false,
+    isolatedTimelineDivergenceObserved: true,
+    isolatedScoringEventDivergenceObserved: false,
+    isolatedScoreDivergenceObserved: false,
+    replayAppliedOnlyInIsolatedEngine: true,
+    replayAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input?.overrideCandidateLegal === false ? 1 : 0,
+    rejectedUnavailableCandidateCount: input?.overrideCandidateAvailable === false ? 1 : 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateSandboxScoringOpportunityModelGuard(): readonly string[] {
+  const available = sandboxScoringOpportunityModelFromResolution({
+    sandbox: controlledRouteResolutionSandboxFromReplay({
+      replay: replayFixture({ overrideCandidateId: "chain-context-forward-progress-sh" }),
+    }),
+  });
+  const closed = sandboxScoringOpportunityModelFromResolution({
+    sandbox: controlledRouteResolutionSandboxFromReplay({
+      replay: replayFixture({
+        overrideCandidateId: "chain-context-forward-progress-sh",
+        overrideCandidateLegal: false,
+      }),
+    }),
+  });
+  const unavailable = sandboxScoringOpportunityModelFromResolution({
+    sandbox: controlledRouteResolutionSandboxFromReplay({
+      replay: replayFixture({
+        overrideCandidateId: "chain-context-forward-progress-sh",
+        overrideCandidateAvailable: false,
+      }),
+    }),
+  });
+  const missing = sandboxScoringOpportunityModelFromResolution({
+    sandbox: controlledRouteResolutionSandboxFromReplay({ replay: replayFixture() }),
+  });
+
+  assertTest(available.status === "available", "available sandbox opportunity should be available.");
+  assertTest(closed.status !== "available", "closed override candidate cannot produce available opportunity model.");
+  assertTest(unavailable.status !== "available", "unavailable override candidate cannot produce available opportunity model.");
+  assertTest(missing.status !== "available", "missing override candidate cannot produce available opportunity model.");
+  assertTest(sandboxScoringOpportunityCannotMutateOfficialFullMatch(available), "available model cannot mutate official full-match.");
+  assertTest(sandboxScoringOpportunityCannotClaimGlobalEconomy(available), "available model cannot claim global economy.");
+  assertTest(!available.canInjectEventsIntoOfficialTimeline, "model cannot inject official timeline events.");
+  assertTest(!available.canMutateOfficialScore, "model cannot mutate official score.");
+  assertTest(!available.canMutateOfficialScoringEvents, "model cannot mutate official scoring events.");
+  assertTest(!available.canCreateProductionScoringEvents, "model cannot create production scoring events.");
+  assertTest(!available.canMutateProductionRouteResolution, "model cannot mutate production route resolution.");
+  assertTest(!available.canMutateGlobalRouteSuccessRates, "model cannot mutate global route success rates.");
+  assertTest(!available.canClaimGlobalEconomy, "model cannot claim global economy.");
+
+  return [
+    "CLOSED override candidate cannot produce available model",
+    "unavailable override candidate cannot produce available model",
+    "missing override candidate returns not available or blocked",
+    "sandbox opportunity cannot inject events into official timeline",
+    "sandbox opportunity cannot mutate official score, scoring events, production route resolution, route success rates, or global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxScoringOpportunityModelGuard();
+
+  console.log("sandboxScoringOpportunityModelGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/compareSandboxScoringOpportunities.test.ts
+
+```ts
+import { compareSandboxScoringOpportunities } from "./compareSandboxScoringOpportunities";
+import type { SandboxScoringOpportunityPathResult } from "./sandboxScoringOpportunityModel";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function path(input: {
+  readonly pathId: "baseline" | "override";
+  readonly opportunityType: SandboxScoringOpportunityPathResult["opportunityType"];
+  readonly opportunityFamily: SandboxScoringOpportunityPathResult["opportunityFamily"];
+  readonly opportunityProbability: number;
+  readonly opportunityCreated: boolean;
+}): SandboxScoringOpportunityPathResult {
+  return {
+    pathId: input.pathId,
+    sourceDangerProbability: input.pathId === "baseline" ? 18 : 64,
+    sourceScoringOpportunityProbability: input.opportunityProbability,
+    turnoverRisk: input.pathId === "baseline" ? 12 : 34,
+    receptionQuality: input.pathId === "baseline" ? 86 : 72,
+    defensivePressure: input.pathId === "baseline" ? 31 : 58,
+    opportunityType: input.opportunityType,
+    opportunityFamily: input.opportunityFamily,
+    opportunityProbability: input.opportunityProbability,
+    opportunityCreated: input.opportunityCreated,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateCompareSandboxScoringOpportunities(): readonly string[] {
+  const comparison = compareSandboxScoringOpportunities({
+    baseline: path({
+      pathId: "baseline",
+      opportunityType: "no_opportunity",
+      opportunityFamily: "none",
+      opportunityProbability: 5,
+      opportunityCreated: false,
+    }),
+    override: path({
+      pathId: "override",
+      opportunityType: "half_chance",
+      opportunityFamily: "territorial_danger",
+      opportunityProbability: 24,
+      opportunityCreated: true,
+    }),
+  });
+
+  assertTest(comparison.opportunityTypeDivergenceObserved, "type divergence must be observed.");
+  assertTest(comparison.opportunityFamilyDivergenceObserved, "family divergence must be observed.");
+  assertTest(comparison.opportunityProbabilityDivergenceObserved, "probability divergence must be observed.");
+  assertTest(comparison.opportunityCreationDivergenceObserved, "creation divergence must be observed.");
+  assertTest(!comparison.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!comparison.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(comparison.explanation.includes("baseline route") && comparison.explanation.includes("override"), "comparison explanation must be coach-readable.");
+
+  return [
+    "no_opportunity baseline vs half_chance override creates type divergence",
+    "none family vs territorial_danger family creates family divergence",
+    "5 vs 24 creates probability divergence",
+    "false vs true creates creation divergence",
+    "sandbox scoring event and score divergences remain false",
+    "comparison explanation is present",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCompareSandboxScoringOpportunities();
+
+  console.log("compareSandboxScoringOpportunities tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -13202,6 +15610,188 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalControlledRouteResolutionSandbox.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { controlledRouteResolutionSandboxSignature } from "./controlledRouteResolutionSandboxSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalControlledRouteResolutionSandbox(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = controlledRouteResolutionSandboxSignature(defaultReport);
+  const experimentalSignature = controlledRouteResolutionSandboxSignature(experimentalReport);
+  const sandboxFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
+  );
+  const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
+    candidate.summary.includes("sandbox de resolution controlee")
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.sandboxTagCount === 0, "default runFullMatch must not expose sandbox tags.");
+  assertTest(experimentalSignature.sandboxTagCount > 0, "experimental runFullMatch must expose sandbox tags.");
+  assertTest(experimentalSignature.officialSandboxEventCount === 0, "sandbox results must not be inserted as official MatchEvents.");
+  assertTest(experimentalSignature.baselineCandidateId === "chain-context-safe-recycle-pv", "sandbox signature must expose baseline candidate.");
+  assertTest(experimentalSignature.baselineActionType === "SAFE_RECYCLE", "sandbox signature must expose baseline action.");
+  assertTest(experimentalSignature.baselineReceiverId === "control-pivot", "sandbox signature must expose baseline receiver.");
+  assertTest(experimentalSignature.baselineTargetZone === "Z2-HSL", "sandbox signature must expose baseline zone.");
+  assertTest(experimentalSignature.baselineResolved, "baseline route must resolve.");
+  assertTest(experimentalSignature.baselineOutcome === "safe_retention", "baseline outcome must be safe_retention.");
+  assertTest(experimentalSignature.overrideCandidateId === "chain-context-forward-progress-sh", "sandbox signature must expose override candidate.");
+  assertTest(experimentalSignature.overrideActionType === "FORWARD_PROGRESS", "sandbox signature must expose override action.");
+  assertTest(experimentalSignature.overrideReceiverId === "control-space-hunter", "sandbox signature must expose override receiver.");
+  assertTest(experimentalSignature.overrideTargetZone === "Z4-HSR", "sandbox signature must expose override zone.");
+  assertTest(experimentalSignature.overrideResolved, "override route must resolve.");
+  assertTest(experimentalSignature.overrideOutcome === "dangerous_progression", "override outcome must be dangerous_progression.");
+  assertTest(experimentalSignature.overrideDangerProbability > experimentalSignature.baselineDangerProbability, "override danger probability must be greater than baseline.");
+  assertTest(experimentalSignature.selectionDivergenceObserved, "sandbox must expose selection divergence.");
+  assertTest(experimentalSignature.carrierDivergenceObserved, "sandbox must expose carrier divergence.");
+  assertTest(experimentalSignature.zoneProgressionDivergenceObserved, "sandbox must expose zone progression divergence.");
+  assertTest(experimentalSignature.dangerCreationDivergenceObserved, "sandbox must expose danger creation divergence.");
+  assertTest(experimentalSignature.sandboxAppliedOnlyInIsolatedResolution, "sandbox must apply only in isolated resolution.");
+  assertTest(!experimentalSignature.sandboxAppliedToNormalLiveSelection, "sandbox must not apply to normal live selection.");
+  assertTest(sandboxFact !== undefined, "experimental report must include sandbox evidence.");
+  assertTest(sandboxFact?.internalTags.includes("sandbox_applied_only_in_isolated_resolution_true") ?? false, "sandbox evidence must say isolated-only.");
+  assertTest(sandboxFact?.internalTags.includes("sandbox_official_timeline_injection_forbidden") ?? false, "sandbox evidence must forbid official timeline injection.");
+  assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention route resolution sandbox.");
+  assertTest(diagnosis?.summary.includes("ne modifie pas le full-match normal") ?? false, "coach diagnosis must say sandbox does not alter official full-match.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_RESULTS_ISOLATED_ONLY"), "limitations must say sandbox results are isolated-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_RESULTS_NOT_OFFICIAL_MATCH_EVENTS"), "limitations must say sandbox results are not official MatchEvents.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
+  assertTest(!visibleText.includes("resolution live du simulation"), "coach copy must not contain stale wording resolution live du simulation.");
+  assertTest(!visibleText.includes("simulation experimental"), "coach copy must not contain stale wording simulation experimental.");
+
+  return [
+    "default runFullMatch has no sandbox tags",
+    "experimental runFullMatch has sandbox tags",
+    "experimental report includes sandbox evidence",
+    "experimental coach diagnosis mentions controlled route resolution sandbox",
+    "experimental report says sandbox results are isolated-only",
+    "experimental report says sandbox results are not official MatchEvents",
+    "experimental report says sandbox does not alter official full-match",
+    "normal full-match is not claimed as production chain-driven",
+    "coach copy avoids stale wording",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalControlledRouteResolutionSandbox();
+
+  console.log("runFullMatchExperimentalControlledRouteResolutionSandbox tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchExperimentalSandboxScoringOpportunityModel.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { sandboxScoringOpportunityModelSignature } from "./sandboxScoringOpportunityModelSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalSandboxScoringOpportunityModel(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = sandboxScoringOpportunityModelSignature(defaultReport);
+  const experimentalSignature = sandboxScoringOpportunityModelSignature(experimentalReport);
+  const opportunityFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL"
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.opportunityTagCount === 0, "default runFullMatch must not expose sandbox opportunity tags.");
+  assertTest(experimentalSignature.opportunityTagCount > 0, "experimental runFullMatch must expose sandbox opportunity tags.");
+  assertTest(experimentalSignature.officialSandboxOpportunityEventCount === 0, "sandbox opportunity must not be inserted as official MatchEvent.");
+  assertTest(experimentalSignature.baselineCandidateId === "chain-context-safe-recycle-pv", "baseline candidate mismatch.");
+  assertTest(experimentalSignature.baselineActionType === "SAFE_RECYCLE", "baseline action mismatch.");
+  assertTest(experimentalSignature.baselineReceiverId === "control-pivot", "baseline receiver mismatch.");
+  assertTest(experimentalSignature.baselineTargetZone === "Z2-HSL", "baseline zone mismatch.");
+  assertTest(experimentalSignature.baselineRouteOutcome === "safe_retention", "baseline route outcome mismatch.");
+  assertTest(experimentalSignature.baselineSourceDangerProbability === 18, "baseline danger probability must be 18.");
+  assertTest(experimentalSignature.baselineSourceScoringOpportunityProbability === 5, "baseline scoring opportunity probability must be 5.");
+  assertTest(experimentalSignature.baselineOpportunityType === "no_opportunity", "baseline opportunity type mismatch.");
+  assertTest(experimentalSignature.baselineOpportunityFamily === "none", "baseline opportunity family mismatch.");
+  assertTest(experimentalSignature.baselineOpportunityProbability === 5, "baseline opportunity probability mismatch.");
+  assertTest(!experimentalSignature.baselineOpportunityCreated, "baseline opportunity created must be false.");
+  assertTest(experimentalSignature.overrideCandidateId === "chain-context-forward-progress-sh", "override candidate mismatch.");
+  assertTest(experimentalSignature.overrideActionType === "FORWARD_PROGRESS", "override action mismatch.");
+  assertTest(experimentalSignature.overrideReceiverId === "control-space-hunter", "override receiver mismatch.");
+  assertTest(experimentalSignature.overrideTargetZone === "Z4-HSR", "override zone mismatch.");
+  assertTest(experimentalSignature.overrideRouteOutcome === "dangerous_progression", "override route outcome mismatch.");
+  assertTest(experimentalSignature.overrideSourceDangerProbability === 64, "override danger probability must be 64.");
+  assertTest(experimentalSignature.overrideSourceScoringOpportunityProbability === 24, "override scoring opportunity probability must be 24.");
+  assertTest(experimentalSignature.overrideOpportunityType === "half_chance", "override opportunity type mismatch.");
+  assertTest(experimentalSignature.overrideOpportunityFamily === "territorial_danger", "override opportunity family mismatch.");
+  assertTest(experimentalSignature.overrideOpportunityProbability === 24, "override opportunity probability mismatch.");
+  assertTest(experimentalSignature.overrideOpportunityCreated, "override opportunity created must be true.");
+  assertTest(experimentalSignature.opportunityTypeDivergenceObserved, "type divergence must be observed.");
+  assertTest(experimentalSignature.opportunityFamilyDivergenceObserved, "family divergence must be observed.");
+  assertTest(experimentalSignature.opportunityProbabilityDivergenceObserved, "probability divergence must be observed.");
+  assertTest(experimentalSignature.opportunityCreationDivergenceObserved, "creation divergence must be observed.");
+  assertTest(!experimentalSignature.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!experimentalSignature.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(experimentalSignature.modelAppliedOnlyInSandbox, "model must apply only in sandbox.");
+  assertTest(!experimentalSignature.modelAppliedToNormalLiveSelection, "model must not apply to normal live selection.");
+  assertTest(opportunityFact !== undefined, "experimental report must include sandbox opportunity evidence.");
+  assertTest(opportunityFact?.internalTags.includes("sandbox_opportunity_applied_only_in_sandbox_true") ?? false, "evidence must say applied only in sandbox.");
+  assertTest(opportunityFact?.internalTags.includes("sandbox_opportunity_official_timeline_injection_forbidden") ?? false, "evidence must forbid official timeline injection.");
+  assertTest(visibleText.includes("modele sandbox d'opportunite de scoring"), "coach diagnosis must mention sandbox scoring opportunity model.");
+  assertTest(visibleText.includes("ne cree aucun MatchEvent officiel"), "coach diagnosis must say sandbox opportunity is not official.");
+  assertTest(visibleText.includes("ne modifie pas le score officiel"), "coach diagnosis must say sandbox opportunity does not alter official score.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_RESULTS_ISOLATED_ONLY"), "limitations must say opportunity model is isolated-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match must not be claimed as production chain-driven.");
+  assertTest(!visibleText.includes("rÃ©solution live du simulation"), "coach copy must not contain stale wording resolution live du simulation.");
+  assertTest(!visibleText.includes("simulation experimental"), "coach copy must not contain stale wording simulation experimental.");
+
+  return [
+    "default runFullMatch has no sandbox opportunity tags",
+    "experimental runFullMatch has sandbox opportunity tags",
+    "experimental report includes sandbox opportunity evidence",
+    "experimental coach diagnosis mentions sandbox scoring opportunity model",
+    "experimental report says sandbox opportunity is isolated-only and not official",
+    "normal full-match is not claimed as production chain-driven",
+    "coach copy avoids stale wording",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalSandboxScoringOpportunityModel();
+
+  console.log("runFullMatchExperimentalSandboxScoringOpportunityModel tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -13874,6 +16464,154 @@ if (require.main === module) {
   const checks = validateRunFullMatchRealIsolatedSegmentReplayScoringGuard();
 
   console.log("runFullMatchRealIsolatedSegmentReplayScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchControlledRouteResolutionSandboxScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { controlledRouteResolutionSandboxSignature } from "./controlledRouteResolutionSandboxSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateRunFullMatchControlledRouteResolutionSandboxScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = controlledRouteResolutionSandboxSignature(defaultReport);
+  const experimentalSignature = controlledRouteResolutionSandboxSignature(experimentalReport);
+
+  assertTest(defaultReport.score.home === experimentalReport.score.home, "sandbox must not mutate official home score.");
+  assertTest(defaultReport.score.away === experimentalReport.score.away, "sandbox must not mutate official away score.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "sandbox must not mutate official scoring event count.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "sandbox must not mutate official score_change total.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "sandbox must not add official timeline events.");
+  assertTest(experimentalSignature.officialSandboxEventCount === 0, "no sandbox result is inserted as official MatchEvent.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official final score must still derive from official score_change consequences.");
+  assertTest(experimentalSignature.officialTimelineInjectionCount === 0, "sandbox events injected into official timeline count must be 0.");
+  assertTest(experimentalSignature.officialScoreMutationCount === 0, "official score mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoringEventMutationCount === 0, "official scoring event mutation count must be 0.");
+  assertTest(experimentalSignature.productionScoringEventCreationCount === 0, "sandbox must not create production scoring events.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "sandbox must not mutate production route resolution.");
+  assertTest(experimentalSignature.globalRouteSuccessRateMutationCount === 0, "sandbox must not mutate global route success rates.");
+  assertTest(experimentalSignature.globalEconomyClaimCount === 0, "sandbox must not claim global economy.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "limitations must forbid production scoring event creation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION"), "limitations must forbid production route resolution mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES"), "limitations must forbid global route success mutation.");
+
+  return [
+    "default and experimental official final scores remain equal",
+    "default and experimental official scoring event counts remain equal",
+    "default and experimental official score_change totals remain equal",
+    "official timeline event count remains equal",
+    "no sandbox result is inserted as official MatchEvent",
+    "no production scoring events are deleted/capped/rewritten/fabricated",
+    "no production scoring events are created by sandbox",
+    "global route success rates are not mutated",
+    "production route resolution is not mutated",
+    "normal live mini-match route resolution is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchControlledRouteResolutionSandboxScoringGuard();
+
+  console.log("runFullMatchControlledRouteResolutionSandboxScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchSandboxScoringOpportunityModelScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { sandboxScoringOpportunityModelSignature } from "./sandboxScoringOpportunityModelSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateRunFullMatchSandboxScoringOpportunityModelScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = sandboxScoringOpportunityModelSignature(defaultReport);
+  const experimentalSignature = sandboxScoringOpportunityModelSignature(experimentalReport);
+
+  assertTest(defaultReport.score.home === experimentalReport.score.home, "sandbox opportunity must not mutate official home score.");
+  assertTest(defaultReport.score.away === experimentalReport.score.away, "sandbox opportunity must not mutate official away score.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "sandbox opportunity must not mutate official scoring event count.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "sandbox opportunity must not mutate official score_change total.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "sandbox opportunity must not add official timeline events.");
+  assertTest(experimentalSignature.officialSandboxOpportunityEventCount === 0, "no sandbox opportunity is inserted as official MatchEvent.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official final score must still derive from official score_change consequences.");
+  assertTest(experimentalSignature.sandboxScoringEventCreatedCount === 0, "sandbox opportunity must not create sandbox scoring events in 3L.");
+  assertTest(experimentalSignature.sandboxScoreDeltaTotal === 0, "sandbox opportunity score delta total must be 0.");
+  assertTest(experimentalSignature.officialTimelineInjectionCount === 0, "sandbox opportunity injected into official timeline count must be 0.");
+  assertTest(experimentalSignature.officialScoreMutationCount === 0, "official score mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoringEventMutationCount === 0, "official scoring event mutation count must be 0.");
+  assertTest(experimentalSignature.productionScoringEventCreationCount === 0, "sandbox opportunity must not create production scoring events.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "sandbox opportunity must not mutate production route resolution.");
+  assertTest(experimentalSignature.globalRouteSuccessRateMutationCount === 0, "sandbox opportunity must not mutate global route success rates.");
+  assertTest(experimentalSignature.globalEconomyClaimCount === 0, "sandbox opportunity must not claim global economy.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "limitations must forbid production scoring event creation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION"), "limitations must forbid production route resolution mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES"), "limitations must forbid global route success mutation.");
+
+  return [
+    "default and experimental official final scores remain equal",
+    "default and experimental official scoring event counts remain equal",
+    "default and experimental official score_change totals remain equal",
+    "official timeline event count remains equal",
+    "no sandbox opportunity is inserted as official MatchEvent",
+    "no production scoring events are deleted/capped/rewritten/fabricated",
+    "no production scoring events are created by sandbox opportunity model",
+    "global route success rates are not mutated",
+    "production route resolution is not mutated",
+    "normal live mini-match route resolution is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchSandboxScoringOpportunityModelScoringGuard();
+
+  console.log("runFullMatchSandboxScoringOpportunityModelScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -14705,6 +17443,134 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3k.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3K(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "sandbox must not create production scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_RESULTS_ISOLATED_ONLY"), "sandbox scoring events, if any, must remain sandbox-only.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORE"), "sandbox must not mutate official score.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS"), "sandbox must not mutate official scoring events.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "no production scoring event creation from sandbox",
+    "sandbox scoring events, if any, remain sandbox-only",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3K();
+
+  console.log("scoringGuard.3k tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.3l.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { sandboxScoringOpportunityModelSignature } from "./sandboxScoringOpportunityModelSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3L(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = sandboxScoringOpportunityModelSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.sandboxScoringEventCreatedCount === 0, "sandbox opportunity must not create scoring events in 3L.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "sandbox opportunity must not create production scoring events.");
+  assertTest(signature.officialScoreMutationCount === 0, "sandbox opportunity must not mutate official score.");
+  assertTest(signature.officialScoringEventMutationCount === 0, "sandbox opportunity must not mutate official scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "sandbox opportunity must not create production scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_RESULTS_ISOLATED_ONLY"), "sandbox opportunity, if any, must remain sandbox-only.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "no production scoring event creation from sandbox opportunity model",
+    "sandbox opportunity, if any, remains sandbox-only",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3L();
+
+  console.log("scoringGuard.3l tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -15270,6 +18136,136 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3J();
 
   console.log("sourceOfTruthGuards.3j tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3k.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3K(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON cannot make global economy claims",
+    "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT cannot make global economy claims",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3K();
+
+  console.log("sourceOfTruthGuards.3k tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3l.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3L(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON cannot make global economy claims",
+    "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT cannot make global economy claims",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3L();
+
+  console.log("sourceOfTruthGuards.3l tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -16282,6 +19278,8 @@ import type { FullMatchLiveSelectionOverrideGuard } from "../fullMatch/fullMatch
 import type { FullMatchIsolatedMiniMatchOverrideExperiment } from "../fullMatch/fullMatchIsolatedMiniMatchOverrideExperiment";
 import type { FullMatchControlledSegmentReplayComparison } from "../fullMatch/fullMatchControlledSegmentReplayComparison";
 import type { FullMatchRealIsolatedSegmentReplay } from "../fullMatch/fullMatchRealIsolatedSegmentReplay";
+import type { ControlledRouteResolutionSandbox } from "../fullMatch/controlledRouteResolutionSandbox";
+import type { SandboxScoringOpportunityModel } from "../fullMatch/sandboxScoringOpportunityModel";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -16304,6 +19302,8 @@ export interface MiniMatchTimelineSegment {
   readonly isolatedMiniMatchOverrideExperiment?: FullMatchIsolatedMiniMatchOverrideExperiment;
   readonly controlledSegmentReplayComparison?: FullMatchControlledSegmentReplayComparison;
   readonly realIsolatedSegmentReplay?: FullMatchRealIsolatedSegmentReplay;
+  readonly controlledRouteResolutionSandbox?: ControlledRouteResolutionSandbox;
+  readonly sandboxScoringOpportunityModel?: SandboxScoringOpportunityModel;
 }
 
 export interface MatchReportBuilderInput {
@@ -16717,6 +19717,137 @@ function realIsolatedSegmentReplayReason(replay: FullMatchRealIsolatedSegmentRep
   return ` Real isolated segment replay available: baseline generated ${replay.baselineEventCount} isolated event(s) for ${replay.baseline.actionType ?? "none"} to ${replay.baseline.receiverId ?? "none"} in ${replay.baseline.targetZone ?? "none"}; override generated ${replay.overrideEventCount} isolated event(s) for ${replay.override.actionType ?? "none"} to ${replay.override.receiverId ?? "none"} in ${replay.override.targetZone ?? "none"}. These isolated replay events are experimental-only metadata and are not official MatchEvents, not inserted into the official timeline, and cannot mutate official score, official scoring events, production route resolution, or global economy proof.`;
 }
 
+function controlledRouteResolutionSandboxTags(
+  sandbox: ControlledRouteResolutionSandbox | undefined,
+): readonly string[] {
+  if (sandbox === undefined || sandbox.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_controlled_route_resolution_sandbox",
+    "controlled_route_resolution_sandbox",
+    ...(sandbox.baseline.candidateId === undefined ? [] : [`sandbox_baseline_candidate_${sandbox.baseline.candidateId}`]),
+    ...(sandbox.baseline.actionType === undefined ? [] : [`sandbox_baseline_action_${sandbox.baseline.actionType}`]),
+    ...(sandbox.baseline.receiverId === undefined ? [] : [`sandbox_baseline_receiver_${sandbox.baseline.receiverId}`]),
+    ...(sandbox.baseline.targetZone === undefined ? [] : [`sandbox_baseline_zone_${sandbox.baseline.targetZone}`]),
+    `sandbox_baseline_outcome_${sandbox.baseline.outcome}`,
+    ...(sandbox.override.candidateId === undefined ? [] : [`sandbox_override_candidate_${sandbox.override.candidateId}`]),
+    ...(sandbox.override.actionType === undefined ? [] : [`sandbox_override_action_${sandbox.override.actionType}`]),
+    ...(sandbox.override.receiverId === undefined ? [] : [`sandbox_override_receiver_${sandbox.override.receiverId}`]),
+    ...(sandbox.override.targetZone === undefined ? [] : [`sandbox_override_zone_${sandbox.override.targetZone}`]),
+    `sandbox_override_outcome_${sandbox.override.outcome}`,
+    `sandbox_baseline_resolved_${sandbox.baselineResolved ? "true" : "false"}`,
+    `sandbox_override_resolved_${sandbox.overrideResolved ? "true" : "false"}`,
+    `sandbox_selection_divergence_${sandbox.selectionDivergenceObserved ? "true" : "false"}`,
+    `sandbox_carrier_divergence_${sandbox.carrierDivergenceObserved ? "true" : "false"}`,
+    `sandbox_zone_progression_divergence_${sandbox.zoneProgressionDivergenceObserved ? "true" : "false"}`,
+    `sandbox_danger_creation_divergence_${sandbox.dangerCreationDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_opportunity_divergence_${sandbox.scoringOpportunityDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_event_divergence_${sandbox.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `sandbox_score_divergence_${sandbox.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    `sandbox_applied_only_in_isolated_resolution_${sandbox.sandboxAppliedOnlyInIsolatedResolution ? "true" : "false"}`,
+    `sandbox_applied_to_normal_live_${sandbox.sandboxAppliedToNormalLiveSelection ? "true" : "false"}`,
+    "sandbox_official_timeline_injection_forbidden",
+    "sandbox_official_score_mutation_forbidden",
+    "sandbox_official_scoring_events_mutation_forbidden",
+    "sandbox_production_scoring_event_creation_forbidden",
+    "sandbox_production_resolution_forbidden",
+    "sandbox_global_route_success_mutation_forbidden",
+    "sandbox_global_economy_claim_forbidden",
+    "sandbox_closed_candidates_rejected",
+    "sandbox_unavailable_candidates_rejected",
+    "sandbox_events_injected_into_official_timeline_count_0",
+    "sandbox_official_score_mutation_count_0",
+    "sandbox_official_scoring_event_mutation_count_0",
+    "sandbox_production_scoring_event_creation_count_0",
+    "sandbox_production_route_resolution_mutation_count_0",
+    "sandbox_global_route_success_mutation_count_0",
+    "sandbox_global_economy_claim_count_0",
+    ...sandbox.tags,
+  ];
+}
+
+function controlledRouteResolutionSandboxReason(
+  sandbox: ControlledRouteResolutionSandbox | undefined,
+): string {
+  if (sandbox === undefined || sandbox.status === "not_available") {
+    return "";
+  }
+
+  return ` Controlled route resolution sandbox available: baseline ${sandbox.baseline.outcome} for ${sandbox.baseline.actionType ?? "none"} to ${sandbox.baseline.receiverId ?? "none"} in ${sandbox.baseline.targetZone ?? "none"} with danger probability ${sandbox.baseline.dangerProbability}/100; override ${sandbox.override.outcome} for ${sandbox.override.actionType ?? "none"} to ${sandbox.override.receiverId ?? "none"} in ${sandbox.override.targetZone ?? "none"} with danger probability ${sandbox.override.dangerProbability}/100. Sandbox results are isolated-only, not official MatchEvents, not applied to normal live selection, and cannot mutate official score, official scoring events, production route resolution, route success rates, or global economy proof.`;
+}
+
+function sandboxScoringOpportunityModelTags(
+  model: SandboxScoringOpportunityModel | undefined,
+): readonly string[] {
+  if (model === undefined || model.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_sandbox_scoring_opportunity_model",
+    "sandbox_scoring_opportunity_model",
+    ...(model.baseline.candidateId === undefined ? [] : [`sandbox_opportunity_baseline_candidate_${model.baseline.candidateId}`]),
+    ...(model.baseline.actionType === undefined ? [] : [`sandbox_opportunity_baseline_action_${model.baseline.actionType}`]),
+    ...(model.baseline.receiverId === undefined ? [] : [`sandbox_opportunity_baseline_receiver_${model.baseline.receiverId}`]),
+    ...(model.baseline.targetZone === undefined ? [] : [`sandbox_opportunity_baseline_zone_${model.baseline.targetZone}`]),
+    ...(model.baseline.routeOutcome === undefined ? [] : [`sandbox_opportunity_baseline_route_outcome_${model.baseline.routeOutcome}`]),
+    `sandbox_opportunity_baseline_type_${model.baseline.opportunityType}`,
+    `sandbox_opportunity_baseline_family_${model.baseline.opportunityFamily}`,
+    `sandbox_opportunity_baseline_probability_${model.baseline.opportunityProbability}`,
+    `sandbox_opportunity_baseline_created_${model.baseline.opportunityCreated ? "true" : "false"}`,
+    `sandbox_opportunity_baseline_source_danger_probability_${model.baseline.sourceDangerProbability}`,
+    `sandbox_opportunity_baseline_source_scoring_opportunity_probability_${model.baseline.sourceScoringOpportunityProbability}`,
+    ...(model.override.candidateId === undefined ? [] : [`sandbox_opportunity_override_candidate_${model.override.candidateId}`]),
+    ...(model.override.actionType === undefined ? [] : [`sandbox_opportunity_override_action_${model.override.actionType}`]),
+    ...(model.override.receiverId === undefined ? [] : [`sandbox_opportunity_override_receiver_${model.override.receiverId}`]),
+    ...(model.override.targetZone === undefined ? [] : [`sandbox_opportunity_override_zone_${model.override.targetZone}`]),
+    ...(model.override.routeOutcome === undefined ? [] : [`sandbox_opportunity_override_route_outcome_${model.override.routeOutcome}`]),
+    `sandbox_opportunity_override_type_${model.override.opportunityType}`,
+    `sandbox_opportunity_override_family_${model.override.opportunityFamily}`,
+    `sandbox_opportunity_override_probability_${model.override.opportunityProbability}`,
+    `sandbox_opportunity_override_created_${model.override.opportunityCreated ? "true" : "false"}`,
+    `sandbox_opportunity_override_source_danger_probability_${model.override.sourceDangerProbability}`,
+    `sandbox_opportunity_override_source_scoring_opportunity_probability_${model.override.sourceScoringOpportunityProbability}`,
+    `sandbox_opportunity_type_divergence_${model.opportunityTypeDivergenceObserved ? "true" : "false"}`,
+    `sandbox_opportunity_family_divergence_${model.opportunityFamilyDivergenceObserved ? "true" : "false"}`,
+    `sandbox_opportunity_probability_divergence_${model.opportunityProbabilityDivergenceObserved ? "true" : "false"}`,
+    `sandbox_opportunity_creation_divergence_${model.opportunityCreationDivergenceObserved ? "true" : "false"}`,
+    `sandbox_opportunity_scoring_event_divergence_${model.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `sandbox_opportunity_score_divergence_${model.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    "sandbox_opportunity_scoring_event_created_false",
+    "sandbox_opportunity_score_delta_0",
+    `sandbox_opportunity_applied_only_in_sandbox_${model.modelAppliedOnlyInSandbox ? "true" : "false"}`,
+    `sandbox_opportunity_applied_to_normal_live_${model.modelAppliedToNormalLiveSelection ? "true" : "false"}`,
+    "sandbox_opportunity_official_timeline_injection_forbidden",
+    "sandbox_opportunity_official_score_mutation_forbidden",
+    "sandbox_opportunity_official_scoring_events_mutation_forbidden",
+    "sandbox_opportunity_production_scoring_event_creation_forbidden",
+    "sandbox_opportunity_global_economy_claim_forbidden",
+    "sandbox_opportunity_closed_candidates_rejected",
+    "sandbox_opportunity_unavailable_candidates_rejected",
+    "sandbox_opportunity_injected_into_official_timeline_count_0",
+    "sandbox_opportunity_official_score_mutation_count_0",
+    "sandbox_opportunity_official_scoring_event_mutation_count_0",
+    "sandbox_opportunity_production_scoring_event_creation_count_0",
+    "sandbox_opportunity_production_route_resolution_mutation_count_0",
+    "sandbox_opportunity_global_route_success_mutation_count_0",
+    "sandbox_opportunity_global_economy_claim_count_0",
+    ...model.tags,
+  ];
+}
+
+function sandboxScoringOpportunityModelReason(
+  model: SandboxScoringOpportunityModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return ` Sandbox scoring opportunity model available: baseline ${model.baseline.opportunityType} (${model.baseline.opportunityProbability}/100) from ${model.baseline.routeOutcome ?? "none"}; override ${model.override.opportunityType} (${model.override.opportunityProbability}/100) from ${model.override.routeOutcome ?? "none"}. The model is sandbox-only, is not an official MatchEvent, is not applied to normal live selection, creates no production scoring event, and cannot mutate official score, official scoring events, production route resolution, route success rates, or global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -16758,7 +19889,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -16786,6 +19917,8 @@ function kickoffEvent(input: {
       ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
       ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
       ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+      ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
+      ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
     ],
     narrativeWeight: 5,
   };
@@ -16848,6 +19981,8 @@ function sequenceRecordToMatchEvent(input: {
     ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
     ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
     ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+    ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
+    ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -16872,7 +20007,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -16935,7 +20070,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -16973,6 +20108,8 @@ function scoringEventToMatchEvent(input: {
       ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
       ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
       ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+      ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
+      ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
     ],
     narrativeWeight: 70,
   };
@@ -17666,6 +20803,8 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT":
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
+    case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return "training_recommendation";
   }
 }
@@ -17710,6 +20849,10 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Comparaison de replay controle du segment";
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
       return "Replay isole reel du segment";
+    case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
+      return "Sandbox de resolution controlee de route";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+      return "Modele sandbox d'opportunite de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -17772,6 +20915,8 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT":
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
+    case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -17801,6 +20946,8 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT",
     "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON",
     "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY",
+    "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -18920,6 +22067,10 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 43;
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
       return 42;
+    case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
+      return 41;
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+      return 40;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -18974,6 +22125,10 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la comparaison de replay controle du segment";
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
       return "Relire les evenements de replay isole du segment";
+    case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
+      return "Relire la sandbox de resolution controlee de route";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+      return "Relire le modele sandbox d'opportunite de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -20235,7 +23390,9 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD"
   | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"
-  | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY";
+  | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
+  | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -20586,6 +23743,62 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route resolution quality",
       "normal live mini-match route resolution quality",
       "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
+    canProve: [
+      "experimental baseline and override routes were resolved inside an isolated sandbox",
+      "sandbox route outcomes exposed pressure, reception, risk, danger, and scoring-opportunity probabilities",
+      "sandbox resolution rejected closed and unavailable candidates",
+      "sandbox resolution remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
+    canProve: [
+      "experimental sandbox route metrics were classified into typed scoring-opportunity signals",
+      "baseline and override opportunity type, family, probability, and creation divergence were exposed",
+      "sandbox opportunity classification rejected closed and unavailable candidates through the route-resolution sandbox",
+      "sandbox opportunity classification remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production scoring opportunity quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
       "full-match economy coherence",
       "production chain-driven full-match behavior",
     ],
