@@ -277,6 +277,87 @@ function renderWarning(warning: MatchReport["warnings"][number]): string {
     </article>`;
 }
 
+function tagValue(tags: readonly string[], prefix: string): string | undefined {
+  return tags.find((tag) => tag.startsWith(prefix))?.slice(prefix.length);
+}
+
+function renderTimelineReview(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW" &&
+    candidate.internalTags.includes("coach_facing_timeline_review")
+  );
+
+  if (fact === undefined) {
+    return "";
+  }
+
+  const baselineEvents = tagValue(fact.internalTags, "timeline_review_sandbox_baseline_events_") ?? "0";
+  const overrideEvents = tagValue(fact.internalTags, "timeline_review_sandbox_override_events_") ?? "0";
+  const finalOutcome = tagValue(fact.internalTags, "timeline_review_override_final_outcome_") ?? "secured_by_goalkeeper_team";
+  const finalActor = tagValue(fact.internalTags, "timeline_review_override_final_actor_") ?? "blitz-goalkeeper-free-safety";
+  const finalZone = tagValue(fact.internalTags, "timeline_review_override_final_zone_") ?? "Z3-HSR";
+  const blocks = [
+    {
+      title: "Ce qui s'est passé officiellement",
+      summary:
+        "La timeline officielle reste la seule source de vérité du match. Dans ce run, le diff ne modifie ni les événements officiels, ni la possession officielle, ni le score officiel.",
+      bullets: [
+        "Le score officiel reste inchangé.",
+        "La possession officielle reste inchangée.",
+        "Les événements de score officiels restent inchangés.",
+        "Les événements sandbox ne sont pas des MatchEvents officiels.",
+      ],
+    },
+    {
+      title: "Ce que le sandbox a rejoué",
+      summary:
+        `Le sandbox rejoue un scénario parallèle sur le premier segment. L'override se termine par ${finalOutcome}, avec ${finalActor} comme acteur final en ${finalZone}.`,
+      bullets: [
+        `Baseline sandbox-only : ${baselineEvents} événements.`,
+        `Override sandbox-only : ${overrideEvents} événements.`,
+        "Ce replay reste explicatif et non officiel.",
+      ],
+    },
+    {
+      title: "Ce qui est différent",
+      summary:
+        "La différence principale est uniquement expérimentale : le sandbox explore ce qu'aurait donné la route contrôlée FORWARD_PROGRESS, mais cette lecture ne remplace pas la timeline officielle.",
+      bullets: [
+        "La divergence appartient au sandbox.",
+        "Elle sert à relire une alternative contrôlée et ses conséquences possibles.",
+      ],
+    },
+    {
+      title: "Ce qui n'a pas été modifié",
+      summary:
+        "Rien n'est modifié côté officiel : pas d'événement ajouté, pas de possession changée, pas de score modifié, pas d'événement de score créé et aucune conclusion d'économie globale.",
+      bullets: [
+        "Timeline officielle inchangée.",
+        "Score, possession et événements de score officiels inchangés.",
+        "Aucun événement de score production créé.",
+        "Aucune preuve d'économie globale modifiée.",
+      ],
+    },
+  ];
+  const articles = blocks.map((block) => `
+      <article class="card">
+        <h3>${escapeHtml(block.title)}</h3>
+        <p>${escapeHtml(block.summary)}</p>
+        <ul>${block.bullets.map((bullet) => `<li>${escapeHtml(bullet)}</li>`).join("")}</ul>
+      </article>`).join("");
+
+  return `
+    <section>
+      <h2>Lecture timeline officielle vs sandbox</h2>
+      <div class="grid">${articles}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques du sandbox</summary>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -373,6 +454,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const teamStats = report.teamStats.map(renderTeamStats).join("");
   const zoneStats = report.zoneStats.map(renderZoneStats).join("");
   const timeline = [...report.timeline].sort(compareTimelineEvents).map(renderTimelineEvent).join("");
+  const timelineReview = renderTimelineReview(report);
 
   return `<!doctype html>
 <html lang="fr">
@@ -436,6 +518,8 @@ export function renderHtmlCoachReport(report: MatchReport): string {
       <h2>Analyse du coach</h2>
       <div class="grid">${insights}</div>
     </section>
+
+    ${timelineReview}
 
     <section>
       <h2>Diagnostic tactique</h2>

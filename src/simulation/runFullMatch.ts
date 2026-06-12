@@ -92,6 +92,8 @@ import { controlledSegmentSandboxTimelineFromReplay } from "./fullMatch/controll
 import type { ControlledSegmentSandboxTimelineModel } from "./fullMatch/controlledSegmentSandboxTimeline";
 import { officialTimelineDiffFromSandboxTimeline } from "./fullMatch/officialTimelineDiffFromSandboxTimeline";
 import type { OfficialTimelineDiffViewModel } from "./fullMatch/officialTimelineDiffView";
+import { coachFacingTimelineReviewFromDiff } from "./fullMatch/coachFacingTimelineReviewFromDiff";
+import type { CoachFacingTimelineReviewModel } from "./fullMatch/coachFacingTimelineReview";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -817,6 +819,26 @@ function officialTimelineDiffViewModelLimitations(model: OfficialTimelineDiffVie
     "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
     "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function coachFacingTimelineReviewModelLimitations(model: CoachFacingTimelineReviewModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_EXPERIMENTAL",
+    `FULLMATCH_COACH_FACING_TIMELINE_REVIEW_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_READ_ONLY",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_SANDBOX_ONLY",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2162,6 +2184,48 @@ function officialTimelineDiffViewModelEvidenceFact(input: {
   };
 }
 
+function coachFacingTimelineReviewModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachFacingTimelineReviewModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+  const finalActor = input.model.tags.find((tag) => tag.startsWith("timeline_review_override_final_actor_"))?.replace("timeline_review_override_final_actor_", "") ?? "none";
+  const finalZone = input.model.tags.find((tag) => tag.startsWith("timeline_review_override_final_zone_"))?.replace("timeline_review_override_final_zone_", "") ?? "none";
+  const finalOutcome = input.model.tags.find((tag) => tag.startsWith("timeline_review_override_final_outcome_"))?.replace("timeline_review_override_final_outcome_", "") ?? "none";
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-coach-facing-timeline-review`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [finalZone === "none" ? "Z3-HSR" : finalZone],
+    summary:
+      `Coach-facing timeline review ${input.model.status}: origin ${input.model.origin}, ` +
+      `blocks=${input.model.blocks.length}, officialTimelineUnchanged=${input.model.officialTimelineUnchanged}, ` +
+      `officialScoreUnchanged=${input.model.officialScoreUnchanged}, officialPossessionUnchanged=${input.model.officialPossessionUnchanged}, ` +
+      `officialScoringEventsUnchanged=${input.model.officialScoringEventsUnchanged}, sandboxEventsAreOfficial=${input.model.sandboxEventsAreOfficial}, ` +
+      `sandboxEventsInsertedIntoOfficialTimeline=${input.model.sandboxEventsInsertedIntoOfficialTimeline}, ` +
+      `override outcome=${finalOutcome}, actor=${finalActor}, zone=${finalZone}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 93 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_coach_facing_timeline_review",
+      ...(input.model.chainId === undefined ? [] : [`coach_facing_timeline_review_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2187,6 +2251,7 @@ function withFullMatchGroundingDiagnosis(
   sandboxSequenceReplayModel: SandboxSequenceReplayModel,
   controlledSegmentSandboxTimelineModel: ControlledSegmentSandboxTimelineModel,
   officialTimelineDiffViewModel: OfficialTimelineDiffViewModel,
+  coachFacingTimelineReviewModel: CoachFacingTimelineReviewModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2212,7 +2277,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_multi_action_continuation_sandbox") ||
     fact.internalTags.includes("workbench_chain_sandbox_sequence_replay") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline") ||
-    fact.internalTags.includes("workbench_chain_official_timeline_diff_view")
+    fact.internalTags.includes("workbench_chain_official_timeline_diff_view") ||
+    fact.internalTags.includes("workbench_chain_coach_facing_timeline_review")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2248,7 +2314,10 @@ function withFullMatchGroundingDiagnosis(
   const officialTimelineDiffSummary = officialTimelineDiffViewModel.status === "not_available"
     ? ""
     : ` Le diff officiel read-only compare ensuite la timeline officielle avec les deux timelines sandbox : officiel ${officialTimelineDiffViewModel.officialTimelineEventCountBefore}->${officialTimelineDiffViewModel.officialTimelineEventCountAfter} evenements, score ${officialTimelineDiffViewModel.officialScoreBefore}->${officialTimelineDiffViewModel.officialScoreAfter}, score events ${officialTimelineDiffViewModel.officialScoringEventCountBefore}->${officialTimelineDiffViewModel.officialScoringEventCountAfter}, possession changee ${officialTimelineDiffViewModel.officialPossessionChanged ? "oui" : "non"}. Les divergences restent sandbox-only : ${officialTimelineDiffViewModel.baselineSandboxOnlyEventCount} evenements baseline et ${officialTimelineDiffViewModel.overrideSandboxOnlyEventCount} evenements override, sans insertion dans la timeline officielle ni mutation de scoring.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}`;
+  const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
+    ? technicalCoachSummary
+    : "La lecture timeline officielle vs sandbox est disponible dans une section dediee. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee et diff officiel read-only restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2256,7 +2325,7 @@ function withFullMatchGroundingDiagnosis(
     severity: "low",
     title: "Ancrage tactique full-match partiel",
     coachSummary,
-    technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
+    technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false. Technical sandbox summary: ${technicalCoachSummary}`,
     evidenceFactIds: [...groundingFacts, ...chainFacts].map((fact) => fact.factId),
     eventIds: chainFacts.length > 0 ? [...eventIds, ...chainFacts.flatMap((fact) => fact.eventIds)].slice(0, 8) : eventIds,
     mayInvalidateGlobalScoringEconomy: false,
@@ -2483,6 +2552,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     officialScore: score,
     controlledSegmentSandboxTimelineModel,
   });
+  const coachFacingTimelineReviewModel = coachFacingTimelineReviewFromDiff({
+    diffViewModel: officialTimelineDiffViewModel,
+  });
 
   const report = buildMatchReport({
     matchInput: input,
@@ -2524,6 +2596,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...sandboxSequenceReplayModelLimitations(sandboxSequenceReplayModel),
       ...controlledSegmentSandboxTimelineModelLimitations(controlledSegmentSandboxTimelineModel),
       ...officialTimelineDiffViewModelLimitations(officialTimelineDiffViewModel),
+      ...coachFacingTimelineReviewModelLimitations(coachFacingTimelineReviewModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2636,6 +2709,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: officialTimelineDiffViewModel,
   });
+  const coachFacingTimelineReviewModelFact = coachFacingTimelineReviewModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachFacingTimelineReviewModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2659,6 +2737,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(sandboxSequenceReplayModelFact === null ? [] : [sandboxSequenceReplayModelFact]),
     ...(controlledSegmentSandboxTimelineModelFact === null ? [] : [controlledSegmentSandboxTimelineModelFact]),
     ...(officialTimelineDiffViewModelFact === null ? [] : [officialTimelineDiffViewModelFact]),
+    ...(coachFacingTimelineReviewModelFact === null ? [] : [coachFacingTimelineReviewModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2692,5 +2771,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     sandboxSequenceReplayModel,
     controlledSegmentSandboxTimelineModel,
     officialTimelineDiffViewModel,
+    coachFacingTimelineReviewModel,
   );
 }

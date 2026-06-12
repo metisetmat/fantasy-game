@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3U - Official Timeline Diff View. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3V - Coach-Facing Timeline Review. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -424,7 +424,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
   | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
-  | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW";
+  | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
+  | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

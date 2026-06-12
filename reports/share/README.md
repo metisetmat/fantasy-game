@@ -1,23 +1,23 @@
-# Sprint 3U Share Pack
+# Sprint 3V Share Pack
 
 Mode: MINIMAL_REVIEW
-Current sprint: Sprint 3U - Official Timeline Diff View
+Current sprint: Sprint 3V - Coach-Facing Timeline Review
 
 ## What to read first
 
-- fullmatch-workbench-chain-replay-3u.md
-- validation.fullmatch-workbench-chain-replay-3u.md
+- fullmatch-workbench-chain-replay-3v.md
+- validation.fullmatch-workbench-chain-replay-3v.md
 - validation.share-pack.md
 - coach-report.experimental.html
 
 ## Sprint boundary
 
-Sprint 3U adds a read-only Official Timeline Diff View over the existing controlled segment sandbox timeline. It stays behind workbench_chain_replay_experimental and does not change scoring values, official ScoringEvents, MatchBonusEvent, official possession, official timeline, production route resolution, default full-match mode, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
+Sprint 3V converts the technical Official Timeline Diff View into a coach-facing review panel. It stays behind workbench_chain_replay_experimental and does not change scoring values, official ScoringEvents, MatchBonusEvent, official possession, official timeline, production route resolution, default full-match mode, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
 
 ## Review steps
 
 1. Read validation.share-pack.md first.
-2. Read fullmatch-workbench-chain-replay-3u.md.
-3. Inspect validation.fullmatch-workbench-chain-replay-3u.md.
-4. Use bundle__simulation.md for implementation details.
-5. Use coach-report.experimental.html only to verify coach-visible wording.
+2. Read fullmatch-workbench-chain-replay-3v.md.
+3. Inspect validation.fullmatch-workbench-chain-replay-3v.md.
+4. Use coach-report.experimental.html to verify the four coach-facing timeline blocks.
+5. Use bundle__simulation.md and bundle__reports.md for implementation details.

@@ -69,6 +69,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 32;
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
       return 31;
+    case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
+      return 30;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -145,6 +147,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la timeline sandbox controlee du segment";
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
       return "Relire le diff read-only entre timeline officielle et sandbox";
+    case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
+      return "Relire la timeline officielle face au sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

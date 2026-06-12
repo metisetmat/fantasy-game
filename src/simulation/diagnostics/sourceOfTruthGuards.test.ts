@@ -14,6 +14,7 @@ const NON_GLOBAL_ECONOMY_SCOPES: readonly MatchEvidenceScope[] = [
   "LIVE_SCORING_STREAM",
   "REPORT_RENDERING_ONLY",
   "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW",
+  "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW",
 ];
 
 export function validateSourceOfTruthGuards(): readonly string[] {
