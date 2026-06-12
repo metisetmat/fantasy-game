@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T14:11:20.124Z
-Task/sprint: Sprint 3T - Controlled Segment Sandbox Timeline
+Generated: 2026-06-12T15:09:21.638Z
+Task/sprint: Sprint 3U - Official Timeline Diff View
 Mode: MINIMAL_REVIEW
 Final file count: 18
 
@@ -20,8 +20,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3t.md
-- validation.fullmatch-workbench-chain-replay-3t.md
+- fullmatch-workbench-chain-replay-3u.md
+- validation.fullmatch-workbench-chain-replay-3u.md
 - README.md
 
 ## Bundle Files

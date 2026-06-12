@@ -176,6 +176,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3SValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3s.md"));
   const fullMatchWorkbenchChainReplay3T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3t.md"));
   const fullMatchWorkbenchChainReplay3TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3t.md"));
+  const fullMatchWorkbenchChainReplay3U = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3u.md"));
+  const fullMatchWorkbenchChainReplay3UValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3u.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1884,6 +1886,86 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3TValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3T.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay3T.includes("CONFIRM_SANDBOX_SEQUENCE_REPLAY_TO_CONTROLLED_SEGMENT_SANDBOX_TIMELINE") && fullMatchWorkbenchChainReplay3T.includes("PREPARE_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_TO_OFFICIAL_TIMELINE_DIFF_VIEW") && fullMatchWorkbenchChainReplay3T.includes("KEEP_50_MATCH_ECONOMY_REFERENCE"), "3T recommendations visible"),
+  ];
+
+  const sprint3UExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3u.md",
+    "validation.fullmatch-workbench-chain-replay-3u.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3UForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3t.md",
+    "validation.fullmatch-workbench-chain-replay-3t.md",
+    "fullmatch-workbench-chain-replay-3s.md",
+    "validation.fullmatch-workbench-chain-replay-3s.md",
+    "fullmatch-workbench-chain-replay-3r.md",
+    "validation.fullmatch-workbench-chain-replay-3r.md",
+  ];
+  const sprint3UChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 3U", activeConfig.sprintName === "Sprint 3U - Official Timeline Diff View", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint3UExpectedFiles.every((file) => requiredCopied(file)), sprint3UExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint3UForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3UForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint3UExpectedFiles.every((file) => requiredCopied(file)), sprint3UExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3U", manifest.includes("Sprint 3U - Official Timeline Diff View") && detailedManifest.includes("Sprint 3U - Official Timeline Diff View"), "visible"),
+    check("README is Sprint 3U oriented", readme.includes("# Sprint 3U Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3u.md"), "README current"),
+    check("3U report included", fullMatchWorkbenchChainReplay3U.includes("# FullMatch Workbench Chain Replay 3U") && fullMatchWorkbenchChainReplay3U.includes("official timeline diff view model status: available"), "3U doc included"),
+    check("3U validation is PASS", fullMatchWorkbenchChainReplay3UValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3UValidation.includes("official timeline diff view model status is available"), "3U validation PASS"),
+    check("official event count delta is zero", fullMatchWorkbenchChainReplay3U.includes("official timeline event count delta: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("official timeline event count delta: 0"), "official event delta 0"),
+    check("official scoring event count delta is zero", fullMatchWorkbenchChainReplay3U.includes("official scoring event count delta: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("official scoring event count delta: 0"), "official scoring delta 0"),
+    check("official score delta is zero", fullMatchWorkbenchChainReplay3U.includes("official score delta: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("official score delta: 0"), "official score delta 0"),
+    check("official possession unchanged", fullMatchWorkbenchChainReplay3U.includes("official possession changed: false") && fullMatchWorkbenchChainReplay3UValidation.includes("official possession changed: false"), "official possession unchanged"),
+    check("baseline and override sandbox-only counts visible", fullMatchWorkbenchChainReplay3U.includes("baseline sandbox-only event count: 9") && fullMatchWorkbenchChainReplay3U.includes("override sandbox-only event count: 9"), "sandbox-only counts visible"),
+    check("override final sandbox state visible", fullMatchWorkbenchChainReplay3U.includes("override final sandbox outcome: secured_by_goalkeeper_team") && fullMatchWorkbenchChainReplay3U.includes("override final team candidate: goalkeeper_team") && fullMatchWorkbenchChainReplay3U.includes("override final actor candidate: blitz-goalkeeper-free-safety") && fullMatchWorkbenchChainReplay3U.includes("override final zone candidate: Z3-HSR"), "override final state visible"),
+    check("sandbox divergences visible", fullMatchWorkbenchChainReplay3U.includes("sandbox outcome divergence observed: true") && fullMatchWorkbenchChainReplay3U.includes("sandbox final team divergence observed: true") && fullMatchWorkbenchChainReplay3U.includes("sandbox final zone divergence observed: true"), "sandbox divergences visible"),
+    check("official divergences false", fullMatchWorkbenchChainReplay3U.includes("official timeline divergence observed: false") && fullMatchWorkbenchChainReplay3U.includes("official possession divergence observed: false") && fullMatchWorkbenchChainReplay3U.includes("official score divergence observed: false") && fullMatchWorkbenchChainReplay3U.includes("official scoring event divergence observed: false"), "official divergence false"),
+    check("diff view creates no official events or score", fullMatchWorkbenchChainReplay3U.includes("sandbox events inserted into official timeline count: 0") && fullMatchWorkbenchChainReplay3U.includes("official score mutation count: 0") && fullMatchWorkbenchChainReplay3U.includes("production scoring event creation count: 0"), "no official timeline/scoring mutation"),
+    check("official timeline diff contract bundled", bundleSimulation.includes("src/simulation/fullMatch/officialTimelineDiffView.ts") && bundleSimulation.includes("OfficialTimelineDiffViewModel"), "3U contract bundled"),
+    check("official timeline snapshot bundled", bundleSimulation.includes("src/simulation/fullMatch/createOfficialTimelineSnapshot.ts") && bundleSimulation.includes("createOfficialTimelineSnapshot"), "3U snapshot bundled"),
+    check("official timeline diff builder bundled", bundleSimulation.includes("src/simulation/fullMatch/buildOfficialTimelineDiffEntry.ts") && bundleSimulation.includes("buildOfficialTimelineDiffEntry"), "3U entry builder bundled"),
+    check("official timeline diff converter bundled", bundleSimulation.includes("src/simulation/fullMatch/officialTimelineDiffFromSandboxTimeline.ts") && bundleSimulation.includes("officialTimelineDiffFromSandboxTimeline"), "3U converter bundled"),
+    check("official timeline diff comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareOfficialTimelineDiffPaths.ts") && bundleSimulation.includes("compareOfficialTimelineDiffPaths"), "3U comparison bundled"),
+    check("official timeline diff signature bundled", bundleSimulation.includes("src/simulation/fullMatch/officialTimelineDiffViewSignature.ts") && bundleSimulation.includes("officialTimelineDiffViewSignature"), "3U signature bundled"),
+    check("official timeline diff tests bundled", bundleSimulation.includes("buildOfficialTimelineDiffEntry.test.ts") && bundleSimulation.includes("createOfficialTimelineSnapshot.test.ts") && bundleSimulation.includes("runFullMatchExperimentalOfficialTimelineDiffView.test.ts") && bundleSimulation.includes("runFullMatchOfficialTimelineDiffViewScoringGuard.test.ts"), "3U tests bundled"),
+    check("3U scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3u.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3u.test.ts"), "3U guards bundled"),
+    check("official timeline diff evidence included", fullMatchWorkbenchChainReplay3U.includes("WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW") && bundleSimulation.includes("WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"), "3U evidence visible"),
+    check("model isolated-only", fullMatchWorkbenchChainReplay3U.includes("model applied only in sandbox: true") && fullMatchWorkbenchChainReplay3U.includes("model applied to normal live selection: false"), "diff model isolated"),
+    check("diff view cannot mutate official score", fullMatchWorkbenchChainReplay3U.includes("official score mutation count: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("official timeline diff view is read-only"), "official score mutation forbidden"),
+    check("diff view cannot mutate official timeline", fullMatchWorkbenchChainReplay3U.includes("official timeline mutation count: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("sandbox events are not inserted into official MatchReport timeline"), "official timeline mutation forbidden"),
+    check("diff view cannot mutate official possession", fullMatchWorkbenchChainReplay3U.includes("official possession mutation count: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("official possession divergence remains false"), "official possession mutation forbidden"),
+    check("diff view cannot create production scoring events", fullMatchWorkbenchChainReplay3U.includes("production scoring event creation count: 0") && fullMatchWorkbenchChainReplay3UValidation.includes("no production scoring events deleted or capped"), "production scoring event creation forbidden"),
+    check("diff view cannot claim global economy", fullMatchWorkbenchChainReplay3U.includes("global economy claim count: 0") && fullMatchWorkbenchChainReplay3U.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3U.includes("Official Timeline Diff View") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3UValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay3UValidation.includes("SHOT_GOAL remains 3"), "scoring constants visible"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3UValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3UValidation.includes("no MatchBonusEvent mutation"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3UValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3U.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3U.includes("CONFIRM_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_TO_OFFICIAL_TIMELINE_DIFF_VIEW") && fullMatchWorkbenchChainReplay3U.includes("CONFIRM_OFFICIAL_TIMELINE_DIFF_VIEW_READ_ONLY") && fullMatchWorkbenchChainReplay3U.includes("KEEP_50_MATCH_ECONOMY_REFERENCE"), "3U recommendations visible"),
   ];
 
   const sprint3SExpectedFiles = [
@@ -3914,6 +3996,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3U - Official Timeline Diff View")
+      ? sprint3UChecks
     : activeConfig.sprintName.includes("Sprint 3T - Controlled Segment Sandbox Timeline")
       ? sprint3TChecks
     : activeConfig.sprintName.includes("Sprint 3S - Sandbox Sequence Replay")
