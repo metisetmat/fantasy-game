@@ -1,0 +1,136 @@
+# FullMatch Workbench Chain Replay 3R Validation
+
+Status: PASS
+
+## Checks
+- PASS: runFullMatch default remains segment_harness.
+- PASS: workbench_chain_replay_experimental remains opt-in.
+- PASS: rebound second chance model remains available.
+- PASS: multi-action continuation model status is available.
+- PASS: multi-action continuation model origin is rebound_second_chance_sandbox.
+- PASS: baseline continuation action is NO_CONTINUATION.
+- PASS: baseline continuation outcome is none.
+- PASS: baseline continuation created is false.
+- PASS: override source rebound outcome is SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE.
+- PASS: override source ball loose state is safe_area.
+- PASS: override source recovery team candidate is goalkeeper_team.
+- PASS: override continuation action is GOALKEEPER_TEAM_SECURE_RECOVERY.
+- PASS: override continuation outcome is secured_by_goalkeeper_team.
+- PASS: override continuation team candidate is goalkeeper_team.
+- PASS: override continuation actor candidate is blitz-goalkeeper-free-safety.
+- PASS: override continuation target zone candidate is Z3-HSR.
+- PASS: possession security score is 82.
+- PASS: pressure after rebound is 24.
+- PASS: transition risk is 18.
+- PASS: continuation confidence is 77.
+- PASS: sandbox continuation created is true.
+- PASS: continuation action divergence is observed.
+- PASS: continuation outcome divergence is observed.
+- PASS: continuation team divergence is observed.
+- PASS: possession security is observed.
+- PASS: transition risk is observed.
+- PASS: sandbox match event created count is 0.
+- PASS: sandbox scoring event created count is 0.
+- PASS: sandbox score delta total is 0.
+- PASS: official possession mutation count is 0.
+- PASS: official timeline mutation count is 0.
+- PASS: model applies only in sandbox.
+- PASS: model is not applied to normal live selection.
+- PASS: multi-action continuation model is isolated-only.
+- PASS: multi-action continuation model is not inserted into official timeline.
+- PASS: CLOSED candidates remain rejected.
+- PASS: unavailable candidates remain rejected.
+- PASS: multi-action continuation model cannot mutate official score.
+- PASS: multi-action continuation model cannot mutate official scoring events.
+- PASS: multi-action continuation model cannot mutate official possession.
+- PASS: multi-action continuation model cannot mutate official timeline.
+- PASS: multi-action continuation model cannot create production scoring events.
+- PASS: multi-action continuation model cannot mutate production route resolution.
+- PASS: multi-action continuation model cannot mutate global route success rates.
+- PASS: multi-action continuation model cannot claim global economy.
+- PASS: experimental timeline/report includes multi-action continuation tags.
+- PASS: default timeline/report has no multi-action continuation tags.
+- PASS: experimental report includes multi-action continuation evidence.
+- PASS: experimental coach diagnosis mentions multi-action continuation sandbox.
+- PASS: coach copy avoids stale wording.
+- PASS: normal full-match is not falsely claimed as production chain-driven.
+- PASS: default and experimental official score signatures remain equal.
+- PASS: default and experimental official scoring event counts remain equal.
+- PASS: default and experimental official score_change totals remain equal.
+- PASS: default and experimental official timeline event counts remain equal.
+- PASS: FULL_MATCH_HARNESS_SINGLE_RUN remains warning-only.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains the global economy reference.
+- PASS: scoring constants unchanged.
+- PASS: no production scoring events deleted or capped.
+- PASS: MatchBonusEvent unchanged.
+- PASS: batch/live separation preserved.
+- PASS: explicit exhaustive test command is available.
+
+## Counts
+- default multi-action continuation tag count: 0
+- experimental multi-action continuation tag count: 9
+- rebound second chance model status: available
+- multi-action continuation model status: available
+- multi-action continuation model origin: rebound_second_chance_sandbox
+- baseline continuation action: NO_CONTINUATION
+- baseline continuation outcome: none
+- baseline continuation created: false
+- override source rebound outcome: SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE
+- override source ball loose state: safe_area
+- override source recovery team candidate: goalkeeper_team
+- override source next sandbox possession candidate: goalkeeper_team
+- source rebound danger score: 4
+- source second chance probability: 4
+- source second chance created: false
+- override continuation action: GOALKEEPER_TEAM_SECURE_RECOVERY
+- override continuation outcome: secured_by_goalkeeper_team
+- override continuation team candidate: goalkeeper_team
+- override continuation actor candidate: blitz-goalkeeper-free-safety
+- override continuation target zone candidate: Z3-HSR
+- possession security score: 82
+- pressure after rebound: 24
+- transition risk: 18
+- continuation confidence: 77
+- sandbox continuation created count: 1
+- continuation action divergence observed: true
+- continuation outcome divergence observed: true
+- continuation team divergence observed: true
+- possession security observed: true
+- transition risk observed: true
+- sandbox match event created count: 0
+- sandbox scoring event created count: 0
+- sandbox score delta total: 0
+- official possession mutation count: 0
+- official timeline mutation count: 0
+- modelAppliedOnlyInSandbox: true
+- modelAppliedToNormalLiveSelection: false
+- rejected closed candidate count: 1
+- rejected unavailable candidate count: 1
+- sandbox continuation injected into official timeline count: 0
+- official score mutation count: 0
+- official scoring event mutation count: 0
+- production scoring event creation count: 0
+- production route resolution mutation count: 0
+- global route success mutation count: 0
+- global economy claim count: 0
+- default official scoring event count: unchanged
+- experimental official scoring event count: unchanged
+- default official score_change total: unchanged
+- experimental official score_change total: unchanged
+- scoring constants changed: 0
+- production scoring events deleted or capped: 0
+- share file count: 18
+- exhaustive test command: npm run test:all
+
+## Recommendation
+- CONFIRM_REBOUND_SECOND_CHANCE_TO_MULTI_ACTION_CONTINUATION_SANDBOX.
+- CONFIRM_MULTI_ACTION_CONTINUATION_MODEL_IS_ISOLATED_ONLY.
+- CONFIRM_MULTI_ACTION_CONTINUATION_MODEL_IS_NOT_AN_OFFICIAL_MATCH_EVENT.
+- CONFIRM_MULTI_ACTION_CONTINUATION_MODEL_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS.
+- CONFIRM_MULTI_ACTION_CONTINUATION_MODEL_DOES_NOT_MUTATE_OFFICIAL_POSSESSION_OR_TIMELINE.
+- CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED.
+- CONFIRM_DEFAULT_FULLMATCH_UNCHANGED.
+- CONFIRM_NO_OFFICIAL_SCORE_OR_SCORING_EVENT_MUTATION.
+- KEEP_SCORING_VALUES_UNCHANGED.
+- KEEP_50_MATCH_ECONOMY_REFERENCE.
+- PREPARE_MULTI_ACTION_CONTINUATION_FOR_LIVE_GUARDS_ONLY_AFTER_MORE_PROOF.

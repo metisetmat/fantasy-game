@@ -348,6 +348,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
       return "training_recommendation";
   }
 }
@@ -406,6 +407,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Modele de reponse gardien sandbox";
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
       return "Rebond et seconde chance sandbox";
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
+      return "Continuation multi-action sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -475,6 +478,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -511,6 +515,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX",
     "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX",
     "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
+    "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
