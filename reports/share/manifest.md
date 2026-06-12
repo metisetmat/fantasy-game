@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T12:36:37.465Z
-Task/sprint: Sprint 3R - Multi-Action Continuation Sandbox
+Generated: 2026-06-12T13:18:35.912Z
+Task/sprint: Sprint 3S - Sandbox Sequence Replay
 Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -17,8 +17,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3r.md
-- validation.fullmatch-workbench-chain-replay-3r.md
+- fullmatch-workbench-chain-replay-3s.md
+- validation.fullmatch-workbench-chain-replay-3s.md
 - README.md
 
 ## Bundle Files

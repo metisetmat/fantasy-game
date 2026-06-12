@@ -86,6 +86,8 @@ import { reboundSecondChanceFromGoalkeeperResponse } from "./fullMatch/reboundSe
 import type { ReboundSecondChanceModel } from "./fullMatch/reboundSecondChanceSandbox";
 import { multiActionContinuationFromRebound } from "./fullMatch/multiActionContinuationFromRebound";
 import type { MultiActionContinuationModel } from "./fullMatch/multiActionContinuationSandbox";
+import { sandboxSequenceReplayFromContinuation } from "./fullMatch/sandboxSequenceReplayFromContinuation";
+import type { SandboxSequenceReplayModel } from "./fullMatch/sandboxSequenceReplay";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -737,6 +739,31 @@ function multiActionContinuationModelLimitations(model: MultiActionContinuationM
     "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function sandboxSequenceReplayModelLimitations(model: SandboxSequenceReplayModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_SEQUENCE_REPLAY_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -1938,6 +1965,54 @@ function multiActionContinuationModelEvidenceFact(input: {
   };
 }
 
+function sandboxSequenceReplayModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxSequenceReplayModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_sandbox_sequence_replay")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-sequence-replay`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.override.finalZoneCandidate ?? "Z3-HSR"],
+    summary:
+      `Experimental sandbox sequence replay ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline steps=${input.model.baseline.stepCount}, baseline types=${input.model.baseline.steps.map((step) => step.stepType).join(">")}, ` +
+      `baseline outcome=${input.model.baseline.finalOutcome ?? "none"}; override steps=${input.model.override.stepCount}, ` +
+      `override types=${input.model.override.steps.map((step) => step.stepType).join(">")}, ` +
+      `override outcome=${input.model.override.finalOutcome ?? "none"}, team=${input.model.override.finalTeamCandidate ?? "none"}, ` +
+      `actor=${input.model.override.finalActorCandidate ?? "none"}, zone=${input.model.override.finalZoneCandidate ?? "none"}, ` +
+      `stepCountDivergence=${input.model.sequenceStepCountDivergenceObserved}, outcomeDivergence=${input.model.sequenceOutcomeDivergenceObserved}, ` +
+      `teamDivergence=${input.model.sequenceFinalTeamDivergenceObserved}, zoneDivergence=${input.model.sequenceFinalZoneDivergenceObserved}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, canMutateOfficialTimeline=${input.model.canMutateOfficialTimeline}, ` +
+      `canMutateOfficialPossession=${input.model.canMutateOfficialPossession}, canMutateOfficialScore=${input.model.canMutateOfficialScore}, ` +
+      `canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, ` +
+      `canMutateProductionRouteResolution=${input.model.canMutateProductionRouteResolution}, canMutateGlobalRouteSuccessRates=${input.model.canMutateGlobalRouteSuccessRates}, ` +
+      `canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 90 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_sequence_replay",
+      "sandbox_sequence_replay",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_sequence_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -1960,6 +2035,7 @@ function withFullMatchGroundingDiagnosis(
   goalkeeperResponseModel: GoalkeeperResponseModel,
   reboundSecondChanceModel: ReboundSecondChanceModel,
   multiActionContinuationModel: MultiActionContinuationModel,
+  sandboxSequenceReplayModel: SandboxSequenceReplayModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -1982,7 +2058,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_attribute_driven_shot_resolution_sandbox") ||
     fact.internalTags.includes("workbench_chain_goalkeeper_response_model_sandbox") ||
     fact.internalTags.includes("workbench_chain_rebound_second_chance_sandbox") ||
-    fact.internalTags.includes("workbench_chain_multi_action_continuation_sandbox")
+    fact.internalTags.includes("workbench_chain_multi_action_continuation_sandbox") ||
+    fact.internalTags.includes("workbench_chain_sandbox_sequence_replay")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2009,7 +2086,10 @@ function withFullMatchGroundingDiagnosis(
   const multiActionContinuationSummary = multiActionContinuationModel.status === "not_available"
     ? ""
     : ` Le sandbox de continuation multi-action transforme l'etat de rebond en action sandbox : action ${multiActionContinuationModel.override.continuationActionType}, outcome ${multiActionContinuationModel.override.continuationOutcome}, equipe ${multiActionContinuationModel.override.continuationTeamCandidate}, acteur ${multiActionContinuationModel.override.continuationActorCandidate ?? "none"}, cible ${multiActionContinuationModel.override.continuationTargetZoneCandidate ?? "none"}, securite ${multiActionContinuationModel.override.possessionSecurityScore}/100, pression apres rebond ${multiActionContinuationModel.override.pressureAfterRebound}/100, risque de transition ${multiActionContinuationModel.override.transitionRisk}/100, confiance ${multiActionContinuationModel.override.continuationConfidence}/100. Ce resultat reste strictement sandbox-only : aucune mutation de timeline officielle, aucune mutation de possession officielle, aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}`;
+  const sandboxSequenceSummary = sandboxSequenceReplayModel.status === "not_available"
+    ? ""
+    : ` La mini-sequence sandbox rejoue ensuite le chemin complet en ${sandboxSequenceReplayModel.override.stepCount} etapes typees : reference ${sandboxSequenceReplayModel.baseline.finalOutcome ?? "none"} contre override ${sandboxSequenceReplayModel.override.finalOutcome ?? "none"} pour ${sandboxSequenceReplayModel.override.finalTeamCandidate ?? "none"}, acteur ${sandboxSequenceReplayModel.override.finalActorCandidate ?? "none"}, zone ${sandboxSequenceReplayModel.override.finalZoneCandidate ?? "none"}. Elle reste strictement sandbox-only : aucune mutation de timeline officielle, aucune mutation de possession officielle, aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2118,6 +2198,17 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     reboundSecondChanceModel,
   });
+  const sandboxSequenceReplayModel = sandboxSequenceReplayFromContinuation({
+    matchInput: input,
+    routeSandbox: controlledRouteResolutionSandbox,
+    opportunityModel: sandboxScoringOpportunityModel,
+    scoringCandidateModel: sandboxScoringEventCandidateModel,
+    scoringResolutionModel: sandboxScoringEventResolutionModel,
+    attributeShotModel: attributeDrivenShotResolutionModel,
+    goalkeeperResponseModel,
+    reboundSecondChanceModel,
+    multiActionContinuationModel,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -2174,6 +2265,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && goalkeeperResponseModel.status !== "not_available" ? { goalkeeperResponseModel } : {}),
           ...(index === 0 && reboundSecondChanceModel.status !== "not_available" ? { reboundSecondChanceModel } : {}),
           ...(index === 0 && multiActionContinuationModel.status !== "not_available" ? { multiActionContinuationModel } : {}),
+          ...(index === 0 && sandboxSequenceReplayModel.status !== "not_available" ? { sandboxSequenceReplayModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -2259,6 +2351,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...goalkeeperResponseModelLimitations(goalkeeperResponseModel),
       ...reboundSecondChanceModelLimitations(reboundSecondChanceModel),
       ...multiActionContinuationModelLimitations(multiActionContinuationModel),
+      ...sandboxSequenceReplayModelLimitations(sandboxSequenceReplayModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2356,6 +2449,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: multiActionContinuationModel,
   });
+  const sandboxSequenceReplayModelFact = sandboxSequenceReplayModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: sandboxSequenceReplayModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2376,6 +2474,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(goalkeeperResponseModelFact === null ? [] : [goalkeeperResponseModelFact]),
     ...(reboundSecondChanceModelFact === null ? [] : [reboundSecondChanceModelFact]),
     ...(multiActionContinuationModelFact === null ? [] : [multiActionContinuationModelFact]),
+    ...(sandboxSequenceReplayModelFact === null ? [] : [sandboxSequenceReplayModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2406,5 +2505,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     goalkeeperResponseModel,
     reboundSecondChanceModel,
     multiActionContinuationModel,
+    sandboxSequenceReplayModel,
   );
 }

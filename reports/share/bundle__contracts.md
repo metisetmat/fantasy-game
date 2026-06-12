@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3R - Multi-Action Continuation Sandbox. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3S - Sandbox Sequence Replay. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -421,7 +421,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"
   | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
   | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"
-  | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX";
+  | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
+  | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"
