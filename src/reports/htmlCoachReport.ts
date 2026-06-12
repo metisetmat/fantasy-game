@@ -250,7 +250,32 @@ function renderCoachInsight(insight: CoachInsight): string {
     </article>`;
 }
 
+function isTechnicalGroundingDiagnosis(diagnosis: TacticalDiagnosis): boolean {
+  return diagnosis.title.includes("Ancrage workbench") ||
+    diagnosis.title.includes("Ancrage tactique full-match");
+}
+
+function renderTechnicalGroundingDiagnosis(diagnosis: TacticalDiagnosis): string {
+  return `
+    <article class="card">
+      <div class="card-meta">Équipe ${escapeHtml(diagnosis.teamId)} ${renderConfidence(diagnosis.confidence)}</div>
+      <h3>Limite actuelle du harnais expérimental</h3>
+      <p>Le moteur utilise encore un harnais expérimental : certaines lectures sandbox servent à expliquer des pistes de test, mais elles ne modifient pas la timeline officielle, le score, la possession ou les événements de score.</p>
+      <div class="zones">Zones: ${diagnosis.affectedZones.map(renderBadge).join(" ") || renderBadge("none")}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques développeur</summary>
+        <div class="muted">Titre source : ${escapeHtml(diagnosis.title)}</div>
+        <div class="muted">${escapeHtml(diagnosis.summary)}</div>
+        <div class="muted">Événements de preuve : ${diagnosis.evidenceEventIds.map(escapeHtml).join(", ") || "aucun"}</div>
+      </details>
+    </article>`;
+}
+
 function renderDiagnosis(diagnosis: TacticalDiagnosis): string {
+  if (isTechnicalGroundingDiagnosis(diagnosis)) {
+    return renderTechnicalGroundingDiagnosis(diagnosis);
+  }
+
   return `
     <article class="card">
       <div class="card-meta">Équipe ${escapeHtml(diagnosis.teamId)} ${renderConfidence(diagnosis.confidence)}</div>
@@ -262,6 +287,24 @@ function renderDiagnosis(diagnosis: TacticalDiagnosis): string {
 }
 
 function renderWarning(warning: MatchReport["warnings"][number]): string {
+  if (warning.title.includes("Ancrage workbench") || warning.title.includes("Ancrage tactique full-match")) {
+    return `
+    <article class="card">
+      <div class="card-meta">${renderBadge(warning.severity)} ${renderBadge(warning.scope)}</div>
+      <h3>Limite actuelle du harnais expérimental</h3>
+      <p>Le moteur utilise encore un harnais expérimental : certaines lectures sandbox servent à expliquer des pistes de test, mais elles ne modifient pas la timeline officielle, le score, la possession ou les événements de score.</p>
+      <details class="internal-markers">
+        <summary>Détails techniques développeur</summary>
+        <div class="muted">Titre source : ${escapeHtml(warning.title)}</div>
+        <div class="muted">${escapeHtml(warning.coachSummary)}</div>
+        <div class="muted">Type : ${escapeHtml(warning.type)}</div>
+        <div class="muted">Faits d'évidence : ${warning.evidenceFactIds.map(escapeHtml).join(", ") || "aucun"}</div>
+        <div class="muted">Événements : ${warning.eventIds.map(escapeHtml).join(", ") || "aucun"}</div>
+        <div class="muted">${escapeHtml(warning.technicalSummary)}</div>
+      </details>
+    </article>`;
+  }
+
   return `
     <article class="card">
       <div class="card-meta">${renderBadge(warning.severity)} ${renderBadge(warning.scope)}</div>
@@ -503,6 +546,7 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
     <section>
       <h2>Panneau de décision sandbox</h2>
       <p>Ce panneau propose une option coach à tester. Il ne remplace pas la timeline officielle et ne pilote pas la sélection live.</p>
+      <p>Cette piste reste une suggestion sandbox, pas une consigne officielle. Elle ne modifie ni la timeline officielle, ni le score, ni la possession, ni les événements de score. Elle ne constitue pas une preuve d’économie globale.</p>
       <div class="grid">${evidenceCalibration}${batchCalibration}${articles}</div>
       <details class="internal-markers">
         <summary>Détails techniques du panneau sandbox</summary>
@@ -615,7 +659,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const timelineReview = renderTimelineReview(report);
   const sandboxDecisionPanel = renderSandboxDecisionPanel(report);
 
-  return `<!doctype html>
+  const html = `<!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8">
@@ -727,4 +771,6 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   </main>
 </body>
 </html>`;
+
+  return normalizeCoachFacingCopy(html);
 }
