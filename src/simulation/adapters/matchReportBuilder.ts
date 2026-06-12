@@ -48,6 +48,7 @@ import type { SandboxScoringEventCandidateModel } from "../fullMatch/sandboxScor
 import type { SandboxScoringEventResolutionModel } from "../fullMatch/sandboxScoringEventResolution";
 import type { AttributeDrivenShotResolutionModel } from "../fullMatch/attributeDrivenShotResolutionSandbox";
 import type { GoalkeeperResponseModel } from "../fullMatch/goalkeeperResponseModel";
+import type { ReboundSecondChanceModel } from "../fullMatch/reboundSecondChanceSandbox";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -76,6 +77,7 @@ export interface MiniMatchTimelineSegment {
   readonly sandboxScoringEventResolutionModel?: SandboxScoringEventResolutionModel;
   readonly attributeDrivenShotResolutionModel?: AttributeDrivenShotResolutionModel;
   readonly goalkeeperResponseModel?: GoalkeeperResponseModel;
+  readonly reboundSecondChanceModel?: ReboundSecondChanceModel;
 }
 
 export interface MatchReportBuilderInput {
@@ -877,6 +879,74 @@ function goalkeeperResponseModelReason(model: GoalkeeperResponseModel | undefine
   return ` Goalkeeper response model sandbox available: goalkeeper ${model.override.goalkeeperId ?? "fallback"} faces shot quality ${model.override.shotQualityFaced}/100 with response score ${model.override.goalkeeperResponseScore}/100, save margin ${model.override.saveMargin}, response ${model.override.responseType}, rebound ${model.override.reboundState}. It explains positioning, trajectory reading, reaction, handling, rebound control, concentration, and mental fatigue, but remains sandbox-only: it is not an official MatchEvent, creates no production scoring event, changes no official score, and cannot claim global economy proof.`;
 }
 
+function reboundSecondChanceModelTags(model: ReboundSecondChanceModel | undefined): readonly string[] {
+  if (model === undefined || model.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_rebound_second_chance_sandbox",
+    "rebound_second_chance_sandbox",
+    `rebound_second_chance_model_status_${model.status}`,
+    `rebound_second_chance_model_origin_${model.origin}`,
+    `rebound_second_chance_baseline_outcome_${model.baseline.reboundOutcome}`,
+    `rebound_second_chance_baseline_ball_loose_${model.baseline.ballLooseState}`,
+    `rebound_second_chance_baseline_created_${model.baseline.secondChanceCreated ? "true" : "false"}`,
+    `rebound_second_chance_override_source_response_type_${model.override.sourceGoalkeeperResponseType ?? "none"}`,
+    `rebound_second_chance_override_source_rebound_state_${model.override.sourceReboundState ?? "none"}`,
+    `rebound_second_chance_override_outcome_${model.override.reboundOutcome}`,
+    `rebound_second_chance_override_ball_loose_${model.override.ballLooseState}`,
+    `rebound_second_chance_override_recovery_team_${model.override.recoveryTeamCandidate}`,
+    `rebound_second_chance_override_next_possession_${model.override.nextSandboxPossessionCandidate}`,
+    `rebound_second_chance_override_attacking_proximity_${model.override.attackingProximityScore}`,
+    `rebound_second_chance_override_defensive_recovery_${model.override.defensiveRecoveryScore}`,
+    `rebound_second_chance_override_danger_${model.override.reboundDangerScore}`,
+    `rebound_second_chance_override_probability_${model.override.secondChanceProbability}`,
+    `rebound_second_chance_override_created_${model.override.secondChanceCreated ? "true" : "false"}`,
+    `rebound_second_chance_outcome_divergence_${model.reboundOutcomeDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_ball_loose_divergence_${model.ballLooseStateDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_recovery_team_divergence_${model.recoveryTeamDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_probability_observed_${model.secondChanceProbabilityObserved ? "true" : "false"}`,
+    `rebound_second_chance_creation_divergence_${model.secondChanceCreationDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_scoring_event_divergence_${model.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_score_divergence_${model.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    "rebound_second_chance_match_event_created_false",
+    "rebound_second_chance_scoring_event_created_false",
+    "rebound_second_chance_score_delta_0",
+    "rebound_second_chance_official_possession_mutation_count_0",
+    `rebound_second_chance_model_applied_only_in_sandbox_${model.modelAppliedOnlyInSandbox ? "true" : "false"}`,
+    `rebound_second_chance_model_applied_to_normal_live_${model.modelAppliedToNormalLiveSelection ? "true" : "false"}`,
+    `rebound_second_chance_rejected_closed_count_${model.rejectedClosedCandidateCount}`,
+    `rebound_second_chance_rejected_unavailable_count_${model.rejectedUnavailableCandidateCount}`,
+    "rebound_second_chance_official_timeline_injection_forbidden",
+    "rebound_second_chance_official_score_mutation_forbidden",
+    "rebound_second_chance_official_scoring_events_mutation_forbidden",
+    "rebound_second_chance_official_possession_mutation_forbidden",
+    "rebound_second_chance_production_scoring_event_creation_forbidden",
+    "rebound_second_chance_production_route_resolution_mutation_forbidden",
+    "rebound_second_chance_global_route_success_mutation_forbidden",
+    "rebound_second_chance_global_economy_claim_forbidden",
+    "rebound_second_chance_closed_candidates_rejected",
+    "rebound_second_chance_unavailable_candidates_rejected",
+    "rebound_second_chance_injected_into_official_timeline_count_0",
+    "rebound_second_chance_official_score_mutation_count_0",
+    "rebound_second_chance_official_scoring_event_mutation_count_0",
+    "rebound_second_chance_production_scoring_event_creation_count_0",
+    "rebound_second_chance_production_route_resolution_mutation_count_0",
+    "rebound_second_chance_global_route_success_mutation_count_0",
+    "rebound_second_chance_global_economy_claim_count_0",
+    ...model.tags,
+  ];
+}
+
+function reboundSecondChanceModelReason(model: ReboundSecondChanceModel | undefined): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return ` Rebound and second-chance sandbox available: goalkeeper response ${model.override.sourceGoalkeeperResponseType ?? "none"} with source rebound ${model.override.sourceReboundState ?? "none"} becomes ${model.override.reboundOutcome}, loose state ${model.override.ballLooseState}, recovery candidate ${model.override.recoveryTeamCandidate}, second-chance probability ${model.override.secondChanceProbability}/100, second chance created ${model.override.secondChanceCreated ? "true" : "false"}. It remains sandbox-only: no official MatchEvent, no official possession mutation, no production scoring event, no official score change, and no global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -918,7 +988,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -952,6 +1022,7 @@ function kickoffEvent(input: {
       ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
       ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+      ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ],
     narrativeWeight: 5,
   };
@@ -1020,6 +1091,7 @@ function sequenceRecordToMatchEvent(input: {
     ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
     ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
     ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+    ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -1044,7 +1116,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -1107,7 +1179,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -1151,6 +1223,7 @@ function scoringEventToMatchEvent(input: {
       ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
       ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+      ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ],
     narrativeWeight: 70,
   };

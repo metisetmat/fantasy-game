@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 3P - Goalkeeper Response Model
+- current sprint: Sprint 3Q - Rebound & Second Chance Sandbox
 - final file count: 18
 - share file count: 18
 - minimal allowlist count: 18
@@ -16,7 +16,7 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Sprint 3P - Sprint 3P - Goalkeeper Response Model
+- PASS: current sprint is Sprint 3Q - Sprint 3Q - Rebound & Second Chance Sandbox
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 18
 - PASS: final file count is 18 - 18
@@ -25,29 +25,31 @@ Status: PASS
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 3P - visible
-- PASS: README is Sprint 3P oriented - README current
-- PASS: 3P report included - 3P doc included
-- PASS: 3P validation is PASS - 3P validation PASS
-- PASS: baseline goalkeeper response fields visible - baseline fields visible
-- PASS: override goalkeeper response fields visible - override fields visible
-- PASS: goalkeeper sub-scores visible - sub-scores visible
-- PASS: goalkeeper divergence fields visible - goalkeeper divergences visible
-- PASS: goalkeeper sandbox creates no scoring event - no sandbox scoring event
-- PASS: goalkeeper response model bundled - 3P contract bundled
-- PASS: goalkeeper attribute extraction bundled - 3P extraction bundled
-- PASS: goalkeeper response resolver bundled - 3P resolver bundled
-- PASS: goalkeeper response converter bundled - 3P converter bundled
-- PASS: goalkeeper response comparison bundled - 3P comparison bundled
-- PASS: goalkeeper response signature bundled - 3P signature bundled
-- PASS: goalkeeper response tests bundled - 3P tests bundled
-- PASS: 3P scoring and source-of-truth guards bundled - 3P guards bundled
-- PASS: goalkeeper response evidence included - 3P evidence visible
-- PASS: goalkeeper response sandbox is isolated-only - goalkeeper response isolated
+- PASS: manifest lists Sprint 3Q - visible
+- PASS: README is Sprint 3Q oriented - README current
+- PASS: 3Q report included - 3Q doc included
+- PASS: 3Q validation is PASS - 3Q validation PASS
+- PASS: baseline rebound fields visible - baseline fields visible
+- PASS: override rebound fields visible - override fields visible
+- PASS: second chance scores visible - second chance scores visible
+- PASS: current fixture creates no second chance - no second chance created
+- PASS: rebound divergence fields visible - rebound divergences visible
+- PASS: rebound sandbox creates no events or score - no sandbox event or score
+- PASS: rebound sandbox does not mutate possession - official possession mutation forbidden
+- PASS: rebound second chance contract bundled - 3Q contract bundled
+- PASS: rebound context extraction bundled - 3Q context bundled
+- PASS: rebound resolver bundled - 3Q resolver bundled
+- PASS: rebound converter bundled - 3Q converter bundled
+- PASS: rebound comparison bundled - 3Q comparison bundled
+- PASS: rebound signature bundled - 3Q signature bundled
+- PASS: rebound tests bundled - 3Q tests bundled
+- PASS: 3Q scoring and source-of-truth guards bundled - 3Q guards bundled
+- PASS: rebound second chance evidence included - 3Q evidence visible
+- PASS: rebound sandbox is isolated-only - rebound sandbox isolated
 - PASS: default and experimental official score signatures remain equal - score signatures equal
-- PASS: goalkeeper response sandbox cannot mutate official score - official score mutation forbidden
-- PASS: goalkeeper response sandbox cannot create production scoring events - production scoring event creation forbidden
-- PASS: goalkeeper response sandbox cannot claim global economy - global economy forbidden
+- PASS: rebound sandbox cannot mutate official score - official score mutation forbidden
+- PASS: rebound sandbox cannot create production scoring events - production scoring event creation forbidden
+- PASS: rebound sandbox cannot claim global economy - global economy forbidden
 - PASS: coach copy wording is clean - coach copy clean
 - PASS: explicit exhaustive test command available - test:all visible
 - PASS: scoring constants unchanged - scoring constants visible
@@ -56,7 +58,7 @@ Status: PASS
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: recommendations visible - 3P recommendations visible
+- PASS: recommendations visible - 3Q recommendations visible
 
 ## Files
 
@@ -68,7 +70,7 @@ Status: PASS
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.latest.html
-- fullmatch-workbench-chain-replay-3p.md
+- fullmatch-workbench-chain-replay-3q.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -76,5 +78,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-3p.md
+- validation.fullmatch-workbench-chain-replay-3q.md
 - validation.share-pack.md

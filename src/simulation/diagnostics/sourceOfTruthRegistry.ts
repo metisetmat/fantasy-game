@@ -21,7 +21,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION"
   | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"
-  | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX";
+  | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
+  | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -548,6 +549,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotOverride: [
       "live score",
       "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX: {
+    scope: "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
+    canProve: [
+      "experimental rebound and second-chance sandbox consumed the goalkeeper response model output",
+      "baseline and override rebound outcome, loose-ball state, recovery candidate, second-chance probability, and divergence were exposed",
+      "current sandbox rebound result remained separated from official timeline, official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production rebound model quality",
+      "production second-chance conversion quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
       "normal live mini-match route resolution",
       "official scoring events",
       "production route resolution",
