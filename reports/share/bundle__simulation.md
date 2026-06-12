@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3Q - Rebound & Second Chance Sandbox. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3R - Multi-Action Continuation Sandbox. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -180,6 +180,8 @@ import { goalkeeperResponseModelFromShotResolution } from "./fullMatch/goalkeepe
 import type { GoalkeeperResponseModel } from "./fullMatch/goalkeeperResponseModel";
 import { reboundSecondChanceFromGoalkeeperResponse } from "./fullMatch/reboundSecondChanceFromGoalkeeperResponse";
 import type { ReboundSecondChanceModel } from "./fullMatch/reboundSecondChanceSandbox";
+import { multiActionContinuationFromRebound } from "./fullMatch/multiActionContinuationFromRebound";
+import type { MultiActionContinuationModel } from "./fullMatch/multiActionContinuationSandbox";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -806,6 +808,31 @@ function reboundSecondChanceModelLimitations(model: ReboundSecondChanceModel): r
     "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function multiActionContinuationModelLimitations(model: MultiActionContinuationModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_EXPERIMENTAL",
+    `FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DIAGNOSTIC_ONLY",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -1960,6 +1987,53 @@ function reboundSecondChanceModelEvidenceFact(input: {
   };
 }
 
+function multiActionContinuationModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: MultiActionContinuationModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_multi_action_continuation_sandbox")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-multi-action-continuation-sandbox`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.baseline.targetZone ?? "Z2-HSL", input.model.override.continuationTargetZoneCandidate ?? input.model.override.targetZone ?? "Z3-HSR"],
+    summary:
+      `Experimental multi-action continuation sandbox ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline action=${input.model.baseline.continuationActionType}, outcome=${input.model.baseline.continuationOutcome}, ` +
+      `created=${input.model.baseline.sandboxContinuationCreated}; override sourceRebound=${input.model.override.sourceReboundOutcome ?? "none"}, ` +
+      `ballLoose=${input.model.override.sourceBallLooseState ?? "none"}, recovery=${input.model.override.sourceRecoveryTeamCandidate ?? "none"}, ` +
+      `action=${input.model.override.continuationActionType}, outcome=${input.model.override.continuationOutcome}, ` +
+      `team=${input.model.override.continuationTeamCandidate}, actor=${input.model.override.continuationActorCandidate ?? "none"}, ` +
+      `target=${input.model.override.continuationTargetZoneCandidate ?? "none"}, security=${input.model.override.possessionSecurityScore}, ` +
+      `pressureAfterRebound=${input.model.override.pressureAfterRebound}, transitionRisk=${input.model.override.transitionRisk}, ` +
+      `confidence=${input.model.override.continuationConfidence}, canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, ` +
+      `canMutateOfficialTimeline=${input.model.canMutateOfficialTimeline}, canMutateOfficialPossession=${input.model.canMutateOfficialPossession}, ` +
+      `canMutateOfficialScore=${input.model.canMutateOfficialScore}, canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 88 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_multi_action_continuation_sandbox",
+      "multi_action_continuation_sandbox",
+      ...(input.model.chainId === undefined ? [] : [`multi_action_continuation_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -1981,6 +2055,7 @@ function withFullMatchGroundingDiagnosis(
   attributeDrivenShotResolutionModel: AttributeDrivenShotResolutionModel,
   goalkeeperResponseModel: GoalkeeperResponseModel,
   reboundSecondChanceModel: ReboundSecondChanceModel,
+  multiActionContinuationModel: MultiActionContinuationModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2002,7 +2077,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_sandbox_scoring_event_resolution") ||
     fact.internalTags.includes("workbench_chain_attribute_driven_shot_resolution_sandbox") ||
     fact.internalTags.includes("workbench_chain_goalkeeper_response_model_sandbox") ||
-    fact.internalTags.includes("workbench_chain_rebound_second_chance_sandbox")
+    fact.internalTags.includes("workbench_chain_rebound_second_chance_sandbox") ||
+    fact.internalTags.includes("workbench_chain_multi_action_continuation_sandbox")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2026,7 +2102,10 @@ function withFullMatchGroundingDiagnosis(
   const reboundSecondChanceSummary = reboundSecondChanceModel.status === "not_available"
     ? ""
     : ` Le sandbox rebond et seconde chance transforme cette reponse gardien en etat de rebond : outcome ${reboundSecondChanceModel.override.reboundOutcome}, ballon ${reboundSecondChanceModel.override.ballLooseState}, recuperation candidate ${reboundSecondChanceModel.override.recoveryTeamCandidate}, prochaine possession sandbox ${reboundSecondChanceModel.override.nextSandboxPossessionCandidate}, danger ${reboundSecondChanceModel.override.reboundDangerScore}/100, probabilite de seconde chance ${reboundSecondChanceModel.override.secondChanceProbability}/100, seconde chance creee ${reboundSecondChanceModel.override.secondChanceCreated ? "oui" : "non"}. Ce resultat reste strictement sandbox-only : aucune mutation de possession officielle, aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}`;
+  const multiActionContinuationSummary = multiActionContinuationModel.status === "not_available"
+    ? ""
+    : ` Le sandbox de continuation multi-action transforme l'etat de rebond en action sandbox : action ${multiActionContinuationModel.override.continuationActionType}, outcome ${multiActionContinuationModel.override.continuationOutcome}, equipe ${multiActionContinuationModel.override.continuationTeamCandidate}, acteur ${multiActionContinuationModel.override.continuationActorCandidate ?? "none"}, cible ${multiActionContinuationModel.override.continuationTargetZoneCandidate ?? "none"}, securite ${multiActionContinuationModel.override.possessionSecurityScore}/100, pression apres rebond ${multiActionContinuationModel.override.pressureAfterRebound}/100, risque de transition ${multiActionContinuationModel.override.transitionRisk}/100, confiance ${multiActionContinuationModel.override.continuationConfidence}/100. Ce resultat reste strictement sandbox-only : aucune mutation de timeline officielle, aucune mutation de possession officielle, aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2131,6 +2210,10 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     goalkeeperResponseModel,
   });
+  const multiActionContinuationModel = multiActionContinuationFromRebound({
+    matchInput: input,
+    reboundSecondChanceModel,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -2186,6 +2269,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && attributeDrivenShotResolutionModel.status !== "not_available" ? { attributeDrivenShotResolutionModel } : {}),
           ...(index === 0 && goalkeeperResponseModel.status !== "not_available" ? { goalkeeperResponseModel } : {}),
           ...(index === 0 && reboundSecondChanceModel.status !== "not_available" ? { reboundSecondChanceModel } : {}),
+          ...(index === 0 && multiActionContinuationModel.status !== "not_available" ? { multiActionContinuationModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -2270,6 +2354,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...attributeDrivenShotResolutionModelLimitations(attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelLimitations(goalkeeperResponseModel),
       ...reboundSecondChanceModelLimitations(reboundSecondChanceModel),
+      ...multiActionContinuationModelLimitations(multiActionContinuationModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2362,6 +2447,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: reboundSecondChanceModel,
   });
+  const multiActionContinuationModelFact = multiActionContinuationModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: multiActionContinuationModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2381,6 +2471,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(attributeDrivenShotResolutionModelFact === null ? [] : [attributeDrivenShotResolutionModelFact]),
     ...(goalkeeperResponseModelFact === null ? [] : [goalkeeperResponseModelFact]),
     ...(reboundSecondChanceModelFact === null ? [] : [reboundSecondChanceModelFact]),
+    ...(multiActionContinuationModelFact === null ? [] : [multiActionContinuationModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2410,6 +2501,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     attributeDrivenShotResolutionModel,
     goalkeeperResponseModel,
     reboundSecondChanceModel,
+    multiActionContinuationModel,
   );
 }
 ```
@@ -13863,6 +13955,971 @@ export function reboundSecondChanceSignature(report: MatchReport): {
 }
 ```
 
+## File: src/simulation/fullMatch/multiActionContinuationSandbox.ts
+
+```ts
+export type MultiActionContinuationStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type MultiActionContinuationScope =
+  | "multi_action_continuation_sandbox"
+  | "production_scoring_forbidden";
+
+export type MultiActionContinuationOrigin =
+  | "none"
+  | "rebound_second_chance_sandbox";
+
+export type SandboxContinuationActionType =
+  | "NO_CONTINUATION"
+  | "GOALKEEPER_CLAIM"
+  | "GOALKEEPER_TEAM_SECURE_RECOVERY"
+  | "DEFENSIVE_CLEARANCE"
+  | "SAFE_RESET"
+  | "TERRITORIAL_CLEARANCE"
+  | "CONTROLLED_OUTLET"
+  | "SECOND_CHANCE_ATTACK"
+  | "LOOSE_BALL_CONTEST";
+
+export type SandboxContinuationOutcome =
+  | "none"
+  | "secured_by_goalkeeper_team"
+  | "cleared_to_safe_zone"
+  | "reset_under_control"
+  | "territory_relieved"
+  | "outlet_available"
+  | "attacking_second_chance_window"
+  | "contested_loose_ball";
+
+export type SandboxContinuationReason =
+  | "NO_REBOUND"
+  | "SAFE_DEFLECTION"
+  | "RECOVERY_TEAM_GOALKEEPER_TEAM"
+  | "DEFENSIVE_RECOVERY_ADVANTAGE"
+  | "ATTACKING_PROXIMITY_SUPPRESSED"
+  | "SECOND_CHANCE_PROBABILITY_LOW"
+  | "SECOND_CHANCE_WINDOW_CREATED"
+  | "SAFE_AREA"
+  | "CONTESTED_AREA"
+  | "DANGER_ZONE"
+  | "SANDBOX_ONLY"
+  | "PRODUCTION_SCORING_FORBIDDEN";
+
+export type SandboxContinuationTeamCandidate =
+  | "none"
+  | "goalkeeper_team"
+  | "attacking_team"
+  | "contested";
+
+export type MultiActionContinuationPathResult = {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly shooterId?: string;
+  readonly goalkeeperId?: string;
+  readonly targetZone?: string;
+  readonly sourceReboundOutcome?: string;
+  readonly sourceBallLooseState?: string;
+  readonly sourceRecoveryTeamCandidate?: string;
+  readonly sourceNextSandboxPossessionCandidate?: string;
+  readonly sourceReboundDangerScore: number;
+  readonly sourceSecondChanceProbability: number;
+  readonly sourceSecondChanceCreated: boolean;
+  readonly continuationActionType: SandboxContinuationActionType;
+  readonly continuationOutcome: SandboxContinuationOutcome;
+  readonly continuationTeamCandidate: SandboxContinuationTeamCandidate;
+  readonly continuationActorCandidate?: string;
+  readonly continuationTargetZoneCandidate?: string;
+  readonly possessionSecurityScore: number;
+  readonly pressureAfterRebound: number;
+  readonly transitionRisk: number;
+  readonly continuationConfidence: number;
+  readonly sandboxContinuationCreated: boolean;
+  readonly sandboxMatchEventCreated: false;
+  readonly sandboxScoringEventCreated: false;
+  readonly sandboxScoreDelta: 0;
+  readonly isolatedOnly: true;
+  readonly canBecomeOfficialMatchEvent: false;
+  readonly canMutateOfficialScore: false;
+  readonly canCreateOfficialScoringEvent: false;
+  readonly canCreateProductionScoringEvent: false;
+  readonly canMutateOfficialPossession: false;
+  readonly canMutateOfficialTimeline: false;
+  readonly reasons: readonly SandboxContinuationReason[];
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type MultiActionContinuationModel = {
+  readonly status: MultiActionContinuationStatus;
+  readonly scope: MultiActionContinuationScope;
+  readonly origin: MultiActionContinuationOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly baseline: MultiActionContinuationPathResult;
+  readonly override: MultiActionContinuationPathResult;
+  readonly baselineContinuationCreated: boolean;
+  readonly overrideContinuationCreated: boolean;
+  readonly continuationActionDivergenceObserved: boolean;
+  readonly continuationOutcomeDivergenceObserved: boolean;
+  readonly continuationTeamDivergenceObserved: boolean;
+  readonly possessionSecurityObserved: boolean;
+  readonly transitionRiskObserved: boolean;
+  readonly sandboxMatchEventDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly officialPossessionDivergenceObserved: false;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly canInjectEventsIntoOfficialTimeline: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateOfficialPossession: false;
+  readonly canMutateOfficialTimeline: false;
+  readonly canMutateProductionRouteResolution: false;
+  readonly canMutateGlobalRouteSuccessRates: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly explanation?: string;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyMultiActionContinuationPathResult(
+  pathId: "baseline" | "override",
+): MultiActionContinuationPathResult {
+  return {
+    pathId,
+    sourceReboundDangerScore: 0,
+    sourceSecondChanceProbability: 0,
+    sourceSecondChanceCreated: false,
+    continuationActionType: "NO_CONTINUATION",
+    continuationOutcome: "none",
+    continuationTeamCandidate: "none",
+    possessionSecurityScore: 0,
+    pressureAfterRebound: 0,
+    transitionRisk: 0,
+    continuationConfidence: 0,
+    sandboxContinuationCreated: false,
+    sandboxMatchEventCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    reasons: ["NO_REBOUND", "SANDBOX_ONLY", "PRODUCTION_SCORING_FORBIDDEN"],
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function emptyMultiActionContinuationModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): MultiActionContinuationModel {
+  return {
+    status: "not_available",
+    scope: "production_scoring_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    baseline: emptyMultiActionContinuationPathResult("baseline"),
+    override: emptyMultiActionContinuationPathResult("override"),
+    baselineContinuationCreated: false,
+    overrideContinuationCreated: false,
+    continuationActionDivergenceObserved: false,
+    continuationOutcomeDivergenceObserved: false,
+    continuationTeamDivergenceObserved: false,
+    possessionSecurityObserved: false,
+    transitionRiskObserved: false,
+    sandboxMatchEventDivergenceObserved: false,
+    sandboxScoringEventDivergenceObserved: false,
+    sandboxScoreDivergenceObserved: false,
+    officialPossessionDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: false,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/extractContinuationContext.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+
+function bounded(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function safeTargetZone(targetZone: string | undefined): string {
+  if (targetZone === undefined) {
+    return "Z3-C";
+  }
+
+  if (targetZone.includes("HSR")) {
+    return "Z3-HSR";
+  }
+
+  if (targetZone.includes("HSL")) {
+    return "Z3-HSL";
+  }
+
+  return "Z3-C";
+}
+
+function fallbackGoalkeeperTeamActor(input: MatchInput, goalkeeperId: string | undefined): string | undefined {
+  if (goalkeeperId !== undefined) {
+    return goalkeeperId;
+  }
+
+  return input.awayTeam.goalkeeperId ?? input.awayTeam.roster[0]?.playerId;
+}
+
+export function extractContinuationContext(input: {
+  readonly matchInput: MatchInput;
+  readonly shooterId?: string;
+  readonly goalkeeperId?: string;
+  readonly targetZone?: string;
+  readonly recoveryTeamCandidate?: string;
+}): {
+  readonly continuationActorCandidate?: string;
+  readonly continuationTargetZoneCandidate?: string;
+  readonly pressureAfterRebound: number;
+  readonly transitionRisk: number;
+  readonly possessionSecurityScore: number;
+  readonly warnings: readonly string[];
+} {
+  const goalkeeperTeamRecovery = input.recoveryTeamCandidate === "goalkeeper_team";
+  const attackingRecovery = input.recoveryTeamCandidate === "attacking_team";
+  const actor = goalkeeperTeamRecovery
+    ? fallbackGoalkeeperTeamActor(input.matchInput, input.goalkeeperId)
+    : attackingRecovery
+      ? input.shooterId
+      : undefined;
+  const targetZone = goalkeeperTeamRecovery ? safeTargetZone(input.targetZone) : input.targetZone;
+
+  return {
+    ...(actor === undefined ? {} : { continuationActorCandidate: actor }),
+    ...(targetZone === undefined ? {} : { continuationTargetZoneCandidate: targetZone }),
+    pressureAfterRebound: bounded(goalkeeperTeamRecovery ? 24 : attackingRecovery ? 72 : 54),
+    transitionRisk: bounded(goalkeeperTeamRecovery ? 18 : attackingRecovery ? 68 : 52),
+    possessionSecurityScore: bounded(goalkeeperTeamRecovery ? 82 : attackingRecovery ? 42 : 50),
+    warnings: [
+      "CONTINUATION_CONTEXT_SPATIAL_FALLBACK_USED",
+      "CONTINUATION_CONTEXT_DOES_NOT_CREATE_OFFICIAL_POSSESSION",
+      "CONTINUATION_CONTEXT_DOES_NOT_CREATE_OFFICIAL_MATCH_EVENT",
+      "CONTINUATION_CONTEXT_DOES_NOT_CREATE_OFFICIAL_SCORING_EVENT",
+    ],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/resolveMultiActionContinuation.ts
+
+```ts
+import type {
+  MultiActionContinuationPathResult,
+  SandboxContinuationActionType,
+  SandboxContinuationOutcome,
+  SandboxContinuationReason,
+  SandboxContinuationTeamCandidate,
+} from "./multiActionContinuationSandbox";
+
+function bounded(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function actionForInput(input: {
+  readonly pathId: "baseline" | "override";
+  readonly sourceReboundOutcome?: string;
+  readonly sourceBallLooseState?: string;
+  readonly sourceRecoveryTeamCandidate?: string;
+  readonly sourceSecondChanceCreated: boolean;
+  readonly sourceSecondChanceProbability: number;
+  readonly possessionSecurityScore: number;
+  readonly transitionRisk: number;
+}): {
+  readonly continuationActionType: SandboxContinuationActionType;
+  readonly continuationOutcome: SandboxContinuationOutcome;
+  readonly continuationTeamCandidate: SandboxContinuationTeamCandidate;
+  readonly sandboxContinuationCreated: boolean;
+} {
+  if (input.pathId === "baseline" || input.sourceReboundOutcome === "NO_REBOUND") {
+    return {
+      continuationActionType: "NO_CONTINUATION",
+      continuationOutcome: "none",
+      continuationTeamCandidate: "none",
+      sandboxContinuationCreated: false,
+    };
+  }
+
+  if (
+    input.sourceReboundOutcome === "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE" &&
+    input.sourceBallLooseState === "safe_area" &&
+    input.sourceRecoveryTeamCandidate === "goalkeeper_team"
+  ) {
+    return {
+      continuationActionType: input.possessionSecurityScore >= 78 ? "GOALKEEPER_TEAM_SECURE_RECOVERY" : "DEFENSIVE_CLEARANCE",
+      continuationOutcome: input.possessionSecurityScore >= 78 ? "secured_by_goalkeeper_team" : "cleared_to_safe_zone",
+      continuationTeamCandidate: "goalkeeper_team",
+      sandboxContinuationCreated: true,
+    };
+  }
+
+  if (input.sourceSecondChanceCreated || input.sourceSecondChanceProbability >= 50) {
+    return {
+      continuationActionType: "SECOND_CHANCE_ATTACK",
+      continuationOutcome: "attacking_second_chance_window",
+      continuationTeamCandidate: "attacking_team",
+      sandboxContinuationCreated: true,
+    };
+  }
+
+  if (input.sourceBallLooseState === "contested") {
+    return {
+      continuationActionType: "LOOSE_BALL_CONTEST",
+      continuationOutcome: "contested_loose_ball",
+      continuationTeamCandidate: "contested",
+      sandboxContinuationCreated: true,
+    };
+  }
+
+  if (input.transitionRisk <= 35) {
+    return {
+      continuationActionType: "SAFE_RESET",
+      continuationOutcome: "reset_under_control",
+      continuationTeamCandidate: "goalkeeper_team",
+      sandboxContinuationCreated: true,
+    };
+  }
+
+  return {
+    continuationActionType: "DEFENSIVE_CLEARANCE",
+    continuationOutcome: "cleared_to_safe_zone",
+    continuationTeamCandidate: "goalkeeper_team",
+    sandboxContinuationCreated: true,
+  };
+}
+
+function reasonsForInput(input: {
+  readonly sourceReboundOutcome?: string;
+  readonly sourceBallLooseState?: string;
+  readonly sourceRecoveryTeamCandidate?: string;
+  readonly sourceSecondChanceCreated: boolean;
+  readonly sourceSecondChanceProbability: number;
+  readonly possessionSecurityScore: number;
+  readonly transitionRisk: number;
+}): readonly SandboxContinuationReason[] {
+  return [
+    ...(input.sourceReboundOutcome === "NO_REBOUND" ? ["NO_REBOUND" as const] : []),
+    ...(input.sourceReboundOutcome === "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE" || input.sourceReboundOutcome === "SAFE_DEFLECTION" ? ["SAFE_DEFLECTION" as const] : []),
+    ...(input.sourceRecoveryTeamCandidate === "goalkeeper_team" ? ["RECOVERY_TEAM_GOALKEEPER_TEAM" as const] : []),
+    ...(input.possessionSecurityScore >= 60 ? ["DEFENSIVE_RECOVERY_ADVANTAGE" as const] : []),
+    ...(input.sourceSecondChanceProbability < 30 ? ["SECOND_CHANCE_PROBABILITY_LOW" as const] : []),
+    ...(input.sourceSecondChanceCreated ? ["SECOND_CHANCE_WINDOW_CREATED" as const] : ["ATTACKING_PROXIMITY_SUPPRESSED" as const]),
+    ...(input.sourceBallLooseState === "safe_area" ? ["SAFE_AREA" as const] : []),
+    ...(input.sourceBallLooseState === "contested" ? ["CONTESTED_AREA" as const] : []),
+    ...(input.sourceBallLooseState === "danger_zone" ? ["DANGER_ZONE" as const] : []),
+    "SANDBOX_ONLY",
+    "PRODUCTION_SCORING_FORBIDDEN",
+  ];
+}
+
+export function resolveMultiActionContinuation(input: {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly shooterId?: string;
+  readonly goalkeeperId?: string;
+  readonly targetZone?: string;
+  readonly sourceReboundOutcome?: string;
+  readonly sourceBallLooseState?: string;
+  readonly sourceRecoveryTeamCandidate?: string;
+  readonly sourceNextSandboxPossessionCandidate?: string;
+  readonly sourceReboundDangerScore: number;
+  readonly sourceSecondChanceProbability: number;
+  readonly sourceSecondChanceCreated: boolean;
+  readonly continuationActorCandidate?: string;
+  readonly continuationTargetZoneCandidate?: string;
+  readonly possessionSecurityScore: number;
+  readonly pressureAfterRebound: number;
+  readonly transitionRisk: number;
+}): MultiActionContinuationPathResult {
+  const action = actionForInput({
+    pathId: input.pathId,
+    ...(input.sourceReboundOutcome === undefined ? {} : { sourceReboundOutcome: input.sourceReboundOutcome }),
+    ...(input.sourceBallLooseState === undefined ? {} : { sourceBallLooseState: input.sourceBallLooseState }),
+    ...(input.sourceRecoveryTeamCandidate === undefined ? {} : { sourceRecoveryTeamCandidate: input.sourceRecoveryTeamCandidate }),
+    sourceSecondChanceCreated: input.sourceSecondChanceCreated,
+    sourceSecondChanceProbability: input.sourceSecondChanceProbability,
+    possessionSecurityScore: input.possessionSecurityScore,
+    transitionRisk: input.transitionRisk,
+  });
+  const continuationConfidence = input.pathId === "baseline"
+    ? 0
+    : bounded(
+      input.possessionSecurityScore * 0.55 +
+      (100 - input.transitionRisk) * 0.25 +
+      (100 - input.pressureAfterRebound) * 0.15 -
+      input.sourceSecondChanceProbability * 0.1,
+    );
+
+  return {
+    pathId: input.pathId,
+    ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+    ...(input.shooterId === undefined ? {} : { shooterId: input.shooterId }),
+    ...(input.goalkeeperId === undefined ? {} : { goalkeeperId: input.goalkeeperId }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+    ...(input.sourceReboundOutcome === undefined ? {} : { sourceReboundOutcome: input.sourceReboundOutcome }),
+    ...(input.sourceBallLooseState === undefined ? {} : { sourceBallLooseState: input.sourceBallLooseState }),
+    ...(input.sourceRecoveryTeamCandidate === undefined ? {} : { sourceRecoveryTeamCandidate: input.sourceRecoveryTeamCandidate }),
+    ...(input.sourceNextSandboxPossessionCandidate === undefined ? {} : { sourceNextSandboxPossessionCandidate: input.sourceNextSandboxPossessionCandidate }),
+    sourceReboundDangerScore: input.sourceReboundDangerScore,
+    sourceSecondChanceProbability: input.sourceSecondChanceProbability,
+    sourceSecondChanceCreated: input.sourceSecondChanceCreated,
+    continuationActionType: action.continuationActionType,
+    continuationOutcome: action.continuationOutcome,
+    continuationTeamCandidate: action.continuationTeamCandidate,
+    ...(input.continuationActorCandidate === undefined ? {} : { continuationActorCandidate: input.continuationActorCandidate }),
+    ...(input.continuationTargetZoneCandidate === undefined ? {} : { continuationTargetZoneCandidate: input.continuationTargetZoneCandidate }),
+    possessionSecurityScore: input.pathId === "baseline" ? 0 : input.possessionSecurityScore,
+    pressureAfterRebound: input.pathId === "baseline" ? 0 : input.pressureAfterRebound,
+    transitionRisk: input.pathId === "baseline" ? 0 : input.transitionRisk,
+    continuationConfidence,
+    sandboxContinuationCreated: action.sandboxContinuationCreated,
+    sandboxMatchEventCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    reasons: reasonsForInput({
+      ...(input.sourceReboundOutcome === undefined ? {} : { sourceReboundOutcome: input.sourceReboundOutcome }),
+      ...(input.sourceBallLooseState === undefined ? {} : { sourceBallLooseState: input.sourceBallLooseState }),
+      ...(input.sourceRecoveryTeamCandidate === undefined ? {} : { sourceRecoveryTeamCandidate: input.sourceRecoveryTeamCandidate }),
+      sourceSecondChanceCreated: input.sourceSecondChanceCreated,
+      sourceSecondChanceProbability: input.sourceSecondChanceProbability,
+      possessionSecurityScore: input.possessionSecurityScore,
+      transitionRisk: input.transitionRisk,
+    }),
+    tags: [
+      `multi_action_continuation_${input.pathId}_action_${action.continuationActionType}`,
+      `multi_action_continuation_${input.pathId}_outcome_${action.continuationOutcome}`,
+      `multi_action_continuation_${input.pathId}_team_${action.continuationTeamCandidate}`,
+      `multi_action_continuation_${input.pathId}_created_${action.sandboxContinuationCreated ? "true" : "false"}`,
+      `multi_action_continuation_${input.pathId}_security_${input.pathId === "baseline" ? 0 : input.possessionSecurityScore}`,
+      `multi_action_continuation_${input.pathId}_pressure_${input.pathId === "baseline" ? 0 : input.pressureAfterRebound}`,
+      `multi_action_continuation_${input.pathId}_transition_risk_${input.pathId === "baseline" ? 0 : input.transitionRisk}`,
+      `multi_action_continuation_${input.pathId}_confidence_${continuationConfidence}`,
+    ],
+    warnings: [],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/multiActionContinuationFromRebound.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import { compareMultiActionContinuation } from "./compareMultiActionContinuation";
+import { extractContinuationContext } from "./extractContinuationContext";
+import {
+  emptyMultiActionContinuationModel,
+  type MultiActionContinuationModel,
+  type MultiActionContinuationPathResult,
+} from "./multiActionContinuationSandbox";
+import type { ReboundSecondChanceModel, ReboundSecondChancePathResult } from "./reboundSecondChanceSandbox";
+import { resolveMultiActionContinuation } from "./resolveMultiActionContinuation";
+
+function continuationFromReboundPath(input: {
+  readonly matchInput: MatchInput;
+  readonly path: ReboundSecondChancePathResult;
+}): MultiActionContinuationPathResult {
+  const context = extractContinuationContext({
+    matchInput: input.matchInput,
+    ...(input.path.shooterId === undefined ? {} : { shooterId: input.path.shooterId }),
+    ...(input.path.goalkeeperId === undefined ? {} : { goalkeeperId: input.path.goalkeeperId }),
+    ...(input.path.targetZone === undefined ? {} : { targetZone: input.path.targetZone }),
+    recoveryTeamCandidate: input.path.recoveryTeamCandidate,
+  });
+
+  return {
+    ...resolveMultiActionContinuation({
+      pathId: input.path.pathId,
+      ...(input.path.candidateId === undefined ? {} : { candidateId: input.path.candidateId }),
+      ...(input.path.shooterId === undefined ? {} : { shooterId: input.path.shooterId }),
+      ...(input.path.goalkeeperId === undefined ? {} : { goalkeeperId: input.path.goalkeeperId }),
+      ...(input.path.targetZone === undefined ? {} : { targetZone: input.path.targetZone }),
+      sourceReboundOutcome: input.path.reboundOutcome,
+      sourceBallLooseState: input.path.ballLooseState,
+      sourceRecoveryTeamCandidate: input.path.recoveryTeamCandidate,
+      sourceNextSandboxPossessionCandidate: input.path.nextSandboxPossessionCandidate,
+      sourceReboundDangerScore: input.path.reboundDangerScore,
+      sourceSecondChanceProbability: input.path.secondChanceProbability,
+      sourceSecondChanceCreated: input.path.secondChanceCreated,
+      ...(context.continuationActorCandidate === undefined ? {} : { continuationActorCandidate: context.continuationActorCandidate }),
+      ...(context.continuationTargetZoneCandidate === undefined ? {} : { continuationTargetZoneCandidate: context.continuationTargetZoneCandidate }),
+      possessionSecurityScore: context.possessionSecurityScore,
+      pressureAfterRebound: context.pressureAfterRebound,
+      transitionRisk: context.transitionRisk,
+    }),
+    warnings: context.warnings,
+  };
+}
+
+export function multiActionContinuationCannotMutateOfficialFullMatch(
+  model: MultiActionContinuationModel,
+): boolean {
+  const results = [model.baseline, model.override];
+
+  return (
+    !model.canInjectEventsIntoOfficialTimeline &&
+    !model.canMutateOfficialScore &&
+    !model.canMutateOfficialScoringEvents &&
+    !model.canMutateOfficialPossession &&
+    !model.canMutateOfficialTimeline &&
+    !model.canMutateProductionRouteResolution &&
+    !model.canMutateGlobalRouteSuccessRates &&
+    !model.canCreateProductionScoringEvents &&
+    !model.modelAppliedToNormalLiveSelection &&
+    results.every((result) =>
+      result.isolatedOnly &&
+      !result.canBecomeOfficialMatchEvent &&
+      !result.canMutateOfficialScore &&
+      !result.canCreateOfficialScoringEvent &&
+      !result.canCreateProductionScoringEvent &&
+      !result.canMutateOfficialPossession &&
+      !result.canMutateOfficialTimeline &&
+      !result.sandboxMatchEventCreated &&
+      !result.sandboxScoringEventCreated &&
+      result.sandboxScoreDelta === 0
+    )
+  );
+}
+
+export function multiActionContinuationCannotClaimGlobalEconomy(
+  model: MultiActionContinuationModel,
+): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateMultiActionContinuationModel(model: MultiActionContinuationModel): readonly string[] {
+  const shouldValidate = model.status === "available";
+  const results = [model.baseline, model.override];
+
+  return [
+    ...(shouldValidate && model.origin !== "rebound_second_chance_sandbox"
+      ? ["MULTI_ACTION_CONTINUATION_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && model.baseline.continuationActionType !== "NO_CONTINUATION"
+      ? ["MULTI_ACTION_CONTINUATION_BASELINE_NOT_NO_CONTINUATION"]
+      : []),
+    ...(shouldValidate && model.baseline.sandboxContinuationCreated
+      ? ["MULTI_ACTION_CONTINUATION_BASELINE_CREATED"]
+      : []),
+    ...(shouldValidate && !["GOALKEEPER_TEAM_SECURE_RECOVERY", "DEFENSIVE_CLEARANCE", "SAFE_RESET"].includes(model.override.continuationActionType)
+      ? ["MULTI_ACTION_CONTINUATION_OVERRIDE_UNEXPECTED_ACTION"]
+      : []),
+    ...(shouldValidate && model.override.continuationTeamCandidate !== "goalkeeper_team"
+      ? ["MULTI_ACTION_CONTINUATION_OVERRIDE_NOT_GOALKEEPER_TEAM"]
+      : []),
+    ...(shouldValidate && !model.override.sandboxContinuationCreated
+      ? ["MULTI_ACTION_CONTINUATION_OVERRIDE_NOT_CREATED"]
+      : []),
+    ...(results.some((result) => result.sandboxMatchEventCreated)
+      ? ["MULTI_ACTION_CONTINUATION_CREATED_MATCH_EVENT"]
+      : []),
+    ...(results.some((result) => result.sandboxScoringEventCreated)
+      ? ["MULTI_ACTION_CONTINUATION_CREATED_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.sandboxScoreDelta !== 0)
+      ? ["MULTI_ACTION_CONTINUATION_SCORE_DELTA_NON_ZERO"]
+      : []),
+    ...(shouldValidate && !model.modelAppliedOnlyInSandbox
+      ? ["MULTI_ACTION_CONTINUATION_NOT_SANDBOX_ONLY"]
+      : []),
+    ...(model.modelAppliedToNormalLiveSelection
+      ? ["MULTI_ACTION_CONTINUATION_APPLIED_TO_NORMAL_LIVE"]
+      : []),
+    ...(results.some((result) => !result.isolatedOnly) ? ["MULTI_ACTION_CONTINUATION_RESULT_NOT_ISOLATED"] : []),
+    ...(results.some((result) => result.canBecomeOfficialMatchEvent)
+      ? ["MULTI_ACTION_CONTINUATION_RESULT_CAN_BECOME_MATCH_EVENT"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialScore)
+      ? ["MULTI_ACTION_CONTINUATION_RESULT_CAN_MUTATE_SCORE"]
+      : []),
+    ...(results.some((result) => result.canCreateOfficialScoringEvent)
+      ? ["MULTI_ACTION_CONTINUATION_RESULT_CAN_CREATE_OFFICIAL_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.canCreateProductionScoringEvent)
+      ? ["MULTI_ACTION_CONTINUATION_RESULT_CAN_CREATE_PRODUCTION_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialPossession)
+      ? ["MULTI_ACTION_CONTINUATION_RESULT_CAN_MUTATE_POSSESSION"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialTimeline)
+      ? ["MULTI_ACTION_CONTINUATION_RESULT_CAN_MUTATE_TIMELINE"]
+      : []),
+    ...(!multiActionContinuationCannotMutateOfficialFullMatch(model)
+      ? ["MULTI_ACTION_CONTINUATION_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!multiActionContinuationCannotClaimGlobalEconomy(model)
+      ? ["MULTI_ACTION_CONTINUATION_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function multiActionContinuationFromRebound(input: {
+  readonly matchInput: MatchInput;
+  readonly reboundSecondChanceModel: ReboundSecondChanceModel;
+}): MultiActionContinuationModel {
+  if (input.reboundSecondChanceModel.status !== "available") {
+    return emptyMultiActionContinuationModel({
+      ...(input.reboundSecondChanceModel.segmentLabel === undefined ? {} : { segmentLabel: input.reboundSecondChanceModel.segmentLabel }),
+      ...(input.reboundSecondChanceModel.chainId === undefined ? {} : { chainId: input.reboundSecondChanceModel.chainId }),
+      warnings: input.reboundSecondChanceModel.warnings,
+    });
+  }
+
+  const baseline = continuationFromReboundPath({
+    matchInput: input.matchInput,
+    path: input.reboundSecondChanceModel.baseline,
+  });
+  const override = continuationFromReboundPath({
+    matchInput: input.matchInput,
+    path: input.reboundSecondChanceModel.override,
+  });
+  const comparison = compareMultiActionContinuation({ baseline, override });
+  const result: MultiActionContinuationModel = {
+    status: "available",
+    scope: "multi_action_continuation_sandbox",
+    origin: "rebound_second_chance_sandbox",
+    ...(input.reboundSecondChanceModel.segmentLabel === undefined ? {} : { segmentLabel: input.reboundSecondChanceModel.segmentLabel }),
+    ...(input.reboundSecondChanceModel.chainId === undefined ? {} : { chainId: input.reboundSecondChanceModel.chainId }),
+    baseline,
+    override,
+    baselineContinuationCreated: baseline.sandboxContinuationCreated,
+    overrideContinuationCreated: override.sandboxContinuationCreated,
+    continuationActionDivergenceObserved: comparison.continuationActionDivergenceObserved,
+    continuationOutcomeDivergenceObserved: comparison.continuationOutcomeDivergenceObserved,
+    continuationTeamDivergenceObserved: comparison.continuationTeamDivergenceObserved,
+    possessionSecurityObserved: comparison.possessionSecurityObserved,
+    transitionRiskObserved: comparison.transitionRiskObserved,
+    sandboxMatchEventDivergenceObserved: comparison.sandboxMatchEventDivergenceObserved,
+    sandboxScoringEventDivergenceObserved: comparison.sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved: comparison.sandboxScoreDivergenceObserved,
+    officialPossessionDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input.reboundSecondChanceModel.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: input.reboundSecondChanceModel.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    explanation: comparison.explanation,
+    tags: [
+      "workbench_chain_multi_action_continuation_sandbox",
+      "multi_action_continuation_sandbox",
+      "multi_action_continuation_results_isolated_only",
+      "multi_action_continuation_model_status_available",
+      "multi_action_continuation_model_origin_rebound_second_chance_sandbox",
+      `multi_action_continuation_baseline_action_${baseline.continuationActionType}`,
+      `multi_action_continuation_baseline_outcome_${baseline.continuationOutcome}`,
+      `multi_action_continuation_baseline_created_${baseline.sandboxContinuationCreated ? "true" : "false"}`,
+      `multi_action_continuation_override_source_rebound_outcome_${override.sourceReboundOutcome ?? "none"}`,
+      `multi_action_continuation_override_source_ball_loose_${override.sourceBallLooseState ?? "none"}`,
+      `multi_action_continuation_override_source_recovery_team_${override.sourceRecoveryTeamCandidate ?? "none"}`,
+      `multi_action_continuation_override_action_${override.continuationActionType}`,
+      `multi_action_continuation_override_outcome_${override.continuationOutcome}`,
+      `multi_action_continuation_override_team_${override.continuationTeamCandidate}`,
+      `multi_action_continuation_override_actor_${override.continuationActorCandidate ?? "none"}`,
+      `multi_action_continuation_override_target_zone_${override.continuationTargetZoneCandidate ?? "none"}`,
+      `multi_action_continuation_override_security_${override.possessionSecurityScore}`,
+      `multi_action_continuation_override_pressure_${override.pressureAfterRebound}`,
+      `multi_action_continuation_override_transition_risk_${override.transitionRisk}`,
+      `multi_action_continuation_override_confidence_${override.continuationConfidence}`,
+      `multi_action_continuation_override_created_${override.sandboxContinuationCreated ? "true" : "false"}`,
+      ...baseline.tags,
+      ...override.tags,
+      `multi_action_continuation_action_divergence_${comparison.continuationActionDivergenceObserved ? "true" : "false"}`,
+      `multi_action_continuation_outcome_divergence_${comparison.continuationOutcomeDivergenceObserved ? "true" : "false"}`,
+      `multi_action_continuation_team_divergence_${comparison.continuationTeamDivergenceObserved ? "true" : "false"}`,
+      `multi_action_continuation_possession_security_observed_${comparison.possessionSecurityObserved ? "true" : "false"}`,
+      `multi_action_continuation_transition_risk_observed_${comparison.transitionRiskObserved ? "true" : "false"}`,
+      `multi_action_continuation_match_event_divergence_${comparison.sandboxMatchEventDivergenceObserved ? "true" : "false"}`,
+      `multi_action_continuation_scoring_event_divergence_${comparison.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+      `multi_action_continuation_score_divergence_${comparison.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+      "multi_action_continuation_official_possession_divergence_false",
+      "multi_action_continuation_match_event_created_false",
+      "multi_action_continuation_scoring_event_created_false",
+      "multi_action_continuation_score_delta_0",
+      "multi_action_continuation_official_possession_mutation_count_0",
+      "multi_action_continuation_official_timeline_mutation_count_0",
+      `multi_action_continuation_rejected_closed_count_${input.reboundSecondChanceModel.rejectedClosedCandidateCount}`,
+      `multi_action_continuation_rejected_unavailable_count_${input.reboundSecondChanceModel.rejectedUnavailableCandidateCount}`,
+      "multi_action_continuation_applied_only_in_sandbox_true",
+      "multi_action_continuation_applied_to_normal_live_false",
+      "multi_action_continuation_model_applied_only_in_sandbox_true",
+      "multi_action_continuation_model_applied_to_normal_live_false",
+      "multi_action_continuation_official_timeline_injection_forbidden",
+      "multi_action_continuation_official_score_mutation_forbidden",
+      "multi_action_continuation_official_scoring_events_mutation_forbidden",
+      "multi_action_continuation_official_possession_mutation_forbidden",
+      "multi_action_continuation_production_scoring_event_creation_forbidden",
+      "multi_action_continuation_production_route_resolution_mutation_forbidden",
+      "multi_action_continuation_global_route_success_mutation_forbidden",
+      "multi_action_continuation_global_economy_claim_forbidden",
+      "multi_action_continuation_closed_candidates_rejected",
+      "multi_action_continuation_unavailable_candidates_rejected",
+      "multi_action_continuation_injected_into_official_timeline_count_0",
+      "multi_action_continuation_official_score_mutation_count_0",
+      "multi_action_continuation_official_scoring_event_mutation_count_0",
+      "multi_action_continuation_production_scoring_event_creation_count_0",
+      "multi_action_continuation_production_route_resolution_mutation_count_0",
+      "multi_action_continuation_global_route_success_mutation_count_0",
+      "multi_action_continuation_global_economy_claim_count_0",
+      ...(input.reboundSecondChanceModel.chainId === undefined ? [] : [`multi_action_continuation_chain_id_${input.reboundSecondChanceModel.chainId}`]),
+    ],
+    warnings: [...baseline.warnings, ...override.warnings],
+  };
+  const warnings = validateMultiActionContinuationModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/compareMultiActionContinuation.ts
+
+```ts
+import type { MultiActionContinuationPathResult } from "./multiActionContinuationSandbox";
+
+export function compareMultiActionContinuation(input: {
+  readonly baseline: MultiActionContinuationPathResult;
+  readonly override: MultiActionContinuationPathResult;
+}): {
+  readonly continuationActionDivergenceObserved: boolean;
+  readonly continuationOutcomeDivergenceObserved: boolean;
+  readonly continuationTeamDivergenceObserved: boolean;
+  readonly possessionSecurityObserved: boolean;
+  readonly transitionRiskObserved: boolean;
+  readonly sandboxMatchEventDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly officialPossessionDivergenceObserved: false;
+  readonly explanation: string;
+} {
+  const continuationActionDivergenceObserved = input.baseline.continuationActionType !== input.override.continuationActionType;
+  const continuationOutcomeDivergenceObserved = input.baseline.continuationOutcome !== input.override.continuationOutcome;
+  const continuationTeamDivergenceObserved = input.baseline.continuationTeamCandidate !== input.override.continuationTeamCandidate;
+  const possessionSecurityObserved = input.override.possessionSecurityScore > input.baseline.possessionSecurityScore;
+  const transitionRiskObserved = input.override.transitionRisk > input.baseline.transitionRisk;
+  const sandboxMatchEventDivergenceObserved = input.baseline.sandboxMatchEventCreated !== input.override.sandboxMatchEventCreated;
+  const sandboxScoringEventDivergenceObserved =
+    input.baseline.sandboxScoringEventCreated !== input.override.sandboxScoringEventCreated;
+  const sandboxScoreDivergenceObserved = input.baseline.sandboxScoreDelta !== input.override.sandboxScoreDelta;
+
+  return {
+    continuationActionDivergenceObserved,
+    continuationOutcomeDivergenceObserved,
+    continuationTeamDivergenceObserved,
+    possessionSecurityObserved,
+    transitionRiskObserved,
+    sandboxMatchEventDivergenceObserved,
+    sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved,
+    officialPossessionDivergenceObserved: false,
+    explanation:
+      `Baseline has ${input.baseline.continuationActionType}; override creates ${input.override.continuationActionType} ` +
+      `for ${input.override.continuationTeamCandidate} with confidence ${input.override.continuationConfidence}/100. ` +
+      "The continuation is diagnostic-only and does not create official events, possession changes, or score changes.",
+  };
+}
+```
+
+## File: src/simulation/fullMatch/multiActionContinuationSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function valueFromTag(tags: readonly string[], prefix: string): string | undefined {
+  return tags.find((tag) => tag.startsWith(prefix))?.slice(prefix.length);
+}
+
+function tagCount(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function numberFromTag(tags: readonly string[], prefix: string): number {
+  const value = valueFromTag(tags, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+function hasTag(tags: readonly string[], tag: string): boolean {
+  return tags.includes(tag);
+}
+
+export function multiActionContinuationSignature(report: MatchReport): {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly tagCount: number;
+  readonly officialSandboxEventCount: number;
+  readonly status: string | undefined;
+  readonly origin: string | undefined;
+  readonly baselineContinuationAction: string | undefined;
+  readonly baselineContinuationOutcome: string | undefined;
+  readonly baselineContinuationCreated: string | undefined;
+  readonly overrideSourceReboundOutcome: string | undefined;
+  readonly overrideSourceBallLooseState: string | undefined;
+  readonly overrideSourceRecoveryTeamCandidate: string | undefined;
+  readonly overrideContinuationAction: string | undefined;
+  readonly overrideContinuationOutcome: string | undefined;
+  readonly overrideContinuationTeamCandidate: string | undefined;
+  readonly overrideContinuationActorCandidate: string | undefined;
+  readonly overrideContinuationTargetZoneCandidate: string | undefined;
+  readonly overridePossessionSecurityScore: string | undefined;
+  readonly overridePressureAfterRebound: string | undefined;
+  readonly overrideTransitionRisk: string | undefined;
+  readonly overrideContinuationConfidence: string | undefined;
+  readonly overrideContinuationCreated: string | undefined;
+  readonly continuationActionDivergenceObserved: string | undefined;
+  readonly continuationOutcomeDivergenceObserved: string | undefined;
+  readonly continuationTeamDivergenceObserved: string | undefined;
+  readonly possessionSecurityObserved: string | undefined;
+  readonly transitionRiskObserved: string | undefined;
+  readonly sandboxMatchEventDivergenceObserved: string | undefined;
+  readonly sandboxScoringEventDivergenceObserved: string | undefined;
+  readonly sandboxScoreDivergenceObserved: string | undefined;
+  readonly officialPossessionDivergenceObserved: string | undefined;
+  readonly modelAppliedOnlyInSandbox: string | undefined;
+  readonly modelAppliedToNormalLiveSelection: string | undefined;
+  readonly sandboxContinuationCreatedCount: number;
+  readonly sandboxMatchEventCreatedCount: number;
+  readonly sandboxScoringEventCreatedCount: number;
+  readonly sandboxScoreDeltaTotal: number;
+  readonly officialPossessionMutationCount: number;
+  readonly officialTimelineMutationCount: number;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly officialTimelineInjectionCount: number;
+  readonly officialScoreMutationCount: number;
+  readonly officialScoringEventMutationCount: number;
+  readonly productionScoringEventCreationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly globalRouteSuccessRateMutationCount: number;
+  readonly globalEconomyClaimCount: number;
+} {
+  const facts = report.evidenceFacts.flatMap((fact) => fact.internalTags);
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    tagCount: tagCount(report, "workbench_chain_multi_action_continuation_sandbox"),
+    officialSandboxEventCount: report.timeline.filter((event) =>
+      event.eventId.includes("multi-action-continuation")
+    ).length,
+    status: valueFromTag(facts, "multi_action_continuation_model_status_"),
+    origin: valueFromTag(facts, "multi_action_continuation_model_origin_"),
+    baselineContinuationAction: valueFromTag(facts, "multi_action_continuation_baseline_action_"),
+    baselineContinuationOutcome: valueFromTag(facts, "multi_action_continuation_baseline_outcome_"),
+    baselineContinuationCreated: valueFromTag(facts, "multi_action_continuation_baseline_created_"),
+    overrideSourceReboundOutcome: valueFromTag(facts, "multi_action_continuation_override_source_rebound_outcome_"),
+    overrideSourceBallLooseState: valueFromTag(facts, "multi_action_continuation_override_source_ball_loose_"),
+    overrideSourceRecoveryTeamCandidate: valueFromTag(facts, "multi_action_continuation_override_source_recovery_team_"),
+    overrideContinuationAction: valueFromTag(facts, "multi_action_continuation_override_action_"),
+    overrideContinuationOutcome: valueFromTag(facts, "multi_action_continuation_override_outcome_"),
+    overrideContinuationTeamCandidate: valueFromTag(facts, "multi_action_continuation_override_team_"),
+    overrideContinuationActorCandidate: valueFromTag(facts, "multi_action_continuation_override_actor_"),
+    overrideContinuationTargetZoneCandidate: valueFromTag(facts, "multi_action_continuation_override_target_zone_"),
+    overridePossessionSecurityScore: valueFromTag(facts, "multi_action_continuation_override_security_"),
+    overridePressureAfterRebound: valueFromTag(facts, "multi_action_continuation_override_pressure_"),
+    overrideTransitionRisk: valueFromTag(facts, "multi_action_continuation_override_transition_risk_"),
+    overrideContinuationConfidence: valueFromTag(facts, "multi_action_continuation_override_confidence_"),
+    overrideContinuationCreated: valueFromTag(facts, "multi_action_continuation_override_created_"),
+    continuationActionDivergenceObserved: valueFromTag(facts, "multi_action_continuation_action_divergence_"),
+    continuationOutcomeDivergenceObserved: valueFromTag(facts, "multi_action_continuation_outcome_divergence_"),
+    continuationTeamDivergenceObserved: valueFromTag(facts, "multi_action_continuation_team_divergence_"),
+    possessionSecurityObserved: valueFromTag(facts, "multi_action_continuation_possession_security_observed_"),
+    transitionRiskObserved: valueFromTag(facts, "multi_action_continuation_transition_risk_observed_"),
+    sandboxMatchEventDivergenceObserved: valueFromTag(facts, "multi_action_continuation_match_event_divergence_"),
+    sandboxScoringEventDivergenceObserved: valueFromTag(facts, "multi_action_continuation_scoring_event_divergence_"),
+    sandboxScoreDivergenceObserved: valueFromTag(facts, "multi_action_continuation_score_divergence_"),
+    officialPossessionDivergenceObserved: valueFromTag(facts, "multi_action_continuation_official_possession_divergence_"),
+    modelAppliedOnlyInSandbox: valueFromTag(facts, "multi_action_continuation_model_applied_only_in_sandbox_"),
+    modelAppliedToNormalLiveSelection: valueFromTag(facts, "multi_action_continuation_model_applied_to_normal_live_"),
+    sandboxContinuationCreatedCount: hasTag(facts, "multi_action_continuation_override_created_true") ? 1 : 0,
+    sandboxMatchEventCreatedCount: hasTag(facts, "multi_action_continuation_match_event_created_true") ? 1 : 0,
+    sandboxScoringEventCreatedCount: hasTag(facts, "multi_action_continuation_scoring_event_created_true") ? 1 : 0,
+    sandboxScoreDeltaTotal: numberFromTag(facts, "multi_action_continuation_score_delta_"),
+    officialPossessionMutationCount: numberFromTag(facts, "multi_action_continuation_official_possession_mutation_count_"),
+    officialTimelineMutationCount: numberFromTag(facts, "multi_action_continuation_official_timeline_mutation_count_"),
+    rejectedClosedCandidateCount: numberFromTag(facts, "multi_action_continuation_rejected_closed_count_"),
+    rejectedUnavailableCandidateCount: numberFromTag(facts, "multi_action_continuation_rejected_unavailable_count_"),
+    officialTimelineInjectionCount: numberFromTag(facts, "multi_action_continuation_injected_into_official_timeline_count_"),
+    officialScoreMutationCount: numberFromTag(facts, "multi_action_continuation_official_score_mutation_count_"),
+    officialScoringEventMutationCount: numberFromTag(facts, "multi_action_continuation_official_scoring_event_mutation_count_"),
+    productionScoringEventCreationCount: numberFromTag(facts, "multi_action_continuation_production_scoring_event_creation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(facts, "multi_action_continuation_production_route_resolution_mutation_count_"),
+    globalRouteSuccessRateMutationCount: numberFromTag(facts, "multi_action_continuation_global_route_success_mutation_count_"),
+    globalEconomyClaimCount: numberFromTag(facts, "multi_action_continuation_global_economy_claim_count_"),
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -21083,6 +22140,158 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/multiActionContinuationSandbox.test.ts
+
+```ts
+import { resolveMultiActionContinuation } from "./resolveMultiActionContinuation";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMultiActionContinuationSandbox(): readonly string[] {
+  const baseline = resolveMultiActionContinuation({
+    pathId: "baseline",
+    sourceReboundOutcome: "NO_REBOUND",
+    sourceBallLooseState: "none",
+    sourceRecoveryTeamCandidate: "none",
+    sourceNextSandboxPossessionCandidate: "none",
+    sourceReboundDangerScore: 0,
+    sourceSecondChanceProbability: 0,
+    sourceSecondChanceCreated: false,
+    possessionSecurityScore: 0,
+    pressureAfterRebound: 0,
+    transitionRisk: 0,
+  });
+  const override = resolveMultiActionContinuation({
+    pathId: "override",
+    candidateId: "chain-context-forward-progress-sh",
+    shooterId: "control-space-hunter",
+    goalkeeperId: "blitz-goalkeeper-free-safety",
+    targetZone: "Z4-HSR",
+    sourceReboundOutcome: "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE",
+    sourceBallLooseState: "safe_area",
+    sourceRecoveryTeamCandidate: "goalkeeper_team",
+    sourceNextSandboxPossessionCandidate: "goalkeeper_team",
+    sourceReboundDangerScore: 4,
+    sourceSecondChanceProbability: 4,
+    sourceSecondChanceCreated: false,
+    continuationActorCandidate: "blitz-goalkeeper-free-safety",
+    continuationTargetZoneCandidate: "Z3-HSR",
+    possessionSecurityScore: 82,
+    pressureAfterRebound: 24,
+    transitionRisk: 18,
+  });
+
+  assertTest(baseline.continuationActionType === "NO_CONTINUATION", "baseline continuation action must be NO_CONTINUATION.");
+  assertTest(baseline.continuationOutcome === "none", "baseline continuation outcome must be none.");
+  assertTest(!baseline.sandboxContinuationCreated, "baseline must not create a continuation.");
+  assertTest(override.sourceReboundOutcome === "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE", "override source rebound outcome mismatch.");
+  assertTest(override.sourceBallLooseState === "safe_area", "override source ball loose state mismatch.");
+  assertTest(override.sourceRecoveryTeamCandidate === "goalkeeper_team", "override recovery team mismatch.");
+  assertTest(override.continuationActionType === "GOALKEEPER_TEAM_SECURE_RECOVERY", "override continuation action mismatch.");
+  assertTest(override.continuationOutcome === "secured_by_goalkeeper_team", "override continuation outcome mismatch.");
+  assertTest(override.continuationTeamCandidate === "goalkeeper_team", "override continuation team mismatch.");
+  assertTest(override.continuationActorCandidate === "blitz-goalkeeper-free-safety", "override continuation actor mismatch.");
+  assertTest(override.continuationTargetZoneCandidate === "Z3-HSR", "override continuation target zone mismatch.");
+  assertTest(override.possessionSecurityScore === 82, "override possession security mismatch.");
+  assertTest(override.pressureAfterRebound === 24, "override pressure after rebound mismatch.");
+  assertTest(override.transitionRisk === 18, "override transition risk mismatch.");
+  assertTest(override.continuationConfidence === 77, "override continuation confidence mismatch.");
+  assertTest(override.sandboxContinuationCreated, "override must create a sandbox continuation.");
+  assertTest(!override.sandboxMatchEventCreated, "sandbox continuation must not create a MatchEvent.");
+  assertTest(!override.sandboxScoringEventCreated, "sandbox continuation must not create a scoring event.");
+  assertTest(override.sandboxScoreDelta === 0, "sandbox continuation score delta must be 0.");
+  assertTest(!override.canMutateOfficialPossession, "sandbox continuation must not mutate official possession.");
+  assertTest(!override.canMutateOfficialTimeline, "sandbox continuation must not mutate official timeline.");
+
+  return [
+    "baseline has no continuation",
+    "override resolves goalkeeper-team secure recovery",
+    "current fixture creates one sandbox-only continuation",
+    "sandbox continuation creates no MatchEvent, scoring event, possession mutation, timeline mutation, or score delta",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMultiActionContinuationSandbox();
+
+  console.log("multiActionContinuationSandbox tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/compareMultiActionContinuation.test.ts
+
+```ts
+import { compareMultiActionContinuation } from "./compareMultiActionContinuation";
+import { emptyMultiActionContinuationPathResult, type MultiActionContinuationPathResult } from "./multiActionContinuationSandbox";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function path(input: Partial<MultiActionContinuationPathResult> & {
+  readonly pathId: "baseline" | "override";
+}): MultiActionContinuationPathResult {
+  return {
+    ...emptyMultiActionContinuationPathResult(input.pathId),
+    ...input,
+  };
+}
+
+export function validateCompareMultiActionContinuation(): readonly string[] {
+  const comparison = compareMultiActionContinuation({
+    baseline: path({
+      pathId: "baseline",
+      continuationActionType: "NO_CONTINUATION",
+      continuationOutcome: "none",
+      continuationTeamCandidate: "none",
+    }),
+    override: path({
+      pathId: "override",
+      continuationActionType: "GOALKEEPER_TEAM_SECURE_RECOVERY",
+      continuationOutcome: "secured_by_goalkeeper_team",
+      continuationTeamCandidate: "goalkeeper_team",
+      possessionSecurityScore: 82,
+      transitionRisk: 18,
+      sandboxContinuationCreated: true,
+    }),
+  });
+
+  assertTest(comparison.continuationActionDivergenceObserved, "continuation action divergence must be observed.");
+  assertTest(comparison.continuationOutcomeDivergenceObserved, "continuation outcome divergence must be observed.");
+  assertTest(comparison.continuationTeamDivergenceObserved, "continuation team divergence must be observed.");
+  assertTest(comparison.possessionSecurityObserved, "possession security must be observed.");
+  assertTest(comparison.transitionRiskObserved, "transition risk must be observed.");
+  assertTest(!comparison.sandboxMatchEventDivergenceObserved, "sandbox MatchEvent divergence must remain false.");
+  assertTest(!comparison.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!comparison.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(comparison.explanation.includes("diagnostic-only"), "comparison explanation must be coach-readable and diagnostic-only.");
+
+  return [
+    "continuation action, outcome, and team divergence are observed",
+    "possession security and transition risk are observed",
+    "score/scoring/MatchEvent divergence remains false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCompareMultiActionContinuation();
+
+  console.log("compareMultiActionContinuation tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -22488,6 +23697,95 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalMultiActionContinuation.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { multiActionContinuationSignature } from "./multiActionContinuationSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalMultiActionContinuation(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = multiActionContinuationSignature(defaultReport);
+  const experimentalSignature = multiActionContinuationSignature(experimentalReport);
+  const continuationFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.tagCount === 0, "default runFullMatch must not expose multi-action continuation tags.");
+  assertTest(experimentalSignature.tagCount > 0, "experimental runFullMatch must expose multi-action continuation tags.");
+  assertTest(experimentalSignature.officialSandboxEventCount === 0, "multi-action continuation must not be inserted as official MatchEvent.");
+  assertTest(experimentalSignature.status === "available", "multi-action continuation model status must be available.");
+  assertTest(experimentalSignature.origin === "rebound_second_chance_sandbox", "multi-action continuation origin mismatch.");
+  assertTest(experimentalSignature.baselineContinuationAction === "NO_CONTINUATION", "baseline continuation action mismatch.");
+  assertTest(experimentalSignature.baselineContinuationOutcome === "none", "baseline continuation outcome mismatch.");
+  assertTest(experimentalSignature.baselineContinuationCreated === "false", "baseline continuation created mismatch.");
+  assertTest(experimentalSignature.overrideSourceReboundOutcome === "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE", "override source rebound mismatch.");
+  assertTest(experimentalSignature.overrideSourceBallLooseState === "safe_area", "override source ball loose mismatch.");
+  assertTest(experimentalSignature.overrideSourceRecoveryTeamCandidate === "goalkeeper_team", "override source recovery team mismatch.");
+  assertTest(experimentalSignature.overrideContinuationAction === "GOALKEEPER_TEAM_SECURE_RECOVERY", "override continuation action mismatch.");
+  assertTest(experimentalSignature.overrideContinuationOutcome === "secured_by_goalkeeper_team", "override continuation outcome mismatch.");
+  assertTest(experimentalSignature.overrideContinuationTeamCandidate === "goalkeeper_team", "override continuation team mismatch.");
+  assertTest(experimentalSignature.overrideContinuationActorCandidate === "blitz-goalkeeper-free-safety", "override continuation actor mismatch.");
+  assertTest(experimentalSignature.overrideContinuationTargetZoneCandidate === "Z3-HSR", "override continuation target mismatch.");
+  assertTest(experimentalSignature.overridePossessionSecurityScore === "82", "override possession security mismatch.");
+  assertTest(experimentalSignature.overridePressureAfterRebound === "24", "override pressure after rebound mismatch.");
+  assertTest(experimentalSignature.overrideTransitionRisk === "18", "override transition risk mismatch.");
+  assertTest(experimentalSignature.overrideContinuationConfidence === "77", "override continuation confidence mismatch.");
+  assertTest(experimentalSignature.overrideContinuationCreated === "true", "override continuation created mismatch.");
+  assertTest(experimentalSignature.continuationActionDivergenceObserved === "true", "continuation action divergence must be observed.");
+  assertTest(experimentalSignature.continuationOutcomeDivergenceObserved === "true", "continuation outcome divergence must be observed.");
+  assertTest(experimentalSignature.continuationTeamDivergenceObserved === "true", "continuation team divergence must be observed.");
+  assertTest(experimentalSignature.possessionSecurityObserved === "true", "possession security must be observed.");
+  assertTest(experimentalSignature.transitionRiskObserved === "true", "transition risk must be observed.");
+  assertTest(experimentalSignature.sandboxMatchEventDivergenceObserved === "false", "sandbox MatchEvent divergence must remain false.");
+  assertTest(experimentalSignature.sandboxScoringEventDivergenceObserved === "false", "sandbox scoring event divergence must remain false.");
+  assertTest(experimentalSignature.sandboxScoreDivergenceObserved === "false", "sandbox score divergence must remain false.");
+  assertTest(experimentalSignature.officialPossessionDivergenceObserved === "false", "official possession divergence must remain false.");
+  assertTest(experimentalSignature.modelAppliedOnlyInSandbox === "true", "model must apply only in sandbox.");
+  assertTest(experimentalSignature.modelAppliedToNormalLiveSelection === "false", "model must not apply to normal live selection.");
+  assertTest(continuationFact !== undefined, "experimental report must include multi-action continuation evidence.");
+  assertTest(continuationFact?.internalTags.includes("multi_action_continuation_official_possession_mutation_forbidden") ?? false, "evidence must forbid official possession mutation.");
+  assertTest(visibleText.includes("sandbox de continuation multi-action"), "coach diagnosis must mention multi-action continuation sandbox.");
+  assertTest(visibleText.includes("aucune mutation de timeline officielle"), "coach diagnosis must say no official timeline mutation.");
+  assertTest(visibleText.includes("aucune mutation de possession officielle"), "coach diagnosis must say no official possession mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_RESULTS_ISOLATED_ONLY"), "limitations must say continuation result is isolated-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match must not be claimed as production chain-driven.");
+
+  return [
+    "default runFullMatch has no multi-action continuation tags",
+    "experimental runFullMatch has multi-action continuation tags",
+    "experimental report includes multi-action continuation evidence",
+    "baseline has no continuation and override secures goalkeeper-team recovery",
+    "experimental coach diagnosis mentions multi-action continuation sandbox",
+    "multi-action continuation remains isolated-only and not official",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalMultiActionContinuation();
+
+  console.log("runFullMatchExperimentalMultiActionContinuation tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -23685,6 +24983,86 @@ if (require.main === module) {
   const checks = validateRunFullMatchReboundSecondChanceScoringGuard();
 
   console.log("runFullMatchReboundSecondChanceScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchMultiActionContinuationScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { multiActionContinuationSignature } from "./multiActionContinuationSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateRunFullMatchMultiActionContinuationScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = multiActionContinuationSignature(defaultReport);
+  const experimentalSignature = multiActionContinuationSignature(experimentalReport);
+
+  assertTest(defaultReport.score.home === experimentalReport.score.home, "multi-action continuation must not mutate official home score.");
+  assertTest(defaultReport.score.away === experimentalReport.score.away, "multi-action continuation must not mutate official away score.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "multi-action continuation must not mutate official scoring event count.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "multi-action continuation must not mutate official score_change total.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "multi-action continuation must not add official timeline events.");
+  assertTest(experimentalSignature.officialSandboxEventCount === 0, "no multi-action continuation result is inserted as official MatchEvent.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official final score must still derive from official score_change consequences.");
+  assertTest(experimentalSignature.sandboxContinuationCreatedCount === 1, "one sandbox continuation should be created in the current fixture.");
+  assertTest(experimentalSignature.sandboxMatchEventCreatedCount === 0, "multi-action continuation must not create sandbox MatchEvents in 3R.");
+  assertTest(experimentalSignature.sandboxScoringEventCreatedCount === 0, "multi-action continuation must not create sandbox scoring events in 3R.");
+  assertTest(experimentalSignature.sandboxScoreDeltaTotal === 0, "multi-action continuation score delta total must be 0.");
+  assertTest(experimentalSignature.officialPossessionMutationCount === 0, "official possession mutation count must be 0.");
+  assertTest(experimentalSignature.officialTimelineMutationCount === 0, "official timeline mutation count must be 0.");
+  assertTest(experimentalSignature.officialTimelineInjectionCount === 0, "multi-action continuation injected into official timeline count must be 0.");
+  assertTest(experimentalSignature.officialScoreMutationCount === 0, "official score mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoringEventMutationCount === 0, "official scoring event mutation count must be 0.");
+  assertTest(experimentalSignature.productionScoringEventCreationCount === 0, "multi-action continuation must not create production scoring events.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "multi-action continuation must not mutate production route resolution.");
+  assertTest(experimentalSignature.globalRouteSuccessRateMutationCount === 0, "multi-action continuation must not mutate global route success rates.");
+  assertTest(experimentalSignature.globalEconomyClaimCount === 0, "multi-action continuation must not claim global economy.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_POSSESSION"), "limitations must forbid official possession mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_OFFICIAL_TIMELINE"), "limitations must forbid official timeline mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "limitations must forbid production scoring event creation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION"), "limitations must forbid production route resolution mutation.");
+
+  return [
+    "default and experimental official final scores remain equal",
+    "default and experimental official scoring event counts remain equal",
+    "default and experimental official score_change totals remain equal",
+    "official timeline event count remains equal",
+    "one sandbox-only continuation is created",
+    "no continuation result is inserted as official MatchEvent",
+    "no official possession or timeline is changed by continuation sandbox",
+    "no production scoring events are created by continuation sandbox",
+    "global route success rates are not mutated",
+    "production route resolution is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchMultiActionContinuationScoringGuard();
+
+  console.log("runFullMatchMultiActionContinuationScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -24977,6 +26355,77 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3r.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { multiActionContinuationSignature } from "./multiActionContinuationSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3R(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = multiActionContinuationSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.sandboxContinuationCreatedCount === 1, "multi-action continuation should create one sandbox-only continuation.");
+  assertTest(signature.sandboxMatchEventCreatedCount === 0, "multi-action continuation must not create MatchEvents in 3R.");
+  assertTest(signature.sandboxScoringEventCreatedCount === 0, "multi-action continuation must not create scoring events in 3R.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "multi-action continuation must not create production scoring events.");
+  assertTest(signature.officialPossessionMutationCount === 0, "multi-action continuation must not mutate official possession.");
+  assertTest(signature.officialTimelineMutationCount === 0, "multi-action continuation must not mutate official timeline.");
+  assertTest(signature.officialScoreMutationCount === 0, "multi-action continuation must not mutate official score.");
+  assertTest(signature.officialScoringEventMutationCount === 0, "multi-action continuation must not mutate official scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "multi-action continuation must not create production scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_MULTI_ACTION_CONTINUATION_SANDBOX_RESULTS_ISOLATED_ONLY"), "multi-action continuation must remain sandbox-only.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "no production scoring event creation from multi-action continuation sandbox",
+    "multi-action continuation sandbox remains sandbox-only",
+    "official possession and timeline are not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3R();
+
+  console.log("scoringGuard.3r tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -26038,6 +27487,84 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3r.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3R(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON cannot make global economy claims",
+    "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT cannot make global economy claims",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3R();
+
+  console.log("sourceOfTruthGuards.3r tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/routeRanking/routeAttributeInfluence.test.ts
 
 ```ts
@@ -27051,6 +28578,7 @@ import type { SandboxScoringEventResolutionModel } from "../fullMatch/sandboxSco
 import type { AttributeDrivenShotResolutionModel } from "../fullMatch/attributeDrivenShotResolutionSandbox";
 import type { GoalkeeperResponseModel } from "../fullMatch/goalkeeperResponseModel";
 import type { ReboundSecondChanceModel } from "../fullMatch/reboundSecondChanceSandbox";
+import type { MultiActionContinuationModel } from "../fullMatch/multiActionContinuationSandbox";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -27080,6 +28608,7 @@ export interface MiniMatchTimelineSegment {
   readonly attributeDrivenShotResolutionModel?: AttributeDrivenShotResolutionModel;
   readonly goalkeeperResponseModel?: GoalkeeperResponseModel;
   readonly reboundSecondChanceModel?: ReboundSecondChanceModel;
+  readonly multiActionContinuationModel?: MultiActionContinuationModel;
 }
 
 export interface MatchReportBuilderInput {
@@ -27949,6 +29478,79 @@ function reboundSecondChanceModelReason(model: ReboundSecondChanceModel | undefi
   return ` Rebound and second-chance sandbox available: goalkeeper response ${model.override.sourceGoalkeeperResponseType ?? "none"} with source rebound ${model.override.sourceReboundState ?? "none"} becomes ${model.override.reboundOutcome}, loose state ${model.override.ballLooseState}, recovery candidate ${model.override.recoveryTeamCandidate}, second-chance probability ${model.override.secondChanceProbability}/100, second chance created ${model.override.secondChanceCreated ? "true" : "false"}. It remains sandbox-only: no official MatchEvent, no official possession mutation, no production scoring event, no official score change, and no global economy proof.`;
 }
 
+function multiActionContinuationModelTags(model: MultiActionContinuationModel | undefined): readonly string[] {
+  if (model === undefined || model.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_multi_action_continuation_sandbox",
+    "multi_action_continuation_sandbox",
+    `multi_action_continuation_model_status_${model.status}`,
+    `multi_action_continuation_model_origin_${model.origin}`,
+    `multi_action_continuation_baseline_action_${model.baseline.continuationActionType}`,
+    `multi_action_continuation_baseline_outcome_${model.baseline.continuationOutcome}`,
+    `multi_action_continuation_baseline_created_${model.baseline.sandboxContinuationCreated ? "true" : "false"}`,
+    `multi_action_continuation_override_source_rebound_outcome_${model.override.sourceReboundOutcome ?? "none"}`,
+    `multi_action_continuation_override_source_ball_loose_${model.override.sourceBallLooseState ?? "none"}`,
+    `multi_action_continuation_override_source_recovery_team_${model.override.sourceRecoveryTeamCandidate ?? "none"}`,
+    `multi_action_continuation_override_action_${model.override.continuationActionType}`,
+    `multi_action_continuation_override_outcome_${model.override.continuationOutcome}`,
+    `multi_action_continuation_override_team_${model.override.continuationTeamCandidate}`,
+    `multi_action_continuation_override_actor_${model.override.continuationActorCandidate ?? "none"}`,
+    `multi_action_continuation_override_target_zone_${model.override.continuationTargetZoneCandidate ?? "none"}`,
+    `multi_action_continuation_override_security_${model.override.possessionSecurityScore}`,
+    `multi_action_continuation_override_pressure_${model.override.pressureAfterRebound}`,
+    `multi_action_continuation_override_transition_risk_${model.override.transitionRisk}`,
+    `multi_action_continuation_override_confidence_${model.override.continuationConfidence}`,
+    `multi_action_continuation_override_created_${model.override.sandboxContinuationCreated ? "true" : "false"}`,
+    `multi_action_continuation_action_divergence_${model.continuationActionDivergenceObserved ? "true" : "false"}`,
+    `multi_action_continuation_outcome_divergence_${model.continuationOutcomeDivergenceObserved ? "true" : "false"}`,
+    `multi_action_continuation_team_divergence_${model.continuationTeamDivergenceObserved ? "true" : "false"}`,
+    `multi_action_continuation_possession_security_observed_${model.possessionSecurityObserved ? "true" : "false"}`,
+    `multi_action_continuation_transition_risk_observed_${model.transitionRiskObserved ? "true" : "false"}`,
+    `multi_action_continuation_match_event_divergence_${model.sandboxMatchEventDivergenceObserved ? "true" : "false"}`,
+    `multi_action_continuation_scoring_event_divergence_${model.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `multi_action_continuation_score_divergence_${model.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    `multi_action_continuation_official_possession_divergence_${model.officialPossessionDivergenceObserved ? "true" : "false"}`,
+    "multi_action_continuation_match_event_created_false",
+    "multi_action_continuation_scoring_event_created_false",
+    "multi_action_continuation_score_delta_0",
+    "multi_action_continuation_official_possession_mutation_count_0",
+    "multi_action_continuation_official_timeline_mutation_count_0",
+    `multi_action_continuation_model_applied_only_in_sandbox_${model.modelAppliedOnlyInSandbox ? "true" : "false"}`,
+    `multi_action_continuation_model_applied_to_normal_live_${model.modelAppliedToNormalLiveSelection ? "true" : "false"}`,
+    `multi_action_continuation_rejected_closed_count_${model.rejectedClosedCandidateCount}`,
+    `multi_action_continuation_rejected_unavailable_count_${model.rejectedUnavailableCandidateCount}`,
+    "multi_action_continuation_official_timeline_injection_forbidden",
+    "multi_action_continuation_official_score_mutation_forbidden",
+    "multi_action_continuation_official_scoring_events_mutation_forbidden",
+    "multi_action_continuation_official_possession_mutation_forbidden",
+    "multi_action_continuation_production_scoring_event_creation_forbidden",
+    "multi_action_continuation_production_route_resolution_mutation_forbidden",
+    "multi_action_continuation_global_route_success_mutation_forbidden",
+    "multi_action_continuation_global_economy_claim_forbidden",
+    "multi_action_continuation_closed_candidates_rejected",
+    "multi_action_continuation_unavailable_candidates_rejected",
+    "multi_action_continuation_injected_into_official_timeline_count_0",
+    "multi_action_continuation_official_score_mutation_count_0",
+    "multi_action_continuation_official_scoring_event_mutation_count_0",
+    "multi_action_continuation_production_scoring_event_creation_count_0",
+    "multi_action_continuation_production_route_resolution_mutation_count_0",
+    "multi_action_continuation_global_route_success_mutation_count_0",
+    "multi_action_continuation_global_economy_claim_count_0",
+    ...model.tags,
+  ];
+}
+
+function multiActionContinuationModelReason(model: MultiActionContinuationModel | undefined): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return ` Multi-action continuation sandbox available: rebound ${model.override.sourceReboundOutcome ?? "none"} with ball ${model.override.sourceBallLooseState ?? "none"} becomes ${model.override.continuationActionType}, outcome ${model.override.continuationOutcome}, team ${model.override.continuationTeamCandidate}, actor ${model.override.continuationActorCandidate ?? "none"}, target ${model.override.continuationTargetZoneCandidate ?? "none"}, confidence ${model.override.continuationConfidence}/100. It remains sandbox-only: no official MatchEvent, no official timeline mutation, no official possession mutation, no production scoring event, no official score change, and no global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -27990,7 +29592,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -28025,6 +29627,7 @@ function kickoffEvent(input: {
       ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
       ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
+      ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
     ],
     narrativeWeight: 5,
   };
@@ -28094,6 +29697,7 @@ function sequenceRecordToMatchEvent(input: {
     ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
     ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
     ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
+    ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -28118,7 +29722,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -28181,7 +29785,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -28226,6 +29830,7 @@ function scoringEventToMatchEvent(input: {
       ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
       ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
+      ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
     ],
     narrativeWeight: 70,
   };
@@ -28926,6 +30531,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
       return "training_recommendation";
   }
 }
@@ -28984,6 +30590,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Modele de reponse gardien sandbox";
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
       return "Rebond et seconde chance sandbox";
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
+      return "Continuation multi-action sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -29053,6 +30661,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -29089,6 +30698,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX",
     "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX",
     "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
+    "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -30222,6 +31832,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 36;
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
       return 35;
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
+      return 34;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -30290,6 +31902,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le modele de reponse gardien sandbox";
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
       return "Relire le rebond et la seconde chance sandbox";
+    case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
+      return "Relire la continuation multi-action sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -31558,7 +33172,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION"
   | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"
   | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
-  | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX";
+  | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"
+  | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -32105,6 +33720,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "global scoring balance",
       "production rebound model quality",
       "production second-chance conversion quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX: {
+    scope: "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX",
+    canProve: [
+      "experimental multi-action continuation sandbox consumed the rebound second chance sandbox output",
+      "baseline and override continuation action, outcome, team, actor, target zone, possession security, pressure, transition risk, confidence, and divergence were exposed",
+      "current continuation result remained separated from official timeline, official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production continuation model quality",
+      "production second-action selection quality",
       "production route resolution quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",
