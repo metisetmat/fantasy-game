@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3L - Sandbox Scoring Opportunity Model. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3M - Sandbox Scoring Event Candidate. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -415,7 +415,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"
   | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
-  | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL";
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL"
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

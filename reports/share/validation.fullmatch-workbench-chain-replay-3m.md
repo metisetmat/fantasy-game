@@ -1,0 +1,128 @@
+# FullMatch Workbench Chain Replay 3M Validation
+
+Status: PASS
+
+## Checks
+- PASS: runFullMatch default remains segment_harness.
+- PASS: workbench_chain_replay_experimental remains opt-in.
+- PASS: controlled route resolution sandbox remains available.
+- PASS: sandbox scoring opportunity model status is available.
+- PASS: sandbox scoring event candidate model status is available.
+- PASS: sandbox scoring event candidate model origin is sandbox_scoring_opportunity_model.
+- PASS: baseline opportunity type is no_opportunity.
+- PASS: baseline scoring candidate type is NO_SCORING_EVENT.
+- PASS: baseline scoring candidate family is none.
+- PASS: baseline scoring candidate probability is 0.
+- PASS: baseline conversion probability is 0.
+- PASS: baseline scoring candidate created is false.
+- PASS: override opportunity type is half_chance.
+- PASS: override scoring candidate type is SHOT_CANDIDATE.
+- PASS: override scoring candidate family is shot.
+- PASS: override scoring candidate probability is 24.
+- PASS: override conversion probability is 14.
+- PASS: override scoring candidate created is true.
+- PASS: scoring candidate type divergence is observed.
+- PASS: scoring candidate family divergence is observed.
+- PASS: scoring candidate probability divergence is observed.
+- PASS: scoring candidate creation divergence is observed.
+- PASS: conversion probability divergence is observed.
+- PASS: sandbox scoring event divergence is false.
+- PASS: sandbox score divergence is false.
+- PASS: sandbox scoring event created count is 0.
+- PASS: sandbox score delta total is 0.
+- PASS: model applies only in sandbox.
+- PASS: model is not applied to normal live selection.
+- PASS: sandbox scoring event candidate is isolated-only.
+- PASS: sandbox scoring event candidate is not inserted into official timeline.
+- PASS: CLOSED candidates remain rejected.
+- PASS: unavailable candidates remain rejected.
+- PASS: sandbox scoring event candidate cannot mutate official score.
+- PASS: sandbox scoring event candidate cannot mutate official scoring events.
+- PASS: sandbox scoring event candidate cannot create production scoring events.
+- PASS: sandbox scoring event candidate cannot mutate production route resolution.
+- PASS: sandbox scoring event candidate cannot mutate global route success rates.
+- PASS: sandbox scoring event candidate cannot claim global economy.
+- PASS: experimental timeline/report includes sandbox scoring event candidate tags.
+- PASS: default timeline/report has no sandbox scoring event candidate tags.
+- PASS: experimental report includes sandbox scoring event candidate evidence.
+- PASS: experimental coach diagnosis mentions sandbox scoring event candidate model.
+- PASS: coach copy avoids stale wording.
+- PASS: normal full-match is not falsely claimed as production chain-driven.
+- PASS: default and experimental official score signatures remain equal.
+- PASS: default and experimental official scoring event counts remain equal.
+- PASS: default and experimental official score_change totals remain equal.
+- PASS: FULL_MATCH_HARNESS_SINGLE_RUN remains warning-only.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains the global economy reference.
+- PASS: scoring constants unchanged.
+- PASS: no production scoring events deleted or capped.
+- PASS: MatchBonusEvent unchanged.
+- PASS: batch/live separation preserved.
+- PASS: explicit exhaustive test command is available.
+
+## Counts
+- default sandbox scoring candidate tag count: 0.
+- experimental sandbox scoring candidate tag count: greater than 0.
+- opportunity model status: available.
+- opportunity model origin: controlled_route_resolution_sandbox.
+- scoring candidate model status: available.
+- scoring candidate model origin: sandbox_scoring_opportunity_model.
+- baseline candidate: chain-context-safe-recycle-pv.
+- baseline route outcome: safe_retention.
+- baseline danger probability: 18.
+- baseline scoring opportunity probability: 5.
+- baseline opportunity type: no_opportunity.
+- baseline scoring candidate type: NO_SCORING_EVENT.
+- baseline scoring candidate family: none.
+- baseline scoring candidate probability: 0.
+- baseline conversion probability: 0.
+- baseline scoring candidate created: false.
+- override candidate: chain-context-forward-progress-sh.
+- override route outcome: dangerous_progression.
+- override danger probability: 64.
+- override scoring opportunity probability: 24.
+- override opportunity type: half_chance.
+- override scoring candidate type: SHOT_CANDIDATE.
+- override scoring candidate family: shot.
+- override scoring candidate probability: 24.
+- override conversion probability: 14.
+- override scoring candidate created: true.
+- scoring candidate type divergence observed: true.
+- scoring candidate family divergence observed: true.
+- scoring candidate probability divergence observed: true.
+- scoring candidate creation divergence observed: true.
+- conversion probability divergence observed: true.
+- sandbox scoring event divergence observed: false.
+- sandbox score divergence observed: false.
+- sandbox scoring event created count: 0.
+- sandbox score delta total: 0.
+- modelAppliedOnlyInSandbox: true.
+- modelAppliedToNormalLiveSelection: false.
+- rejected closed candidate count: 1.
+- rejected unavailable candidate count: 1.
+- sandbox opportunity injected into official timeline count: 0.
+- official score mutation count: 0.
+- official scoring event mutation count: 0.
+- production scoring event creation count: 0.
+- production route resolution mutation count: 0.
+- global route success mutation count: 0.
+- global economy claim count: 0.
+- default official scoring event count: unchanged.
+- experimental official scoring event count: unchanged.
+- default official score_change total: unchanged.
+- experimental official score_change total: unchanged.
+- scoring constants changed: 0.
+- production scoring events deleted or capped: 0.
+- share file count: 18.
+- exhaustive test command: npm run test:all.
+
+## Recommendation
+- CONFIRM_SANDBOX_OPPORTUNITY_MODEL_TO_SANDBOX_SCORING_EVENT_CANDIDATE.
+- CONFIRM_SANDBOX_SCORING_CANDIDATES_ARE_ISOLATED_ONLY.
+- CONFIRM_SANDBOX_SCORING_CANDIDATES_ARE_NOT_OFFICIAL_MATCH_EVENTS.
+- CONFIRM_SANDBOX_SCORING_CANDIDATE_DOES_NOT_CREATE_PRODUCTION_SCORING_EVENTS.
+- CONFIRM_CLOSED_AND_UNAVAILABLE_ROUTES_REMAIN_REJECTED.
+- CONFIRM_DEFAULT_FULLMATCH_UNCHANGED.
+- CONFIRM_NO_OFFICIAL_SCORE_OR_SCORING_EVENT_MUTATION.
+- KEEP_SCORING_VALUES_UNCHANGED.
+- KEEP_50_MATCH_ECONOMY_REFERENCE.
+- PREPARE_SANDBOX_SCORING_EVENT_CANDIDATE_TO_SANDBOX_SCORING_EVENT_RESOLUTION.

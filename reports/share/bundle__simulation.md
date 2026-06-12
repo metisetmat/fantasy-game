@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3L - Sandbox Scoring Opportunity Model. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3M - Sandbox Scoring Event Candidate. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -170,6 +170,8 @@ import { controlledRouteResolutionSandboxFromReplay } from "./fullMatch/controll
 import type { ControlledRouteResolutionSandbox } from "./fullMatch/controlledRouteResolutionSandbox";
 import { sandboxScoringOpportunityModelFromResolution } from "./fullMatch/sandboxScoringOpportunityModelFromResolution";
 import type { SandboxScoringOpportunityModel } from "./fullMatch/sandboxScoringOpportunityModel";
+import { sandboxScoringEventCandidateModelFromOpportunity } from "./fullMatch/sandboxScoringEventCandidateModelFromOpportunity";
+import type { SandboxScoringEventCandidateModel } from "./fullMatch/sandboxScoringEventCandidate";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -671,6 +673,32 @@ function sandboxScoringOpportunityModelLimitations(
     "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function sandboxScoringEventCandidateModelLimitations(
+  model: SandboxScoringEventCandidateModel,
+): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_APPLIED_ONLY_IN_SANDBOX",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_NOT_APPLIED_TO_NORMAL_LIVE_SELECTION",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -1583,6 +1611,54 @@ function sandboxScoringOpportunityModelEvidenceFact(input: {
   };
 }
 
+function sandboxScoringEventCandidateModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxScoringEventCandidateModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_sandbox_scoring_event_candidate")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-scoring-event-candidate`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.baseline.targetZone ?? "Z2-HSL", input.model.override.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental sandbox scoring event candidate ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline opportunity=${input.model.baseline.sourceOpportunityType ?? "none"}, candidate=${input.model.baseline.scoringCandidateType}, ` +
+      `family=${input.model.baseline.scoringCandidateFamily}, probability=${input.model.baseline.scoringCandidateProbability}, ` +
+      `conversionProbability=${input.model.baseline.conversionProbability}, created=${input.model.baseline.scoringCandidateCreated}; ` +
+      `override opportunity=${input.model.override.sourceOpportunityType ?? "none"}, candidate=${input.model.override.scoringCandidateType}, ` +
+      `family=${input.model.override.scoringCandidateFamily}, probability=${input.model.override.scoringCandidateProbability}, ` +
+      `conversionProbability=${input.model.override.conversionProbability}, created=${input.model.override.scoringCandidateCreated}. ` +
+      `typeDivergence=${input.model.scoringCandidateTypeDivergenceObserved}, familyDivergence=${input.model.scoringCandidateFamilyDivergenceObserved}, ` +
+      `probabilityDivergence=${input.model.scoringCandidateProbabilityDivergenceObserved}, creationDivergence=${input.model.scoringCandidateCreationDivergenceObserved}, ` +
+      `conversionDivergence=${input.model.conversionProbabilityDivergenceObserved}, sandboxScoringEventDivergence=${input.model.sandboxScoringEventDivergenceObserved}, ` +
+      `sandboxScoreDivergence=${input.model.sandboxScoreDivergenceObserved}, canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, ` +
+      `canMutateOfficialScore=${input.model.canMutateOfficialScore}, canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 78 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_scoring_event_candidate",
+      "sandbox_scoring_event_candidate",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_scoring_candidate_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -1599,6 +1675,7 @@ function withFullMatchGroundingDiagnosis(
   realIsolatedSegmentReplay: FullMatchRealIsolatedSegmentReplay,
   controlledRouteResolutionSandbox: ControlledRouteResolutionSandbox,
   sandboxScoringOpportunityModel: SandboxScoringOpportunityModel,
+  sandboxScoringEventCandidateModel: SandboxScoringEventCandidateModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -1615,7 +1692,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_controlled_segment_replay_comparison") ||
     fact.internalTags.includes("workbench_chain_real_isolated_segment_replay") ||
     fact.internalTags.includes("workbench_chain_controlled_route_resolution_sandbox") ||
-    fact.internalTags.includes("workbench_chain_sandbox_scoring_opportunity_model")
+    fact.internalTags.includes("workbench_chain_sandbox_scoring_opportunity_model") ||
+    fact.internalTags.includes("workbench_chain_sandbox_scoring_event_candidate")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -1624,7 +1702,10 @@ function withFullMatchGroundingDiagnosis(
   const opportunitySummary = sandboxScoringOpportunityModel.status === "not_available"
     ? ""
     : ` Le modele sandbox d'opportunite de scoring classe ensuite la reference en ${sandboxScoringOpportunityModel.baseline.opportunityType} (${sandboxScoringOpportunityModel.baseline.opportunityProbability}/100) et l'override en ${sandboxScoringOpportunityModel.override.opportunityType} (${sandboxScoringOpportunityModel.override.opportunityProbability}/100). Ce signal reste sandbox-only : il ne cree aucun MatchEvent officiel, aucun evenement de score production, ne modifie pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}`;
+  const scoringCandidateSummary = sandboxScoringEventCandidateModel.status === "not_available"
+    ? ""
+    : ` Le candidat sandbox d'evenement de scoring transforme ensuite cette opportunite en ${sandboxScoringEventCandidateModel.override.scoringCandidateType} pour l'override, avec conversion ${sandboxScoringEventCandidateModel.override.conversionProbability}/100, tandis que la reference reste ${sandboxScoringEventCandidateModel.baseline.scoringCandidateType}. Ce candidat reste sandbox-only : il ne cree aucun MatchEvent officiel, aucun evenement de score production, ne modifie pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -1711,6 +1792,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const sandboxScoringOpportunityModel = sandboxScoringOpportunityModelFromResolution({
     sandbox: controlledRouteResolutionSandbox,
   });
+  const sandboxScoringEventCandidateModel = sandboxScoringEventCandidateModelFromOpportunity({
+    opportunityModel: sandboxScoringOpportunityModel,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -1761,6 +1845,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && realIsolatedSegmentReplay.status !== "not_available" ? { realIsolatedSegmentReplay } : {}),
           ...(index === 0 && controlledRouteResolutionSandbox.status !== "not_available" ? { controlledRouteResolutionSandbox } : {}),
           ...(index === 0 && sandboxScoringOpportunityModel.status !== "not_available" ? { sandboxScoringOpportunityModel } : {}),
+          ...(index === 0 && sandboxScoringEventCandidateModel.status !== "not_available" ? { sandboxScoringEventCandidateModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -1840,6 +1925,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...realIsolatedSegmentReplayLimitations(realIsolatedSegmentReplay),
       ...controlledRouteResolutionSandboxLimitations(controlledRouteResolutionSandbox),
       ...sandboxScoringOpportunityModelLimitations(sandboxScoringOpportunityModel),
+      ...sandboxScoringEventCandidateModelLimitations(sandboxScoringEventCandidateModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -1907,6 +1993,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: sandboxScoringOpportunityModel,
   });
+  const sandboxScoringEventCandidateModelFact = sandboxScoringEventCandidateModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: sandboxScoringEventCandidateModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -1921,6 +2012,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(realIsolatedSegmentReplayFact === null ? [] : [realIsolatedSegmentReplayFact]),
     ...(controlledRouteResolutionSandboxFact === null ? [] : [controlledRouteResolutionSandboxFact]),
     ...(sandboxScoringOpportunityModelFact === null ? [] : [sandboxScoringOpportunityModelFact]),
+    ...(sandboxScoringEventCandidateModelFact === null ? [] : [sandboxScoringEventCandidateModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1945,6 +2037,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     realIsolatedSegmentReplay,
     controlledRouteResolutionSandbox,
     sandboxScoringOpportunityModel,
+    sandboxScoringEventCandidateModel,
   );
 }
 ```
@@ -8811,6 +8904,723 @@ export function sandboxScoringOpportunityModelSignature(
 }
 ```
 
+## File: src/simulation/fullMatch/sandboxScoringEventCandidate.ts
+
+```ts
+export type SandboxScoringEventCandidateStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type SandboxScoringEventCandidateScope =
+  | "sandbox_scoring_event_candidate"
+  | "production_scoring_forbidden";
+
+export type SandboxScoringEventCandidateOrigin =
+  | "none"
+  | "sandbox_scoring_opportunity_model";
+
+export type SandboxScoringCandidateType =
+  | "NO_SCORING_EVENT"
+  | "SHOT_CANDIDATE"
+  | "TRY_CANDIDATE"
+  | "DROP_CANDIDATE"
+  | "MIXED_CANDIDATE";
+
+export type SandboxScoringCandidateFamily =
+  | "none"
+  | "shot"
+  | "try"
+  | "drop"
+  | "mixed"
+  | "territorial_danger";
+
+export type SandboxScoringCandidateReason =
+  | "NO_OPPORTUNITY"
+  | "LOW_OPPORTUNITY_PROBABILITY"
+  | "HALF_CHANCE_TERRITORIAL_DANGER"
+  | "CLEAR_CHANCE"
+  | "TRY_WINDOW"
+  | "SHOT_WINDOW"
+  | "DROP_WINDOW"
+  | "TARGET_ZONE_SUPPORTS_SHOT"
+  | "TARGET_ZONE_SUPPORTS_TRY"
+  | "TARGET_ZONE_SUPPORTS_DROP"
+  | "SANDBOX_ONLY"
+  | "PRODUCTION_SCORING_FORBIDDEN";
+
+export type SandboxScoringEventCandidatePathResult = {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly sourceOpportunityType?: string;
+  readonly sourceOpportunityFamily?: string;
+  readonly sourceOpportunityProbability: number;
+  readonly sourceRouteOutcome?: string;
+  readonly sourceDangerProbability: number;
+  readonly scoringCandidateType: SandboxScoringCandidateType;
+  readonly scoringCandidateFamily: SandboxScoringCandidateFamily;
+  readonly scoringCandidateCreated: boolean;
+  readonly scoringCandidateProbability: number;
+  readonly conversionProbability: number;
+  readonly sandboxScoringEventCreated: false;
+  readonly sandboxScoreDelta: 0;
+  readonly isolatedOnly: true;
+  readonly canBecomeOfficialMatchEvent: false;
+  readonly canMutateOfficialScore: false;
+  readonly canCreateOfficialScoringEvent: false;
+  readonly canCreateProductionScoringEvent: false;
+  readonly reasons: readonly SandboxScoringCandidateReason[];
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type SandboxScoringEventCandidateModel = {
+  readonly status: SandboxScoringEventCandidateStatus;
+  readonly scope: SandboxScoringEventCandidateScope;
+  readonly origin: SandboxScoringEventCandidateOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly baseline: SandboxScoringEventCandidatePathResult;
+  readonly override: SandboxScoringEventCandidatePathResult;
+  readonly baselineScoringCandidateCreated: boolean;
+  readonly overrideScoringCandidateCreated: boolean;
+  readonly scoringCandidateTypeDivergenceObserved: boolean;
+  readonly scoringCandidateFamilyDivergenceObserved: boolean;
+  readonly scoringCandidateProbabilityDivergenceObserved: boolean;
+  readonly scoringCandidateCreationDivergenceObserved: boolean;
+  readonly conversionProbabilityDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly canInjectEventsIntoOfficialTimeline: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateProductionRouteResolution: false;
+  readonly canMutateGlobalRouteSuccessRates: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly explanation?: string;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptySandboxScoringEventCandidatePathResult(
+  pathId: "baseline" | "override",
+): SandboxScoringEventCandidatePathResult {
+  return {
+    pathId,
+    sourceOpportunityProbability: 0,
+    sourceDangerProbability: 0,
+    scoringCandidateType: "NO_SCORING_EVENT",
+    scoringCandidateFamily: "none",
+    scoringCandidateCreated: false,
+    scoringCandidateProbability: 0,
+    conversionProbability: 0,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    reasons: ["NO_OPPORTUNITY", "SANDBOX_ONLY", "PRODUCTION_SCORING_FORBIDDEN"],
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function emptySandboxScoringEventCandidateModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): SandboxScoringEventCandidateModel {
+  return {
+    status: "not_available",
+    scope: "production_scoring_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    baseline: emptySandboxScoringEventCandidatePathResult("baseline"),
+    override: emptySandboxScoringEventCandidatePathResult("override"),
+    baselineScoringCandidateCreated: false,
+    overrideScoringCandidateCreated: false,
+    scoringCandidateTypeDivergenceObserved: false,
+    scoringCandidateFamilyDivergenceObserved: false,
+    scoringCandidateProbabilityDivergenceObserved: false,
+    scoringCandidateCreationDivergenceObserved: false,
+    conversionProbabilityDivergenceObserved: false,
+    sandboxScoringEventDivergenceObserved: false,
+    sandboxScoreDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: false,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/createSandboxScoringEventCandidate.ts
+
+```ts
+import type {
+  SandboxScoringCandidateFamily,
+  SandboxScoringCandidateReason,
+  SandboxScoringCandidateType,
+  SandboxScoringEventCandidatePathResult,
+} from "./sandboxScoringEventCandidate";
+
+function candidateType(input: {
+  readonly opportunityType?: string;
+  readonly opportunityFamily?: string;
+  readonly opportunityProbability: number;
+}): SandboxScoringCandidateType {
+  if (input.opportunityType === "no_opportunity" || input.opportunityProbability < 12) {
+    return "NO_SCORING_EVENT";
+  }
+
+  if (input.opportunityType === "try_window" || input.opportunityFamily === "try") {
+    return "TRY_CANDIDATE";
+  }
+
+  if (input.opportunityType === "drop_window" || input.opportunityFamily === "drop") {
+    return "DROP_CANDIDATE";
+  }
+
+  if (input.opportunityType === "shot_window" || input.opportunityFamily === "shot") {
+    return "SHOT_CANDIDATE";
+  }
+
+  if (input.opportunityType === "half_chance" || input.opportunityFamily === "territorial_danger") {
+    return "SHOT_CANDIDATE";
+  }
+
+  return "MIXED_CANDIDATE";
+}
+
+function familyForCandidate(type: SandboxScoringCandidateType): SandboxScoringCandidateFamily {
+  switch (type) {
+    case "NO_SCORING_EVENT":
+      return "none";
+    case "SHOT_CANDIDATE":
+      return "shot";
+    case "TRY_CANDIDATE":
+      return "try";
+    case "DROP_CANDIDATE":
+      return "drop";
+    case "MIXED_CANDIDATE":
+      return "mixed";
+  }
+}
+
+function conversionProbability(input: {
+  readonly type: SandboxScoringCandidateType;
+  readonly opportunityProbability: number;
+  readonly dangerProbability: number;
+}): number {
+  if (input.type === "NO_SCORING_EVENT") {
+    return 0;
+  }
+
+  const raw = Math.round(input.opportunityProbability * 0.45 + input.dangerProbability * 0.05);
+
+  return Math.max(8, Math.min(15, raw));
+}
+
+function reasons(input: {
+  readonly type: SandboxScoringCandidateType;
+  readonly opportunityType?: string;
+  readonly opportunityFamily?: string;
+  readonly targetZone?: string;
+}): readonly SandboxScoringCandidateReason[] {
+  if (input.type === "NO_SCORING_EVENT") {
+    return ["NO_OPPORTUNITY", "LOW_OPPORTUNITY_PROBABILITY", "SANDBOX_ONLY", "PRODUCTION_SCORING_FORBIDDEN"];
+  }
+
+  const opportunityReasons: SandboxScoringCandidateReason[] = input.opportunityType === "half_chance"
+    ? ["HALF_CHANCE_TERRITORIAL_DANGER"]
+    : input.opportunityType === "clear_chance"
+      ? ["CLEAR_CHANCE"]
+      : input.opportunityType === "try_window"
+        ? ["TRY_WINDOW"]
+        : input.opportunityType === "drop_window"
+          ? ["DROP_WINDOW"]
+          : input.opportunityType === "shot_window"
+            ? ["SHOT_WINDOW"]
+            : [];
+  const targetReasons: SandboxScoringCandidateReason[] = input.targetZone?.startsWith("Z4") === true
+    ? ["TARGET_ZONE_SUPPORTS_SHOT"]
+    : [];
+
+  return [...opportunityReasons, ...targetReasons, "SANDBOX_ONLY", "PRODUCTION_SCORING_FORBIDDEN"];
+}
+
+export function createSandboxScoringEventCandidate(input: {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly actionType?: string;
+  readonly receiverId?: string;
+  readonly targetZone?: string;
+  readonly opportunityType?: string;
+  readonly opportunityFamily?: string;
+  readonly opportunityProbability: number;
+  readonly routeOutcome?: string;
+  readonly dangerProbability: number;
+}): SandboxScoringEventCandidatePathResult {
+  const scoringCandidateType = candidateType(input);
+  const scoringCandidateFamily = familyForCandidate(scoringCandidateType);
+  const scoringCandidateCreated = scoringCandidateType !== "NO_SCORING_EVENT";
+  const scoringCandidateProbability = scoringCandidateCreated ? input.opportunityProbability : 0;
+  const candidateConversionProbability = conversionProbability({
+    type: scoringCandidateType,
+    opportunityProbability: input.opportunityProbability,
+    dangerProbability: input.dangerProbability,
+  });
+  const candidateReasons = reasons({
+    type: scoringCandidateType,
+    ...(input.opportunityType === undefined ? {} : { opportunityType: input.opportunityType }),
+    ...(input.opportunityFamily === undefined ? {} : { opportunityFamily: input.opportunityFamily }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+  });
+
+  return {
+    pathId: input.pathId,
+    ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+    ...(input.actionType === undefined ? {} : { actionType: input.actionType }),
+    ...(input.receiverId === undefined ? {} : { receiverId: input.receiverId }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+    ...(input.opportunityType === undefined ? {} : { sourceOpportunityType: input.opportunityType }),
+    ...(input.opportunityFamily === undefined ? {} : { sourceOpportunityFamily: input.opportunityFamily }),
+    sourceOpportunityProbability: input.opportunityProbability,
+    ...(input.routeOutcome === undefined ? {} : { sourceRouteOutcome: input.routeOutcome }),
+    sourceDangerProbability: input.dangerProbability,
+    scoringCandidateType,
+    scoringCandidateFamily,
+    scoringCandidateCreated,
+    scoringCandidateProbability,
+    conversionProbability: candidateConversionProbability,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    reasons: candidateReasons,
+    tags: [
+      `sandbox_scoring_candidate_${input.pathId}_candidate_${input.candidateId ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_action_${input.actionType ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_receiver_${input.receiverId ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_zone_${input.targetZone ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_source_opportunity_type_${input.opportunityType ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_source_opportunity_family_${input.opportunityFamily ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_source_opportunity_probability_${input.opportunityProbability}`,
+      `sandbox_scoring_candidate_${input.pathId}_source_route_outcome_${input.routeOutcome ?? "none"}`,
+      `sandbox_scoring_candidate_${input.pathId}_source_danger_probability_${input.dangerProbability}`,
+      `sandbox_scoring_candidate_${input.pathId}_type_${scoringCandidateType}`,
+      `sandbox_scoring_candidate_${input.pathId}_family_${scoringCandidateFamily}`,
+      `sandbox_scoring_candidate_${input.pathId}_probability_${scoringCandidateProbability}`,
+      `sandbox_scoring_candidate_${input.pathId}_conversion_probability_${candidateConversionProbability}`,
+      `sandbox_scoring_candidate_${input.pathId}_created_${scoringCandidateCreated ? "true" : "false"}`,
+      ...candidateReasons.map((reason) => `sandbox_scoring_candidate_${input.pathId}_reason_${reason}`),
+    ],
+    warnings: [],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringEventCandidateModelFromOpportunity.ts
+
+```ts
+import { compareSandboxScoringEventCandidates } from "./compareSandboxScoringEventCandidates";
+import { createSandboxScoringEventCandidate } from "./createSandboxScoringEventCandidate";
+import {
+  emptySandboxScoringEventCandidateModel,
+  type SandboxScoringEventCandidateModel,
+  type SandboxScoringEventCandidatePathResult,
+} from "./sandboxScoringEventCandidate";
+import type { SandboxScoringOpportunityModel, SandboxScoringOpportunityPathResult } from "./sandboxScoringOpportunityModel";
+
+function candidateFromOpportunity(
+  opportunity: SandboxScoringOpportunityPathResult,
+): SandboxScoringEventCandidatePathResult {
+  return createSandboxScoringEventCandidate({
+    pathId: opportunity.pathId,
+    ...(opportunity.candidateId === undefined ? {} : { candidateId: opportunity.candidateId }),
+    ...(opportunity.actionType === undefined ? {} : { actionType: opportunity.actionType }),
+    ...(opportunity.receiverId === undefined ? {} : { receiverId: opportunity.receiverId }),
+    ...(opportunity.targetZone === undefined ? {} : { targetZone: opportunity.targetZone }),
+    opportunityType: opportunity.opportunityType,
+    opportunityFamily: opportunity.opportunityFamily,
+    opportunityProbability: opportunity.opportunityProbability,
+    ...(opportunity.routeOutcome === undefined ? {} : { routeOutcome: opportunity.routeOutcome }),
+    dangerProbability: opportunity.sourceDangerProbability,
+  });
+}
+
+export function sandboxScoringEventCandidateCannotMutateOfficialFullMatch(
+  model: SandboxScoringEventCandidateModel,
+): boolean {
+  const results = [model.baseline, model.override];
+
+  return (
+    !model.canInjectEventsIntoOfficialTimeline &&
+    !model.canMutateOfficialScore &&
+    !model.canMutateOfficialScoringEvents &&
+    !model.canMutateProductionRouteResolution &&
+    !model.canMutateGlobalRouteSuccessRates &&
+    !model.canCreateProductionScoringEvents &&
+    !model.modelAppliedToNormalLiveSelection &&
+    results.every((result) =>
+      result.isolatedOnly &&
+      !result.canBecomeOfficialMatchEvent &&
+      !result.canMutateOfficialScore &&
+      !result.canCreateOfficialScoringEvent &&
+      !result.canCreateProductionScoringEvent
+    )
+  );
+}
+
+export function sandboxScoringEventCandidateCannotClaimGlobalEconomy(
+  model: SandboxScoringEventCandidateModel,
+): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateSandboxScoringEventCandidateModel(
+  model: SandboxScoringEventCandidateModel,
+): readonly string[] {
+  const shouldValidate = model.status === "available";
+  const results = [model.baseline, model.override];
+
+  return [
+    ...(shouldValidate && model.origin !== "sandbox_scoring_opportunity_model"
+      ? ["SANDBOX_SCORING_CANDIDATE_WRONG_ORIGIN"]
+      : []),
+    ...(results.some((result) => result.sandboxScoringEventCreated)
+      ? ["SANDBOX_SCORING_CANDIDATE_CREATED_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.sandboxScoreDelta !== 0)
+      ? ["SANDBOX_SCORING_CANDIDATE_SCORE_DELTA_NON_ZERO"]
+      : []),
+    ...(shouldValidate && !model.modelAppliedOnlyInSandbox ? ["SANDBOX_SCORING_CANDIDATE_NOT_SANDBOX_ONLY"] : []),
+    ...(model.modelAppliedToNormalLiveSelection ? ["SANDBOX_SCORING_CANDIDATE_APPLIED_TO_NORMAL_LIVE"] : []),
+    ...(results.some((result) => !result.isolatedOnly) ? ["SANDBOX_SCORING_CANDIDATE_RESULT_NOT_ISOLATED"] : []),
+    ...(results.some((result) => result.canBecomeOfficialMatchEvent)
+      ? ["SANDBOX_SCORING_CANDIDATE_RESULT_CAN_BECOME_MATCH_EVENT"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialScore)
+      ? ["SANDBOX_SCORING_CANDIDATE_RESULT_CAN_MUTATE_SCORE"]
+      : []),
+    ...(results.some((result) => result.canCreateOfficialScoringEvent)
+      ? ["SANDBOX_SCORING_CANDIDATE_RESULT_CAN_CREATE_OFFICIAL_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.canCreateProductionScoringEvent)
+      ? ["SANDBOX_SCORING_CANDIDATE_RESULT_CAN_CREATE_PRODUCTION_SCORING_EVENT"]
+      : []),
+    ...(!sandboxScoringEventCandidateCannotMutateOfficialFullMatch(model)
+      ? ["SANDBOX_SCORING_CANDIDATE_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!sandboxScoringEventCandidateCannotClaimGlobalEconomy(model)
+      ? ["SANDBOX_SCORING_CANDIDATE_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function sandboxScoringEventCandidateModelFromOpportunity(input: {
+  readonly opportunityModel: SandboxScoringOpportunityModel;
+}): SandboxScoringEventCandidateModel {
+  if (input.opportunityModel.status !== "available") {
+    return emptySandboxScoringEventCandidateModel({
+      ...(input.opportunityModel.segmentLabel === undefined ? {} : { segmentLabel: input.opportunityModel.segmentLabel }),
+      ...(input.opportunityModel.chainId === undefined ? {} : { chainId: input.opportunityModel.chainId }),
+      warnings: input.opportunityModel.warnings,
+    });
+  }
+
+  const baseline = candidateFromOpportunity(input.opportunityModel.baseline);
+  const override = candidateFromOpportunity(input.opportunityModel.override);
+  const comparison = compareSandboxScoringEventCandidates({ baseline, override });
+  const result: SandboxScoringEventCandidateModel = {
+    status: "available",
+    scope: "sandbox_scoring_event_candidate",
+    origin: "sandbox_scoring_opportunity_model",
+    ...(input.opportunityModel.segmentLabel === undefined ? {} : { segmentLabel: input.opportunityModel.segmentLabel }),
+    ...(input.opportunityModel.chainId === undefined ? {} : { chainId: input.opportunityModel.chainId }),
+    baseline,
+    override,
+    baselineScoringCandidateCreated: baseline.scoringCandidateCreated,
+    overrideScoringCandidateCreated: override.scoringCandidateCreated,
+    scoringCandidateTypeDivergenceObserved: comparison.scoringCandidateTypeDivergenceObserved,
+    scoringCandidateFamilyDivergenceObserved: comparison.scoringCandidateFamilyDivergenceObserved,
+    scoringCandidateProbabilityDivergenceObserved: comparison.scoringCandidateProbabilityDivergenceObserved,
+    scoringCandidateCreationDivergenceObserved: comparison.scoringCandidateCreationDivergenceObserved,
+    conversionProbabilityDivergenceObserved: comparison.conversionProbabilityDivergenceObserved,
+    sandboxScoringEventDivergenceObserved: comparison.sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved: comparison.sandboxScoreDivergenceObserved,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input.opportunityModel.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: input.opportunityModel.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    explanation: comparison.explanation,
+    tags: [
+      "workbench_chain_sandbox_scoring_event_candidate",
+      "sandbox_scoring_event_candidate",
+      "sandbox_scoring_candidate_results_isolated_only",
+      ...baseline.tags,
+      ...override.tags,
+      `sandbox_scoring_candidate_type_divergence_${comparison.scoringCandidateTypeDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_candidate_family_divergence_${comparison.scoringCandidateFamilyDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_candidate_probability_divergence_${comparison.scoringCandidateProbabilityDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_candidate_creation_divergence_${comparison.scoringCandidateCreationDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_candidate_conversion_probability_divergence_${comparison.conversionProbabilityDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_event_divergence_${comparison.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+      `sandbox_scoring_candidate_score_divergence_${comparison.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+      "sandbox_scoring_event_created_false",
+      "sandbox_scoring_candidate_score_delta_0",
+      "sandbox_scoring_candidate_applied_only_in_sandbox_true",
+      "sandbox_scoring_candidate_applied_to_normal_live_false",
+      "sandbox_scoring_candidate_official_timeline_injection_forbidden",
+      "sandbox_scoring_candidate_official_score_mutation_forbidden",
+      "sandbox_scoring_candidate_official_scoring_events_mutation_forbidden",
+      "sandbox_scoring_candidate_production_resolution_forbidden",
+      "sandbox_scoring_candidate_production_scoring_event_creation_forbidden",
+      "sandbox_scoring_candidate_global_route_success_mutation_forbidden",
+      "sandbox_scoring_candidate_global_economy_claim_forbidden",
+      "sandbox_scoring_candidate_closed_candidates_rejected",
+      "sandbox_scoring_candidate_unavailable_candidates_rejected",
+      "sandbox_scoring_candidate_injected_into_official_timeline_count_0",
+      "sandbox_scoring_candidate_official_score_mutation_count_0",
+      "sandbox_scoring_candidate_official_scoring_event_mutation_count_0",
+      "sandbox_scoring_candidate_production_scoring_event_creation_count_0",
+      "sandbox_scoring_candidate_production_route_resolution_mutation_count_0",
+      "sandbox_scoring_candidate_global_route_success_mutation_count_0",
+      "sandbox_scoring_candidate_global_economy_claim_count_0",
+      ...(input.opportunityModel.chainId === undefined ? [] : [`sandbox_scoring_candidate_chain_id_${input.opportunityModel.chainId}`]),
+    ],
+    warnings: [...baseline.warnings, ...override.warnings],
+  };
+  const warnings = validateSandboxScoringEventCandidateModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/compareSandboxScoringEventCandidates.ts
+
+```ts
+import type { SandboxScoringEventCandidatePathResult } from "./sandboxScoringEventCandidate";
+
+export type SandboxScoringEventCandidateComparison = {
+  readonly scoringCandidateTypeDivergenceObserved: boolean;
+  readonly scoringCandidateFamilyDivergenceObserved: boolean;
+  readonly scoringCandidateProbabilityDivergenceObserved: boolean;
+  readonly scoringCandidateCreationDivergenceObserved: boolean;
+  readonly conversionProbabilityDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly explanation: string;
+};
+
+export function compareSandboxScoringEventCandidates(input: {
+  readonly baseline: SandboxScoringEventCandidatePathResult;
+  readonly override: SandboxScoringEventCandidatePathResult;
+}): SandboxScoringEventCandidateComparison {
+  const scoringCandidateTypeDivergenceObserved =
+    input.baseline.scoringCandidateType !== input.override.scoringCandidateType;
+  const scoringCandidateFamilyDivergenceObserved =
+    input.baseline.scoringCandidateFamily !== input.override.scoringCandidateFamily;
+  const scoringCandidateProbabilityDivergenceObserved =
+    input.baseline.scoringCandidateProbability !== input.override.scoringCandidateProbability;
+  const scoringCandidateCreationDivergenceObserved =
+    input.baseline.scoringCandidateCreated !== input.override.scoringCandidateCreated;
+  const conversionProbabilityDivergenceObserved =
+    input.baseline.conversionProbability !== input.override.conversionProbability;
+  const sandboxScoringEventDivergenceObserved =
+    input.baseline.sandboxScoringEventCreated !== input.override.sandboxScoringEventCreated;
+  const sandboxScoreDivergenceObserved = input.baseline.sandboxScoreDelta !== input.override.sandboxScoreDelta;
+
+  return {
+    scoringCandidateTypeDivergenceObserved,
+    scoringCandidateFamilyDivergenceObserved,
+    scoringCandidateProbabilityDivergenceObserved,
+    scoringCandidateCreationDivergenceObserved,
+    conversionProbabilityDivergenceObserved,
+    sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved,
+    explanation:
+      `The baseline produces ${input.baseline.scoringCandidateType} with conversion ${input.baseline.conversionProbability}/100, while the override produces ${input.override.scoringCandidateType} with conversion ${input.override.conversionProbability}/100. This is a sandbox scoring-event candidate only; it does not create official scoring events.`,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringEventCandidateSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+export type SandboxScoringEventCandidateSignature = {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly candidateTagCount: number;
+  readonly officialSandboxCandidateEventCount: number;
+  readonly baselineCandidateId?: string;
+  readonly baselineSourceOpportunityType?: string;
+  readonly baselineScoringCandidateType?: string;
+  readonly baselineScoringCandidateFamily?: string;
+  readonly baselineScoringCandidateProbability: number;
+  readonly baselineConversionProbability: number;
+  readonly baselineScoringCandidateCreated: boolean;
+  readonly overrideCandidateId?: string;
+  readonly overrideSourceOpportunityType?: string;
+  readonly overrideScoringCandidateType?: string;
+  readonly overrideScoringCandidateFamily?: string;
+  readonly overrideScoringCandidateProbability: number;
+  readonly overrideConversionProbability: number;
+  readonly overrideScoringCandidateCreated: boolean;
+  readonly scoringCandidateTypeDivergenceObserved: boolean;
+  readonly scoringCandidateFamilyDivergenceObserved: boolean;
+  readonly scoringCandidateProbabilityDivergenceObserved: boolean;
+  readonly scoringCandidateCreationDivergenceObserved: boolean;
+  readonly conversionProbabilityDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: boolean;
+  readonly sandboxScoringEventCreatedCount: number;
+  readonly sandboxScoreDeltaTotal: number;
+  readonly officialTimelineInjectionCount: number;
+  readonly officialScoreMutationCount: number;
+  readonly officialScoringEventMutationCount: number;
+  readonly productionScoringEventCreationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly globalRouteSuccessRateMutationCount: number;
+  readonly globalEconomyClaimCount: number;
+};
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function countTag(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function suffixFromTag(report: MatchReport, prefix: string): string | undefined {
+  const tag = report.evidenceFacts
+    .flatMap((fact) => fact.internalTags)
+    .find((candidate) => candidate.startsWith(prefix));
+
+  return tag?.slice(prefix.length);
+}
+
+function numberFromTag(report: MatchReport, prefix: string): number {
+  const value = suffixFromTag(report, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+function hasEvidenceTag(report: MatchReport, tag: string): boolean {
+  return report.evidenceFacts.some((fact) => fact.internalTags.includes(tag));
+}
+
+export function sandboxScoringEventCandidateSignature(
+  report: MatchReport,
+): SandboxScoringEventCandidateSignature {
+  const baselineCandidateId = suffixFromTag(report, "sandbox_scoring_candidate_baseline_candidate_");
+  const baselineSourceOpportunityType = suffixFromTag(report, "sandbox_scoring_candidate_baseline_source_opportunity_type_");
+  const baselineScoringCandidateType = suffixFromTag(report, "sandbox_scoring_candidate_baseline_type_");
+  const baselineScoringCandidateFamily = suffixFromTag(report, "sandbox_scoring_candidate_baseline_family_");
+  const overrideCandidateId = suffixFromTag(report, "sandbox_scoring_candidate_override_candidate_");
+  const overrideSourceOpportunityType = suffixFromTag(report, "sandbox_scoring_candidate_override_source_opportunity_type_");
+  const overrideScoringCandidateType = suffixFromTag(report, "sandbox_scoring_candidate_override_type_");
+  const overrideScoringCandidateFamily = suffixFromTag(report, "sandbox_scoring_candidate_override_family_");
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    candidateTagCount: countTag(report, "workbench_chain_sandbox_scoring_event_candidate"),
+    officialSandboxCandidateEventCount: report.timeline.filter((event) =>
+      event.eventId.includes("sandbox-scoring-candidate")
+    ).length,
+    ...(baselineCandidateId === undefined ? {} : { baselineCandidateId }),
+    ...(baselineSourceOpportunityType === undefined ? {} : { baselineSourceOpportunityType }),
+    ...(baselineScoringCandidateType === undefined ? {} : { baselineScoringCandidateType }),
+    ...(baselineScoringCandidateFamily === undefined ? {} : { baselineScoringCandidateFamily }),
+    baselineScoringCandidateProbability: numberFromTag(report, "sandbox_scoring_candidate_baseline_probability_"),
+    baselineConversionProbability: numberFromTag(report, "sandbox_scoring_candidate_baseline_conversion_probability_"),
+    baselineScoringCandidateCreated: hasEvidenceTag(report, "sandbox_scoring_candidate_baseline_created_true"),
+    ...(overrideCandidateId === undefined ? {} : { overrideCandidateId }),
+    ...(overrideSourceOpportunityType === undefined ? {} : { overrideSourceOpportunityType }),
+    ...(overrideScoringCandidateType === undefined ? {} : { overrideScoringCandidateType }),
+    ...(overrideScoringCandidateFamily === undefined ? {} : { overrideScoringCandidateFamily }),
+    overrideScoringCandidateProbability: numberFromTag(report, "sandbox_scoring_candidate_override_probability_"),
+    overrideConversionProbability: numberFromTag(report, "sandbox_scoring_candidate_override_conversion_probability_"),
+    overrideScoringCandidateCreated: hasEvidenceTag(report, "sandbox_scoring_candidate_override_created_true"),
+    scoringCandidateTypeDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_candidate_type_divergence_true"),
+    scoringCandidateFamilyDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_candidate_family_divergence_true"),
+    scoringCandidateProbabilityDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_candidate_probability_divergence_true"),
+    scoringCandidateCreationDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_candidate_creation_divergence_true"),
+    conversionProbabilityDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_candidate_conversion_probability_divergence_true"),
+    sandboxScoringEventDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_event_divergence_true"),
+    sandboxScoreDivergenceObserved: hasEvidenceTag(report, "sandbox_scoring_candidate_score_divergence_true"),
+    modelAppliedOnlyInSandbox: hasEvidenceTag(report, "sandbox_scoring_candidate_applied_only_in_sandbox_true"),
+    modelAppliedToNormalLiveSelection: hasEvidenceTag(report, "sandbox_scoring_candidate_applied_to_normal_live_true"),
+    sandboxScoringEventCreatedCount: hasEvidenceTag(report, "sandbox_scoring_event_created_true") ? 1 : 0,
+    sandboxScoreDeltaTotal: numberFromTag(report, "sandbox_scoring_candidate_score_delta_"),
+    officialTimelineInjectionCount: numberFromTag(report, "sandbox_scoring_candidate_injected_into_official_timeline_count_"),
+    officialScoreMutationCount: numberFromTag(report, "sandbox_scoring_candidate_official_score_mutation_count_"),
+    officialScoringEventMutationCount: numberFromTag(report, "sandbox_scoring_candidate_official_scoring_event_mutation_count_"),
+    productionScoringEventCreationCount: numberFromTag(report, "sandbox_scoring_candidate_production_scoring_event_creation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(report, "sandbox_scoring_candidate_production_route_resolution_mutation_count_"),
+    globalRouteSuccessRateMutationCount: numberFromTag(report, "sandbox_scoring_candidate_global_route_success_mutation_count_"),
+    globalEconomyClaimCount: numberFromTag(report, "sandbox_scoring_candidate_global_economy_claim_count_"),
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -14810,6 +15620,352 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/sandboxScoringEventCandidate.test.ts
+
+```ts
+import { controlledRouteResolutionSandboxFromReplay } from "./controlledRouteResolutionSandboxFromReplay";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+import { sandboxScoringOpportunityModelFromResolution } from "./sandboxScoringOpportunityModelFromResolution";
+import { sandboxScoringEventCandidateModelFromOpportunity } from "./sandboxScoringEventCandidateModelFromOpportunity";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function replayFixture(): FullMatchRealIsolatedSegmentReplay {
+  return {
+    status: "available",
+    scope: "real_isolated_segment_replay",
+    origin: "controlled_segment_replay_comparison",
+    segmentLabel: "segment-1",
+    chainId: "sequence-1-multi-action-chain",
+    baseline: {
+      pathId: "baseline",
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 4,
+      warnings: [],
+    },
+    override: {
+      pathId: "override",
+      candidateId: "chain-context-forward-progress-sh",
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 5,
+      warnings: [],
+    },
+    baselineEventCount: 4,
+    overrideEventCount: 5,
+    selectionDivergenceObserved: true,
+    possessionContinuityDivergenceObserved: false,
+    carrierDivergenceObserved: true,
+    zoneProgressionDivergenceObserved: true,
+    dangerCreationDivergenceObserved: true,
+    scoringOpportunityDivergenceObserved: false,
+    isolatedTimelineDivergenceObserved: true,
+    isolatedScoringEventDivergenceObserved: false,
+    isolatedScoreDivergenceObserved: false,
+    replayAppliedOnlyInIsolatedEngine: true,
+    replayAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 1,
+    rejectedUnavailableCandidateCount: 1,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateSandboxScoringEventCandidate(): readonly string[] {
+  const sandbox = controlledRouteResolutionSandboxFromReplay({ replay: replayFixture() });
+  const opportunityModel = sandboxScoringOpportunityModelFromResolution({ sandbox });
+  const model = sandboxScoringEventCandidateModelFromOpportunity({ opportunityModel });
+
+  assertTest(model.status === "available", "sandbox scoring event candidate model must be available.");
+  assertTest(model.origin === "sandbox_scoring_opportunity_model", "candidate model origin mismatch.");
+  assertTest(model.baseline.sourceOpportunityType === "no_opportunity", "baseline source opportunity mismatch.");
+  assertTest(model.baseline.scoringCandidateType === "NO_SCORING_EVENT", "baseline candidate type mismatch.");
+  assertTest(model.baseline.scoringCandidateFamily === "none", "baseline candidate family mismatch.");
+  assertTest(model.baseline.scoringCandidateProbability === 0, "baseline candidate probability must be 0.");
+  assertTest(model.baseline.conversionProbability === 0, "baseline conversion probability must be 0.");
+  assertTest(!model.baseline.scoringCandidateCreated, "baseline scoring candidate must not be created.");
+  assertTest(model.override.sourceOpportunityType === "half_chance", "override source opportunity mismatch.");
+  assertTest(model.override.scoringCandidateType === "SHOT_CANDIDATE", "override candidate type must be SHOT_CANDIDATE.");
+  assertTest(model.override.scoringCandidateFamily === "shot", "override candidate family must be shot.");
+  assertTest(model.override.scoringCandidateProbability === 24, "override candidate probability must be 24.");
+  assertTest(model.override.conversionProbability > model.baseline.conversionProbability, "override conversion must beat baseline.");
+  assertTest(model.override.scoringCandidateCreated, "override scoring candidate must be created.");
+  assertTest(model.scoringCandidateTypeDivergenceObserved, "candidate type divergence must be observed.");
+  assertTest(model.scoringCandidateFamilyDivergenceObserved, "candidate family divergence must be observed.");
+  assertTest(model.scoringCandidateProbabilityDivergenceObserved, "candidate probability divergence must be observed.");
+  assertTest(model.scoringCandidateCreationDivergenceObserved, "candidate creation divergence must be observed.");
+  assertTest(model.conversionProbabilityDivergenceObserved, "conversion probability divergence must be observed.");
+  assertTest(!model.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!model.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(!model.override.sandboxScoringEventCreated, "override must not create sandbox scoring event in 3M.");
+  assertTest(model.override.sandboxScoreDelta === 0, "override sandbox score delta must remain 0.");
+  assertTest(model.modelAppliedOnlyInSandbox, "model must apply only in sandbox.");
+  assertTest(!model.modelAppliedToNormalLiveSelection, "model must not apply to normal live selection.");
+  assertTest(!model.canCreateProductionScoringEvents, "model cannot create production scoring events.");
+  assertTest(!model.canClaimGlobalEconomy, "model cannot claim global economy.");
+
+  return [
+    "sandbox scoring event candidate model status is available",
+    "baseline produces NO_SCORING_EVENT",
+    "override produces SHOT_CANDIDATE",
+    "candidate and conversion divergences are observed",
+    "sandbox candidate creates no scoring event and no score delta",
+    "sandbox candidate remains isolated-only",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxScoringEventCandidate();
+
+  console.log("sandboxScoringEventCandidate tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxScoringEventCandidateGuard.test.ts
+
+```ts
+import { controlledRouteResolutionSandboxFromReplay } from "./controlledRouteResolutionSandboxFromReplay";
+import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatchRealIsolatedSegmentReplay";
+import {
+  sandboxScoringEventCandidateCannotClaimGlobalEconomy,
+  sandboxScoringEventCandidateCannotMutateOfficialFullMatch,
+  sandboxScoringEventCandidateModelFromOpportunity,
+} from "./sandboxScoringEventCandidateModelFromOpportunity";
+import { sandboxScoringOpportunityModelFromResolution } from "./sandboxScoringOpportunityModelFromResolution";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function replayFixture(input?: {
+  readonly overrideCandidateLegal?: boolean;
+  readonly overrideCandidateAvailable?: boolean;
+  readonly overrideCandidateId?: string;
+}): FullMatchRealIsolatedSegmentReplay {
+  return {
+    status: "available",
+    scope: "real_isolated_segment_replay",
+    origin: "controlled_segment_replay_comparison",
+    segmentLabel: "segment-1",
+    baseline: {
+      pathId: "baseline",
+      candidateId: "chain-context-safe-recycle-pv",
+      actionType: "SAFE_RECYCLE",
+      receiverId: "control-pivot",
+      targetZone: "Z2-HSL",
+      candidateLegal: true,
+      candidateAvailable: true,
+      events: [],
+      eventCount: 4,
+      warnings: [],
+    },
+    override: {
+      pathId: "override",
+      ...(input?.overrideCandidateId === undefined ? {} : { candidateId: input.overrideCandidateId }),
+      actionType: "FORWARD_PROGRESS",
+      receiverId: "control-space-hunter",
+      targetZone: "Z4-HSR",
+      candidateLegal: input?.overrideCandidateLegal ?? true,
+      candidateAvailable: input?.overrideCandidateAvailable ?? true,
+      events: [],
+      eventCount: 5,
+      warnings: [],
+    },
+    baselineEventCount: 4,
+    overrideEventCount: 5,
+    selectionDivergenceObserved: true,
+    possessionContinuityDivergenceObserved: false,
+    carrierDivergenceObserved: true,
+    zoneProgressionDivergenceObserved: true,
+    dangerCreationDivergenceObserved: true,
+    scoringOpportunityDivergenceObserved: false,
+    isolatedTimelineDivergenceObserved: true,
+    isolatedScoringEventDivergenceObserved: false,
+    isolatedScoreDivergenceObserved: false,
+    replayAppliedOnlyInIsolatedEngine: true,
+    replayAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input?.overrideCandidateLegal === false ? 1 : 0,
+    rejectedUnavailableCandidateCount: input?.overrideCandidateAvailable === false ? 1 : 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function validateSandboxScoringEventCandidateGuard(): readonly string[] {
+  const available = sandboxScoringEventCandidateModelFromOpportunity({
+    opportunityModel: sandboxScoringOpportunityModelFromResolution({
+      sandbox: controlledRouteResolutionSandboxFromReplay({
+        replay: replayFixture({ overrideCandidateId: "chain-context-forward-progress-sh" }),
+      }),
+    }),
+  });
+  const closed = sandboxScoringEventCandidateModelFromOpportunity({
+    opportunityModel: sandboxScoringOpportunityModelFromResolution({
+      sandbox: controlledRouteResolutionSandboxFromReplay({
+        replay: replayFixture({
+          overrideCandidateId: "chain-context-forward-progress-sh",
+          overrideCandidateLegal: false,
+        }),
+      }),
+    }),
+  });
+  const unavailable = sandboxScoringEventCandidateModelFromOpportunity({
+    opportunityModel: sandboxScoringOpportunityModelFromResolution({
+      sandbox: controlledRouteResolutionSandboxFromReplay({
+        replay: replayFixture({
+          overrideCandidateId: "chain-context-forward-progress-sh",
+          overrideCandidateAvailable: false,
+        }),
+      }),
+    }),
+  });
+  const missing = sandboxScoringEventCandidateModelFromOpportunity({
+    opportunityModel: sandboxScoringOpportunityModelFromResolution({
+      sandbox: controlledRouteResolutionSandboxFromReplay({ replay: replayFixture() }),
+    }),
+  });
+
+  assertTest(available.status === "available", "available sandbox candidate model should be available.");
+  assertTest(closed.status !== "available", "closed override candidate cannot produce available candidate model.");
+  assertTest(unavailable.status !== "available", "unavailable override candidate cannot produce available candidate model.");
+  assertTest(missing.status !== "available", "missing override candidate cannot produce available candidate model.");
+  assertTest(
+    sandboxScoringEventCandidateCannotMutateOfficialFullMatch(available),
+    "available candidate model cannot mutate official full-match.",
+  );
+  assertTest(
+    sandboxScoringEventCandidateCannotClaimGlobalEconomy(available),
+    "available candidate model cannot claim global economy.",
+  );
+  assertTest(!available.canInjectEventsIntoOfficialTimeline, "model cannot inject official timeline events.");
+  assertTest(!available.canMutateOfficialScore, "model cannot mutate official score.");
+  assertTest(!available.canMutateOfficialScoringEvents, "model cannot mutate official scoring events.");
+  assertTest(!available.canCreateProductionScoringEvents, "model cannot create production scoring events.");
+  assertTest(!available.canMutateProductionRouteResolution, "model cannot mutate production route resolution.");
+  assertTest(!available.canMutateGlobalRouteSuccessRates, "model cannot mutate global route success rates.");
+  assertTest(!available.canClaimGlobalEconomy, "model cannot claim global economy.");
+
+  return [
+    "CLOSED override candidate cannot produce available candidate model",
+    "unavailable override candidate cannot produce available candidate model",
+    "missing override candidate returns not available or blocked",
+    "sandbox scoring event candidate cannot inject events into official timeline",
+    "sandbox scoring event candidate cannot mutate official score, scoring events, production route resolution, route success rates, or global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxScoringEventCandidateGuard();
+
+  console.log("sandboxScoringEventCandidateGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/compareSandboxScoringEventCandidates.test.ts
+
+```ts
+import { compareSandboxScoringEventCandidates } from "./compareSandboxScoringEventCandidates";
+import { createSandboxScoringEventCandidate } from "./createSandboxScoringEventCandidate";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCompareSandboxScoringEventCandidates(): readonly string[] {
+  const baseline = createSandboxScoringEventCandidate({
+    pathId: "baseline",
+    candidateId: "chain-context-safe-recycle-pv",
+    actionType: "SAFE_RECYCLE",
+    receiverId: "control-pivot",
+    targetZone: "Z2-HSL",
+    opportunityType: "no_opportunity",
+    opportunityFamily: "none",
+    opportunityProbability: 5,
+    routeOutcome: "safe_retention",
+    dangerProbability: 18,
+  });
+  const override = createSandboxScoringEventCandidate({
+    pathId: "override",
+    candidateId: "chain-context-forward-progress-sh",
+    actionType: "FORWARD_PROGRESS",
+    receiverId: "control-space-hunter",
+    targetZone: "Z4-HSR",
+    opportunityType: "half_chance",
+    opportunityFamily: "territorial_danger",
+    opportunityProbability: 24,
+    routeOutcome: "dangerous_progression",
+    dangerProbability: 64,
+  });
+  const comparison = compareSandboxScoringEventCandidates({ baseline, override });
+
+  assertTest(comparison.scoringCandidateTypeDivergenceObserved, "candidate type divergence must be observed.");
+  assertTest(comparison.scoringCandidateFamilyDivergenceObserved, "candidate family divergence must be observed.");
+  assertTest(comparison.scoringCandidateProbabilityDivergenceObserved, "candidate probability divergence must be observed.");
+  assertTest(comparison.scoringCandidateCreationDivergenceObserved, "candidate creation divergence must be observed.");
+  assertTest(comparison.conversionProbabilityDivergenceObserved, "conversion probability divergence must be observed.");
+  assertTest(!comparison.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!comparison.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(comparison.explanation.includes("NO_SCORING_EVENT"), "comparison explanation must mention baseline.");
+  assertTest(comparison.explanation.includes("SHOT_CANDIDATE"), "comparison explanation must mention override.");
+  assertTest(comparison.explanation.includes("does not create official scoring events"), "comparison must mention scoring guard.");
+
+  return [
+    "candidate type/family/probability/creation/conversion divergences are visible",
+    "sandbox scoring event and score divergences remain false",
+    "comparison explanation names baseline, override, and scoring guard",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCompareSandboxScoringEventCandidates();
+
+  console.log("compareSandboxScoringEventCandidates tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -15792,6 +16948,90 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalSandboxScoringEventCandidate.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { sandboxScoringEventCandidateSignature } from "./sandboxScoringEventCandidateSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalSandboxScoringEventCandidate(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = sandboxScoringEventCandidateSignature(defaultReport);
+  const experimentalSignature = sandboxScoringEventCandidateSignature(experimentalReport);
+  const candidateFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.candidateTagCount === 0, "default runFullMatch must not expose sandbox candidate tags.");
+  assertTest(experimentalSignature.candidateTagCount > 0, "experimental runFullMatch must expose sandbox candidate tags.");
+  assertTest(experimentalSignature.officialSandboxCandidateEventCount === 0, "sandbox candidate must not be inserted as official MatchEvent.");
+  assertTest(experimentalSignature.baselineCandidateId === "chain-context-safe-recycle-pv", "baseline candidate mismatch.");
+  assertTest(experimentalSignature.baselineSourceOpportunityType === "no_opportunity", "baseline source opportunity mismatch.");
+  assertTest(experimentalSignature.baselineScoringCandidateType === "NO_SCORING_EVENT", "baseline candidate type mismatch.");
+  assertTest(experimentalSignature.baselineScoringCandidateFamily === "none", "baseline candidate family mismatch.");
+  assertTest(experimentalSignature.baselineScoringCandidateProbability === 0, "baseline probability must be 0.");
+  assertTest(experimentalSignature.baselineConversionProbability === 0, "baseline conversion probability must be 0.");
+  assertTest(!experimentalSignature.baselineScoringCandidateCreated, "baseline candidate created must be false.");
+  assertTest(experimentalSignature.overrideCandidateId === "chain-context-forward-progress-sh", "override candidate mismatch.");
+  assertTest(experimentalSignature.overrideSourceOpportunityType === "half_chance", "override source opportunity mismatch.");
+  assertTest(experimentalSignature.overrideScoringCandidateType === "SHOT_CANDIDATE", "override candidate type mismatch.");
+  assertTest(experimentalSignature.overrideScoringCandidateFamily === "shot", "override candidate family mismatch.");
+  assertTest(experimentalSignature.overrideScoringCandidateProbability === 24, "override probability must be 24.");
+  assertTest(experimentalSignature.overrideConversionProbability > 0, "override conversion probability must be positive.");
+  assertTest(experimentalSignature.overrideScoringCandidateCreated, "override candidate created must be true.");
+  assertTest(experimentalSignature.scoringCandidateTypeDivergenceObserved, "type divergence must be observed.");
+  assertTest(experimentalSignature.scoringCandidateFamilyDivergenceObserved, "family divergence must be observed.");
+  assertTest(experimentalSignature.scoringCandidateProbabilityDivergenceObserved, "probability divergence must be observed.");
+  assertTest(experimentalSignature.scoringCandidateCreationDivergenceObserved, "creation divergence must be observed.");
+  assertTest(experimentalSignature.conversionProbabilityDivergenceObserved, "conversion divergence must be observed.");
+  assertTest(!experimentalSignature.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!experimentalSignature.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(experimentalSignature.modelAppliedOnlyInSandbox, "model must apply only in sandbox.");
+  assertTest(!experimentalSignature.modelAppliedToNormalLiveSelection, "model must not apply to normal live selection.");
+  assertTest(candidateFact !== undefined, "experimental report must include sandbox candidate evidence.");
+  assertTest(candidateFact?.internalTags.includes("sandbox_scoring_candidate_applied_only_in_sandbox_true") ?? false, "evidence must say applied only in sandbox.");
+  assertTest(candidateFact?.internalTags.includes("sandbox_scoring_candidate_production_scoring_event_creation_forbidden") ?? false, "evidence must forbid production scoring event creation.");
+  assertTest(visibleText.includes("candidat sandbox d'evenement de scoring"), "coach diagnosis must mention sandbox scoring event candidate.");
+  assertTest(visibleText.includes("ne cree aucun MatchEvent officiel"), "coach diagnosis must say sandbox candidate is not official.");
+  assertTest(visibleText.includes("ne modifie pas le score officiel"), "coach diagnosis must say sandbox candidate does not alter official score.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_RESULTS_ISOLATED_ONLY"), "limitations must say candidate model is isolated-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match must not be claimed as production chain-driven.");
+
+  return [
+    "default runFullMatch has no sandbox candidate tags",
+    "experimental runFullMatch has sandbox candidate tags",
+    "experimental report includes sandbox candidate evidence",
+    "experimental coach diagnosis mentions sandbox scoring event candidate",
+    "experimental report says sandbox candidate is isolated-only and not official",
+    "normal full-match is not claimed as production chain-driven",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalSandboxScoringEventCandidate();
+
+  console.log("runFullMatchExperimentalSandboxScoringEventCandidate tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -16612,6 +17852,81 @@ if (require.main === module) {
   const checks = validateRunFullMatchSandboxScoringOpportunityModelScoringGuard();
 
   console.log("runFullMatchSandboxScoringOpportunityModelScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchSandboxScoringEventCandidateScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { sandboxScoringEventCandidateSignature } from "./sandboxScoringEventCandidateSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateRunFullMatchSandboxScoringEventCandidateScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = sandboxScoringEventCandidateSignature(defaultReport);
+  const experimentalSignature = sandboxScoringEventCandidateSignature(experimentalReport);
+
+  assertTest(defaultReport.score.home === experimentalReport.score.home, "sandbox candidate must not mutate official home score.");
+  assertTest(defaultReport.score.away === experimentalReport.score.away, "sandbox candidate must not mutate official away score.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "sandbox candidate must not mutate official scoring event count.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "sandbox candidate must not mutate official score_change total.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "sandbox candidate must not add official timeline events.");
+  assertTest(experimentalSignature.officialSandboxCandidateEventCount === 0, "no sandbox candidate is inserted as official MatchEvent.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official final score must still derive from official score_change consequences.");
+  assertTest(experimentalSignature.sandboxScoringEventCreatedCount === 0, "sandbox candidate must not create sandbox scoring events in 3M.");
+  assertTest(experimentalSignature.sandboxScoreDeltaTotal === 0, "sandbox candidate score delta total must be 0.");
+  assertTest(experimentalSignature.officialTimelineInjectionCount === 0, "sandbox candidate injected into official timeline count must be 0.");
+  assertTest(experimentalSignature.officialScoreMutationCount === 0, "official score mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoringEventMutationCount === 0, "official scoring event mutation count must be 0.");
+  assertTest(experimentalSignature.productionScoringEventCreationCount === 0, "sandbox candidate must not create production scoring events.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "sandbox candidate must not mutate production route resolution.");
+  assertTest(experimentalSignature.globalRouteSuccessRateMutationCount === 0, "sandbox candidate must not mutate global route success rates.");
+  assertTest(experimentalSignature.globalEconomyClaimCount === 0, "sandbox candidate must not claim global economy.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "limitations must forbid production scoring event creation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION"), "limitations must forbid production route resolution mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES"), "limitations must forbid global route success mutation.");
+
+  return [
+    "default and experimental official final scores remain equal",
+    "default and experimental official scoring event counts remain equal",
+    "default and experimental official score_change totals remain equal",
+    "official timeline event count remains equal",
+    "no sandbox candidate is inserted as official MatchEvent",
+    "no production scoring events are deleted/capped/rewritten/fabricated",
+    "no production scoring events are created by sandbox candidate model",
+    "global route success rates are not mutated",
+    "production route resolution is not mutated",
+    "normal live mini-match route resolution is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchSandboxScoringEventCandidateScoringGuard();
+
+  console.log("runFullMatchSandboxScoringEventCandidateScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -17571,6 +18886,72 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3m.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { sandboxScoringEventCandidateSignature } from "./sandboxScoringEventCandidateSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3M(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = sandboxScoringEventCandidateSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.sandboxScoringEventCreatedCount === 0, "sandbox candidate must not create scoring events in 3M.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "sandbox candidate must not create production scoring events.");
+  assertTest(signature.officialScoreMutationCount === 0, "sandbox candidate must not mutate official score.");
+  assertTest(signature.officialScoringEventMutationCount === 0, "sandbox candidate must not mutate official scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "sandbox candidate must not create production scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SANDBOX_SCORING_EVENT_CANDIDATE_RESULTS_ISOLATED_ONLY"), "sandbox candidate, if any, must remain sandbox-only.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "no production scoring event creation from sandbox candidate model",
+    "sandbox candidate, if any, remains sandbox-only",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3M();
+
+  console.log("scoringGuard.3m tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -18266,6 +19647,74 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3L();
 
   console.log("sourceOfTruthGuards.3l tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3m.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3M(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON cannot make global economy claims",
+    "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT cannot make global economy claims",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3M();
+
+  console.log("sourceOfTruthGuards.3m tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -19280,6 +20729,7 @@ import type { FullMatchControlledSegmentReplayComparison } from "../fullMatch/fu
 import type { FullMatchRealIsolatedSegmentReplay } from "../fullMatch/fullMatchRealIsolatedSegmentReplay";
 import type { ControlledRouteResolutionSandbox } from "../fullMatch/controlledRouteResolutionSandbox";
 import type { SandboxScoringOpportunityModel } from "../fullMatch/sandboxScoringOpportunityModel";
+import type { SandboxScoringEventCandidateModel } from "../fullMatch/sandboxScoringEventCandidate";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -19304,6 +20754,7 @@ export interface MiniMatchTimelineSegment {
   readonly realIsolatedSegmentReplay?: FullMatchRealIsolatedSegmentReplay;
   readonly controlledRouteResolutionSandbox?: ControlledRouteResolutionSandbox;
   readonly sandboxScoringOpportunityModel?: SandboxScoringOpportunityModel;
+  readonly sandboxScoringEventCandidateModel?: SandboxScoringEventCandidateModel;
 }
 
 export interface MatchReportBuilderInput {
@@ -19848,6 +21299,69 @@ function sandboxScoringOpportunityModelReason(
   return ` Sandbox scoring opportunity model available: baseline ${model.baseline.opportunityType} (${model.baseline.opportunityProbability}/100) from ${model.baseline.routeOutcome ?? "none"}; override ${model.override.opportunityType} (${model.override.opportunityProbability}/100) from ${model.override.routeOutcome ?? "none"}. The model is sandbox-only, is not an official MatchEvent, is not applied to normal live selection, creates no production scoring event, and cannot mutate official score, official scoring events, production route resolution, route success rates, or global economy proof.`;
 }
 
+function sandboxScoringEventCandidateModelTags(
+  model: SandboxScoringEventCandidateModel | undefined,
+): readonly string[] {
+  if (model === undefined || model.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_sandbox_scoring_event_candidate",
+    "sandbox_scoring_event_candidate",
+    ...(model.baseline.candidateId === undefined ? [] : [`sandbox_scoring_candidate_baseline_candidate_${model.baseline.candidateId}`]),
+    `sandbox_scoring_candidate_baseline_type_${model.baseline.scoringCandidateType}`,
+    `sandbox_scoring_candidate_baseline_family_${model.baseline.scoringCandidateFamily}`,
+    `sandbox_scoring_candidate_baseline_created_${model.baseline.scoringCandidateCreated ? "true" : "false"}`,
+    `sandbox_scoring_candidate_baseline_probability_${model.baseline.scoringCandidateProbability}`,
+    `sandbox_scoring_candidate_baseline_conversion_probability_${model.baseline.conversionProbability}`,
+    ...(model.baseline.sourceOpportunityType === undefined ? [] : [`sandbox_scoring_candidate_baseline_source_opportunity_type_${model.baseline.sourceOpportunityType}`]),
+    ...(model.override.candidateId === undefined ? [] : [`sandbox_scoring_candidate_override_candidate_${model.override.candidateId}`]),
+    `sandbox_scoring_candidate_override_type_${model.override.scoringCandidateType}`,
+    `sandbox_scoring_candidate_override_family_${model.override.scoringCandidateFamily}`,
+    `sandbox_scoring_candidate_override_created_${model.override.scoringCandidateCreated ? "true" : "false"}`,
+    `sandbox_scoring_candidate_override_probability_${model.override.scoringCandidateProbability}`,
+    `sandbox_scoring_candidate_override_conversion_probability_${model.override.conversionProbability}`,
+    ...(model.override.sourceOpportunityType === undefined ? [] : [`sandbox_scoring_candidate_override_source_opportunity_type_${model.override.sourceOpportunityType}`]),
+    `sandbox_scoring_candidate_type_divergence_${model.scoringCandidateTypeDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_candidate_family_divergence_${model.scoringCandidateFamilyDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_candidate_probability_divergence_${model.scoringCandidateProbabilityDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_candidate_creation_divergence_${model.scoringCandidateCreationDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_candidate_conversion_probability_divergence_${model.conversionProbabilityDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_event_divergence_${model.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `sandbox_scoring_candidate_score_divergence_${model.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    "sandbox_scoring_event_created_false",
+    "sandbox_scoring_candidate_score_delta_0",
+    `sandbox_scoring_candidate_applied_only_in_sandbox_${model.modelAppliedOnlyInSandbox ? "true" : "false"}`,
+    `sandbox_scoring_candidate_applied_to_normal_live_${model.modelAppliedToNormalLiveSelection ? "true" : "false"}`,
+    "sandbox_scoring_candidate_official_timeline_injection_forbidden",
+    "sandbox_scoring_candidate_official_score_mutation_forbidden",
+    "sandbox_scoring_candidate_official_scoring_events_mutation_forbidden",
+    "sandbox_scoring_candidate_production_scoring_event_creation_forbidden",
+    "sandbox_scoring_candidate_global_economy_claim_forbidden",
+    "sandbox_scoring_candidate_closed_candidates_rejected",
+    "sandbox_scoring_candidate_unavailable_candidates_rejected",
+    "sandbox_scoring_candidate_injected_into_official_timeline_count_0",
+    "sandbox_scoring_candidate_official_score_mutation_count_0",
+    "sandbox_scoring_candidate_official_scoring_event_mutation_count_0",
+    "sandbox_scoring_candidate_production_scoring_event_creation_count_0",
+    "sandbox_scoring_candidate_production_route_resolution_mutation_count_0",
+    "sandbox_scoring_candidate_global_route_success_mutation_count_0",
+    "sandbox_scoring_candidate_global_economy_claim_count_0",
+    ...model.tags,
+  ];
+}
+
+function sandboxScoringEventCandidateModelReason(
+  model: SandboxScoringEventCandidateModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return ` Sandbox scoring event candidate model available: baseline ${model.baseline.scoringCandidateType} with conversion ${model.baseline.conversionProbability}/100; override ${model.override.scoringCandidateType} with conversion ${model.override.conversionProbability}/100. The candidate is sandbox-only, is not an official MatchEvent, is not applied to normal live selection, creates no production scoring event, and cannot mutate official score, official scoring events, production route resolution, route success rates, or global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -19889,7 +21403,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -19919,6 +21433,7 @@ function kickoffEvent(input: {
       ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
       ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
       ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
+      ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
     ],
     narrativeWeight: 5,
   };
@@ -19983,6 +21498,7 @@ function sequenceRecordToMatchEvent(input: {
     ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
     ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
     ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
+    ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -20007,7 +21523,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -20070,7 +21586,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -20110,6 +21626,7 @@ function scoringEventToMatchEvent(input: {
       ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
       ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
       ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
+      ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
     ],
     narrativeWeight: 70,
   };
@@ -20805,6 +22322,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
       return "training_recommendation";
   }
 }
@@ -20853,6 +22371,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Sandbox de resolution controlee de route";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return "Modele sandbox d'opportunite de scoring";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+      return "Candidat sandbox d'evenement de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -20917,6 +22437,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -20948,6 +22469,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY",
     "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
     "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -22071,6 +23593,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 41;
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return 40;
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+      return 39;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -22129,6 +23653,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la sandbox de resolution controlee de route";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
       return "Relire le modele sandbox d'opportunite de scoring";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+      return "Relire le candidat sandbox d'evenement de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -23392,7 +24918,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"
   | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
-  | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL";
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL"
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -23797,6 +25324,34 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotProve: [
       "global scoring balance",
       "production scoring opportunity quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE",
+    canProve: [
+      "experimental sandbox scoring opportunities were converted into typed scoring-event candidates",
+      "baseline and override candidate type, family, probability, conversion probability, and creation divergence were exposed",
+      "sandbox scoring-event candidates rejected closed and unavailable candidates through upstream sandbox guards",
+      "sandbox scoring-event candidates remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production scoring-event quality",
       "production route resolution quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",
