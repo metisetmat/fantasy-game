@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3S - Sandbox Sequence Replay. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3T - Controlled Segment Sandbox Timeline. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -184,6 +184,8 @@ import { multiActionContinuationFromRebound } from "./fullMatch/multiActionConti
 import type { MultiActionContinuationModel } from "./fullMatch/multiActionContinuationSandbox";
 import { sandboxSequenceReplayFromContinuation } from "./fullMatch/sandboxSequenceReplayFromContinuation";
 import type { SandboxSequenceReplayModel } from "./fullMatch/sandboxSequenceReplay";
+import { controlledSegmentSandboxTimelineFromReplay } from "./fullMatch/controlledSegmentSandboxTimelineFromReplay";
+import type { ControlledSegmentSandboxTimelineModel } from "./fullMatch/controlledSegmentSandboxTimeline";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -860,6 +862,31 @@ function sandboxSequenceReplayModelLimitations(model: SandboxSequenceReplayModel
     "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_SANDBOX_SEQUENCE_REPLAY_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function controlledSegmentSandboxTimelineModelLimitations(model: ControlledSegmentSandboxTimelineModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_EXPERIMENTAL",
+    `FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2109,6 +2136,55 @@ function sandboxSequenceReplayModelEvidenceFact(input: {
   };
 }
 
+function controlledSegmentSandboxTimelineModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: ControlledSegmentSandboxTimelineModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_controlled_segment_sandbox_timeline")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-controlled-segment-sandbox-timeline`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.override.finalZoneCandidate ?? "Z3-HSR"],
+    summary:
+      `Experimental controlled segment sandbox timeline ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline events=${input.model.baseline.eventCount}, baseline types=${input.model.baseline.events.map((event) => event.eventType).join(">")}, ` +
+      `baseline outcome=${input.model.baseline.finalOutcome ?? "none"}; override events=${input.model.override.eventCount}, ` +
+      `override types=${input.model.override.events.map((event) => event.eventType).join(">")}, ` +
+      `override outcome=${input.model.override.finalOutcome ?? "none"}, team=${input.model.override.finalTeamCandidate ?? "none"}, ` +
+      `actor=${input.model.override.finalActorCandidate ?? "none"}, zone=${input.model.override.finalZoneCandidate ?? "none"}, ` +
+      `sandboxTimelineCreated=${input.model.sandboxTimelineCreated}, separateFromOfficial=${input.model.sandboxTimelineSeparateFromOfficialTimeline}, ` +
+      `eventCountDivergence=${input.model.sandboxTimelineEventCountDivergenceObserved}, outcomeDivergence=${input.model.sandboxTimelineOutcomeDivergenceObserved}, ` +
+      `teamDivergence=${input.model.sandboxTimelineFinalTeamDivergenceObserved}, zoneDivergence=${input.model.sandboxTimelineFinalZoneDivergenceObserved}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, canMutateOfficialTimeline=${input.model.canMutateOfficialTimeline}, ` +
+      `canMutateOfficialPossession=${input.model.canMutateOfficialPossession}, canMutateOfficialScore=${input.model.canMutateOfficialScore}, ` +
+      `canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, ` +
+      `canMutateProductionRouteResolution=${input.model.canMutateProductionRouteResolution}, canMutateGlobalRouteSuccessRates=${input.model.canMutateGlobalRouteSuccessRates}, ` +
+      `canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 92 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_controlled_segment_sandbox_timeline",
+      "controlled_segment_sandbox_timeline",
+      ...(input.model.chainId === undefined ? [] : [`controlled_segment_sandbox_timeline_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2132,6 +2208,7 @@ function withFullMatchGroundingDiagnosis(
   reboundSecondChanceModel: ReboundSecondChanceModel,
   multiActionContinuationModel: MultiActionContinuationModel,
   sandboxSequenceReplayModel: SandboxSequenceReplayModel,
+  controlledSegmentSandboxTimelineModel: ControlledSegmentSandboxTimelineModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2155,7 +2232,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_goalkeeper_response_model_sandbox") ||
     fact.internalTags.includes("workbench_chain_rebound_second_chance_sandbox") ||
     fact.internalTags.includes("workbench_chain_multi_action_continuation_sandbox") ||
-    fact.internalTags.includes("workbench_chain_sandbox_sequence_replay")
+    fact.internalTags.includes("workbench_chain_sandbox_sequence_replay") ||
+    fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2185,7 +2263,10 @@ function withFullMatchGroundingDiagnosis(
   const sandboxSequenceSummary = sandboxSequenceReplayModel.status === "not_available"
     ? ""
     : ` La mini-sequence sandbox rejoue ensuite le chemin complet en ${sandboxSequenceReplayModel.override.stepCount} etapes typees : reference ${sandboxSequenceReplayModel.baseline.finalOutcome ?? "none"} contre override ${sandboxSequenceReplayModel.override.finalOutcome ?? "none"} pour ${sandboxSequenceReplayModel.override.finalTeamCandidate ?? "none"}, acteur ${sandboxSequenceReplayModel.override.finalActorCandidate ?? "none"}, zone ${sandboxSequenceReplayModel.override.finalZoneCandidate ?? "none"}. Elle reste strictement sandbox-only : aucune mutation de timeline officielle, aucune mutation de possession officielle, aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}`;
+  const controlledSegmentSandboxTimelineSummary = controlledSegmentSandboxTimelineModel.status === "not_available"
+    ? ""
+    : ` La timeline sandbox separee du segment convertit ce replay en ${controlledSegmentSandboxTimelineModel.override.eventCount} evenements sandbox : reference ${controlledSegmentSandboxTimelineModel.baseline.finalOutcome ?? "none"} contre override ${controlledSegmentSandboxTimelineModel.override.finalOutcome ?? "none"} pour ${controlledSegmentSandboxTimelineModel.override.finalTeamCandidate ?? "none"}, acteur ${controlledSegmentSandboxTimelineModel.override.finalActorCandidate ?? "none"}, zone ${controlledSegmentSandboxTimelineModel.override.finalZoneCandidate ?? "none"}. Elle n'est pas la timeline officielle : aucun MatchEvent officiel, aucune insertion dans la timeline officielle, aucune mutation de possession, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2305,6 +2386,10 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     reboundSecondChanceModel,
     multiActionContinuationModel,
   });
+  const controlledSegmentSandboxTimelineModel = controlledSegmentSandboxTimelineFromReplay({
+    matchInput: input,
+    sandboxSequenceReplayModel,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -2362,6 +2447,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && reboundSecondChanceModel.status !== "not_available" ? { reboundSecondChanceModel } : {}),
           ...(index === 0 && multiActionContinuationModel.status !== "not_available" ? { multiActionContinuationModel } : {}),
           ...(index === 0 && sandboxSequenceReplayModel.status !== "not_available" ? { sandboxSequenceReplayModel } : {}),
+          ...(index === 0 && controlledSegmentSandboxTimelineModel.status !== "not_available" ? { controlledSegmentSandboxTimelineModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -2448,6 +2534,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...reboundSecondChanceModelLimitations(reboundSecondChanceModel),
       ...multiActionContinuationModelLimitations(multiActionContinuationModel),
       ...sandboxSequenceReplayModelLimitations(sandboxSequenceReplayModel),
+      ...controlledSegmentSandboxTimelineModelLimitations(controlledSegmentSandboxTimelineModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2550,6 +2637,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: sandboxSequenceReplayModel,
   });
+  const controlledSegmentSandboxTimelineModelFact = controlledSegmentSandboxTimelineModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: controlledSegmentSandboxTimelineModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2571,6 +2663,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(reboundSecondChanceModelFact === null ? [] : [reboundSecondChanceModelFact]),
     ...(multiActionContinuationModelFact === null ? [] : [multiActionContinuationModelFact]),
     ...(sandboxSequenceReplayModelFact === null ? [] : [sandboxSequenceReplayModelFact]),
+    ...(controlledSegmentSandboxTimelineModelFact === null ? [] : [controlledSegmentSandboxTimelineModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2602,6 +2695,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     reboundSecondChanceModel,
     multiActionContinuationModel,
     sandboxSequenceReplayModel,
+    controlledSegmentSandboxTimelineModel,
   );
 }
 ```
@@ -15802,6 +15896,709 @@ export function sandboxSequenceReplaySignature(report: MatchReport): {
 }
 ```
 
+## File: src/simulation/fullMatch/controlledSegmentSandboxTimeline.ts
+
+```ts
+import type {
+  SandboxSequenceReplayStatus,
+  SandboxSequenceStepSource,
+  SandboxSequenceStepType,
+  SandboxSequenceTeamCandidate,
+} from "./sandboxSequenceReplay";
+
+export type ControlledSegmentSandboxTimelineStatus = SandboxSequenceReplayStatus;
+
+export type ControlledSegmentSandboxTimelineScope =
+  | "controlled_segment_sandbox_timeline"
+  | "production_scoring_forbidden";
+
+export type ControlledSegmentSandboxTimelineOrigin =
+  | "none"
+  | "sandbox_sequence_replay";
+
+export type ControlledSegmentSandboxTimelineEventType =
+  | "sandbox_sequence_start"
+  | "sandbox_baseline_route_reference"
+  | "sandbox_route_resolved"
+  | "sandbox_no_scoring_opportunity"
+  | "sandbox_opportunity_classified"
+  | "sandbox_no_scoring_event_candidate"
+  | "sandbox_scoring_candidate_created"
+  | "sandbox_no_score_attempt"
+  | "sandbox_shot_resolved"
+  | "sandbox_no_goalkeeper_response"
+  | "sandbox_goalkeeper_response"
+  | "sandbox_no_rebound"
+  | "sandbox_rebound_state"
+  | "sandbox_no_continuation"
+  | "sandbox_continuation_action"
+  | "sandbox_sequence_end";
+
+export type ControlledSegmentSandboxTimelineEvent = {
+  readonly sandboxEventId: string;
+  readonly sandboxIndex: number;
+  readonly sandboxMinuteOffset: number;
+  readonly eventType: ControlledSegmentSandboxTimelineEventType;
+  readonly sourceStepId: string;
+  readonly sourceStepType: SandboxSequenceStepType;
+  readonly sourceStepSource: SandboxSequenceStepSource;
+  readonly pathId: "baseline" | "override";
+  readonly actorId?: string;
+  readonly teamCandidate?: SandboxSequenceTeamCandidate;
+  readonly targetZone?: string;
+  readonly outcome?: string;
+  readonly confidence: number;
+  readonly createsOfficialMatchEvent: false;
+  readonly insertedIntoOfficialTimeline: false;
+  readonly mutatesOfficialTimeline: false;
+  readonly mutatesOfficialPossession: false;
+  readonly mutatesOfficialScore: false;
+  readonly mutatesOfficialScoringEvents: false;
+  readonly createsProductionScoringEvent: false;
+  readonly mutatesProductionRouteResolution: false;
+  readonly mutatesGlobalRouteSuccessRates: false;
+  readonly reasons: readonly string[];
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type ControlledSegmentSandboxTimelinePath = {
+  readonly pathId: "baseline" | "override";
+  readonly status: ControlledSegmentSandboxTimelineStatus;
+  readonly events: readonly ControlledSegmentSandboxTimelineEvent[];
+  readonly eventCount: number;
+  readonly firstEventType?: ControlledSegmentSandboxTimelineEventType;
+  readonly finalEventType?: ControlledSegmentSandboxTimelineEventType;
+  readonly finalOutcome?: string;
+  readonly finalTeamCandidate?: string;
+  readonly finalActorCandidate?: string;
+  readonly finalZoneCandidate?: string;
+  readonly officialTimelineEventCreatedCount: 0;
+  readonly officialTimelineMutationCount: 0;
+  readonly officialPossessionMutationCount: 0;
+  readonly officialScoreMutationCount: 0;
+  readonly officialScoringEventMutationCount: 0;
+  readonly productionScoringEventCreationCount: 0;
+};
+
+export type ControlledSegmentSandboxTimelineModel = {
+  readonly status: ControlledSegmentSandboxTimelineStatus;
+  readonly scope: ControlledSegmentSandboxTimelineScope;
+  readonly origin: ControlledSegmentSandboxTimelineOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly baseline: ControlledSegmentSandboxTimelinePath;
+  readonly override: ControlledSegmentSandboxTimelinePath;
+  readonly baselineEventCount: number;
+  readonly overrideEventCount: number;
+  readonly sandboxTimelineCreated: boolean;
+  readonly sandboxTimelineSeparateFromOfficialTimeline: boolean;
+  readonly sandboxTimelineEventCountDivergenceObserved: boolean;
+  readonly sandboxTimelineOutcomeDivergenceObserved: boolean;
+  readonly sandboxTimelineFinalTeamDivergenceObserved: boolean;
+  readonly sandboxTimelineFinalZoneDivergenceObserved: boolean;
+  readonly officialTimelineDivergenceObserved: false;
+  readonly officialPossessionDivergenceObserved: false;
+  readonly officialScoreDivergenceObserved: false;
+  readonly officialScoringEventDivergenceObserved: false;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly canInjectEventsIntoOfficialTimeline: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateOfficialPossession: false;
+  readonly canMutateOfficialTimeline: false;
+  readonly canMutateProductionRouteResolution: false;
+  readonly canMutateGlobalRouteSuccessRates: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly explanation?: string;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyControlledSegmentSandboxTimelinePath(pathId: "baseline" | "override"): ControlledSegmentSandboxTimelinePath {
+  return {
+    pathId,
+    status: "not_available",
+    events: [],
+    eventCount: 0,
+    officialTimelineEventCreatedCount: 0,
+    officialTimelineMutationCount: 0,
+    officialPossessionMutationCount: 0,
+    officialScoreMutationCount: 0,
+    officialScoringEventMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+  };
+}
+
+export function emptyControlledSegmentSandboxTimelineModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): ControlledSegmentSandboxTimelineModel {
+  return {
+    status: "not_available",
+    scope: "production_scoring_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    baseline: emptyControlledSegmentSandboxTimelinePath("baseline"),
+    override: emptyControlledSegmentSandboxTimelinePath("override"),
+    baselineEventCount: 0,
+    overrideEventCount: 0,
+    sandboxTimelineCreated: false,
+    sandboxTimelineSeparateFromOfficialTimeline: true,
+    sandboxTimelineEventCountDivergenceObserved: false,
+    sandboxTimelineOutcomeDivergenceObserved: false,
+    sandboxTimelineFinalTeamDivergenceObserved: false,
+    sandboxTimelineFinalZoneDivergenceObserved: false,
+    officialTimelineDivergenceObserved: false,
+    officialPossessionDivergenceObserved: false,
+    officialScoreDivergenceObserved: false,
+    officialScoringEventDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: false,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/buildControlledSegmentSandboxEvent.ts
+
+```ts
+import type { SandboxSequenceStep } from "./sandboxSequenceReplay";
+import type {
+  ControlledSegmentSandboxTimelineEvent,
+  ControlledSegmentSandboxTimelineEventType,
+} from "./controlledSegmentSandboxTimeline";
+
+export function buildControlledSegmentSandboxEvent(input: {
+  readonly step: SandboxSequenceStep;
+  readonly eventType: ControlledSegmentSandboxTimelineEventType;
+  readonly sandboxIndex: number;
+  readonly sandboxMinuteOffset: number;
+}): ControlledSegmentSandboxTimelineEvent {
+  const eventId = `controlled-segment-sandbox-${input.step.pathId}-${input.sandboxIndex}-${input.eventType}`;
+
+  return {
+    sandboxEventId: eventId,
+    sandboxIndex: input.sandboxIndex,
+    sandboxMinuteOffset: input.sandboxMinuteOffset,
+    eventType: input.eventType,
+    sourceStepId: input.step.stepId,
+    sourceStepType: input.step.stepType,
+    sourceStepSource: input.step.source,
+    pathId: input.step.pathId,
+    ...(input.step.actorId === undefined ? {} : { actorId: input.step.actorId }),
+    ...(input.step.teamCandidate === undefined ? {} : { teamCandidate: input.step.teamCandidate }),
+    ...(input.step.targetZone === undefined ? {} : { targetZone: input.step.targetZone }),
+    ...(input.step.outcome === undefined ? {} : { outcome: input.step.outcome }),
+    confidence: input.step.confidence,
+    createsOfficialMatchEvent: false,
+    insertedIntoOfficialTimeline: false,
+    mutatesOfficialTimeline: false,
+    mutatesOfficialPossession: false,
+    mutatesOfficialScore: false,
+    mutatesOfficialScoringEvents: false,
+    createsProductionScoringEvent: false,
+    mutatesProductionRouteResolution: false,
+    mutatesGlobalRouteSuccessRates: false,
+    reasons: input.step.reasons,
+    tags: [
+      "controlled_segment_sandbox_timeline_event",
+      `controlled_segment_sandbox_${input.step.pathId}_event_${input.sandboxIndex}`,
+      `controlled_segment_sandbox_${input.step.pathId}_event_type_${input.eventType}`,
+      `controlled_segment_sandbox_${input.step.pathId}_event_source_step_${input.step.stepType}`,
+      `controlled_segment_sandbox_${input.step.pathId}_event_confidence_${input.step.confidence}`,
+      ...(input.step.outcome === undefined ? [] : [`controlled_segment_sandbox_${input.step.pathId}_event_outcome_${input.step.outcome}`]),
+      ...(input.step.targetZone === undefined ? [] : [`controlled_segment_sandbox_${input.step.pathId}_event_zone_${input.step.targetZone}`]),
+      ...(input.step.actorId === undefined ? [] : [`controlled_segment_sandbox_${input.step.pathId}_event_actor_${input.step.actorId}`]),
+      ...(input.step.teamCandidate === undefined ? [] : [`controlled_segment_sandbox_${input.step.pathId}_event_team_${input.step.teamCandidate}`]),
+      "controlled_segment_sandbox_event_official_match_event_created_false",
+      "controlled_segment_sandbox_event_inserted_official_timeline_false",
+      "controlled_segment_sandbox_event_official_timeline_mutation_false",
+      "controlled_segment_sandbox_event_official_possession_mutation_false",
+      "controlled_segment_sandbox_event_official_score_mutation_false",
+      "controlled_segment_sandbox_event_official_scoring_event_mutation_false",
+      "controlled_segment_sandbox_event_production_scoring_event_creation_false",
+      "controlled_segment_sandbox_event_production_route_resolution_mutation_false",
+      "controlled_segment_sandbox_event_global_route_success_mutation_false",
+    ],
+    warnings: input.step.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxStepToTimelineEvent.ts
+
+```ts
+import type { SandboxSequenceStepType } from "./sandboxSequenceReplay";
+import type { ControlledSegmentSandboxTimelineEventType } from "./controlledSegmentSandboxTimeline";
+
+export function sandboxStepToTimelineEvent(stepType: SandboxSequenceStepType): ControlledSegmentSandboxTimelineEventType {
+  switch (stepType) {
+    case "SANDBOX_SEQUENCE_START":
+      return "sandbox_sequence_start";
+    case "BASELINE_ROUTE_REFERENCE":
+      return "sandbox_baseline_route_reference";
+    case "CONTROLLED_ROUTE_RESOLVED":
+      return "sandbox_route_resolved";
+    case "NO_SCORING_OPPORTUNITY":
+      return "sandbox_no_scoring_opportunity";
+    case "SCORING_OPPORTUNITY_CLASSIFIED":
+      return "sandbox_opportunity_classified";
+    case "NO_SCORING_EVENT_CANDIDATE":
+      return "sandbox_no_scoring_event_candidate";
+    case "SCORING_EVENT_CANDIDATE_CREATED":
+      return "sandbox_scoring_candidate_created";
+    case "NO_SCORE_ATTEMPT":
+      return "sandbox_no_score_attempt";
+    case "SHOT_RESOLVED":
+      return "sandbox_shot_resolved";
+    case "NO_GOALKEEPER_RESPONSE":
+      return "sandbox_no_goalkeeper_response";
+    case "GOALKEEPER_RESPONSE_RESOLVED":
+      return "sandbox_goalkeeper_response";
+    case "NO_REBOUND":
+      return "sandbox_no_rebound";
+    case "REBOUND_STATE_RESOLVED":
+      return "sandbox_rebound_state";
+    case "NO_CONTINUATION":
+      return "sandbox_no_continuation";
+    case "CONTINUATION_ACTION_RESOLVED":
+      return "sandbox_continuation_action";
+    case "SANDBOX_SEQUENCE_END":
+      return "sandbox_sequence_end";
+  }
+}
+```
+
+## File: src/simulation/fullMatch/controlledSegmentSandboxTimelineFromReplay.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import { buildControlledSegmentSandboxEvent } from "./buildControlledSegmentSandboxEvent";
+import { compareControlledSegmentSandboxTimeline } from "./compareControlledSegmentSandboxTimeline";
+import {
+  emptyControlledSegmentSandboxTimelineModel,
+  type ControlledSegmentSandboxTimelineModel,
+  type ControlledSegmentSandboxTimelinePath,
+  type ControlledSegmentSandboxTimelineStatus,
+} from "./controlledSegmentSandboxTimeline";
+import type { SandboxSequenceReplayModel, SandboxSequenceReplayPath } from "./sandboxSequenceReplay";
+import { sandboxStepToTimelineEvent } from "./sandboxStepToTimelineEvent";
+
+function statusForReplay(replay: SandboxSequenceReplayModel): ControlledSegmentSandboxTimelineStatus {
+  if (replay.status === "available") {
+    return "available";
+  }
+
+  if (replay.status === "failed" || replay.status === "blocked") {
+    return replay.status;
+  }
+
+  if (replay.status === "partial") {
+    return "partial";
+  }
+
+  return "not_available";
+}
+
+function pathFromReplayPath(input: {
+  readonly replayPath: SandboxSequenceReplayPath;
+  readonly status: ControlledSegmentSandboxTimelineStatus;
+}): ControlledSegmentSandboxTimelinePath {
+  const events = input.replayPath.steps.map((step, index) =>
+    buildControlledSegmentSandboxEvent({
+      step,
+      eventType: sandboxStepToTimelineEvent(step.stepType),
+      sandboxIndex: index,
+      sandboxMinuteOffset: input.replayPath.pathId === "baseline" ? index : index + 100,
+    })
+  );
+  const firstEvent = events[0];
+  const finalEvent = events[events.length - 1];
+
+  return {
+    pathId: input.replayPath.pathId,
+    status: input.status,
+    events,
+    eventCount: events.length,
+    ...(firstEvent === undefined ? {} : { firstEventType: firstEvent.eventType }),
+    ...(finalEvent === undefined ? {} : { finalEventType: finalEvent.eventType }),
+    ...(input.replayPath.finalOutcome === undefined ? {} : { finalOutcome: input.replayPath.finalOutcome }),
+    ...(input.replayPath.finalTeamCandidate === undefined ? {} : { finalTeamCandidate: input.replayPath.finalTeamCandidate }),
+    ...(input.replayPath.finalActorCandidate === undefined ? {} : { finalActorCandidate: input.replayPath.finalActorCandidate }),
+    ...(input.replayPath.finalZoneCandidate === undefined ? {} : { finalZoneCandidate: input.replayPath.finalZoneCandidate }),
+    officialTimelineEventCreatedCount: 0,
+    officialTimelineMutationCount: 0,
+    officialPossessionMutationCount: 0,
+    officialScoreMutationCount: 0,
+    officialScoringEventMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+  };
+}
+
+export function controlledSegmentSandboxTimelineCannotMutateOfficialFullMatch(model: ControlledSegmentSandboxTimelineModel): boolean {
+  const events = [...model.baseline.events, ...model.override.events];
+
+  return (
+    !model.canInjectEventsIntoOfficialTimeline &&
+    !model.canMutateOfficialScore &&
+    !model.canMutateOfficialScoringEvents &&
+    !model.canMutateOfficialPossession &&
+    !model.canMutateOfficialTimeline &&
+    !model.canMutateProductionRouteResolution &&
+    !model.canMutateGlobalRouteSuccessRates &&
+    !model.canCreateProductionScoringEvents &&
+    !model.modelAppliedToNormalLiveSelection &&
+    events.every((event) =>
+      !event.createsOfficialMatchEvent &&
+      !event.insertedIntoOfficialTimeline &&
+      !event.mutatesOfficialTimeline &&
+      !event.mutatesOfficialPossession &&
+      !event.mutatesOfficialScore &&
+      !event.mutatesOfficialScoringEvents &&
+      !event.createsProductionScoringEvent &&
+      !event.mutatesProductionRouteResolution &&
+      !event.mutatesGlobalRouteSuccessRates
+    )
+  );
+}
+
+export function controlledSegmentSandboxTimelineCannotClaimGlobalEconomy(model: ControlledSegmentSandboxTimelineModel): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateControlledSegmentSandboxTimelineModel(model: ControlledSegmentSandboxTimelineModel): readonly string[] {
+  const shouldValidate = model.status === "available";
+
+  return [
+    ...(shouldValidate && model.origin !== "sandbox_sequence_replay"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && model.baseline.eventCount !== 9 ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_BASELINE_EVENT_COUNT_NOT_9"] : []),
+    ...(shouldValidate && model.override.eventCount !== 9 ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_OVERRIDE_EVENT_COUNT_NOT_9"] : []),
+    ...(shouldValidate && model.baseline.finalEventType !== "sandbox_sequence_end"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_BASELINE_FINAL_EVENT_UNEXPECTED"]
+      : []),
+    ...(shouldValidate && model.override.finalEventType !== "sandbox_sequence_end"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_OVERRIDE_FINAL_EVENT_UNEXPECTED"]
+      : []),
+    ...(shouldValidate && model.baseline.finalOutcome !== "none"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_BASELINE_FINAL_OUTCOME_NOT_NONE"]
+      : []),
+    ...(shouldValidate && model.override.finalOutcome !== "secured_by_goalkeeper_team"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_OVERRIDE_FINAL_OUTCOME_UNEXPECTED"]
+      : []),
+    ...(shouldValidate && model.override.finalTeamCandidate !== "goalkeeper_team"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_OVERRIDE_FINAL_TEAM_UNEXPECTED"]
+      : []),
+    ...(shouldValidate && model.override.finalActorCandidate !== "blitz-goalkeeper-free-safety"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_OVERRIDE_FINAL_ACTOR_UNEXPECTED"]
+      : []),
+    ...(shouldValidate && model.override.finalZoneCandidate !== "Z3-HSR"
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_OVERRIDE_FINAL_ZONE_UNEXPECTED"]
+      : []),
+    ...(shouldValidate && !model.sandboxTimelineCreated ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_NOT_CREATED"] : []),
+    ...(shouldValidate && !model.sandboxTimelineSeparateFromOfficialTimeline
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_NOT_SEPARATE_FROM_OFFICIAL"]
+      : []),
+    ...(!controlledSegmentSandboxTimelineCannotMutateOfficialFullMatch(model)
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!controlledSegmentSandboxTimelineCannotClaimGlobalEconomy(model)
+      ? ["CONTROLLED_SEGMENT_SANDBOX_TIMELINE_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function controlledSegmentSandboxTimelineFromReplay(input: {
+  readonly matchInput: MatchInput;
+  readonly sandboxSequenceReplayModel: SandboxSequenceReplayModel;
+}): ControlledSegmentSandboxTimelineModel {
+  if (input.sandboxSequenceReplayModel.status === "not_available") {
+    return emptyControlledSegmentSandboxTimelineModel({
+      ...(input.sandboxSequenceReplayModel.segmentLabel === undefined ? {} : { segmentLabel: input.sandboxSequenceReplayModel.segmentLabel }),
+      ...(input.sandboxSequenceReplayModel.chainId === undefined ? {} : { chainId: input.sandboxSequenceReplayModel.chainId }),
+      warnings: input.sandboxSequenceReplayModel.warnings,
+    });
+  }
+
+  const status = statusForReplay(input.sandboxSequenceReplayModel);
+  const baseline = pathFromReplayPath({
+    replayPath: input.sandboxSequenceReplayModel.baseline,
+    status,
+  });
+  const override = pathFromReplayPath({
+    replayPath: input.sandboxSequenceReplayModel.override,
+    status,
+  });
+  const comparison = compareControlledSegmentSandboxTimeline({ baseline, override });
+  const result: ControlledSegmentSandboxTimelineModel = {
+    status,
+    scope: status === "available" ? "controlled_segment_sandbox_timeline" : "production_scoring_forbidden",
+    origin: "sandbox_sequence_replay",
+    ...(input.sandboxSequenceReplayModel.segmentLabel === undefined ? {} : { segmentLabel: input.sandboxSequenceReplayModel.segmentLabel }),
+    ...(input.sandboxSequenceReplayModel.chainId === undefined ? {} : { chainId: input.sandboxSequenceReplayModel.chainId }),
+    baseline,
+    override,
+    baselineEventCount: baseline.eventCount,
+    overrideEventCount: override.eventCount,
+    sandboxTimelineCreated: status === "available",
+    sandboxTimelineSeparateFromOfficialTimeline: true,
+    sandboxTimelineEventCountDivergenceObserved: comparison.sandboxTimelineEventCountDivergenceObserved,
+    sandboxTimelineOutcomeDivergenceObserved: comparison.sandboxTimelineOutcomeDivergenceObserved,
+    sandboxTimelineFinalTeamDivergenceObserved: comparison.sandboxTimelineFinalTeamDivergenceObserved,
+    sandboxTimelineFinalZoneDivergenceObserved: comparison.sandboxTimelineFinalZoneDivergenceObserved,
+    officialTimelineDivergenceObserved: false,
+    officialPossessionDivergenceObserved: false,
+    officialScoreDivergenceObserved: false,
+    officialScoringEventDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: status === "available",
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input.sandboxSequenceReplayModel.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: input.sandboxSequenceReplayModel.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    explanation: comparison.explanation,
+    tags: [
+      "workbench_chain_controlled_segment_sandbox_timeline",
+      "controlled_segment_sandbox_timeline",
+      `controlled_segment_sandbox_timeline_model_status_${status}`,
+      "controlled_segment_sandbox_timeline_model_origin_sandbox_sequence_replay",
+      `controlled_segment_sandbox_timeline_segment_${input.sandboxSequenceReplayModel.segmentLabel ?? "segment-1"}`,
+      `controlled_segment_sandbox_timeline_baseline_event_count_${baseline.eventCount}`,
+      `controlled_segment_sandbox_timeline_override_event_count_${override.eventCount}`,
+      `controlled_segment_sandbox_timeline_baseline_event_types_${baseline.events.map((event) => event.eventType).join("__")}`,
+      `controlled_segment_sandbox_timeline_override_event_types_${override.events.map((event) => event.eventType).join("__")}`,
+      `controlled_segment_sandbox_timeline_baseline_final_outcome_${baseline.finalOutcome ?? "none"}`,
+      `controlled_segment_sandbox_timeline_override_final_outcome_${override.finalOutcome ?? "none"}`,
+      `controlled_segment_sandbox_timeline_override_final_team_${override.finalTeamCandidate ?? "none"}`,
+      `controlled_segment_sandbox_timeline_override_final_actor_${override.finalActorCandidate ?? "none"}`,
+      `controlled_segment_sandbox_timeline_override_final_zone_${override.finalZoneCandidate ?? "none"}`,
+      `controlled_segment_sandbox_timeline_created_${status === "available" ? "true" : "false"}`,
+      "controlled_segment_sandbox_timeline_separate_from_official_true",
+      `controlled_segment_sandbox_timeline_event_count_divergence_${comparison.sandboxTimelineEventCountDivergenceObserved ? "true" : "false"}`,
+      `controlled_segment_sandbox_timeline_outcome_divergence_${comparison.sandboxTimelineOutcomeDivergenceObserved ? "true" : "false"}`,
+      `controlled_segment_sandbox_timeline_final_team_divergence_${comparison.sandboxTimelineFinalTeamDivergenceObserved ? "true" : "false"}`,
+      `controlled_segment_sandbox_timeline_final_zone_divergence_${comparison.sandboxTimelineFinalZoneDivergenceObserved ? "true" : "false"}`,
+      "controlled_segment_sandbox_timeline_official_timeline_event_created_count_0",
+      "controlled_segment_sandbox_timeline_official_timeline_mutation_count_0",
+      "controlled_segment_sandbox_timeline_official_possession_mutation_count_0",
+      "controlled_segment_sandbox_timeline_official_score_mutation_count_0",
+      "controlled_segment_sandbox_timeline_official_scoring_event_mutation_count_0",
+      "controlled_segment_sandbox_timeline_production_scoring_event_creation_count_0",
+      "controlled_segment_sandbox_timeline_production_route_resolution_mutation_count_0",
+      "controlled_segment_sandbox_timeline_global_route_success_mutation_count_0",
+      "controlled_segment_sandbox_timeline_global_economy_claim_count_0",
+      `controlled_segment_sandbox_timeline_model_applied_only_in_sandbox_${status === "available" ? "true" : "false"}`,
+      "controlled_segment_sandbox_timeline_model_applied_to_normal_live_false",
+      `controlled_segment_sandbox_timeline_rejected_closed_count_${input.sandboxSequenceReplayModel.rejectedClosedCandidateCount}`,
+      `controlled_segment_sandbox_timeline_rejected_unavailable_count_${input.sandboxSequenceReplayModel.rejectedUnavailableCandidateCount}`,
+      "controlled_segment_sandbox_timeline_official_timeline_injection_forbidden",
+      "controlled_segment_sandbox_timeline_official_score_mutation_forbidden",
+      "controlled_segment_sandbox_timeline_official_scoring_events_mutation_forbidden",
+      "controlled_segment_sandbox_timeline_official_possession_mutation_forbidden",
+      "controlled_segment_sandbox_timeline_production_scoring_event_creation_forbidden",
+      "controlled_segment_sandbox_timeline_production_route_resolution_mutation_forbidden",
+      "controlled_segment_sandbox_timeline_global_route_success_mutation_forbidden",
+      "controlled_segment_sandbox_timeline_global_economy_claim_forbidden",
+      ...baseline.events.flatMap((event) => event.tags),
+      ...override.events.flatMap((event) => event.tags),
+    ],
+    warnings: input.sandboxSequenceReplayModel.warnings,
+  };
+  const warnings = validateControlledSegmentSandboxTimelineModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/compareControlledSegmentSandboxTimeline.ts
+
+```ts
+import type { ControlledSegmentSandboxTimelinePath } from "./controlledSegmentSandboxTimeline";
+
+export function compareControlledSegmentSandboxTimeline(input: {
+  readonly baseline: ControlledSegmentSandboxTimelinePath;
+  readonly override: ControlledSegmentSandboxTimelinePath;
+}): {
+  readonly sandboxTimelineEventCountDivergenceObserved: boolean;
+  readonly sandboxTimelineOutcomeDivergenceObserved: boolean;
+  readonly sandboxTimelineFinalTeamDivergenceObserved: boolean;
+  readonly sandboxTimelineFinalZoneDivergenceObserved: boolean;
+  readonly officialTimelineDivergenceObserved: false;
+  readonly officialPossessionDivergenceObserved: false;
+  readonly officialScoreDivergenceObserved: false;
+  readonly officialScoringEventDivergenceObserved: false;
+  readonly explanation: string;
+} {
+  const sandboxTimelineEventCountDivergenceObserved = input.baseline.eventCount !== input.override.eventCount;
+  const sandboxTimelineOutcomeDivergenceObserved = input.baseline.finalOutcome !== input.override.finalOutcome;
+  const sandboxTimelineFinalTeamDivergenceObserved = input.baseline.finalTeamCandidate !== input.override.finalTeamCandidate;
+  const sandboxTimelineFinalZoneDivergenceObserved = input.baseline.finalZoneCandidate !== input.override.finalZoneCandidate;
+
+  return {
+    sandboxTimelineEventCountDivergenceObserved,
+    sandboxTimelineOutcomeDivergenceObserved,
+    sandboxTimelineFinalTeamDivergenceObserved,
+    sandboxTimelineFinalZoneDivergenceObserved,
+    officialTimelineDivergenceObserved: false,
+    officialPossessionDivergenceObserved: false,
+    officialScoreDivergenceObserved: false,
+    officialScoringEventDivergenceObserved: false,
+    explanation:
+      `Baseline sandbox timeline ends with ${input.baseline.finalOutcome ?? "none"}; ` +
+      `override sandbox timeline ends with ${input.override.finalOutcome ?? "none"} for ${input.override.finalTeamCandidate ?? "none"} ` +
+      `at ${input.override.finalZoneCandidate ?? "none"}. This is a separate sandbox timeline, not the official MatchReport timeline.`,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/controlledSegmentSandboxTimelineSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function valueFromTag(tags: readonly string[], prefix: string): string | undefined {
+  return tags.find((tag) => tag.startsWith(prefix))?.slice(prefix.length);
+}
+
+function numberFromTag(tags: readonly string[], prefix: string): number {
+  const value = valueFromTag(tags, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+function tagCount(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+export function controlledSegmentSandboxTimelineSignature(report: MatchReport): {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly tagCount: number;
+  readonly officialSandboxTimelineEventCount: number;
+  readonly status: string | undefined;
+  readonly origin: string | undefined;
+  readonly baselineEventCount: string | undefined;
+  readonly overrideEventCount: string | undefined;
+  readonly baselineEventTypes: string | undefined;
+  readonly overrideEventTypes: string | undefined;
+  readonly baselineFinalOutcome: string | undefined;
+  readonly overrideFinalOutcome: string | undefined;
+  readonly overrideFinalTeamCandidate: string | undefined;
+  readonly overrideFinalActorCandidate: string | undefined;
+  readonly overrideFinalZoneCandidate: string | undefined;
+  readonly sandboxTimelineCreated: string | undefined;
+  readonly sandboxTimelineSeparateFromOfficialTimeline: string | undefined;
+  readonly sandboxTimelineEventCountDivergenceObserved: string | undefined;
+  readonly sandboxTimelineOutcomeDivergenceObserved: string | undefined;
+  readonly sandboxTimelineFinalTeamDivergenceObserved: string | undefined;
+  readonly sandboxTimelineFinalZoneDivergenceObserved: string | undefined;
+  readonly modelAppliedOnlyInSandbox: string | undefined;
+  readonly modelAppliedToNormalLiveSelection: string | undefined;
+  readonly officialTimelineEventCreatedCount: number;
+  readonly officialTimelineMutationCount: number;
+  readonly officialPossessionMutationCount: number;
+  readonly officialScoreMutationCount: number;
+  readonly officialScoringEventMutationCount: number;
+  readonly productionScoringEventCreationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly globalRouteSuccessRateMutationCount: number;
+  readonly globalEconomyClaimCount: number;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+} {
+  const facts = report.evidenceFacts.flatMap((fact) => fact.internalTags);
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    tagCount: tagCount(report, "workbench_chain_controlled_segment_sandbox_timeline"),
+    officialSandboxTimelineEventCount: report.timeline.filter((event) =>
+      event.eventId.includes("controlled-segment-sandbox")
+    ).length,
+    status: valueFromTag(facts, "controlled_segment_sandbox_timeline_model_status_"),
+    origin: valueFromTag(facts, "controlled_segment_sandbox_timeline_model_origin_"),
+    baselineEventCount: valueFromTag(facts, "controlled_segment_sandbox_timeline_baseline_event_count_"),
+    overrideEventCount: valueFromTag(facts, "controlled_segment_sandbox_timeline_override_event_count_"),
+    baselineEventTypes: valueFromTag(facts, "controlled_segment_sandbox_timeline_baseline_event_types_"),
+    overrideEventTypes: valueFromTag(facts, "controlled_segment_sandbox_timeline_override_event_types_"),
+    baselineFinalOutcome: valueFromTag(facts, "controlled_segment_sandbox_timeline_baseline_final_outcome_"),
+    overrideFinalOutcome: valueFromTag(facts, "controlled_segment_sandbox_timeline_override_final_outcome_"),
+    overrideFinalTeamCandidate: valueFromTag(facts, "controlled_segment_sandbox_timeline_override_final_team_"),
+    overrideFinalActorCandidate: valueFromTag(facts, "controlled_segment_sandbox_timeline_override_final_actor_"),
+    overrideFinalZoneCandidate: valueFromTag(facts, "controlled_segment_sandbox_timeline_override_final_zone_"),
+    sandboxTimelineCreated: valueFromTag(facts, "controlled_segment_sandbox_timeline_created_"),
+    sandboxTimelineSeparateFromOfficialTimeline: valueFromTag(facts, "controlled_segment_sandbox_timeline_separate_from_official_"),
+    sandboxTimelineEventCountDivergenceObserved: valueFromTag(facts, "controlled_segment_sandbox_timeline_event_count_divergence_"),
+    sandboxTimelineOutcomeDivergenceObserved: valueFromTag(facts, "controlled_segment_sandbox_timeline_outcome_divergence_"),
+    sandboxTimelineFinalTeamDivergenceObserved: valueFromTag(facts, "controlled_segment_sandbox_timeline_final_team_divergence_"),
+    sandboxTimelineFinalZoneDivergenceObserved: valueFromTag(facts, "controlled_segment_sandbox_timeline_final_zone_divergence_"),
+    modelAppliedOnlyInSandbox: valueFromTag(facts, "controlled_segment_sandbox_timeline_model_applied_only_in_sandbox_"),
+    modelAppliedToNormalLiveSelection: valueFromTag(facts, "controlled_segment_sandbox_timeline_model_applied_to_normal_live_"),
+    officialTimelineEventCreatedCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_official_timeline_event_created_count_"),
+    officialTimelineMutationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_official_timeline_mutation_count_"),
+    officialPossessionMutationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_official_possession_mutation_count_"),
+    officialScoreMutationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_official_score_mutation_count_"),
+    officialScoringEventMutationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_official_scoring_event_mutation_count_"),
+    productionScoringEventCreationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_production_scoring_event_creation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_production_route_resolution_mutation_count_"),
+    globalRouteSuccessRateMutationCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_global_route_success_mutation_count_"),
+    globalEconomyClaimCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_global_economy_claim_count_"),
+    rejectedClosedCandidateCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_rejected_closed_count_"),
+    rejectedUnavailableCandidateCount: numberFromTag(facts, "controlled_segment_sandbox_timeline_rejected_unavailable_count_"),
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -23238,6 +24035,171 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/controlledSegmentSandboxTimeline.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { controlledSegmentSandboxTimelineSignature } from "./controlledSegmentSandboxTimelineSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateControlledSegmentSandboxTimeline(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = controlledSegmentSandboxTimelineSignature(report);
+
+  assertTest(signature.status === "available", "controlled segment sandbox timeline should be available behind the experimental flag.");
+  assertTest(signature.origin === "sandbox_sequence_replay", "controlled segment sandbox timeline should originate from sandbox sequence replay.");
+  assertTest(signature.baselineEventCount === "9", "baseline timeline event count should be 9.");
+  assertTest(signature.overrideEventCount === "9", "override timeline event count should be 9.");
+  assertTest(signature.officialSandboxTimelineEventCount === 0, "controlled segment sandbox events must not be official timeline events.");
+  assertTest(signature.officialTimelineEventCreatedCount === 0, "controlled segment sandbox timeline must not create official timeline events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "controlled segment sandbox timeline must not create production scoring events.");
+  assertTest(signature.globalEconomyClaimCount === 0, "controlled segment sandbox timeline must not claim global economy.");
+
+  return [
+    "controlled segment sandbox timeline is available behind the experimental flag",
+    "controlled segment sandbox timeline consumes sandbox sequence replay output",
+    "baseline and override timeline paths each contain 9 events",
+    "sandbox timeline events remain separate from official MatchReport events",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateControlledSegmentSandboxTimeline();
+
+  console.log("controlledSegmentSandboxTimeline tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxStepToTimelineEvent.test.ts
+
+```ts
+import { sandboxStepToTimelineEvent } from "./sandboxStepToTimelineEvent";
+import type { SandboxSequenceStepType } from "./sandboxSequenceReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+const EXPECTED: Readonly<Record<SandboxSequenceStepType, string>> = {
+  SANDBOX_SEQUENCE_START: "sandbox_sequence_start",
+  BASELINE_ROUTE_REFERENCE: "sandbox_baseline_route_reference",
+  CONTROLLED_ROUTE_RESOLVED: "sandbox_route_resolved",
+  NO_SCORING_OPPORTUNITY: "sandbox_no_scoring_opportunity",
+  SCORING_OPPORTUNITY_CLASSIFIED: "sandbox_opportunity_classified",
+  NO_SCORING_EVENT_CANDIDATE: "sandbox_no_scoring_event_candidate",
+  SCORING_EVENT_CANDIDATE_CREATED: "sandbox_scoring_candidate_created",
+  NO_SCORE_ATTEMPT: "sandbox_no_score_attempt",
+  SHOT_RESOLVED: "sandbox_shot_resolved",
+  NO_GOALKEEPER_RESPONSE: "sandbox_no_goalkeeper_response",
+  GOALKEEPER_RESPONSE_RESOLVED: "sandbox_goalkeeper_response",
+  NO_REBOUND: "sandbox_no_rebound",
+  REBOUND_STATE_RESOLVED: "sandbox_rebound_state",
+  NO_CONTINUATION: "sandbox_no_continuation",
+  CONTINUATION_ACTION_RESOLVED: "sandbox_continuation_action",
+  SANDBOX_SEQUENCE_END: "sandbox_sequence_end",
+};
+
+export function validateSandboxStepToTimelineEvent(): readonly string[] {
+  for (const [stepType, eventType] of Object.entries(EXPECTED)) {
+    assertTest(
+      sandboxStepToTimelineEvent(stepType as SandboxSequenceStepType) === eventType,
+      `${stepType} should map to ${eventType}.`,
+    );
+  }
+
+  return [
+    "all sandbox sequence step types map to controlled segment sandbox timeline event types",
+    "baseline no-op steps map to explicit no-* timeline events",
+    "override scoring/rebound/continuation steps map to positive sandbox timeline events",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxStepToTimelineEvent();
+
+  console.log("sandboxStepToTimelineEvent tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/compareControlledSegmentSandboxTimeline.test.ts
+
+```ts
+import { compareControlledSegmentSandboxTimeline } from "./compareControlledSegmentSandboxTimeline";
+import {
+  emptyControlledSegmentSandboxTimelinePath,
+  type ControlledSegmentSandboxTimelinePath,
+} from "./controlledSegmentSandboxTimeline";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function path(input: Partial<ControlledSegmentSandboxTimelinePath> & Pick<ControlledSegmentSandboxTimelinePath, "pathId">): ControlledSegmentSandboxTimelinePath {
+  return {
+    ...emptyControlledSegmentSandboxTimelinePath(input.pathId),
+    status: "available",
+    eventCount: input.eventCount ?? 9,
+    finalOutcome: input.finalOutcome ?? "none",
+    finalTeamCandidate: input.finalTeamCandidate ?? "none",
+    finalZoneCandidate: input.finalZoneCandidate ?? "none",
+  };
+}
+
+export function validateCompareControlledSegmentSandboxTimeline(): readonly string[] {
+  const comparison = compareControlledSegmentSandboxTimeline({
+    baseline: path({ pathId: "baseline" }),
+    override: path({
+      pathId: "override",
+      finalOutcome: "secured_by_goalkeeper_team",
+      finalTeamCandidate: "goalkeeper_team",
+      finalZoneCandidate: "Z3-HSR",
+    }),
+  });
+
+  assertTest(!comparison.sandboxTimelineEventCountDivergenceObserved, "equal event counts should not diverge.");
+  assertTest(comparison.sandboxTimelineOutcomeDivergenceObserved, "different outcomes should diverge.");
+  assertTest(comparison.sandboxTimelineFinalTeamDivergenceObserved, "different final teams should diverge.");
+  assertTest(comparison.sandboxTimelineFinalZoneDivergenceObserved, "different final zones should diverge.");
+  assertTest(!comparison.officialTimelineDivergenceObserved, "official timeline divergence must remain false.");
+  assertTest(!comparison.officialPossessionDivergenceObserved, "official possession divergence must remain false.");
+  assertTest(!comparison.officialScoreDivergenceObserved, "official score divergence must remain false.");
+  assertTest(!comparison.officialScoringEventDivergenceObserved, "official scoring event divergence must remain false.");
+
+  return [
+    "controlled segment sandbox timeline comparison observes sandbox outcome/team/zone divergence",
+    "controlled segment sandbox timeline event counts remain equal at 9",
+    "official timeline, possession, score, and scoring-event divergence remain false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCompareControlledSegmentSandboxTimeline();
+
+  console.log("compareControlledSegmentSandboxTimeline tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -24816,6 +25778,87 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalControlledSegmentSandboxTimeline.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { controlledSegmentSandboxTimelineSignature } from "./controlledSegmentSandboxTimelineSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+const BASELINE_TYPES =
+  "sandbox_sequence_start__sandbox_baseline_route_reference__sandbox_no_scoring_opportunity__sandbox_no_scoring_event_candidate__sandbox_no_score_attempt__sandbox_no_goalkeeper_response__sandbox_no_rebound__sandbox_no_continuation__sandbox_sequence_end";
+
+const OVERRIDE_TYPES =
+  "sandbox_sequence_start__sandbox_route_resolved__sandbox_opportunity_classified__sandbox_scoring_candidate_created__sandbox_shot_resolved__sandbox_goalkeeper_response__sandbox_rebound_state__sandbox_continuation_action__sandbox_sequence_end";
+
+export function validateRunFullMatchExperimentalControlledSegmentSandboxTimeline(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = controlledSegmentSandboxTimelineSignature(defaultReport);
+  const experimentalSignature = controlledSegmentSandboxTimelineSignature(experimentalReport);
+  const timelineFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.tagCount === 0, "default runFullMatch must not expose controlled segment sandbox timeline tags.");
+  assertTest(experimentalSignature.tagCount > 0, "experimental runFullMatch must expose controlled segment sandbox timeline tags.");
+  assertTest(experimentalSignature.officialSandboxTimelineEventCount === 0, "sandbox timeline events must not be official MatchEvents.");
+  assertTest(experimentalSignature.status === "available", "controlled segment sandbox timeline status must be available.");
+  assertTest(experimentalSignature.origin === "sandbox_sequence_replay", "controlled segment sandbox timeline origin mismatch.");
+  assertTest(experimentalSignature.baselineEventCount === "9", "baseline sandbox timeline event count must be 9.");
+  assertTest(experimentalSignature.overrideEventCount === "9", "override sandbox timeline event count must be 9.");
+  assertTest(experimentalSignature.baselineEventTypes === BASELINE_TYPES, "baseline sandbox timeline event types mismatch.");
+  assertTest(experimentalSignature.overrideEventTypes === OVERRIDE_TYPES, "override sandbox timeline event types mismatch.");
+  assertTest(experimentalSignature.baselineFinalOutcome === "none", "baseline final outcome must remain none.");
+  assertTest(experimentalSignature.overrideFinalOutcome === "secured_by_goalkeeper_team", "override final outcome mismatch.");
+  assertTest(experimentalSignature.overrideFinalTeamCandidate === "goalkeeper_team", "override final team mismatch.");
+  assertTest(experimentalSignature.overrideFinalActorCandidate === "blitz-goalkeeper-free-safety", "override final actor mismatch.");
+  assertTest(experimentalSignature.overrideFinalZoneCandidate === "Z3-HSR", "override final zone mismatch.");
+  assertTest(experimentalSignature.sandboxTimelineCreated === "true", "sandbox timeline must be marked as created.");
+  assertTest(experimentalSignature.sandboxTimelineSeparateFromOfficialTimeline === "true", "sandbox timeline must be separate from official timeline.");
+  assertTest(experimentalSignature.sandboxTimelineEventCountDivergenceObserved === "false", "equal 9-event paths must not diverge by count.");
+  assertTest(experimentalSignature.sandboxTimelineOutcomeDivergenceObserved === "true", "sandbox timeline outcome divergence must be observed.");
+  assertTest(experimentalSignature.sandboxTimelineFinalTeamDivergenceObserved === "true", "sandbox timeline final team divergence must be observed.");
+  assertTest(experimentalSignature.sandboxTimelineFinalZoneDivergenceObserved === "true", "sandbox timeline final zone divergence must be observed.");
+  assertTest(experimentalSignature.modelAppliedOnlyInSandbox === "true", "timeline model must apply only in sandbox.");
+  assertTest(experimentalSignature.modelAppliedToNormalLiveSelection === "false", "timeline model must not apply to normal live selection.");
+  assertTest(timelineFact !== undefined, "experimental report must include controlled segment sandbox timeline evidence.");
+  assertTest(timelineFact?.internalTags.includes("controlled_segment_sandbox_timeline_official_timeline_injection_forbidden") ?? false, "evidence must forbid official timeline injection.");
+  assertTest(visibleText.includes("timeline sandbox separee"), "coach diagnosis must mention a separate sandbox timeline.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_RESULTS_ISOLATED_ONLY"), "limitations must say timeline result is isolated-only.");
+
+  return [
+    "default runFullMatch has no controlled segment sandbox timeline tags",
+    "experimental runFullMatch has controlled segment sandbox timeline tags",
+    "baseline and override paths expose the expected 9 timeline events",
+    "override timeline ends with goalkeeper-team secure recovery",
+    "sandbox timeline remains separate from official MatchReport timeline",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalControlledSegmentSandboxTimeline();
+
+  console.log("runFullMatchExperimentalControlledSegmentSandboxTimeline tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -26093,6 +27136,79 @@ if (require.main === module) {
   const checks = validateRunFullMatchSandboxSequenceReplayScoringGuard();
 
   console.log("runFullMatchSandboxSequenceReplayScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchControlledSegmentSandboxTimelineScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { controlledSegmentSandboxTimelineSignature } from "./controlledSegmentSandboxTimelineSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateRunFullMatchControlledSegmentSandboxTimelineScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = controlledSegmentSandboxTimelineSignature(defaultReport);
+  const experimentalSignature = controlledSegmentSandboxTimelineSignature(experimentalReport);
+
+  assertTest(defaultReport.score.home === experimentalReport.score.home, "controlled segment sandbox timeline must not mutate official home score.");
+  assertTest(defaultReport.score.away === experimentalReport.score.away, "controlled segment sandbox timeline must not mutate official away score.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "controlled segment sandbox timeline must not mutate official scoring event count.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "controlled segment sandbox timeline must not mutate official score_change total.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "controlled segment sandbox timeline must not add official timeline events.");
+  assertTest(experimentalSignature.officialSandboxTimelineEventCount === 0, "no sandbox timeline event is inserted as official MatchEvent.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official final score must still derive from official score_change consequences.");
+  assertTest(experimentalSignature.officialTimelineEventCreatedCount === 0, "sandbox timeline must not create official timeline events.");
+  assertTest(experimentalSignature.officialTimelineMutationCount === 0, "official timeline mutation count must be 0.");
+  assertTest(experimentalSignature.officialPossessionMutationCount === 0, "official possession mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoreMutationCount === 0, "official score mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoringEventMutationCount === 0, "official scoring event mutation count must be 0.");
+  assertTest(experimentalSignature.productionScoringEventCreationCount === 0, "sandbox timeline must not create production scoring events.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "sandbox timeline must not mutate production route resolution.");
+  assertTest(experimentalSignature.globalRouteSuccessRateMutationCount === 0, "sandbox timeline must not mutate global route success rates.");
+  assertTest(experimentalSignature.globalEconomyClaimCount === 0, "sandbox timeline must not claim global economy.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_OFFICIAL_POSSESSION"), "limitations must forbid official possession mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_OFFICIAL_TIMELINE"), "limitations must forbid official timeline mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "limitations must forbid production scoring event creation.");
+
+  return [
+    "default and experimental official final scores remain equal",
+    "default and experimental official scoring event counts remain equal",
+    "default and experimental official score_change totals remain equal",
+    "official timeline event count remains equal",
+    "no controlled segment sandbox timeline event is inserted as official MatchEvent",
+    "no official possession, timeline, score, or scoring event is changed",
+    "no production scoring events are created by controlled segment sandbox timeline",
+    "global route success rates are not mutated",
+    "production route resolution is not mutated",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchControlledSegmentSandboxTimelineScoringGuard();
+
+  console.log("runFullMatchControlledSegmentSandboxTimelineScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -27607,6 +28723,77 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3t.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { controlledSegmentSandboxTimelineSignature } from "./controlledSegmentSandboxTimelineSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3T(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = controlledSegmentSandboxTimelineSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.status === "available", "controlled segment sandbox timeline should be available.");
+  assertTest(signature.officialSandboxTimelineEventCount === 0, "sandbox timeline events must not be official MatchEvents.");
+  assertTest(signature.officialTimelineEventCreatedCount === 0, "sandbox timeline must not create official timeline events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "sandbox timeline must not create production scoring events.");
+  assertTest(signature.officialPossessionMutationCount === 0, "sandbox timeline must not mutate official possession.");
+  assertTest(signature.officialTimelineMutationCount === 0, "sandbox timeline must not mutate official timeline.");
+  assertTest(signature.officialScoreMutationCount === 0, "sandbox timeline must not mutate official score.");
+  assertTest(signature.officialScoringEventMutationCount === 0, "sandbox timeline must not mutate official scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "controlled segment sandbox timeline must not create production scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_RESULTS_ISOLATED_ONLY"), "controlled segment sandbox timeline must remain sandbox-only.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "no production scoring event creation from controlled segment sandbox timeline",
+    "controlled segment sandbox timeline remains separate from official timeline",
+    "official possession, score, timeline, and scoring events are not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3T();
+
+  console.log("scoringGuard.3t tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -28826,6 +30013,70 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3t.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3T(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY cannot make global economy claims",
+    "all upstream workbench-chain experimental scopes remain unable to make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3T();
+
+  console.log("sourceOfTruthGuards.3t tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/routeRanking/routeAttributeInfluence.test.ts
 
 ```ts
@@ -29841,6 +31092,7 @@ import type { GoalkeeperResponseModel } from "../fullMatch/goalkeeperResponseMod
 import type { ReboundSecondChanceModel } from "../fullMatch/reboundSecondChanceSandbox";
 import type { MultiActionContinuationModel } from "../fullMatch/multiActionContinuationSandbox";
 import type { SandboxSequenceReplayModel } from "../fullMatch/sandboxSequenceReplay";
+import type { ControlledSegmentSandboxTimelineModel } from "../fullMatch/controlledSegmentSandboxTimeline";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -29872,6 +31124,7 @@ export interface MiniMatchTimelineSegment {
   readonly reboundSecondChanceModel?: ReboundSecondChanceModel;
   readonly multiActionContinuationModel?: MultiActionContinuationModel;
   readonly sandboxSequenceReplayModel?: SandboxSequenceReplayModel;
+  readonly controlledSegmentSandboxTimelineModel?: ControlledSegmentSandboxTimelineModel;
 }
 
 export interface MatchReportBuilderInput {
@@ -30873,6 +32126,64 @@ function sandboxSequenceReplayModelReason(model: SandboxSequenceReplayModel | un
   return ` Sandbox sequence replay available: baseline ${model.baseline.stepCount} steps ending ${model.baseline.finalOutcome ?? "none"}; override ${model.override.stepCount} steps ending ${model.override.finalOutcome ?? "none"} for ${model.override.finalTeamCandidate ?? "none"} by ${model.override.finalActorCandidate ?? "none"} at ${model.override.finalZoneCandidate ?? "none"}. It remains sandbox-only: no official MatchEvent, no official timeline mutation, no official possession mutation, no production scoring event, no official score change, and no global economy proof.`;
 }
 
+function controlledSegmentSandboxTimelineModelTags(model: ControlledSegmentSandboxTimelineModel | undefined): readonly string[] {
+  if (model === undefined || model.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_controlled_segment_sandbox_timeline",
+    "controlled_segment_sandbox_timeline",
+    `controlled_segment_sandbox_timeline_model_status_${model.status}`,
+    `controlled_segment_sandbox_timeline_model_origin_${model.origin}`,
+    `controlled_segment_sandbox_timeline_baseline_event_count_${model.baseline.eventCount}`,
+    `controlled_segment_sandbox_timeline_override_event_count_${model.override.eventCount}`,
+    `controlled_segment_sandbox_timeline_baseline_event_types_${model.baseline.events.map((event) => event.eventType).join("__")}`,
+    `controlled_segment_sandbox_timeline_override_event_types_${model.override.events.map((event) => event.eventType).join("__")}`,
+    `controlled_segment_sandbox_timeline_baseline_final_outcome_${model.baseline.finalOutcome ?? "none"}`,
+    `controlled_segment_sandbox_timeline_override_final_outcome_${model.override.finalOutcome ?? "none"}`,
+    `controlled_segment_sandbox_timeline_override_final_team_${model.override.finalTeamCandidate ?? "none"}`,
+    `controlled_segment_sandbox_timeline_override_final_actor_${model.override.finalActorCandidate ?? "none"}`,
+    `controlled_segment_sandbox_timeline_override_final_zone_${model.override.finalZoneCandidate ?? "none"}`,
+    `controlled_segment_sandbox_timeline_created_${model.sandboxTimelineCreated ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_separate_from_official_${model.sandboxTimelineSeparateFromOfficialTimeline ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_event_count_divergence_${model.sandboxTimelineEventCountDivergenceObserved ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_outcome_divergence_${model.sandboxTimelineOutcomeDivergenceObserved ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_final_team_divergence_${model.sandboxTimelineFinalTeamDivergenceObserved ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_final_zone_divergence_${model.sandboxTimelineFinalZoneDivergenceObserved ? "true" : "false"}`,
+    "controlled_segment_sandbox_timeline_official_timeline_event_created_count_0",
+    "controlled_segment_sandbox_timeline_official_timeline_mutation_count_0",
+    "controlled_segment_sandbox_timeline_official_possession_mutation_count_0",
+    "controlled_segment_sandbox_timeline_official_score_mutation_count_0",
+    "controlled_segment_sandbox_timeline_official_scoring_event_mutation_count_0",
+    "controlled_segment_sandbox_timeline_production_scoring_event_creation_count_0",
+    "controlled_segment_sandbox_timeline_production_route_resolution_mutation_count_0",
+    "controlled_segment_sandbox_timeline_global_route_success_mutation_count_0",
+    "controlled_segment_sandbox_timeline_global_economy_claim_count_0",
+    `controlled_segment_sandbox_timeline_model_applied_only_in_sandbox_${model.modelAppliedOnlyInSandbox ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_model_applied_to_normal_live_${model.modelAppliedToNormalLiveSelection ? "true" : "false"}`,
+    `controlled_segment_sandbox_timeline_rejected_closed_count_${model.rejectedClosedCandidateCount}`,
+    `controlled_segment_sandbox_timeline_rejected_unavailable_count_${model.rejectedUnavailableCandidateCount}`,
+    "controlled_segment_sandbox_timeline_official_timeline_injection_forbidden",
+    "controlled_segment_sandbox_timeline_official_score_mutation_forbidden",
+    "controlled_segment_sandbox_timeline_official_scoring_events_mutation_forbidden",
+    "controlled_segment_sandbox_timeline_official_possession_mutation_forbidden",
+    "controlled_segment_sandbox_timeline_production_scoring_event_creation_forbidden",
+    "controlled_segment_sandbox_timeline_production_route_resolution_mutation_forbidden",
+    "controlled_segment_sandbox_timeline_global_route_success_mutation_forbidden",
+    "controlled_segment_sandbox_timeline_global_economy_claim_forbidden",
+    ...model.tags,
+  ];
+}
+
+function controlledSegmentSandboxTimelineModelReason(model: ControlledSegmentSandboxTimelineModel | undefined): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return ` Controlled segment sandbox timeline available: baseline ${model.baseline.eventCount} events ending ${model.baseline.finalOutcome ?? "none"}; override ${model.override.eventCount} events ending ${model.override.finalOutcome ?? "none"} for ${model.override.finalTeamCandidate ?? "none"} by ${model.override.finalActorCandidate ?? "none"} at ${model.override.finalZoneCandidate ?? "none"}. It is a timeline sandbox separee, not the official MatchReport timeline: no official MatchEvent, no official timeline insertion, no official possession mutation, no production scoring event, no official score change, and no global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -30914,7 +32225,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}${sandboxSequenceReplayModelReason(input.segment.sandboxSequenceReplayModel)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}${sandboxSequenceReplayModelReason(input.segment.sandboxSequenceReplayModel)}${controlledSegmentSandboxTimelineModelReason(input.segment.controlledSegmentSandboxTimelineModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -30951,6 +32262,7 @@ function kickoffEvent(input: {
       ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
       ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
       ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
+      ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
     ],
     narrativeWeight: 5,
   };
@@ -31022,6 +32334,7 @@ function sequenceRecordToMatchEvent(input: {
     ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
     ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
+    ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -31046,7 +32359,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}${sandboxSequenceReplayModelReason(input.segment.sandboxSequenceReplayModel)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}${sandboxSequenceReplayModelReason(input.segment.sandboxSequenceReplayModel)}${controlledSegmentSandboxTimelineModelReason(input.segment.controlledSegmentSandboxTimelineModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -31109,7 +32422,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}${sandboxSequenceReplayModelReason(input.segment.sandboxSequenceReplayModel)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}${multiActionContinuationModelReason(input.segment.multiActionContinuationModel)}${sandboxSequenceReplayModelReason(input.segment.sandboxSequenceReplayModel)}${controlledSegmentSandboxTimelineModelReason(input.segment.controlledSegmentSandboxTimelineModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -31156,6 +32469,7 @@ function scoringEventToMatchEvent(input: {
       ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
       ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
       ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
+      ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
     ],
     narrativeWeight: 70,
   };
@@ -31858,6 +33172,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
     case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
       return "training_recommendation";
   }
 }
@@ -31920,6 +33235,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Continuation multi-action sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
       return "Replay de mini-sequence sandbox";
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
+      return "Timeline sandbox controlee du segment";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -31991,6 +33308,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
     case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -32029,6 +33347,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
     "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX",
     "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -33166,6 +34485,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 34;
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
       return 33;
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
+      return 32;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -33238,6 +34559,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la continuation multi-action sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
       return "Relire le replay de mini-sequence sandbox";
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
+      return "Relire la timeline sandbox controlee du segment";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -34508,7 +35831,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
   | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"
   | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
-  | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY";
+  | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -35114,6 +36438,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "global scoring balance",
       "production sequence replay quality",
       "production continuation model quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE",
+    canProve: [
+      "experimental sandbox sequence replay steps were projected into a controlled segment sandbox timeline",
+      "baseline and override sandbox timeline paths expose event type order, final outcome, team, actor, and zone metadata",
+      "sandbox timeline events are not official MatchEvents and are not inserted into the official MatchReport timeline",
+      "current sandbox timeline remained separated from official timeline, official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production timeline quality",
+      "production route resolution quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",
       "production chain-driven full-match behavior",
