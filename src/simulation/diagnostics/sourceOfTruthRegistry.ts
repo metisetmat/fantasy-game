@@ -26,7 +26,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
   | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
-  | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW";
+  | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
+  | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -685,6 +686,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "baseline and override sandbox timelines are visible as sandbox-only rows",
       "sandbox timeline events are not official MatchEvents and are not inserted into the official MatchReport timeline",
       "current official timeline diff view remained read-only and separated from official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production timeline quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW: {
+    scope: "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW",
+    canProve: [
+      "the coach-facing report can separate the official timeline from sandbox replay evidence",
+      "the official timeline, official score, official possession, and official scoring events remain unchanged in the review",
+      "sandbox replay events remain sandbox-only and are not presented as official MatchEvents",
+      "technical sandbox details can be hidden behind coach-readable details without changing production state",
     ],
     cannotProve: [
       "global scoring balance",

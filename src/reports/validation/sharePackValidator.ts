@@ -178,6 +178,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3t.md"));
   const fullMatchWorkbenchChainReplay3U = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3u.md"));
   const fullMatchWorkbenchChainReplay3UValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3u.md"));
+  const fullMatchWorkbenchChainReplay3V = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3v.md"));
+  const fullMatchWorkbenchChainReplay3VValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3v.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1908,6 +1910,77 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "bundle__simulation.md",
     "bundle__reports.md",
   ];
+  const sprint3VExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3v.md",
+    "validation.fullmatch-workbench-chain-replay-3v.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3VForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3u.md",
+    "validation.fullmatch-workbench-chain-replay-3u.md",
+    "fullmatch-workbench-chain-replay-3t.md",
+    "validation.fullmatch-workbench-chain-replay-3t.md",
+    "fullmatch-workbench-chain-replay-3s.md",
+    "validation.fullmatch-workbench-chain-replay-3s.md",
+  ];
+  const sprint3VChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 3V", activeConfig.sprintName === "Sprint 3V - Coach-Facing Timeline Review", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint3VExpectedFiles.every((file) => requiredCopied(file)), sprint3VExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint3VForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3VForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint3VExpectedFiles.every((file) => requiredCopied(file)), sprint3VExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3V", manifest.includes("Sprint 3V - Coach-Facing Timeline Review") && detailedManifest.includes("Sprint 3V - Coach-Facing Timeline Review"), "visible"),
+    check("README is Sprint 3V oriented", readme.includes("# Sprint 3V Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3v.md"), "README current"),
+    check("3V report included", fullMatchWorkbenchChainReplay3V.includes("# FullMatch Workbench Chain Replay 3V") && fullMatchWorkbenchChainReplay3V.includes("coach-facing timeline review status: available"), "3V doc included"),
+    check("3V validation is PASS", fullMatchWorkbenchChainReplay3VValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3VValidation.includes("coach-facing timeline review status is available"), "3V validation PASS"),
+    check("review has four coach-readable blocks", fullMatchWorkbenchChainReplay3V.includes("review block count: 4") && fullMatchWorkbenchChainReplay3VValidation.includes("review has four coach-readable blocks"), "four blocks visible"),
+    check("official timeline block present", fullMatchWorkbenchChainReplay3V.includes("Ce qui s'est passé officiellement") && coachExperimentalHtml.includes("Ce qui s&#39;est passé officiellement"), "official block visible"),
+    check("sandbox replay block present", fullMatchWorkbenchChainReplay3V.includes("Ce que le sandbox a rejoué") && coachExperimentalHtml.includes("Ce que le sandbox a rejoué"), "sandbox block visible"),
+    check("differences block present", fullMatchWorkbenchChainReplay3V.includes("Ce qui est différent") && coachExperimentalHtml.includes("Ce qui est différent"), "differences block visible"),
+    check("unchanged official state block present", fullMatchWorkbenchChainReplay3V.includes("Ce qui n'a pas été modifié") && coachExperimentalHtml.includes("Ce qui n&#39;a pas été modifié"), "unchanged block visible"),
+    check("official timeline remains source of truth", coachExperimentalHtml.includes("La timeline officielle reste la seule source de vérité") && fullMatchWorkbenchChainReplay3VValidation.includes("official timeline remains source of truth"), "source of truth visible"),
+    check("sandbox events are not official", coachExperimentalHtml.includes("Les événements sandbox ne sont pas des MatchEvents officiels") && fullMatchWorkbenchChainReplay3V.includes("sandbox events official: false"), "sandbox non-official visible"),
+    check("default report has no experimental timeline review", !coachDefaultHtml.includes("Lecture timeline officielle vs sandbox") && fullMatchWorkbenchChainReplay3VValidation.includes("default report has no experimental timeline review"), "default hidden"),
+    check("experimental report has timeline review", coachExperimentalHtml.includes("Lecture timeline officielle vs sandbox"), "experimental visible"),
+    check("technical workbench detail moved behind details", coachExperimentalHtml.includes("Détails techniques du sandbox") && !coachExperimentalHtml.replace(/<details[\s\S]*?<\/details>/g, "").includes("Le contexte workbench produit une selection shadow"), "technical detail collapsed"),
+    check("official state unchanged", fullMatchWorkbenchChainReplay3V.includes("official timeline unchanged: true") && fullMatchWorkbenchChainReplay3V.includes("official score unchanged: true") && fullMatchWorkbenchChainReplay3V.includes("official possession unchanged: true") && fullMatchWorkbenchChainReplay3V.includes("official scoring events unchanged: true"), "official state unchanged"),
+    check("no sandbox insertion or production scoring", fullMatchWorkbenchChainReplay3V.includes("sandbox events inserted into official timeline: false") && fullMatchWorkbenchChainReplay3V.includes("production scoring event creation count: 0"), "no insertion/no production scoring"),
+    check("coach-facing timeline review contract bundled", bundleSimulation.includes("src/simulation/fullMatch/coachFacingTimelineReview.ts") && bundleSimulation.includes("CoachFacingTimelineReviewModel"), "3V contract bundled"),
+    check("coach-facing timeline review builder bundled", bundleSimulation.includes("src/simulation/fullMatch/coachFacingTimelineReviewFromDiff.ts") && bundleSimulation.includes("coachFacingTimelineReviewFromDiff"), "3V builder bundled"),
+    check("coach-facing timeline review tests bundled", bundleSimulation.includes("coachFacingTimelineReviewFromDiff.test.ts") && bundleSimulation.includes("officialTimelineReviewGuard.test.ts") && bundleSimulation.includes("scoringGuard.3v.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3v.test.ts"), "3V tests bundled"),
+    check("coach-facing timeline review renderer test bundled", bundleReports.includes("coachReportTimelineReview.test.ts") && bundleReports.includes("renderTimelineReview"), "3V report test bundled"),
+    check("coach-facing timeline review evidence included", fullMatchWorkbenchChainReplay3V.includes("WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW") && bundleSimulation.includes("WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"), "3V evidence visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3VValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay3VValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3VValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3VValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3V.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3V.includes("CONFIRM_OFFICIAL_TIMELINE_DIFF_TO_COACH_FACING_REVIEW") && fullMatchWorkbenchChainReplay3V.includes("CONFIRM_SANDBOX_REMAINS_NON_OFFICIAL") && fullMatchWorkbenchChainReplay3V.includes("PREPARE_COACH_REVIEW_TO_SANDBOX_DECISION_PANEL"), "3V recommendations visible"),
+  ];
+
   const sprint3UForbiddenLeftovers = [
     "fullmatch-workbench-chain-replay-3t.md",
     "validation.fullmatch-workbench-chain-replay-3t.md",
@@ -3996,6 +4069,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3V - Coach-Facing Timeline Review")
+      ? sprint3VChecks
     : activeConfig.sprintName.includes("Sprint 3U - Official Timeline Diff View")
       ? sprint3UChecks
     : activeConfig.sprintName.includes("Sprint 3T - Controlled Segment Sandbox Timeline")
