@@ -174,6 +174,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3RValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3r.md"));
   const fullMatchWorkbenchChainReplay3S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3s.md"));
   const fullMatchWorkbenchChainReplay3SValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3s.md"));
+  const fullMatchWorkbenchChainReplay3T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3t.md"));
+  const fullMatchWorkbenchChainReplay3TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3t.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1806,6 +1808,84 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3TExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3t.md",
+    "validation.fullmatch-workbench-chain-replay-3t.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3TForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3s.md",
+    "validation.fullmatch-workbench-chain-replay-3s.md",
+    "fullmatch-workbench-chain-replay-3r.md",
+    "validation.fullmatch-workbench-chain-replay-3r.md",
+    "fullmatch-workbench-chain-replay-3q.md",
+    "validation.fullmatch-workbench-chain-replay-3q.md",
+  ];
+  const sprint3TChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 3T", activeConfig.sprintName === "Sprint 3T - Controlled Segment Sandbox Timeline", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint3TExpectedFiles.every((file) => requiredCopied(file)), sprint3TExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint3TForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3TForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint3TExpectedFiles.every((file) => requiredCopied(file)), sprint3TExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3T", manifest.includes("Sprint 3T - Controlled Segment Sandbox Timeline") && detailedManifest.includes("Sprint 3T - Controlled Segment Sandbox Timeline"), "visible"),
+    check("README is Sprint 3T oriented", readme.includes("# Sprint 3T Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3t.md"), "README current"),
+    check("3T report included", fullMatchWorkbenchChainReplay3T.includes("# FullMatch Workbench Chain Replay 3T") && fullMatchWorkbenchChainReplay3T.includes("controlled segment sandbox timeline model status: available"), "3T doc included"),
+    check("3T validation is PASS", fullMatchWorkbenchChainReplay3TValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3TValidation.includes("controlled segment sandbox timeline model status is available"), "3T validation PASS"),
+    check("baseline timeline fields visible", fullMatchWorkbenchChainReplay3T.includes("baseline event count: 9") && fullMatchWorkbenchChainReplay3T.includes("sandbox_baseline_route_reference") && fullMatchWorkbenchChainReplay3T.includes("sandbox_no_continuation") && fullMatchWorkbenchChainReplay3T.includes("baseline final outcome: none"), "baseline timeline visible"),
+    check("override timeline fields visible", fullMatchWorkbenchChainReplay3T.includes("override event count: 9") && fullMatchWorkbenchChainReplay3T.includes("sandbox_route_resolved") && fullMatchWorkbenchChainReplay3T.includes("sandbox_opportunity_classified") && fullMatchWorkbenchChainReplay3T.includes("sandbox_continuation_action"), "override timeline visible"),
+    check("override final state visible", fullMatchWorkbenchChainReplay3T.includes("override final outcome: secured_by_goalkeeper_team") && fullMatchWorkbenchChainReplay3T.includes("override final team candidate: goalkeeper_team") && fullMatchWorkbenchChainReplay3T.includes("override final actor candidate: blitz-goalkeeper-free-safety") && fullMatchWorkbenchChainReplay3T.includes("override final zone candidate: Z3-HSR"), "override final state visible"),
+    check("timeline separation visible", fullMatchWorkbenchChainReplay3T.includes("sandbox timeline created: true") && fullMatchWorkbenchChainReplay3T.includes("sandbox timeline separate from official timeline: true") && fullMatchWorkbenchChainReplay3TValidation.includes("sandbox timeline events are not official MatchEvents"), "timeline separation visible"),
+    check("timeline divergences visible", fullMatchWorkbenchChainReplay3T.includes("sandbox timeline event count divergence observed: false") && fullMatchWorkbenchChainReplay3T.includes("sandbox timeline outcome divergence observed: true") && fullMatchWorkbenchChainReplay3T.includes("sandbox timeline final team divergence observed: true") && fullMatchWorkbenchChainReplay3T.includes("sandbox timeline final zone divergence observed: true"), "timeline divergences visible"),
+    check("timeline creates no official events or score", fullMatchWorkbenchChainReplay3T.includes("official timeline event created count: 0") && fullMatchWorkbenchChainReplay3T.includes("official score mutation count: 0") && fullMatchWorkbenchChainReplay3T.includes("production scoring event creation count: 0"), "no official timeline/scoring mutation"),
+    check("controlled segment sandbox timeline contract bundled", bundleSimulation.includes("src/simulation/fullMatch/controlledSegmentSandboxTimeline.ts") && bundleSimulation.includes("ControlledSegmentSandboxTimelineModel"), "3T contract bundled"),
+    check("controlled segment sandbox event builder bundled", bundleSimulation.includes("src/simulation/fullMatch/buildControlledSegmentSandboxEvent.ts") && bundleSimulation.includes("buildControlledSegmentSandboxEvent"), "3T event builder bundled"),
+    check("sandbox step to timeline mapper bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxStepToTimelineEvent.ts") && bundleSimulation.includes("sandboxStepToTimelineEvent"), "3T mapper bundled"),
+    check("controlled timeline converter bundled", bundleSimulation.includes("src/simulation/fullMatch/controlledSegmentSandboxTimelineFromReplay.ts") && bundleSimulation.includes("controlledSegmentSandboxTimelineFromReplay"), "3T converter bundled"),
+    check("controlled timeline comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareControlledSegmentSandboxTimeline.ts") && bundleSimulation.includes("compareControlledSegmentSandboxTimeline"), "3T comparison bundled"),
+    check("controlled timeline signature bundled", bundleSimulation.includes("src/simulation/fullMatch/controlledSegmentSandboxTimelineSignature.ts") && bundleSimulation.includes("controlledSegmentSandboxTimelineSignature"), "3T signature bundled"),
+    check("controlled timeline tests bundled", bundleSimulation.includes("controlledSegmentSandboxTimeline.test.ts") && bundleSimulation.includes("sandboxStepToTimelineEvent.test.ts") && bundleSimulation.includes("runFullMatchExperimentalControlledSegmentSandboxTimeline.test.ts") && bundleSimulation.includes("runFullMatchControlledSegmentSandboxTimelineScoringGuard.test.ts"), "3T tests bundled"),
+    check("3T scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3t.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3t.test.ts"), "3T guards bundled"),
+    check("controlled timeline evidence included", fullMatchWorkbenchChainReplay3T.includes("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE") && bundleSimulation.includes("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"), "3T evidence visible"),
+    check("model isolated-only", fullMatchWorkbenchChainReplay3T.includes("model applied only in sandbox: true") && fullMatchWorkbenchChainReplay3T.includes("model applied to normal live selection: false"), "timeline model isolated"),
+    check("default and experimental official score signatures remain equal", fullMatchWorkbenchChainReplay3TValidation.includes("default and experimental official score signatures remain equal"), "score signatures equal"),
+    check("timeline cannot mutate official score", fullMatchWorkbenchChainReplay3T.includes("official score mutation count: 0") && fullMatchWorkbenchChainReplay3TValidation.includes("controlled segment sandbox timeline model cannot mutate official score"), "official score mutation forbidden"),
+    check("timeline cannot mutate official timeline", fullMatchWorkbenchChainReplay3T.includes("official timeline mutation count: 0") && fullMatchWorkbenchChainReplay3TValidation.includes("controlled segment sandbox timeline model cannot mutate official timeline"), "official timeline mutation forbidden"),
+    check("timeline cannot mutate official possession", fullMatchWorkbenchChainReplay3T.includes("official possession mutation count: 0") && fullMatchWorkbenchChainReplay3TValidation.includes("controlled segment sandbox timeline model cannot mutate official possession"), "official possession mutation forbidden"),
+    check("timeline cannot create production scoring events", fullMatchWorkbenchChainReplay3T.includes("production scoring event creation count: 0") && fullMatchWorkbenchChainReplay3TValidation.includes("controlled segment sandbox timeline model cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("timeline cannot claim global economy", fullMatchWorkbenchChainReplay3T.includes("global economy claim count: 0") && fullMatchWorkbenchChainReplay3TValidation.includes("controlled segment sandbox timeline model cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3T.includes("controlled segment sandbox timeline") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3TValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay3TValidation.includes("SHOT_GOAL remains 3"), "scoring constants visible"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3TValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3TValidation.includes("no MatchBonusEvent mutation"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3TValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3T.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3T.includes("CONFIRM_SANDBOX_SEQUENCE_REPLAY_TO_CONTROLLED_SEGMENT_SANDBOX_TIMELINE") && fullMatchWorkbenchChainReplay3T.includes("PREPARE_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_TO_OFFICIAL_TIMELINE_DIFF_VIEW") && fullMatchWorkbenchChainReplay3T.includes("KEEP_50_MATCH_ECONOMY_REFERENCE"), "3T recommendations visible"),
+  ];
+
   const sprint3SExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3834,6 +3914,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3T - Controlled Segment Sandbox Timeline")
+      ? sprint3TChecks
     : activeConfig.sprintName.includes("Sprint 3S - Sandbox Sequence Replay")
       ? sprint3SChecks
     : activeConfig.sprintName.includes("Sprint 3R - Multi-Action Continuation Sandbox")

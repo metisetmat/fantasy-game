@@ -65,6 +65,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 34;
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
       return 33;
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
+      return 32;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -137,6 +139,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la continuation multi-action sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
       return "Relire le replay de mini-sequence sandbox";
+    case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
+      return "Relire la timeline sandbox controlee du segment";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

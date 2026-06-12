@@ -24,7 +24,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
   | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"
   | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
-  | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY";
+  | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -630,6 +631,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "global scoring balance",
       "production sequence replay quality",
       "production continuation model quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE",
+    canProve: [
+      "experimental sandbox sequence replay steps were projected into a controlled segment sandbox timeline",
+      "baseline and override sandbox timeline paths expose event type order, final outcome, team, actor, and zone metadata",
+      "sandbox timeline events are not official MatchEvents and are not inserted into the official MatchReport timeline",
+      "current sandbox timeline remained separated from official timeline, official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production timeline quality",
+      "production route resolution quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",
       "production chain-driven full-match behavior",
