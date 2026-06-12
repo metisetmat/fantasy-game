@@ -26,6 +26,48 @@ function readIfExists(path: string): string {
   return existsSync(path) ? readFileSync(path, "utf8") : "";
 }
 
+function stripHtmlDetailsBlocks(html: string): string {
+  let visible = "";
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = html.indexOf("<details", cursor);
+    if (start === -1) {
+      visible += html.slice(cursor);
+      break;
+    }
+
+    visible += html.slice(cursor, start);
+    let depth = 0;
+    let scan = start;
+
+    while (scan < html.length) {
+      const nextOpen = html.indexOf("<details", scan);
+      const nextClose = html.indexOf("</details>", scan);
+
+      if (nextClose === -1) {
+        cursor = html.length;
+        break;
+      }
+
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        depth += 1;
+        scan = nextOpen + "<details".length;
+        continue;
+      }
+
+      depth -= 1;
+      scan = nextClose + "</details>".length;
+      if (depth === 0) {
+        cursor = scan;
+        break;
+      }
+    }
+  }
+
+  return visible;
+}
+
 function check(label: string, passed: boolean, detail: string): SharePackCheck {
   return {
     label,
@@ -186,6 +228,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3XValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3x.md"));
   const fullMatchWorkbenchChainReplay3Y = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3y.md"));
   const fullMatchWorkbenchChainReplay3YValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3y.md"));
+  const fullMatchWorkbenchChainReplay3Z = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3z.md"));
+  const fullMatchWorkbenchChainReplay3ZValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3z.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1984,6 +2028,100 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "bundle__simulation.md",
     "bundle__reports.md",
   ];
+  const sprint3ZExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3z.md",
+    "validation.fullmatch-workbench-chain-replay-3z.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3ZForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3y.md",
+    "validation.fullmatch-workbench-chain-replay-3y.md",
+    "fullmatch-workbench-chain-replay-3x.md",
+    "validation.fullmatch-workbench-chain-replay-3x.md",
+    "fullmatch-workbench-chain-replay-3w.md",
+    "validation.fullmatch-workbench-chain-replay-3w.md",
+    "fullmatch-workbench-chain-replay-3v.md",
+    "validation.fullmatch-workbench-chain-replay-3v.md",
+    "fullmatch-workbench-chain-replay-3u.md",
+    "validation.fullmatch-workbench-chain-replay-3u.md",
+  ];
+  const coachHtmlMojibakeMarkers = [
+    "Ãƒ",
+    "Ã‚",
+    "Ã¢â‚¬",
+    "Ã©",
+    "Ã¨",
+    "Ã ",
+    "Ã§",
+    "â€”",
+    "â€“",
+  ];
+  const visibleDeveloperJargon = [
+    "SegmentRouteInput",
+    "selection shadow",
+    "read-only",
+    "canDrive",
+    "production route resolution",
+    "scoreMutationCount",
+    "workbench_chain_",
+  ];
+  const coachExperimentalVisibleHtml = stripHtmlDetailsBlocks(coachExperimentalHtml);
+  const sprint3ZChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 3Z", activeConfig.sprintName === "Sprint 3Z - Coach Report UX Cleanup & Encoding Fix", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint3ZExpectedFiles.every((file) => requiredCopied(file)), sprint3ZExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint3ZForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3ZForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint3ZExpectedFiles.every((file) => requiredCopied(file)), sprint3ZExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3Z", manifest.includes("Sprint 3Z - Coach Report UX Cleanup & Encoding Fix") && detailedManifest.includes("Sprint 3Z - Coach Report UX Cleanup & Encoding Fix"), "visible"),
+    check("README is Sprint 3Z oriented", readme.includes("# Sprint 3Z Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3z.md"), "README current"),
+    check("3Z report included", fullMatchWorkbenchChainReplay3Z.includes("# FullMatch Workbench Chain Replay 3Z") && fullMatchWorkbenchChainReplay3Z.includes("Coach Report Encoding"), "3Z doc included"),
+    check("3Z validation is PASS", fullMatchWorkbenchChainReplay3ZValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3ZValidation.includes("experimental coach report contains Confiance multi-scénarios"), "3Z validation PASS"),
+    check("experimental report has clean multi-scenario title", coachExperimentalHtml.includes("Confiance multi-scénarios"), "title clean"),
+    check("experimental report has clean em dash copy", coachExperimentalHtml.includes("Confiance faible — 37/100"), "em dash clean"),
+    check("experimental report has clean stability copy", coachExperimentalHtml.includes("Stabilité"), "stability clean"),
+    check("experimental report contains no mojibake markers", !containsAny(coachExperimentalHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("default report contains no mojibake markers", !containsAny(coachDefaultHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("visible coach copy avoids developer jargon", !containsAny(coachExperimentalVisibleHtml, visibleDeveloperJargon), "visible jargon count 0"),
+    check("technical details are collapsed", coachExperimentalHtml.includes("Détails techniques développeur") && coachExperimentalHtml.includes("Ancrage workbench maintenant partiel") && !coachExperimentalVisibleHtml.includes("Ancrage workbench maintenant partiel"), "details collapsed"),
+    check("technical diagnostics are preserved internally", coachExperimentalHtml.includes("workbench_chain_") && coachExperimentalHtml.includes("SegmentRouteInput"), "internal diagnostics preserved"),
+    check("default report has no experimental sandbox sections", !coachDefaultHtml.includes("Lecture timeline officielle vs sandbox") && !coachDefaultHtml.includes("Panneau de décision sandbox") && !coachDefaultHtml.includes("Confiance multi-scénarios"), "default boundary clean"),
+    check("experimental report keeps sandbox sections", coachExperimentalHtml.includes("Lecture timeline officielle vs sandbox") && coachExperimentalHtml.includes("Panneau de décision sandbox") && coachExperimentalHtml.includes("Niveau de confiance de la suggestion") && coachExperimentalHtml.includes("Confiance multi-scénarios"), "experimental sections visible"),
+    check("sandbox remains suggestion-only", coachExperimentalHtml.includes("Cette piste reste une suggestion sandbox, pas une consigne officielle"), "suggestion-only visible"),
+    check("official state unchanged wording visible", coachExperimentalHtml.includes("Elle ne modifie ni la timeline officielle, ni le score, ni la possession, ni les événements de score"), "official state wording visible"),
+    check("no global economy proof wording visible", coachExperimentalHtml.includes("Elle ne constitue pas une preuve d’économie globale"), "global economy boundary visible"),
+    check("UTF-8 report tests bundled", bundleReports.includes("htmlCoachReportEncoding.test.ts") && bundleReports.includes("Confiance multi-scénarios"), "encoding tests bundled"),
+    check("visible jargon tests bundled", bundleReports.includes("htmlCoachReportCoachCopyGuard.test.ts") && bundleReports.includes("SegmentRouteInput"), "jargon tests bundled"),
+    check("technical details tests bundled", bundleReports.includes("htmlCoachReportTechnicalDetailsGuard.test.ts") && bundleReports.includes("Détails techniques développeur"), "technical placement tests bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3ZValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay3ZValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3ZValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3ZValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3Z.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3Z.includes("CONFIRM_COACH_REPORT_ENCODING_FIXED") && fullMatchWorkbenchChainReplay3Z.includes("CONFIRM_VISIBLE_COACH_COPY_CLEAN") && fullMatchWorkbenchChainReplay3Z.includes("PREPARE_MULTI_SCENARIO_RESULTS_TO_COACH_TEST_PLAN"), "3Z recommendations visible"),
+  ];
   const sprint3YExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2038,7 +2176,6 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "fullmatch-workbench-chain-replay-3t.md",
     "validation.fullmatch-workbench-chain-replay-3t.md",
   ];
-  const coachExperimentalVisibleHtml = coachExperimentalHtml.replace(/<details[\s\S]*?<\/details>/g, "");
   const sprint3YChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
     check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
@@ -4297,6 +4434,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3Z - Coach Report UX Cleanup")
+      ? sprint3ZChecks
     : activeConfig.sprintName.includes("Sprint 3Y - Batch Confidence Calibration")
       ? sprint3YChecks
     : activeConfig.sprintName.includes("Sprint 3X - Sandbox Decision Evidence Calibration")

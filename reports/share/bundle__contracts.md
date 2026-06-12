@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3Y - Batch Confidence Calibration. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3Z - Coach Report UX Cleanup & Encoding Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

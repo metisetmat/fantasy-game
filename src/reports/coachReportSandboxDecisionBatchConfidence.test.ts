@@ -20,15 +20,15 @@ export function validateCoachReportSandboxDecisionBatchConfidence(): readonly st
   }));
   const visibleExperimental = visibleHtml(experimentalHtml);
 
-  assertTest(!defaultHtml.includes("Confiance multi-scÃ©narios"), "default report must not show batch confidence calibration.");
-  assertTest(experimentalHtml.includes("Confiance multi-scÃ©narios"), "experimental report must show batch confidence calibration.");
-  assertTest(experimentalHtml.includes("scÃ©narios"), "experimental report must show scenario count wording.");
-  assertTest(experimentalHtml.includes("Confiance faible") || experimentalHtml.includes("Confiance faible Ã  moyenne"), "experimental report must show batch confidence.");
+  assertTest(!defaultHtml.includes("Confiance multi-scénarios"), "default report must not show batch confidence calibration.");
+  assertTest(experimentalHtml.includes("Confiance multi-scénarios"), "experimental report must show batch confidence calibration.");
+  assertTest(experimentalHtml.includes("scénarios"), "experimental report must show scenario count wording.");
+  assertTest(experimentalHtml.includes("Confiance faible") || experimentalHtml.includes("Confiance faible à moyenne"), "experimental report must show batch confidence.");
   assertTest(experimentalHtml.includes("piste") || experimentalHtml.includes("test"), "coach copy must say this remains a test or suggestion.");
   assertTest(experimentalHtml.includes("consigne officielle"), "coach copy must avoid official-instruction overclaim.");
   assertTest(!visibleExperimental.includes("doit appliquer"), "visible copy must not say coach must apply the suggestion.");
-  assertTest(!visibleExperimental.includes("est une vÃ©ritÃ© officielle"), "visible batch copy must not claim official truth.");
-  assertTest(!visibleExperimental.includes("est une preuve d'Ã©conomie globale"), "visible batch copy must not claim global economy proof.");
+  assertTest(!visibleExperimental.includes("est une vérité officielle"), "visible batch copy must not claim official truth.");
+  assertTest(!visibleExperimental.includes("est une preuve d'économie globale"), "visible batch copy must not claim global economy proof.");
 
   return [
     "experimental coach report contains multi-scenario confidence block",

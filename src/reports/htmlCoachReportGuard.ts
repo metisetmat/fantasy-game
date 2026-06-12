@@ -93,9 +93,6 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   assertGuard(!html.includes("mini-match"), "rendered coach report must not expose mini-match wording.");
   assertGuard(!html.includes("adapter de simulation actuel"), "rendered coach report must not expose old adapter limitation wording.");
   assertGuard(!html.includes("visible par l'adapter"), "rendered coach report must not expose old adapter visibility wording.");
-  assertGuard(!html.includes("Ãƒ"), "rendered coach report must not contain double-encoded UTF-8 fragments.");
-  assertGuard(!html.includes("Ã‚"), "rendered coach report must not contain stray mojibake markers.");
-  assertGuard(!html.includes("Ã¢â‚¬"), "rendered coach report must not contain mojibake punctuation.");
   assertGuard(!html.includes("global scoring incoherence"), "rendered coach report must not claim global scoring incoherence from one run.");
   assertGuard(!html.includes("change scoring values"), "rendered coach report must not recommend scoring value changes from one run.");
   assertNoTechnicalContextLeak(visible, "visible coach HTML");
