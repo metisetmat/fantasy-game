@@ -75,6 +75,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 29;
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
       return 28;
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
+      return 27;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -157,6 +159,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire l'option coach proposee par le sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
       return "Relire la confiance de l'option coach sandbox";
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
+      return "Relire la confiance multi-scenarios de l'option sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

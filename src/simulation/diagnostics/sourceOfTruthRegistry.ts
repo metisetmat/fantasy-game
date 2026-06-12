@@ -29,7 +29,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -790,6 +791,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "normal live selection quality",
       "full-match economy coherence",
       "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION",
+    canProve: [
+      "the sandbox coach suggestion has been checked across multiple local sandbox scenarios",
+      "average, minimum, and maximum local evidence scores are visible",
+      "local batch confidence is capped at medium",
+      "scenario variation does not mutate official match truth",
+    ],
+    canSuggest: [
+      "coach-facing tactical tests",
+      "whether a suggestion remains worth testing across local scenario variants",
+      "what support, goalkeeper, fatigue, and rebound conditions affect the suggestion",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "team-wide tactical superiority",
     ],
     cannotOverride: [
       "live score",
