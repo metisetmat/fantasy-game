@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3P - Goalkeeper Response Model. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3Q - Rebound & Second Chance Sandbox. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -178,6 +178,8 @@ import { attributeDrivenShotResolutionFromSandbox } from "./fullMatch/attributeD
 import type { AttributeDrivenShotResolutionModel } from "./fullMatch/attributeDrivenShotResolutionSandbox";
 import { goalkeeperResponseModelFromShotResolution } from "./fullMatch/goalkeeperResponseModelFromShotResolution";
 import type { GoalkeeperResponseModel } from "./fullMatch/goalkeeperResponseModel";
+import { reboundSecondChanceFromGoalkeeperResponse } from "./fullMatch/reboundSecondChanceFromGoalkeeperResponse";
+import type { ReboundSecondChanceModel } from "./fullMatch/reboundSecondChanceSandbox";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -781,6 +783,30 @@ function goalkeeperResponseModelLimitations(model: GoalkeeperResponseModel): rea
     "FULLMATCH_GOALKEEPER_RESPONSE_MODEL_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_GOALKEEPER_RESPONSE_MODEL_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_GOALKEEPER_RESPONSE_MODEL_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function reboundSecondChanceModelLimitations(model: ReboundSecondChanceModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_EXPERIMENTAL",
+    `FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DIAGNOSTIC_ONLY",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
 
@@ -1887,6 +1913,53 @@ function goalkeeperResponseModelEvidenceFact(input: {
   };
 }
 
+function reboundSecondChanceModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: ReboundSecondChanceModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_rebound_second_chance_sandbox")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-rebound-second-chance-sandbox`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.baseline.targetZone ?? "Z2-HSL", input.model.override.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental rebound second chance sandbox ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline rebound=${input.model.baseline.reboundOutcome}, ballLoose=${input.model.baseline.ballLooseState}, ` +
+      `secondChance=${input.model.baseline.secondChanceCreated}; override sourceResponse=${input.model.override.sourceGoalkeeperResponseType ?? "none"}, ` +
+      `sourceRebound=${input.model.override.sourceReboundState ?? "none"}, rebound=${input.model.override.reboundOutcome}, ` +
+      `ballLoose=${input.model.override.ballLooseState}, recovery=${input.model.override.recoveryTeamCandidate}, ` +
+      `nextPossession=${input.model.override.nextSandboxPossessionCandidate}, attackingProximity=${input.model.override.attackingProximityScore}, ` +
+      `defensiveRecovery=${input.model.override.defensiveRecoveryScore}, danger=${input.model.override.reboundDangerScore}, ` +
+      `secondChanceProbability=${input.model.override.secondChanceProbability}, secondChanceCreated=${input.model.override.secondChanceCreated}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, ` +
+      `canMutateOfficialPossession=${input.model.canMutateOfficialPossession}, canMutateOfficialScore=${input.model.canMutateOfficialScore}, ` +
+      `canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 86 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_rebound_second_chance_sandbox",
+      "rebound_second_chance_sandbox",
+      ...(input.model.chainId === undefined ? [] : [`rebound_second_chance_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -1907,6 +1980,7 @@ function withFullMatchGroundingDiagnosis(
   sandboxScoringEventResolutionModel: SandboxScoringEventResolutionModel,
   attributeDrivenShotResolutionModel: AttributeDrivenShotResolutionModel,
   goalkeeperResponseModel: GoalkeeperResponseModel,
+  reboundSecondChanceModel: ReboundSecondChanceModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -1927,7 +2001,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_sandbox_scoring_event_candidate") ||
     fact.internalTags.includes("workbench_chain_sandbox_scoring_event_resolution") ||
     fact.internalTags.includes("workbench_chain_attribute_driven_shot_resolution_sandbox") ||
-    fact.internalTags.includes("workbench_chain_goalkeeper_response_model_sandbox")
+    fact.internalTags.includes("workbench_chain_goalkeeper_response_model_sandbox") ||
+    fact.internalTags.includes("workbench_chain_rebound_second_chance_sandbox")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -1948,7 +2023,10 @@ function withFullMatchGroundingDiagnosis(
   const goalkeeperResponseSummary = goalkeeperResponseModel.status === "not_available"
     ? ""
     : ` Le modele de reponse gardien sandbox detaille ensuite pourquoi ${goalkeeperResponseModel.override.goalkeeperId ?? "fallback"} repond au tir : positionnement ${goalkeeperResponseModel.override.positioningScore}/100, lecture de trajectoire ${goalkeeperResponseModel.override.trajectoryReadingScore}/100, reaction ${goalkeeperResponseModel.override.reactionScore}/100, main ${goalkeeperResponseModel.override.handlingScore}/100, controle du rebond ${goalkeeperResponseModel.override.reboundControlScore}/100, concentration ${goalkeeperResponseModel.override.concentrationScore}/100, fatigue mentale ${goalkeeperResponseModel.override.mentalFatigueImpact}. Face a une qualite de tir ${goalkeeperResponseModel.override.shotQualityFaced}/100, le score de reponse gardien est ${goalkeeperResponseModel.override.goalkeeperResponseScore}/100, marge ${goalkeeperResponseModel.override.saveMargin}, reponse ${goalkeeperResponseModel.override.responseType}, rebond ${goalkeeperResponseModel.override.reboundState}. Ce modele reste sandbox-only : aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}`;
+  const reboundSecondChanceSummary = reboundSecondChanceModel.status === "not_available"
+    ? ""
+    : ` Le sandbox rebond et seconde chance transforme cette reponse gardien en etat de rebond : outcome ${reboundSecondChanceModel.override.reboundOutcome}, ballon ${reboundSecondChanceModel.override.ballLooseState}, recuperation candidate ${reboundSecondChanceModel.override.recoveryTeamCandidate}, prochaine possession sandbox ${reboundSecondChanceModel.override.nextSandboxPossessionCandidate}, danger ${reboundSecondChanceModel.override.reboundDangerScore}/100, probabilite de seconde chance ${reboundSecondChanceModel.override.secondChanceProbability}/100, seconde chance creee ${reboundSecondChanceModel.override.secondChanceCreated ? "oui" : "non"}. Ce resultat reste strictement sandbox-only : aucune mutation de possession officielle, aucun MatchEvent officiel, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2049,6 +2127,10 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     shotResolutionModel: attributeDrivenShotResolutionModel,
   });
+  const reboundSecondChanceModel = reboundSecondChanceFromGoalkeeperResponse({
+    matchInput: input,
+    goalkeeperResponseModel,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -2103,6 +2185,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && sandboxScoringEventResolutionModel.status !== "not_available" ? { sandboxScoringEventResolutionModel } : {}),
           ...(index === 0 && attributeDrivenShotResolutionModel.status !== "not_available" ? { attributeDrivenShotResolutionModel } : {}),
           ...(index === 0 && goalkeeperResponseModel.status !== "not_available" ? { goalkeeperResponseModel } : {}),
+          ...(index === 0 && reboundSecondChanceModel.status !== "not_available" ? { reboundSecondChanceModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -2186,6 +2269,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...sandboxScoringEventResolutionModelLimitations(sandboxScoringEventResolutionModel),
       ...attributeDrivenShotResolutionModelLimitations(attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelLimitations(goalkeeperResponseModel),
+      ...reboundSecondChanceModelLimitations(reboundSecondChanceModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2273,6 +2357,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: goalkeeperResponseModel,
   });
+  const reboundSecondChanceModelFact = reboundSecondChanceModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: reboundSecondChanceModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2291,6 +2380,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(sandboxScoringEventResolutionModelFact === null ? [] : [sandboxScoringEventResolutionModelFact]),
     ...(attributeDrivenShotResolutionModelFact === null ? [] : [attributeDrivenShotResolutionModelFact]),
     ...(goalkeeperResponseModelFact === null ? [] : [goalkeeperResponseModelFact]),
+    ...(reboundSecondChanceModelFact === null ? [] : [reboundSecondChanceModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2319,6 +2409,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     sandboxScoringEventResolutionModel,
     attributeDrivenShotResolutionModel,
     goalkeeperResponseModel,
+    reboundSecondChanceModel,
   );
 }
 ```
@@ -12803,6 +12894,975 @@ export function goalkeeperResponseModelSignature(report: MatchReport): {
 }
 ```
 
+## File: src/simulation/fullMatch/reboundSecondChanceSandbox.ts
+
+```ts
+export type ReboundSecondChanceStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type ReboundSecondChanceScope =
+  | "rebound_second_chance_sandbox"
+  | "production_scoring_forbidden";
+
+export type ReboundSecondChanceOrigin =
+  | "none"
+  | "goalkeeper_response_model_sandbox";
+
+export type ReboundOutcome =
+  | "NO_REBOUND"
+  | "HELD_BALL"
+  | "SAFE_DEFLECTION"
+  | "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE"
+  | "DANGEROUS_REBOUND"
+  | "LOOSE_BALL"
+  | "SECOND_CHANCE_WINDOW"
+  | "DEFENSIVE_CLEARANCE";
+
+export type BallLooseState =
+  | "none"
+  | "held_by_goalkeeper"
+  | "safe_area"
+  | "contested"
+  | "danger_zone"
+  | "attacker_favored"
+  | "defender_favored";
+
+export type SandboxRecoveryTeamCandidate =
+  | "none"
+  | "goalkeeper_team"
+  | "attacking_team"
+  | "contested";
+
+export type ReboundSecondChanceReason =
+  | "NO_SAVE_REQUIRED"
+  | "CLEAN_SAVE_HELD"
+  | "PARRIED_SAVE"
+  | "SAFE_DEFLECTION"
+  | "REBOUND_CONTROL_STRONG"
+  | "REBOUND_CONTROL_WEAK"
+  | "HANDLING_STRONG"
+  | "HANDLING_WEAK"
+  | "DEFENSIVE_RECOVERY_ADVANTAGE"
+  | "ATTACKING_PROXIMITY_ADVANTAGE"
+  | "SECOND_CHANCE_SUPPRESSED"
+  | "SECOND_CHANCE_CREATED"
+  | "SANDBOX_ONLY"
+  | "PRODUCTION_SCORING_FORBIDDEN";
+
+export type ReboundSecondChancePathResult = {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly shooterId?: string;
+  readonly goalkeeperId?: string;
+  readonly targetZone?: string;
+  readonly sourceGoalkeeperResponseType?: string;
+  readonly sourceReboundState?: string;
+  readonly sourceShotQualityFaced: number;
+  readonly sourceGoalkeeperResponseScore: number;
+  readonly sourceSaveMargin: number;
+  readonly handlingScore: number;
+  readonly reboundControlScore: number;
+  readonly concentrationScore: number;
+  readonly mentalFatigueImpact: number;
+  readonly attackingProximityScore: number;
+  readonly defensiveRecoveryScore: number;
+  readonly reboundDangerScore: number;
+  readonly secondChanceProbability: number;
+  readonly reboundOutcome: ReboundOutcome;
+  readonly ballLooseState: BallLooseState;
+  readonly recoveryTeamCandidate: SandboxRecoveryTeamCandidate;
+  readonly nextSandboxPossessionCandidate: SandboxRecoveryTeamCandidate;
+  readonly secondChanceCreated: boolean;
+  readonly sandboxMatchEventCreated: false;
+  readonly sandboxScoringEventCreated: false;
+  readonly sandboxScoreDelta: 0;
+  readonly isolatedOnly: true;
+  readonly canBecomeOfficialMatchEvent: false;
+  readonly canMutateOfficialScore: false;
+  readonly canCreateOfficialScoringEvent: false;
+  readonly canCreateProductionScoringEvent: false;
+  readonly canMutateOfficialPossession: false;
+  readonly reasons: readonly ReboundSecondChanceReason[];
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type ReboundSecondChanceModel = {
+  readonly status: ReboundSecondChanceStatus;
+  readonly scope: ReboundSecondChanceScope;
+  readonly origin: ReboundSecondChanceOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly baseline: ReboundSecondChancePathResult;
+  readonly override: ReboundSecondChancePathResult;
+  readonly baselineSecondChanceCreated: boolean;
+  readonly overrideSecondChanceCreated: boolean;
+  readonly reboundOutcomeDivergenceObserved: boolean;
+  readonly ballLooseStateDivergenceObserved: boolean;
+  readonly recoveryTeamDivergenceObserved: boolean;
+  readonly secondChanceProbabilityObserved: boolean;
+  readonly secondChanceCreationDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly modelAppliedOnlyInSandbox: boolean;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly diagnosticOnly: boolean;
+  readonly canInjectEventsIntoOfficialTimeline: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateOfficialPossession: false;
+  readonly canMutateProductionRouteResolution: false;
+  readonly canMutateGlobalRouteSuccessRates: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly explanation?: string;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptyReboundSecondChancePathResult(
+  pathId: "baseline" | "override",
+): ReboundSecondChancePathResult {
+  return {
+    pathId,
+    sourceShotQualityFaced: 0,
+    sourceGoalkeeperResponseScore: 0,
+    sourceSaveMargin: 0,
+    handlingScore: 0,
+    reboundControlScore: 0,
+    concentrationScore: 0,
+    mentalFatigueImpact: 0,
+    attackingProximityScore: 0,
+    defensiveRecoveryScore: 0,
+    reboundDangerScore: 0,
+    secondChanceProbability: 0,
+    reboundOutcome: "NO_REBOUND",
+    ballLooseState: "none",
+    recoveryTeamCandidate: "none",
+    nextSandboxPossessionCandidate: "none",
+    secondChanceCreated: false,
+    sandboxMatchEventCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    canMutateOfficialPossession: false,
+    reasons: ["NO_SAVE_REQUIRED", "SANDBOX_ONLY", "PRODUCTION_SCORING_FORBIDDEN"],
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function emptyReboundSecondChanceModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): ReboundSecondChanceModel {
+  return {
+    status: "not_available",
+    scope: "production_scoring_forbidden",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    baseline: emptyReboundSecondChancePathResult("baseline"),
+    override: emptyReboundSecondChancePathResult("override"),
+    baselineSecondChanceCreated: false,
+    overrideSecondChanceCreated: false,
+    reboundOutcomeDivergenceObserved: false,
+    ballLooseStateDivergenceObserved: false,
+    recoveryTeamDivergenceObserved: false,
+    secondChanceProbabilityObserved: false,
+    secondChanceCreationDivergenceObserved: false,
+    sandboxScoringEventDivergenceObserved: false,
+    sandboxScoreDivergenceObserved: false,
+    modelAppliedOnlyInSandbox: false,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: 0,
+    rejectedUnavailableCandidateCount: 0,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/extractReboundContext.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+
+function bounded(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function zoneDanger(targetZone: string | undefined): number {
+  if (targetZone === undefined) {
+    return 45;
+  }
+
+  if (targetZone.includes("Z5")) {
+    return 72;
+  }
+
+  if (targetZone.includes("Z4")) {
+    return 58;
+  }
+
+  if (targetZone.includes("Z3")) {
+    return 44;
+  }
+
+  return 38;
+}
+
+function teamSupportScore(input: MatchInput, teamId: string): number {
+  const team = input.homeTeam.teamId === teamId ? input.homeTeam : input.awayTeam;
+  const averageCondition = team.roster.length === 0
+    ? 65
+    : team.roster.reduce((sum, player) => sum + player.currentCondition, 0) / team.roster.length;
+  const averageMental = team.roster.length === 0
+    ? 65
+    : team.roster.reduce((sum, player) => sum + player.mentalFreshness, 0) / team.roster.length;
+
+  return bounded(averageCondition * 0.45 + averageMental * 0.35 + 12);
+}
+
+export function extractReboundContext(input: {
+  readonly matchInput: MatchInput;
+  readonly shooterId?: string;
+  readonly goalkeeperId?: string;
+  readonly targetZone?: string;
+}): {
+  readonly attackingProximityScore: number;
+  readonly defensiveRecoveryScore: number;
+  readonly warnings: readonly string[];
+} {
+  const shooterTeam = input.matchInput.homeTeam.roster.some((player) => player.playerId === input.shooterId)
+    ? input.matchInput.homeTeam.teamId
+    : input.matchInput.awayTeam.roster.some((player) => player.playerId === input.shooterId)
+      ? input.matchInput.awayTeam.teamId
+      : input.matchInput.homeTeam.teamId;
+  const goalkeeperTeam = input.matchInput.homeTeam.roster.some((player) => player.playerId === input.goalkeeperId)
+    ? input.matchInput.homeTeam.teamId
+    : input.matchInput.awayTeam.roster.some((player) => player.playerId === input.goalkeeperId)
+      ? input.matchInput.awayTeam.teamId
+      : input.matchInput.awayTeam.teamId;
+  const danger = zoneDanger(input.targetZone);
+  const attackingSupport = teamSupportScore(input.matchInput, shooterTeam);
+  const defensiveSupport = teamSupportScore(input.matchInput, goalkeeperTeam);
+
+  return {
+    attackingProximityScore: bounded(danger * 0.6 + attackingSupport * 0.25 + 4),
+    defensiveRecoveryScore: bounded(defensiveSupport * 0.55 + danger * 0.2 + 16),
+    warnings: [
+      "REBOUND_CONTEXT_SPATIAL_FALLBACK_USED",
+      "REBOUND_CONTEXT_DOES_NOT_CREATE_OFFICIAL_POSSESSION",
+      "REBOUND_CONTEXT_DOES_NOT_CREATE_OFFICIAL_SCORING_EVENT",
+    ],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/resolveReboundSecondChance.ts
+
+```ts
+import type {
+  BallLooseState,
+  ReboundOutcome,
+  ReboundSecondChancePathResult,
+  ReboundSecondChanceReason,
+  SandboxRecoveryTeamCandidate,
+} from "./reboundSecondChanceSandbox";
+
+function bounded(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function outcomeForInput(input: {
+  readonly pathId: "baseline" | "override";
+  readonly sourceGoalkeeperResponseType?: string;
+  readonly sourceReboundState?: string;
+  readonly sourceSaveMargin: number;
+  readonly reboundControlScore: number;
+  readonly handlingScore: number;
+  readonly attackingProximityScore: number;
+  readonly defensiveRecoveryScore: number;
+  readonly secondChanceProbability: number;
+}): {
+  readonly reboundOutcome: ReboundOutcome;
+  readonly ballLooseState: BallLooseState;
+  readonly recoveryTeamCandidate: SandboxRecoveryTeamCandidate;
+  readonly nextSandboxPossessionCandidate: SandboxRecoveryTeamCandidate;
+  readonly secondChanceCreated: boolean;
+} {
+  if (input.pathId === "baseline" || input.sourceGoalkeeperResponseType === "NOT_APPLICABLE") {
+    return {
+      reboundOutcome: "NO_REBOUND",
+      ballLooseState: "none",
+      recoveryTeamCandidate: "none",
+      nextSandboxPossessionCandidate: "none",
+      secondChanceCreated: false,
+    };
+  }
+
+  if (input.sourceGoalkeeperResponseType === "CLEAN_SAVE" || input.sourceReboundState === "held") {
+    return {
+      reboundOutcome: "HELD_BALL",
+      ballLooseState: "held_by_goalkeeper",
+      recoveryTeamCandidate: "goalkeeper_team",
+      nextSandboxPossessionCandidate: "goalkeeper_team",
+      secondChanceCreated: false,
+    };
+  }
+
+  if (
+    input.sourceGoalkeeperResponseType === "PARRIED_SAVE" &&
+    input.sourceReboundState === "safe_deflection" &&
+    input.reboundControlScore >= 70 &&
+    input.handlingScore >= 70 &&
+    input.sourceSaveMargin > 0
+  ) {
+    return {
+      reboundOutcome: "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE",
+      ballLooseState: "safe_area",
+      recoveryTeamCandidate: "goalkeeper_team",
+      nextSandboxPossessionCandidate: "goalkeeper_team",
+      secondChanceCreated: false,
+    };
+  }
+
+  if (
+    input.sourceGoalkeeperResponseType === "PARRIED_SAVE" &&
+    input.sourceReboundState === "safe_deflection" &&
+    input.reboundControlScore >= 55
+  ) {
+    return {
+      reboundOutcome: "SAFE_DEFLECTION",
+      ballLooseState: "contested",
+      recoveryTeamCandidate: "contested",
+      nextSandboxPossessionCandidate: "contested",
+      secondChanceCreated: false,
+    };
+  }
+
+  if (input.secondChanceProbability >= 50 && input.attackingProximityScore > input.defensiveRecoveryScore) {
+    return {
+      reboundOutcome: "SECOND_CHANCE_WINDOW",
+      ballLooseState: "attacker_favored",
+      recoveryTeamCandidate: "attacking_team",
+      nextSandboxPossessionCandidate: "attacking_team",
+      secondChanceCreated: true,
+    };
+  }
+
+  if (input.defensiveRecoveryScore >= input.attackingProximityScore + 8) {
+    return {
+      reboundOutcome: "DEFENSIVE_CLEARANCE",
+      ballLooseState: "defender_favored",
+      recoveryTeamCandidate: "goalkeeper_team",
+      nextSandboxPossessionCandidate: "goalkeeper_team",
+      secondChanceCreated: false,
+    };
+  }
+
+  return {
+    reboundOutcome: "DANGEROUS_REBOUND",
+    ballLooseState: "danger_zone",
+    recoveryTeamCandidate: "contested",
+    nextSandboxPossessionCandidate: "contested",
+    secondChanceCreated: input.secondChanceProbability >= 50,
+  };
+}
+
+function reasonsForInput(input: {
+  readonly sourceGoalkeeperResponseType?: string;
+  readonly sourceReboundState?: string;
+  readonly reboundControlScore: number;
+  readonly handlingScore: number;
+  readonly attackingProximityScore: number;
+  readonly defensiveRecoveryScore: number;
+  readonly secondChanceCreated: boolean;
+}): readonly ReboundSecondChanceReason[] {
+  return [
+    ...(input.sourceGoalkeeperResponseType === "NOT_APPLICABLE" ? ["NO_SAVE_REQUIRED" as const] : []),
+    ...(input.sourceGoalkeeperResponseType === "CLEAN_SAVE" ? ["CLEAN_SAVE_HELD" as const] : []),
+    ...(input.sourceGoalkeeperResponseType === "PARRIED_SAVE" ? ["PARRIED_SAVE" as const] : []),
+    ...(input.sourceReboundState === "safe_deflection" ? ["SAFE_DEFLECTION" as const] : []),
+    ...(input.reboundControlScore >= 70 ? ["REBOUND_CONTROL_STRONG" as const] : []),
+    ...(input.reboundControlScore > 0 && input.reboundControlScore < 55 ? ["REBOUND_CONTROL_WEAK" as const] : []),
+    ...(input.handlingScore >= 70 ? ["HANDLING_STRONG" as const] : []),
+    ...(input.handlingScore > 0 && input.handlingScore < 55 ? ["HANDLING_WEAK" as const] : []),
+    ...(input.defensiveRecoveryScore >= input.attackingProximityScore ? ["DEFENSIVE_RECOVERY_ADVANTAGE" as const] : ["ATTACKING_PROXIMITY_ADVANTAGE" as const]),
+    input.secondChanceCreated ? "SECOND_CHANCE_CREATED" : "SECOND_CHANCE_SUPPRESSED",
+    "SANDBOX_ONLY",
+    "PRODUCTION_SCORING_FORBIDDEN",
+  ];
+}
+
+export function resolveReboundSecondChance(input: {
+  readonly pathId: "baseline" | "override";
+  readonly candidateId?: string;
+  readonly shooterId?: string;
+  readonly goalkeeperId?: string;
+  readonly targetZone?: string;
+  readonly sourceGoalkeeperResponseType?: string;
+  readonly sourceReboundState?: string;
+  readonly sourceShotQualityFaced: number;
+  readonly sourceGoalkeeperResponseScore: number;
+  readonly sourceSaveMargin: number;
+  readonly handlingScore: number;
+  readonly reboundControlScore: number;
+  readonly concentrationScore: number;
+  readonly mentalFatigueImpact: number;
+  readonly attackingProximityScore: number;
+  readonly defensiveRecoveryScore: number;
+}): ReboundSecondChancePathResult {
+  const reboundControlModifier = input.reboundControlScore * 0.42;
+  const handlingModifier = input.handlingScore * 0.24;
+  const defensiveRecoveryModifier = input.defensiveRecoveryScore * 0.18;
+  const attackingProximityModifier = input.attackingProximityScore * 0.22;
+  const reboundDangerScore = input.pathId === "baseline"
+    ? 0
+    : bounded(
+      input.sourceShotQualityFaced +
+      attackingProximityModifier -
+      reboundControlModifier -
+      handlingModifier -
+      defensiveRecoveryModifier +
+      input.mentalFatigueImpact * 0.5 -
+      Math.max(0, input.sourceSaveMargin) * 0.3,
+    );
+  const secondChanceProbability = input.pathId === "baseline"
+    ? 0
+    : bounded(reboundDangerScore + input.attackingProximityScore * 0.25 - input.defensiveRecoveryScore * 0.2);
+  const outcome = outcomeForInput({
+    pathId: input.pathId,
+    ...(input.sourceGoalkeeperResponseType === undefined ? {} : { sourceGoalkeeperResponseType: input.sourceGoalkeeperResponseType }),
+    ...(input.sourceReboundState === undefined ? {} : { sourceReboundState: input.sourceReboundState }),
+    sourceSaveMargin: input.sourceSaveMargin,
+    reboundControlScore: input.reboundControlScore,
+    handlingScore: input.handlingScore,
+    attackingProximityScore: input.attackingProximityScore,
+    defensiveRecoveryScore: input.defensiveRecoveryScore,
+    secondChanceProbability,
+  });
+
+  return {
+    pathId: input.pathId,
+    ...(input.candidateId === undefined ? {} : { candidateId: input.candidateId }),
+    ...(input.shooterId === undefined ? {} : { shooterId: input.shooterId }),
+    ...(input.goalkeeperId === undefined ? {} : { goalkeeperId: input.goalkeeperId }),
+    ...(input.targetZone === undefined ? {} : { targetZone: input.targetZone }),
+    ...(input.sourceGoalkeeperResponseType === undefined ? {} : { sourceGoalkeeperResponseType: input.sourceGoalkeeperResponseType }),
+    ...(input.sourceReboundState === undefined ? {} : { sourceReboundState: input.sourceReboundState }),
+    sourceShotQualityFaced: input.sourceShotQualityFaced,
+    sourceGoalkeeperResponseScore: input.sourceGoalkeeperResponseScore,
+    sourceSaveMargin: input.sourceSaveMargin,
+    handlingScore: input.handlingScore,
+    reboundControlScore: input.reboundControlScore,
+    concentrationScore: input.concentrationScore,
+    mentalFatigueImpact: input.mentalFatigueImpact,
+    attackingProximityScore: input.attackingProximityScore,
+    defensiveRecoveryScore: input.defensiveRecoveryScore,
+    reboundDangerScore,
+    secondChanceProbability,
+    reboundOutcome: outcome.reboundOutcome,
+    ballLooseState: outcome.ballLooseState,
+    recoveryTeamCandidate: outcome.recoveryTeamCandidate,
+    nextSandboxPossessionCandidate: outcome.nextSandboxPossessionCandidate,
+    secondChanceCreated: outcome.secondChanceCreated,
+    sandboxMatchEventCreated: false,
+    sandboxScoringEventCreated: false,
+    sandboxScoreDelta: 0,
+    isolatedOnly: true,
+    canBecomeOfficialMatchEvent: false,
+    canMutateOfficialScore: false,
+    canCreateOfficialScoringEvent: false,
+    canCreateProductionScoringEvent: false,
+    canMutateOfficialPossession: false,
+    reasons: reasonsForInput({
+      ...(input.sourceGoalkeeperResponseType === undefined ? {} : { sourceGoalkeeperResponseType: input.sourceGoalkeeperResponseType }),
+      ...(input.sourceReboundState === undefined ? {} : { sourceReboundState: input.sourceReboundState }),
+      reboundControlScore: input.reboundControlScore,
+      handlingScore: input.handlingScore,
+      attackingProximityScore: input.attackingProximityScore,
+      defensiveRecoveryScore: input.defensiveRecoveryScore,
+      secondChanceCreated: outcome.secondChanceCreated,
+    }),
+    tags: [
+      `rebound_second_chance_${input.pathId}_outcome_${outcome.reboundOutcome}`,
+      `rebound_second_chance_${input.pathId}_ball_loose_${outcome.ballLooseState}`,
+      `rebound_second_chance_${input.pathId}_recovery_team_${outcome.recoveryTeamCandidate}`,
+      `rebound_second_chance_${input.pathId}_next_possession_${outcome.nextSandboxPossessionCandidate}`,
+      `rebound_second_chance_${input.pathId}_danger_${reboundDangerScore}`,
+      `rebound_second_chance_${input.pathId}_probability_${secondChanceProbability}`,
+      `rebound_second_chance_${input.pathId}_created_${outcome.secondChanceCreated ? "true" : "false"}`,
+    ],
+    warnings: [],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/reboundSecondChanceFromGoalkeeperResponse.ts
+
+```ts
+import type { MatchInput } from "../../contracts/engineToCoach";
+import type { GoalkeeperResponseModel, GoalkeeperResponsePathResult } from "./goalkeeperResponseModel";
+import { compareReboundSecondChance } from "./compareReboundSecondChance";
+import { extractReboundContext } from "./extractReboundContext";
+import {
+  emptyReboundSecondChanceModel,
+  type ReboundSecondChanceModel,
+  type ReboundSecondChancePathResult,
+} from "./reboundSecondChanceSandbox";
+import { resolveReboundSecondChance } from "./resolveReboundSecondChance";
+
+function reboundFromGoalkeeperPath(input: {
+  readonly matchInput: MatchInput;
+  readonly path: GoalkeeperResponsePathResult;
+}): ReboundSecondChancePathResult {
+  const context = extractReboundContext({
+    matchInput: input.matchInput,
+    ...(input.path.shooterId === undefined ? {} : { shooterId: input.path.shooterId }),
+    ...(input.path.goalkeeperId === undefined ? {} : { goalkeeperId: input.path.goalkeeperId }),
+    ...(input.path.targetZone === undefined ? {} : { targetZone: input.path.targetZone }),
+  });
+
+  return {
+    ...resolveReboundSecondChance({
+      pathId: input.path.pathId,
+      ...(input.path.candidateId === undefined ? {} : { candidateId: input.path.candidateId }),
+      ...(input.path.shooterId === undefined ? {} : { shooterId: input.path.shooterId }),
+      ...(input.path.goalkeeperId === undefined ? {} : { goalkeeperId: input.path.goalkeeperId }),
+      ...(input.path.targetZone === undefined ? {} : { targetZone: input.path.targetZone }),
+      sourceGoalkeeperResponseType: input.path.responseType,
+      sourceReboundState: input.path.reboundState,
+      sourceShotQualityFaced: input.path.shotQualityFaced,
+      sourceGoalkeeperResponseScore: input.path.goalkeeperResponseScore,
+      sourceSaveMargin: input.path.saveMargin,
+      handlingScore: input.path.handlingScore,
+      reboundControlScore: input.path.reboundControlScore,
+      concentrationScore: input.path.concentrationScore,
+      mentalFatigueImpact: input.path.mentalFatigueImpact,
+      attackingProximityScore: context.attackingProximityScore,
+      defensiveRecoveryScore: context.defensiveRecoveryScore,
+    }),
+    warnings: context.warnings,
+  };
+}
+
+export function reboundSecondChanceCannotMutateOfficialFullMatch(
+  model: ReboundSecondChanceModel,
+): boolean {
+  const results = [model.baseline, model.override];
+
+  return (
+    !model.canInjectEventsIntoOfficialTimeline &&
+    !model.canMutateOfficialScore &&
+    !model.canMutateOfficialScoringEvents &&
+    !model.canMutateOfficialPossession &&
+    !model.canMutateProductionRouteResolution &&
+    !model.canMutateGlobalRouteSuccessRates &&
+    !model.canCreateProductionScoringEvents &&
+    !model.modelAppliedToNormalLiveSelection &&
+    results.every((result) =>
+      result.isolatedOnly &&
+      !result.canBecomeOfficialMatchEvent &&
+      !result.canMutateOfficialScore &&
+      !result.canCreateOfficialScoringEvent &&
+      !result.canCreateProductionScoringEvent &&
+      !result.canMutateOfficialPossession &&
+      !result.sandboxMatchEventCreated &&
+      !result.sandboxScoringEventCreated &&
+      result.sandboxScoreDelta === 0
+    )
+  );
+}
+
+export function reboundSecondChanceCannotClaimGlobalEconomy(model: ReboundSecondChanceModel): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateReboundSecondChanceModel(model: ReboundSecondChanceModel): readonly string[] {
+  const shouldValidate = model.status === "available";
+  const results = [model.baseline, model.override];
+
+  return [
+    ...(shouldValidate && model.origin !== "goalkeeper_response_model_sandbox"
+      ? ["REBOUND_SECOND_CHANCE_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && model.baseline.reboundOutcome !== "NO_REBOUND"
+      ? ["REBOUND_SECOND_CHANCE_BASELINE_NOT_NO_REBOUND"]
+      : []),
+    ...(shouldValidate && model.baseline.ballLooseState !== "none"
+      ? ["REBOUND_SECOND_CHANCE_BASELINE_BALL_LOOSE_NOT_NONE"]
+      : []),
+    ...(shouldValidate && model.baseline.secondChanceCreated
+      ? ["REBOUND_SECOND_CHANCE_BASELINE_CREATED"]
+      : []),
+    ...(shouldValidate && !["SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE", "SAFE_DEFLECTION", "HELD_BALL", "DEFENSIVE_CLEARANCE"].includes(model.override.reboundOutcome)
+      ? ["REBOUND_SECOND_CHANCE_OVERRIDE_UNEXPECTED_OUTCOME"]
+      : []),
+    ...(shouldValidate && model.override.secondChanceCreated
+      ? ["REBOUND_SECOND_CHANCE_CURRENT_FIXTURE_CREATED_SECOND_CHANCE"]
+      : []),
+    ...(results.some((result) => result.sandboxMatchEventCreated)
+      ? ["REBOUND_SECOND_CHANCE_CREATED_MATCH_EVENT"]
+      : []),
+    ...(results.some((result) => result.sandboxScoringEventCreated)
+      ? ["REBOUND_SECOND_CHANCE_CREATED_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.sandboxScoreDelta !== 0)
+      ? ["REBOUND_SECOND_CHANCE_SCORE_DELTA_NON_ZERO"]
+      : []),
+    ...(shouldValidate && !model.modelAppliedOnlyInSandbox
+      ? ["REBOUND_SECOND_CHANCE_NOT_SANDBOX_ONLY"]
+      : []),
+    ...(model.modelAppliedToNormalLiveSelection
+      ? ["REBOUND_SECOND_CHANCE_APPLIED_TO_NORMAL_LIVE"]
+      : []),
+    ...(results.some((result) => !result.isolatedOnly) ? ["REBOUND_SECOND_CHANCE_RESULT_NOT_ISOLATED"] : []),
+    ...(results.some((result) => result.canBecomeOfficialMatchEvent)
+      ? ["REBOUND_SECOND_CHANCE_RESULT_CAN_BECOME_MATCH_EVENT"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialScore)
+      ? ["REBOUND_SECOND_CHANCE_RESULT_CAN_MUTATE_SCORE"]
+      : []),
+    ...(results.some((result) => result.canCreateOfficialScoringEvent)
+      ? ["REBOUND_SECOND_CHANCE_RESULT_CAN_CREATE_OFFICIAL_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.canCreateProductionScoringEvent)
+      ? ["REBOUND_SECOND_CHANCE_RESULT_CAN_CREATE_PRODUCTION_SCORING_EVENT"]
+      : []),
+    ...(results.some((result) => result.canMutateOfficialPossession)
+      ? ["REBOUND_SECOND_CHANCE_RESULT_CAN_MUTATE_POSSESSION"]
+      : []),
+    ...(!reboundSecondChanceCannotMutateOfficialFullMatch(model)
+      ? ["REBOUND_SECOND_CHANCE_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!reboundSecondChanceCannotClaimGlobalEconomy(model)
+      ? ["REBOUND_SECOND_CHANCE_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function reboundSecondChanceFromGoalkeeperResponse(input: {
+  readonly matchInput: MatchInput;
+  readonly goalkeeperResponseModel: GoalkeeperResponseModel;
+}): ReboundSecondChanceModel {
+  if (input.goalkeeperResponseModel.status !== "available") {
+    return emptyReboundSecondChanceModel({
+      ...(input.goalkeeperResponseModel.segmentLabel === undefined ? {} : { segmentLabel: input.goalkeeperResponseModel.segmentLabel }),
+      ...(input.goalkeeperResponseModel.chainId === undefined ? {} : { chainId: input.goalkeeperResponseModel.chainId }),
+      warnings: input.goalkeeperResponseModel.warnings,
+    });
+  }
+
+  const baseline = reboundFromGoalkeeperPath({
+    matchInput: input.matchInput,
+    path: input.goalkeeperResponseModel.baseline,
+  });
+  const override = reboundFromGoalkeeperPath({
+    matchInput: input.matchInput,
+    path: input.goalkeeperResponseModel.override,
+  });
+  const comparison = compareReboundSecondChance({ baseline, override });
+  const result: ReboundSecondChanceModel = {
+    status: "available",
+    scope: "rebound_second_chance_sandbox",
+    origin: "goalkeeper_response_model_sandbox",
+    ...(input.goalkeeperResponseModel.segmentLabel === undefined ? {} : { segmentLabel: input.goalkeeperResponseModel.segmentLabel }),
+    ...(input.goalkeeperResponseModel.chainId === undefined ? {} : { chainId: input.goalkeeperResponseModel.chainId }),
+    baseline,
+    override,
+    baselineSecondChanceCreated: baseline.secondChanceCreated,
+    overrideSecondChanceCreated: override.secondChanceCreated,
+    reboundOutcomeDivergenceObserved: comparison.reboundOutcomeDivergenceObserved,
+    ballLooseStateDivergenceObserved: comparison.ballLooseStateDivergenceObserved,
+    recoveryTeamDivergenceObserved: comparison.recoveryTeamDivergenceObserved,
+    secondChanceProbabilityObserved: comparison.secondChanceProbabilityObserved,
+    secondChanceCreationDivergenceObserved: comparison.secondChanceCreationDivergenceObserved,
+    sandboxScoringEventDivergenceObserved: comparison.sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved: comparison.sandboxScoreDivergenceObserved,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    rejectedClosedCandidateCount: input.goalkeeperResponseModel.rejectedClosedCandidateCount,
+    rejectedUnavailableCandidateCount: input.goalkeeperResponseModel.rejectedUnavailableCandidateCount,
+    diagnosticOnly: true,
+    canInjectEventsIntoOfficialTimeline: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateProductionRouteResolution: false,
+    canMutateGlobalRouteSuccessRates: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    explanation: comparison.explanation,
+    tags: [
+      "workbench_chain_rebound_second_chance_sandbox",
+      "rebound_second_chance_sandbox",
+      "rebound_second_chance_results_isolated_only",
+      "rebound_second_chance_model_status_available",
+      "rebound_second_chance_model_origin_goalkeeper_response_model_sandbox",
+      `rebound_second_chance_baseline_outcome_${baseline.reboundOutcome}`,
+      `rebound_second_chance_baseline_ball_loose_${baseline.ballLooseState}`,
+      `rebound_second_chance_baseline_created_${baseline.secondChanceCreated ? "true" : "false"}`,
+      `rebound_second_chance_override_source_response_type_${override.sourceGoalkeeperResponseType ?? "none"}`,
+      `rebound_second_chance_override_source_rebound_state_${override.sourceReboundState ?? "none"}`,
+      `rebound_second_chance_override_outcome_${override.reboundOutcome}`,
+      `rebound_second_chance_override_ball_loose_${override.ballLooseState}`,
+      `rebound_second_chance_override_recovery_team_${override.recoveryTeamCandidate}`,
+      `rebound_second_chance_override_next_possession_${override.nextSandboxPossessionCandidate}`,
+      `rebound_second_chance_override_attacking_proximity_${override.attackingProximityScore}`,
+      `rebound_second_chance_override_defensive_recovery_${override.defensiveRecoveryScore}`,
+      `rebound_second_chance_override_danger_${override.reboundDangerScore}`,
+      `rebound_second_chance_override_probability_${override.secondChanceProbability}`,
+      `rebound_second_chance_override_created_${override.secondChanceCreated ? "true" : "false"}`,
+      ...baseline.tags,
+      ...override.tags,
+      `rebound_second_chance_outcome_divergence_${comparison.reboundOutcomeDivergenceObserved ? "true" : "false"}`,
+      `rebound_second_chance_ball_loose_divergence_${comparison.ballLooseStateDivergenceObserved ? "true" : "false"}`,
+      `rebound_second_chance_recovery_team_divergence_${comparison.recoveryTeamDivergenceObserved ? "true" : "false"}`,
+      `rebound_second_chance_probability_observed_${comparison.secondChanceProbabilityObserved ? "true" : "false"}`,
+      `rebound_second_chance_creation_divergence_${comparison.secondChanceCreationDivergenceObserved ? "true" : "false"}`,
+      `rebound_second_chance_scoring_event_divergence_${comparison.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+      `rebound_second_chance_score_divergence_${comparison.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+      "rebound_second_chance_match_event_created_false",
+      "rebound_second_chance_scoring_event_created_false",
+      "rebound_second_chance_score_delta_0",
+      "rebound_second_chance_official_possession_mutation_count_0",
+      `rebound_second_chance_rejected_closed_count_${input.goalkeeperResponseModel.rejectedClosedCandidateCount}`,
+      `rebound_second_chance_rejected_unavailable_count_${input.goalkeeperResponseModel.rejectedUnavailableCandidateCount}`,
+      "rebound_second_chance_applied_only_in_sandbox_true",
+      "rebound_second_chance_applied_to_normal_live_false",
+      "rebound_second_chance_model_applied_only_in_sandbox_true",
+      "rebound_second_chance_model_applied_to_normal_live_false",
+      "rebound_second_chance_official_timeline_injection_forbidden",
+      "rebound_second_chance_official_score_mutation_forbidden",
+      "rebound_second_chance_official_scoring_events_mutation_forbidden",
+      "rebound_second_chance_official_possession_mutation_forbidden",
+      "rebound_second_chance_production_scoring_event_creation_forbidden",
+      "rebound_second_chance_production_route_resolution_mutation_forbidden",
+      "rebound_second_chance_global_route_success_mutation_forbidden",
+      "rebound_second_chance_global_economy_claim_forbidden",
+      "rebound_second_chance_closed_candidates_rejected",
+      "rebound_second_chance_unavailable_candidates_rejected",
+      "rebound_second_chance_injected_into_official_timeline_count_0",
+      "rebound_second_chance_official_score_mutation_count_0",
+      "rebound_second_chance_official_scoring_event_mutation_count_0",
+      "rebound_second_chance_production_scoring_event_creation_count_0",
+      "rebound_second_chance_production_route_resolution_mutation_count_0",
+      "rebound_second_chance_global_route_success_mutation_count_0",
+      "rebound_second_chance_global_economy_claim_count_0",
+      ...(input.goalkeeperResponseModel.chainId === undefined ? [] : [`rebound_second_chance_chain_id_${input.goalkeeperResponseModel.chainId}`]),
+    ],
+    warnings: [...baseline.warnings, ...override.warnings],
+  };
+  const warnings = validateReboundSecondChanceModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
+## File: src/simulation/fullMatch/compareReboundSecondChance.ts
+
+```ts
+import type { ReboundSecondChancePathResult } from "./reboundSecondChanceSandbox";
+
+export function compareReboundSecondChance(input: {
+  readonly baseline: ReboundSecondChancePathResult;
+  readonly override: ReboundSecondChancePathResult;
+}): {
+  readonly reboundOutcomeDivergenceObserved: boolean;
+  readonly ballLooseStateDivergenceObserved: boolean;
+  readonly recoveryTeamDivergenceObserved: boolean;
+  readonly secondChanceProbabilityObserved: boolean;
+  readonly secondChanceCreationDivergenceObserved: boolean;
+  readonly sandboxScoringEventDivergenceObserved: boolean;
+  readonly sandboxScoreDivergenceObserved: boolean;
+  readonly explanation: string;
+} {
+  const reboundOutcomeDivergenceObserved = input.baseline.reboundOutcome !== input.override.reboundOutcome;
+  const ballLooseStateDivergenceObserved = input.baseline.ballLooseState !== input.override.ballLooseState;
+  const recoveryTeamDivergenceObserved = input.baseline.recoveryTeamCandidate !== input.override.recoveryTeamCandidate;
+  const secondChanceProbabilityObserved = input.override.secondChanceProbability > input.baseline.secondChanceProbability;
+  const secondChanceCreationDivergenceObserved = input.baseline.secondChanceCreated !== input.override.secondChanceCreated;
+  const sandboxScoringEventDivergenceObserved =
+    input.baseline.sandboxScoringEventCreated !== input.override.sandboxScoringEventCreated;
+  const sandboxScoreDivergenceObserved = input.baseline.sandboxScoreDelta !== input.override.sandboxScoreDelta;
+
+  return {
+    reboundOutcomeDivergenceObserved,
+    ballLooseStateDivergenceObserved,
+    recoveryTeamDivergenceObserved,
+    secondChanceProbabilityObserved,
+    secondChanceCreationDivergenceObserved,
+    sandboxScoringEventDivergenceObserved,
+    sandboxScoreDivergenceObserved,
+    explanation:
+      `Baseline has ${input.baseline.reboundOutcome}; override has ${input.override.reboundOutcome} ` +
+      `with loose state ${input.override.ballLooseState}, recovery candidate ${input.override.recoveryTeamCandidate}, ` +
+      `and second-chance probability ${input.override.secondChanceProbability}/100. ` +
+      "The comparison is diagnostic-only and does not create official events or score changes.",
+  };
+}
+```
+
+## File: src/simulation/fullMatch/reboundSecondChanceSignature.ts
+
+```ts
+import type { MatchReport } from "../../contracts/engineToCoach";
+import type { ScoreState } from "../../models/match";
+
+function scoreChangeTotal(report: MatchReport): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function valueFromTag(tags: readonly string[], prefix: string): string | undefined {
+  return tags.find((tag) => tag.startsWith(prefix))?.slice(prefix.length);
+}
+
+function tagCount(report: MatchReport, tag: string): number {
+  return report.timeline.filter((event) => event.tags.includes(tag)).length;
+}
+
+function numberFromTag(tags: readonly string[], prefix: string): number {
+  const value = valueFromTag(tags, prefix);
+
+  return value === undefined ? 0 : Number.parseInt(value, 10);
+}
+
+function hasTag(tags: readonly string[], tag: string): boolean {
+  return tags.includes(tag);
+}
+
+export function reboundSecondChanceSignature(report: MatchReport): {
+  readonly score: ScoreState;
+  readonly scoringEventCount: number;
+  readonly scoreChangeTotal: number;
+  readonly timelineEventCount: number;
+  readonly tagCount: number;
+  readonly officialSandboxEventCount: number;
+  readonly status: string | undefined;
+  readonly origin: string | undefined;
+  readonly baselineReboundOutcome: string | undefined;
+  readonly baselineBallLooseState: string | undefined;
+  readonly baselineSecondChanceCreated: string | undefined;
+  readonly overrideGoalkeeperResponseType: string | undefined;
+  readonly overrideSourceReboundState: string | undefined;
+  readonly overrideReboundOutcome: string | undefined;
+  readonly overrideBallLooseState: string | undefined;
+  readonly overrideRecoveryTeamCandidate: string | undefined;
+  readonly overrideNextSandboxPossessionCandidate: string | undefined;
+  readonly overrideAttackingProximityScore: string | undefined;
+  readonly overrideDefensiveRecoveryScore: string | undefined;
+  readonly overrideReboundDangerScore: string | undefined;
+  readonly overrideSecondChanceProbability: string | undefined;
+  readonly overrideSecondChanceCreated: string | undefined;
+  readonly reboundOutcomeDivergenceObserved: string | undefined;
+  readonly ballLooseStateDivergenceObserved: string | undefined;
+  readonly recoveryTeamDivergenceObserved: string | undefined;
+  readonly secondChanceProbabilityObserved: string | undefined;
+  readonly secondChanceCreationDivergenceObserved: string | undefined;
+  readonly sandboxScoringEventDivergenceObserved: string | undefined;
+  readonly sandboxScoreDivergenceObserved: string | undefined;
+  readonly modelAppliedOnlyInSandbox: string | undefined;
+  readonly modelAppliedToNormalLiveSelection: string | undefined;
+  readonly sandboxMatchEventCreatedCount: number;
+  readonly sandboxScoringEventCreatedCount: number;
+  readonly sandboxScoreDeltaTotal: number;
+  readonly officialPossessionMutationCount: number;
+  readonly rejectedClosedCandidateCount: number;
+  readonly rejectedUnavailableCandidateCount: number;
+  readonly officialTimelineInjectionCount: number;
+  readonly officialScoreMutationCount: number;
+  readonly officialScoringEventMutationCount: number;
+  readonly productionScoringEventCreationCount: number;
+  readonly productionRouteResolutionMutationCount: number;
+  readonly globalRouteSuccessRateMutationCount: number;
+  readonly globalEconomyClaimCount: number;
+} {
+  const facts = report.evidenceFacts.flatMap((fact) => fact.internalTags);
+
+  return {
+    score: report.score,
+    scoringEventCount: report.timeline.filter((event) => event.eventType === "scoring").length,
+    scoreChangeTotal: scoreChangeTotal(report),
+    timelineEventCount: report.timeline.length,
+    tagCount: tagCount(report, "workbench_chain_rebound_second_chance_sandbox"),
+    officialSandboxEventCount: report.timeline.filter((event) =>
+      event.eventId.includes("rebound-second-chance")
+    ).length,
+    status: valueFromTag(facts, "rebound_second_chance_model_status_"),
+    origin: valueFromTag(facts, "rebound_second_chance_model_origin_"),
+    baselineReboundOutcome: valueFromTag(facts, "rebound_second_chance_baseline_outcome_"),
+    baselineBallLooseState: valueFromTag(facts, "rebound_second_chance_baseline_ball_loose_"),
+    baselineSecondChanceCreated: valueFromTag(facts, "rebound_second_chance_baseline_created_"),
+    overrideGoalkeeperResponseType: valueFromTag(facts, "rebound_second_chance_override_source_response_type_"),
+    overrideSourceReboundState: valueFromTag(facts, "rebound_second_chance_override_source_rebound_state_"),
+    overrideReboundOutcome: valueFromTag(facts, "rebound_second_chance_override_outcome_"),
+    overrideBallLooseState: valueFromTag(facts, "rebound_second_chance_override_ball_loose_"),
+    overrideRecoveryTeamCandidate: valueFromTag(facts, "rebound_second_chance_override_recovery_team_"),
+    overrideNextSandboxPossessionCandidate: valueFromTag(facts, "rebound_second_chance_override_next_possession_"),
+    overrideAttackingProximityScore: valueFromTag(facts, "rebound_second_chance_override_attacking_proximity_"),
+    overrideDefensiveRecoveryScore: valueFromTag(facts, "rebound_second_chance_override_defensive_recovery_"),
+    overrideReboundDangerScore: valueFromTag(facts, "rebound_second_chance_override_danger_"),
+    overrideSecondChanceProbability: valueFromTag(facts, "rebound_second_chance_override_probability_"),
+    overrideSecondChanceCreated: valueFromTag(facts, "rebound_second_chance_override_created_"),
+    reboundOutcomeDivergenceObserved: valueFromTag(facts, "rebound_second_chance_outcome_divergence_"),
+    ballLooseStateDivergenceObserved: valueFromTag(facts, "rebound_second_chance_ball_loose_divergence_"),
+    recoveryTeamDivergenceObserved: valueFromTag(facts, "rebound_second_chance_recovery_team_divergence_"),
+    secondChanceProbabilityObserved: valueFromTag(facts, "rebound_second_chance_probability_observed_"),
+    secondChanceCreationDivergenceObserved: valueFromTag(facts, "rebound_second_chance_creation_divergence_"),
+    sandboxScoringEventDivergenceObserved: valueFromTag(facts, "rebound_second_chance_scoring_event_divergence_"),
+    sandboxScoreDivergenceObserved: valueFromTag(facts, "rebound_second_chance_score_divergence_"),
+    modelAppliedOnlyInSandbox: valueFromTag(facts, "rebound_second_chance_model_applied_only_in_sandbox_"),
+    modelAppliedToNormalLiveSelection: valueFromTag(facts, "rebound_second_chance_model_applied_to_normal_live_"),
+    sandboxMatchEventCreatedCount: hasTag(facts, "rebound_second_chance_match_event_created_true") ? 1 : 0,
+    sandboxScoringEventCreatedCount: hasTag(facts, "rebound_second_chance_scoring_event_created_true") ? 1 : 0,
+    sandboxScoreDeltaTotal: numberFromTag(facts, "rebound_second_chance_score_delta_"),
+    officialPossessionMutationCount: numberFromTag(facts, "rebound_second_chance_official_possession_mutation_count_"),
+    rejectedClosedCandidateCount: numberFromTag(facts, "rebound_second_chance_rejected_closed_count_"),
+    rejectedUnavailableCandidateCount: numberFromTag(facts, "rebound_second_chance_rejected_unavailable_count_"),
+    officialTimelineInjectionCount: numberFromTag(facts, "rebound_second_chance_injected_into_official_timeline_count_"),
+    officialScoreMutationCount: numberFromTag(facts, "rebound_second_chance_official_score_mutation_count_"),
+    officialScoringEventMutationCount: numberFromTag(facts, "rebound_second_chance_official_scoring_event_mutation_count_"),
+    productionScoringEventCreationCount: numberFromTag(facts, "rebound_second_chance_production_scoring_event_creation_count_"),
+    productionRouteResolutionMutationCount: numberFromTag(facts, "rebound_second_chance_production_route_resolution_mutation_count_"),
+    globalRouteSuccessRateMutationCount: numberFromTag(facts, "rebound_second_chance_global_route_success_mutation_count_"),
+    globalEconomyClaimCount: numberFromTag(facts, "rebound_second_chance_global_economy_claim_count_"),
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -19886,6 +20946,143 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/reboundSecondChanceSandbox.test.ts
+
+```ts
+import { resolveReboundSecondChance } from "./resolveReboundSecondChance";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateReboundSecondChanceSandbox(): readonly string[] {
+  const baseline = resolveReboundSecondChance({
+    pathId: "baseline",
+    sourceGoalkeeperResponseType: "NOT_APPLICABLE",
+    sourceReboundState: "none",
+    sourceShotQualityFaced: 0,
+    sourceGoalkeeperResponseScore: 0,
+    sourceSaveMargin: 0,
+    handlingScore: 0,
+    reboundControlScore: 0,
+    concentrationScore: 0,
+    mentalFatigueImpact: 0,
+    attackingProximityScore: 0,
+    defensiveRecoveryScore: 0,
+  });
+  const override = resolveReboundSecondChance({
+    pathId: "override",
+    candidateId: "chain-context-forward-progress-sh",
+    shooterId: "control-space-hunter",
+    goalkeeperId: "blitz-goalkeeper-free-safety",
+    targetZone: "Z4-HSR",
+    sourceGoalkeeperResponseType: "PARRIED_SAVE",
+    sourceReboundState: "safe_deflection",
+    sourceShotQualityFaced: 53,
+    sourceGoalkeeperResponseScore: 65,
+    sourceSaveMargin: 12,
+    handlingScore: 78,
+    reboundControlScore: 73,
+    concentrationScore: 68,
+    mentalFatigueImpact: 8,
+    attackingProximityScore: 61,
+    defensiveRecoveryScore: 77,
+  });
+
+  assertTest(baseline.reboundOutcome === "NO_REBOUND", "baseline rebound outcome must be NO_REBOUND.");
+  assertTest(baseline.ballLooseState === "none", "baseline ball loose state must be none.");
+  assertTest(!baseline.secondChanceCreated, "baseline must not create a second chance.");
+  assertTest(override.reboundOutcome === "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE", "override rebound outcome mismatch.");
+  assertTest(override.ballLooseState === "safe_area", "override ball loose state mismatch.");
+  assertTest(override.recoveryTeamCandidate === "goalkeeper_team", "override recovery team candidate mismatch.");
+  assertTest(override.nextSandboxPossessionCandidate === "goalkeeper_team", "override next sandbox possession mismatch.");
+  assertTest(override.reboundDangerScore === 4, "override rebound danger score mismatch.");
+  assertTest(override.secondChanceProbability === 4, "override second chance probability mismatch.");
+  assertTest(!override.secondChanceCreated, "current fixture must not create a second chance.");
+  assertTest(!override.sandboxMatchEventCreated, "sandbox rebound must not create a MatchEvent.");
+  assertTest(!override.sandboxScoringEventCreated, "sandbox rebound must not create a scoring event.");
+  assertTest(override.sandboxScoreDelta === 0, "sandbox rebound score delta must be 0.");
+
+  return [
+    "baseline has no rebound",
+    "override resolves safe deflection recoverable by defense",
+    "current fixture does not create a second chance",
+    "sandbox rebound creates no MatchEvent, scoring event, or score delta",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateReboundSecondChanceSandbox();
+
+  console.log("reboundSecondChanceSandbox tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/compareReboundSecondChance.test.ts
+
+```ts
+import { compareReboundSecondChance } from "./compareReboundSecondChance";
+import type { ReboundSecondChancePathResult } from "./reboundSecondChanceSandbox";
+import { emptyReboundSecondChancePathResult } from "./reboundSecondChanceSandbox";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function path(input: Partial<ReboundSecondChancePathResult> & {
+  readonly pathId: "baseline" | "override";
+}): ReboundSecondChancePathResult {
+  return {
+    ...emptyReboundSecondChancePathResult(input.pathId),
+    ...input,
+  };
+}
+
+export function validateCompareReboundSecondChance(): readonly string[] {
+  const comparison = compareReboundSecondChance({
+    baseline: path({ pathId: "baseline", reboundOutcome: "NO_REBOUND", ballLooseState: "none" }),
+    override: path({
+      pathId: "override",
+      reboundOutcome: "SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE",
+      ballLooseState: "safe_area",
+      recoveryTeamCandidate: "goalkeeper_team",
+      secondChanceProbability: 4,
+    }),
+  });
+
+  assertTest(comparison.reboundOutcomeDivergenceObserved, "rebound outcome divergence must be observed.");
+  assertTest(comparison.ballLooseStateDivergenceObserved, "ball loose state divergence must be observed.");
+  assertTest(comparison.recoveryTeamDivergenceObserved, "recovery team divergence must be observed.");
+  assertTest(comparison.secondChanceProbabilityObserved, "second chance probability must be observed.");
+  assertTest(!comparison.secondChanceCreationDivergenceObserved, "second chance creation divergence should remain false.");
+  assertTest(!comparison.sandboxScoringEventDivergenceObserved, "sandbox scoring event divergence must remain false.");
+  assertTest(!comparison.sandboxScoreDivergenceObserved, "sandbox score divergence must remain false.");
+  assertTest(comparison.explanation.includes("diagnostic-only"), "comparison explanation must be coach-readable and diagnostic-only.");
+
+  return [
+    "rebound outcome divergence is observed",
+    "ball loose and recovery divergence are observed",
+    "second chance probability is observed without score/scoring divergence",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCompareReboundSecondChance();
+
+  console.log("compareReboundSecondChance tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchExperimentalChainConsumption.test.ts
 
 ```ts
@@ -21205,6 +22402,92 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/runFullMatchExperimentalReboundSecondChance.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { reboundSecondChanceSignature } from "./reboundSecondChanceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchExperimentalReboundSecondChance(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = reboundSecondChanceSignature(defaultReport);
+  const experimentalSignature = reboundSecondChanceSignature(experimentalReport);
+  const reboundFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"
+  );
+  const visibleText = [
+    ...experimentalReport.tacticalReport.diagnoses.map((item) => item.summary),
+    ...experimentalReport.warnings.map((item) => item.coachSummary),
+  ].join("\n");
+
+  assertTest(defaultSignature.tagCount === 0, "default runFullMatch must not expose rebound second chance tags.");
+  assertTest(experimentalSignature.tagCount > 0, "experimental runFullMatch must expose rebound second chance tags.");
+  assertTest(experimentalSignature.officialSandboxEventCount === 0, "rebound sandbox must not be inserted as official MatchEvent.");
+  assertTest(experimentalSignature.status === "available", "rebound second chance model status must be available.");
+  assertTest(experimentalSignature.origin === "goalkeeper_response_model_sandbox", "rebound second chance origin mismatch.");
+  assertTest(experimentalSignature.baselineReboundOutcome === "NO_REBOUND", "baseline rebound outcome mismatch.");
+  assertTest(experimentalSignature.baselineBallLooseState === "none", "baseline ball loose state mismatch.");
+  assertTest(experimentalSignature.baselineSecondChanceCreated === "false", "baseline second chance created mismatch.");
+  assertTest(experimentalSignature.overrideGoalkeeperResponseType === "PARRIED_SAVE", "override source response mismatch.");
+  assertTest(experimentalSignature.overrideSourceReboundState === "safe_deflection", "override source rebound state mismatch.");
+  assertTest(["SAFE_DEFLECTION_RECOVERABLE_BY_DEFENSE", "SAFE_DEFLECTION"].includes(experimentalSignature.overrideReboundOutcome ?? ""), "override rebound outcome mismatch.");
+  assertTest(["safe_area", "contested"].includes(experimentalSignature.overrideBallLooseState ?? ""), "override ball loose state mismatch.");
+  assertTest(["goalkeeper_team", "contested"].includes(experimentalSignature.overrideRecoveryTeamCandidate ?? ""), "override recovery candidate mismatch.");
+  assertTest(experimentalSignature.overrideNextSandboxPossessionCandidate !== undefined, "next sandbox possession candidate must be present.");
+  assertTest(Number(experimentalSignature.overrideAttackingProximityScore ?? "0") > 0, "attacking proximity score must be populated.");
+  assertTest(Number(experimentalSignature.overrideDefensiveRecoveryScore ?? "0") > 0, "defensive recovery score must be populated.");
+  assertTest(Number(experimentalSignature.overrideReboundDangerScore ?? "-1") >= 0, "rebound danger score must be populated.");
+  assertTest(Number(experimentalSignature.overrideSecondChanceProbability ?? "-1") >= 0, "second chance probability must be populated.");
+  assertTest(experimentalSignature.overrideSecondChanceCreated === "false", "current fixture must not create a second chance.");
+  assertTest(experimentalSignature.reboundOutcomeDivergenceObserved === "true", "rebound outcome divergence must be observed.");
+  assertTest(experimentalSignature.ballLooseStateDivergenceObserved === "true", "ball loose state divergence must be observed.");
+  assertTest(experimentalSignature.recoveryTeamDivergenceObserved === "true", "recovery team divergence must be observed.");
+  assertTest(experimentalSignature.secondChanceProbabilityObserved === "true", "second chance probability must be observed.");
+  assertTest(experimentalSignature.secondChanceCreationDivergenceObserved === "false", "second chance creation divergence should remain false.");
+  assertTest(experimentalSignature.sandboxScoringEventDivergenceObserved === "false", "sandbox scoring event divergence must remain false.");
+  assertTest(experimentalSignature.sandboxScoreDivergenceObserved === "false", "sandbox score divergence must remain false.");
+  assertTest(experimentalSignature.modelAppliedOnlyInSandbox === "true", "model must apply only in sandbox.");
+  assertTest(experimentalSignature.modelAppliedToNormalLiveSelection === "false", "model must not apply to normal live selection.");
+  assertTest(reboundFact !== undefined, "experimental report must include rebound second chance evidence.");
+  assertTest(reboundFact?.internalTags.includes("rebound_second_chance_production_scoring_event_creation_forbidden") ?? false, "evidence must forbid production scoring event creation.");
+  assertTest(visibleText.includes("sandbox rebond et seconde chance"), "coach diagnosis must mention rebound second chance sandbox.");
+  assertTest(visibleText.includes("aucune mutation de possession officielle"), "coach diagnosis must say no official possession mutation.");
+  assertTest(visibleText.includes("aucun MatchEvent officiel"), "coach diagnosis must say no official MatchEvent is created.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_RESULTS_ISOLATED_ONLY"), "limitations must say rebound result is isolated-only.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "normal full-match must not be claimed as production chain-driven.");
+
+  return [
+    "default runFullMatch has no rebound second chance tags",
+    "experimental runFullMatch has rebound second chance tags",
+    "experimental report includes rebound second chance evidence",
+    "baseline has no rebound and override resolves safe deflection",
+    "current fixture creates no second chance",
+    "experimental coach diagnosis mentions rebound second chance sandbox",
+    "rebound second chance remains isolated-only and not official",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchExperimentalReboundSecondChance();
+
+  console.log("runFullMatchExperimentalReboundSecondChance tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -22325,6 +23608,83 @@ if (require.main === module) {
   const checks = validateRunFullMatchGoalkeeperResponseModelScoringGuard();
 
   console.log("runFullMatchGoalkeeperResponseModelScoringGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/runFullMatchReboundSecondChanceScoringGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+import { reboundSecondChanceSignature } from "./reboundSecondChanceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateRunFullMatchReboundSecondChanceScoringGuard(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultReport = runFullMatch(input);
+  const experimentalReport = runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const defaultSignature = reboundSecondChanceSignature(defaultReport);
+  const experimentalSignature = reboundSecondChanceSignature(experimentalReport);
+
+  assertTest(defaultReport.score.home === experimentalReport.score.home, "rebound sandbox must not mutate official home score.");
+  assertTest(defaultReport.score.away === experimentalReport.score.away, "rebound sandbox must not mutate official away score.");
+  assertTest(defaultSignature.scoringEventCount === experimentalSignature.scoringEventCount, "rebound sandbox must not mutate official scoring event count.");
+  assertTest(defaultSignature.scoreChangeTotal === experimentalSignature.scoreChangeTotal, "rebound sandbox must not mutate official score_change total.");
+  assertTest(defaultSignature.timelineEventCount === experimentalSignature.timelineEventCount, "rebound sandbox must not add official timeline events.");
+  assertTest(experimentalSignature.officialSandboxEventCount === 0, "no rebound sandbox result is inserted as official MatchEvent.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official final score must still derive from official score_change consequences.");
+  assertTest(experimentalSignature.sandboxMatchEventCreatedCount === 0, "rebound sandbox must not create sandbox MatchEvents in 3Q.");
+  assertTest(experimentalSignature.sandboxScoringEventCreatedCount === 0, "rebound sandbox must not create sandbox scoring events in 3Q.");
+  assertTest(experimentalSignature.sandboxScoreDeltaTotal === 0, "rebound sandbox score delta total must be 0.");
+  assertTest(experimentalSignature.officialPossessionMutationCount === 0, "official possession mutation count must be 0.");
+  assertTest(experimentalSignature.officialTimelineInjectionCount === 0, "rebound sandbox injected into official timeline count must be 0.");
+  assertTest(experimentalSignature.officialScoreMutationCount === 0, "official score mutation count must be 0.");
+  assertTest(experimentalSignature.officialScoringEventMutationCount === 0, "official scoring event mutation count must be 0.");
+  assertTest(experimentalSignature.productionScoringEventCreationCount === 0, "rebound sandbox must not create production scoring events.");
+  assertTest(experimentalSignature.productionRouteResolutionMutationCount === 0, "rebound sandbox must not mutate production route resolution.");
+  assertTest(experimentalSignature.globalRouteSuccessRateMutationCount === 0, "rebound sandbox must not mutate global route success rates.");
+  assertTest(experimentalSignature.globalEconomyClaimCount === 0, "rebound sandbox must not claim global economy.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_OFFICIAL_POSSESSION"), "limitations must forbid official possession mutation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "limitations must forbid production scoring event creation.");
+  assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION"), "limitations must forbid production route resolution mutation.");
+
+  return [
+    "default and experimental official final scores remain equal",
+    "default and experimental official scoring event counts remain equal",
+    "default and experimental official score_change totals remain equal",
+    "official timeline event count remains equal",
+    "no rebound sandbox result is inserted as official MatchEvent",
+    "no official possession is changed by rebound sandbox",
+    "no production scoring events are created by rebound sandbox",
+    "global route success rates are not mutated",
+    "production route resolution is not mutated",
+    "normal live mini-match route resolution is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchReboundSecondChanceScoringGuard();
+
+  console.log("runFullMatchReboundSecondChanceScoringGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -23548,6 +24908,75 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3q.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { reboundSecondChanceSignature } from "./reboundSecondChanceSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3Q(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = reboundSecondChanceSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.sandboxMatchEventCreatedCount === 0, "rebound sandbox must not create MatchEvents in 3Q.");
+  assertTest(signature.sandboxScoringEventCreatedCount === 0, "rebound sandbox must not create scoring events in 3Q.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "rebound sandbox must not create production scoring events.");
+  assertTest(signature.officialPossessionMutationCount === 0, "rebound sandbox must not mutate official possession.");
+  assertTest(signature.officialScoreMutationCount === 0, "rebound sandbox must not mutate official score.");
+  assertTest(signature.officialScoringEventMutationCount === 0, "rebound sandbox must not mutate official scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS"), "rebound sandbox must not create production scoring events.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_REBOUND_SECOND_CHANCE_SANDBOX_RESULTS_ISOLATED_ONLY"), "rebound sandbox must remain sandbox-only.");
+
+  return [
+    "SHOT_GOAL remains 3",
+    "TRY_TOUCHDOWN remains 5",
+    "CONVERSION_GOAL remains 2",
+    "DROP_GOAL remains 2",
+    "PENALTY_SHOT remains inactive",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "no production scoring event creation from rebound second chance sandbox",
+    "rebound second chance sandbox remains sandbox-only",
+    "official possession is not mutated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3Q();
+
+  console.log("scoringGuard.3q tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -24527,6 +25956,82 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3P();
 
   console.log("sourceOfTruthGuards.3p tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3q.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function mustRejectGlobalEconomy(scope: Parameters<typeof assertCanMakeGlobalScoringEconomyClaim>[0]): void {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim(scope);
+    throw new Error(`${scope} must not make a global economy claim.`);
+  } catch (error) {
+    assertTest(String(error).includes("50-match economy"), `${scope} rejection must mention 50-match economy.`);
+  }
+}
+
+export function validateSourceOfTruthGuards3Q(): readonly string[] {
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_SEGMENT_CONTEXT");
+  mustRejectGlobalEconomy("WORKBENCH_CHAIN_CONSUMPTION");
+  mustRejectGlobalEconomy("FULL_MATCH_HARNESS_SINGLE_RUN");
+  assertCanMakeGlobalScoringEconomyClaim("FULL_MATCH_BATCH_ECONOMY");
+
+  return [
+    "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX cannot make global economy claims",
+    "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON cannot make global economy claims",
+    "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT cannot make global economy claims",
+    "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION cannot make global economy claims",
+    "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE cannot make global economy claims",
+    "WORKBENCH_CHAIN_SEGMENT_CONTEXT cannot make global economy claims",
+    "WORKBENCH_CHAIN_CONSUMPTION cannot make global economy claims",
+    "FULL_MATCH_HARNESS_SINGLE_RUN cannot make global economy claims",
+    "FULL_MATCH_BATCH_ECONOMY remains the only global scoring economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3Q();
+
+  console.log("sourceOfTruthGuards.3q tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -25545,6 +27050,7 @@ import type { SandboxScoringEventCandidateModel } from "../fullMatch/sandboxScor
 import type { SandboxScoringEventResolutionModel } from "../fullMatch/sandboxScoringEventResolution";
 import type { AttributeDrivenShotResolutionModel } from "../fullMatch/attributeDrivenShotResolutionSandbox";
 import type { GoalkeeperResponseModel } from "../fullMatch/goalkeeperResponseModel";
+import type { ReboundSecondChanceModel } from "../fullMatch/reboundSecondChanceSandbox";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -25573,6 +27079,7 @@ export interface MiniMatchTimelineSegment {
   readonly sandboxScoringEventResolutionModel?: SandboxScoringEventResolutionModel;
   readonly attributeDrivenShotResolutionModel?: AttributeDrivenShotResolutionModel;
   readonly goalkeeperResponseModel?: GoalkeeperResponseModel;
+  readonly reboundSecondChanceModel?: ReboundSecondChanceModel;
 }
 
 export interface MatchReportBuilderInput {
@@ -26374,6 +27881,74 @@ function goalkeeperResponseModelReason(model: GoalkeeperResponseModel | undefine
   return ` Goalkeeper response model sandbox available: goalkeeper ${model.override.goalkeeperId ?? "fallback"} faces shot quality ${model.override.shotQualityFaced}/100 with response score ${model.override.goalkeeperResponseScore}/100, save margin ${model.override.saveMargin}, response ${model.override.responseType}, rebound ${model.override.reboundState}. It explains positioning, trajectory reading, reaction, handling, rebound control, concentration, and mental fatigue, but remains sandbox-only: it is not an official MatchEvent, creates no production scoring event, changes no official score, and cannot claim global economy proof.`;
 }
 
+function reboundSecondChanceModelTags(model: ReboundSecondChanceModel | undefined): readonly string[] {
+  if (model === undefined || model.status === "not_available") {
+    return [];
+  }
+
+  return [
+    "workbench_chain_rebound_second_chance_sandbox",
+    "rebound_second_chance_sandbox",
+    `rebound_second_chance_model_status_${model.status}`,
+    `rebound_second_chance_model_origin_${model.origin}`,
+    `rebound_second_chance_baseline_outcome_${model.baseline.reboundOutcome}`,
+    `rebound_second_chance_baseline_ball_loose_${model.baseline.ballLooseState}`,
+    `rebound_second_chance_baseline_created_${model.baseline.secondChanceCreated ? "true" : "false"}`,
+    `rebound_second_chance_override_source_response_type_${model.override.sourceGoalkeeperResponseType ?? "none"}`,
+    `rebound_second_chance_override_source_rebound_state_${model.override.sourceReboundState ?? "none"}`,
+    `rebound_second_chance_override_outcome_${model.override.reboundOutcome}`,
+    `rebound_second_chance_override_ball_loose_${model.override.ballLooseState}`,
+    `rebound_second_chance_override_recovery_team_${model.override.recoveryTeamCandidate}`,
+    `rebound_second_chance_override_next_possession_${model.override.nextSandboxPossessionCandidate}`,
+    `rebound_second_chance_override_attacking_proximity_${model.override.attackingProximityScore}`,
+    `rebound_second_chance_override_defensive_recovery_${model.override.defensiveRecoveryScore}`,
+    `rebound_second_chance_override_danger_${model.override.reboundDangerScore}`,
+    `rebound_second_chance_override_probability_${model.override.secondChanceProbability}`,
+    `rebound_second_chance_override_created_${model.override.secondChanceCreated ? "true" : "false"}`,
+    `rebound_second_chance_outcome_divergence_${model.reboundOutcomeDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_ball_loose_divergence_${model.ballLooseStateDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_recovery_team_divergence_${model.recoveryTeamDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_probability_observed_${model.secondChanceProbabilityObserved ? "true" : "false"}`,
+    `rebound_second_chance_creation_divergence_${model.secondChanceCreationDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_scoring_event_divergence_${model.sandboxScoringEventDivergenceObserved ? "true" : "false"}`,
+    `rebound_second_chance_score_divergence_${model.sandboxScoreDivergenceObserved ? "true" : "false"}`,
+    "rebound_second_chance_match_event_created_false",
+    "rebound_second_chance_scoring_event_created_false",
+    "rebound_second_chance_score_delta_0",
+    "rebound_second_chance_official_possession_mutation_count_0",
+    `rebound_second_chance_model_applied_only_in_sandbox_${model.modelAppliedOnlyInSandbox ? "true" : "false"}`,
+    `rebound_second_chance_model_applied_to_normal_live_${model.modelAppliedToNormalLiveSelection ? "true" : "false"}`,
+    `rebound_second_chance_rejected_closed_count_${model.rejectedClosedCandidateCount}`,
+    `rebound_second_chance_rejected_unavailable_count_${model.rejectedUnavailableCandidateCount}`,
+    "rebound_second_chance_official_timeline_injection_forbidden",
+    "rebound_second_chance_official_score_mutation_forbidden",
+    "rebound_second_chance_official_scoring_events_mutation_forbidden",
+    "rebound_second_chance_official_possession_mutation_forbidden",
+    "rebound_second_chance_production_scoring_event_creation_forbidden",
+    "rebound_second_chance_production_route_resolution_mutation_forbidden",
+    "rebound_second_chance_global_route_success_mutation_forbidden",
+    "rebound_second_chance_global_economy_claim_forbidden",
+    "rebound_second_chance_closed_candidates_rejected",
+    "rebound_second_chance_unavailable_candidates_rejected",
+    "rebound_second_chance_injected_into_official_timeline_count_0",
+    "rebound_second_chance_official_score_mutation_count_0",
+    "rebound_second_chance_official_scoring_event_mutation_count_0",
+    "rebound_second_chance_production_scoring_event_creation_count_0",
+    "rebound_second_chance_production_route_resolution_mutation_count_0",
+    "rebound_second_chance_global_route_success_mutation_count_0",
+    "rebound_second_chance_global_economy_claim_count_0",
+    ...model.tags,
+  ];
+}
+
+function reboundSecondChanceModelReason(model: ReboundSecondChanceModel | undefined): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return ` Rebound and second-chance sandbox available: goalkeeper response ${model.override.sourceGoalkeeperResponseType ?? "none"} with source rebound ${model.override.sourceReboundState ?? "none"} becomes ${model.override.reboundOutcome}, loose state ${model.override.ballLooseState}, recovery candidate ${model.override.recoveryTeamCandidate}, second-chance probability ${model.override.secondChanceProbability}/100, second chance created ${model.override.secondChanceCreated ? "true" : "false"}. It remains sandbox-only: no official MatchEvent, no official possession mutation, no production scoring event, no official score change, and no global economy proof.`;
+}
+
 export function primaryReportZone(input: MatchInput): ZoneId {
   return input.homePlan.targetZones[0] ?? input.awayPlan.targetZones[0] ?? DEFAULT_REPORT_ZONE;
 }
@@ -26415,7 +27990,7 @@ function kickoffEvent(input: {
       ballZone: input.zone,
       targetZone: input.zone,
       moveType: "adapter_bootstrap",
-      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}`,
+      reason: `Official tactical plans influence this adapter through sequence count, report zones, and event tags. ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? averageCondition(input.matchInput.homeTeam),
@@ -26449,6 +28024,7 @@ function kickoffEvent(input: {
       ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
       ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+      ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ],
     narrativeWeight: 5,
   };
@@ -26517,6 +28093,7 @@ function sequenceRecordToMatchEvent(input: {
     ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
     ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
     ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+    ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ...(teamState === undefined ? [] : [`momentum_${teamState.momentum >= 55 ? "positive" : teamState.momentum <= 45 ? "negative" : "neutral"}`]),
   ];
   const timelineTick = input.segment.tickOffset + input.record.sequenceNumber;
@@ -26541,7 +28118,7 @@ function sequenceRecordToMatchEvent(input: {
       ballZone: finalContext.activeZone,
       targetZone: ballZoneAfter ?? finalContext.activeZone,
       moveType: finalContext.currentInteraction,
-      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}`,
+      reason: `${input.record.setup.openingLine} Final danger ${finalContext.currentDanger}, pressure ${finalContext.pressureLevel}, possession stability ${finalContext.possessionStability}. Score context ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -26604,7 +28181,7 @@ function scoringEventToMatchEvent(input: {
       targetZone: input.zone,
       moveType: input.event.scoringType,
       reason:
-        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}`,
+        `Scoring summary converted into the official MatchEvent shape. Score context before segment ${input.segment.segmentState?.score.home ?? 0}-${input.segment.segmentState?.score.away ?? 0}; momentum ${teamState?.momentum ?? 50}. Plan influence: ${input.influence.explanation}${chainSegmentContextReason(input.segment.chainSegmentContext)}${routeCandidateInfluenceReason(input.segment.routeCandidateInfluence)}${shadowRouteSelectionReason(input.segment.shadowRouteSelection)}${controlledSegmentSelectionReason(input.segment.controlledSegmentSelection)}${segmentRouteInputReason(input.segment.segmentRouteInput)}${controlledMiniMatchRouteSourceReason(input.segment.controlledMiniMatchRouteSource)}${liveSelectionOverrideGuardReason(input.segment.liveSelectionOverrideGuard)}${isolatedMiniMatchOverrideExperimentReason(input.segment.isolatedMiniMatchOverrideExperiment)}${controlledSegmentReplayComparisonReason(input.segment.controlledSegmentReplayComparison)}${realIsolatedSegmentReplayReason(input.segment.realIsolatedSegmentReplay)}${controlledRouteResolutionSandboxReason(input.segment.controlledRouteResolutionSandbox)}${sandboxScoringOpportunityModelReason(input.segment.sandboxScoringOpportunityModel)}${sandboxScoringEventCandidateModelReason(input.segment.sandboxScoringEventCandidateModel)}${sandboxScoringEventResolutionModelReason(input.segment.sandboxScoringEventResolutionModel)}${attributeDrivenShotResolutionModelReason(input.segment.attributeDrivenShotResolutionModel)}${goalkeeperResponseModelReason(input.segment.goalkeeperResponseModel)}${reboundSecondChanceModelReason(input.segment.reboundSecondChanceModel)}`,
     },
     fatigueContext: {
       teamCondition: teamState?.condition ?? (teamId === input.matchInput.homeTeam.teamId
@@ -26648,6 +28225,7 @@ function scoringEventToMatchEvent(input: {
       ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
       ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
       ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+      ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
     ],
     narrativeWeight: 70,
   };
@@ -27347,6 +28925,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION":
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
+    case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
       return "training_recommendation";
   }
 }
@@ -27403,6 +28982,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Resolution attributaire de tir sandbox";
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
       return "Modele de reponse gardien sandbox";
+    case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+      return "Rebond et seconde chance sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -27471,6 +29052,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION":
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
+    case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -27506,6 +29088,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION",
     "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX",
     "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX",
+    "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -28637,6 +30220,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 37;
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
       return 36;
+    case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+      return 35;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -28703,6 +30288,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la resolution de tir attributaire sandbox";
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
       return "Relire le modele de reponse gardien sandbox";
+    case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
+      return "Relire le rebond et la seconde chance sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -29970,7 +31557,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION"
   | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"
-  | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX";
+  | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
+  | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -30497,6 +32085,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotOverride: [
       "live score",
       "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX: {
+    scope: "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX",
+    canProve: [
+      "experimental rebound and second-chance sandbox consumed the goalkeeper response model output",
+      "baseline and override rebound outcome, loose-ball state, recovery candidate, second-chance probability, and divergence were exposed",
+      "current sandbox rebound result remained separated from official timeline, official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production rebound model quality",
+      "production second-chance conversion quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
       "normal live mini-match route resolution",
       "official scoring events",
       "production route resolution",
