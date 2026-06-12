@@ -72,6 +72,8 @@ import { realIsolatedSegmentReplayFromComparison } from "./fullMatch/realIsolate
 import type { FullMatchRealIsolatedSegmentReplay } from "./fullMatch/fullMatchRealIsolatedSegmentReplay";
 import { controlledRouteResolutionSandboxFromReplay } from "./fullMatch/controlledRouteResolutionSandboxFromReplay";
 import type { ControlledRouteResolutionSandbox } from "./fullMatch/controlledRouteResolutionSandbox";
+import { sandboxScoringOpportunityModelFromResolution } from "./fullMatch/sandboxScoringOpportunityModelFromResolution";
+import type { SandboxScoringOpportunityModel } from "./fullMatch/sandboxScoringOpportunityModel";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -547,6 +549,32 @@ function controlledRouteResolutionSandboxLimitations(
     "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_CONTROLLED_ROUTE_RESOLUTION_SANDBOX_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function sandboxScoringOpportunityModelLimitations(
+  model: SandboxScoringOpportunityModel,
+): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_APPLIED_ONLY_IN_SANDBOX",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_NOT_APPLIED_TO_NORMAL_LIVE_SELECTION",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_SANDBOX_SCORING_OPPORTUNITY_MODEL_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
   ];
 }
 
@@ -1405,6 +1433,60 @@ function controlledRouteResolutionSandboxEvidenceFact(input: {
   };
 }
 
+function sandboxScoringOpportunityModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxScoringOpportunityModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_sandbox_scoring_opportunity_model")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-scoring-opportunity-model`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.baseline.targetZone ?? "Z2-HSL", input.model.override.targetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental sandbox scoring opportunity model ${input.model.status}: origin ${input.model.origin}, ` +
+      `baseline ${input.model.baseline.candidateId ?? "none"} (${input.model.baseline.actionType ?? "none"}) ` +
+      `to ${input.model.baseline.receiverId ?? "none"} in ${input.model.baseline.targetZone ?? "none"} ` +
+      `routeOutcome=${input.model.baseline.routeOutcome ?? "none"}, sourceDangerProbability=${input.model.baseline.sourceDangerProbability}, ` +
+      `sourceScoringOpportunityProbability=${input.model.baseline.sourceScoringOpportunityProbability}, ` +
+      `opportunityType=${input.model.baseline.opportunityType}, opportunityFamily=${input.model.baseline.opportunityFamily}, ` +
+      `opportunityProbability=${input.model.baseline.opportunityProbability}, opportunityCreated=${input.model.baseline.opportunityCreated}; ` +
+      `override ${input.model.override.candidateId ?? "none"} (${input.model.override.actionType ?? "none"}) ` +
+      `to ${input.model.override.receiverId ?? "none"} in ${input.model.override.targetZone ?? "none"} ` +
+      `routeOutcome=${input.model.override.routeOutcome ?? "none"}, sourceDangerProbability=${input.model.override.sourceDangerProbability}, ` +
+      `sourceScoringOpportunityProbability=${input.model.override.sourceScoringOpportunityProbability}, ` +
+      `opportunityType=${input.model.override.opportunityType}, opportunityFamily=${input.model.override.opportunityFamily}, ` +
+      `opportunityProbability=${input.model.override.opportunityProbability}, opportunityCreated=${input.model.override.opportunityCreated}. ` +
+      `typeDivergence=${input.model.opportunityTypeDivergenceObserved}, familyDivergence=${input.model.opportunityFamilyDivergenceObserved}, ` +
+      `probabilityDivergence=${input.model.opportunityProbabilityDivergenceObserved}, creationDivergence=${input.model.opportunityCreationDivergenceObserved}, ` +
+      `sandboxScoringEventDivergence=${input.model.sandboxScoringEventDivergenceObserved}, sandboxScoreDivergence=${input.model.sandboxScoreDivergenceObserved}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, canMutateOfficialScore=${input.model.canMutateOfficialScore}, ` +
+      `canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, ` +
+      `canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 76 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_scoring_opportunity_model",
+      "sandbox_scoring_opportunity_model",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_opportunity_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -1420,6 +1502,7 @@ function withFullMatchGroundingDiagnosis(
   controlledSegmentReplayComparison: FullMatchControlledSegmentReplayComparison,
   realIsolatedSegmentReplay: FullMatchRealIsolatedSegmentReplay,
   controlledRouteResolutionSandbox: ControlledRouteResolutionSandbox,
+  sandboxScoringOpportunityModel: SandboxScoringOpportunityModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -1435,19 +1518,24 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_isolated_minimatch_override_experiment") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_replay_comparison") ||
     fact.internalTags.includes("workbench_chain_real_isolated_segment_replay") ||
-    fact.internalTags.includes("workbench_chain_controlled_route_resolution_sandbox")
+    fact.internalTags.includes("workbench_chain_controlled_route_resolution_sandbox") ||
+    fact.internalTags.includes("workbench_chain_sandbox_scoring_opportunity_model")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
     : `Le contexte workbench produit une selection shadow, puis une selection controlee experimentale, puis un input de route experimental SegmentRouteInput. Le moteur dispose maintenant d'une source de route controlee pour mini-match, en mode experimental, sur le premier segment : ${controlledMiniMatchRouteSource.actionType ?? segmentRouteInput.actionType ?? controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledMiniMatchRouteSource.receiverId ?? segmentRouteInput.receiverId ?? controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledMiniMatchRouteSource.targetZone ?? segmentRouteInput.targetZone ?? controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. La selection controlee experimentale ne pilote pas encore la resolution reelle du full-match. La source de route controlee pour mini-match ne pilote pas encore la resolution live du mini-match. Le moteur prepare maintenant un override de selection live experimental pour le premier segment : ${liveSelectionOverrideGuard.overrideActionType ?? controlledMiniMatchRouteSource.actionType ?? "none"} vers ${liveSelectionOverrideGuard.overrideReceiverId ?? controlledMiniMatchRouteSource.receiverId ?? "none"} en ${liveSelectionOverrideGuard.overrideTargetZone ?? controlledMiniMatchRouteSource.targetZone ?? "none"}. Il reste volontairement non applique a la selection live normale. Le moteur applique maintenant l'override uniquement dans une experience mini-match isolee : ${isolatedMiniMatchOverrideExperiment.overrideActionType ?? liveSelectionOverrideGuard.overrideActionType ?? "none"} vers ${isolatedMiniMatchOverrideExperiment.overrideReceiverId ?? liveSelectionOverrideGuard.overrideReceiverId ?? "none"} en ${isolatedMiniMatchOverrideExperiment.overrideTargetZone ?? liveSelectionOverrideGuard.overrideTargetZone ?? "none"}. Le moteur compare maintenant deux replays controles du premier segment : la reference ${controlledSegmentReplayComparison.baseline.actionType ?? isolatedMiniMatchOverrideExperiment.baselineActionType ?? "none"} vers ${controlledSegmentReplayComparison.baseline.receiverId ?? isolatedMiniMatchOverrideExperiment.baselineReceiverId ?? "none"} en ${controlledSegmentReplayComparison.baseline.targetZone ?? isolatedMiniMatchOverrideExperiment.baselineTargetZone ?? "none"} et l'override ${controlledSegmentReplayComparison.override.actionType ?? isolatedMiniMatchOverrideExperiment.overrideActionType ?? "none"} vers ${controlledSegmentReplayComparison.override.receiverId ?? isolatedMiniMatchOverrideExperiment.overrideReceiverId ?? "none"} en ${controlledSegmentReplayComparison.override.targetZone ?? isolatedMiniMatchOverrideExperiment.overrideTargetZone ?? "none"}. Le moteur genere aussi de vrais evenements de replay isole : ${realIsolatedSegmentReplay.baselineEventCount} pour la reference et ${realIsolatedSegmentReplay.overrideEventCount} pour l'override. Il resout maintenant ces deux routes dans une sandbox de resolution controlee : reference ${controlledRouteResolutionSandbox.baseline.outcome} avec danger ${controlledRouteResolutionSandbox.baseline.dangerProbability}/100, override ${controlledRouteResolutionSandbox.override.outcome} avec danger ${controlledRouteResolutionSandbox.override.dangerProbability}/100. Cette sandbox reste strictement isolee : ses resultats ne sont pas des MatchEvents officiels, ne sont pas injectes dans la timeline officielle, ne modifient pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale. Cette comparaison montre une divergence de selection, de porteur, de progression territoriale et de danger, mais elle reste isolee : elle ne modifie pas le full-match normal. L'override n'est pas applique a la selection live normale. Les routes fermees ou indisponibles restent rejetees avant la comparaison et la sandbox. Cette source, ce garde, cette comparaison, ce replay reel isole et cette sandbox restent cantonnes au diagnostic sans modifier le score ni les evenements ; ils ne pilotent pas encore la resolution reelle du full-match. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
+  const opportunitySummary = sandboxScoringOpportunityModel.status === "not_available"
+    ? ""
+    : ` Le modele sandbox d'opportunite de scoring classe ensuite la reference en ${sandboxScoringOpportunityModel.baseline.opportunityType} (${sandboxScoringOpportunityModel.baseline.opportunityProbability}/100) et l'override en ${sandboxScoringOpportunityModel.override.opportunityType} (${sandboxScoringOpportunityModel.override.opportunityProbability}/100). Ce signal reste sandbox-only : il ne cree aucun MatchEvent officiel, aucun evenement de score production, ne modifie pas le score officiel, les evenements de score officiels, la resolution de route production, ni la preuve d'economie globale.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
     scope: "coach_visible",
     severity: "low",
     title: "Ancrage tactique full-match partiel",
-    coachSummary: chainSummary,
+    coachSummary,
     technicalSummary: `Grounding warnings: ${grounding.warnings.join(", ")}. Scope: ${grounding.scope}. May invalidate global economy: false.`,
     evidenceFactIds: [...groundingFacts, ...chainFacts].map((fact) => fact.factId),
     eventIds: chainFacts.length > 0 ? [...eventIds, ...chainFacts.flatMap((fact) => fact.eventIds)].slice(0, 8) : eventIds,
@@ -1458,7 +1546,7 @@ function withFullMatchGroundingDiagnosis(
     diagnosisId: `${input.matchId}-tactical-grounding-gap`,
     teamId: input.homeTeam.teamId,
     title: "Ancrage workbench maintenant partiel",
-    summary: chainSummary,
+    summary: coachSummary,
     evidenceEventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
     affectedZones: report.zoneStats.map((stats) => stats.zone).slice(0, 3),
     confidence: "low",
@@ -1524,6 +1612,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const controlledRouteResolutionSandbox = controlledRouteResolutionSandboxFromReplay({
     replay: realIsolatedSegmentReplay,
   });
+  const sandboxScoringOpportunityModel = sandboxScoringOpportunityModelFromResolution({
+    sandbox: controlledRouteResolutionSandbox,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -1573,6 +1664,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && controlledSegmentReplayComparison.status !== "not_available" ? { controlledSegmentReplayComparison } : {}),
           ...(index === 0 && realIsolatedSegmentReplay.status !== "not_available" ? { realIsolatedSegmentReplay } : {}),
           ...(index === 0 && controlledRouteResolutionSandbox.status !== "not_available" ? { controlledRouteResolutionSandbox } : {}),
+          ...(index === 0 && sandboxScoringOpportunityModel.status !== "not_available" ? { sandboxScoringOpportunityModel } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -1651,6 +1743,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...controlledSegmentReplayComparisonLimitations(controlledSegmentReplayComparison),
       ...realIsolatedSegmentReplayLimitations(realIsolatedSegmentReplay),
       ...controlledRouteResolutionSandboxLimitations(controlledRouteResolutionSandbox),
+      ...sandboxScoringOpportunityModelLimitations(sandboxScoringOpportunityModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -1713,6 +1806,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     sandbox: controlledRouteResolutionSandbox,
   });
+  const sandboxScoringOpportunityModelFact = sandboxScoringOpportunityModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: sandboxScoringOpportunityModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -1726,6 +1824,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(controlledSegmentReplayComparisonFact === null ? [] : [controlledSegmentReplayComparisonFact]),
     ...(realIsolatedSegmentReplayFact === null ? [] : [realIsolatedSegmentReplayFact]),
     ...(controlledRouteResolutionSandboxFact === null ? [] : [controlledRouteResolutionSandboxFact]),
+    ...(sandboxScoringOpportunityModelFact === null ? [] : [sandboxScoringOpportunityModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -1749,5 +1848,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     controlledSegmentReplayComparison,
     realIsolatedSegmentReplay,
     controlledRouteResolutionSandbox,
+    sandboxScoringOpportunityModel,
   );
 }
