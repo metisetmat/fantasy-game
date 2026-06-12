@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3V - Coach-Facing Timeline Review. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3W - Sandbox Decision Panel. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -190,6 +190,8 @@ import { officialTimelineDiffFromSandboxTimeline } from "./fullMatch/officialTim
 import type { OfficialTimelineDiffViewModel } from "./fullMatch/officialTimelineDiffView";
 import { coachFacingTimelineReviewFromDiff } from "./fullMatch/coachFacingTimelineReviewFromDiff";
 import type { CoachFacingTimelineReviewModel } from "./fullMatch/coachFacingTimelineReview";
+import { sandboxDecisionPanelFromTimelineReview } from "./fullMatch/sandboxDecisionPanelFromTimelineReview";
+import type { SandboxDecisionPanelModel } from "./fullMatch/sandboxDecisionPanel";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -935,6 +937,27 @@ function coachFacingTimelineReviewModelLimitations(model: CoachFacingTimelineRev
     "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
     "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
     "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function sandboxDecisionPanelModelLimitations(model: SandboxDecisionPanelModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_DECISION_PANEL_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_DECISION_PANEL_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_DECISION_PANEL_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_DECISION_PANEL_SUGGESTION_ONLY",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_DRIVE_LIVE_SELECTION",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2322,6 +2345,45 @@ function coachFacingTimelineReviewModelEvidenceFact(input: {
   };
 }
 
+function sandboxDecisionPanelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxDecisionPanelModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-decision-panel`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: ["Z4-HSR", "Z3-HSR"],
+    summary:
+      `Sandbox decision panel ${input.model.status}: origin ${input.model.origin}, recommendation=${input.model.recommendationType}, ` +
+      `suggestedTacticalTest="${input.model.suggestedTacticalTest}", associatedRisk="${input.model.associatedRisk}", ` +
+      `stillUnprovenCount=${input.model.stillUnproven.length}, suggestionOnly=${input.model.suggestionOnly}, officialTruth=${input.model.officialTruth}, ` +
+      `officialTimelineUnchanged=${input.model.officialTimelineUnchanged}, officialScoreUnchanged=${input.model.officialScoreUnchanged}, ` +
+      `officialPossessionUnchanged=${input.model.officialPossessionUnchanged}, officialScoringEventsUnchanged=${input.model.officialScoringEventsUnchanged}, ` +
+      `canDriveLiveSelection=${input.model.canDriveLiveSelection}, canDriveProductionRouteResolution=${input.model.canDriveProductionRouteResolution}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 88 : 20,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_decision_panel",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_decision_panel_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2348,6 +2410,7 @@ function withFullMatchGroundingDiagnosis(
   controlledSegmentSandboxTimelineModel: ControlledSegmentSandboxTimelineModel,
   officialTimelineDiffViewModel: OfficialTimelineDiffViewModel,
   coachFacingTimelineReviewModel: CoachFacingTimelineReviewModel,
+  sandboxDecisionPanelModel: SandboxDecisionPanelModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2374,7 +2437,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_sandbox_sequence_replay") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline") ||
     fact.internalTags.includes("workbench_chain_official_timeline_diff_view") ||
-    fact.internalTags.includes("workbench_chain_coach_facing_timeline_review")
+    fact.internalTags.includes("workbench_chain_coach_facing_timeline_review") ||
+    fact.internalTags.includes("workbench_chain_sandbox_decision_panel")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2410,10 +2474,13 @@ function withFullMatchGroundingDiagnosis(
   const officialTimelineDiffSummary = officialTimelineDiffViewModel.status === "not_available"
     ? ""
     : ` Le diff officiel read-only compare ensuite la timeline officielle avec les deux timelines sandbox : officiel ${officialTimelineDiffViewModel.officialTimelineEventCountBefore}->${officialTimelineDiffViewModel.officialTimelineEventCountAfter} evenements, score ${officialTimelineDiffViewModel.officialScoreBefore}->${officialTimelineDiffViewModel.officialScoreAfter}, score events ${officialTimelineDiffViewModel.officialScoringEventCountBefore}->${officialTimelineDiffViewModel.officialScoringEventCountAfter}, possession changee ${officialTimelineDiffViewModel.officialPossessionChanged ? "oui" : "non"}. Les divergences restent sandbox-only : ${officialTimelineDiffViewModel.baselineSandboxOnlyEventCount} evenements baseline et ${officialTimelineDiffViewModel.overrideSandboxOnlyEventCount} evenements override, sans insertion dans la timeline officielle ni mutation de scoring.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}`;
+  const sandboxDecisionPanelSummary = sandboxDecisionPanelModel.status === "not_available"
+    ? ""
+    : ` Le panneau de decision sandbox transforme cette lecture en option coach a tester : ${sandboxDecisionPanelModel.recommendationType}, test ${sandboxDecisionPanelModel.suggestedTacticalTest}, risque ${sandboxDecisionPanelModel.associatedRisk}. Il reste suggestion-only, ne pilote pas la selection live, ne pilote pas la resolution de route production, ne modifie pas la timeline officielle, la possession officielle, le score officiel ou les ScoringEvents officiels, et ne prouve aucune economie globale.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
-    : "La lecture timeline officielle vs sandbox est disponible dans une section dediee. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee et diff officiel read-only restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
+    : "La lecture timeline officielle vs sandbox et le panneau de decision sandbox sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only et panneau de decision sandbox restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2651,6 +2718,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const coachFacingTimelineReviewModel = coachFacingTimelineReviewFromDiff({
     diffViewModel: officialTimelineDiffViewModel,
   });
+  const sandboxDecisionPanelModel = sandboxDecisionPanelFromTimelineReview({
+    timelineReview: coachFacingTimelineReviewModel,
+  });
 
   const report = buildMatchReport({
     matchInput: input,
@@ -2693,6 +2763,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...controlledSegmentSandboxTimelineModelLimitations(controlledSegmentSandboxTimelineModel),
       ...officialTimelineDiffViewModelLimitations(officialTimelineDiffViewModel),
       ...coachFacingTimelineReviewModelLimitations(coachFacingTimelineReviewModel),
+      ...sandboxDecisionPanelModelLimitations(sandboxDecisionPanelModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2810,6 +2881,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachFacingTimelineReviewModel,
   });
+  const sandboxDecisionPanelModelFact = sandboxDecisionPanelEvidenceFact({
+    report,
+    matchInput: input,
+    model: sandboxDecisionPanelModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2834,6 +2910,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(controlledSegmentSandboxTimelineModelFact === null ? [] : [controlledSegmentSandboxTimelineModelFact]),
     ...(officialTimelineDiffViewModelFact === null ? [] : [officialTimelineDiffViewModelFact]),
     ...(coachFacingTimelineReviewModelFact === null ? [] : [coachFacingTimelineReviewModelFact]),
+    ...(sandboxDecisionPanelModelFact === null ? [] : [sandboxDecisionPanelModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2868,6 +2945,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     controlledSegmentSandboxTimelineModel,
     officialTimelineDiffViewModel,
     coachFacingTimelineReviewModel,
+    sandboxDecisionPanelModel,
   );
 }
 ```
@@ -17991,6 +18069,351 @@ export function coachFacingTimelineReviewFromDiff(input: {
 }
 ```
 
+## File: src/simulation/fullMatch/sandboxDecisionPanel.ts
+
+```ts
+export type SandboxDecisionPanelStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type SandboxDecisionPanelOrigin =
+  | "none"
+  | "coach_facing_timeline_review";
+
+export type SandboxDecisionPanelRecommendationType =
+  | "none"
+  | "test_support_around_forward_progress";
+
+export type SandboxDecisionPanelBlockId =
+  | "coach_teaching"
+  | "option_to_test"
+  | "associated_risk"
+  | "still_to_prove";
+
+export type SandboxDecisionPanelBlock = {
+  readonly blockId: SandboxDecisionPanelBlockId;
+  readonly title: string;
+  readonly summary: string;
+  readonly bullets: readonly string[];
+  readonly confidence: "low" | "medium" | "high";
+  readonly sandboxOnly: boolean;
+  readonly officialTruth: false;
+};
+
+export type SandboxDecisionPanelModel = {
+  readonly status: SandboxDecisionPanelStatus;
+  readonly origin: SandboxDecisionPanelOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly title: string;
+  readonly shortSummary: string;
+  readonly recommendationType: SandboxDecisionPanelRecommendationType;
+  readonly suggestedTacticalTest: string;
+  readonly associatedRisk: string;
+  readonly stillUnproven: readonly string[];
+  readonly blocks: readonly SandboxDecisionPanelBlock[];
+  readonly suggestionOnly: true;
+  readonly officialTruth: false;
+  readonly officialTimelineUnchanged: true;
+  readonly officialScoreUnchanged: true;
+  readonly officialPossessionUnchanged: true;
+  readonly officialScoringEventsUnchanged: true;
+  readonly modelAppliedOnlyInSandbox: true;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly diagnosticOnly: true;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canMutateOfficialScore: false;
+  readonly canMutateOfficialScoringEvents: false;
+  readonly canMutateOfficialPossession: false;
+  readonly canMutateOfficialTimeline: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptySandboxDecisionPanelModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): SandboxDecisionPanelModel {
+  return {
+    status: "not_available",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    title: "Panneau de décision sandbox",
+    shortSummary: "Le panneau de décision sandbox n'est pas disponible pour ce run.",
+    recommendationType: "none",
+    suggestedTacticalTest: "none",
+    associatedRisk: "none",
+    stillUnproven: [],
+    blocks: [],
+    suggestionOnly: true,
+    officialTruth: false,
+    officialTimelineUnchanged: true,
+    officialScoreUnchanged: true,
+    officialPossessionUnchanged: true,
+    officialScoringEventsUnchanged: true,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    diagnosticOnly: true,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canCreateProductionScoringEvents: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    canClaimGlobalEconomy: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxDecisionPanelFromTimelineReview.ts
+
+```ts
+import type { CoachFacingTimelineReviewModel } from "./coachFacingTimelineReview";
+import {
+  emptySandboxDecisionPanelModel,
+  type SandboxDecisionPanelBlock,
+  type SandboxDecisionPanelModel,
+  type SandboxDecisionPanelStatus,
+} from "./sandboxDecisionPanel";
+
+function statusFromReview(status: CoachFacingTimelineReviewModel["status"]): SandboxDecisionPanelStatus {
+  if (status === "available" || status === "blocked" || status === "partial" || status === "failed") {
+    return status;
+  }
+
+  return "not_available";
+}
+
+function tagValue(tags: readonly string[], prefix: string): string | undefined {
+  return tags.find((tag) => tag.startsWith(prefix))?.slice(prefix.length);
+}
+
+function buildBlocks(review: CoachFacingTimelineReviewModel): readonly SandboxDecisionPanelBlock[] {
+  const finalOutcome = tagValue(review.tags, "timeline_review_override_final_outcome_") ?? "secured_by_goalkeeper_team";
+  const finalActor = tagValue(review.tags, "timeline_review_override_final_actor_") ?? "blitz-goalkeeper-free-safety";
+  const finalZone = tagValue(review.tags, "timeline_review_override_final_zone_") ?? "Z3-HSR";
+
+  return [
+    {
+      blockId: "coach_teaching",
+      title: "Enseignement coach",
+      summary:
+        "Le sandbox suggère que FORWARD_PROGRESS peut créer une situation de danger, mais la réponse du gardien et le contrôle du rebond ramènent l'action vers une récupération sécurisée par l'équipe du gardien.",
+      bullets: [
+        "Cette lecture est une hypothèse de travail, pas une vérité officielle.",
+        `L'issue sandbox observée reste ${finalOutcome}.`,
+        `L'acteur final sandbox reste ${finalActor} en ${finalZone}.`,
+      ],
+      confidence: "medium",
+      sandboxOnly: true,
+      officialTruth: false,
+    },
+    {
+      blockId: "option_to_test",
+      title: "Option à tester",
+      summary:
+        "Tester FORWARD_PROGRESS vers control-space-hunter avec un meilleur soutien autour de Z4-HSR, afin de transformer la progression en seconde action plutôt qu'en tir isolé.",
+      bullets: [
+        "Ajouter un soutien proche pour sécuriser le deuxième ballon.",
+        "Comparer réception sous pression, fenêtre de tir et contrôle du rebond.",
+        "Garder la route comme test sandbox tant que la preuve live n'est pas suffisante.",
+      ],
+      confidence: "low",
+      sandboxOnly: true,
+      officialTruth: false,
+    },
+    {
+      blockId: "associated_risk",
+      title: "Risque associé",
+      summary:
+        "Si le soutien n'arrive pas, la même route peut produire un tir isolé, une réponse gardien favorable à BLITZ et une récupération sécurisée par l'équipe du gardien.",
+      bullets: [
+        "Le danger apparent ne garantit pas une conversion.",
+        "Un tir isolé peut rendre le rebond plus facile à contrôler pour le gardien.",
+        "La rest-defense doit rester lisible avant d'augmenter cette route.",
+      ],
+      confidence: "medium",
+      sandboxOnly: true,
+      officialTruth: false,
+    },
+    {
+      blockId: "still_to_prove",
+      title: "Ce qui reste à prouver",
+      summary:
+        "Il faut encore prouver cette option dans plusieurs contextes, avec différents profils de gardien, niveaux de soutien, états de fatigue et pressions défensives.",
+      bullets: [
+        "La recommandation ne pilote pas la sélection live.",
+        "Elle ne modifie pas la résolution de route production.",
+        "Elle ne prouve aucune économie globale.",
+      ],
+      confidence: "low",
+      sandboxOnly: true,
+      officialTruth: false,
+    },
+  ];
+}
+
+export function sandboxDecisionPanelCannotMutateOfficialFullMatch(model: SandboxDecisionPanelModel): boolean {
+  return (
+    model.officialTimelineUnchanged &&
+    model.officialScoreUnchanged &&
+    model.officialPossessionUnchanged &&
+    model.officialScoringEventsUnchanged &&
+    !model.canMutateOfficialTimeline &&
+    !model.canMutateOfficialPossession &&
+    !model.canMutateOfficialScore &&
+    !model.canMutateOfficialScoringEvents &&
+    !model.canCreateProductionScoringEvents
+  );
+}
+
+export function sandboxDecisionPanelCannotDriveLiveSelection(model: SandboxDecisionPanelModel): boolean {
+  return !model.canDriveLiveSelection && !model.canDriveProductionRouteResolution && !model.modelAppliedToNormalLiveSelection;
+}
+
+export function sandboxDecisionPanelCannotClaimGlobalEconomy(model: SandboxDecisionPanelModel): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateSandboxDecisionPanelModel(model: SandboxDecisionPanelModel): readonly string[] {
+  const shouldValidate = model.status === "available";
+  const joinedBlocks = model.blocks.map((block) => `${block.title} ${block.summary} ${block.bullets.join(" ")}`).join("\n");
+  const forbiddenWording = [
+    "doit faire",
+    "doit appliquer",
+    "prouve que",
+    "officiellement meilleure",
+    "score aurait changé",
+    "possession aurait officiellement changé",
+    "sandbox est officiel",
+  ];
+
+  return [
+    ...(shouldValidate && model.origin !== "coach_facing_timeline_review"
+      ? ["SANDBOX_DECISION_PANEL_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && model.blocks.length !== 4
+      ? ["SANDBOX_DECISION_PANEL_BLOCK_COUNT_NOT_4"]
+      : []),
+    ...(shouldValidate && model.recommendationType !== "test_support_around_forward_progress"
+      ? ["SANDBOX_DECISION_PANEL_RECOMMENDATION_MISSING"]
+      : []),
+    ...(shouldValidate && !joinedBlocks.includes("hypothèse de travail")
+      ? ["SANDBOX_DECISION_PANEL_SUGGESTION_WORDING_MISSING"]
+      : []),
+    ...(shouldValidate && forbiddenWording.some((fragment) => joinedBlocks.includes(fragment))
+      ? ["SANDBOX_DECISION_PANEL_OVERCLAIMS_OFFICIAL_TRUTH"]
+      : []),
+    ...(!sandboxDecisionPanelCannotMutateOfficialFullMatch(model)
+      ? ["SANDBOX_DECISION_PANEL_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!sandboxDecisionPanelCannotDriveLiveSelection(model)
+      ? ["SANDBOX_DECISION_PANEL_LIVE_SELECTION_BREACH"]
+      : []),
+    ...(!sandboxDecisionPanelCannotClaimGlobalEconomy(model)
+      ? ["SANDBOX_DECISION_PANEL_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function sandboxDecisionPanelFromTimelineReview(input: {
+  readonly timelineReview: CoachFacingTimelineReviewModel;
+}): SandboxDecisionPanelModel {
+  if (input.timelineReview.status === "not_available") {
+    return emptySandboxDecisionPanelModel({
+      ...(input.timelineReview.segmentLabel === undefined ? {} : { segmentLabel: input.timelineReview.segmentLabel }),
+      ...(input.timelineReview.chainId === undefined ? {} : { chainId: input.timelineReview.chainId }),
+      warnings: input.timelineReview.warnings,
+    });
+  }
+
+  const status = statusFromReview(input.timelineReview.status);
+  const blocks = buildBlocks(input.timelineReview);
+  const stillUnproven = [
+    "multiple match contexts",
+    "different goalkeeper profiles",
+    "support positioning around Z4-HSR",
+    "fatigue and pressure variation",
+    "batch economy before production use",
+  ];
+  const result: SandboxDecisionPanelModel = {
+    status,
+    origin: "coach_facing_timeline_review",
+    ...(input.timelineReview.segmentLabel === undefined ? {} : { segmentLabel: input.timelineReview.segmentLabel }),
+    ...(input.timelineReview.chainId === undefined ? {} : { chainId: input.timelineReview.chainId }),
+    title: "Panneau de décision sandbox",
+    shortSummary:
+      "Le sandbox propose une option coach à tester autour de FORWARD_PROGRESS et du soutien proche, sans modifier la vérité officielle du match.",
+    recommendationType: "test_support_around_forward_progress",
+    suggestedTacticalTest:
+      "Tester FORWARD_PROGRESS vers control-space-hunter avec soutien proche autour de Z4-HSR et contrôle du second ballon.",
+    associatedRisk:
+      "Sans soutien proche, la progression peut devenir un tir isolé que le gardien peut sécuriser ou repousser vers une récupération adverse.",
+    stillUnproven,
+    blocks,
+    suggestionOnly: true,
+    officialTruth: false,
+    officialTimelineUnchanged: true,
+    officialScoreUnchanged: true,
+    officialPossessionUnchanged: true,
+    officialScoringEventsUnchanged: true,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    diagnosticOnly: true,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canCreateProductionScoringEvents: false,
+    canMutateOfficialScore: false,
+    canMutateOfficialScoringEvents: false,
+    canMutateOfficialPossession: false,
+    canMutateOfficialTimeline: false,
+    canClaimGlobalEconomy: false,
+    tags: [
+      "sandbox_decision_panel",
+      `sandbox_decision_panel_status_${status}`,
+      "sandbox_decision_panel_origin_coach_facing_timeline_review",
+      "sandbox_decision_recommendation_test_support_around_forward_progress",
+      "sandbox_decision_suggestion_only_true",
+      "sandbox_decision_official_truth_false",
+      "sandbox_decision_can_drive_live_selection_false",
+      "sandbox_decision_can_drive_production_route_resolution_false",
+      "sandbox_decision_official_timeline_unchanged_true",
+      "sandbox_decision_score_unchanged_true",
+      "sandbox_decision_possession_unchanged_true",
+      "sandbox_decision_scoring_events_unchanged_true",
+      "sandbox_decision_production_scoring_event_creation_count_0",
+      "sandbox_decision_global_economy_claim_forbidden",
+      `sandbox_decision_still_unproven_count_${stillUnproven.length}`,
+      "sandbox_decision_model_applied_only_in_sandbox_true",
+      "sandbox_decision_model_applied_to_normal_live_false",
+    ],
+    warnings: input.timelineReview.warnings,
+  };
+  const warnings = validateSandboxDecisionPanelModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -27706,6 +28129,173 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/sandboxDecisionPanelFromTimelineReview.test.ts
+
+```ts
+import {
+  emptyOfficialTimelineDiffPath,
+  emptyOfficialTimelineDiffViewModel,
+  type OfficialTimelineDiffViewModel,
+} from "./officialTimelineDiffView";
+import { coachFacingTimelineReviewFromDiff } from "./coachFacingTimelineReviewFromDiff";
+import { sandboxDecisionPanelFromTimelineReview } from "./sandboxDecisionPanelFromTimelineReview";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function diffFixture(): OfficialTimelineDiffViewModel {
+  const baseline = {
+    ...emptyOfficialTimelineDiffPath({ pathId: "baseline", status: "available" }),
+    sandboxOnlyEventCount: 9,
+  };
+  const override = {
+    ...emptyOfficialTimelineDiffPath({ pathId: "override", status: "available" }),
+    sandboxOnlyEventCount: 9,
+    finalSandboxOutcome: "secured_by_goalkeeper_team",
+    finalSandboxActorCandidate: "blitz-goalkeeper-free-safety",
+    finalSandboxZoneCandidate: "Z3-HSR",
+  };
+
+  return {
+    ...emptyOfficialTimelineDiffViewModel({
+      segmentLabel: "segment-1",
+      chainId: "sequence-1-action-1",
+      warnings: [],
+    }),
+    status: "available",
+    scope: "official_timeline_diff_view",
+    origin: "controlled_segment_sandbox_timeline",
+    baseline,
+    override,
+    baselineSandboxOnlyEventCount: 9,
+    overrideSandboxOnlyEventCount: 9,
+    modelAppliedOnlyInSandbox: true,
+    tags: ["official_timeline_diff_view"],
+  };
+}
+
+export function validateSandboxDecisionPanelFromTimelineReview(): readonly string[] {
+  const missingReview = coachFacingTimelineReviewFromDiff({
+    diffViewModel: emptyOfficialTimelineDiffViewModel({ warnings: [] }),
+  });
+  const missingPanel = sandboxDecisionPanelFromTimelineReview({ timelineReview: missingReview });
+  const review = coachFacingTimelineReviewFromDiff({ diffViewModel: diffFixture() });
+  const panel = sandboxDecisionPanelFromTimelineReview({ timelineReview: review });
+  const joined = panel.blocks.map((block) => `${block.title} ${block.summary} ${block.bullets.join(" ")}`).join("\n");
+
+  assertTest(missingPanel.status === "not_available", "not_available review must return not_available panel.");
+  assertTest(panel.status === "available", "available review must return available sandbox decision panel.");
+  assertTest(panel.origin === "coach_facing_timeline_review", "panel origin must be coach_facing_timeline_review.");
+  assertTest(panel.blocks.length === 4, "panel must have exactly four blocks.");
+  assertTest(panel.blocks.some((block) => block.title === "Enseignement coach"), "coach teaching block missing.");
+  assertTest(panel.blocks.some((block) => block.blockId === "option_to_test"), "option to test block missing.");
+  assertTest(panel.blocks.some((block) => block.blockId === "associated_risk"), "associated risk block missing.");
+  assertTest(panel.blocks.some((block) => block.blockId === "still_to_prove"), "still to prove block missing.");
+  assertTest(joined.includes("FORWARD_PROGRESS"), "panel must mention FORWARD_PROGRESS.");
+  assertTest(panel.tags.includes("sandbox_decision_suggestion_only_true"), "panel must frame the option as a working hypothesis.");
+  assertTest(!joined.includes("officiellement meilleure"), "panel must not overclaim official route quality.");
+  assertTest(!joined.includes("doit appliquer"), "panel must not instruct production application.");
+  assertTest(panel.tags.includes("sandbox_decision_suggestion_only_true"), "suggestion-only tag missing.");
+  assertTest(panel.tags.includes("sandbox_decision_can_drive_live_selection_false"), "live selection guard tag missing.");
+
+  return [
+    "not_available review returns not_available decision panel",
+    "available review returns four coach-readable decision blocks",
+    "panel frames sandbox output as suggestion-only",
+    "panel does not overclaim official truth or production readiness",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxDecisionPanelFromTimelineReview();
+
+  console.log("sandboxDecisionPanelFromTimelineReview tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxDecisionPanelGuard.test.ts
+
+```ts
+import {
+  emptyOfficialTimelineDiffPath,
+  emptyOfficialTimelineDiffViewModel,
+  type OfficialTimelineDiffViewModel,
+} from "./officialTimelineDiffView";
+import { coachFacingTimelineReviewFromDiff } from "./coachFacingTimelineReviewFromDiff";
+import {
+  sandboxDecisionPanelCannotClaimGlobalEconomy,
+  sandboxDecisionPanelCannotDriveLiveSelection,
+  sandboxDecisionPanelCannotMutateOfficialFullMatch,
+  sandboxDecisionPanelFromTimelineReview,
+} from "./sandboxDecisionPanelFromTimelineReview";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function diffFixture(): OfficialTimelineDiffViewModel {
+  return {
+    ...emptyOfficialTimelineDiffViewModel({ warnings: [] }),
+    status: "available",
+    scope: "official_timeline_diff_view",
+    origin: "controlled_segment_sandbox_timeline",
+    baseline: {
+      ...emptyOfficialTimelineDiffPath({ pathId: "baseline", status: "available" }),
+      sandboxOnlyEventCount: 9,
+    },
+    override: {
+      ...emptyOfficialTimelineDiffPath({ pathId: "override", status: "available" }),
+      sandboxOnlyEventCount: 9,
+      finalSandboxOutcome: "secured_by_goalkeeper_team",
+      finalSandboxActorCandidate: "blitz-goalkeeper-free-safety",
+      finalSandboxZoneCandidate: "Z3-HSR",
+    },
+    baselineSandboxOnlyEventCount: 9,
+    overrideSandboxOnlyEventCount: 9,
+    modelAppliedOnlyInSandbox: true,
+    tags: ["official_timeline_diff_view"],
+  };
+}
+
+export function validateSandboxDecisionPanelGuard(): readonly string[] {
+  const review = coachFacingTimelineReviewFromDiff({ diffViewModel: diffFixture() });
+  const panel = sandboxDecisionPanelFromTimelineReview({ timelineReview: review });
+
+  assertTest(panel.status === "available", "sandbox decision panel must be available.");
+  assertTest(sandboxDecisionPanelCannotMutateOfficialFullMatch(panel), "panel must not mutate official full-match state.");
+  assertTest(sandboxDecisionPanelCannotDriveLiveSelection(panel), "panel must not drive live selection or production route resolution.");
+  assertTest(sandboxDecisionPanelCannotClaimGlobalEconomy(panel), "panel must not claim global economy.");
+  assertTest(!panel.canCreateProductionScoringEvents, "panel cannot create production scoring events.");
+  assertTest(!panel.canDriveLiveSelection, "panel cannot drive live selection.");
+  assertTest(!panel.canDriveProductionRouteResolution, "panel cannot drive production route resolution.");
+  assertTest(!panel.canClaimGlobalEconomy, "panel cannot claim global economy.");
+
+  return [
+    "sandbox decision panel cannot mutate official timeline, possession, score, or scoring events",
+    "sandbox decision panel cannot drive live selection",
+    "sandbox decision panel cannot drive production route resolution",
+    "sandbox decision panel cannot claim global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxDecisionPanelGuard();
+
+  console.log("sandboxDecisionPanelGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -30855,6 +31445,73 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3w.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3W(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const panelFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "official timeline event count delta must be zero.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "official scoring event count delta must be zero.");
+  assertTest(signature.officialScoreDelta === 0, "official score delta must be zero.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "panel must not create production scoring events.");
+  assertTest(panelFact !== undefined, "sandbox decision panel evidence must exist.");
+  assertTest(panelFact?.internalTags.includes("sandbox_decision_suggestion_only_true") ?? false, "panel must be suggestion-only.");
+  assertTest(panelFact?.internalTags.includes("sandbox_decision_can_drive_live_selection_false") ?? false, "panel must not drive live selection.");
+  assertTest(panelFact?.internalTags.includes("sandbox_decision_can_drive_production_route_resolution_false") ?? false, "panel must not drive production route resolution.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_DRIVE_LIVE_SELECTION"), "limitations must mark panel live-selection-forbidden.");
+
+  return [
+    "scoring constants unchanged",
+    "official final score still derives only from official score_change",
+    "sandbox decision panel creates no production scoring events",
+    "sandbox decision panel cannot drive live selection or production route resolution",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3W();
+
+  console.log("scoringGuard.3w tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -32212,6 +32869,46 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3V();
 
   console.log("source-of-truth guard 3V tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3w.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSourceOfTruthGuards3W(): readonly string[] {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim("WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    assertTest(message.includes("50-match economy"), "sandbox decision panel rejection must mention 50-match economy.");
+    assertTest(message.includes("single runFullMatch harness output"), "sandbox decision panel rejection must mention single-run limitation.");
+
+    return [
+      "sandbox decision panel cannot make global scoring economy claims",
+      "sandbox decision panel guard message mentions 50-match economy",
+      "sandbox decision panel guard message mentions single-run limitation",
+    ];
+  }
+
+  throw new Error("WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL must not make global scoring economy claims.");
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3W();
+
+  console.log("source-of-truth guard 3W tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -35316,6 +36013,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
       return "training_recommendation";
   }
 }
@@ -35384,6 +36082,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Diff read-only timeline officielle vs sandbox";
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
       return "Lecture timeline officielle vs sandbox";
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+      return "Panneau de decision sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -35458,6 +36158,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -35499,6 +36200,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE",
     "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW",
     "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW",
+    "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -36642,6 +37344,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 31;
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
       return 30;
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+      return 29;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -36720,6 +37424,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le diff read-only entre timeline officielle et sandbox";
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
       return "Relire la timeline officielle face au sandbox";
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+      return "Relire l'option coach proposee par le sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -37993,7 +38699,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
   | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
-  | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW";
+  | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -38698,6 +39405,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "official scoring events",
       "production route resolution",
       "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
+    canProve: [
+      "the coach-facing report can expose a sandbox decision suggestion without changing official match state",
+      "the sandbox decision panel remains suggestion-only and cannot drive live selection",
+      "the sandbox decision panel keeps official timeline, score, possession, and scoring events unchanged",
+      "technical sandbox evidence can be converted into coach-readable test options",
+    ],
+    canSuggest: [
+      "coach-facing tactical tests",
+      "risks to monitor before production use",
+      "unproven evidence gaps",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route quality",
+      "normal live selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
       "full-match batch economy",
       "scoring constants",
     ],

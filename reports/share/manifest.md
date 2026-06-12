@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T16:11:44.896Z
-Task/sprint: Sprint 3V - Coach-Facing Timeline Review
+Generated: 2026-06-12T17:54:49.056Z
+Task/sprint: Sprint 3W - Sandbox Decision Panel
 Mode: MINIMAL_REVIEW
 Final file count: 18
 
@@ -20,8 +20,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3v.md
-- validation.fullmatch-workbench-chain-replay-3v.md
+- fullmatch-workbench-chain-replay-3w.md
+- validation.fullmatch-workbench-chain-replay-3w.md
 - README.md
 
 ## Bundle Files

@@ -94,6 +94,8 @@ import { officialTimelineDiffFromSandboxTimeline } from "./fullMatch/officialTim
 import type { OfficialTimelineDiffViewModel } from "./fullMatch/officialTimelineDiffView";
 import { coachFacingTimelineReviewFromDiff } from "./fullMatch/coachFacingTimelineReviewFromDiff";
 import type { CoachFacingTimelineReviewModel } from "./fullMatch/coachFacingTimelineReview";
+import { sandboxDecisionPanelFromTimelineReview } from "./fullMatch/sandboxDecisionPanelFromTimelineReview";
+import type { SandboxDecisionPanelModel } from "./fullMatch/sandboxDecisionPanel";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -839,6 +841,27 @@ function coachFacingTimelineReviewModelLimitations(model: CoachFacingTimelineRev
     "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
     "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
     "FULLMATCH_COACH_FACING_TIMELINE_REVIEW_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function sandboxDecisionPanelModelLimitations(model: SandboxDecisionPanelModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_DECISION_PANEL_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_DECISION_PANEL_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_DECISION_PANEL_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_DECISION_PANEL_SUGGESTION_ONLY",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_DRIVE_LIVE_SELECTION",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2226,6 +2249,45 @@ function coachFacingTimelineReviewModelEvidenceFact(input: {
   };
 }
 
+function sandboxDecisionPanelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxDecisionPanelModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-decision-panel`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: ["Z4-HSR", "Z3-HSR"],
+    summary:
+      `Sandbox decision panel ${input.model.status}: origin ${input.model.origin}, recommendation=${input.model.recommendationType}, ` +
+      `suggestedTacticalTest="${input.model.suggestedTacticalTest}", associatedRisk="${input.model.associatedRisk}", ` +
+      `stillUnprovenCount=${input.model.stillUnproven.length}, suggestionOnly=${input.model.suggestionOnly}, officialTruth=${input.model.officialTruth}, ` +
+      `officialTimelineUnchanged=${input.model.officialTimelineUnchanged}, officialScoreUnchanged=${input.model.officialScoreUnchanged}, ` +
+      `officialPossessionUnchanged=${input.model.officialPossessionUnchanged}, officialScoringEventsUnchanged=${input.model.officialScoringEventsUnchanged}, ` +
+      `canDriveLiveSelection=${input.model.canDriveLiveSelection}, canDriveProductionRouteResolution=${input.model.canDriveProductionRouteResolution}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 88 : 20,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_decision_panel",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_decision_panel_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2252,6 +2314,7 @@ function withFullMatchGroundingDiagnosis(
   controlledSegmentSandboxTimelineModel: ControlledSegmentSandboxTimelineModel,
   officialTimelineDiffViewModel: OfficialTimelineDiffViewModel,
   coachFacingTimelineReviewModel: CoachFacingTimelineReviewModel,
+  sandboxDecisionPanelModel: SandboxDecisionPanelModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2278,7 +2341,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_sandbox_sequence_replay") ||
     fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline") ||
     fact.internalTags.includes("workbench_chain_official_timeline_diff_view") ||
-    fact.internalTags.includes("workbench_chain_coach_facing_timeline_review")
+    fact.internalTags.includes("workbench_chain_coach_facing_timeline_review") ||
+    fact.internalTags.includes("workbench_chain_sandbox_decision_panel")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2314,10 +2378,13 @@ function withFullMatchGroundingDiagnosis(
   const officialTimelineDiffSummary = officialTimelineDiffViewModel.status === "not_available"
     ? ""
     : ` Le diff officiel read-only compare ensuite la timeline officielle avec les deux timelines sandbox : officiel ${officialTimelineDiffViewModel.officialTimelineEventCountBefore}->${officialTimelineDiffViewModel.officialTimelineEventCountAfter} evenements, score ${officialTimelineDiffViewModel.officialScoreBefore}->${officialTimelineDiffViewModel.officialScoreAfter}, score events ${officialTimelineDiffViewModel.officialScoringEventCountBefore}->${officialTimelineDiffViewModel.officialScoringEventCountAfter}, possession changee ${officialTimelineDiffViewModel.officialPossessionChanged ? "oui" : "non"}. Les divergences restent sandbox-only : ${officialTimelineDiffViewModel.baselineSandboxOnlyEventCount} evenements baseline et ${officialTimelineDiffViewModel.overrideSandboxOnlyEventCount} evenements override, sans insertion dans la timeline officielle ni mutation de scoring.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}`;
+  const sandboxDecisionPanelSummary = sandboxDecisionPanelModel.status === "not_available"
+    ? ""
+    : ` Le panneau de decision sandbox transforme cette lecture en option coach a tester : ${sandboxDecisionPanelModel.recommendationType}, test ${sandboxDecisionPanelModel.suggestedTacticalTest}, risque ${sandboxDecisionPanelModel.associatedRisk}. Il reste suggestion-only, ne pilote pas la selection live, ne pilote pas la resolution de route production, ne modifie pas la timeline officielle, la possession officielle, le score officiel ou les ScoringEvents officiels, et ne prouve aucune economie globale.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
-    : "La lecture timeline officielle vs sandbox est disponible dans une section dediee. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee et diff officiel read-only restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
+    : "La lecture timeline officielle vs sandbox et le panneau de decision sandbox sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only et panneau de decision sandbox restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2555,6 +2622,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const coachFacingTimelineReviewModel = coachFacingTimelineReviewFromDiff({
     diffViewModel: officialTimelineDiffViewModel,
   });
+  const sandboxDecisionPanelModel = sandboxDecisionPanelFromTimelineReview({
+    timelineReview: coachFacingTimelineReviewModel,
+  });
 
   const report = buildMatchReport({
     matchInput: input,
@@ -2597,6 +2667,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...controlledSegmentSandboxTimelineModelLimitations(controlledSegmentSandboxTimelineModel),
       ...officialTimelineDiffViewModelLimitations(officialTimelineDiffViewModel),
       ...coachFacingTimelineReviewModelLimitations(coachFacingTimelineReviewModel),
+      ...sandboxDecisionPanelModelLimitations(sandboxDecisionPanelModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2714,6 +2785,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachFacingTimelineReviewModel,
   });
+  const sandboxDecisionPanelModelFact = sandboxDecisionPanelEvidenceFact({
+    report,
+    matchInput: input,
+    model: sandboxDecisionPanelModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2738,6 +2814,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(controlledSegmentSandboxTimelineModelFact === null ? [] : [controlledSegmentSandboxTimelineModelFact]),
     ...(officialTimelineDiffViewModelFact === null ? [] : [officialTimelineDiffViewModelFact]),
     ...(coachFacingTimelineReviewModelFact === null ? [] : [coachFacingTimelineReviewModelFact]),
+    ...(sandboxDecisionPanelModelFact === null ? [] : [sandboxDecisionPanelModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2772,5 +2849,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     controlledSegmentSandboxTimelineModel,
     officialTimelineDiffViewModel,
     coachFacingTimelineReviewModel,
+    sandboxDecisionPanelModel,
   );
 }
