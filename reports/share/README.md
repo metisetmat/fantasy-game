@@ -1,12 +1,13 @@
-# Sprint 3M Share Pack
+# Sprint 3P Share Pack
 
-This compact review pack covers the sandbox scoring event candidate model generated from the sandbox scoring opportunity model behind the opt-in route selection flag.
+This compact review pack covers the goalkeeper response model generated from the attribute-driven shot resolution sandbox behind the opt-in route selection flag.
 
 Start with:
-- `00-share-manifest.txt` for copied files, bundle contents, commands, and git status.
-- `fullmatch-workbench-chain-replay-3m.md` for sandbox scoring event candidate model status, baseline-versus-override candidate classification, opportunity source fields, divergence fields, rejected candidates, official score signature comparison, diagnostics, and guardrails.
-- `validation.fullmatch-workbench-chain-replay-3m.md` for opt-in sandbox candidate classification, official score mutation, official scoring event mutation, production scoring-event creation, route-success mutation, production-resolution guardrails, global-economy guardrails, and source-of-truth checks.
-- `coach-report.default.html` and `coach-report.experimental.html` to compare default and experimental coach-facing outputs.
-- `sequence-1-action-1.html`, `sequence-1-action-2.html`, and `sequence-1-action-3.html` for visual workbench truth.
-- `bundle__simulation.md` for multi-action WorkbenchChain files/tests, segment context influence, route candidate influence, shadow route selection, controlled segment selection, SegmentRouteInput wiring, controlled mini-match route source wiring, live selection override guard wiring, isolated mini-match override experiment wiring, controlled segment replay comparison wiring, real isolated replay engine wiring, controlled route resolution sandbox wiring, sandbox scoring opportunity model wiring, sandbox scoring event candidate wiring, full-match route selection flag files/tests, mini-match route selection files/tests, replay seed, grounding diagnostics, and evidence.
-- `bundle__reports.md` for the share-pack generator, coach report renderer, copy quality utility, and guards.
+1. `00-share-manifest.txt` for copied files, bundle contents, commands, and git status.
+2. `fullmatch-workbench-chain-replay-3p.md` explains the goalkeeper response model, baseline-versus-override response, save margin, rebound state, positioning, trajectory reading, reaction, handling, rebound control, concentration, mental fatigue, and guardrails.
+3. `validation.fullmatch-workbench-chain-replay-3p.md` validates opt-in behavior, goalkeeper response fields, official score mutation guards, official scoring event mutation guards, production scoring-event creation guards, route-success mutation guards, global-economy guardrails, and source-of-truth checks.
+4. `coach-report.default.html` and `coach-report.experimental.html` compare default and experimental coach-facing outputs.
+5. `bundle__simulation.md` contains the chain from replay through goalkeeper response model sandbox and all related tests.
+
+## Guardrail reminder
+Sprint 3P does not change scoring values, official ScoringEvents, MatchBonusEvent, production route resolution, default full-match mode, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.

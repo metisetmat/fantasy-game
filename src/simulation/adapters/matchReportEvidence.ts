@@ -344,6 +344,9 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION":
+    case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
+    case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
       return "training_recommendation";
   }
 }
@@ -394,6 +397,12 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Modele sandbox d'opportunite de scoring";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
       return "Candidat sandbox d'evenement de scoring";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION":
+      return "Resolution sandbox d'evenement de scoring";
+    case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
+      return "Resolution attributaire de tir sandbox";
+    case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
+      return "Modele de reponse gardien sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -459,6 +468,9 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION":
+    case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
+    case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -491,6 +503,9 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX",
     "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
     "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE",
+    "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION",
+    "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX",
+    "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
