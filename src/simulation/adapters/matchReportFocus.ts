@@ -49,6 +49,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 42;
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
       return 41;
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+      return 40;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -105,6 +107,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire les evenements de replay isole du segment";
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
       return "Relire la sandbox de resolution controlee de route";
+    case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
+      return "Relire le modele sandbox d'opportunite de scoring";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }

@@ -16,7 +16,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT"
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON"
   | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
-  | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX";
+  | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -395,6 +396,34 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route resolution quality",
       "normal live mini-match route resolution quality",
       "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL",
+    canProve: [
+      "experimental sandbox route metrics were classified into typed scoring-opportunity signals",
+      "baseline and override opportunity type, family, probability, and creation divergence were exposed",
+      "sandbox opportunity classification rejected closed and unavailable candidates through the route-resolution sandbox",
+      "sandbox opportunity classification remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production scoring opportunity quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
       "full-match economy coherence",
       "production chain-driven full-match behavior",
     ],

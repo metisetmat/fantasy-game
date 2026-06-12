@@ -8,6 +8,7 @@
     "reports:coach": "npm run build && node dist/reports/generateCoachHtmlReport.js",
     "reports:demo": "npm run build && node dist/demo/runMiniMatchDemo.js",
     "reports:share": "npm run build && node dist/reports/share/updateSharePack.js",
+    "test:all": "npm test && npm run test:contracts",
     "test:contracts": "npm run build && node dist/contracts/runContractTests.js",
     "typecheck": "tsc --noEmit",
     "test": "npm run typecheck"
