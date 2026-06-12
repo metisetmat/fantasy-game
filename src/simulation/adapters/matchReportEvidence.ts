@@ -354,6 +354,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
       return "training_recommendation";
   }
 }
@@ -424,6 +425,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Lecture timeline officielle vs sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
       return "Panneau de decision sandbox";
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
+      return "Calibration d'evidence du panneau sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -499,6 +502,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -541,6 +545,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW",
     "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW",
     "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
+    "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];

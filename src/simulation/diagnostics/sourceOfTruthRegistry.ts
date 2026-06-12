@@ -28,7 +28,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
   | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -750,6 +751,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "coach-facing tactical tests",
       "risks to monitor before production use",
       "unproven evidence gaps",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route quality",
+      "normal live selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
+    canProve: [
+      "the sandbox decision suggestion has bounded evidence scoring",
+      "supporting and limiting evidence signals are visible for coach review",
+      "single-chain sandbox evidence remains low-confidence when goalkeeper recovery and no batch confirmation are present",
+      "calibrated sandbox evidence remains suggestion-only and cannot drive live selection",
+    ],
+    canSuggest: [
+      "coach-facing tactical tests",
+      "evidence confidence explanations",
+      "future multi-scenario validation needs",
     ],
     cannotProve: [
       "global scoring balance",

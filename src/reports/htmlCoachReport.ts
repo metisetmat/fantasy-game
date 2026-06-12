@@ -363,12 +363,51 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
     candidate.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL" &&
     candidate.internalTags.includes("sandbox_decision_panel")
   );
+  const calibrationFact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION" &&
+    candidate.internalTags.includes("sandbox_decision_evidence_calibration")
+  );
 
   if (fact === undefined) {
     return "";
   }
 
   const recommendation = tagValue(fact.internalTags, "sandbox_decision_recommendation_") ?? "test_support_around_forward_progress";
+  const evidenceScore = calibrationFact === undefined
+    ? "42"
+    : tagValue(calibrationFact.internalTags, "sandbox_decision_evidence_score_") ?? "42";
+  const confidence = calibrationFact === undefined
+    ? "low"
+    : tagValue(calibrationFact.internalTags, "sandbox_decision_evidence_confidence_") ?? "low";
+  const confidenceCopy = confidence === "low"
+    ? "Confiance faible"
+    : confidence === "medium"
+      ? "Confiance moyenne"
+      : confidence === "very_low"
+        ? "Confiance très faible"
+        : confidence === "strong"
+          ? "Confiance forte"
+          : "Confiance très forte";
+  const evidenceCalibration = calibrationFact === undefined ? "" : `
+      <article class="card summary-card">
+        <h3>Niveau de confiance de la suggestion</h3>
+        <p>${escapeHtml(confidenceCopy)} — ${escapeHtml(evidenceScore)}/100.</p>
+        <p>La suggestion est affichée comme une piste à tester : le sandbox crée du danger et une opportunité de tir, mais la séquence ne va pas jusqu'au score, le gardien répond, puis l'équipe du gardien sécurise le ballon. Ce n'est pas une vérité officielle ni une preuve d'économie globale.</p>
+        <h4>Ce qui soutient la suggestion</h4>
+        <ul>
+          <li>FORWARD_PROGRESS crée une progression dangereuse à 64/100.</li>
+          <li>Le sandbox produit une half-chance et un SHOT_CANDIDATE.</li>
+          <li>La qualité de tir ajustée atteint 53/100.</li>
+          <li>Le test coach est concret : soutien autour de Z4-HSR et occupation du second ballon.</li>
+        </ul>
+        <h4>Ce qui limite la suggestion</h4>
+        <ul>
+          <li>Le tir est sauvé par le gardien, avec une réponse gardien à 65/100.</li>
+          <li>Le danger de rebond et la seconde chance restent à 4/100.</li>
+          <li>L'issue finale sandbox est secured_by_goalkeeper_team.</li>
+          <li>Le signal vient d'une seule chaîne sandbox, sans confirmation batch ni variation de profils.</li>
+        </ul>
+      </article>`;
   const blocks = [
     {
       title: "Enseignement coach",
@@ -422,11 +461,13 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
     <section>
       <h2>Panneau de décision sandbox</h2>
       <p>Ce panneau propose une option coach à tester. Il ne remplace pas la timeline officielle et ne pilote pas la sélection live.</p>
-      <div class="grid">${articles}</div>
+      <div class="grid">${evidenceCalibration}${articles}</div>
       <details class="internal-markers">
         <summary>Détails techniques du panneau sandbox</summary>
         <div class="muted">${escapeHtml(fact.summary)}</div>
         <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+        ${calibrationFact === undefined ? "" : `<div class="muted">${escapeHtml(calibrationFact.summary)}</div>`}
+        ${calibrationFact === undefined ? "" : `<div class="muted">${calibrationFact.internalTags.map(escapeHtml).join(", ")}</div>`}
       </details>
     </section>`;
 }
