@@ -182,6 +182,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3VValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3v.md"));
   const fullMatchWorkbenchChainReplay3W = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3w.md"));
   const fullMatchWorkbenchChainReplay3WValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3w.md"));
+  const fullMatchWorkbenchChainReplay3X = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3x.md"));
+  const fullMatchWorkbenchChainReplay3XValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3x.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1960,6 +1962,26 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "bundle__simulation.md",
     "bundle__reports.md",
   ];
+  const sprint3XExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3x.md",
+    "validation.fullmatch-workbench-chain-replay-3x.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
   const sprint3WForbiddenLeftovers = [
     "fullmatch-workbench-chain-replay-3v.md",
     "validation.fullmatch-workbench-chain-replay-3v.md",
@@ -1970,7 +1992,63 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "fullmatch-workbench-chain-replay-3s.md",
     "validation.fullmatch-workbench-chain-replay-3s.md",
   ];
+  const sprint3XForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3w.md",
+    "validation.fullmatch-workbench-chain-replay-3w.md",
+    "fullmatch-workbench-chain-replay-3v.md",
+    "validation.fullmatch-workbench-chain-replay-3v.md",
+    "fullmatch-workbench-chain-replay-3u.md",
+    "validation.fullmatch-workbench-chain-replay-3u.md",
+    "fullmatch-workbench-chain-replay-3t.md",
+    "validation.fullmatch-workbench-chain-replay-3t.md",
+    "fullmatch-workbench-chain-replay-3s.md",
+    "validation.fullmatch-workbench-chain-replay-3s.md",
+  ];
   const coachExperimentalVisibleHtml = coachExperimentalHtml.replace(/<details[\s\S]*?<\/details>/g, "");
+  const sprint3XChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 3X", activeConfig.sprintName === "Sprint 3X - Sandbox Decision Evidence Calibration", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint3XExpectedFiles.every((file) => requiredCopied(file)), sprint3XExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint3XForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3XForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint3XExpectedFiles.every((file) => requiredCopied(file)), sprint3XExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3X", manifest.includes("Sprint 3X - Sandbox Decision Evidence Calibration") && detailedManifest.includes("Sprint 3X - Sandbox Decision Evidence Calibration"), "visible"),
+    check("README is Sprint 3X oriented", readme.includes("# Sprint 3X Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3x.md"), "README current"),
+    check("3X report included", fullMatchWorkbenchChainReplay3X.includes("# FullMatch Workbench Chain Replay 3X") && fullMatchWorkbenchChainReplay3X.includes("sandbox decision evidence calibration status: available"), "3X doc included"),
+    check("3X validation is PASS", fullMatchWorkbenchChainReplay3XValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3XValidation.includes("confidence is low for current fixture"), "3X validation PASS"),
+    check("evidence score is in current fixture band", fullMatchWorkbenchChainReplay3X.includes("evidence score: 38/100") && fullMatchWorkbenchChainReplay3XValidation.includes("evidence score is in current fixture target band 35-50"), "score 38 in band"),
+    check("confidence low visible", fullMatchWorkbenchChainReplay3X.includes("confidence: low") && fullMatchWorkbenchChainReplay3X.includes("confidence label: Confiance faible"), "low confidence visible"),
+    check("supporting and limiting signals visible", fullMatchWorkbenchChainReplay3X.includes("supporting signal count: 6") && fullMatchWorkbenchChainReplay3X.includes("limiting signal count: 7"), "signal counts visible"),
+    check("evidence weights visible", fullMatchWorkbenchChainReplay3X.includes("positive weight total: 48") && fullMatchWorkbenchChainReplay3X.includes("negative weight total: 40") && fullMatchWorkbenchChainReplay3X.includes("net evidence weight: 8"), "weights visible"),
+    check("confidence caps visible", fullMatchWorkbenchChainReplay3X.includes("no batch confirmation caps confidence") && fullMatchWorkbenchChainReplay3X.includes("goalkeeper recovery caps confidence"), "caps visible"),
+    check("default report has no sandbox decision evidence calibration", !coachDefaultHtml.includes("Niveau de confiance de la suggestion") && !coachDefaultHtml.includes("sandbox_decision_evidence_calibration"), "default hidden"),
+    check("experimental report has sandbox decision evidence calibration", coachExperimentalHtml.includes("Niveau de confiance de la suggestion") && coachExperimentalHtml.includes("sandbox_decision_evidence_calibration"), "experimental visible"),
+    check("visible coach copy says low confidence", coachExperimentalVisibleHtml.includes("Confiance faible") && coachExperimentalVisibleHtml.includes("38/100"), "low confidence copy"),
+    check("visible coach copy says suggestion not official truth", coachExperimentalVisibleHtml.includes("piste") && coachExperimentalVisibleHtml.includes("pas une v") && coachExperimentalVisibleHtml.includes("preuve d"), "coach boundary copy"),
+    check("calibration cannot drive live selection", fullMatchWorkbenchChainReplay3X.includes("can drive live selection: false") && fullMatchWorkbenchChainReplay3XValidation.includes("cannot drive live selection"), "live selection forbidden"),
+    check("calibration cannot drive production route resolution", fullMatchWorkbenchChainReplay3X.includes("can drive production route resolution: false") && fullMatchWorkbenchChainReplay3XValidation.includes("cannot drive production route resolution"), "production route forbidden"),
+    check("official state unchanged", fullMatchWorkbenchChainReplay3X.includes("official timeline unchanged: true") && fullMatchWorkbenchChainReplay3X.includes("official score unchanged: true") && fullMatchWorkbenchChainReplay3X.includes("official possession unchanged: true") && fullMatchWorkbenchChainReplay3X.includes("official scoring events unchanged: true"), "official state unchanged"),
+    check("no production scoring or global economy claim", fullMatchWorkbenchChainReplay3X.includes("production scoring event creation count: 0") && fullMatchWorkbenchChainReplay3X.includes("global economy claim count: 0"), "no production scoring/global economy"),
+    check("sandbox decision evidence calibration source bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxDecisionEvidenceCalibration.ts") && bundleSimulation.includes("SandboxDecisionEvidenceCalibrationModel"), "3X contract bundled"),
+    check("sandbox decision evidence score resolver bundled", bundleSimulation.includes("src/simulation/fullMatch/calculateSandboxDecisionEvidenceScore.ts") && bundleSimulation.includes("calculateSandboxDecisionEvidenceScore"), "3X score resolver bundled"),
+    check("sandbox decision evidence builder bundled", bundleSimulation.includes("src/simulation/fullMatch/sandboxDecisionEvidenceCalibrationFromPanel.ts") && bundleSimulation.includes("sandboxDecisionEvidenceCalibrationFromPanel"), "3X builder bundled"),
+    check("sandbox decision evidence tests bundled", bundleSimulation.includes("calculateSandboxDecisionEvidenceScore.test.ts") && bundleSimulation.includes("sandboxDecisionEvidenceCalibrationFromPanel.test.ts") && bundleSimulation.includes("sandboxDecisionEvidenceCalibrationGuard.test.ts") && bundleSimulation.includes("scoringGuard.3x.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3x.test.ts"), "3X tests bundled"),
+    check("sandbox decision evidence renderer test bundled", bundleReports.includes("coachReportSandboxDecisionEvidenceCalibration.test.ts") && bundleReports.includes("Niveau de confiance de la suggestion"), "3X report test bundled"),
+    check("sandbox decision evidence category included", fullMatchWorkbenchChainReplay3X.includes("WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION") && bundleSimulation.includes("WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"), "3X evidence visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3XValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay3XValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3XValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3XValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3X.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3X.includes("CONFIRM_SANDBOX_DECISION_EVIDENCE_CALIBRATION_SUGGESTION_ONLY") && fullMatchWorkbenchChainReplay3X.includes("CONFIRM_LOW_CONFIDENCE_FOR_CURRENT_FIXTURE") && fullMatchWorkbenchChainReplay3X.includes("PREPARE_BATCH_CONFIDENCE_CALIBRATION"), "3X recommendations visible"),
+  ];
   const sprint3WChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
     check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
@@ -4142,6 +4220,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3X - Sandbox Decision Evidence Calibration")
+      ? sprint3XChecks
     : activeConfig.sprintName.includes("Sprint 3W - Sandbox Decision Panel")
       ? sprint3WChecks
     : activeConfig.sprintName.includes("Sprint 3V - Coach-Facing Timeline Review")

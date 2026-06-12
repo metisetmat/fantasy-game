@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3W - Sandbox Decision Panel. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3X - Sandbox Decision Evidence Calibration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -426,7 +426,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
   | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

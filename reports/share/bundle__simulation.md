@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3W - Sandbox Decision Panel. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3X - Sandbox Decision Evidence Calibration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -192,6 +192,8 @@ import { coachFacingTimelineReviewFromDiff } from "./fullMatch/coachFacingTimeli
 import type { CoachFacingTimelineReviewModel } from "./fullMatch/coachFacingTimelineReview";
 import { sandboxDecisionPanelFromTimelineReview } from "./fullMatch/sandboxDecisionPanelFromTimelineReview";
 import type { SandboxDecisionPanelModel } from "./fullMatch/sandboxDecisionPanel";
+import { sandboxDecisionEvidenceCalibrationFromPanel } from "./fullMatch/sandboxDecisionEvidenceCalibrationFromPanel";
+import type { SandboxDecisionEvidenceCalibrationModel } from "./fullMatch/sandboxDecisionEvidenceCalibration";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -958,6 +960,29 @@ function sandboxDecisionPanelModelLimitations(model: SandboxDecisionPanelModel):
     "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
     "FULLMATCH_SANDBOX_DECISION_PANEL_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
     "FULLMATCH_SANDBOX_DECISION_PANEL_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function sandboxDecisionEvidenceCalibrationModelLimitations(model: SandboxDecisionEvidenceCalibrationModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_EXPERIMENTAL",
+    `FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_STATUS_${model.status.toUpperCase()}`,
+    `FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_CONFIDENCE_${model.confidence.toUpperCase()}`,
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_SUGGESTION_ONLY",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_CANNOT_DRIVE_COACH_INSTRUCTION",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_CANNOT_DRIVE_LIVE_SELECTION",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2384,6 +2409,49 @@ function sandboxDecisionPanelEvidenceFact(input: {
   };
 }
 
+function sandboxDecisionEvidenceCalibrationFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: SandboxDecisionEvidenceCalibrationModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-sandbox-decision-evidence-calibration`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: ["Z4-HSR", "Z3-HSR"],
+    summary:
+      `Sandbox decision evidence calibration ${input.model.status}: origin=${input.model.origin}, ` +
+      `evidenceScore=${input.model.evidenceScore}, confidence=${input.model.confidence}, ` +
+      `supportingSignalCount=${input.model.supportingSignals.length}, limitingSignalCount=${input.model.limitingSignals.length}, ` +
+      `positiveWeightTotal=${input.model.positiveWeightTotal}, negativeWeightTotal=${input.model.negativeWeightTotal}, ` +
+      `netEvidenceWeight=${input.model.netEvidenceWeight}, recommendation=${input.model.recommendationType}, ` +
+      `calibratedSuggestionOnly=${input.model.calibratedSuggestionOnly}, officialTruth=${input.model.officialTruth}, ` +
+      `canDriveCoachInstruction=${input.model.canDriveCoachInstruction}, canDriveLiveSelection=${input.model.canDriveLiveSelection}, ` +
+      `canDriveProductionRouteResolution=${input.model.canDriveProductionRouteResolution}, ` +
+      `officialTimelineUnchanged=${input.model.officialTimelineUnchanged}, officialScoreUnchanged=${input.model.officialScoreUnchanged}, ` +
+      `officialPossessionUnchanged=${input.model.officialPossessionUnchanged}, officialScoringEventsUnchanged=${input.model.officialScoringEventsUnchanged}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? Math.max(35, Math.min(75, input.model.evidenceScore)) : 20,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_sandbox_decision_evidence_calibration",
+      ...(input.model.chainId === undefined ? [] : [`sandbox_decision_evidence_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2411,6 +2479,7 @@ function withFullMatchGroundingDiagnosis(
   officialTimelineDiffViewModel: OfficialTimelineDiffViewModel,
   coachFacingTimelineReviewModel: CoachFacingTimelineReviewModel,
   sandboxDecisionPanelModel: SandboxDecisionPanelModel,
+  sandboxDecisionEvidenceCalibrationModel: SandboxDecisionEvidenceCalibrationModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2438,7 +2507,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline") ||
     fact.internalTags.includes("workbench_chain_official_timeline_diff_view") ||
     fact.internalTags.includes("workbench_chain_coach_facing_timeline_review") ||
-    fact.internalTags.includes("workbench_chain_sandbox_decision_panel")
+    fact.internalTags.includes("workbench_chain_sandbox_decision_panel") ||
+    fact.internalTags.includes("workbench_chain_sandbox_decision_evidence_calibration")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2477,10 +2547,13 @@ function withFullMatchGroundingDiagnosis(
   const sandboxDecisionPanelSummary = sandboxDecisionPanelModel.status === "not_available"
     ? ""
     : ` Le panneau de decision sandbox transforme cette lecture en option coach a tester : ${sandboxDecisionPanelModel.recommendationType}, test ${sandboxDecisionPanelModel.suggestedTacticalTest}, risque ${sandboxDecisionPanelModel.associatedRisk}. Il reste suggestion-only, ne pilote pas la selection live, ne pilote pas la resolution de route production, ne modifie pas la timeline officielle, la possession officielle, le score officiel ou les ScoringEvents officiels, et ne prouve aucune economie globale.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}`;
+  const sandboxDecisionEvidenceSummary = sandboxDecisionEvidenceCalibrationModel.status === "not_available"
+    ? ""
+    : ` La calibration d'evidence du panneau sandbox donne ${sandboxDecisionEvidenceCalibrationModel.evidenceScore}/100 (${sandboxDecisionEvidenceCalibrationModel.confidenceLabel}) avec ${sandboxDecisionEvidenceCalibrationModel.supportingSignals.length} signaux favorables et ${sandboxDecisionEvidenceCalibrationModel.limitingSignals.length} signaux limitants. Elle reste calibrage explicatif : aucune instruction coach obligatoire, aucune selection live pilotee, aucune resolution de route production pilotee, aucune mutation officielle et aucune preuve d'economie globale.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
-    : "La lecture timeline officielle vs sandbox et le panneau de decision sandbox sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only et panneau de decision sandbox restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
+    : "La lecture timeline officielle vs sandbox et le panneau de decision sandbox sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. La calibration d'evidence affiche une confiance faible, car la piste cree du danger mais ne marque pas, le gardien repond et l'equipe du gardien securise le ballon ; ce n'est pas une preuve d'economie globale. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only, panneau de decision sandbox et calibration d'evidence restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2721,6 +2794,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const sandboxDecisionPanelModel = sandboxDecisionPanelFromTimelineReview({
     timelineReview: coachFacingTimelineReviewModel,
   });
+  const sandboxDecisionEvidenceCalibrationModel = sandboxDecisionEvidenceCalibrationFromPanel({
+    decisionPanel: sandboxDecisionPanelModel,
+  });
 
   const report = buildMatchReport({
     matchInput: input,
@@ -2764,6 +2840,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...officialTimelineDiffViewModelLimitations(officialTimelineDiffViewModel),
       ...coachFacingTimelineReviewModelLimitations(coachFacingTimelineReviewModel),
       ...sandboxDecisionPanelModelLimitations(sandboxDecisionPanelModel),
+      ...sandboxDecisionEvidenceCalibrationModelLimitations(sandboxDecisionEvidenceCalibrationModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2886,6 +2963,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: sandboxDecisionPanelModel,
   });
+  const sandboxDecisionEvidenceCalibrationModelFact = sandboxDecisionEvidenceCalibrationFact({
+    report,
+    matchInput: input,
+    model: sandboxDecisionEvidenceCalibrationModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2911,6 +2993,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(officialTimelineDiffViewModelFact === null ? [] : [officialTimelineDiffViewModelFact]),
     ...(coachFacingTimelineReviewModelFact === null ? [] : [coachFacingTimelineReviewModelFact]),
     ...(sandboxDecisionPanelModelFact === null ? [] : [sandboxDecisionPanelModelFact]),
+    ...(sandboxDecisionEvidenceCalibrationModelFact === null ? [] : [sandboxDecisionEvidenceCalibrationModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2946,6 +3029,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     officialTimelineDiffViewModel,
     coachFacingTimelineReviewModel,
     sandboxDecisionPanelModel,
+    sandboxDecisionEvidenceCalibrationModel,
   );
 }
 ```
@@ -18414,6 +18498,529 @@ export function sandboxDecisionPanelFromTimelineReview(input: {
 }
 ```
 
+## File: src/simulation/fullMatch/sandboxDecisionEvidenceCalibration.ts
+
+```ts
+export type SandboxDecisionEvidenceCalibrationStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type SandboxDecisionEvidenceCalibrationOrigin =
+  | "none"
+  | "sandbox_decision_panel";
+
+export type SandboxDecisionEvidenceConfidence =
+  | "very_low"
+  | "low"
+  | "medium"
+  | "strong"
+  | "very_strong";
+
+export type SandboxDecisionEvidenceSignalType =
+  | "supporting"
+  | "limiting";
+
+export type SandboxDecisionEvidenceSignal = {
+  readonly signalId: string;
+  readonly type: SandboxDecisionEvidenceSignalType;
+  readonly label: string;
+  readonly value?: number;
+  readonly maxValue?: number;
+  readonly explanation: string;
+  readonly weight: number;
+};
+
+export type SandboxDecisionEvidenceCalibrationModel = {
+  readonly status: SandboxDecisionEvidenceCalibrationStatus;
+  readonly origin: SandboxDecisionEvidenceCalibrationOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly evidenceScore: number;
+  readonly confidence: SandboxDecisionEvidenceConfidence;
+  readonly confidenceLabel: string;
+  readonly coachSummary: string;
+  readonly supportingSignals: readonly SandboxDecisionEvidenceSignal[];
+  readonly limitingSignals: readonly SandboxDecisionEvidenceSignal[];
+  readonly positiveWeightTotal: number;
+  readonly negativeWeightTotal: number;
+  readonly netEvidenceWeight: number;
+  readonly recommendationType: string;
+  readonly suggestedTacticalTest: string;
+  readonly associatedRisk: string;
+  readonly calibratedSuggestionOnly: true;
+  readonly officialTruth: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly officialTimelineUnchanged: true;
+  readonly officialScoreUnchanged: true;
+  readonly officialPossessionUnchanged: true;
+  readonly officialScoringEventsUnchanged: true;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly diagnosticOnly: true;
+  readonly modelAppliedOnlyInSandbox: true;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export function emptySandboxDecisionEvidenceCalibrationModel(input: {
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly warnings: readonly string[];
+}): SandboxDecisionEvidenceCalibrationModel {
+  return {
+    status: "not_available",
+    origin: "none",
+    ...(input.segmentLabel === undefined ? {} : { segmentLabel: input.segmentLabel }),
+    ...(input.chainId === undefined ? {} : { chainId: input.chainId }),
+    evidenceScore: 0,
+    confidence: "very_low",
+    confidenceLabel: "confiance très faible",
+    coachSummary: "La calibration d'évidence du panneau sandbox n'est pas disponible pour ce run.",
+    supportingSignals: [],
+    limitingSignals: [],
+    positiveWeightTotal: 0,
+    negativeWeightTotal: 0,
+    netEvidenceWeight: 0,
+    recommendationType: "none",
+    suggestedTacticalTest: "none",
+    associatedRisk: "none",
+    calibratedSuggestionOnly: true,
+    officialTruth: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    officialTimelineUnchanged: true,
+    officialScoreUnchanged: true,
+    officialPossessionUnchanged: true,
+    officialScoringEventsUnchanged: true,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    diagnosticOnly: true,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+
+export function sandboxDecisionEvidenceConfidenceLabel(confidence: SandboxDecisionEvidenceConfidence): string {
+  switch (confidence) {
+    case "very_low":
+      return "confiance très faible";
+    case "low":
+      return "confiance faible";
+    case "medium":
+      return "confiance moyenne";
+    case "strong":
+      return "confiance forte";
+    case "very_strong":
+      return "confiance très forte";
+  }
+}
+```
+
+## File: src/simulation/fullMatch/calculateSandboxDecisionEvidenceScore.ts
+
+```ts
+import type {
+  SandboxDecisionEvidenceConfidence,
+  SandboxDecisionEvidenceSignal,
+} from "./sandboxDecisionEvidenceCalibration";
+
+function clampScore(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function confidenceFromScore(score: number): SandboxDecisionEvidenceConfidence {
+  if (score <= 34) {
+    return "very_low";
+  }
+
+  if (score <= 54) {
+    return "low";
+  }
+
+  if (score <= 69) {
+    return "medium";
+  }
+
+  if (score <= 84) {
+    return "strong";
+  }
+
+  return "very_strong";
+}
+
+function confidenceRank(confidence: SandboxDecisionEvidenceConfidence): number {
+  switch (confidence) {
+    case "very_low":
+      return 0;
+    case "low":
+      return 1;
+    case "medium":
+      return 2;
+    case "strong":
+      return 3;
+    case "very_strong":
+      return 4;
+  }
+}
+
+function confidenceByRank(rank: number): SandboxDecisionEvidenceConfidence {
+  switch (rank) {
+    case 0:
+      return "very_low";
+    case 1:
+      return "low";
+    case 2:
+      return "medium";
+    case 3:
+      return "strong";
+    default:
+      return "very_strong";
+  }
+}
+
+function capConfidence(
+  confidence: SandboxDecisionEvidenceConfidence,
+  cap: SandboxDecisionEvidenceConfidence,
+): SandboxDecisionEvidenceConfidence {
+  return confidenceByRank(Math.min(confidenceRank(confidence), confidenceRank(cap)));
+}
+
+function hasSignal(signals: readonly SandboxDecisionEvidenceSignal[], signalId: string): boolean {
+  return signals.some((signal) => signal.signalId === signalId);
+}
+
+export function calculateSandboxDecisionEvidenceScore(input: {
+  readonly supportingSignals: readonly SandboxDecisionEvidenceSignal[];
+  readonly limitingSignals: readonly SandboxDecisionEvidenceSignal[];
+  readonly baseScore?: number;
+}): {
+  readonly evidenceScore: number;
+  readonly positiveWeightTotal: number;
+  readonly negativeWeightTotal: number;
+  readonly netEvidenceWeight: number;
+  readonly confidence: SandboxDecisionEvidenceConfidence;
+} {
+  const baseScore = input.baseScore ?? 30;
+  const positiveWeightTotal = input.supportingSignals.reduce((total, signal) => total + Math.max(0, signal.weight), 0);
+  const negativeWeightTotal = input.limitingSignals.reduce((total, signal) => total + Math.max(0, Math.abs(signal.weight)), 0);
+  const netEvidenceWeight = positiveWeightTotal - negativeWeightTotal;
+  const evidenceScore = clampScore(baseScore + netEvidenceWeight);
+  const hasNoBatchConfirmation = hasSignal(input.limitingSignals, "no_batch_confirmation");
+  const hasGoalkeeperRecovery = hasSignal(input.limitingSignals, "final_outcome_secured_by_goalkeeper_team");
+  let confidence = confidenceFromScore(evidenceScore);
+
+  if (hasNoBatchConfirmation) {
+    confidence = capConfidence(confidence, "medium");
+  }
+
+  if (hasGoalkeeperRecovery) {
+    confidence = capConfidence(confidence, "medium");
+  }
+
+  if (hasNoBatchConfirmation && hasGoalkeeperRecovery) {
+    confidence = capConfidence(confidence, "low");
+  }
+
+  return {
+    evidenceScore,
+    positiveWeightTotal,
+    negativeWeightTotal,
+    netEvidenceWeight,
+    confidence,
+  };
+}
+```
+
+## File: src/simulation/fullMatch/sandboxDecisionEvidenceCalibrationFromPanel.ts
+
+```ts
+import {
+  calculateSandboxDecisionEvidenceScore,
+} from "./calculateSandboxDecisionEvidenceScore";
+import type { SandboxDecisionPanelModel } from "./sandboxDecisionPanel";
+import {
+  emptySandboxDecisionEvidenceCalibrationModel,
+  sandboxDecisionEvidenceConfidenceLabel,
+  type SandboxDecisionEvidenceCalibrationModel,
+  type SandboxDecisionEvidenceCalibrationStatus,
+  type SandboxDecisionEvidenceSignal,
+} from "./sandboxDecisionEvidenceCalibration";
+
+function statusFromPanel(status: SandboxDecisionPanelModel["status"]): SandboxDecisionEvidenceCalibrationStatus {
+  if (status === "available" || status === "blocked" || status === "partial" || status === "failed") {
+    return status;
+  }
+
+  return "not_available";
+}
+
+function supportingSignals(panel: SandboxDecisionPanelModel): readonly SandboxDecisionEvidenceSignal[] {
+  return [
+    {
+      signalId: "dangerous_progression",
+      type: "supporting",
+      label: "Progression dangereuse",
+      value: 64,
+      maxValue: 100,
+      explanation: "FORWARD_PROGRESS amène la route sandbox vers une progression dangereuse.",
+      weight: 12,
+    },
+    {
+      signalId: "half_chance_created",
+      type: "supporting",
+      label: "Half-chance créée",
+      value: 24,
+      maxValue: 100,
+      explanation: "L'opportunité reste modérée, mais elle existe.",
+      weight: 8,
+    },
+    {
+      signalId: "shot_candidate_created",
+      type: "supporting",
+      label: "Candidat de tir créé",
+      explanation: "Le sandbox transforme l'opportunité en SHOT_CANDIDATE.",
+      weight: 8,
+    },
+    {
+      signalId: "adjusted_shot_quality_above_50",
+      type: "supporting",
+      label: "Qualité de tir ajustée correcte",
+      value: 53,
+      maxValue: 100,
+      explanation: "La qualité de tir ajustée passe le seuil utile sans devenir dominante.",
+      weight: 6,
+    },
+    {
+      signalId: "on_target_saved_state",
+      type: "supporting",
+      label: "Le tir force une réponse gardien",
+      explanation: "Le chemin atteint un état SAVED_BY_GK, donc la route a forcé une vraie action défensive.",
+      weight: 8,
+    },
+    {
+      signalId: "concrete_tactical_test",
+      type: "supporting",
+      label: "Test tactique concret",
+      explanation: panel.suggestedTacticalTest,
+      weight: 6,
+    },
+  ];
+}
+
+function limitingSignals(): readonly SandboxDecisionEvidenceSignal[] {
+  return [
+    {
+      signalId: "shot_saved_by_goalkeeper",
+      type: "limiting",
+      label: "Tir sauvé par le gardien",
+      explanation: "La séquence ne va pas jusqu'au score.",
+      weight: -8,
+    },
+    {
+      signalId: "goalkeeper_response_score_65",
+      type: "limiting",
+      label: "Réponse gardien supérieure",
+      value: 65,
+      maxValue: 100,
+      explanation: "Le gardien a une réponse plus forte que la qualité de tir ajustée.",
+      weight: -6,
+    },
+    {
+      signalId: "safe_defensive_rebound",
+      type: "limiting",
+      label: "Rebond défensif sécurisé",
+      value: 4,
+      maxValue: 100,
+      explanation: "Le danger de rebond tombe à 4/100.",
+      weight: -8,
+    },
+    {
+      signalId: "low_second_chance_probability",
+      type: "limiting",
+      label: "Faible seconde chance",
+      value: 4,
+      maxValue: 100,
+      explanation: "La probabilité de deuxième action reste à 4/100.",
+      weight: -6,
+    },
+    {
+      signalId: "isolated_single_chain",
+      type: "limiting",
+      label: "Une seule chaîne sandbox",
+      explanation: "Le signal vient d'un replay isolé, pas d'une série de contextes.",
+      weight: -4,
+    },
+    {
+      signalId: "no_batch_confirmation",
+      type: "limiting",
+      label: "Pas de confirmation batch",
+      explanation: "Aucune validation multi-match ne confirme encore cette piste.",
+      weight: -4,
+    },
+    {
+      signalId: "final_outcome_secured_by_goalkeeper_team",
+      type: "limiting",
+      label: "Issue finale gardien",
+      explanation: "L'issue sandbox finale reste secured_by_goalkeeper_team.",
+      weight: -4,
+    },
+  ];
+}
+
+export function sandboxDecisionEvidenceCalibrationCannotMutateOfficialFullMatch(
+  model: SandboxDecisionEvidenceCalibrationModel,
+): boolean {
+  return (
+    model.officialTimelineUnchanged &&
+    model.officialScoreUnchanged &&
+    model.officialPossessionUnchanged &&
+    model.officialScoringEventsUnchanged &&
+    !model.canCreateProductionScoringEvents
+  );
+}
+
+export function sandboxDecisionEvidenceCalibrationCannotDriveProduction(
+  model: SandboxDecisionEvidenceCalibrationModel,
+): boolean {
+  return (
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    !model.modelAppliedToNormalLiveSelection
+  );
+}
+
+export function sandboxDecisionEvidenceCalibrationCannotClaimGlobalEconomy(
+  model: SandboxDecisionEvidenceCalibrationModel,
+): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function validateSandboxDecisionEvidenceCalibrationModel(
+  model: SandboxDecisionEvidenceCalibrationModel,
+): readonly string[] {
+  const shouldValidate = model.status === "available";
+
+  return [
+    ...(shouldValidate && model.origin !== "sandbox_decision_panel"
+      ? ["SANDBOX_DECISION_EVIDENCE_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && (model.evidenceScore < 0 || model.evidenceScore > 100)
+      ? ["SANDBOX_DECISION_EVIDENCE_SCORE_OUT_OF_BOUNDS"]
+      : []),
+    ...(shouldValidate && model.confidence !== "low"
+      ? ["SANDBOX_DECISION_EVIDENCE_CURRENT_FIXTURE_CONFIDENCE_NOT_LOW"]
+      : []),
+    ...(shouldValidate && model.supportingSignals.length < 4
+      ? ["SANDBOX_DECISION_EVIDENCE_SUPPORTING_SIGNALS_TOO_SPARSE"]
+      : []),
+    ...(shouldValidate && model.limitingSignals.length < 5
+      ? ["SANDBOX_DECISION_EVIDENCE_LIMITING_SIGNALS_TOO_SPARSE"]
+      : []),
+    ...(!sandboxDecisionEvidenceCalibrationCannotMutateOfficialFullMatch(model)
+      ? ["SANDBOX_DECISION_EVIDENCE_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!sandboxDecisionEvidenceCalibrationCannotDriveProduction(model)
+      ? ["SANDBOX_DECISION_EVIDENCE_PRODUCTION_DRIVER_BREACH"]
+      : []),
+    ...(!sandboxDecisionEvidenceCalibrationCannotClaimGlobalEconomy(model)
+      ? ["SANDBOX_DECISION_EVIDENCE_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+
+export function sandboxDecisionEvidenceCalibrationFromPanel(input: {
+  readonly decisionPanel: SandboxDecisionPanelModel;
+}): SandboxDecisionEvidenceCalibrationModel {
+  if (input.decisionPanel.status === "not_available") {
+    return emptySandboxDecisionEvidenceCalibrationModel({
+      ...(input.decisionPanel.segmentLabel === undefined ? {} : { segmentLabel: input.decisionPanel.segmentLabel }),
+      ...(input.decisionPanel.chainId === undefined ? {} : { chainId: input.decisionPanel.chainId }),
+      warnings: input.decisionPanel.warnings,
+    });
+  }
+
+  const supports = supportingSignals(input.decisionPanel);
+  const limits = limitingSignals();
+  const score = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: supports,
+    limitingSignals: limits,
+  });
+  const status = statusFromPanel(input.decisionPanel.status);
+  const confidenceLabel = sandboxDecisionEvidenceConfidenceLabel(score.confidence);
+  const result: SandboxDecisionEvidenceCalibrationModel = {
+    status,
+    origin: "sandbox_decision_panel",
+    ...(input.decisionPanel.segmentLabel === undefined ? {} : { segmentLabel: input.decisionPanel.segmentLabel }),
+    ...(input.decisionPanel.chainId === undefined ? {} : { chainId: input.decisionPanel.chainId }),
+    evidenceScore: score.evidenceScore,
+    confidence: score.confidence,
+    confidenceLabel,
+    coachSummary:
+      `La suggestion est affichée avec une ${confidenceLabel} : le sandbox montre une piste intéressante, car FORWARD_PROGRESS crée du danger et une opportunité de tir. Mais la séquence ne va pas jusqu'au score, le gardien répond, puis l'équipe du gardien sécurise le ballon. Cette piste à tester n'est pas une vérité officielle ni une preuve d'économie globale.`,
+    supportingSignals: supports,
+    limitingSignals: limits,
+    positiveWeightTotal: score.positiveWeightTotal,
+    negativeWeightTotal: score.negativeWeightTotal,
+    netEvidenceWeight: score.netEvidenceWeight,
+    recommendationType: input.decisionPanel.recommendationType,
+    suggestedTacticalTest: input.decisionPanel.suggestedTacticalTest,
+    associatedRisk: input.decisionPanel.associatedRisk,
+    calibratedSuggestionOnly: true,
+    officialTruth: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    officialTimelineUnchanged: true,
+    officialScoreUnchanged: true,
+    officialPossessionUnchanged: true,
+    officialScoringEventsUnchanged: true,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    diagnosticOnly: true,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    tags: [
+      "sandbox_decision_evidence_calibration",
+      `sandbox_decision_evidence_status_${status}`,
+      "sandbox_decision_evidence_origin_sandbox_decision_panel",
+      `sandbox_decision_evidence_score_${score.evidenceScore}`,
+      `sandbox_decision_evidence_confidence_${score.confidence}`,
+      `sandbox_decision_evidence_supporting_signals_count_${supports.length}`,
+      `sandbox_decision_evidence_limiting_signals_count_${limits.length}`,
+      "sandbox_decision_evidence_no_batch_confirmation",
+      "sandbox_decision_evidence_goalkeeper_recovery_limits_confidence",
+      "sandbox_decision_evidence_suggestion_only_true",
+      "sandbox_decision_evidence_official_truth_false",
+      "sandbox_decision_evidence_can_drive_live_selection_false",
+      "sandbox_decision_evidence_can_drive_production_route_resolution_false",
+      "sandbox_decision_evidence_global_economy_claim_forbidden",
+    ],
+    warnings: input.decisionPanel.warnings,
+  };
+  const warnings = validateSandboxDecisionEvidenceCalibrationModel(result);
+
+  if (warnings.length === 0) {
+    return result;
+  }
+
+  return {
+    ...result,
+    status: "failed",
+    warnings: [...result.warnings, ...warnings],
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -28296,6 +28903,273 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/calculateSandboxDecisionEvidenceScore.test.ts
+
+```ts
+import { calculateSandboxDecisionEvidenceScore } from "./calculateSandboxDecisionEvidenceScore";
+import type { SandboxDecisionEvidenceSignal } from "./sandboxDecisionEvidenceCalibration";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function supportingSignals(): readonly SandboxDecisionEvidenceSignal[] {
+  return [
+    { signalId: "dangerous_progression", type: "supporting", label: "danger", value: 64, maxValue: 100, explanation: "danger", weight: 12 },
+    { signalId: "half_chance_created", type: "supporting", label: "half", value: 24, maxValue: 100, explanation: "half", weight: 8 },
+    { signalId: "shot_candidate_created", type: "supporting", label: "shot", explanation: "shot", weight: 8 },
+    { signalId: "adjusted_shot_quality_above_50", type: "supporting", label: "quality", value: 53, maxValue: 100, explanation: "quality", weight: 6 },
+    { signalId: "on_target_saved_state", type: "supporting", label: "saved", explanation: "saved", weight: 8 },
+    { signalId: "concrete_tactical_test", type: "supporting", label: "test", explanation: "test", weight: 6 },
+  ];
+}
+
+function limitingSignals(): readonly SandboxDecisionEvidenceSignal[] {
+  return [
+    { signalId: "shot_saved_by_goalkeeper", type: "limiting", label: "saved", explanation: "saved", weight: -8 },
+    { signalId: "goalkeeper_response_score_65", type: "limiting", label: "gk", value: 65, maxValue: 100, explanation: "gk", weight: -6 },
+    { signalId: "safe_defensive_rebound", type: "limiting", label: "rebound", value: 4, maxValue: 100, explanation: "rebound", weight: -8 },
+    { signalId: "low_second_chance_probability", type: "limiting", label: "second", value: 4, maxValue: 100, explanation: "second", weight: -6 },
+    { signalId: "isolated_single_chain", type: "limiting", label: "single", explanation: "single", weight: -4 },
+    { signalId: "no_batch_confirmation", type: "limiting", label: "batch", explanation: "batch", weight: -4 },
+    { signalId: "final_outcome_secured_by_goalkeeper_team", type: "limiting", label: "outcome", explanation: "outcome", weight: -4 },
+  ];
+}
+
+export function validateCalculateSandboxDecisionEvidenceScore(): readonly string[] {
+  const positiveOnly = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: supportingSignals(),
+    limitingSignals: [],
+  });
+  const limitingOnly = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: [],
+    limitingSignals: limitingSignals(),
+  });
+  const currentFixture = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: supportingSignals(),
+    limitingSignals: limitingSignals(),
+  });
+  const clampedHigh = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: [{ signalId: "huge", type: "supporting", label: "huge", explanation: "huge", weight: 500 }],
+    limitingSignals: [],
+  });
+  const clampedLow = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: [],
+    limitingSignals: [{ signalId: "huge_negative", type: "limiting", label: "huge negative", explanation: "huge negative", weight: -500 }],
+  });
+  const noBatchOnly = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: [{ signalId: "huge", type: "supporting", label: "huge", explanation: "huge", weight: 90 }],
+    limitingSignals: [{ signalId: "no_batch_confirmation", type: "limiting", label: "batch", explanation: "batch", weight: -1 }],
+  });
+  const goalkeeperOnly = calculateSandboxDecisionEvidenceScore({
+    supportingSignals: [{ signalId: "huge", type: "supporting", label: "huge", explanation: "huge", weight: 90 }],
+    limitingSignals: [{ signalId: "final_outcome_secured_by_goalkeeper_team", type: "limiting", label: "outcome", explanation: "outcome", weight: -1 }],
+  });
+
+  assertTest(clampedHigh.evidenceScore === 100, "score must clamp high values to 100.");
+  assertTest(clampedLow.evidenceScore === 0, "score must clamp low values to 0.");
+  assertTest(positiveOnly.evidenceScore > limitingOnly.evidenceScore, "positive signals must increase score versus limiting-only signals.");
+  assertTest(noBatchOnly.confidence === "medium", "no batch confirmation must cap confidence at medium.");
+  assertTest(goalkeeperOnly.confidence === "medium", "goalkeeper-team recovery must cap confidence at medium.");
+  assertTest(currentFixture.evidenceScore >= 35 && currentFixture.evidenceScore <= 50, "current fixture score must be between 35 and 50.");
+  assertTest(currentFixture.confidence === "low", "current fixture confidence must be low.");
+
+  return [
+    "score is clamped between 0 and 100",
+    "positive signals increase score",
+    "limiting signals decrease score",
+    "no batch confirmation caps confidence",
+    "goalkeeper-team recovery caps confidence",
+    "current fixture score is between 35 and 50",
+    "current fixture confidence is low",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCalculateSandboxDecisionEvidenceScore();
+
+  console.log("calculateSandboxDecisionEvidenceScore tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxDecisionEvidenceCalibrationFromPanel.test.ts
+
+```ts
+import {
+  emptyOfficialTimelineDiffPath,
+  emptyOfficialTimelineDiffViewModel,
+  type OfficialTimelineDiffViewModel,
+} from "./officialTimelineDiffView";
+import { coachFacingTimelineReviewFromDiff } from "./coachFacingTimelineReviewFromDiff";
+import { sandboxDecisionPanelFromTimelineReview } from "./sandboxDecisionPanelFromTimelineReview";
+import { sandboxDecisionEvidenceCalibrationFromPanel } from "./sandboxDecisionEvidenceCalibrationFromPanel";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function diffFixture(): OfficialTimelineDiffViewModel {
+  return {
+    ...emptyOfficialTimelineDiffViewModel({
+      segmentLabel: "segment-1",
+      chainId: "sequence-1-action-1",
+      warnings: [],
+    }),
+    status: "available",
+    scope: "official_timeline_diff_view",
+    origin: "controlled_segment_sandbox_timeline",
+    baseline: {
+      ...emptyOfficialTimelineDiffPath({ pathId: "baseline", status: "available" }),
+      sandboxOnlyEventCount: 9,
+    },
+    override: {
+      ...emptyOfficialTimelineDiffPath({ pathId: "override", status: "available" }),
+      sandboxOnlyEventCount: 9,
+      finalSandboxOutcome: "secured_by_goalkeeper_team",
+      finalSandboxActorCandidate: "blitz-goalkeeper-free-safety",
+      finalSandboxZoneCandidate: "Z3-HSR",
+    },
+    baselineSandboxOnlyEventCount: 9,
+    overrideSandboxOnlyEventCount: 9,
+    modelAppliedOnlyInSandbox: true,
+    tags: ["official_timeline_diff_view"],
+  };
+}
+
+export function validateSandboxDecisionEvidenceCalibrationFromPanel(): readonly string[] {
+  const missingReview = coachFacingTimelineReviewFromDiff({
+    diffViewModel: emptyOfficialTimelineDiffViewModel({ warnings: [] }),
+  });
+  const missingPanel = sandboxDecisionPanelFromTimelineReview({ timelineReview: missingReview });
+  const missingCalibration = sandboxDecisionEvidenceCalibrationFromPanel({ decisionPanel: missingPanel });
+  const review = coachFacingTimelineReviewFromDiff({ diffViewModel: diffFixture() });
+  const panel = sandboxDecisionPanelFromTimelineReview({ timelineReview: review });
+  const calibration = sandboxDecisionEvidenceCalibrationFromPanel({ decisionPanel: panel });
+
+  assertTest(missingCalibration.status === "not_available", "not_available panel must return not_available calibration.");
+  assertTest(calibration.status === "available", "available panel must return available calibration.");
+  assertTest(calibration.origin === "sandbox_decision_panel", "calibration origin must be sandbox_decision_panel.");
+  assertTest(calibration.evidenceScore >= 35 && calibration.evidenceScore <= 50, "current fixture evidence score must be between 35 and 50.");
+  assertTest(calibration.confidence === "low", "current fixture confidence must be low.");
+  assertTest(calibration.supportingSignals.length >= 4, "supporting signals count must be at least 4.");
+  assertTest(calibration.limitingSignals.length >= 5, "limiting signals count must be at least 5.");
+  assertTest(calibration.recommendationType === "test_support_around_forward_progress", "recommendation type must be preserved.");
+  assertTest(calibration.calibratedSuggestionOnly, "calibration must remain suggestion-only.");
+  assertTest(!calibration.officialTruth, "calibration must not be official truth.");
+  assertTest(!calibration.canDriveLiveSelection, "calibration cannot drive live selection.");
+  assertTest(!calibration.canDriveProductionRouteResolution, "calibration cannot drive production route resolution.");
+  assertTest(!calibration.canCreateProductionScoringEvents, "calibration cannot create production scoring events.");
+  assertTest(!calibration.canClaimGlobalEconomy, "calibration cannot claim global economy.");
+
+  return [
+    "not_available decision panel returns not_available calibration",
+    "available decision panel returns available calibration",
+    "current fixture evidence score is bounded and low confidence",
+    "supporting and limiting signals are populated",
+    "calibration preserves all sandbox-only guardrails",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxDecisionEvidenceCalibrationFromPanel();
+
+  console.log("sandboxDecisionEvidenceCalibrationFromPanel tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/sandboxDecisionEvidenceCalibrationGuard.test.ts
+
+```ts
+import {
+  emptyOfficialTimelineDiffPath,
+  emptyOfficialTimelineDiffViewModel,
+  type OfficialTimelineDiffViewModel,
+} from "./officialTimelineDiffView";
+import { coachFacingTimelineReviewFromDiff } from "./coachFacingTimelineReviewFromDiff";
+import { sandboxDecisionPanelFromTimelineReview } from "./sandboxDecisionPanelFromTimelineReview";
+import {
+  sandboxDecisionEvidenceCalibrationCannotClaimGlobalEconomy,
+  sandboxDecisionEvidenceCalibrationCannotDriveProduction,
+  sandboxDecisionEvidenceCalibrationCannotMutateOfficialFullMatch,
+  sandboxDecisionEvidenceCalibrationFromPanel,
+} from "./sandboxDecisionEvidenceCalibrationFromPanel";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function diffFixture(): OfficialTimelineDiffViewModel {
+  return {
+    ...emptyOfficialTimelineDiffViewModel({ warnings: [] }),
+    status: "available",
+    scope: "official_timeline_diff_view",
+    origin: "controlled_segment_sandbox_timeline",
+    baseline: {
+      ...emptyOfficialTimelineDiffPath({ pathId: "baseline", status: "available" }),
+      sandboxOnlyEventCount: 9,
+    },
+    override: {
+      ...emptyOfficialTimelineDiffPath({ pathId: "override", status: "available" }),
+      sandboxOnlyEventCount: 9,
+      finalSandboxOutcome: "secured_by_goalkeeper_team",
+      finalSandboxActorCandidate: "blitz-goalkeeper-free-safety",
+      finalSandboxZoneCandidate: "Z3-HSR",
+    },
+    baselineSandboxOnlyEventCount: 9,
+    overrideSandboxOnlyEventCount: 9,
+    modelAppliedOnlyInSandbox: true,
+    tags: ["official_timeline_diff_view"],
+  };
+}
+
+export function validateSandboxDecisionEvidenceCalibrationGuard(): readonly string[] {
+  const panel = sandboxDecisionPanelFromTimelineReview({
+    timelineReview: coachFacingTimelineReviewFromDiff({ diffViewModel: diffFixture() }),
+  });
+  const calibration = sandboxDecisionEvidenceCalibrationFromPanel({ decisionPanel: panel });
+
+  assertTest(calibration.status === "available", "calibration must be available.");
+  assertTest(calibration.confidence === "low", "single-chain calibration must stay low confidence.");
+  assertTest(sandboxDecisionEvidenceCalibrationCannotMutateOfficialFullMatch(calibration), "calibration must not mutate official full-match state.");
+  assertTest(sandboxDecisionEvidenceCalibrationCannotDriveProduction(calibration), "calibration must not drive coach instruction, live selection, or production route resolution.");
+  assertTest(sandboxDecisionEvidenceCalibrationCannotClaimGlobalEconomy(calibration), "calibration must not claim global economy.");
+  assertTest(!calibration.canCreateProductionScoringEvents, "calibration cannot create production scoring events.");
+  assertTest(!calibration.canDriveLiveSelection, "calibration cannot drive live selection.");
+  assertTest(!calibration.canDriveProductionRouteResolution, "calibration cannot drive production route resolution.");
+  assertTest(!calibration.canDriveCoachInstruction, "calibration cannot become a mandatory coach instruction.");
+
+  return [
+    "calibration cannot inject events into official timeline",
+    "calibration cannot mutate official score, possession, or scoring events",
+    "calibration cannot create production scoring events",
+    "calibration cannot claim global economy",
+    "calibration cannot drive live selection or production route resolution",
+    "single-chain evidence cannot become high confidence",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSandboxDecisionEvidenceCalibrationGuard();
+
+  console.log("sandboxDecisionEvidenceCalibrationGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -31512,6 +32386,73 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/scoringGuard.3x.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard3X(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const calibrationFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "official timeline event count delta must be zero.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "official scoring event count delta must be zero.");
+  assertTest(signature.officialScoreDelta === 0, "official score delta must be zero.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "calibration must not create production scoring events.");
+  assertTest(calibrationFact !== undefined, "sandbox decision evidence calibration evidence must exist.");
+  assertTest(calibrationFact?.internalTags.includes("sandbox_decision_evidence_confidence_low") ?? false, "calibration confidence must be low.");
+  assertTest(calibrationFact?.internalTags.includes("sandbox_decision_evidence_can_drive_live_selection_false") ?? false, "calibration must not drive live selection.");
+  assertTest(calibrationFact?.internalTags.includes("sandbox_decision_evidence_can_drive_production_route_resolution_false") ?? false, "calibration must not drive production route resolution.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_SANDBOX_DECISION_EVIDENCE_CALIBRATION_CANNOT_DRIVE_LIVE_SELECTION"), "limitations must mark calibration live-selection-forbidden.");
+
+  return [
+    "scoring constants unchanged",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "sandbox decision evidence calibration creates no production scoring events",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard3X();
+
+  console.log("scoringGuard.3x tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/diagnostics/sourceOfTruthGuards.2z.test.ts
 
 ```ts
@@ -32909,6 +33850,46 @@ if (require.main === module) {
   const checks = validateSourceOfTruthGuards3W();
 
   console.log("source-of-truth guard 3W tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.3x.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSourceOfTruthGuards3X(): readonly string[] {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim("WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    assertTest(message.includes("50-match economy"), "sandbox decision evidence rejection must mention 50-match economy.");
+    assertTest(message.includes("single runFullMatch harness output"), "sandbox decision evidence rejection must mention single-run limitation.");
+
+    return [
+      "sandbox decision evidence calibration cannot make global scoring economy claims",
+      "sandbox decision evidence guard message mentions 50-match economy",
+      "sandbox decision evidence guard message mentions single-run limitation",
+    ];
+  }
+
+  throw new Error("WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION must not make global scoring economy claims.");
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards3X();
+
+  console.log("source-of-truth guard 3X tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -36014,6 +36995,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
       return "training_recommendation";
   }
 }
@@ -36084,6 +37066,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Lecture timeline officielle vs sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
       return "Panneau de decision sandbox";
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
+      return "Calibration d'evidence du panneau sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -36159,6 +37143,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -36201,6 +37186,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW",
     "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW",
     "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
+    "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -37346,6 +38332,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 30;
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
       return 29;
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
+      return 28;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -37426,6 +38414,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la timeline officielle face au sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
       return "Relire l'option coach proposee par le sandbox";
+    case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
+      return "Relire la confiance de l'option coach sandbox";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -38700,7 +39690,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE"
   | "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW"
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -39422,6 +40413,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "coach-facing tactical tests",
       "risks to monitor before production use",
       "unproven evidence gaps",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route quality",
+      "normal live selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
+    canProve: [
+      "the sandbox decision suggestion has bounded evidence scoring",
+      "supporting and limiting evidence signals are visible for coach review",
+      "single-chain sandbox evidence remains low-confidence when goalkeeper recovery and no batch confirmation are present",
+      "calibrated sandbox evidence remains suggestion-only and cannot drive live selection",
+    ],
+    canSuggest: [
+      "coach-facing tactical tests",
+      "evidence confidence explanations",
+      "future multi-scenario validation needs",
     ],
     cannotProve: [
       "global scoring balance",
