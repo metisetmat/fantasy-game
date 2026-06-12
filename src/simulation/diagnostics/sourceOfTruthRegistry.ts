@@ -23,7 +23,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"
   | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"
   | "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX"
-  | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX";
+  | "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX"
+  | "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -600,6 +601,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production continuation model quality",
       "production second-action selection quality",
       "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY",
+    canProve: [
+      "experimental sandbox sequence replay consumed the route-resolution to multi-action-continuation sandbox chain",
+      "baseline and override sequence paths were replayed as typed sandbox steps",
+      "sequence replay exposed final outcome, team, actor, zone, and divergence metadata",
+      "current sequence replay remained separated from official timeline, official possession, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production sequence replay quality",
+      "production continuation model quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",
       "production chain-driven full-match behavior",
