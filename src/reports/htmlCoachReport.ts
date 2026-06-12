@@ -367,6 +367,10 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
     candidate.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION" &&
     candidate.internalTags.includes("sandbox_decision_evidence_calibration")
   );
+  const batchFact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION" &&
+    candidate.internalTags.includes("sandbox_decision_batch_confidence_calibration")
+  );
 
   if (fact === undefined) {
     return "";
@@ -406,6 +410,44 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
           <li>Le danger de rebond et la seconde chance restent à 4/100.</li>
           <li>L'issue finale sandbox est secured_by_goalkeeper_team.</li>
           <li>Le signal vient d'une seule chaîne sandbox, sans confirmation batch ni variation de profils.</li>
+        </ul>
+      </article>`;
+  const batchScenarioCount = batchFact === undefined
+    ? "0"
+    : tagValue(batchFact.internalTags, "sandbox_decision_batch_scenario_count_") ?? "0";
+  const batchAverageScore = batchFact === undefined
+    ? "0"
+    : tagValue(batchFact.internalTags, "sandbox_decision_batch_average_score_") ?? "0";
+  const batchMinScore = batchFact === undefined
+    ? "0"
+    : tagValue(batchFact.internalTags, "sandbox_decision_batch_min_score_") ?? "0";
+  const batchMaxScore = batchFact === undefined
+    ? "0"
+    : tagValue(batchFact.internalTags, "sandbox_decision_batch_max_score_") ?? "0";
+  const batchConfidence = batchFact === undefined
+    ? "low"
+    : tagValue(batchFact.internalTags, "sandbox_decision_batch_confidence_") ?? "low";
+  const batchStability = batchFact === undefined
+    ? "stable_but_low"
+    : tagValue(batchFact.internalTags, "sandbox_decision_batch_stability_") ?? "stable_but_low";
+  const batchConfidenceCopy = batchConfidence === "medium"
+    ? "Confiance moyenne"
+    : batchConfidence === "low_medium"
+      ? "Confiance faible Ã  moyenne"
+      : batchConfidence === "very_low"
+        ? "Confiance trÃ¨s faible"
+        : "Confiance faible";
+  const batchCalibration = batchFact === undefined ? "" : `
+      <article class="card summary-card">
+        <h3>Confiance multi-scÃ©narios</h3>
+        <p>${escapeHtml(batchConfidenceCopy)} â€” ${escapeHtml(batchAverageScore)}/100 en moyenne sur ${escapeHtml(batchScenarioCount)} scÃ©narios.</p>
+        <p>Fourchette locale : ${escapeHtml(batchMinScore)}â€“${escapeHtml(batchMaxScore)}/100. StabilitÃ© : ${escapeHtml(batchStability)}.</p>
+        <p>La confiance reste prudente car cette piste varie selon le soutien autour de Z4-HSR, la rÃ©ponse du gardien et la couverture du second ballon. Le batch sandbox renforce l'idÃ©e d'un test, mais ne suffit pas Ã  en faire une consigne officielle.</p>
+        <ul>
+          <li>Meilleur soutien offensif : confiance plus haute.</li>
+          <li>Soutien faible : confiance plus basse.</li>
+          <li>Gardien plus fort : confiance plus basse.</li>
+          <li>Pression sur second ballon : signal Ã  surveiller.</li>
         </ul>
       </article>`;
   const blocks = [
@@ -461,13 +503,15 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
     <section>
       <h2>Panneau de décision sandbox</h2>
       <p>Ce panneau propose une option coach à tester. Il ne remplace pas la timeline officielle et ne pilote pas la sélection live.</p>
-      <div class="grid">${evidenceCalibration}${articles}</div>
+      <div class="grid">${evidenceCalibration}${batchCalibration}${articles}</div>
       <details class="internal-markers">
         <summary>Détails techniques du panneau sandbox</summary>
         <div class="muted">${escapeHtml(fact.summary)}</div>
         <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
         ${calibrationFact === undefined ? "" : `<div class="muted">${escapeHtml(calibrationFact.summary)}</div>`}
         ${calibrationFact === undefined ? "" : `<div class="muted">${calibrationFact.internalTags.map(escapeHtml).join(", ")}</div>`}
+        ${batchFact === undefined ? "" : `<div class="muted">${escapeHtml(batchFact.summary)}</div>`}
+        ${batchFact === undefined ? "" : `<div class="muted">${batchFact.internalTags.map(escapeHtml).join(", ")}</div>`}
       </details>
     </section>`;
 }
