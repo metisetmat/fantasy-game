@@ -13,6 +13,7 @@ const NON_GLOBAL_ECONOMY_SCOPES: readonly MatchEvidenceScope[] = [
   "BATCH_DIAGNOSTIC_PROJECTION",
   "LIVE_SCORING_STREAM",
   "REPORT_RENDERING_ONLY",
+  "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW",
 ];
 
 export function validateSourceOfTruthGuards(): readonly string[] {

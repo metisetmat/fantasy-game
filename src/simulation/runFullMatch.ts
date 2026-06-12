@@ -90,6 +90,8 @@ import { sandboxSequenceReplayFromContinuation } from "./fullMatch/sandboxSequen
 import type { SandboxSequenceReplayModel } from "./fullMatch/sandboxSequenceReplay";
 import { controlledSegmentSandboxTimelineFromReplay } from "./fullMatch/controlledSegmentSandboxTimelineFromReplay";
 import type { ControlledSegmentSandboxTimelineModel } from "./fullMatch/controlledSegmentSandboxTimeline";
+import { officialTimelineDiffFromSandboxTimeline } from "./fullMatch/officialTimelineDiffFromSandboxTimeline";
+import type { OfficialTimelineDiffViewModel } from "./fullMatch/officialTimelineDiffView";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -791,6 +793,30 @@ function controlledSegmentSandboxTimelineModelLimitations(model: ControlledSegme
     "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
     "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "FULLMATCH_CONTROLLED_SEGMENT_SANDBOX_TIMELINE_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function officialTimelineDiffViewModelLimitations(model: OfficialTimelineDiffViewModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_EXPERIMENTAL",
+    `FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_STATUS_${model.status.toUpperCase()}`,
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_READ_ONLY",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_RESULTS_ISOLATED_ONLY",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_SANDBOX_EVENTS_NOT_OFFICIAL_MATCH_EVENTS",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_SANDBOX_EVENTS_NOT_INSERTED_IN_OFFICIAL_TIMELINE",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_DID_NOT_MUTATE_GLOBAL_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_OFFICIAL_TIMELINE_DIFF_VIEW_CANNOT_CLAIM_GLOBAL_ECONOMY",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2089,6 +2115,53 @@ function controlledSegmentSandboxTimelineModelEvidenceFact(input: {
   };
 }
 
+function officialTimelineDiffViewModelEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: OfficialTimelineDiffViewModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-official-timeline-diff-view`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.model.override.finalSandboxZoneCandidate ?? "Z3-HSR"],
+    summary:
+      `Experimental official timeline diff view ${input.model.status}: origin ${input.model.origin}, ` +
+      `official events before=${input.model.officialTimelineEventCountBefore}, after=${input.model.officialTimelineEventCountAfter}, delta=${input.model.officialTimelineEventCountDelta}; ` +
+      `official scoring events before=${input.model.officialScoringEventCountBefore}, after=${input.model.officialScoringEventCountAfter}, delta=${input.model.officialScoringEventCountDelta}; ` +
+      `official score before=${input.model.officialScoreBefore}, after=${input.model.officialScoreAfter}, delta=${input.model.officialScoreDelta}; ` +
+      `official possession changed=${input.model.officialPossessionChanged}; baseline sandbox-only events=${input.model.baselineSandboxOnlyEventCount}, ` +
+      `override sandbox-only events=${input.model.overrideSandboxOnlyEventCount}, official-only events=${input.model.officialOnlyEventCount}, ` +
+      `matched official references=${input.model.matchedReferenceEventCount}; override outcome=${input.model.override.finalSandboxOutcome ?? "none"}, ` +
+      `team=${input.model.override.finalSandboxTeamCandidate ?? "none"}, actor=${input.model.override.finalSandboxActorCandidate ?? "none"}, ` +
+      `zone=${input.model.override.finalSandboxZoneCandidate ?? "none"}; sandboxOutcomeDivergence=${input.model.sandboxOutcomeDivergenceObserved}, ` +
+      `canInjectEventsIntoOfficialTimeline=${input.model.canInjectEventsIntoOfficialTimeline}, canMutateOfficialTimeline=${input.model.canMutateOfficialTimeline}, ` +
+      `canMutateOfficialPossession=${input.model.canMutateOfficialPossession}, canMutateOfficialScore=${input.model.canMutateOfficialScore}, ` +
+      `canMutateOfficialScoringEvents=${input.model.canMutateOfficialScoringEvents}, canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, ` +
+      `canMutateProductionRouteResolution=${input.model.canMutateProductionRouteResolution}, canMutateGlobalRouteSuccessRates=${input.model.canMutateGlobalRouteSuccessRates}, ` +
+      `canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.status === "available" ? "medium" : "low",
+    strength: input.model.status === "available" ? 94 : 24,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_official_timeline_diff_view",
+      "official_timeline_diff_view",
+      ...(input.model.chainId === undefined ? [] : [`official_timeline_diff_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2113,6 +2186,7 @@ function withFullMatchGroundingDiagnosis(
   multiActionContinuationModel: MultiActionContinuationModel,
   sandboxSequenceReplayModel: SandboxSequenceReplayModel,
   controlledSegmentSandboxTimelineModel: ControlledSegmentSandboxTimelineModel,
+  officialTimelineDiffViewModel: OfficialTimelineDiffViewModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2137,7 +2211,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_rebound_second_chance_sandbox") ||
     fact.internalTags.includes("workbench_chain_multi_action_continuation_sandbox") ||
     fact.internalTags.includes("workbench_chain_sandbox_sequence_replay") ||
-    fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline")
+    fact.internalTags.includes("workbench_chain_controlled_segment_sandbox_timeline") ||
+    fact.internalTags.includes("workbench_chain_official_timeline_diff_view")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2170,7 +2245,10 @@ function withFullMatchGroundingDiagnosis(
   const controlledSegmentSandboxTimelineSummary = controlledSegmentSandboxTimelineModel.status === "not_available"
     ? ""
     : ` La timeline sandbox separee du segment convertit ce replay en ${controlledSegmentSandboxTimelineModel.override.eventCount} evenements sandbox : reference ${controlledSegmentSandboxTimelineModel.baseline.finalOutcome ?? "none"} contre override ${controlledSegmentSandboxTimelineModel.override.finalOutcome ?? "none"} pour ${controlledSegmentSandboxTimelineModel.override.finalTeamCandidate ?? "none"}, acteur ${controlledSegmentSandboxTimelineModel.override.finalActorCandidate ?? "none"}, zone ${controlledSegmentSandboxTimelineModel.override.finalZoneCandidate ?? "none"}. Elle n'est pas la timeline officielle : aucun MatchEvent officiel, aucune insertion dans la timeline officielle, aucune mutation de possession, aucun score_change, aucun evenement de score production et aucune preuve d'economie globale ne sont crees.`;
-  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}`;
+  const officialTimelineDiffSummary = officialTimelineDiffViewModel.status === "not_available"
+    ? ""
+    : ` Le diff officiel read-only compare ensuite la timeline officielle avec les deux timelines sandbox : officiel ${officialTimelineDiffViewModel.officialTimelineEventCountBefore}->${officialTimelineDiffViewModel.officialTimelineEventCountAfter} evenements, score ${officialTimelineDiffViewModel.officialScoreBefore}->${officialTimelineDiffViewModel.officialScoreAfter}, score events ${officialTimelineDiffViewModel.officialScoringEventCountBefore}->${officialTimelineDiffViewModel.officialScoringEventCountAfter}, possession changee ${officialTimelineDiffViewModel.officialPossessionChanged ? "oui" : "non"}. Les divergences restent sandbox-only : ${officialTimelineDiffViewModel.baselineSandboxOnlyEventCount} evenements baseline et ${officialTimelineDiffViewModel.overrideSandboxOnlyEventCount} evenements override, sans insertion dans la timeline officielle ni mutation de scoring.`;
+  const coachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2399,6 +2477,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     homeTeamId: input.homeTeam.teamId,
     awayTeamId: input.awayTeam.teamId,
   });
+  const officialTimelineDiffViewModel = officialTimelineDiffFromSandboxTimeline({
+    matchInput: input,
+    officialTimeline: timeline,
+    officialScore: score,
+    controlledSegmentSandboxTimelineModel,
+  });
 
   const report = buildMatchReport({
     matchInput: input,
@@ -2439,6 +2523,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...multiActionContinuationModelLimitations(multiActionContinuationModel),
       ...sandboxSequenceReplayModelLimitations(sandboxSequenceReplayModel),
       ...controlledSegmentSandboxTimelineModelLimitations(controlledSegmentSandboxTimelineModel),
+      ...officialTimelineDiffViewModelLimitations(officialTimelineDiffViewModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -2546,6 +2631,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: controlledSegmentSandboxTimelineModel,
   });
+  const officialTimelineDiffViewModelFact = officialTimelineDiffViewModelEvidenceFact({
+    report,
+    matchInput: input,
+    model: officialTimelineDiffViewModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -2568,6 +2658,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(multiActionContinuationModelFact === null ? [] : [multiActionContinuationModelFact]),
     ...(sandboxSequenceReplayModelFact === null ? [] : [sandboxSequenceReplayModelFact]),
     ...(controlledSegmentSandboxTimelineModelFact === null ? [] : [controlledSegmentSandboxTimelineModelFact]),
+    ...(officialTimelineDiffViewModelFact === null ? [] : [officialTimelineDiffViewModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -2600,5 +2691,6 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     multiActionContinuationModel,
     sandboxSequenceReplayModel,
     controlledSegmentSandboxTimelineModel,
+    officialTimelineDiffViewModel,
   );
 }
