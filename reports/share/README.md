@@ -1,12 +1,13 @@
-# Sprint 3N Share Pack
+# Sprint 3O Share Pack
 
-This compact review pack covers the sandbox scoring event resolution model generated from the sandbox scoring event candidate model behind the opt-in route selection flag.
+This compact review pack covers the attribute-driven shot resolution sandbox generated from the sandbox scoring-event resolution model behind the opt-in route selection flag.
 
-Start with:
-- `00-share-manifest.txt` for copied files, bundle contents, commands, and git status.
-- `fullmatch-workbench-chain-replay-3n.md` for sandbox scoring event resolution model status, baseline-versus-override resolution classification, candidate source fields, divergence fields, rejected candidates, official score signature comparison, diagnostics, and guardrails.
-- `validation.fullmatch-workbench-chain-replay-3n.md` for opt-in sandbox resolution classification, official score mutation, official scoring event mutation, production scoring-event creation, route-success mutation, production-resolution guardrails, global-economy guardrails, and source-of-truth checks.
-- `coach-report.default.html` and `coach-report.experimental.html` to compare default and experimental coach-facing outputs.
-- `sequence-1-action-1.html`, `sequence-1-action-2.html`, and `sequence-1-action-3.html` for visual workbench truth.
-- `bundle__simulation.md` for multi-action WorkbenchChain files/tests, segment context influence, route candidate influence, shadow route selection, controlled segment selection, SegmentRouteInput wiring, controlled mini-match route source wiring, live selection override guard wiring, isolated mini-match override experiment wiring, controlled segment replay comparison wiring, real isolated replay engine wiring, controlled route resolution sandbox wiring, sandbox scoring opportunity model wiring, sandbox scoring event candidate wiring, sandbox scoring event resolution wiring, full-match route selection flag files/tests, mini-match route selection files/tests, replay seed, grounding diagnostics, and evidence.
-- `bundle__reports.md` for the share-pack generator, coach report renderer, copy quality utility, and guards.
+## Review order
+1. `validation.share-pack.md` confirms that the pack is current and below the 20-file limit.
+2. `fullmatch-workbench-chain-replay-3o.md` explains the attribute-driven shot resolution sandbox, baseline-versus-override outcome, shooter/goalkeeper attributes, adjusted shot quality, goalkeeper quality, and guardrails.
+3. `validation.fullmatch-workbench-chain-replay-3o.md` validates opt-in behavior, attribute-driven outcome, official score mutation guards, official scoring event mutation guards, production scoring-event creation guards, route-success mutation guards, global-economy guardrails, and source-of-truth checks.
+4. `coach-report.default.html` and `coach-report.experimental.html` compare the default segment harness with the opt-in experimental report.
+5. `bundle__simulation.md` contains the chain from replay through attribute-driven shot resolution sandbox and all related tests.
+
+## Guardrail reminder
+Sprint 3O does not change scoring values, official ScoringEvents, MatchBonusEvent, production route resolution, default full-match mode, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.

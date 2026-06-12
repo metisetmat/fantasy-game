@@ -19,7 +19,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"
-  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION";
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION"
+  | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -480,6 +481,35 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotProve: [
       "global scoring balance",
       "production scoring-event resolution quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX: {
+    scope: "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX",
+    canProve: [
+      "experimental sandbox shot resolution used shooter, reception, pressure, target-zone, fatigue, mental freshness, and goalkeeper attributes",
+      "baseline and override attribute-driven shot outcome, shot quality, goalkeeper response quality, and divergence were exposed",
+      "attribute-driven sandbox shot resolution rejected closed and unavailable candidates through upstream sandbox guards",
+      "attribute-driven sandbox shot resolution remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production scoring-event resolution quality",
+      "production goalkeeper model quality",
       "production route resolution quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",

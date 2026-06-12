@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T07:50:01.068Z
-Task/sprint: Sprint 3N - Sandbox Scoring Event Resolution
+Generated: 2026-06-12T08:48:09.576Z
+Task/sprint: Sprint 3O - Attribute-Driven Shot Resolution Sandbox
 Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -17,8 +17,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3n.md
-- validation.fullmatch-workbench-chain-replay-3n.md
+- fullmatch-workbench-chain-replay-3o.md
+- validation.fullmatch-workbench-chain-replay-3o.md
 - README.md
 
 ## Bundle Files
