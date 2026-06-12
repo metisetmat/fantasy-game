@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T08:48:09.576Z
-Task/sprint: Sprint 3O - Attribute-Driven Shot Resolution Sandbox
+Generated: 2026-06-12T10:00:11.920Z
+Task/sprint: Sprint 3P - Goalkeeper Response Model
 Final file count: 18
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -17,8 +17,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3o.md
-- validation.fullmatch-workbench-chain-replay-3o.md
+- fullmatch-workbench-chain-replay-3p.md
+- validation.fullmatch-workbench-chain-replay-3p.md
 - README.md
 
 ## Bundle Files

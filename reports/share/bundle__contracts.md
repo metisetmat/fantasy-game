@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3O - Attribute-Driven Shot Resolution Sandbox. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3P - Goalkeeper Response Model. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -418,7 +418,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION"
-  | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX";
+  | "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX"
+  | "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

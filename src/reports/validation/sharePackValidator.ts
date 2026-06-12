@@ -166,6 +166,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3NValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3n.md"));
   const fullMatchWorkbenchChainReplay3O = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3o.md"));
   const fullMatchWorkbenchChainReplay3OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3o.md"));
+  const fullMatchWorkbenchChainReplay3P = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3p.md"));
+  const fullMatchWorkbenchChainReplay3PValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3p.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -1798,6 +1800,77 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("single full-match harness remains warning-only", bundleSimulation.includes("mayInvalidateGlobalScoringEconomy: false") && rosterToSpatialContextAdapter.includes("full-match does not yet replay the workbench sequence chain"), "single-run warning-only"),
     check("recommendations visible", rosterToSpatialContextAdapter.includes("CONFIRM_ROSTER_TO_SPATIAL_CONTEXT_ADAPTER") && rosterToSpatialContextAdapter.includes("CONFIRM_WORKBENCH_REPLAY_SEED") && rosterToSpatialContextAdapter.includes("PREPARE_ATTRIBUTE_DRIVEN_ROUTE_RANKING"), "2S recommendations visible"),
   ];
+  const sprint3PExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-3p.md",
+    "validation.fullmatch-workbench-chain-replay-3p.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint3PForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3o.md",
+    "validation.fullmatch-workbench-chain-replay-3o.md",
+    "fullmatch-workbench-chain-replay-3n.md",
+    "validation.fullmatch-workbench-chain-replay-3n.md",
+  ];
+  const sprint3PChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("current sprint is Sprint 3P", activeConfig.sprintName === "Sprint 3P - Goalkeeper Response Model", activeConfig.sprintName),
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", missingExpectedFiles.length === 0, missingExpectedFiles.join(", ") || "none"),
+    check("stale share file count is 0", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("previous sprint leftovers are 0", sprint3PForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint3PForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("source files deleted count is 0", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("all required current sprint files copied", sprint3PExpectedFiles.every((file) => requiredCopied(file)), sprint3PExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 3P", manifest.includes("Sprint 3P - Goalkeeper Response Model") && detailedManifest.includes("Sprint 3P - Goalkeeper Response Model"), "visible"),
+    check("README is Sprint 3P oriented", readme.includes("# Sprint 3P Share Pack") && readme.includes("fullmatch-workbench-chain-replay-3p.md"), "README current"),
+    check("3P report included", fullMatchWorkbenchChainReplay3P.includes("# FullMatch Workbench Chain Replay 3P") && fullMatchWorkbenchChainReplay3P.includes("goalkeeper response model status: available"), "3P doc included"),
+    check("3P validation is PASS", fullMatchWorkbenchChainReplay3PValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay3PValidation.includes("goalkeeper response model status is available"), "3P validation PASS"),
+    check("baseline goalkeeper response fields visible", fullMatchWorkbenchChainReplay3P.includes("baseline response type: NOT_APPLICABLE") && fullMatchWorkbenchChainReplay3P.includes("baseline rebound state: none"), "baseline fields visible"),
+    check("override goalkeeper response fields visible", fullMatchWorkbenchChainReplay3P.includes("override shooter id: control-space-hunter") && fullMatchWorkbenchChainReplay3P.includes("override goalkeeper id: blitz-goalkeeper-free-safety") && fullMatchWorkbenchChainReplay3P.includes("shot quality faced: 53") && fullMatchWorkbenchChainReplay3P.includes("goalkeeper response score: 65") && fullMatchWorkbenchChainReplay3P.includes("save margin: 12") && fullMatchWorkbenchChainReplay3P.includes("response type: PARRIED_SAVE") && fullMatchWorkbenchChainReplay3P.includes("rebound state: safe_deflection"), "override fields visible"),
+    check("goalkeeper sub-scores visible", fullMatchWorkbenchChainReplay3P.includes("positioning score: 75") && fullMatchWorkbenchChainReplay3P.includes("trajectory reading score: 74") && fullMatchWorkbenchChainReplay3P.includes("reaction score: 73") && fullMatchWorkbenchChainReplay3P.includes("handling score: 78") && fullMatchWorkbenchChainReplay3P.includes("rebound control score: 73") && fullMatchWorkbenchChainReplay3P.includes("concentration score: 68") && fullMatchWorkbenchChainReplay3P.includes("mental fatigue impact: 8"), "sub-scores visible"),
+    check("goalkeeper divergence fields visible", fullMatchWorkbenchChainReplay3P.includes("goalkeeper attribute influence observed: true") && fullMatchWorkbenchChainReplay3P.includes("goalkeeper response divergence observed: true") && fullMatchWorkbenchChainReplay3P.includes("rebound state divergence observed: true"), "goalkeeper divergences visible"),
+    check("goalkeeper sandbox creates no scoring event", fullMatchWorkbenchChainReplay3P.includes("sandbox scoring event created count: 0") && fullMatchWorkbenchChainReplay3P.includes("sandbox score delta total: 0"), "no sandbox scoring event"),
+    check("goalkeeper response model bundled", bundleSimulation.includes("src/simulation/fullMatch/goalkeeperResponseModel.ts") && bundleSimulation.includes("GoalkeeperResponseModel"), "3P contract bundled"),
+    check("goalkeeper attribute extraction bundled", bundleSimulation.includes("src/simulation/fullMatch/extractGoalkeeperResponseAttributes.ts") && bundleSimulation.includes("extractGoalkeeperResponseAttributes"), "3P extraction bundled"),
+    check("goalkeeper response resolver bundled", bundleSimulation.includes("src/simulation/fullMatch/resolveGoalkeeperResponse.ts") && bundleSimulation.includes("resolveGoalkeeperResponse"), "3P resolver bundled"),
+    check("goalkeeper response converter bundled", bundleSimulation.includes("src/simulation/fullMatch/goalkeeperResponseModelFromShotResolution.ts") && bundleSimulation.includes("goalkeeperResponseModelFromShotResolution"), "3P converter bundled"),
+    check("goalkeeper response comparison bundled", bundleSimulation.includes("src/simulation/fullMatch/compareGoalkeeperResponses.ts") && bundleSimulation.includes("compareGoalkeeperResponses"), "3P comparison bundled"),
+    check("goalkeeper response signature bundled", bundleSimulation.includes("src/simulation/fullMatch/goalkeeperResponseModelSignature.ts") && bundleSimulation.includes("goalkeeperResponseModelSignature"), "3P signature bundled"),
+    check("goalkeeper response tests bundled", bundleSimulation.includes("goalkeeperResponseModel.test.ts") && bundleSimulation.includes("compareGoalkeeperResponses.test.ts") && bundleSimulation.includes("runFullMatchExperimentalGoalkeeperResponseModel.test.ts"), "3P tests bundled"),
+    check("3P scoring and source-of-truth guards bundled", bundleSimulation.includes("scoringGuard.3p.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.3p.test.ts"), "3P guards bundled"),
+    check("goalkeeper response evidence included", fullMatchWorkbenchChainReplay3P.includes("WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX") && bundleSimulation.includes("WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX"), "3P evidence visible"),
+    check("goalkeeper response sandbox is isolated-only", fullMatchWorkbenchChainReplay3P.includes("modelAppliedOnlyInSandbox: true") && fullMatchWorkbenchChainReplay3P.includes("modelAppliedToNormalLiveSelection: false"), "goalkeeper response isolated"),
+    check("default and experimental official score signatures remain equal", fullMatchWorkbenchChainReplay3P.includes("default and experimental official score signatures remain equal for now: YES") && fullMatchWorkbenchChainReplay3PValidation.includes("default and experimental official score signatures remain equal"), "score signatures equal"),
+    check("goalkeeper response sandbox cannot mutate official score", fullMatchWorkbenchChainReplay3P.includes("goalkeeper response model can mutate official score: false") && fullMatchWorkbenchChainReplay3PValidation.includes("goalkeeper response model cannot mutate official score"), "official score mutation forbidden"),
+    check("goalkeeper response sandbox cannot create production scoring events", fullMatchWorkbenchChainReplay3P.includes("goalkeeper response model can create production scoring events: false") && fullMatchWorkbenchChainReplay3PValidation.includes("goalkeeper response model cannot create production scoring events"), "production scoring event creation forbidden"),
+    check("goalkeeper response sandbox cannot claim global economy", fullMatchWorkbenchChainReplay3P.includes("goalkeeper response model can claim global economy: false") && fullMatchWorkbenchChainReplay3PValidation.includes("goalkeeper response model cannot claim global economy"), "global economy forbidden"),
+    check("coach copy wording is clean", fullMatchWorkbenchChainReplay3P.includes("coach copy wording status: absent") && !coachExperimentalHtml.includes("simulation experimental") && !coachExperimentalHtml.includes("resolution live du simulation"), "coach copy clean"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay3PValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("no production scoring events deleted or capped", fullMatchWorkbenchChainReplay3PValidation.includes("no production scoring events deleted or capped") && bundleSimulation.includes("score_change"), "scoring event guard visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay3PValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay3PValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay3P.includes("FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay3P.includes("CONFIRM_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_TO_GOALKEEPER_RESPONSE_MODEL") && fullMatchWorkbenchChainReplay3P.includes("CONFIRM_GOALKEEPER_RESPONSE_MODEL_IS_ISOLATED_ONLY") && fullMatchWorkbenchChainReplay3P.includes("PREPARE_GOALKEEPER_RESPONSE_MODEL_TO_REBOUND_AND_SECOND_CHANCE_SANDBOX"), "3P recommendations visible"),
+  ];
+
   const sprint3OExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3524,6 +3597,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 3P - Goalkeeper Response Model")
+      ? sprint3PChecks
     : activeConfig.sprintName.includes("Sprint 3O - Attribute-Driven Shot Resolution Sandbox")
       ? sprint3OChecks
     : activeConfig.sprintName.includes("Sprint 3N - Sandbox Scoring Event Resolution")

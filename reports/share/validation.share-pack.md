@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 3O - Attribute-Driven Shot Resolution Sandbox
+- current sprint: Sprint 3P - Goalkeeper Response Model
 - final file count: 18
 - share file count: 18
 - minimal allowlist count: 18
@@ -16,7 +16,7 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Sprint 3O - Sprint 3O - Attribute-Driven Shot Resolution Sandbox
+- PASS: current sprint is Sprint 3P - Sprint 3P - Goalkeeper Response Model
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 18
 - PASS: final file count is 18 - 18
@@ -25,28 +25,29 @@ Status: PASS
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 3O - visible
-- PASS: README is Sprint 3O oriented - README current
-- PASS: 3O report included - 3O doc included
-- PASS: 3O validation is PASS - 3O validation PASS
-- PASS: baseline attribute-driven fields visible - baseline fields visible
-- PASS: override attribute-driven fields visible - override fields visible
-- PASS: attribute divergence fields visible - attribute divergences visible
-- PASS: attribute-driven sandbox creates no scoring event - no sandbox scoring event
-- PASS: attribute-driven model bundled - 3O contract bundled
-- PASS: attribute-driven actor extraction bundled - 3O extraction bundled
-- PASS: attribute-driven resolver bundled - 3O resolver bundled
-- PASS: attribute-driven converter bundled - 3O converter bundled
-- PASS: attribute-driven comparison bundled - 3O comparison bundled
-- PASS: attribute-driven signature bundled - 3O signature bundled
-- PASS: attribute-driven tests bundled - 3O tests bundled
-- PASS: 3O scoring and source-of-truth guards bundled - 3O guards bundled
-- PASS: attribute-driven evidence included - 3O evidence visible
-- PASS: attribute-driven sandbox is isolated-only - attribute-driven isolated
+- PASS: manifest lists Sprint 3P - visible
+- PASS: README is Sprint 3P oriented - README current
+- PASS: 3P report included - 3P doc included
+- PASS: 3P validation is PASS - 3P validation PASS
+- PASS: baseline goalkeeper response fields visible - baseline fields visible
+- PASS: override goalkeeper response fields visible - override fields visible
+- PASS: goalkeeper sub-scores visible - sub-scores visible
+- PASS: goalkeeper divergence fields visible - goalkeeper divergences visible
+- PASS: goalkeeper sandbox creates no scoring event - no sandbox scoring event
+- PASS: goalkeeper response model bundled - 3P contract bundled
+- PASS: goalkeeper attribute extraction bundled - 3P extraction bundled
+- PASS: goalkeeper response resolver bundled - 3P resolver bundled
+- PASS: goalkeeper response converter bundled - 3P converter bundled
+- PASS: goalkeeper response comparison bundled - 3P comparison bundled
+- PASS: goalkeeper response signature bundled - 3P signature bundled
+- PASS: goalkeeper response tests bundled - 3P tests bundled
+- PASS: 3P scoring and source-of-truth guards bundled - 3P guards bundled
+- PASS: goalkeeper response evidence included - 3P evidence visible
+- PASS: goalkeeper response sandbox is isolated-only - goalkeeper response isolated
 - PASS: default and experimental official score signatures remain equal - score signatures equal
-- PASS: attribute-driven sandbox cannot mutate official score - official score mutation forbidden
-- PASS: attribute-driven sandbox cannot create production scoring events - production scoring event creation forbidden
-- PASS: attribute-driven sandbox cannot claim global economy - global economy forbidden
+- PASS: goalkeeper response sandbox cannot mutate official score - official score mutation forbidden
+- PASS: goalkeeper response sandbox cannot create production scoring events - production scoring event creation forbidden
+- PASS: goalkeeper response sandbox cannot claim global economy - global economy forbidden
 - PASS: coach copy wording is clean - coach copy clean
 - PASS: explicit exhaustive test command available - test:all visible
 - PASS: scoring constants unchanged - scoring constants visible
@@ -55,7 +56,7 @@ Status: PASS
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: recommendations visible - 3O recommendations visible
+- PASS: recommendations visible - 3P recommendations visible
 
 ## Files
 
@@ -67,7 +68,7 @@ Status: PASS
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.latest.html
-- fullmatch-workbench-chain-replay-3o.md
+- fullmatch-workbench-chain-replay-3p.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -75,5 +76,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-3o.md
+- validation.fullmatch-workbench-chain-replay-3p.md
 - validation.share-pack.md
