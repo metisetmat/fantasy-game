@@ -18,7 +18,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY"
   | "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX"
   | "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL"
-  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE";
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE"
+  | "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -451,6 +452,34 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     cannotProve: [
       "global scoring balance",
       "production scoring-event quality",
+      "production route resolution quality",
+      "normal live mini-match route resolution quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "normal live mini-match route resolution",
+      "official scoring events",
+      "production route resolution",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION: {
+    scope: "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION",
+    canProve: [
+      "experimental sandbox scoring-event candidates were resolved into sandbox-only tactical scoring outcomes",
+      "baseline and override resolution type, shot attempt creation, shot quality, goalkeeper response, and divergence were exposed",
+      "sandbox scoring-event resolution rejected closed and unavailable candidates through upstream sandbox guards",
+      "sandbox scoring-event resolution remained separated from official timeline, normal live selection, official scoring, production route resolution, and global route success rates",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production scoring-event resolution quality",
       "production route resolution quality",
       "normal live mini-match route resolution quality",
       "full-match economy coherence",
