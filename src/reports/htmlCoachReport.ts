@@ -560,6 +560,103 @@ function renderSandboxDecisionPanel(report: MatchReport): string {
     </section>`;
 }
 
+function confidenceLabel(value: string): string {
+  switch (value) {
+    case "medium":
+      return "moyenne";
+    case "low_medium":
+      return "faible à moyenne";
+    case "low":
+    default:
+      return "faible";
+  }
+}
+
+function renderMultiScenarioCoachTestPlan(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN" &&
+    candidate.internalTags.includes("workbench_chain_multi_scenario_coach_test_plan")
+  );
+
+  if (fact === undefined) {
+    return "";
+  }
+
+  const supportScenario = tagValue(fact.internalTags, "multi_scenario_test_support_around_z4_hsr_scenario_") ??
+    "batch-scenario-better-attacking-support";
+  const secondBallScenario = tagValue(fact.internalTags, "multi_scenario_test_second_ball_occupation_scenario_") ??
+    "batch-scenario-better-attacking-rebound-pressure";
+  const goalkeeperScenario = tagValue(fact.internalTags, "multi_scenario_test_strong_goalkeeper_fallback_scenario_") ??
+    "batch-scenario-stronger-goalkeeper";
+  const supportConfidence = confidenceLabel(
+    tagValue(fact.internalTags, "multi_scenario_test_support_around_z4_hsr_confidence_") ?? "low",
+  );
+  const secondBallConfidence = confidenceLabel(
+    tagValue(fact.internalTags, "multi_scenario_test_second_ball_occupation_confidence_") ?? "low",
+  );
+  const goalkeeperConfidence = confidenceLabel(
+    tagValue(fact.internalTags, "multi_scenario_test_strong_goalkeeper_fallback_confidence_") ?? "low",
+  );
+  const tests = [
+    {
+      title: "Renforcer le soutien autour de Z4-HSR",
+      summary:
+        "Tester FORWARD_PROGRESS vers control-space-hunter avec un soutien plus proche autour de Z4-HSR. Le scénario avec meilleur soutien offensif est celui qui améliore le plus la piste, mais le signal reste local et ne prouve pas encore que la route est supérieure.",
+      scenario: supportScenario,
+      expectedSignal: "meilleure continuité après tir / meilleure présence au second ballon",
+      risk: "tir isolé si le soutien arrive trop tard",
+      confidence: supportConfidence,
+      unproven: "La supériorité de la route reste non prouvée dans l'économie officielle.",
+    },
+    {
+      title: "Mieux occuper le second ballon",
+      summary:
+        "Tester une présence plus agressive autour du rebond après tir. Le but est de vérifier si CONTROL peut transformer une parade du gardien en seconde action plutôt qu'en récupération propre par BLITZ.",
+      scenario: secondBallScenario,
+      expectedSignal: "la probabilité de seconde chance progresse",
+      risk: "sur-engagement et exposition de la rest-defense",
+      confidence: secondBallConfidence,
+      unproven: "Le modèle ne prouve pas encore que cette occupation reste sûre contre une transition adverse.",
+    },
+    {
+      title: "Prévoir la réaction au gardien fort",
+      summary:
+        "Tester un plan B si le gardien adverse gagne la séquence. Le scénario avec gardien plus fort fait chuter la confiance : la progression peut créer du danger, mais finir en récupération adverse.",
+      scenario: goalkeeperScenario,
+      expectedSignal: "continuité plus sûre ou meilleure pression après arrêt",
+      risk: "gardien plus fort qui neutralise l'attaque",
+      confidence: goalkeeperConfidence,
+      unproven: "La réponse au gardien fort reste une hypothèse locale, pas une consigne officielle.",
+    },
+  ];
+  const cards = tests.map((test) => `
+      <article class="card">
+        <h3>${escapeHtml(test.title)}</h3>
+        <p>${escapeHtml(test.summary)}</p>
+        <ul>
+          <li><strong>Scénario lié :</strong> ${escapeHtml(test.scenario)}</li>
+          <li><strong>Signal utile attendu :</strong> ${escapeHtml(test.expectedSignal)}</li>
+          <li><strong>Risque à surveiller :</strong> ${escapeHtml(test.risk)}</li>
+          <li><strong>Confiance :</strong> ${escapeHtml(test.confidence)}</li>
+          <li><strong>Ce qui reste non prouvé :</strong> ${escapeHtml(test.unproven)}</li>
+        </ul>
+      </article>`).join("");
+
+  return `
+    <section>
+      <h2>Plan de test coach</h2>
+      <p>Ces tests sont des hypothèses issues du sandbox, pas des consignes officielles.</p>
+      <p>Ils ne modifient ni la timeline officielle, ni le score, ni la possession, ni les événements de score.</p>
+      <p>Ils ne constituent pas une preuve d’économie globale.</p>
+      <div class="grid">${cards}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques du plan de test</summary>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -658,6 +755,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const timeline = [...report.timeline].sort(compareTimelineEvents).map(renderTimelineEvent).join("");
   const timelineReview = renderTimelineReview(report);
   const sandboxDecisionPanel = renderSandboxDecisionPanel(report);
+  const multiScenarioCoachTestPlan = renderMultiScenarioCoachTestPlan(report);
 
   const html = `<!doctype html>
 <html lang="fr">
@@ -724,6 +822,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
 
     ${timelineReview}
     ${sandboxDecisionPanel}
+    ${multiScenarioCoachTestPlan}
 
     <section>
       <h2>Diagnostic tactique</h2>
