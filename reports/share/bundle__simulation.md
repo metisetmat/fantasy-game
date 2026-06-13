@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 3Z - Coach Report UX Cleanup & Encoding Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4A - Multi-Scenario Coach Test Plan. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -196,6 +196,8 @@ import { sandboxDecisionEvidenceCalibrationFromPanel } from "./fullMatch/sandbox
 import type { SandboxDecisionEvidenceCalibrationModel } from "./fullMatch/sandboxDecisionEvidenceCalibration";
 import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./fullMatch/sandboxDecisionBatchConfidenceCalibrationFromEvidence";
 import type { SandboxDecisionBatchConfidenceCalibrationModel } from "./fullMatch/sandboxDecisionBatchConfidenceCalibration";
+import { multiScenarioCoachTestPlanFromBatch } from "./fullMatch/multiScenarioCoachTestPlanFromBatch";
+import type { MultiScenarioCoachTestPlanModel } from "./fullMatch/multiScenarioCoachTestPlan";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -1011,6 +1013,31 @@ function sandboxDecisionBatchConfidenceCalibrationModelLimitations(
     "FULLMATCH_SANDBOX_DECISION_BATCH_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
     "FULLMATCH_SANDBOX_DECISION_BATCH_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
     "FULLMATCH_SANDBOX_DECISION_BATCH_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
+  ];
+}
+
+function multiScenarioCoachTestPlanModelLimitations(model: MultiScenarioCoachTestPlanModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_EXPERIMENTAL",
+    `FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_STATUS_${model.status.toUpperCase()}`,
+    `FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_TEST_COUNT_${model.testCount}`,
+    `FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_BATCH_CONFIDENCE_${model.batchConfidence.toUpperCase()}`,
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_SUGGESTION_ONLY",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_CANNOT_DRIVE_COACH_INSTRUCTION",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_CANNOT_DRIVE_LIVE_SELECTION",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_DID_NOT_MUTATE_OFFICIAL_TIMELINE",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_DID_NOT_MUTATE_OFFICIAL_POSSESSION",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_DID_NOT_MUTATE_OFFICIAL_SCORE",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULL_MATCH_BATCH_ECONOMY_REMAINS_ONLY_GLOBAL_ECONOMY_PROOF",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
 }
@@ -2523,6 +2550,48 @@ function sandboxDecisionBatchConfidenceCalibrationFact(input: {
   };
 }
 
+function multiScenarioCoachTestPlanFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: MultiScenarioCoachTestPlanModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-multi-scenario-coach-test-plan`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: ["Z4-HSR", "Z3-HSR"],
+    summary:
+      `Multi-scenario coach test plan ${input.model.status}: origin=${input.model.origin}, ` +
+      `testCount=${input.model.testCount}, testIds=${input.model.tests.map((test) => test.testId).join("|")}, ` +
+      `linkedScenarioIds=${input.model.tests.map((test) => test.linkedScenarioId).join("|")}, ` +
+      `batchConfidence=${input.model.batchConfidence}, recommendationStability=${input.model.recommendationStability}, ` +
+      `suggestionOnly=${input.model.planSuggestionOnly}, officialTruth=${input.model.officialTruth}, ` +
+      `canDriveCoachInstruction=${input.model.canDriveCoachInstruction}, canDriveLiveSelection=${input.model.canDriveLiveSelection}, ` +
+      `canDriveProductionRouteResolution=${input.model.canDriveProductionRouteResolution}, ` +
+      `officialTimelineUnchanged=${input.model.officialTimelineUnchanged}, officialScoreUnchanged=${input.model.officialScoreUnchanged}, ` +
+      `officialPossessionUnchanged=${input.model.officialPossessionUnchanged}, officialScoringEventsUnchanged=${input.model.officialScoringEventsUnchanged}, ` +
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+    confidence: input.model.batchConfidence === "medium" ? "medium" : "low",
+    strength: input.model.status === "available" ? 55 : 25,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_multi_scenario_coach_test_plan",
+      ...(input.model.chainId === undefined ? [] : [`multi_scenario_test_plan_chain_id_${input.model.chainId}`]),
+      ...input.model.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
@@ -2552,6 +2621,7 @@ function withFullMatchGroundingDiagnosis(
   sandboxDecisionPanelModel: SandboxDecisionPanelModel,
   sandboxDecisionEvidenceCalibrationModel: SandboxDecisionEvidenceCalibrationModel,
   sandboxDecisionBatchConfidenceCalibrationModel: SandboxDecisionBatchConfidenceCalibrationModel,
+  multiScenarioCoachTestPlanModel: MultiScenarioCoachTestPlanModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2581,7 +2651,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_coach_facing_timeline_review") ||
     fact.internalTags.includes("workbench_chain_sandbox_decision_panel") ||
     fact.internalTags.includes("workbench_chain_sandbox_decision_evidence_calibration") ||
-    fact.internalTags.includes("workbench_chain_sandbox_decision_batch_confidence_calibration")
+    fact.internalTags.includes("workbench_chain_sandbox_decision_batch_confidence_calibration") ||
+    fact.internalTags.includes("workbench_chain_multi_scenario_coach_test_plan")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2626,10 +2697,13 @@ function withFullMatchGroundingDiagnosis(
   const sandboxDecisionBatchConfidenceSummary = sandboxDecisionBatchConfidenceCalibrationModel.status === "not_available"
     ? ""
     : ` Le batch local de confiance sandbox teste ${sandboxDecisionBatchConfidenceCalibrationModel.scenarioCount} scenarios autour de la meme suggestion : score moyen ${sandboxDecisionBatchConfidenceCalibrationModel.averageEvidenceScore}/100, min ${sandboxDecisionBatchConfidenceCalibrationModel.minEvidenceScore}, max ${sandboxDecisionBatchConfidenceCalibrationModel.maxEvidenceScore}, confiance ${sandboxDecisionBatchConfidenceCalibrationModel.batchConfidenceLabel}. Il reste local, explicatif et plafonne : aucune selection live, aucune resolution production, aucune mutation officielle et aucune preuve d'economie globale.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}`;
+  const multiScenarioCoachTestPlanSummary = multiScenarioCoachTestPlanModel.status === "not_available"
+    ? ""
+    : ` Le plan de test coach multi-scenarios transforme le batch local en ${multiScenarioCoachTestPlanModel.testCount} tests pratiques : ${multiScenarioCoachTestPlanModel.tests.map((test) => test.title).join(", ")}. Il reste une hypothese sandbox, pas une consigne officielle : aucune instruction obligatoire, aucune selection live, aucune resolution production, aucune mutation officielle et aucune preuve d'economie globale.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
-    : "La lecture timeline officielle vs sandbox et le panneau de decision sandbox sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. La calibration d'evidence affiche une confiance faible, car la piste cree du danger mais ne marque pas, le gardien repond et l'equipe du gardien securise le ballon ; ce n'est pas une preuve d'economie globale. Le batch local multi-scenarios teste cette meme piste dans des variations de soutien, gardien, fatigue et second ballon ; il reste une aide de lecture, pas une consigne officielle ni une preuve d'economie globale. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only, panneau de decision sandbox, calibration d'evidence et batch de confiance restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
+    : "La lecture timeline officielle vs sandbox, le panneau de decision sandbox et le plan de test coach sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. La calibration d'evidence affiche une confiance faible, car la piste cree du danger mais ne marque pas, le gardien repond et l'equipe du gardien securise le ballon ; ce n'est pas une preuve d'economie globale. Le batch local multi-scenarios teste cette meme piste dans des variations de soutien, gardien, fatigue et second ballon ; il reste une aide de lecture, pas une consigne officielle ni une preuve d'economie globale. Le plan de test coach transforme ce batch local en hypotheses pratiques : renforcer le soutien autour de Z4-HSR, mieux occuper le second ballon et prevoir une reponse si le gardien adverse gagne la sequence. Ces tests restent suggestifs, ne pilotent pas la selection live, ne pilotent pas la resolution de route production, ne modifient pas la timeline officielle, la possession officielle, le score officiel ou les evenements de score officiels, et ne prouvent aucune economie globale. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only, panneau de decision sandbox, calibration d'evidence, batch de confiance et plan de test coach restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -2876,6 +2950,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const sandboxDecisionBatchConfidenceCalibrationModel = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
     calibration: sandboxDecisionEvidenceCalibrationModel,
   });
+  const multiScenarioCoachTestPlanModel = multiScenarioCoachTestPlanFromBatch({
+    batchCalibration: sandboxDecisionBatchConfidenceCalibrationModel,
+  });
 
   const report = buildMatchReport({
     matchInput: input,
@@ -2921,6 +2998,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...sandboxDecisionPanelModelLimitations(sandboxDecisionPanelModel),
       ...sandboxDecisionEvidenceCalibrationModelLimitations(sandboxDecisionEvidenceCalibrationModel),
       ...sandboxDecisionBatchConfidenceCalibrationModelLimitations(sandboxDecisionBatchConfidenceCalibrationModel),
+      ...multiScenarioCoachTestPlanModelLimitations(multiScenarioCoachTestPlanModel),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -3053,6 +3131,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: sandboxDecisionBatchConfidenceCalibrationModel,
   });
+  const multiScenarioCoachTestPlanModelFact = multiScenarioCoachTestPlanFact({
+    report,
+    matchInput: input,
+    model: multiScenarioCoachTestPlanModel,
+  });
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3080,6 +3163,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(sandboxDecisionPanelModelFact === null ? [] : [sandboxDecisionPanelModelFact]),
     ...(sandboxDecisionEvidenceCalibrationModelFact === null ? [] : [sandboxDecisionEvidenceCalibrationModelFact]),
     ...(sandboxDecisionBatchConfidenceCalibrationModelFact === null ? [] : [sandboxDecisionBatchConfidenceCalibrationModelFact]),
+    ...(multiScenarioCoachTestPlanModelFact === null ? [] : [multiScenarioCoachTestPlanModelFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
@@ -3117,6 +3201,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     sandboxDecisionPanelModel,
     sandboxDecisionEvidenceCalibrationModel,
     sandboxDecisionBatchConfidenceCalibrationModel,
+    multiScenarioCoachTestPlanModel,
   );
 }
 ```
@@ -19945,6 +20030,400 @@ export function sandboxDecisionBatchConfidenceCalibrationFromEvidence(input: {
 }
 ```
 
+## File: src/simulation/fullMatch/multiScenarioCoachTestPlan.ts
+
+```ts
+import type {
+  SandboxDecisionBatchConfidence,
+  SandboxDecisionBatchConfidenceCalibrationModel,
+} from "./sandboxDecisionBatchConfidenceCalibration";
+
+export type MultiScenarioCoachTestPlanStatus =
+  | "not_available"
+  | "available"
+  | "blocked"
+  | "partial"
+  | "failed";
+
+export type MultiScenarioCoachTestPlanOrigin =
+  | "none"
+  | "sandbox_decision_batch_confidence_calibration";
+
+export type MultiScenarioCoachTestId =
+  | "support_around_z4_hsr"
+  | "second_ball_occupation"
+  | "strong_goalkeeper_fallback";
+
+export type MultiScenarioCoachTestConfidence =
+  | "low"
+  | "low_medium"
+  | "medium";
+
+export type MultiScenarioCoachTest = {
+  readonly testId: MultiScenarioCoachTestId;
+  readonly title: string;
+  readonly summary: string;
+  readonly linkedScenarioId: string;
+  readonly linkedScenarioType: string;
+  readonly expectedPositiveSignal: string;
+  readonly riskToWatch: string;
+  readonly remainsUnproven: string;
+  readonly confidence: MultiScenarioCoachTestConfidence;
+  readonly suggestionOnly: true;
+  readonly officialTruth: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canClaimGlobalEconomy: false;
+};
+
+export type MultiScenarioCoachTestPlanModel = {
+  readonly status: MultiScenarioCoachTestPlanStatus;
+  readonly origin: MultiScenarioCoachTestPlanOrigin;
+  readonly segmentLabel?: string;
+  readonly chainId?: string;
+  readonly title: "Plan de test coach";
+  readonly summary: string;
+  readonly recommendationType: string;
+  readonly batchConfidence: string;
+  readonly recommendationStability: SandboxDecisionBatchConfidenceCalibrationModel["recommendationStability"];
+  readonly testCount: number;
+  readonly tests: readonly MultiScenarioCoachTest[];
+  readonly bestScenarioId?: string;
+  readonly worstScenarioId?: string;
+  readonly planSuggestionOnly: true;
+  readonly officialTruth: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly officialTimelineUnchanged: true;
+  readonly officialScoreUnchanged: true;
+  readonly officialPossessionUnchanged: true;
+  readonly officialScoringEventsUnchanged: true;
+  readonly diagnosticOnly: true;
+  readonly modelAppliedOnlyInSandbox: true;
+  readonly modelAppliedToNormalLiveSelection: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+function cappedConfidence(confidence: SandboxDecisionBatchConfidence): MultiScenarioCoachTestConfidence {
+  switch (confidence) {
+    case "medium":
+      return "medium";
+    case "low_medium":
+      return "low_medium";
+    case "very_low":
+    case "low":
+      return "low";
+  }
+}
+
+export function multiScenarioCoachTestPlanCannotMutateOfficialFullMatch(
+  model: MultiScenarioCoachTestPlanModel,
+): boolean {
+  return (
+    model.officialTimelineUnchanged &&
+    model.officialScoreUnchanged &&
+    model.officialPossessionUnchanged &&
+    model.officialScoringEventsUnchanged &&
+    !model.canCreateProductionScoringEvents
+  );
+}
+
+export function multiScenarioCoachTestPlanCannotDriveProduction(
+  model: MultiScenarioCoachTestPlanModel,
+): boolean {
+  return (
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    !model.modelAppliedToNormalLiveSelection
+  );
+}
+
+export function multiScenarioCoachTestPlanCannotClaimGlobalEconomy(
+  model: MultiScenarioCoachTestPlanModel,
+): boolean {
+  return !model.canClaimGlobalEconomy;
+}
+
+export function emptyMultiScenarioCoachTestPlan(input: {
+  readonly batchCalibration: SandboxDecisionBatchConfidenceCalibrationModel;
+  readonly warnings: readonly string[];
+}): MultiScenarioCoachTestPlanModel {
+  return {
+    status: "not_available",
+    origin: "none",
+    ...(input.batchCalibration.segmentLabel === undefined ? {} : { segmentLabel: input.batchCalibration.segmentLabel }),
+    ...(input.batchCalibration.chainId === undefined ? {} : { chainId: input.batchCalibration.chainId }),
+    title: "Plan de test coach",
+    summary: "Plan de test coach indisponible : le batch sandbox local n'est pas disponible.",
+    recommendationType: input.batchCalibration.recommendationType,
+    batchConfidence: cappedConfidence(input.batchCalibration.batchConfidence),
+    recommendationStability: input.batchCalibration.recommendationStability,
+    testCount: 0,
+    tests: [],
+    ...(input.batchCalibration.bestScenarioId === undefined ? {} : { bestScenarioId: input.batchCalibration.bestScenarioId }),
+    ...(input.batchCalibration.worstScenarioId === undefined ? {} : { worstScenarioId: input.batchCalibration.worstScenarioId }),
+    planSuggestionOnly: true,
+    officialTruth: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    officialTimelineUnchanged: true,
+    officialScoreUnchanged: true,
+    officialPossessionUnchanged: true,
+    officialScoringEventsUnchanged: true,
+    diagnosticOnly: true,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    tags: [],
+    warnings: input.warnings,
+  };
+}
+
+export function validateMultiScenarioCoachTestPlanModel(
+  model: MultiScenarioCoachTestPlanModel,
+): readonly string[] {
+  const shouldValidate = model.status === "available";
+
+  return [
+    ...(shouldValidate && model.origin !== "sandbox_decision_batch_confidence_calibration"
+      ? ["MULTI_SCENARIO_COACH_TEST_PLAN_WRONG_ORIGIN"]
+      : []),
+    ...(shouldValidate && (model.testCount < 2 || model.testCount > 3)
+      ? ["MULTI_SCENARIO_COACH_TEST_PLAN_COUNT_OUT_OF_RANGE"]
+      : []),
+    ...(shouldValidate && model.tests.some((test) =>
+      !test.suggestionOnly ||
+      test.officialTruth ||
+      test.canDriveCoachInstruction ||
+      test.canDriveLiveSelection ||
+      test.canDriveProductionRouteResolution ||
+      test.canClaimGlobalEconomy
+    )
+      ? ["MULTI_SCENARIO_COACH_TEST_PLAN_TEST_GUARD_BREACH"]
+      : []),
+    ...(!multiScenarioCoachTestPlanCannotMutateOfficialFullMatch(model)
+      ? ["MULTI_SCENARIO_COACH_TEST_PLAN_MUTATION_FORBIDDEN_BREACH"]
+      : []),
+    ...(!multiScenarioCoachTestPlanCannotDriveProduction(model)
+      ? ["MULTI_SCENARIO_COACH_TEST_PLAN_PRODUCTION_DRIVER_BREACH"]
+      : []),
+    ...(!multiScenarioCoachTestPlanCannotClaimGlobalEconomy(model)
+      ? ["MULTI_SCENARIO_COACH_TEST_PLAN_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+  ];
+}
+```
+
+## File: src/simulation/fullMatch/multiScenarioCoachTestPlanFromBatch.ts
+
+```ts
+import {
+  emptyMultiScenarioCoachTestPlan,
+  validateMultiScenarioCoachTestPlanModel,
+  type MultiScenarioCoachTest,
+  type MultiScenarioCoachTestConfidence,
+  type MultiScenarioCoachTestPlanModel,
+} from "./multiScenarioCoachTestPlan";
+import type {
+  SandboxDecisionBatchConfidence,
+  SandboxDecisionBatchConfidenceCalibrationModel,
+  SandboxDecisionBatchScenarioResult,
+} from "./sandboxDecisionBatchConfidenceCalibration";
+
+function confidenceFromBatch(confidence: SandboxDecisionBatchConfidence): MultiScenarioCoachTestConfidence {
+  switch (confidence) {
+    case "medium":
+      return "medium";
+    case "low_medium":
+      return "low_medium";
+    case "very_low":
+    case "low":
+      return "low";
+  }
+}
+
+function scenarioById(
+  batch: SandboxDecisionBatchConfidenceCalibrationModel,
+  scenarioId: string | undefined,
+): SandboxDecisionBatchScenarioResult | undefined {
+  if (scenarioId === undefined) {
+    return undefined;
+  }
+
+  return batch.scenarioResults.find((scenario) => scenario.scenarioId === scenarioId);
+}
+
+function scenarioByType(
+  batch: SandboxDecisionBatchConfidenceCalibrationModel,
+  scenarioType: SandboxDecisionBatchScenarioResult["scenarioType"],
+): SandboxDecisionBatchScenarioResult | undefined {
+  return batch.scenarioResults.find((scenario) => scenario.scenarioType === scenarioType);
+}
+
+function testGuard(input: Omit<
+  MultiScenarioCoachTest,
+  "suggestionOnly" | "officialTruth" | "canDriveCoachInstruction" | "canDriveLiveSelection" |
+  "canDriveProductionRouteResolution" | "canClaimGlobalEconomy"
+>): MultiScenarioCoachTest {
+  return {
+    ...input,
+    suggestionOnly: true,
+    officialTruth: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+  };
+}
+
+function buildTests(input: {
+  readonly batch: SandboxDecisionBatchConfidenceCalibrationModel;
+  readonly confidence: MultiScenarioCoachTestConfidence;
+}): readonly MultiScenarioCoachTest[] {
+  const bestScenario = scenarioById(input.batch, input.batch.bestScenarioId);
+  const reboundScenario = scenarioByType(input.batch, "better_attacking_rebound_pressure");
+  const worstScenario = scenarioById(input.batch, input.batch.worstScenarioId);
+  const tests: MultiScenarioCoachTest[] = [];
+
+  if (bestScenario !== undefined) {
+    tests.push(testGuard({
+      testId: "support_around_z4_hsr",
+      title: "Renforcer le soutien autour de Z4-HSR",
+      summary:
+        "Tester FORWARD_PROGRESS vers control-space-hunter avec un soutien plus proche autour de Z4-HSR. Le scénario avec meilleur soutien offensif est celui qui améliore le plus la piste, mais le signal reste local et ne prouve pas encore que la route est supérieure.",
+      linkedScenarioId: bestScenario.scenarioId,
+      linkedScenarioType: bestScenario.scenarioType,
+      expectedPositiveSignal: "better continuation after shot / better second-ball presence",
+      riskToWatch: "isolated shot if support arrives late",
+      remainsUnproven: "Le batch sandbox ne prouve pas encore que cette route est supérieure dans l'économie officielle.",
+      confidence: input.confidence === "medium" ? "low_medium" : input.confidence,
+    }));
+  }
+
+  if (reboundScenario !== undefined) {
+    tests.push(testGuard({
+      testId: "second_ball_occupation",
+      title: "Mieux occuper le second ballon",
+      summary:
+        "Tester une présence plus agressive autour du rebond après tir. Le but est de vérifier si CONTROL peut transformer une parade du gardien en seconde action plutôt qu'en récupération propre par BLITZ.",
+      linkedScenarioId: reboundScenario.scenarioId,
+      linkedScenarioType: reboundScenario.scenarioType,
+      expectedPositiveSignal: "second chance probability improves",
+      riskToWatch: "overcommitting and exposing rest defense",
+      remainsUnproven: "Le modèle ne prouve pas encore que l'engagement au rebond reste sûr contre une transition adverse.",
+      confidence: input.confidence === "medium" ? "low_medium" : input.confidence,
+    }));
+  }
+
+  if (worstScenario !== undefined) {
+    tests.push(testGuard({
+      testId: "strong_goalkeeper_fallback",
+      title: "Prévoir la réaction au gardien fort",
+      summary:
+        "Tester un plan B si le gardien adverse gagne la séquence. Le scénario avec gardien plus fort fait chuter la confiance : la progression peut créer du danger, mais finir en récupération adverse.",
+      linkedScenarioId: worstScenario.scenarioId,
+      linkedScenarioType: worstScenario.scenarioType,
+      expectedPositiveSignal: "safer continuation or better pressure after save",
+      riskToWatch: "stronger goalkeeper neutralizes the attack",
+      remainsUnproven: "La meilleure réponse au gardien fort reste une hypothèse locale, pas une consigne officielle.",
+      confidence: "low",
+    }));
+  }
+
+  return tests.slice(0, 3);
+}
+
+export function multiScenarioCoachTestPlanFromBatch(input: {
+  readonly batchCalibration: SandboxDecisionBatchConfidenceCalibrationModel;
+}): MultiScenarioCoachTestPlanModel {
+  if (input.batchCalibration.status !== "available") {
+    return emptyMultiScenarioCoachTestPlan({
+      batchCalibration: input.batchCalibration,
+      warnings: input.batchCalibration.warnings,
+    });
+  }
+
+  const confidence = confidenceFromBatch(input.batchCalibration.batchConfidence);
+  const tests = buildTests({
+    batch: input.batchCalibration,
+    confidence,
+  });
+  const model: MultiScenarioCoachTestPlanModel = {
+    status: tests.length >= 2 ? "available" : "partial",
+    origin: "sandbox_decision_batch_confidence_calibration",
+    ...(input.batchCalibration.segmentLabel === undefined ? {} : { segmentLabel: input.batchCalibration.segmentLabel }),
+    ...(input.batchCalibration.chainId === undefined ? {} : { chainId: input.batchCalibration.chainId }),
+    title: "Plan de test coach",
+    summary:
+      "Ces tests sont des hypothèses issues du sandbox, pas des consignes officielles. Ils transforment le batch local en questions coach concrètes sans modifier le match officiel.",
+    recommendationType: input.batchCalibration.recommendationType,
+    batchConfidence: confidence,
+    recommendationStability: input.batchCalibration.recommendationStability,
+    testCount: tests.length,
+    tests,
+    ...(input.batchCalibration.bestScenarioId === undefined ? {} : { bestScenarioId: input.batchCalibration.bestScenarioId }),
+    ...(input.batchCalibration.worstScenarioId === undefined ? {} : { worstScenarioId: input.batchCalibration.worstScenarioId }),
+    planSuggestionOnly: true,
+    officialTruth: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canCreateProductionScoringEvents: false,
+    canClaimGlobalEconomy: false,
+    officialTimelineUnchanged: true,
+    officialScoreUnchanged: true,
+    officialPossessionUnchanged: true,
+    officialScoringEventsUnchanged: true,
+    diagnosticOnly: true,
+    modelAppliedOnlyInSandbox: true,
+    modelAppliedToNormalLiveSelection: false,
+    tags: [
+      "multi_scenario_coach_test_plan",
+      `multi_scenario_coach_test_plan_status_${tests.length >= 2 ? "available" : "partial"}`,
+      "multi_scenario_coach_test_plan_origin_batch_confidence",
+      `multi_scenario_coach_test_count_${tests.length}`,
+      ...tests.map((test) => `multi_scenario_test_${test.testId}`),
+      ...tests.map((test) => `multi_scenario_test_${test.testId}_scenario_${test.linkedScenarioId}`),
+      ...tests.map((test) => `multi_scenario_test_${test.testId}_confidence_${test.confidence}`),
+      ...(input.batchCalibration.bestScenarioId === undefined ? [] : [`multi_scenario_test_plan_best_scenario_${input.batchCalibration.bestScenarioId}`]),
+      ...(input.batchCalibration.worstScenarioId === undefined ? [] : [`multi_scenario_test_plan_worst_scenario_${input.batchCalibration.worstScenarioId}`]),
+      `multi_scenario_test_plan_batch_confidence_${confidence}`,
+      `multi_scenario_test_plan_stability_${input.batchCalibration.recommendationStability}`,
+      "multi_scenario_test_plan_suggestion_only_true",
+      "multi_scenario_test_plan_official_truth_false",
+      "multi_scenario_test_plan_can_drive_live_selection_false",
+      "multi_scenario_test_plan_can_drive_production_route_resolution_false",
+      "multi_scenario_test_plan_global_economy_claim_forbidden",
+      "multi_scenario_test_plan_production_scoring_event_creation_count_0",
+      "multi_scenario_test_plan_official_timeline_unchanged_true",
+      "multi_scenario_test_plan_official_score_unchanged_true",
+      "multi_scenario_test_plan_official_possession_unchanged_true",
+      "multi_scenario_test_plan_official_scoring_events_unchanged_true",
+    ],
+    warnings: input.batchCalibration.warnings,
+  };
+  const warnings = validateMultiScenarioCoachTestPlanModel(model);
+
+  if (warnings.length === 0) {
+    return model;
+  }
+
+  return {
+    ...model,
+    status: "failed",
+    warnings: [...model.warnings, ...warnings],
+  };
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -30453,6 +30932,243 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/multiScenarioCoachTestPlanFromBatch.test.ts
+
+```ts
+import { sandboxDecisionEvidenceCalibrationFixture } from "./sandboxDecisionBatchConfidenceTestHelpers";
+import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./sandboxDecisionBatchConfidenceCalibrationFromEvidence";
+import {
+  multiScenarioCoachTestPlanCannotClaimGlobalEconomy,
+  multiScenarioCoachTestPlanCannotDriveProduction,
+  multiScenarioCoachTestPlanCannotMutateOfficialFullMatch,
+} from "./multiScenarioCoachTestPlan";
+import { multiScenarioCoachTestPlanFromBatch } from "./multiScenarioCoachTestPlanFromBatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMultiScenarioCoachTestPlanFromBatch(): readonly string[] {
+  const unavailableBatch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: {
+      ...sandboxDecisionEvidenceCalibrationFixture(),
+      status: "not_available",
+    },
+  });
+  const unavailablePlan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: unavailableBatch });
+  const batch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: sandboxDecisionEvidenceCalibrationFixture(),
+  });
+  const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
+  const testIds = new Set(plan.tests.map((test) => test.testId));
+  const scenarioIds = new Set(plan.tests.map((test) => test.linkedScenarioId));
+
+  assertTest(unavailablePlan.status === "not_available", "not_available batch must return not_available plan.");
+  assertTest(plan.status === "available", "available batch must return available plan.");
+  assertTest(plan.testCount >= 2 && plan.testCount <= 3, "plan must have 2 or 3 tests.");
+  assertTest(plan.testCount === 3, "current fixture must have 3 tests.");
+  assertTest(testIds.has("support_around_z4_hsr"), "support around Z4-HSR test must be present.");
+  assertTest(testIds.has("second_ball_occupation"), "second-ball occupation test must be present.");
+  assertTest(testIds.has("strong_goalkeeper_fallback"), "strong-goalkeeper fallback test must be present.");
+  assertTest(batch.bestScenarioId !== undefined && scenarioIds.has(batch.bestScenarioId), "linked best scenario must be used.");
+  assertTest(batch.worstScenarioId !== undefined && scenarioIds.has(batch.worstScenarioId), "linked worst scenario must be used.");
+  assertTest(plan.planSuggestionOnly, "plan must be suggestion-only.");
+  assertTest(!plan.officialTruth, "plan must not be official truth.");
+  assertTest(!plan.canDriveCoachInstruction, "plan cannot drive coach instruction.");
+  assertTest(!plan.canDriveLiveSelection, "plan cannot drive live selection.");
+  assertTest(!plan.canDriveProductionRouteResolution, "plan cannot drive production route resolution.");
+  assertTest(!plan.canCreateProductionScoringEvents, "plan cannot create production scoring events.");
+  assertTest(!plan.canClaimGlobalEconomy, "plan cannot claim global economy.");
+  assertTest(multiScenarioCoachTestPlanCannotMutateOfficialFullMatch(plan), "plan mutation guard must pass.");
+  assertTest(multiScenarioCoachTestPlanCannotDriveProduction(plan), "plan production driver guard must pass.");
+  assertTest(multiScenarioCoachTestPlanCannotClaimGlobalEconomy(plan), "plan global economy guard must pass.");
+
+  return [
+    "not_available batch returns not_available plan",
+    "available batch returns available plan",
+    "current fixture has 3 coach tests",
+    "support around Z4-HSR, second-ball occupation, and goalkeeper fallback tests are present",
+    "best and worst scenarios are linked",
+    "plan remains suggestion-only and cannot drive production",
+    "plan cannot mutate official match state or claim global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMultiScenarioCoachTestPlanFromBatch();
+
+  console.log("multiScenarioCoachTestPlanFromBatch tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/multiScenarioCoachTestPlanGuard.test.ts
+
+```ts
+import { sandboxDecisionEvidenceCalibrationFixture } from "./sandboxDecisionBatchConfidenceTestHelpers";
+import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./sandboxDecisionBatchConfidenceCalibrationFromEvidence";
+import {
+  multiScenarioCoachTestPlanCannotClaimGlobalEconomy,
+  multiScenarioCoachTestPlanCannotDriveProduction,
+  multiScenarioCoachTestPlanCannotMutateOfficialFullMatch,
+} from "./multiScenarioCoachTestPlan";
+import { multiScenarioCoachTestPlanFromBatch } from "./multiScenarioCoachTestPlanFromBatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMultiScenarioCoachTestPlanGuard(): readonly string[] {
+  const batch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: sandboxDecisionEvidenceCalibrationFixture(),
+  });
+  const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
+
+  assertTest(plan.status === "available", "coach test plan must be available.");
+  assertTest(plan.officialTimelineUnchanged, "plan cannot mutate official timeline.");
+  assertTest(plan.officialScoreUnchanged, "plan cannot mutate official score.");
+  assertTest(plan.officialPossessionUnchanged, "plan cannot mutate official possession.");
+  assertTest(plan.officialScoringEventsUnchanged, "plan cannot mutate official scoring events.");
+  assertTest(!plan.canCreateProductionScoringEvents, "plan cannot create production scoring events.");
+  assertTest(!plan.canClaimGlobalEconomy, "plan cannot claim global economy.");
+  assertTest(!plan.canDriveCoachInstruction, "plan cannot become mandatory coach instruction.");
+  assertTest(!plan.canDriveLiveSelection, "plan cannot drive live selection.");
+  assertTest(!plan.canDriveProductionRouteResolution, "plan cannot drive production route resolution.");
+  assertTest(multiScenarioCoachTestPlanCannotMutateOfficialFullMatch(plan), "official mutation guard must pass.");
+  assertTest(multiScenarioCoachTestPlanCannotDriveProduction(plan), "production driver guard must pass.");
+  assertTest(multiScenarioCoachTestPlanCannotClaimGlobalEconomy(plan), "global economy guard must pass.");
+
+  return [
+    "plan cannot mutate official timeline, score, possession, or scoring events",
+    "plan cannot create production scoring events",
+    "plan cannot claim global economy",
+    "plan cannot drive live selection or production route resolution",
+    "plan cannot become mandatory coach instruction",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMultiScenarioCoachTestPlanGuard();
+
+  console.log("multiScenarioCoachTestPlanGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/diagnostics/sourceOfTruthGuards.4a.test.ts
+
+```ts
+import { assertCanMakeGlobalScoringEconomyClaim } from "./sourceOfTruthGuards";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSourceOfTruthGuards4A(): readonly string[] {
+  try {
+    assertCanMakeGlobalScoringEconomyClaim("WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN");
+  } catch (error) {
+    const rejection = error instanceof Error ? error.message : String(error);
+
+    assertTest(rejection.includes("50-match economy"), "rejection must name the 50-match economy source.");
+    assertTest(rejection.includes("single runFullMatch harness output"), "rejection must mention single-run limits.");
+
+    return [
+      "multi-scenario coach test plan cannot make global economy claims",
+      "FULL_MATCH_BATCH_ECONOMY remains the only global economy proof",
+    ];
+  }
+
+  throw new Error("WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN must not make global economy claims.");
+}
+
+if (require.main === module) {
+  const checks = validateSourceOfTruthGuards4A();
+
+  console.log("sourceOfTruthGuards.4a tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4a.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4A(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const planFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "official timeline event count delta must be zero.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "official scoring event count delta must be zero.");
+  assertTest(signature.officialScoreDelta === 0, "official score delta must be zero.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "coach test plan must not create production scoring events.");
+  assertTest(planFact !== undefined, "multi-scenario coach test plan evidence must exist.");
+  assertTest(planFact?.internalTags.includes("multi_scenario_test_plan_suggestion_only_true") ?? false, "plan must remain suggestion-only.");
+  assertTest(planFact?.internalTags.includes("multi_scenario_test_plan_can_drive_live_selection_false") ?? false, "plan must not drive live selection.");
+  assertTest(planFact?.internalTags.includes("multi_scenario_test_plan_can_drive_production_route_resolution_false") ?? false, "plan must not drive production route resolution.");
+  assertTest(report.reportMeta.limitations.includes("FULLMATCH_MULTI_SCENARIO_COACH_TEST_PLAN_CANNOT_DRIVE_LIVE_SELECTION"), "limitations must mark plan live-selection-forbidden.");
+
+  return [
+    "scoring constants unchanged",
+    "official final score still derives only from official score_change",
+    "no production scoring events deleted/capped/rewritten/fabricated",
+    "multi-scenario coach test plan creates no production scoring events",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4A();
+
+  console.log("scoringGuard.4a tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -38386,6 +39102,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
       return "training_recommendation";
   }
 }
@@ -38460,6 +39177,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Calibration d'evidence du panneau sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
       return "Confiance multi-scenarios du sandbox";
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
+      return "Plan de test coach multi-scenarios";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -38537,6 +39256,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -38581,6 +39301,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
     "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
     "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION",
+    "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -39730,6 +40451,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 28;
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
       return 27;
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
+      return 26;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -39814,6 +40537,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la confiance de l'option coach sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
       return "Relire la confiance multi-scenarios de l'option sandbox";
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
+      return "Relire le plan de test coach multi-scenarios";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -41090,7 +41815,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
+  | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -41883,6 +42609,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "team-wide tactical superiority",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN: {
+    scope: "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
+    canProve: [
+      "local sandbox batch results can be translated into practical coach test hypotheses",
+      "each test remains linked to a local sandbox scenario",
+      "coach-facing wording can stay suggestive and non-official",
+    ],
+    canSuggest: [
+      "which tactical test a coach might try next",
+      "what positive signal to watch",
+      "what risk remains visible",
+      "what remains unproven by the local sandbox batch",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "team-wide tactical superiority",
+      "that a coach must apply the test plan",
     ],
     cannotOverride: [
       "live score",

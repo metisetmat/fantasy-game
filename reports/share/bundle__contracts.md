@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3Z - Coach Report UX Cleanup & Encoding Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4A - Multi-Scenario Coach Test Plan. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -428,7 +428,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
+  | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-12T20:05:55.005Z
-Task/sprint: Sprint 3Z - Coach Report UX Cleanup & Encoding Fix
+Generated: 2026-06-13T06:16:07.029Z
+Task/sprint: Sprint 4A - Multi-Scenario Coach Test Plan
 Mode: MINIMAL_REVIEW
 Final file count: 18
 
@@ -20,8 +20,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-3z.md
-- validation.fullmatch-workbench-chain-replay-3z.md
+- fullmatch-workbench-chain-replay-4a.md
+- validation.fullmatch-workbench-chain-replay-4a.md
 - README.md
 
 ## Bundle Files

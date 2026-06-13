@@ -1,25 +1,28 @@
-# Sprint 3Z Share Pack
+# Sprint 4A Share Pack
 
-Mode: MINIMAL_REVIEW
-Current sprint: Sprint 3Z - Coach Report UX Cleanup & Encoding Fix
+Current sprint: Sprint 4A - Multi-Scenario Coach Test Plan
 
-## What to read first
+## Files to review first
 
-- fullmatch-workbench-chain-replay-3z.md
-- validation.fullmatch-workbench-chain-replay-3z.md
-- validation.share-pack.md
+- fullmatch-workbench-chain-replay-4a.md
+- validation.fullmatch-workbench-chain-replay-4a.md
 - coach-report.experimental.html
-- coach-report.default.html
+- validation.share-pack.md
 
-## Sprint boundary
+## Purpose
 
-Sprint 3Z fixes coach report readability only. It repairs visible UTF-8 copy, keeps technical diagnostics behind developer details, and preserves the default/experimental boundary. It does not change scoring values, official ScoringEvents, MatchBonusEvent, official possession, official timeline, production route resolution, default full-match mode, live selection, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
+Sprint 4A turns the local sandbox batch confidence result into a coach-facing test plan. The plan is visible only in experimental mode, contains three practical tests, and remains suggestive only. It does not change scoring values, official ScoringEvents, MatchBonusEvent, official possession, official timeline, production route resolution, default full-match mode, live selection, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
 
-## Review steps
+## Review order
 
-1. Read validation.share-pack.md first.
-2. Read fullmatch-workbench-chain-replay-3z.md.
-3. Inspect validation.fullmatch-workbench-chain-replay-3z.md.
-4. Open coach-report.experimental.html and verify Confiance multi-scénarios, Stabilité, and the em dash render correctly.
-5. Open coach-report.default.html and verify experimental sandbox sections are absent.
-6. Use bundle__reports.md for renderer and guard implementation details.
+1. Read validation.share-pack.md.
+2. Read fullmatch-workbench-chain-replay-4a.md.
+3. Inspect validation.fullmatch-workbench-chain-replay-4a.md.
+4. Open coach-report.experimental.html and verify Plan de test coach appears after the sandbox decision panel.
+5. Open coach-report.default.html and verify the plan is absent.
+
+## Expected recommendation
+
+- CONFIRM_BATCH_RESULTS_TO_COACH_TEST_PLAN.
+- CONFIRM_TEST_PLAN_REMAINS_SUGGESTIVE_ONLY.
+- PREPARE_COACH_TEST_PLAN_TO_SELECTION_PREVIEW.

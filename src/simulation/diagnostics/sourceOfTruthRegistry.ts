@@ -30,7 +30,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
-  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION";
+  | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
+  | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -823,6 +824,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "team-wide tactical superiority",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN: {
+    scope: "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
+    canProve: [
+      "local sandbox batch results can be translated into practical coach test hypotheses",
+      "each test remains linked to a local sandbox scenario",
+      "coach-facing wording can stay suggestive and non-official",
+    ],
+    canSuggest: [
+      "which tactical test a coach might try next",
+      "what positive signal to watch",
+      "what risk remains visible",
+      "what remains unproven by the local sandbox batch",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "team-wide tactical superiority",
+      "that a coach must apply the test plan",
     ],
     cannotOverride: [
       "live score",

@@ -230,6 +230,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay3YValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3y.md"));
   const fullMatchWorkbenchChainReplay3Z = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-3z.md"));
   const fullMatchWorkbenchChainReplay3ZValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-3z.md"));
+  const fullMatchWorkbenchChainReplay4A = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4a.md"));
+  const fullMatchWorkbenchChainReplay4AValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4a.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -2060,6 +2062,36 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "fullmatch-workbench-chain-replay-3u.md",
     "validation.fullmatch-workbench-chain-replay-3u.md",
   ];
+  const sprint4AExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4a.md",
+    "validation.fullmatch-workbench-chain-replay-4a.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4AForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-3z.md",
+    "validation.fullmatch-workbench-chain-replay-3z.md",
+    "fullmatch-workbench-chain-replay-3y.md",
+    "validation.fullmatch-workbench-chain-replay-3y.md",
+    "fullmatch-workbench-chain-replay-3x.md",
+    "validation.fullmatch-workbench-chain-replay-3x.md",
+    "fullmatch-workbench-chain-replay-3w.md",
+    "validation.fullmatch-workbench-chain-replay-3w.md",
+  ];
   const coachHtmlMojibakeMarkers = [
     "Ãƒ",
     "Ã‚",
@@ -2081,6 +2113,49 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "workbench_chain_",
   ];
   const coachExperimentalVisibleHtml = stripHtmlDetailsBlocks(coachExperimentalHtml);
+  const sprint4AChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4A", activeConfig.sprintName === "Sprint 4A - Multi-Scenario Coach Test Plan", "confirmed"),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4AExpectedFiles.every((file) => requiredCopied(file)), sprint4AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4AForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4AForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint4AExpectedFiles.every((file) => requiredCopied(file)), sprint4AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 4A", manifest.includes("Sprint 4A - Multi-Scenario Coach Test Plan") && detailedManifest.includes("Sprint 4A - Multi-Scenario Coach Test Plan"), "visible"),
+    check("README is Sprint 4A oriented", readme.includes("# Sprint 4A Share Pack") && readme.includes("fullmatch-workbench-chain-replay-4a.md"), "README current"),
+    check("4A report included", fullMatchWorkbenchChainReplay4A.includes("# FullMatch Workbench Chain Replay 4A") && fullMatchWorkbenchChainReplay4A.includes("Coach Test Plan"), "4A doc included"),
+    check("4A validation is PASS", fullMatchWorkbenchChainReplay4AValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay4AValidation.includes("multi-scenario coach test plan status is available"), "4A validation PASS"),
+    check("coach test plan is visible experimentally", coachExperimentalHtml.includes("Plan de test coach") && coachExperimentalHtml.includes("Renforcer le soutien autour de Z4-HSR") && coachExperimentalHtml.includes("Mieux occuper le second ballon") && coachExperimentalHtml.includes("Prévoir la réaction au gardien fort"), "experimental plan visible"),
+    check("default report has no coach test plan", !coachDefaultHtml.includes("Plan de test coach"), "default hidden"),
+    check("coach copy says hypotheses or suggestions", coachExperimentalHtml.includes("Ces tests sont des hypothèses issues du sandbox") && coachExperimentalHtml.includes("pas des consignes officielles"), "hypothesis wording visible"),
+    check("coach copy says official state unchanged", coachExperimentalHtml.includes("Ils ne modifient ni la timeline officielle, ni le score, ni la possession, ni les événements de score"), "official state unchanged"),
+    check("coach copy avoids global economy overclaim", coachExperimentalHtml.includes("Ils ne constituent pas une preuve d’économie globale"), "global economy boundary visible"),
+    check("experimental report contains no mojibake markers", !containsAny(coachExperimentalHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("visible coach copy avoids developer jargon", !containsAny(coachExperimentalVisibleHtml, visibleDeveloperJargon), "visible jargon count 0"),
+    check("technical plan details are collapsed", coachExperimentalHtml.includes("Détails techniques du plan de test") && coachExperimentalHtml.includes("multi_scenario_coach_test_plan") && !coachExperimentalVisibleHtml.includes("multi_scenario_coach_test_plan"), "details collapsed"),
+    check("coach test plan contract bundled", bundleSimulation.includes("multiScenarioCoachTestPlan.ts") && bundleSimulation.includes("MultiScenarioCoachTestPlanModel"), "4A contract bundled"),
+    check("coach test plan builder bundled", bundleSimulation.includes("multiScenarioCoachTestPlanFromBatch.ts") && bundleSimulation.includes("multiScenarioCoachTestPlanFromBatch"), "4A builder bundled"),
+    check("coach test plan tests bundled", bundleSimulation.includes("multiScenarioCoachTestPlanFromBatch.test.ts") && bundleSimulation.includes("multiScenarioCoachTestPlanGuard.test.ts") && bundleSimulation.includes("scoringGuard.4a.test.ts") && bundleSimulation.includes("sourceOfTruthGuards.4a.test.ts"), "4A tests bundled"),
+    check("coach test plan renderer test bundled", bundleReports.includes("coachReportMultiScenarioCoachTestPlan.test.ts") && bundleReports.includes("Plan de test coach"), "4A report test bundled"),
+    check("coach test plan evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN") && bundleSimulation.includes("WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"), "4A evidence category bundled"),
+    check("plan cannot drive coach instruction", fullMatchWorkbenchChainReplay4AValidation.includes("test plan cannot drive coach instruction") && bundleSimulation.includes("canDriveCoachInstruction: false"), "coach instruction forbidden"),
+    check("plan cannot drive live selection", fullMatchWorkbenchChainReplay4AValidation.includes("test plan cannot drive live selection") && bundleSimulation.includes("multi_scenario_test_plan_can_drive_live_selection_false"), "live selection forbidden"),
+    check("plan cannot drive production route resolution", fullMatchWorkbenchChainReplay4AValidation.includes("test plan cannot drive production route resolution") && bundleSimulation.includes("multi_scenario_test_plan_can_drive_production_route_resolution_false"), "production route forbidden"),
+    check("plan cannot create production scoring events", fullMatchWorkbenchChainReplay4AValidation.includes("test plan cannot create production scoring events") && bundleSimulation.includes("multi_scenario_test_plan_production_scoring_event_creation_count_0"), "production scoring event creation forbidden"),
+    check("plan cannot claim global economy", fullMatchWorkbenchChainReplay4AValidation.includes("test plan cannot claim global economy") && bundleSimulation.includes("multi_scenario_test_plan_global_economy_claim_forbidden"), "global economy forbidden"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4AValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4AValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4AValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4A.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay4A.includes("CONFIRM_BATCH_RESULTS_TO_COACH_TEST_PLAN") && fullMatchWorkbenchChainReplay4A.includes("PREPARE_COACH_TEST_PLAN_TO_SELECTION_PREVIEW"), "4A recommendations visible"),
+  ];
   const sprint3ZChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
     check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
@@ -4434,6 +4509,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4A - Multi-Scenario Coach Test Plan")
+      ? sprint4AChecks
     : activeConfig.sprintName.includes("Sprint 3Z - Coach Report UX Cleanup")
       ? sprint3ZChecks
     : activeConfig.sprintName.includes("Sprint 3Y - Batch Confidence Calibration")

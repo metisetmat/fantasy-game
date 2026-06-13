@@ -356,6 +356,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
       return "training_recommendation";
   }
 }
@@ -430,6 +431,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Calibration d'evidence du panneau sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
       return "Confiance multi-scenarios du sandbox";
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
+      return "Plan de test coach multi-scenarios";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -507,6 +510,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
+    case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -551,6 +555,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL",
     "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION",
     "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION",
+    "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
