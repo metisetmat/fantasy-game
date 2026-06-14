@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4D - Match Trace Aggregator. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4E - Coach Report V0 from Trace Aggregates. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -212,6 +212,12 @@ import {
   matchTraceAggregatorLimitations,
   type MatchTraceAggregateModel,
 } from "./tracing/matchTraceAggregator";
+import {
+  buildCoachReportFromTraceAggregates,
+  coachReportTraceV0EvidenceFact,
+  coachReportTraceV0Limitations,
+  type CoachReportTraceV0Model,
+} from "../reports/coachReportFromTraceAggregates";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -2718,6 +2724,7 @@ function withFullMatchGroundingDiagnosis(
   selectionPreviewModel: SelectionPreviewModel,
   matchTraceSpineModel: MatchTraceSpineModel,
   matchTraceAggregateModel: MatchTraceAggregateModel,
+  coachReportTraceV0Model: CoachReportTraceV0Model,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2751,7 +2758,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_multi_scenario_coach_test_plan") ||
     fact.internalTags.includes("workbench_chain_selection_preview") ||
     fact.internalTags.includes("workbench_chain_match_event_trace_spine") ||
-    fact.internalTags.includes("workbench_chain_match_trace_aggregator")
+    fact.internalTags.includes("workbench_chain_match_trace_aggregator") ||
+    fact.internalTags.includes("workbench_chain_coach_report_from_trace_aggregates")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2808,7 +2816,10 @@ function withFullMatchGroundingDiagnosis(
   const matchTraceAggregateSummary = matchTraceAggregateModel.status === "not_available"
     ? ""
     : ` Les agregats de traces separent ${matchTraceAggregateModel.official.deduplicatedTraceCount} traces officielles, ${matchTraceAggregateModel.diagnostic.deduplicatedTraceCount} traces diagnostiques et ${matchTraceAggregateModel.sandbox.deduplicatedTraceCount} traces sandbox, avec ${matchTraceAggregateModel.totalDuplicateTraceCount} doublons ecartes. La previsualisation de selection reste sandbox_only et sa confiance n'est pas relevee par l'agregateur.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}${selectionPreviewSummary}${matchTraceSummary}${matchTraceAggregateSummary}`;
+  const coachReportTraceV0Summary = coachReportTraceV0Model.status === "not_available"
+    ? ""
+    : ` Le rapport coach V0 depuis agregats officiels produit ${coachReportTraceV0Model.cardCount} cartes prudentes depuis ${coachReportTraceV0Model.officialAggregateTraceCount} traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la previsualisation de selection reste sandbox_only sans upgrade de confiance.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}${selectionPreviewSummary}${matchTraceSummary}${matchTraceAggregateSummary}${coachReportTraceV0Summary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
     : "La lecture timeline officielle vs sandbox, le panneau de decision sandbox et le plan de test coach sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. La calibration d'evidence affiche une confiance faible, car la piste cree du danger mais ne marque pas, le gardien repond et l'equipe du gardien securise le ballon ; ce n'est pas une preuve d'economie globale. Le batch local multi-scenarios teste cette meme piste dans des variations de soutien, gardien, fatigue et second ballon ; il reste une aide de lecture, pas une consigne officielle ni une preuve d'economie globale. Le plan de test coach transforme ce batch local en hypotheses pratiques : renforcer le soutien autour de Z4-HSR, mieux occuper le second ballon et prevoir une reponse si le gardien adverse gagne la sequence. Ces tests restent suggestifs, ne pilotent pas la selection live, ne pilotent pas la resolution de route production, ne modifient pas la timeline officielle, la possession officielle, le score officiel ou les evenements de score officiels, et ne prouvent aucune economie globale. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only, panneau de decision sandbox, calibration d'evidence, batch de confiance et plan de test coach restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
@@ -3124,6 +3135,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const matchTraceAggregateModel = buildMatchTraceAggregator({
     traceSpine: matchTraceSpineModel,
   });
+  const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
+    aggregate: matchTraceAggregateModel,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3132,6 +3146,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...report.reportMeta.limitations,
         ...matchTraceSpineLimitations(matchTraceSpineModel),
         ...matchTraceAggregatorLimitations(matchTraceAggregateModel),
+        ...coachReportTraceV0Limitations(coachReportTraceV0Model),
       ],
     },
   };
@@ -3285,11 +3300,19 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: matchTraceAggregateModel,
   });
+  const coachReportTraceV0ModelFact = coachReportTraceV0EvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportTraceV0Model,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
   const experimentalMatchTraceAggregatorFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceAggregatorModelFact
+    : null;
+  const experimentalCoachReportTraceV0Fact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportTraceV0ModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3322,6 +3345,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(selectionPreviewModelFact === null ? [] : [selectionPreviewModelFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
+    ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? reportWithTraceLimitations
@@ -3363,6 +3387,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     selectionPreviewModel,
     matchTraceSpineModel,
     matchTraceAggregateModel,
+    coachReportTraceV0Model,
   );
 }
 ```
@@ -34846,6 +34871,122 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/selectionPreviewTraceAggregateContinuity.test.ts
+
+```ts
+import { sandboxDecisionEvidenceCalibrationFixture } from "./sandboxDecisionBatchConfidenceTestHelpers";
+import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./sandboxDecisionBatchConfidenceCalibrationFromEvidence";
+import { multiScenarioCoachTestPlanFromBatch } from "./multiScenarioCoachTestPlanFromBatch";
+import { selectionPreviewFromCoachTestPlan } from "./selectionPreviewFromCoachTestPlanBuilder";
+import {
+  selectionPreviewCannotChangeSelection,
+  selectionPreviewCannotMutateOfficialFullMatch,
+} from "./selectionPreviewFromCoachTestPlan";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSelectionPreviewTraceAggregateContinuity(): readonly string[] {
+  const batch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: sandboxDecisionEvidenceCalibrationFixture(),
+  });
+  const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
+  const preview = selectionPreviewFromCoachTestPlan({ testPlan: plan });
+
+  assertTest(preview.status === "available", "selection preview must remain available.");
+  assertTest(preview.selectionPreviewTraceBackingStatus === "sandbox_only", "selection preview must remain sandbox_only.");
+  assertTest(preview.selectionPreviewFutureTraceConsumer, "selection preview must remain future trace consumer.");
+  assertTest(!preview.tags.includes("selection_preview_confidence_upgraded_by_trace_aggregates"), "selection preview confidence must not be upgraded by Coach Report V0.");
+  assertTest(selectionPreviewCannotChangeSelection(preview), "selection preview cannot change lineup/starters/bench.");
+  assertTest(selectionPreviewCannotMutateOfficialFullMatch(preview), "selection preview cannot mutate official full match.");
+
+  return [
+    "selection preview remains available",
+    "selection preview remains sandbox_only",
+    "selection preview remains future trace consumer",
+    "selection preview confidence is not upgraded by Coach Report V0",
+    "selection preview cannot change lineup/starters/bench",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSelectionPreviewTraceAggregateContinuity();
+
+  console.log("selectionPreviewTraceAggregateContinuity tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4e.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4E(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const coachTraceFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "Coach Report V0 must not mutate official timeline.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "Coach Report V0 must not mutate official scoring events.");
+  assertTest(signature.officialScoreDelta === 0, "Coach Report V0 must not mutate official score.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "Coach Report V0 must not create production scoring events.");
+  assertTest(coachTraceFact !== undefined, "Coach Report V0 evidence must exist.");
+  assertTest(coachTraceFact?.internalTags.includes("coach_report_trace_aggregates_global_economy_claim_forbidden") ?? false, "Coach Report V0 must not claim global economy.");
+  assertTest(coachTraceFact?.internalTags.includes("scoring_constants_unchanged") ?? false, "Coach Report V0 must preserve scoring constants.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4E();
+
+  console.log("scoringGuard.4e tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -42783,6 +42924,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+    case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
       return "training_recommendation";
   }
 }
@@ -42865,6 +43007,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
       return "AgrÃ©gats de traces de match";
+    case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+      return "Rapport coach depuis les agrÃ©gats officiels";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -42946,6 +43090,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+    case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -42994,6 +43139,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SELECTION_PREVIEW",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
+    "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -44151,6 +44297,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 24;
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
       return 23;
+    case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+      return 22;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -44243,6 +44391,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
       return "Relire les agrÃ©gats de traces de match";
+    case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+      return "Relire le rapport coach depuis les agrÃ©gats officiels";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -45523,7 +45673,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
-  | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR";
+  | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
+  | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -46452,6 +46603,40 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "that selection preview confidence should be upgraded",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
+    canProve: [
+      "official trace aggregates can seed cautious coach-facing cards",
+      "diagnostic aggregates remain separated from official conclusions",
+      "sandbox aggregates remain separated from official conclusions",
+      "selection preview remains sandbox-backed and not upgraded",
+      "coach-facing trace cards remain read-only",
+    ],
+    canSuggest: [
+      "zones to monitor",
+      "pressure-loss watchpoints",
+      "recovery patterns to verify",
+      "recurring official trace causes",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
     ],
     cannotOverride: [
       "live score",

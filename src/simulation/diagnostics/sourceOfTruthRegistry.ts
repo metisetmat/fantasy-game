@@ -34,7 +34,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
-  | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR";
+  | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
+  | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -963,6 +964,40 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "that selection preview confidence should be upgraded",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
+    canProve: [
+      "official trace aggregates can seed cautious coach-facing cards",
+      "diagnostic aggregates remain separated from official conclusions",
+      "sandbox aggregates remain separated from official conclusions",
+      "selection preview remains sandbox-backed and not upgraded",
+      "coach-facing trace cards remain read-only",
+    ],
+    canSuggest: [
+      "zones to monitor",
+      "pressure-loss watchpoints",
+      "recovery patterns to verify",
+      "recurring official trace causes",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
     ],
     cannotOverride: [
       "live score",
