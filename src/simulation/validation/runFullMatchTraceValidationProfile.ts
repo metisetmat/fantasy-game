@@ -1,5 +1,6 @@
 import type { MatchReport, MatchInput } from "../../contracts/engineToCoach";
 import { runFullMatch } from "../runFullMatch";
+import { assessFullMatchTraceProfileSignals } from "./fullMatchTraceValidationAssertions";
 import type { FullMatchTraceValidationCardId, FullMatchTraceValidationProfile, FullMatchTraceValidationProfileResult } from "./fullMatchTraceValidationProfiles";
 
 const CARD_IDS: readonly FullMatchTraceValidationCardId[] = [
@@ -35,11 +36,17 @@ function itemKeysFromTag(tags: readonly string[], prefix: string): readonly stri
 
 function textHaystack(input: {
   readonly report: MatchReport;
+  readonly traceSummary: string;
+  readonly aggregateSummary: string;
+  readonly coachSummary: string;
   readonly traceTags: readonly string[];
   readonly aggregateTags: readonly string[];
   readonly coachTags: readonly string[];
 }): string {
   return [
+    input.traceSummary,
+    input.aggregateSummary,
+    input.coachSummary,
     ...input.traceTags,
     ...input.aggregateTags,
     ...input.coachTags,
@@ -121,6 +128,11 @@ function emptyResult(profile: FullMatchTraceValidationProfile): FullMatchTraceVa
     fatigueImpactTotal: 0,
     expectedSignalsPresent: false,
     expectedSignalsMissing: [...profile.expectedSignals],
+    expectedSignalTagsPresent: [],
+    expectedSignalTagsMissing: [...profile.expectedSignals],
+    acceptedFallbackSignals: [],
+    signalCalibrationStatus: "FAIL",
+    profileSignalNarrative: "Profile signal validation could not run because trace evidence was missing.",
     reportChangedFromBaseline: false,
     changedCards: [],
     cardSignatureByCardId: {
@@ -170,10 +182,28 @@ export function runFullMatchTraceValidationProfile(input: {
   const traceTags = traceFact.internalTags;
   const aggregateTags = aggregateFact.internalTags;
   const coachTags = coachFact.internalTags;
-  const haystack = textHaystack({ report, traceTags, aggregateTags, coachTags });
-  const expectedSignalsMissing = input.profile.expectedSignals.filter((signal) => !signalPresent(haystack, signal));
+  const haystack = textHaystack({
+    report,
+    traceSummary: traceFact.summary,
+    aggregateSummary: aggregateFact.summary,
+    coachSummary: coachFact.summary,
+    traceTags,
+    aggregateTags,
+    coachTags,
+  });
+  const legacyExpectedSignalsMissing = input.profile.expectedSignals.filter((signal) => !signalPresent(haystack, signal));
   const signatures = cardSignatures(coachTags);
-  const status = expectedSignalsMissing.length === input.profile.expectedSignals.length ? "partial" : "available";
+  const preliminaryChangedCards: readonly FullMatchTraceValidationCardId[] = [];
+  const signalAssessment = assessFullMatchTraceProfileSignals({
+    profileId: input.profile.profileId,
+    haystack,
+    changedCards: preliminaryChangedCards,
+    highPressureTraceCount: numberTag(coachTags, "coach_report_trace_aggregates_high_pressure_trace_count_"),
+    fatigueImpactTotal: numberTag(coachTags, "coach_report_trace_aggregates_fatigue_impact_total_"),
+  });
+  const status = signalAssessment.status === "FAIL" && legacyExpectedSignalsMissing.length === input.profile.expectedSignals.length
+    ? "partial"
+    : "available";
 
   return {
     profileId: input.profile.profileId,
@@ -192,8 +222,13 @@ export function runFullMatchTraceValidationProfile(input: {
     topImpactTags: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_impact_items_"),
     highPressureTraceCount: numberTag(coachTags, "coach_report_trace_aggregates_high_pressure_trace_count_"),
     fatigueImpactTotal: numberTag(coachTags, "coach_report_trace_aggregates_fatigue_impact_total_"),
-    expectedSignalsPresent: expectedSignalsMissing.length < input.profile.expectedSignals.length,
-    expectedSignalsMissing,
+    expectedSignalsPresent: signalAssessment.status !== "FAIL",
+    expectedSignalsMissing: signalAssessment.expectedSignalTagsMissing,
+    expectedSignalTagsPresent: signalAssessment.expectedSignalTagsPresent,
+    expectedSignalTagsMissing: signalAssessment.expectedSignalTagsMissing,
+    acceptedFallbackSignals: signalAssessment.acceptedFallbackSignals,
+    signalCalibrationStatus: signalAssessment.status,
+    profileSignalNarrative: signalAssessment.explanation,
     reportChangedFromBaseline: false,
     changedCards: [],
     cardSignatureByCardId: signatures,

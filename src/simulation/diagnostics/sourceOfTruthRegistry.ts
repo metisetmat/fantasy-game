@@ -36,7 +36,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
-  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION";
+  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
+  | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -1024,6 +1025,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which Coach Report V0 cards are sensitive enough for future visualization",
       "which expected profile signals remain weak or missing",
       "where future Coach Report V1 evidence should deepen profile-specific language",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
+    canProve: [
+      "validation profiles expose expected or accepted fallback tactical signals",
+      "generated profile validation artifacts are free of mojibake markers",
+      "profile signal calibration remains separate from official state mutation",
+      "selection preview remains sandbox_only and is not upgraded",
+    ],
+    canSuggest: [
+      "which profile signals are strong enough for future Coach Report V1 visualization",
+      "which profiles still rely on fallback evidence",
+      "where future fixtures should deepen tactical distinction",
     ],
     cannotProve: [
       "global scoring balance",

@@ -21,6 +21,11 @@ export type FullMatchTraceValidationStatus =
   | "partial"
   | "failed";
 
+export type FullMatchTraceProfileSignalStatus =
+  | "PASS"
+  | "PARTIAL"
+  | "FAIL";
+
 export type FullMatchTraceValidationCardId =
   | "official_danger_zones"
   | "official_pressure_losses"
@@ -48,6 +53,11 @@ export type FullMatchTraceValidationProfileResult = {
   readonly fatigueImpactTotal: number;
   readonly expectedSignalsPresent: boolean;
   readonly expectedSignalsMissing: readonly string[];
+  readonly expectedSignalTagsPresent: readonly string[];
+  readonly expectedSignalTagsMissing: readonly string[];
+  readonly acceptedFallbackSignals: readonly string[];
+  readonly signalCalibrationStatus: FullMatchTraceProfileSignalStatus;
+  readonly profileSignalNarrative: string;
   readonly reportChangedFromBaseline: boolean;
   readonly changedCards: readonly FullMatchTraceValidationCardId[];
   readonly cardSignatureByCardId: Readonly<Record<FullMatchTraceValidationCardId, string>>;
@@ -76,6 +86,10 @@ export type FullMatchTraceValidationModel = {
   readonly distinctRecoveryProfiles: number;
   readonly distinctCauseTagProfiles: number;
   readonly distinctWatchpointProfiles: number;
+  readonly profilesWithExpectedPrimarySignal: number;
+  readonly profilesWithAcceptedFallbackSignal: number;
+  readonly profilesWithMissingPrimarySignal: number;
+  readonly mojibakeMarkerCount: number;
   readonly allProfilesKeepOfficialDiagnosticSandboxSeparate: boolean;
   readonly allProfilesKeepSelectionPreviewSandboxOnly: boolean;
   readonly noProfileUpgradesSelectionPreviewConfidence: boolean;

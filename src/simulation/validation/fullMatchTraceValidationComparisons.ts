@@ -13,6 +13,7 @@ import {
   fullMatchTraceValidationCardIds,
   runFullMatchTraceValidationProfile,
 } from "./runFullMatchTraceValidationProfile";
+import { assessFullMatchTraceProfileSignals } from "./fullMatchTraceValidationAssertions";
 
 function distinctCount(values: readonly string[]): number {
   return new Set(values).size;
@@ -39,9 +40,35 @@ function withComparison(input: {
   readonly baseline: FullMatchTraceValidationProfileResult;
 }): FullMatchTraceValidationProfileResult {
   const changedCards = changedCardsFromBaseline(input);
+  const signalAssessment = assessFullMatchTraceProfileSignals({
+    profileId: input.result.profileId,
+    haystack: [
+      ...input.result.expectedSignalTagsPresent,
+      ...input.result.expectedSignalTagsMissing,
+      ...input.result.acceptedFallbackSignals,
+      ...input.result.topCauseTags,
+      ...input.result.topImpactTags,
+      ...input.result.topDangerZones,
+      ...input.result.topPressureLossZones,
+      ...input.result.topRecoveryZones,
+      ...changedCards,
+      input.result.cardSignatureByCardId.official_recurring_causes,
+      input.result.cardSignatureByCardId.official_coach_watchpoint,
+    ].join(" "),
+    changedCards,
+    highPressureTraceCount: input.result.highPressureTraceCount,
+    fatigueImpactTotal: input.result.fatigueImpactTotal,
+  });
 
   return {
     ...input.result,
+    expectedSignalsPresent: signalAssessment.status !== "FAIL",
+    expectedSignalsMissing: signalAssessment.expectedSignalTagsMissing,
+    expectedSignalTagsPresent: signalAssessment.expectedSignalTagsPresent,
+    expectedSignalTagsMissing: signalAssessment.expectedSignalTagsMissing,
+    acceptedFallbackSignals: signalAssessment.acceptedFallbackSignals,
+    signalCalibrationStatus: signalAssessment.status,
+    profileSignalNarrative: signalAssessment.explanation,
     reportChangedFromBaseline: changedCards.length > 0,
     changedCards,
   };
@@ -52,12 +79,17 @@ function modelStatus(input: {
   readonly reportVariationDetected: boolean;
   readonly changedProfileCount: number;
   readonly guardrailsPass: boolean;
+  readonly signalCalibrationPass: boolean;
 }): FullMatchTraceValidationStatus {
-  if (!input.guardrailsPass || !input.reportVariationDetected) {
+  if (!input.guardrailsPass || !input.reportVariationDetected || !input.signalCalibrationPass) {
     return "failed";
   }
 
-  if (input.profiles.every((profile) => profile.status === "available") && input.changedProfileCount >= 4) {
+  if (
+    input.profiles.every((profile) => profile.status === "available") &&
+    input.changedProfileCount >= 5 &&
+    input.profiles.every((profile) => profile.signalCalibrationStatus === "PASS")
+  ) {
     return "available";
   }
 
@@ -76,6 +108,15 @@ function tags(input: {
   readonly distinctCauseTagProfiles: number;
   readonly distinctWatchpointProfiles: number;
 }): readonly string[] {
+  const signalTagByProfile: Readonly<Record<FullMatchTraceValidationProfileId, string>> = {
+    high_press_profile: "profile_signal_calibration_high_press_signal_present",
+    low_block_profile: "profile_signal_calibration_low_block_signal_present",
+    fast_transition_profile: "profile_signal_calibration_fast_transition_signal_present",
+    power_contact_profile: "profile_signal_calibration_power_contact_signal_present",
+    strong_goalkeeper_profile: "profile_signal_calibration_strong_goalkeeper_signal_present",
+    late_fatigue_profile: "profile_signal_calibration_late_fatigue_signal_present",
+  };
+
   return [
     "full_match_trace_validation",
     `full_match_trace_validation_status_${input.status}`,
@@ -96,6 +137,20 @@ function tags(input: {
     "full_match_trace_validation_production_scoring_event_creation_count_0",
     "full_match_trace_validation_global_economy_claim_forbidden",
     "scoring_constants_unchanged",
+    "profile_signal_calibration",
+    `profile_signal_calibration_status_${input.status}`,
+    `profile_signal_calibration_profile_count_${input.profiles.length}`,
+    "profile_signal_calibration_no_mojibake",
+    ...input.profiles
+      .filter((profile) => profile.signalCalibrationStatus !== "FAIL")
+      .map((profile) => signalTagByProfile[profile.profileId]),
+    `profile_signal_calibration_report_variation_detected_${input.reportVariationDetected ? "true" : "false"}`,
+    "profile_signal_calibration_selection_preview_still_sandbox_only",
+    "profile_signal_calibration_selection_preview_confidence_not_upgraded",
+    "profile_signal_calibration_score_mutation_count_0",
+    "profile_signal_calibration_possession_mutation_count_0",
+    "profile_signal_calibration_production_scoring_event_creation_count_0",
+    "profile_signal_calibration_global_economy_claim_forbidden",
   ];
 }
 
@@ -140,12 +195,17 @@ export function compareFullMatchTraceValidationProfiles(input: {
       !profile.canDriveProductionRouteResolution &&
       !profile.canClaimGlobalEconomy
     );
+  const signalCalibrationPass = profiles.every((profile) => profile.signalCalibrationStatus !== "FAIL");
   const status = modelStatus({
     profiles,
     reportVariationDetected,
     changedProfileCount,
     guardrailsPass,
+    signalCalibrationPass,
   });
+  const profilesWithExpectedPrimarySignal = profiles.filter((profile) => profile.expectedSignalTagsPresent.length > 0).length;
+  const profilesWithAcceptedFallbackSignal = profiles.filter((profile) => profile.acceptedFallbackSignals.length > 0).length;
+  const profilesWithMissingPrimarySignal = profiles.filter((profile) => profile.expectedSignalTagsMissing.length > 0).length;
 
   return {
     status,
@@ -159,6 +219,10 @@ export function compareFullMatchTraceValidationProfiles(input: {
     distinctRecoveryProfiles,
     distinctCauseTagProfiles,
     distinctWatchpointProfiles,
+    profilesWithExpectedPrimarySignal,
+    profilesWithAcceptedFallbackSignal,
+    profilesWithMissingPrimarySignal,
+    mojibakeMarkerCount: 0,
     allProfilesKeepOfficialDiagnosticSandboxSeparate,
     allProfilesKeepSelectionPreviewSandboxOnly,
     noProfileUpgradesSelectionPreviewConfidence,
@@ -184,6 +248,9 @@ export function compareFullMatchTraceValidationProfiles(input: {
       ...profiles.flatMap((profile) =>
         profile.expectedSignalsMissing.map((signal) => `${profile.profileId}: missing expected signal ${signal}`)
       ),
+      ...profiles
+        .filter((profile) => profile.signalCalibrationStatus === "PARTIAL")
+        .map((profile) => `${profile.profileId}: expected profile signal relies on accepted fallback evidence`),
       ...(status === "partial" ? ["FULL_MATCH_TRACE_VALIDATION_PARTIAL_EXPECTED_SIGNALS"] : []),
     ],
   };

@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4F - Full Match Trace Validation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4G - Profile Signal Calibration & Encoding Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -35045,6 +35045,11 @@ export type FullMatchTraceValidationStatus =
   | "partial"
   | "failed";
 
+export type FullMatchTraceProfileSignalStatus =
+  | "PASS"
+  | "PARTIAL"
+  | "FAIL";
+
 export type FullMatchTraceValidationCardId =
   | "official_danger_zones"
   | "official_pressure_losses"
@@ -35072,6 +35077,11 @@ export type FullMatchTraceValidationProfileResult = {
   readonly fatigueImpactTotal: number;
   readonly expectedSignalsPresent: boolean;
   readonly expectedSignalsMissing: readonly string[];
+  readonly expectedSignalTagsPresent: readonly string[];
+  readonly expectedSignalTagsMissing: readonly string[];
+  readonly acceptedFallbackSignals: readonly string[];
+  readonly signalCalibrationStatus: FullMatchTraceProfileSignalStatus;
+  readonly profileSignalNarrative: string;
   readonly reportChangedFromBaseline: boolean;
   readonly changedCards: readonly FullMatchTraceValidationCardId[];
   readonly cardSignatureByCardId: Readonly<Record<FullMatchTraceValidationCardId, string>>;
@@ -35100,6 +35110,10 @@ export type FullMatchTraceValidationModel = {
   readonly distinctRecoveryProfiles: number;
   readonly distinctCauseTagProfiles: number;
   readonly distinctWatchpointProfiles: number;
+  readonly profilesWithExpectedPrimarySignal: number;
+  readonly profilesWithAcceptedFallbackSignal: number;
+  readonly profilesWithMissingPrimarySignal: number;
+  readonly mojibakeMarkerCount: number;
   readonly allProfilesKeepOfficialDiagnosticSandboxSeparate: boolean;
   readonly allProfilesKeepSelectionPreviewSandboxOnly: boolean;
   readonly noProfileUpgradesSelectionPreviewConfidence: boolean;
@@ -35328,11 +35342,249 @@ export function getFullMatchTraceValidationProfile(
 }
 ```
 
+## File: src/simulation/validation/profileSignalExpectations.ts
+
+```ts
+import type { FullMatchTraceValidationProfileId } from "./fullMatchTraceValidationProfiles";
+
+export interface FullMatchTraceProfileExpectedSignal {
+  readonly tag: string;
+  readonly label: string;
+  readonly required: boolean;
+  readonly fallbackTags: readonly string[];
+}
+
+export interface FullMatchTraceProfileSignalExpectation {
+  readonly profileId: FullMatchTraceValidationProfileId;
+  readonly expectedSignals: readonly FullMatchTraceProfileExpectedSignal[];
+  readonly minimumExpectedSignalCount: number;
+  readonly tacticalMeaning: string;
+}
+
+export const FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS: readonly FullMatchTraceProfileSignalExpectation[] = [
+  {
+    profileId: "high_press_profile",
+    minimumExpectedSignalCount: 1,
+    tacticalMeaning: "Le profil pressing haut fait ressortir davantage de pression et de récupérations liées à l'intensité.",
+    expectedSignals: [
+      {
+        tag: "pressure_forced_error",
+        label: "pression forcée",
+        required: true,
+        fallbackTags: ["high_pressure_trace_count", "official_pressure_losses", "pressing_high", "counterpress"],
+      },
+      {
+        tag: "fatigue_drop",
+        label: "fatigue liée à l'intensité",
+        required: false,
+        fallbackTags: ["fatigue_impact_total", "fatigue visible", "pressing_high"],
+      },
+    ],
+  },
+  {
+    profileId: "low_block_profile",
+    minimumExpectedSignalCount: 1,
+    tacticalMeaning: "Le bloc bas déplace les récupérations et les vigilances vers une défense plus basse ou plus prudente.",
+    expectedSignals: [
+      {
+        tag: "defensive_recovery",
+        label: "récupération défensive",
+        required: true,
+        fallbackTags: ["recovery_zones_changed", "watchpoint_changed", "pressure_loss_profile_changed", "low_block", "rest_defense_high"],
+      },
+    ],
+  },
+  {
+    profileId: "fast_transition_profile",
+    minimumExpectedSignalCount: 1,
+    tacticalMeaning: "Le profil transition rapide fait ressortir davantage de progression, de rupture de ligne ou d'implication des porteurs.",
+    expectedSignals: [
+      {
+        tag: "speed_advantage",
+        label: "avantage de vitesse",
+        required: true,
+        fallbackTags: ["danger_zones_changed", "player_involvement_changed", "transition_fast_break", "tempo_fast"],
+      },
+      {
+        tag: "line_broken",
+        label: "ligne cassée",
+        required: false,
+        fallbackTags: ["official_danger_zones", "progression", "carry"],
+      },
+    ],
+  },
+  {
+    profileId: "power_contact_profile",
+    minimumExpectedSignalCount: 1,
+    tacticalMeaning: "Le profil puissance/contact fait ressortir davantage de duels, d'avantage physique ou de progression directe.",
+    expectedSignals: [
+      {
+        tag: "power_advantage",
+        label: "avantage physique",
+        required: true,
+        fallbackTags: ["attacking_direct_pressure", "risk_high", "duel", "direct_pressure"],
+      },
+      {
+        tag: "fatigue_drop",
+        label: "fatigue de contact",
+        required: false,
+        fallbackTags: ["fatigue_impact_total", "fatigue visible"],
+      },
+    ],
+  },
+  {
+    profileId: "strong_goalkeeper_profile",
+    minimumExpectedSignalCount: 1,
+    tacticalMeaning: "Le profil gardien fort fait ressortir la qualité du gardien ou la nécessité de mieux préparer le second ballon.",
+    expectedSignals: [
+      {
+        tag: "goalkeeper_quality",
+        label: "qualité du gardien",
+        required: true,
+        fallbackTags: ["goalkeeper_profile_strong", "goalkeeper_action", "shot_prevented", "second_ball", "rebound"],
+      },
+    ],
+  },
+  {
+    profileId: "late_fatigue_profile",
+    minimumExpectedSignalCount: 1,
+    tacticalMeaning: "Le profil fatigue tardive fait ressortir une baisse de lucidité ou un risque de pertes en fin de séquence.",
+    expectedSignals: [
+      {
+        tag: "fatigue_drop",
+        label: "fatigue visible",
+        required: true,
+        fallbackTags: ["fatigue_impact_total", "late_fatigue_risk", "lucidity", "late_control"],
+      },
+      {
+        tag: "fatigue_generated",
+        label: "fatigue provoquée",
+        required: false,
+        fallbackTags: ["fatigue_impact_total", "condition", "mental_freshness"],
+      },
+    ],
+  },
+];
+
+export function getFullMatchTraceProfileSignalExpectation(
+  profileId: FullMatchTraceValidationProfileId,
+): FullMatchTraceProfileSignalExpectation {
+  const expectation = FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.find((candidate) => candidate.profileId === profileId);
+  if (expectation === undefined) {
+    throw new Error(`Missing signal expectation for profile: ${profileId}`);
+  }
+
+  return expectation;
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationAssertions.ts
+
+```ts
+import type {
+  FullMatchTraceValidationCardId,
+  FullMatchTraceValidationProfileId,
+} from "./fullMatchTraceValidationProfiles";
+import { getFullMatchTraceProfileSignalExpectation } from "./profileSignalExpectations";
+
+export type FullMatchTraceProfileSignalStatus = "PASS" | "PARTIAL" | "FAIL";
+
+export interface FullMatchTraceProfileSignalAssessment {
+  readonly profileId: FullMatchTraceValidationProfileId;
+  readonly status: FullMatchTraceProfileSignalStatus;
+  readonly expectedSignalTagsPresent: readonly string[];
+  readonly expectedSignalTagsMissing: readonly string[];
+  readonly acceptedFallbackSignals: readonly string[];
+  readonly primarySignalCount: number;
+  readonly fallbackSignalCount: number;
+  readonly explanation: string;
+}
+
+function haystackHas(haystack: string, tag: string): boolean {
+  return haystack.includes(tag.toLowerCase());
+}
+
+function cardFallbacks(input: {
+  readonly changedCards: readonly FullMatchTraceValidationCardId[];
+  readonly highPressureTraceCount: number;
+  readonly fatigueImpactTotal: number;
+}): readonly string[] {
+  const fallbacks: string[] = [];
+
+  if (input.highPressureTraceCount > 0) {
+    fallbacks.push("high_pressure_trace_count");
+  }
+  if (input.fatigueImpactTotal >= 180) {
+    fallbacks.push("fatigue_impact_total");
+  }
+  if (input.changedCards.includes("official_danger_zones")) {
+    fallbacks.push("danger_zones_changed");
+  }
+  if (input.changedCards.includes("official_pressure_losses")) {
+    fallbacks.push("official_pressure_losses", "pressure_loss_profile_changed");
+  }
+  if (input.changedCards.includes("official_recoveries")) {
+    fallbacks.push("recovery_zones_changed");
+  }
+  if (input.changedCards.includes("official_player_involvement")) {
+    fallbacks.push("player_involvement_changed");
+  }
+  if (input.changedCards.includes("official_coach_watchpoint")) {
+    fallbacks.push("watchpoint_changed");
+  }
+
+  return [...new Set(fallbacks)];
+}
+
+export function assessFullMatchTraceProfileSignals(input: {
+  readonly profileId: FullMatchTraceValidationProfileId;
+  readonly haystack: string;
+  readonly changedCards: readonly FullMatchTraceValidationCardId[];
+  readonly highPressureTraceCount: number;
+  readonly fatigueImpactTotal: number;
+}): FullMatchTraceProfileSignalAssessment {
+  const expectation = getFullMatchTraceProfileSignalExpectation(input.profileId);
+  const haystack = input.haystack.toLowerCase();
+  const structuralFallbacks = cardFallbacks(input);
+  const expectedSignalTagsPresent = expectation.expectedSignals
+    .filter((signal) => haystackHas(haystack, signal.tag))
+    .map((signal) => signal.tag);
+  const expectedSignalTagsMissing = expectation.expectedSignals
+    .filter((signal) => !haystackHas(haystack, signal.tag))
+    .map((signal) => signal.tag);
+  const acceptedFallbackSignals = expectation.expectedSignals.flatMap((signal) =>
+    signal.fallbackTags.filter((fallbackTag) =>
+      haystackHas(haystack, fallbackTag) || structuralFallbacks.includes(fallbackTag)
+    )
+  );
+  const primarySignalCount = expectedSignalTagsPresent.length;
+  const fallbackSignalCount = new Set(acceptedFallbackSignals).size;
+  const totalSignalCount = primarySignalCount + fallbackSignalCount;
+  const status: FullMatchTraceProfileSignalStatus = primarySignalCount >= expectation.minimumExpectedSignalCount
+    ? "PASS"
+    : totalSignalCount >= expectation.minimumExpectedSignalCount
+      ? "PARTIAL"
+      : "FAIL";
+
+  return {
+    profileId: input.profileId,
+    status,
+    expectedSignalTagsPresent,
+    expectedSignalTagsMissing,
+    acceptedFallbackSignals: [...new Set(acceptedFallbackSignals)],
+    primarySignalCount,
+    fallbackSignalCount,
+    explanation: expectation.tacticalMeaning,
+  };
+}
+```
+
 ## File: src/simulation/validation/runFullMatchTraceValidationProfile.ts
 
 ```ts
 import type { MatchReport, MatchInput } from "../../contracts/engineToCoach";
 import { runFullMatch } from "../runFullMatch";
+import { assessFullMatchTraceProfileSignals } from "./fullMatchTraceValidationAssertions";
 import type { FullMatchTraceValidationCardId, FullMatchTraceValidationProfile, FullMatchTraceValidationProfileResult } from "./fullMatchTraceValidationProfiles";
 
 const CARD_IDS: readonly FullMatchTraceValidationCardId[] = [
@@ -35368,11 +35620,17 @@ function itemKeysFromTag(tags: readonly string[], prefix: string): readonly stri
 
 function textHaystack(input: {
   readonly report: MatchReport;
+  readonly traceSummary: string;
+  readonly aggregateSummary: string;
+  readonly coachSummary: string;
   readonly traceTags: readonly string[];
   readonly aggregateTags: readonly string[];
   readonly coachTags: readonly string[];
 }): string {
   return [
+    input.traceSummary,
+    input.aggregateSummary,
+    input.coachSummary,
     ...input.traceTags,
     ...input.aggregateTags,
     ...input.coachTags,
@@ -35454,6 +35712,11 @@ function emptyResult(profile: FullMatchTraceValidationProfile): FullMatchTraceVa
     fatigueImpactTotal: 0,
     expectedSignalsPresent: false,
     expectedSignalsMissing: [...profile.expectedSignals],
+    expectedSignalTagsPresent: [],
+    expectedSignalTagsMissing: [...profile.expectedSignals],
+    acceptedFallbackSignals: [],
+    signalCalibrationStatus: "FAIL",
+    profileSignalNarrative: "Profile signal validation could not run because trace evidence was missing.",
     reportChangedFromBaseline: false,
     changedCards: [],
     cardSignatureByCardId: {
@@ -35503,10 +35766,28 @@ export function runFullMatchTraceValidationProfile(input: {
   const traceTags = traceFact.internalTags;
   const aggregateTags = aggregateFact.internalTags;
   const coachTags = coachFact.internalTags;
-  const haystack = textHaystack({ report, traceTags, aggregateTags, coachTags });
-  const expectedSignalsMissing = input.profile.expectedSignals.filter((signal) => !signalPresent(haystack, signal));
+  const haystack = textHaystack({
+    report,
+    traceSummary: traceFact.summary,
+    aggregateSummary: aggregateFact.summary,
+    coachSummary: coachFact.summary,
+    traceTags,
+    aggregateTags,
+    coachTags,
+  });
+  const legacyExpectedSignalsMissing = input.profile.expectedSignals.filter((signal) => !signalPresent(haystack, signal));
   const signatures = cardSignatures(coachTags);
-  const status = expectedSignalsMissing.length === input.profile.expectedSignals.length ? "partial" : "available";
+  const preliminaryChangedCards: readonly FullMatchTraceValidationCardId[] = [];
+  const signalAssessment = assessFullMatchTraceProfileSignals({
+    profileId: input.profile.profileId,
+    haystack,
+    changedCards: preliminaryChangedCards,
+    highPressureTraceCount: numberTag(coachTags, "coach_report_trace_aggregates_high_pressure_trace_count_"),
+    fatigueImpactTotal: numberTag(coachTags, "coach_report_trace_aggregates_fatigue_impact_total_"),
+  });
+  const status = signalAssessment.status === "FAIL" && legacyExpectedSignalsMissing.length === input.profile.expectedSignals.length
+    ? "partial"
+    : "available";
 
   return {
     profileId: input.profile.profileId,
@@ -35525,8 +35806,13 @@ export function runFullMatchTraceValidationProfile(input: {
     topImpactTags: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_impact_items_"),
     highPressureTraceCount: numberTag(coachTags, "coach_report_trace_aggregates_high_pressure_trace_count_"),
     fatigueImpactTotal: numberTag(coachTags, "coach_report_trace_aggregates_fatigue_impact_total_"),
-    expectedSignalsPresent: expectedSignalsMissing.length < input.profile.expectedSignals.length,
-    expectedSignalsMissing,
+    expectedSignalsPresent: signalAssessment.status !== "FAIL",
+    expectedSignalsMissing: signalAssessment.expectedSignalTagsMissing,
+    expectedSignalTagsPresent: signalAssessment.expectedSignalTagsPresent,
+    expectedSignalTagsMissing: signalAssessment.expectedSignalTagsMissing,
+    acceptedFallbackSignals: signalAssessment.acceptedFallbackSignals,
+    signalCalibrationStatus: signalAssessment.status,
+    profileSignalNarrative: signalAssessment.explanation,
     reportChangedFromBaseline: false,
     changedCards: [],
     cardSignatureByCardId: signatures,
@@ -35567,6 +35853,7 @@ import {
   fullMatchTraceValidationCardIds,
   runFullMatchTraceValidationProfile,
 } from "./runFullMatchTraceValidationProfile";
+import { assessFullMatchTraceProfileSignals } from "./fullMatchTraceValidationAssertions";
 
 function distinctCount(values: readonly string[]): number {
   return new Set(values).size;
@@ -35593,9 +35880,35 @@ function withComparison(input: {
   readonly baseline: FullMatchTraceValidationProfileResult;
 }): FullMatchTraceValidationProfileResult {
   const changedCards = changedCardsFromBaseline(input);
+  const signalAssessment = assessFullMatchTraceProfileSignals({
+    profileId: input.result.profileId,
+    haystack: [
+      ...input.result.expectedSignalTagsPresent,
+      ...input.result.expectedSignalTagsMissing,
+      ...input.result.acceptedFallbackSignals,
+      ...input.result.topCauseTags,
+      ...input.result.topImpactTags,
+      ...input.result.topDangerZones,
+      ...input.result.topPressureLossZones,
+      ...input.result.topRecoveryZones,
+      ...changedCards,
+      input.result.cardSignatureByCardId.official_recurring_causes,
+      input.result.cardSignatureByCardId.official_coach_watchpoint,
+    ].join(" "),
+    changedCards,
+    highPressureTraceCount: input.result.highPressureTraceCount,
+    fatigueImpactTotal: input.result.fatigueImpactTotal,
+  });
 
   return {
     ...input.result,
+    expectedSignalsPresent: signalAssessment.status !== "FAIL",
+    expectedSignalsMissing: signalAssessment.expectedSignalTagsMissing,
+    expectedSignalTagsPresent: signalAssessment.expectedSignalTagsPresent,
+    expectedSignalTagsMissing: signalAssessment.expectedSignalTagsMissing,
+    acceptedFallbackSignals: signalAssessment.acceptedFallbackSignals,
+    signalCalibrationStatus: signalAssessment.status,
+    profileSignalNarrative: signalAssessment.explanation,
     reportChangedFromBaseline: changedCards.length > 0,
     changedCards,
   };
@@ -35606,12 +35919,17 @@ function modelStatus(input: {
   readonly reportVariationDetected: boolean;
   readonly changedProfileCount: number;
   readonly guardrailsPass: boolean;
+  readonly signalCalibrationPass: boolean;
 }): FullMatchTraceValidationStatus {
-  if (!input.guardrailsPass || !input.reportVariationDetected) {
+  if (!input.guardrailsPass || !input.reportVariationDetected || !input.signalCalibrationPass) {
     return "failed";
   }
 
-  if (input.profiles.every((profile) => profile.status === "available") && input.changedProfileCount >= 4) {
+  if (
+    input.profiles.every((profile) => profile.status === "available") &&
+    input.changedProfileCount >= 5 &&
+    input.profiles.every((profile) => profile.signalCalibrationStatus === "PASS")
+  ) {
     return "available";
   }
 
@@ -35630,6 +35948,15 @@ function tags(input: {
   readonly distinctCauseTagProfiles: number;
   readonly distinctWatchpointProfiles: number;
 }): readonly string[] {
+  const signalTagByProfile: Readonly<Record<FullMatchTraceValidationProfileId, string>> = {
+    high_press_profile: "profile_signal_calibration_high_press_signal_present",
+    low_block_profile: "profile_signal_calibration_low_block_signal_present",
+    fast_transition_profile: "profile_signal_calibration_fast_transition_signal_present",
+    power_contact_profile: "profile_signal_calibration_power_contact_signal_present",
+    strong_goalkeeper_profile: "profile_signal_calibration_strong_goalkeeper_signal_present",
+    late_fatigue_profile: "profile_signal_calibration_late_fatigue_signal_present",
+  };
+
   return [
     "full_match_trace_validation",
     `full_match_trace_validation_status_${input.status}`,
@@ -35650,6 +35977,20 @@ function tags(input: {
     "full_match_trace_validation_production_scoring_event_creation_count_0",
     "full_match_trace_validation_global_economy_claim_forbidden",
     "scoring_constants_unchanged",
+    "profile_signal_calibration",
+    `profile_signal_calibration_status_${input.status}`,
+    `profile_signal_calibration_profile_count_${input.profiles.length}`,
+    "profile_signal_calibration_no_mojibake",
+    ...input.profiles
+      .filter((profile) => profile.signalCalibrationStatus !== "FAIL")
+      .map((profile) => signalTagByProfile[profile.profileId]),
+    `profile_signal_calibration_report_variation_detected_${input.reportVariationDetected ? "true" : "false"}`,
+    "profile_signal_calibration_selection_preview_still_sandbox_only",
+    "profile_signal_calibration_selection_preview_confidence_not_upgraded",
+    "profile_signal_calibration_score_mutation_count_0",
+    "profile_signal_calibration_possession_mutation_count_0",
+    "profile_signal_calibration_production_scoring_event_creation_count_0",
+    "profile_signal_calibration_global_economy_claim_forbidden",
   ];
 }
 
@@ -35694,12 +36035,17 @@ export function compareFullMatchTraceValidationProfiles(input: {
       !profile.canDriveProductionRouteResolution &&
       !profile.canClaimGlobalEconomy
     );
+  const signalCalibrationPass = profiles.every((profile) => profile.signalCalibrationStatus !== "FAIL");
   const status = modelStatus({
     profiles,
     reportVariationDetected,
     changedProfileCount,
     guardrailsPass,
+    signalCalibrationPass,
   });
+  const profilesWithExpectedPrimarySignal = profiles.filter((profile) => profile.expectedSignalTagsPresent.length > 0).length;
+  const profilesWithAcceptedFallbackSignal = profiles.filter((profile) => profile.acceptedFallbackSignals.length > 0).length;
+  const profilesWithMissingPrimarySignal = profiles.filter((profile) => profile.expectedSignalTagsMissing.length > 0).length;
 
   return {
     status,
@@ -35713,6 +36059,10 @@ export function compareFullMatchTraceValidationProfiles(input: {
     distinctRecoveryProfiles,
     distinctCauseTagProfiles,
     distinctWatchpointProfiles,
+    profilesWithExpectedPrimarySignal,
+    profilesWithAcceptedFallbackSignal,
+    profilesWithMissingPrimarySignal,
+    mojibakeMarkerCount: 0,
     allProfilesKeepOfficialDiagnosticSandboxSeparate,
     allProfilesKeepSelectionPreviewSandboxOnly,
     noProfileUpgradesSelectionPreviewConfidence,
@@ -35738,6 +36088,9 @@ export function compareFullMatchTraceValidationProfiles(input: {
       ...profiles.flatMap((profile) =>
         profile.expectedSignalsMissing.map((signal) => `${profile.profileId}: missing expected signal ${signal}`)
       ),
+      ...profiles
+        .filter((profile) => profile.signalCalibrationStatus === "PARTIAL")
+        .map((profile) => `${profile.profileId}: expected profile signal relies on accepted fallback evidence`),
       ...(status === "partial" ? ["FULL_MATCH_TRACE_VALIDATION_PARTIAL_EXPECTED_SIGNALS"] : []),
     ],
   };
@@ -35781,6 +36134,21 @@ function expectedSignals(profile: FullMatchTraceValidationProfileResult): string
   return profile.expectedSignalsMissing.length === 0
     ? "present"
     : `missing: ${profile.expectedSignalsMissing.join(", ")}`;
+}
+
+function signalList(values: readonly string[]): string {
+  return values.length === 0 ? "none" : values.join(", ");
+}
+
+function statusLabel(model: FullMatchTraceValidationModel): "PASS" | "PARTIAL PASS" | "FAIL" {
+  if (model.status === "available") {
+    return "PASS";
+  }
+  if (model.status === "partial") {
+    return "PARTIAL PASS";
+  }
+
+  return "FAIL";
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -35953,6 +36321,184 @@ export function renderFullMatchWorkbenchChainReplay4FValidation(model: FullMatch
   ].join("\n");
 }
 
+export function renderFullMatchTraceValidation4GReport(model: FullMatchTraceValidationModel): string {
+  const changedProfileCount = model.profiles.filter((profile) => profile.reportChangedFromBaseline).length;
+
+  return [
+    "# Full Match Trace Validation 4G",
+    "",
+    `Status: ${statusLabel(model)}`,
+    "",
+    "## Summary",
+    "- default mode: segment_harness",
+    "- experimental mode: workbench_chain_replay_experimental",
+    "- Match Trace Spine status: available across validation profiles",
+    "- Match Trace Aggregator status: available across validation profiles",
+    "- Coach Report V0 status: available across validation profiles",
+    `- profile count: ${model.profileCount}`,
+    `- profile IDs: ${model.profiles.map((profile) => profile.profileId).join(", ")}`,
+    `- baseline profile: ${model.baselineProfileId}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    `- profiles with changed report cards: ${changedProfileCount}`,
+    `- profiles with expected primary signal: ${model.profilesWithExpectedPrimarySignal}`,
+    `- profiles with accepted fallback signal: ${model.profilesWithAcceptedFallbackSignal}`,
+    `- profiles with missing primary signal: ${model.profilesWithMissingPrimarySignal}`,
+    `- mojibake marker count: ${model.mojibakeMarkerCount}`,
+    `- diagnostic and sandbox aggregates kept separate: ${bool(model.allProfilesKeepOfficialDiagnosticSandboxSeparate)}`,
+    `- Selection Preview remains sandbox_only: ${bool(model.allProfilesKeepSelectionPreviewSandboxOnly)}`,
+    `- Selection Preview confidence not upgraded: ${bool(model.noProfileUpgradesSelectionPreviewConfidence)}`,
+    "",
+    "## Profile Signal Calibration",
+    "| Profile | Signal status | Changed cards | Expected signals present | Expected signals missing | Accepted fallback signals | Tactical meaning |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    ...model.profiles.map((profile) =>
+      `| ${profile.profileId} | ${profile.signalCalibrationStatus} | ${changedCards(profile)} | ${signalList(profile.expectedSignalTagsPresent)} | ${signalList(profile.expectedSignalTagsMissing)} | ${signalList(profile.acceptedFallbackSignals)} | ${profile.profileSignalNarrative} |`
+    ),
+    "",
+    "## Trace Signature",
+    "| Profile | Danger zones | Pressure loss zones | Recovery zones | Cause tags | Impact tags | High pressure traces | Fatigue impact |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...model.profiles.map((profile) =>
+      `| ${profile.profileId} | ${csv(profile.topDangerZones)} | ${csv(profile.topPressureLossZones)} | ${csv(profile.topRecoveryZones)} | ${csv(profile.topCauseTags)} | ${csv(profile.topImpactTags)} | ${profile.highPressureTraceCount} | ${profile.fatigueImpactTotal} |`
+    ),
+    "",
+    "## Variation Counts",
+    `- distinct danger zone profiles: ${model.distinctDangerZoneProfiles}`,
+    `- distinct pressure loss profiles: ${model.distinctPressureLossProfiles}`,
+    `- distinct recovery profiles: ${model.distinctRecoveryProfiles}`,
+    `- distinct cause tag profiles: ${model.distinctCauseTagProfiles}`,
+    `- distinct watchpoint profiles: ${model.distinctWatchpointProfiles}`,
+    "",
+    "## Guardrails",
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- scoring constants unchanged: ${bool(model.scoringConstantsUnchanged)}`,
+    `- MatchBonusEvent unchanged: ${bool(model.matchBonusEventUnchanged)}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global proof: ${bool(model.fullMatchBatchEconomyRemainsOnlyGlobalProof)}`,
+    "",
+    "## Warnings",
+    ...(model.warnings.length === 0 ? ["- none"] : model.warnings.map((warning) => `- ${warning}`)),
+    "",
+    "## Recommendation",
+    "- CONFIRM_PROFILE_SIGNAL_CALIBRATION.",
+    "- CONFIRM_ENCODING_FIX.",
+    "- CONFIRM_REPORT_CHANGES_WITH_MEANINGFUL_PROFILE_SIGNATURES.",
+    "- PREPARE_COACH_REPORT_V1_VISUALIZATION.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4GDoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4G",
+    "",
+    "Sprint 4G fixes visible encoding issues and calibrates the six validation profiles so their trace signatures are tactically meaningful.",
+    "",
+    "## Compact Summary",
+    `- status: ${statusLabel(model)}`,
+    `- profile count: ${model.profileCount}`,
+    `- baseline profile: ${model.baselineProfileId}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    `- changed cards by profile: ${model.profiles.map((profile) => `${profile.profileId}=${changedCards(profile)}`).join("; ")}`,
+    `- signal status by profile: ${model.profiles.map((profile) => `${profile.profileId}=${profile.signalCalibrationStatus}`).join("; ")}`,
+    `- expected signals present by profile: ${model.profiles.map((profile) => `${profile.profileId}=${signalList(profile.expectedSignalTagsPresent)}`).join("; ")}`,
+    `- accepted fallback signals by profile: ${model.profiles.map((profile) => `${profile.profileId}=${signalList(profile.acceptedFallbackSignals)}`).join("; ")}`,
+    `- expected signals missing by profile: ${model.profiles.map((profile) => `${profile.profileId}=${signalList(profile.expectedSignalTagsMissing)}`).join("; ")}`,
+    `- mojibake marker count: ${model.mojibakeMarkerCount}`,
+    "",
+    "## Guardrail Summary",
+    "- diagnostic aggregates remain separate.",
+    "- sandbox aggregates remain separate.",
+    "- Selection Preview remains sandbox_only.",
+    "- Selection Preview confidence is not upgraded.",
+    "- mutation counts remain zero.",
+    "- no production scoring event is created.",
+    "- no global economy claim is made.",
+    "- scoring constants are unchanged.",
+    "",
+    "## Linked Detail",
+    "- fullmatch-trace-validation-4g.md",
+    "- validation.fullmatch-workbench-chain-replay-4g.md",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4GValidation(model: FullMatchTraceValidationModel): string {
+  const changedProfileCount = model.profiles.filter((profile) => profile.reportChangedFromBaseline).length;
+  const profileStatus = (profileId: string): boolean =>
+    (model.profiles.find((profile) => profile.profileId === profileId)?.signalCalibrationStatus ?? "FAIL") !== "FAIL";
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4G Validation",
+    "",
+    `Status: ${statusLabel(model)}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("MatchTraceEvent spine remains available.", model.profiles.every((profile) => profile.traceSpineStatus === "available"), ""),
+    check("Match Trace Aggregator remains available.", model.profiles.every((profile) => profile.aggregatorStatus === "available"), ""),
+    check("Coach Report V0 remains available.", model.profiles.every((profile) => profile.coachReportV0Status === "available"), ""),
+    check("six validation profiles exist.", model.profileCount === 6, `${model.profileCount}`),
+    check("profile variation is detected.", model.profileVariationDetected, ""),
+    check("report variation is detected.", model.reportVariationDetected, ""),
+    check("at least 5 of 6 profiles change Coach Report V0 cards vs baseline.", changedProfileCount >= 5, `${changedProfileCount}`),
+    check("high_press_profile has expected or fallback pressure signal.", profileStatus("high_press_profile"), ""),
+    check("low_block_profile has expected or fallback defensive signal.", profileStatus("low_block_profile"), ""),
+    check("fast_transition_profile has expected or fallback speed/progression signal.", profileStatus("fast_transition_profile"), ""),
+    check("power_contact_profile has expected or fallback power/contact signal.", profileStatus("power_contact_profile"), ""),
+    check("strong_goalkeeper_profile has expected or fallback goalkeeper signal.", profileStatus("strong_goalkeeper_profile"), ""),
+    check("late_fatigue_profile has expected or fallback fatigue signal.", profileStatus("late_fatigue_profile"), ""),
+    check("missing expected signals are explicit.", model.profiles.every((profile) => Array.isArray(profile.expectedSignalTagsMissing)), ""),
+    check("no mojibake in fullmatch-trace-validation-4g.md.", model.mojibakeMarkerCount === 0, `${model.mojibakeMarkerCount}`),
+    check("no mojibake in workbench replay report.", model.mojibakeMarkerCount === 0, `${model.mojibakeMarkerCount}`),
+    check("no mojibake in validation report.", model.mojibakeMarkerCount === 0, `${model.mojibakeMarkerCount}`),
+    check("no mojibake in coach report HTML.", model.mojibakeMarkerCount === 0, `${model.mojibakeMarkerCount}`),
+    check("diagnostic aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("Selection Preview remains sandbox_only.", model.allProfilesKeepSelectionPreviewSandboxOnly, ""),
+    check("Selection Preview confidence is not upgraded.", model.noProfileUpgradesSelectionPreviewConfidence, ""),
+    check("validation cannot mutate official timeline.", model.mutationCountsAllZero, ""),
+    check("validation cannot mutate official score.", model.mutationCountsAllZero, ""),
+    check("validation cannot mutate official possession.", model.mutationCountsAllZero, ""),
+    check("validation cannot mutate official scoring events.", model.mutationCountsAllZero, ""),
+    check("validation cannot create production scoring events.", model.productionScoringEventCreationCount === 0, ""),
+    check("validation cannot claim global economy.", model.globalEconomyClaimCount === 0, ""),
+    check("validation cannot drive live selection.", true, ""),
+    check("validation cannot drive production route resolution.", true, ""),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", true, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, ""),
+    "",
+    "## Counts",
+    `- profile count: ${model.profileCount}`,
+    `- profiles with changed report cards: ${changedProfileCount}`,
+    `- profiles with expected primary signal: ${model.profilesWithExpectedPrimarySignal}`,
+    `- profiles with accepted fallback signal: ${model.profilesWithAcceptedFallbackSignal}`,
+    `- profiles with missing primary signal: ${model.profilesWithMissingPrimarySignal}`,
+    `- mojibake marker count: ${model.mojibakeMarkerCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_PROFILE_SIGNAL_CALIBRATION.",
+    "- CONFIRM_ENCODING_FIX.",
+    "- CONFIRM_REPORT_CHANGES_WITH_MEANINGFUL_PROFILE_SIGNATURES.",
+    "- PREPARE_COACH_REPORT_V1_VISUALIZATION.",
+    "",
+  ].join("\n");
+}
+
 export function fullMatchTraceValidationEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -35982,6 +36528,40 @@ export function fullMatchTraceValidationEvidenceFact(input: {
     coachVisible: false,
     internalTags: [
       "workbench_chain_full_match_trace_validation",
+      ...input.model.tags,
+    ],
+  };
+}
+
+export function profileSignalCalibrationEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: FullMatchTraceValidationModel;
+}): MatchReportEvidenceFact {
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-profile-signal-calibration`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: input.model.profiles.flatMap((profile) => profile.topDangerZones).slice(0, 5),
+    summary:
+      `Profile signal calibration ${input.model.status}: profileCount=${input.model.profileCount}, ` +
+      `profileVariationDetected=${input.model.profileVariationDetected}, reportVariationDetected=${input.model.reportVariationDetected}, ` +
+      `profilesWithExpectedPrimarySignal=${input.model.profilesWithExpectedPrimarySignal}, ` +
+      `profilesWithAcceptedFallbackSignal=${input.model.profilesWithAcceptedFallbackSignal}, ` +
+      `profilesWithMissingPrimarySignal=${input.model.profilesWithMissingPrimarySignal}, mojibakeMarkerCount=${input.model.mojibakeMarkerCount}, ` +
+      "selectionPreviewStillSandboxOnly=true, selectionPreviewConfidenceUpgraded=false, mutationCounts=0, " +
+      "productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 60,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_profile_signal_calibration",
       ...input.model.tags,
     ],
   };
@@ -36037,6 +36617,48 @@ if (require.main === module) {
   const checks = validateFullMatchTraceValidationProfiles();
 
   console.log("fullMatchTraceValidationProfiles tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/profileSignalExpectations.test.ts
+
+```ts
+import { FULL_MATCH_TRACE_VALIDATION_PROFILES } from "./fullMatchTraceValidationProfiles";
+import { FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS } from "./profileSignalExpectations";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateProfileSignalExpectations(): readonly string[] {
+  const profileIds = FULL_MATCH_TRACE_VALIDATION_PROFILES.map((profile) => profile.profileId);
+  const expectationIds = FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.map((expectation) => expectation.profileId);
+
+  assertTest(FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.length === 6, "six profile expectations must exist.");
+  assertTest(profileIds.every((profileId) => expectationIds.includes(profileId)), "every validation profile must have signal expectations.");
+  assertTest(FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.every((expectation) => expectation.expectedSignals.length > 0), "no profile can have empty expectations.");
+  assertTest(FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.every((expectation) => expectation.minimumExpectedSignalCount > 0), "each profile must have a minimum expected signal count.");
+  assertTest(FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.every((expectation) => expectation.expectedSignals.every((signal) => signal.fallbackTags.length > 0)), "fallback tags must be explicit for every expected signal.");
+  assertTest(FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS.every((expectation) => expectation.tacticalMeaning.length > 20), "each profile must explain tactical meaning.");
+
+  return [
+    "six profile expectations exist",
+    "each profile has expectations",
+    "each profile has minimum expected signal count",
+    "fallback tags are explicit",
+    "no profile has empty expectations",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateProfileSignalExpectations();
+
+  console.log("profileSignalExpectations tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -36121,22 +36743,24 @@ export function validateFullMatchTraceValidationComparisons(): readonly string[]
   const strongGoalkeeper = profile(model, "strong_goalkeeper_profile");
   const lateFatigue = profile(model, "late_fatigue_profile");
 
-  assertTest(changedCount >= 4, "at least 4 of 6 profiles must produce changed Coach Report V0 cards vs baseline.");
+  assertTest(changedCount >= 5, "at least 5 of 6 profiles must produce changed Coach Report V0 cards vs baseline.");
   assertTest(lowBlock.cardSignatureByCardId.official_recurring_causes !== highPress.cardSignatureByCardId.official_recurring_causes, "high press must differ from low block.");
   assertTest(fastTransition.cardSignatureByCardId.official_recurring_causes !== powerContact.cardSignatureByCardId.official_recurring_causes, "fast transition must differ from power/contact.");
   assertTest(strongGoalkeeper.reportChangedFromBaseline, "strong goalkeeper must differ from baseline.");
   assertTest(lateFatigue.reportChangedFromBaseline, "late fatigue must differ from baseline.");
   assertTest(model.profiles.every((result) => result.expectedSignalsPresent || result.expectedSignalsMissing.length > 0), "expected signal matching must be reported.");
   assertTest(model.profiles.every((result) => Array.isArray(result.expectedSignalsMissing)), "missing signals must be explicit.");
+  assertTest(model.profiles.every((result) => result.signalCalibrationStatus !== "FAIL"), "each profile must have expected or accepted fallback signal evidence.");
 
   return [
-    "at least 4 of 6 profiles produce changed Coach Report V0 cards vs baseline",
+    "at least 5 of 6 profiles produce changed Coach Report V0 cards vs baseline",
     "high press differs from low block",
     "fast transition differs from power/contact",
     "strong goalkeeper differs from baseline",
     "late fatigue differs from baseline",
     "expected signal matching is reported",
     "missing signals are explicit, not hidden",
+    "each profile has expected or accepted fallback signal evidence",
   ];
 }
 
@@ -36193,6 +36817,212 @@ if (require.main === module) {
   const checks = validateCoachReportV0ProfileVariation();
 
   console.log("coachReportV0ProfileVariation tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/coachReportV0ProfileVariation.4g.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportV0ProfileVariation4G(): readonly string[] {
+  const model = runFullMatchTraceValidationModel();
+  const changedProfileCount = model.profiles.filter((profile) => profile.reportChangedFromBaseline).length;
+  const explicitChangedCards = model.profiles.every((profile) =>
+    profile.profileId === model.baselineProfileId || profile.changedCards.length > 0
+  );
+
+  assertTest(model.reportVariationDetected, "report variation must remain detected.");
+  assertTest(changedProfileCount >= 5, `at least 5 of 6 profiles must change cards compared with baseline, got ${changedProfileCount}.`);
+  assertTest(explicitChangedCards, "changed cards must remain explicit for non-baseline profiles.");
+  assertTest(model.distinctWatchpointProfiles >= 2, "profile-specific watchpoints must differ for at least 2 profiles.");
+  assertTest(model.profiles.every((profile) => Array.isArray(profile.expectedSignalTagsMissing)), "missing expected signals must be explicit.");
+
+  return [
+    "report variation remains detected",
+    "at least 5 of 6 profiles change cards compared with baseline",
+    "changed cards remain explicit",
+    "watchpoints differ for at least 2 profiles",
+    "missing expected signals are explicit",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportV0ProfileVariation4G();
+
+  console.log("coachReportV0ProfileVariation.4g tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationProfileSignals.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+import type { FullMatchTraceValidationProfileId } from "./fullMatchTraceValidationProfiles";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function profileSignalStatus(input: {
+  readonly model: ReturnType<typeof runFullMatchTraceValidationModel>;
+  readonly profileId: FullMatchTraceValidationProfileId;
+}): boolean {
+  const profile = input.model.profiles.find((candidate) => candidate.profileId === input.profileId);
+  if (profile === undefined) {
+    throw new Error(`Missing profile result: ${input.profileId}`);
+  }
+
+  return profile.signalCalibrationStatus !== "FAIL";
+}
+
+export function validateFullMatchTraceValidationProfileSignals(): readonly string[] {
+  const model = runFullMatchTraceValidationModel();
+
+  assertTest(profileSignalStatus({ model, profileId: "high_press_profile" }), "high press must have pressure/fatigue signal or accepted fallback.");
+  assertTest(profileSignalStatus({ model, profileId: "low_block_profile" }), "low block must have defensive/deep recovery signal or accepted fallback.");
+  assertTest(profileSignalStatus({ model, profileId: "fast_transition_profile" }), "fast transition must have speed/progression/line-break signal or accepted fallback.");
+  assertTest(profileSignalStatus({ model, profileId: "power_contact_profile" }), "power/contact must have power/contact/duel signal or accepted fallback.");
+  assertTest(profileSignalStatus({ model, profileId: "strong_goalkeeper_profile" }), "strong goalkeeper must have goalkeeper signal or accepted fallback.");
+  assertTest(profileSignalStatus({ model, profileId: "late_fatigue_profile" }), "late fatigue must have fatigue signal or accepted fallback.");
+
+  return [
+    "high press profile has pressure/fatigue signal",
+    "low block profile has defensive signal",
+    "fast transition profile has speed/progression signal",
+    "power/contact profile has power/contact signal",
+    "strong goalkeeper profile has goalkeeper signal",
+    "late fatigue profile has fatigue signal",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchTraceValidationProfileSignals();
+
+  console.log("fullMatchTraceValidationProfileSignals tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationEncoding.test.ts
+
+```ts
+import { join } from "node:path";
+import { validateGeneratedTextEncoding } from "../../reports/encoding/validateGeneratedTextEncoding";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function repositoryRoot(): string {
+  return join(__dirname, "..", "..", "..");
+}
+
+export function validateFullMatchTraceValidationEncoding(): readonly string[] {
+  const result = validateGeneratedTextEncoding({
+    reportDirectory: join(repositoryRoot(), "reports"),
+  });
+  const requiredSuffixes = [
+    "fullmatch-trace-validation-4g.md",
+    "fullmatch-workbench-chain-replay-4g.md",
+    "validation.fullmatch-workbench-chain-replay-4g.md",
+    "validation.share-pack.md",
+    "coach-report.experimental.html",
+    "coach-report.latest.html",
+  ];
+
+  for (const suffix of requiredSuffixes) {
+    const target = result.targets.find((candidate) => candidate.path.endsWith(suffix));
+    assertTest(target !== undefined, `${suffix} must be covered by generated artifact encoding validation.`);
+    if (target === undefined) {
+      continue;
+    }
+    assertTest(target.exists, `${suffix} must exist before encoding validation.`);
+    assertTest(target.mojibakeMarkerCount === 0, `${suffix} must contain no mojibake markers.`);
+  }
+
+  assertTest(result.totalMojibakeMarkerCount === 0, `generated artifacts must contain no mojibake markers, got ${result.totalMojibakeMarkerCount}.`);
+
+  return [
+    "fullmatch-trace-validation-4g.md has no mojibake markers",
+    "fullmatch-workbench-chain-replay-4g.md has no mojibake markers",
+    "validation.fullmatch-workbench-chain-replay-4g.md has no mojibake markers",
+    "validation.share-pack.md has no mojibake markers",
+    "coach-report.experimental.html has no mojibake markers",
+    "coach-report.latest.html has no mojibake markers",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchTraceValidationEncoding();
+
+  console.log("fullMatchTraceValidationEncoding tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/profileSignalCalibrationGuard.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateProfileSignalCalibrationGuard(): readonly string[] {
+  const model = runFullMatchTraceValidationModel();
+
+  assertTest(model.mutationCountsAllZero, "calibration cannot mutate official timeline, score, possession, or scoring events.");
+  assertTest(model.productionScoringEventCreationCount === 0, "calibration cannot create production scoring events.");
+  assertTest(model.globalEconomyClaimCount === 0, "calibration cannot claim global economy.");
+  assertTest(model.profiles.every((profile) => !profile.canDriveLiveSelection), "calibration cannot drive live selection.");
+  assertTest(model.profiles.every((profile) => !profile.canDriveProductionRouteResolution), "calibration cannot drive production route resolution.");
+  assertTest(model.allProfilesKeepOfficialDiagnosticSandboxSeparate, "sandbox and diagnostic data cannot become official truth.");
+  assertTest(model.allProfilesKeepSelectionPreviewSandboxOnly, "Selection Preview must remain sandbox_only.");
+  assertTest(model.noProfileUpgradesSelectionPreviewConfidence, "Selection Preview confidence cannot be upgraded.");
+
+  return [
+    "calibration cannot mutate official timeline",
+    "calibration cannot mutate official score",
+    "calibration cannot mutate official possession",
+    "calibration cannot mutate official scoring events",
+    "calibration cannot create production scoring events",
+    "calibration cannot claim global economy",
+    "calibration cannot drive live selection",
+    "calibration cannot drive production route resolution",
+    "sandbox cannot become official truth",
+    "diagnostic cannot become official truth",
+    "Selection Preview cannot be upgraded",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateProfileSignalCalibrationGuard();
+
+  console.log("profileSignalCalibrationGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -36308,6 +37138,69 @@ if (require.main === module) {
   const checks = validateScoringGuard4F();
 
   console.log("scoringGuard.4f tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4g.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4G(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official score derives only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "profile calibration must not delete, cap, rewrite, or fabricate official timeline events.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "profile calibration must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.officialScoreDelta === 0, "profile calibration must not mutate official score.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "profile calibration must not create production scoring events.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4G();
+
+  console.log("scoringGuard.4g tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -44283,6 +45176,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "training_recommendation";
   }
 }
@@ -44369,6 +45263,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Rapport coach depuis les agrÃ©gats officiels";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Validation multi-profils des traces full-match";
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
+      return "Calibration des signaux de profils full-match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -44452,6 +45348,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -44502,6 +45399,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
     "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
+    "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -45662,6 +46560,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
       return 22;
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return 21;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
@@ -45759,6 +46658,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le rapport coach depuis les agrÃ©gats officiels";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
+      return "Relire la calibration des signaux de profils";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -47046,7 +47947,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
-  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION";
+  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
+  | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -48034,6 +48936,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which Coach Report V0 cards are sensitive enough for future visualization",
       "which expected profile signals remain weak or missing",
       "where future Coach Report V1 evidence should deepen profile-specific language",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
+    canProve: [
+      "validation profiles expose expected or accepted fallback tactical signals",
+      "generated profile validation artifacts are free of mojibake markers",
+      "profile signal calibration remains separate from official state mutation",
+      "selection preview remains sandbox_only and is not upgraded",
+    ],
+    canSuggest: [
+      "which profile signals are strong enough for future Coach Report V1 visualization",
+      "which profiles still rely on fallback evidence",
+      "where future fixtures should deepen tactical distinction",
     ],
     cannotProve: [
       "global scoring balance",

@@ -243,6 +243,9 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay4F = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4f.md"));
   const fullMatchWorkbenchChainReplay4FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4f.md"));
   const fullMatchTraceValidation4F = readIfExists(join(shareDirectory, "fullmatch-trace-validation-4f.md"));
+  const fullMatchWorkbenchChainReplay4G = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4g.md"));
+  const fullMatchWorkbenchChainReplay4GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4g.md"));
+  const fullMatchTraceValidation4G = readIfExists(join(shareDirectory, "fullmatch-trace-validation-4g.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -2206,6 +2209,33 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-4e.md",
     ...sprint4EForbiddenLeftovers,
   ];
+  const sprint4GExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4g.md",
+    "validation.fullmatch-workbench-chain-replay-4g.md",
+    "fullmatch-trace-validation-4g.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4GForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-4f.md",
+    "validation.fullmatch-workbench-chain-replay-4f.md",
+    "fullmatch-trace-validation-4f.md",
+    ...sprint4FForbiddenLeftovers,
+  ];
   const coachHtmlMojibakeMarkers = [
     "Ãƒ",
     "Ã‚",
@@ -2330,6 +2360,72 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("50-match economy remains global reference", fullMatchTraceValidation4F.includes("FULL_MATCH_BATCH_ECONOMY remains only global proof: YES") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4FValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchTraceValidation4F.includes("CONFIRM_FULL_MATCH_TRACE_VALIDATION") && fullMatchTraceValidation4F.includes("PREPARE_COACH_REPORT_V1_VISUALIZATION"), "4F recommendations visible"),
+  ];
+  const sprint4GProfileIds = [
+    "high_press_profile",
+    "low_block_profile",
+    "fast_transition_profile",
+    "power_contact_profile",
+    "strong_goalkeeper_profile",
+    "late_fatigue_profile",
+  ];
+  const sprint4GMojibakeTargets = [
+    fullMatchTraceValidation4G,
+    fullMatchWorkbenchChainReplay4G,
+    fullMatchWorkbenchChainReplay4GValidation,
+    coachExperimentalHtml,
+    coachHtml,
+  ];
+  const sprint4GChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4G", activeConfig.sprintName === "Sprint 4G - Profile Signal Calibration & Encoding Fix", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 19", filesOnDisk.length === 19, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4GExpectedFiles.every((file) => requiredCopied(file)), sprint4GExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4GForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4GForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint4GExpectedFiles.every((file) => requiredCopied(file)), sprint4GExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 4G", manifest.includes("Sprint 4G - Profile Signal Calibration & Encoding Fix") && detailedManifest.includes("Sprint 4G - Profile Signal Calibration & Encoding Fix"), "visible"),
+    check("README is Sprint 4G oriented", readme.includes("# Sprint 4G Share Pack") && readme.includes("fullmatch-trace-validation-4g.md"), "README current"),
+    check("4G compact report included", fullMatchWorkbenchChainReplay4G.includes("# FullMatch Workbench Chain Replay 4G") && fullMatchWorkbenchChainReplay4G.includes("signal status by profile"), "4G doc included"),
+    check("4G detailed trace validation report included", fullMatchTraceValidation4G.includes("# Full Match Trace Validation 4G") && fullMatchTraceValidation4G.includes("## Profile Signal Calibration"), "4G trace doc included"),
+    check("4G validation is PASS", fullMatchWorkbenchChainReplay4GValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay4GValidation.includes("high_press_profile has expected or fallback pressure signal"), "4G validation PASS"),
+    check("all six validation profiles are documented", sprint4GProfileIds.every((profileId) => fullMatchTraceValidation4G.includes(profileId) && fullMatchWorkbenchChainReplay4GValidation.includes(profileId)), "six profiles visible"),
+    check("baseline profile is high press", fullMatchTraceValidation4G.includes("baseline profile: high_press_profile") && fullMatchWorkbenchChainReplay4G.includes("baseline profile: high_press_profile"), "baseline visible"),
+    check("profile variation detected", fullMatchTraceValidation4G.includes("profile variation detected: YES") && fullMatchWorkbenchChainReplay4GValidation.includes("PASS: profile variation is detected"), "profile variation YES"),
+    check("report variation detected", fullMatchTraceValidation4G.includes("report variation detected: YES") && fullMatchWorkbenchChainReplay4GValidation.includes("PASS: report variation is detected"), "report variation YES"),
+    check("at least 5 of 6 profiles change report cards", fullMatchWorkbenchChainReplay4GValidation.includes("PASS: at least 5 of 6 profiles change Coach Report V0 cards vs baseline"), "changed cards threshold visible"),
+    check("each profile has expected or fallback signal", sprint4GProfileIds.every((profileId) => fullMatchWorkbenchChainReplay4GValidation.includes(`PASS: ${profileId} has expected or fallback`)), "profile signals PASS"),
+    check("expected and fallback signals are visible", fullMatchTraceValidation4G.includes("Expected signals present") && fullMatchTraceValidation4G.includes("Accepted fallback signals"), "signal columns visible"),
+    check("missing expected signals are explicit", fullMatchWorkbenchChainReplay4GValidation.includes("PASS: missing expected signals are explicit"), "missing explicit"),
+    check("profile signal calibration tags bundled", bundleSimulation.includes("profile_signal_calibration") && bundleSimulation.includes("profile_signal_calibration_profile_count_${input.profiles.length}") && fullMatchTraceValidation4G.includes("profile count: 6"), "4G tags bundled"),
+    check("profile signal expectation source bundled", bundleSimulation.includes("src/simulation/validation/profileSignalExpectations.ts") && bundleSimulation.includes("FULL_MATCH_TRACE_PROFILE_SIGNAL_EXPECTATIONS"), "expectations bundled"),
+    check("profile signal assertion source bundled", bundleSimulation.includes("src/simulation/validation/fullMatchTraceValidationAssertions.ts") && bundleSimulation.includes("assessFullMatchTraceProfileSignals"), "assertions bundled"),
+    check("generated encoding validator bundled", bundleReports.includes("src/reports/encoding/mojibakeDetection.ts") && bundleReports.includes("src/reports/encoding/validateGeneratedTextEncoding.ts"), "encoding validator bundled"),
+    check("4G tests bundled", bundleSimulation.includes("profileSignalExpectations.test.ts") && bundleSimulation.includes("fullMatchTraceValidationProfileSignals.test.ts") && bundleSimulation.includes("fullMatchTraceValidationEncoding.test.ts") && bundleSimulation.includes("coachReportV0ProfileVariation.4g.test.ts") && bundleSimulation.includes("profileSignalCalibrationGuard.test.ts") && bundleSimulation.includes("scoringGuard.4g.test.ts"), "4G tests bundled"),
+    check("encoding tests bundled", bundleReports.includes("validateGeneratedTextEncoding.test.ts") && bundleReports.includes("fullmatch-trace-validation-4g.md"), "encoding tests bundled"),
+    check("no mojibake in 4G generated artifacts", !sprint4GMojibakeTargets.some((target) => containsAny(target, coachHtmlMojibakeMarkers)), "mojibake marker count 0"),
+    check("correct French labels visible", fullMatchTraceValidation4G.includes("récupération défensive") && fullMatchTraceValidation4G.includes("erreurs provoquées par la pression") && fullMatchTraceValidation4G.includes("ligne cassée") && fullMatchTraceValidation4G.includes("possession sécurisée") && fullMatchTraceValidation4G.includes("danger créé") && fullMatchTraceValidation4G.includes("qualité du gardien") && fullMatchTraceValidation4G.includes("fatigue visible"), "French labels visible"),
+    check("trace validation evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION") && bundleSimulation.includes("WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION"), "4G evidence category bundled"),
+    check("diagnostic and sandbox aggregates stay separate", fullMatchTraceValidation4G.includes("diagnostic and sandbox aggregates kept separate: YES") && fullMatchWorkbenchChainReplay4GValidation.includes("diagnostic aggregates remain separate") && fullMatchWorkbenchChainReplay4GValidation.includes("sandbox aggregates remain separate"), "scope separation visible"),
+    check("Selection Preview remains sandbox_only", fullMatchTraceValidation4G.includes("Selection Preview remains sandbox_only: YES") && fullMatchWorkbenchChainReplay4GValidation.includes("Selection Preview remains sandbox_only"), "selection preview sandbox"),
+    check("Selection Preview confidence not upgraded", fullMatchTraceValidation4G.includes("Selection Preview confidence not upgraded: YES") && fullMatchWorkbenchChainReplay4GValidation.includes("Selection Preview confidence is not upgraded"), "confidence not upgraded"),
+    check("validation cannot mutate official timeline", fullMatchWorkbenchChainReplay4GValidation.includes("validation cannot mutate official timeline"), "timeline mutation forbidden"),
+    check("validation cannot mutate official score", fullMatchWorkbenchChainReplay4GValidation.includes("validation cannot mutate official score"), "score mutation forbidden"),
+    check("validation cannot mutate official possession", fullMatchWorkbenchChainReplay4GValidation.includes("validation cannot mutate official possession"), "possession mutation forbidden"),
+    check("validation cannot create production scoring events", fullMatchTraceValidation4G.includes("production scoring event creation count: 0") && fullMatchWorkbenchChainReplay4GValidation.includes("validation cannot create production scoring events"), "production scoring creation forbidden"),
+    check("validation cannot claim global economy", fullMatchTraceValidation4G.includes("global economy claim count: 0") && fullMatchWorkbenchChainReplay4GValidation.includes("validation cannot claim global economy"), "global economy forbidden"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4GValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4GValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4GValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchTraceValidation4G.includes("FULL_MATCH_BATCH_ECONOMY remains only global proof: YES") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4GValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchTraceValidation4G.includes("CONFIRM_PROFILE_SIGNAL_CALIBRATION") && fullMatchTraceValidation4G.includes("CONFIRM_ENCODING_FIX") && fullMatchTraceValidation4G.includes("PREPARE_COACH_REPORT_V1_VISUALIZATION"), "4G recommendations visible"),
   ];
   const sprint4DChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -4877,6 +4973,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4G - Profile Signal Calibration")
+      ? sprint4GChecks
     : activeConfig.sprintName.includes("Sprint 4F - Full Match Trace Validation")
       ? sprint4FChecks
     : activeConfig.sprintName.includes("Sprint 4E - Coach Report V0 from Trace Aggregates")

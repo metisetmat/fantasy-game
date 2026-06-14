@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 4F - Full Match Trace Validation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4G - Profile Signal Calibration & Encoding Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -434,7 +434,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
-  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION";
+  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
+  | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

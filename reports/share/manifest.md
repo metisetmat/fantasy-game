@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-14T20:21:13.209Z
-Task/sprint: Sprint 4F - Full Match Trace Validation
+Generated: 2026-06-14T21:24:56.685Z
+Task/sprint: Sprint 4G - Profile Signal Calibration & Encoding Fix
 Mode: MINIMAL_REVIEW
 Final file count: 19
 
@@ -20,9 +20,9 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4f.md
-- validation.fullmatch-workbench-chain-replay-4f.md
-- fullmatch-trace-validation-4f.md
+- fullmatch-workbench-chain-replay-4g.md
+- validation.fullmatch-workbench-chain-replay-4g.md
+- fullmatch-trace-validation-4g.md
 - README.md
 
 ## Bundle Files

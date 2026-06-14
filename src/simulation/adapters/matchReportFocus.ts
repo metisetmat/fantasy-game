@@ -88,6 +88,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
       return 22;
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return 21;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
@@ -185,6 +186,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le rapport coach depuis les agrÃ©gats officiels";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
+    case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
+      return "Relire la calibration des signaux de profils";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
