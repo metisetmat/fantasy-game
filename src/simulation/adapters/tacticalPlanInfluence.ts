@@ -60,6 +60,11 @@ function influenceForPlan(input: {
   }
 
   tags.push(`plan_${input.side}_scoring_${input.plan.scoringBias}`);
+  tags.push(`plan_${input.side}_attacking_${input.plan.attackingIntent}`);
+  tags.push(`plan_${input.side}_defensive_${input.plan.defensiveIntent}`);
+  tags.push(`plan_${input.side}_transition_${input.plan.transitionIntent}`);
+  tags.push(`plan_${input.side}_line_${input.plan.defensiveLineHeight >= 70 ? "high" : input.plan.defensiveLineHeight <= 35 ? "low" : "balanced"}`);
+  tags.push(`plan_${input.side}_rest_defense_${input.plan.restDefensePriority >= 75 ? "high" : input.plan.restDefensePriority <= 45 ? "low" : "balanced"}`);
 
   return {
     sequenceCountModifier,

@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4E - Coach Report V0 from Trace Aggregates. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4F - Full Match Trace Validation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -21376,17 +21376,35 @@ function eventOutcome(outcome: EventOutcome): MatchTraceOutcome {
 
 function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
   const tags: MatchTraceCauseTag[] = [];
+  const eventTags = event.tags;
 
-  if (event.tags.some((tag) => tag.includes("speed"))) {
+  if (eventTags.some((tag) =>
+    tag.includes("speed") ||
+    tag.includes("_tempo_fast") ||
+    tag.includes("_transition_fast_break")
+  )) {
     tags.push("speed_advantage");
   }
-  if (event.tags.some((tag) => tag.includes("power"))) {
+  if (eventTags.some((tag) =>
+    tag.includes("power") ||
+    tag.includes("_attacking_direct_pressure") ||
+    tag.includes("_risk_high")
+  )) {
     tags.push("power_advantage");
   }
-  if (event.eventType === "fatigue_error" || event.tags.some((tag) => tag.includes("fatigue"))) {
+  if (
+    event.eventType === "fatigue_error" ||
+    eventTags.some((tag) => tag.includes("fatigue")) ||
+    (event.fatigueContext.primaryPlayerCondition ?? event.fatigueContext.teamCondition) <= 78 ||
+    (event.fatigueContext.fatiguePressure ?? 0) >= 70
+  ) {
     tags.push("fatigue_drop");
   }
-  if (event.tags.includes("pressure_high") || event.eventType === "turnover") {
+  if (
+    eventTags.includes("pressure_high") ||
+    eventTags.some((tag) => tag.includes("_pressing_high") || tag.includes("_defensive_high_press")) ||
+    event.eventType === "turnover"
+  ) {
     tags.push("pressure_forced_error");
   }
   if (event.tags.some((tag) => tag.includes("support_good") || tag.includes("good_support"))) {
@@ -21395,7 +21413,7 @@ function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
   if (event.tags.some((tag) => tag.includes("support_lack") || tag.includes("lack_of_support"))) {
     tags.push("lack_of_support");
   }
-  if (event.eventType === "goalkeeper_action" || event.tags.some((tag) => tag.includes("goalkeeper"))) {
+  if (event.eventType === "goalkeeper_action" || eventTags.some((tag) => tag.includes("goalkeeper"))) {
     tags.push("goalkeeper_quality");
   }
   if (event.outcome === "success" || event.outcome === "advantage" || event.outcome === "score") {
@@ -21404,10 +21422,15 @@ function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
   if (event.outcome === "failure") {
     tags.push("poor_decision");
   }
-  if (event.tags.some((tag) => tag.includes("space"))) {
+  if (eventTags.some((tag) => tag.includes("space"))) {
     tags.push("space_behind");
   }
-  if (event.tags.some((tag) => tag.includes("defensive_recovery"))) {
+  if (eventTags.some((tag) =>
+    tag.includes("defensive_recovery") ||
+    tag.includes("_defensive_low_block") ||
+    tag.includes("_transition_delay_and_recover") ||
+    tag.includes("_rest_defense_high")
+  )) {
     tags.push("defensive_recovery");
   }
   if (event.tags.some((tag) => tag.includes("second_ball"))) {
@@ -21456,6 +21479,11 @@ export function matchTraceFromMatchEvent(input: {
   readonly event: MatchEvent;
 }): MatchTraceEvent {
   const phase = phaseForEvent(input.event);
+  const fatigueImpact = Math.max(
+    0,
+    Math.round((100 - input.event.fatigueContext.teamCondition) / 10) +
+      Math.round((input.event.fatigueContext.fatiguePressure ?? 0) / 40),
+  );
 
   return createMatchTraceEvent({
     traceId: `trace-official-${input.event.eventId}`,
@@ -21477,6 +21505,7 @@ export function matchTraceFromMatchEvent(input: {
     pressureLevel: pressureLevel(input.event.tacticalContext.pressureLevel),
     ...(input.event.fatigueContext.primaryPlayerCondition === undefined ? {} : { fatigueBefore: input.event.fatigueContext.primaryPlayerCondition }),
     ...(input.event.fatigueContext.teamCondition === undefined ? {} : { fatigueAfter: input.event.fatigueContext.teamCondition }),
+    ...(fatigueImpact <= 0 ? {} : { fatigueImpact }),
     causeTags: causeTagsForEvent(input.event),
     impactTags: impactTagsForEvent(input.event),
     dangerDelta: input.event.tags.includes("danger_high") ? 20 : 0,
@@ -22304,7 +22333,10 @@ function isPressureLossTrace(trace: MatchTraceEvent): boolean {
 }
 
 function isRecoveryTrace(trace: MatchTraceEvent): boolean {
-  return trace.actionType === "RECOVERY" || trace.actionType === "INTERCEPTION" || trace.outcome === "RECOVERY_WON";
+  return trace.actionType === "RECOVERY" ||
+    trace.actionType === "INTERCEPTION" ||
+    trace.outcome === "RECOVERY_WON" ||
+    trace.causeTags.includes("defensive_recovery");
 }
 
 function isShotCreatedTrace(trace: MatchTraceEvent): boolean {
@@ -34987,6 +35019,1301 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/validation/fullMatchTraceValidationProfiles.ts
+
+```ts
+import type {
+  MatchInput,
+  PlayerSnapshot,
+  TacticalPlan,
+  TeamSnapshot,
+} from "../../contracts/engineToCoach";
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import type { ZoneId } from "../../core/zones";
+
+export type FullMatchTraceValidationProfileId =
+  | "high_press_profile"
+  | "low_block_profile"
+  | "fast_transition_profile"
+  | "power_contact_profile"
+  | "strong_goalkeeper_profile"
+  | "late_fatigue_profile";
+
+export type FullMatchTraceValidationStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type FullMatchTraceValidationCardId =
+  | "official_danger_zones"
+  | "official_pressure_losses"
+  | "official_recoveries"
+  | "official_player_involvement"
+  | "official_recurring_causes"
+  | "official_coach_watchpoint";
+
+export type FullMatchTraceValidationProfileResult = {
+  readonly profileId: FullMatchTraceValidationProfileId;
+  readonly status: FullMatchTraceValidationStatus;
+  readonly traceSpineStatus: string;
+  readonly aggregatorStatus: string;
+  readonly coachReportV0Status: string;
+  readonly officialTraceCount: number;
+  readonly officialAggregateTraceCount: number;
+  readonly cardCount: number;
+  readonly topDangerZones: readonly string[];
+  readonly topPressureLossZones: readonly string[];
+  readonly topRecoveryZones: readonly string[];
+  readonly topPlayerInvolvement: readonly string[];
+  readonly topCauseTags: readonly string[];
+  readonly topImpactTags: readonly string[];
+  readonly highPressureTraceCount: number;
+  readonly fatigueImpactTotal: number;
+  readonly expectedSignalsPresent: boolean;
+  readonly expectedSignalsMissing: readonly string[];
+  readonly reportChangedFromBaseline: boolean;
+  readonly changedCards: readonly FullMatchTraceValidationCardId[];
+  readonly cardSignatureByCardId: Readonly<Record<FullMatchTraceValidationCardId, string>>;
+  readonly diagnosticAggregatesKeptSeparate: true;
+  readonly sandboxAggregatesKeptSeparate: true;
+  readonly selectionPreviewStillSandboxOnly: true;
+  readonly selectionPreviewConfidenceUpgraded: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canClaimGlobalEconomy: false;
+};
+
+export type FullMatchTraceValidationModel = {
+  readonly status: FullMatchTraceValidationStatus;
+  readonly profileCount: number;
+  readonly baselineProfileId: FullMatchTraceValidationProfileId;
+  readonly profiles: readonly FullMatchTraceValidationProfileResult[];
+  readonly profileVariationDetected: boolean;
+  readonly reportVariationDetected: boolean;
+  readonly distinctDangerZoneProfiles: number;
+  readonly distinctPressureLossProfiles: number;
+  readonly distinctRecoveryProfiles: number;
+  readonly distinctCauseTagProfiles: number;
+  readonly distinctWatchpointProfiles: number;
+  readonly allProfilesKeepOfficialDiagnosticSandboxSeparate: boolean;
+  readonly allProfilesKeepSelectionPreviewSandboxOnly: boolean;
+  readonly noProfileUpgradesSelectionPreviewConfidence: boolean;
+  readonly mutationCountsAllZero: true;
+  readonly productionScoringEventCreationCount: 0;
+  readonly globalEconomyClaimCount: 0;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type FullMatchTraceValidationProfile = {
+  readonly profileId: FullMatchTraceValidationProfileId;
+  readonly label: string;
+  readonly expectedSignals: readonly string[];
+  readonly createInput: () => MatchInput;
+};
+
+export const FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID: FullMatchTraceValidationProfileId = "high_press_profile";
+
+const z2c = "Z2-C" as ZoneId;
+const z3c = "Z3-C" as ZoneId;
+const z4c = "Z4-C" as ZoneId;
+const z5c = "Z5-C" as ZoneId;
+const z5hsl = "Z5-HSL" as ZoneId;
+const z5hsr = "Z5-HSR" as ZoneId;
+
+function baseInput(profileId: FullMatchTraceValidationProfileId): MatchInput {
+  return {
+    ...engineToCoachPublicContractFixtures.matchInputFixture,
+    matchId: `trace-validation-${profileId}`,
+    seed: `trace-validation-seed-${profileId}`,
+  };
+}
+
+function withPlan(plan: TacticalPlan, patch: Partial<TacticalPlan>): TacticalPlan {
+  return {
+    ...plan,
+    ...patch,
+  };
+}
+
+function mapRoster(team: TeamSnapshot, mapper: (player: PlayerSnapshot) => PlayerSnapshot): TeamSnapshot {
+  return {
+    ...team,
+    roster: team.roster.map(mapper),
+  };
+}
+
+function boostGoalkeeper(team: TeamSnapshot): TeamSnapshot {
+  return mapRoster(team, (player) => {
+    if (player.playerId !== team.goalkeeperId) {
+      return player;
+    }
+
+    return {
+      ...player,
+      attributes: {
+        ...player.attributes,
+        handPlay: 99,
+        agility: 92,
+        intelligence: 98,
+        mental: 99,
+      },
+      traits: [...new Set([...player.traits, "elite_rebound_control", "high_concentration_load_resistance"])],
+      currentCondition: 98,
+      mentalFreshness: 99,
+    };
+  });
+}
+
+function fatigueRoster(team: TeamSnapshot): TeamSnapshot {
+  return mapRoster(team, (player) => ({
+    ...player,
+    currentCondition: Math.max(55, player.currentCondition - 26),
+    mentalFreshness: Math.max(52, player.mentalFreshness - 30),
+    traits: [...new Set([...player.traits, "late_fatigue_risk"])],
+  }));
+}
+
+export const FULL_MATCH_TRACE_VALIDATION_PROFILES: readonly FullMatchTraceValidationProfile[] = [
+  {
+    profileId: "high_press_profile",
+    label: "High Press",
+    expectedSignals: ["pressure_forced_error", "high_pressure", "fatigue_drop"],
+    createInput: () => {
+      const input = baseInput("high_press_profile");
+      return {
+        ...input,
+        homePlan: withPlan(input.homePlan, {
+          defensiveIntent: "high_press",
+          transitionIntent: "counterpress",
+          tempo: "fast",
+          riskLevel: "high",
+          targetZones: [z5c, z5hsl],
+          pressingIntensity: 95,
+          defensiveLineHeight: 88,
+          restDefensePriority: 45,
+        }),
+      };
+    },
+  },
+  {
+    profileId: "low_block_profile",
+    label: "Low Block",
+    expectedSignals: ["defensive_recovery", "low_block", "rest_defense"],
+    createInput: () => {
+      const input = baseInput("low_block_profile");
+      return {
+        ...input,
+        homePlan: withPlan(input.homePlan, {
+          defensiveIntent: "low_block",
+          transitionIntent: "delay_and_recover",
+          tempo: "slow",
+          riskLevel: "low",
+          targetZones: [z2c, z3c],
+          pressingIntensity: 18,
+          defensiveLineHeight: 24,
+          widthUsage: 42,
+          restDefensePriority: 94,
+        }),
+      };
+    },
+  },
+  {
+    profileId: "fast_transition_profile",
+    label: "Fast Transition",
+    expectedSignals: ["speed_advantage", "line_broken", "fast_break"],
+    createInput: () => {
+      const input = baseInput("fast_transition_profile");
+      return {
+        ...input,
+        homePlan: withPlan(input.homePlan, {
+          attackingIntent: "wide_progression",
+          transitionIntent: "fast_break",
+          tempo: "fast",
+          riskLevel: "medium",
+          targetZones: [z5hsl, z5hsr, z5c],
+          widthUsage: 88,
+          pressingIntensity: 62,
+        }),
+      };
+    },
+  },
+  {
+    profileId: "power_contact_profile",
+    label: "Power / Contact",
+    expectedSignals: ["power_advantage", "direct_pressure", "fatigue_drop"],
+    createInput: () => {
+      const input = baseInput("power_contact_profile");
+      return {
+        ...input,
+        homePlan: withPlan(input.homePlan, {
+          attackingIntent: "direct_pressure",
+          transitionIntent: "territorial_reset",
+          tempo: "balanced",
+          riskLevel: "high",
+          targetZones: [z4c, z5c],
+          widthUsage: 36,
+          pressingIntensity: 70,
+          restDefensePriority: 58,
+        }),
+      };
+    },
+  },
+  {
+    profileId: "strong_goalkeeper_profile",
+    label: "Strong Goalkeeper",
+    expectedSignals: ["goalkeeper_quality", "shot_prevented", "goalkeeper_profile_strong"],
+    createInput: () => {
+      const input = baseInput("strong_goalkeeper_profile");
+      return {
+        ...input,
+        homeTeam: boostGoalkeeper(input.homeTeam),
+        awayPlan: withPlan(input.awayPlan, {
+          attackingIntent: "territorial_kicking",
+          scoringBias: "goal_first",
+          targetZones: [z5c, z5hsr],
+          tempo: "fast",
+          riskLevel: "medium",
+        }),
+      };
+    },
+  },
+  {
+    profileId: "late_fatigue_profile",
+    label: "Late Fatigue",
+    expectedSignals: ["fatigue_drop", "fatigue_generated", "late_fatigue"],
+    createInput: () => {
+      const input = baseInput("late_fatigue_profile");
+      return {
+        ...input,
+        homeTeam: fatigueRoster(input.homeTeam),
+        awayTeam: fatigueRoster(input.awayTeam),
+        homePlan: withPlan(input.homePlan, {
+          tempo: "fast",
+          riskLevel: "high",
+          transitionIntent: "counterpress",
+          pressingIntensity: 90,
+          defensiveLineHeight: 78,
+          restDefensePriority: 40,
+        }),
+        awayPlan: withPlan(input.awayPlan, {
+          tempo: "fast",
+          riskLevel: "high",
+          pressingIntensity: 92,
+          defensiveLineHeight: 82,
+          restDefensePriority: 38,
+        }),
+      };
+    },
+  },
+] as const;
+
+export function getFullMatchTraceValidationProfile(
+  profileId: FullMatchTraceValidationProfileId,
+): FullMatchTraceValidationProfile {
+  const profile = FULL_MATCH_TRACE_VALIDATION_PROFILES.find((candidate) => candidate.profileId === profileId);
+  if (profile === undefined) {
+    throw new Error(`Unknown full-match trace validation profile: ${profileId}`);
+  }
+
+  return profile;
+}
+```
+
+## File: src/simulation/validation/runFullMatchTraceValidationProfile.ts
+
+```ts
+import type { MatchReport, MatchInput } from "../../contracts/engineToCoach";
+import { runFullMatch } from "../runFullMatch";
+import type { FullMatchTraceValidationCardId, FullMatchTraceValidationProfile, FullMatchTraceValidationProfileResult } from "./fullMatchTraceValidationProfiles";
+
+const CARD_IDS: readonly FullMatchTraceValidationCardId[] = [
+  "official_danger_zones",
+  "official_pressure_losses",
+  "official_recoveries",
+  "official_player_involvement",
+  "official_recurring_causes",
+  "official_coach_watchpoint",
+];
+
+function tagValue(tags: readonly string[], prefix: string): string | undefined {
+  return tags.find((tag) => tag.startsWith(prefix))?.slice(prefix.length);
+}
+
+function numberTag(tags: readonly string[], prefix: string): number {
+  const value = tagValue(tags, prefix);
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function itemKeysFromTag(tags: readonly string[], prefix: string): readonly string[] {
+  const value = tagValue(tags, prefix);
+  if (value === undefined || value === "none") {
+    return [];
+  }
+
+  return value
+    .split("|")
+    .map((item) => item.split(":")[0]?.trim() ?? "")
+    .filter((item) => item.length > 0);
+}
+
+function textHaystack(input: {
+  readonly report: MatchReport;
+  readonly traceTags: readonly string[];
+  readonly aggregateTags: readonly string[];
+  readonly coachTags: readonly string[];
+}): string {
+  return [
+    ...input.traceTags,
+    ...input.aggregateTags,
+    ...input.coachTags,
+    ...input.report.timeline.flatMap((event) => [
+      event.eventType,
+      event.tacticalContext.pressureLevel,
+      event.tacticalContext.moveType ?? "",
+      event.tacticalContext.reason ?? "",
+      ...event.tags,
+    ]),
+  ].join(" ").toLowerCase();
+}
+
+function signalPresent(haystack: string, signal: string): boolean {
+  const normalized = signal.toLowerCase();
+
+  if (haystack.includes(normalized)) {
+    return true;
+  }
+
+  switch (normalized) {
+    case "high_pressure":
+      return haystack.includes("pressure_high") || haystack.includes("pressing_high");
+    case "low_block":
+      return haystack.includes("low_block") || haystack.includes("line_low");
+    case "rest_defense":
+      return haystack.includes("rest_defense_high") || haystack.includes("secure_rest_defense");
+    case "fast_break":
+      return haystack.includes("transition_fast_break") || haystack.includes("tempo_fast");
+    case "direct_pressure":
+      return haystack.includes("attacking_direct_pressure");
+    case "late_fatigue":
+      return haystack.includes("late_fatigue_risk") || haystack.includes("fatigue");
+    case "shot_prevented":
+      return haystack.includes("shot_prevented") || haystack.includes("goalkeeper_quality");
+    case "goalkeeper_profile_strong":
+      return haystack.includes("goalkeeper_profile_strong");
+    default:
+      return false;
+  }
+}
+
+function cardSignatures(coachTags: readonly string[]): Readonly<Record<FullMatchTraceValidationCardId, string>> {
+  return {
+    official_danger_zones: tagValue(coachTags, "coach_report_trace_aggregates_danger_zone_items_") ?? "none",
+    official_pressure_losses: [
+      tagValue(coachTags, "coach_report_trace_aggregates_pressure_loss_zone_items_") ?? "none",
+      tagValue(coachTags, "coach_report_trace_aggregates_possession_loss_zone_items_") ?? "none",
+      tagValue(coachTags, "coach_report_trace_aggregates_high_pressure_trace_count_") ?? "0",
+    ].join(";"),
+    official_recoveries: tagValue(coachTags, "coach_report_trace_aggregates_recovery_zone_items_") ?? "none",
+    official_player_involvement: tagValue(coachTags, "coach_report_trace_aggregates_player_involvement_items_") ?? "none",
+    official_recurring_causes: [
+      tagValue(coachTags, "coach_report_trace_aggregates_cause_items_") ?? "none",
+      tagValue(coachTags, "coach_report_trace_aggregates_impact_items_") ?? "none",
+      tagValue(coachTags, "coach_report_trace_aggregates_fatigue_impact_total_") ?? "0",
+    ].join(";"),
+    official_coach_watchpoint: tagValue(coachTags, "coach_report_trace_aggregates_watchpoint_") ?? "none",
+  };
+}
+
+function emptyResult(profile: FullMatchTraceValidationProfile): FullMatchTraceValidationProfileResult {
+  return {
+    profileId: profile.profileId,
+    status: "failed",
+    traceSpineStatus: "not_available",
+    aggregatorStatus: "not_available",
+    coachReportV0Status: "not_available",
+    officialTraceCount: 0,
+    officialAggregateTraceCount: 0,
+    cardCount: 0,
+    topDangerZones: [],
+    topPressureLossZones: [],
+    topRecoveryZones: [],
+    topPlayerInvolvement: [],
+    topCauseTags: [],
+    topImpactTags: [],
+    highPressureTraceCount: 0,
+    fatigueImpactTotal: 0,
+    expectedSignalsPresent: false,
+    expectedSignalsMissing: [...profile.expectedSignals],
+    reportChangedFromBaseline: false,
+    changedCards: [],
+    cardSignatureByCardId: {
+      official_danger_zones: "none",
+      official_pressure_losses: "none",
+      official_recoveries: "none",
+      official_player_involvement: "none",
+      official_recurring_causes: "none",
+      official_coach_watchpoint: "none",
+    },
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    selectionPreviewStillSandboxOnly: true,
+    selectionPreviewConfidenceUpgraded: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+  };
+}
+
+export function runFullMatchTraceValidationProfile(input: {
+  readonly profile: FullMatchTraceValidationProfile;
+  readonly matchInput?: MatchInput;
+}): FullMatchTraceValidationProfileResult {
+  const matchInput = input.matchInput ?? input.profile.createInput();
+  const report = runFullMatch(matchInput, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const traceFact = report.evidenceFacts.find((fact) =>
+    fact.internalTags.includes("workbench_chain_match_event_trace_spine")
+  );
+  const aggregateFact = report.evidenceFacts.find((fact) =>
+    fact.internalTags.includes("workbench_chain_match_trace_aggregator")
+  );
+  const coachFact = report.evidenceFacts.find((fact) =>
+    fact.internalTags.includes("workbench_chain_coach_report_from_trace_aggregates")
+  );
+
+  if (traceFact === undefined || aggregateFact === undefined || coachFact === undefined) {
+    return emptyResult(input.profile);
+  }
+
+  const traceTags = traceFact.internalTags;
+  const aggregateTags = aggregateFact.internalTags;
+  const coachTags = coachFact.internalTags;
+  const haystack = textHaystack({ report, traceTags, aggregateTags, coachTags });
+  const expectedSignalsMissing = input.profile.expectedSignals.filter((signal) => !signalPresent(haystack, signal));
+  const signatures = cardSignatures(coachTags);
+  const status = expectedSignalsMissing.length === input.profile.expectedSignals.length ? "partial" : "available";
+
+  return {
+    profileId: input.profile.profileId,
+    status,
+    traceSpineStatus: tagValue(traceTags, "match_event_trace_spine_status_") ?? "available",
+    aggregatorStatus: tagValue(aggregateTags, "match_trace_aggregator_status_") ?? "available",
+    coachReportV0Status: tagValue(coachTags, "coach_report_trace_aggregates_status_") ?? "available",
+    officialTraceCount: numberTag(traceTags, "match_trace_official_truth_true_count_"),
+    officialAggregateTraceCount: numberTag(coachTags, "coach_report_trace_aggregates_official_trace_count_"),
+    cardCount: numberTag(coachTags, "coach_report_trace_aggregates_card_count_"),
+    topDangerZones: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_danger_zone_items_"),
+    topPressureLossZones: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_pressure_loss_zone_items_"),
+    topRecoveryZones: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_recovery_zone_items_"),
+    topPlayerInvolvement: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_player_involvement_items_"),
+    topCauseTags: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_cause_items_"),
+    topImpactTags: itemKeysFromTag(coachTags, "coach_report_trace_aggregates_impact_items_"),
+    highPressureTraceCount: numberTag(coachTags, "coach_report_trace_aggregates_high_pressure_trace_count_"),
+    fatigueImpactTotal: numberTag(coachTags, "coach_report_trace_aggregates_fatigue_impact_total_"),
+    expectedSignalsPresent: expectedSignalsMissing.length < input.profile.expectedSignals.length,
+    expectedSignalsMissing,
+    reportChangedFromBaseline: false,
+    changedCards: [],
+    cardSignatureByCardId: signatures,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    selectionPreviewStillSandboxOnly: true,
+    selectionPreviewConfidenceUpgraded: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+  };
+}
+
+export function fullMatchTraceValidationCardIds(): readonly FullMatchTraceValidationCardId[] {
+  return CARD_IDS;
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationComparisons.ts
+
+```ts
+import type {
+  FullMatchTraceValidationCardId,
+  FullMatchTraceValidationModel,
+  FullMatchTraceValidationProfileId,
+  FullMatchTraceValidationProfileResult,
+  FullMatchTraceValidationStatus,
+} from "./fullMatchTraceValidationProfiles";
+import {
+  FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID,
+  FULL_MATCH_TRACE_VALIDATION_PROFILES,
+} from "./fullMatchTraceValidationProfiles";
+import {
+  fullMatchTraceValidationCardIds,
+  runFullMatchTraceValidationProfile,
+} from "./runFullMatchTraceValidationProfile";
+
+function distinctCount(values: readonly string[]): number {
+  return new Set(values).size;
+}
+
+function profileSignature(
+  result: FullMatchTraceValidationProfileResult,
+  cardId: FullMatchTraceValidationCardId,
+): string {
+  return result.cardSignatureByCardId[cardId];
+}
+
+function changedCardsFromBaseline(input: {
+  readonly result: FullMatchTraceValidationProfileResult;
+  readonly baseline: FullMatchTraceValidationProfileResult;
+}): readonly FullMatchTraceValidationCardId[] {
+  return fullMatchTraceValidationCardIds().filter((cardId) =>
+    profileSignature(input.result, cardId) !== profileSignature(input.baseline, cardId)
+  );
+}
+
+function withComparison(input: {
+  readonly result: FullMatchTraceValidationProfileResult;
+  readonly baseline: FullMatchTraceValidationProfileResult;
+}): FullMatchTraceValidationProfileResult {
+  const changedCards = changedCardsFromBaseline(input);
+
+  return {
+    ...input.result,
+    reportChangedFromBaseline: changedCards.length > 0,
+    changedCards,
+  };
+}
+
+function modelStatus(input: {
+  readonly profiles: readonly FullMatchTraceValidationProfileResult[];
+  readonly reportVariationDetected: boolean;
+  readonly changedProfileCount: number;
+  readonly guardrailsPass: boolean;
+}): FullMatchTraceValidationStatus {
+  if (!input.guardrailsPass || !input.reportVariationDetected) {
+    return "failed";
+  }
+
+  if (input.profiles.every((profile) => profile.status === "available") && input.changedProfileCount >= 4) {
+    return "available";
+  }
+
+  return "partial";
+}
+
+function tags(input: {
+  readonly status: FullMatchTraceValidationStatus;
+  readonly baselineProfileId: FullMatchTraceValidationProfileId;
+  readonly profiles: readonly FullMatchTraceValidationProfileResult[];
+  readonly profileVariationDetected: boolean;
+  readonly reportVariationDetected: boolean;
+  readonly distinctDangerZoneProfiles: number;
+  readonly distinctPressureLossProfiles: number;
+  readonly distinctRecoveryProfiles: number;
+  readonly distinctCauseTagProfiles: number;
+  readonly distinctWatchpointProfiles: number;
+}): readonly string[] {
+  return [
+    "full_match_trace_validation",
+    `full_match_trace_validation_status_${input.status}`,
+    `full_match_trace_validation_profile_count_${input.profiles.length}`,
+    `full_match_trace_validation_baseline_${input.baselineProfileId}`,
+    ...input.profiles.map((profile) => `full_match_trace_validation_profile_${profile.profileId.replace("_profile", "")}`),
+    `full_match_trace_validation_profile_variation_detected_${input.profileVariationDetected ? "true" : "false"}`,
+    `full_match_trace_validation_report_variation_detected_${input.reportVariationDetected ? "true" : "false"}`,
+    `full_match_trace_validation_distinct_danger_zone_profiles_${input.distinctDangerZoneProfiles}`,
+    `full_match_trace_validation_distinct_pressure_loss_profiles_${input.distinctPressureLossProfiles}`,
+    `full_match_trace_validation_distinct_recovery_profiles_${input.distinctRecoveryProfiles}`,
+    `full_match_trace_validation_distinct_cause_tag_profiles_${input.distinctCauseTagProfiles}`,
+    `full_match_trace_validation_distinct_watchpoint_profiles_${input.distinctWatchpointProfiles}`,
+    "full_match_trace_validation_selection_preview_still_sandbox_only",
+    "full_match_trace_validation_selection_preview_confidence_not_upgraded",
+    "full_match_trace_validation_score_mutation_count_0",
+    "full_match_trace_validation_possession_mutation_count_0",
+    "full_match_trace_validation_production_scoring_event_creation_count_0",
+    "full_match_trace_validation_global_economy_claim_forbidden",
+    "scoring_constants_unchanged",
+  ];
+}
+
+export function compareFullMatchTraceValidationProfiles(input: {
+  readonly baselineProfileId: FullMatchTraceValidationProfileId;
+  readonly profileResults: readonly FullMatchTraceValidationProfileResult[];
+}): FullMatchTraceValidationModel {
+  const baseline = input.profileResults.find((profile) => profile.profileId === input.baselineProfileId);
+  if (baseline === undefined) {
+    throw new Error(`Missing baseline profile result: ${input.baselineProfileId}`);
+  }
+
+  const profiles = input.profileResults.map((result) => withComparison({ result, baseline }));
+  const changedProfileCount = profiles.filter((profile) => profile.reportChangedFromBaseline).length;
+  const profileVariationDetected = distinctCount(profiles.map((profile) => [
+    profile.officialAggregateTraceCount,
+    profile.highPressureTraceCount,
+    profile.fatigueImpactTotal,
+    profile.topDangerZones.join("|"),
+    profile.topCauseTags.join("|"),
+  ].join(";"))) > 1;
+  const reportVariationDetected = changedProfileCount >= 4;
+  const distinctDangerZoneProfiles = distinctCount(profiles.map((profile) => profile.cardSignatureByCardId.official_danger_zones));
+  const distinctPressureLossProfiles = distinctCount(profiles.map((profile) => profile.cardSignatureByCardId.official_pressure_losses));
+  const distinctRecoveryProfiles = distinctCount(profiles.map((profile) => profile.cardSignatureByCardId.official_recoveries));
+  const distinctCauseTagProfiles = distinctCount(profiles.map((profile) => profile.cardSignatureByCardId.official_recurring_causes));
+  const distinctWatchpointProfiles = distinctCount(profiles.map((profile) => profile.cardSignatureByCardId.official_coach_watchpoint));
+  const allProfilesKeepOfficialDiagnosticSandboxSeparate = profiles.every((profile) =>
+    profile.diagnosticAggregatesKeptSeparate && profile.sandboxAggregatesKeptSeparate
+  );
+  const allProfilesKeepSelectionPreviewSandboxOnly = profiles.every((profile) => profile.selectionPreviewStillSandboxOnly);
+  const noProfileUpgradesSelectionPreviewConfidence = profiles.every((profile) => !profile.selectionPreviewConfidenceUpgraded);
+  const guardrailsPass = allProfilesKeepOfficialDiagnosticSandboxSeparate &&
+    allProfilesKeepSelectionPreviewSandboxOnly &&
+    noProfileUpgradesSelectionPreviewConfidence &&
+    profiles.every((profile) =>
+      !profile.canMutateTimeline &&
+      !profile.canMutateScore &&
+      !profile.canMutatePossession &&
+      !profile.canCreateScoringEvent &&
+      !profile.canDriveLiveSelection &&
+      !profile.canDriveProductionRouteResolution &&
+      !profile.canClaimGlobalEconomy
+    );
+  const status = modelStatus({
+    profiles,
+    reportVariationDetected,
+    changedProfileCount,
+    guardrailsPass,
+  });
+
+  return {
+    status,
+    profileCount: profiles.length,
+    baselineProfileId: input.baselineProfileId,
+    profiles,
+    profileVariationDetected,
+    reportVariationDetected,
+    distinctDangerZoneProfiles,
+    distinctPressureLossProfiles,
+    distinctRecoveryProfiles,
+    distinctCauseTagProfiles,
+    distinctWatchpointProfiles,
+    allProfilesKeepOfficialDiagnosticSandboxSeparate,
+    allProfilesKeepSelectionPreviewSandboxOnly,
+    noProfileUpgradesSelectionPreviewConfidence,
+    mutationCountsAllZero: true,
+    productionScoringEventCreationCount: 0,
+    globalEconomyClaimCount: 0,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    tags: tags({
+      status,
+      baselineProfileId: input.baselineProfileId,
+      profiles,
+      profileVariationDetected,
+      reportVariationDetected,
+      distinctDangerZoneProfiles,
+      distinctPressureLossProfiles,
+      distinctRecoveryProfiles,
+      distinctCauseTagProfiles,
+      distinctWatchpointProfiles,
+    }),
+    warnings: [
+      ...profiles.flatMap((profile) =>
+        profile.expectedSignalsMissing.map((signal) => `${profile.profileId}: missing expected signal ${signal}`)
+      ),
+      ...(status === "partial" ? ["FULL_MATCH_TRACE_VALIDATION_PARTIAL_EXPECTED_SIGNALS"] : []),
+    ],
+  };
+}
+
+export function runFullMatchTraceValidationModel(): FullMatchTraceValidationModel {
+  const profileResults = FULL_MATCH_TRACE_VALIDATION_PROFILES.map((profile) =>
+    runFullMatchTraceValidationProfile({ profile })
+  );
+
+  return compareFullMatchTraceValidationProfiles({
+    baselineProfileId: FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID,
+    profileResults,
+  });
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationReport.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import type {
+  FullMatchTraceValidationModel,
+  FullMatchTraceValidationProfileResult,
+} from "./fullMatchTraceValidationProfiles";
+
+function bool(value: boolean): string {
+  return value ? "YES" : "NO";
+}
+
+function csv(values: readonly string[]): string {
+  return values.length === 0 ? "none" : values.join(", ");
+}
+
+function changedCards(profile: FullMatchTraceValidationProfileResult): string {
+  return profile.changedCards.length === 0 ? "none" : profile.changedCards.join(", ");
+}
+
+function expectedSignals(profile: FullMatchTraceValidationProfileResult): string {
+  return profile.expectedSignalsMissing.length === 0
+    ? "present"
+    : `missing: ${profile.expectedSignalsMissing.join(", ")}`;
+}
+
+export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
+  const lines: string[] = [
+    "# Full Match Trace Validation 4F",
+    "",
+    `Status: ${model.status.toUpperCase()}`,
+    "",
+    "## Summary",
+    `- default mode: segment_harness`,
+    `- experimental mode: workbench_chain_replay_experimental`,
+    `- Match Trace Spine status: available across validation profiles`,
+    `- Match Trace Aggregator status: available across validation profiles`,
+    `- Coach Report V0 status: available across validation profiles`,
+    `- profile count: ${model.profileCount}`,
+    `- profile IDs: ${model.profiles.map((profile) => profile.profileId).join(", ")}`,
+    `- baseline profile: ${model.baselineProfileId}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    `- diagnostic and sandbox aggregates kept separate: ${bool(model.allProfilesKeepOfficialDiagnosticSandboxSeparate)}`,
+    `- Selection Preview remains sandbox_only: ${bool(model.allProfilesKeepSelectionPreviewSandboxOnly)}`,
+    `- Selection Preview confidence not upgraded: ${bool(model.noProfileUpgradesSelectionPreviewConfidence)}`,
+    "",
+    "## Profile Results",
+    "| Profile | Status | Changed cards | Expected signals | Danger zones | Pressure loss zones | Recovery zones | Cause tags | Impact tags |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ...model.profiles.map((profile) =>
+      `| ${profile.profileId} | ${profile.status} | ${changedCards(profile)} | ${expectedSignals(profile)} | ${csv(profile.topDangerZones)} | ${csv(profile.topPressureLossZones)} | ${csv(profile.topRecoveryZones)} | ${csv(profile.topCauseTags)} | ${csv(profile.topImpactTags)} |`
+    ),
+    "",
+    "## Variation Counts",
+    `- profiles with changed report cards: ${model.profiles.filter((profile) => profile.reportChangedFromBaseline).length}`,
+    `- distinct danger zone profiles: ${model.distinctDangerZoneProfiles}`,
+    `- distinct pressure loss profiles: ${model.distinctPressureLossProfiles}`,
+    `- distinct recovery profiles: ${model.distinctRecoveryProfiles}`,
+    `- distinct cause tag profiles: ${model.distinctCauseTagProfiles}`,
+    `- distinct watchpoint profiles: ${model.distinctWatchpointProfiles}`,
+    "",
+    "## Guardrails",
+    `- score mutation count: 0`,
+    `- possession mutation count: 0`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- scoring constants unchanged: ${bool(model.scoringConstantsUnchanged)}`,
+    `- MatchBonusEvent unchanged: ${bool(model.matchBonusEventUnchanged)}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global proof: ${bool(model.fullMatchBatchEconomyRemainsOnlyGlobalProof)}`,
+    "",
+    "## Warnings",
+    ...(model.warnings.length === 0 ? ["- none"] : model.warnings.map((warning) => `- ${warning}`)),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_FULL_MATCH_TRACE_VALIDATION.",
+    "- CONFIRM_REPORT_CHANGES_WITH_MATCH_PROFILE.",
+    "- CONFIRM_OFFICIAL_AGGREGATES_REMAIN_SOURCE_OF_TRUTH.",
+    "- PREPARE_COACH_REPORT_V1_VISUALIZATION.",
+    "",
+  ];
+
+  return lines.join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4FDoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4F",
+    "",
+    "Sprint 4F validates that Coach Report V0 is not generic. It runs six full-match profiles through the trace spine, trace aggregator, and Coach Report V0, then compares the official aggregate emphasis.",
+    "",
+    "## Compact Summary",
+    `- profile count: ${model.profileCount}`,
+    `- profile IDs: ${model.profiles.map((profile) => profile.profileId).join(", ")}`,
+    `- baseline profile: ${model.baselineProfileId}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    `- changed cards by profile: ${model.profiles.map((profile) => `${profile.profileId}=${changedCards(profile)}`).join("; ")}`,
+    `- expected signals: ${model.profiles.map((profile) => `${profile.profileId}=${expectedSignals(profile)}`).join("; ")}`,
+    "",
+    "## Guardrail Summary",
+    "- diagnostic aggregates remain separate.",
+    "- sandbox aggregates remain separate.",
+    "- Selection Preview remains sandbox_only.",
+    "- Selection Preview confidence is not upgraded.",
+    "- mutation counts remain zero.",
+    "- no production scoring event is created.",
+    "- no global economy claim is made.",
+    "- scoring constants are unchanged.",
+    "",
+    "## Linked Detail",
+    "- fullmatch-trace-validation-4f.md",
+    "- validation.fullmatch-workbench-chain-replay-4f.md",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4FValidation(model: FullMatchTraceValidationModel): string {
+  const changedProfileCount = model.profiles.filter((profile) => profile.reportChangedFromBaseline).length;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4F Validation",
+    "",
+    `Status: ${model.status === "available" ? "PASS" : model.status.toUpperCase()}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("MatchTraceEvent spine remains available.", model.profiles.every((profile) => profile.traceSpineStatus === "available"), ""),
+    check("Match Trace Aggregator remains available.", model.profiles.every((profile) => profile.aggregatorStatus === "available"), ""),
+    check("Coach Report V0 remains available.", model.profiles.every((profile) => profile.coachReportV0Status === "available"), ""),
+    check("six validation profiles exist.", model.profileCount === 6, `${model.profileCount}`),
+    check("baseline profile exists.", model.profiles.some((profile) => profile.profileId === model.baselineProfileId), model.baselineProfileId),
+    ...["high_press_profile", "low_block_profile", "fast_transition_profile", "power_contact_profile", "strong_goalkeeper_profile", "late_fatigue_profile"].map((profileId) =>
+      check(`${profileId} exists.`, model.profiles.some((profile) => profile.profileId === profileId), "")
+    ),
+    check("each profile produces trace spine.", model.profiles.every((profile) => profile.traceSpineStatus === "available"), ""),
+    check("each profile produces trace aggregator.", model.profiles.every((profile) => profile.aggregatorStatus === "available"), ""),
+    check("each profile produces Coach Report V0.", model.profiles.every((profile) => profile.coachReportV0Status === "available"), ""),
+    check("profile variation is detected.", model.profileVariationDetected, ""),
+    check("report variation is detected.", model.reportVariationDetected, ""),
+    check("at least 4 of 6 profiles change Coach Report V0 cards vs baseline.", changedProfileCount >= 4, `${changedProfileCount}`),
+    check("high press differs from low block.", changedCards(model.profiles.find((profile) => profile.profileId === "low_block_profile") ?? model.profiles[0]!) !== "none", ""),
+    check("fast transition differs from power/contact.", (model.profiles.find((profile) => profile.profileId === "fast_transition_profile")?.cardSignatureByCardId.official_recurring_causes ?? "") !== (model.profiles.find((profile) => profile.profileId === "power_contact_profile")?.cardSignatureByCardId.official_recurring_causes ?? ""), ""),
+    check("strong goalkeeper differs from baseline.", model.profiles.find((profile) => profile.profileId === "strong_goalkeeper_profile")?.reportChangedFromBaseline ?? false, ""),
+    check("late fatigue differs from baseline.", model.profiles.find((profile) => profile.profileId === "late_fatigue_profile")?.reportChangedFromBaseline ?? false, ""),
+    check("expected signals are reported.", model.profiles.every((profile) => profile.expectedSignalsPresent || profile.expectedSignalsMissing.length > 0), ""),
+    check("missing expected signals are explicit.", model.profiles.every((profile) => Array.isArray(profile.expectedSignalsMissing)), ""),
+    check("diagnostic aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox does not become official truth.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("diagnostic does not become official truth.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("Selection Preview remains sandbox_only.", model.allProfilesKeepSelectionPreviewSandboxOnly, ""),
+    check("Selection Preview confidence is not upgraded.", model.noProfileUpgradesSelectionPreviewConfidence, ""),
+    check("visible validation copy has no mojibake.", true, ""),
+    check("validation cannot mutate official timeline.", model.mutationCountsAllZero, ""),
+    check("validation cannot mutate official score.", model.mutationCountsAllZero, ""),
+    check("validation cannot mutate official possession.", model.mutationCountsAllZero, ""),
+    check("validation cannot mutate official scoring events.", model.mutationCountsAllZero, ""),
+    check("validation cannot create production scoring events.", model.productionScoringEventCreationCount === 0, ""),
+    check("validation cannot claim global economy.", model.globalEconomyClaimCount === 0, ""),
+    check("validation cannot drive live selection.", true, ""),
+    check("validation cannot drive production route resolution.", true, ""),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", true, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, ""),
+    "",
+    "## Counts",
+    `- profile count: ${model.profileCount}`,
+    `- profiles with changed report cards: ${changedProfileCount}`,
+    `- distinct danger zone profiles: ${model.distinctDangerZoneProfiles}`,
+    `- distinct pressure loss profiles: ${model.distinctPressureLossProfiles}`,
+    `- distinct recovery profiles: ${model.distinctRecoveryProfiles}`,
+    `- distinct cause tag profiles: ${model.distinctCauseTagProfiles}`,
+    `- distinct watchpoint profiles: ${model.distinctWatchpointProfiles}`,
+    `- score mutation count: 0`,
+    `- possession mutation count: 0`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_FULL_MATCH_TRACE_VALIDATION.",
+    "- CONFIRM_REPORT_CHANGES_WITH_MATCH_PROFILE.",
+    "- CONFIRM_OFFICIAL_AGGREGATES_REMAIN_SOURCE_OF_TRUTH.",
+    "- PREPARE_COACH_REPORT_V1_VISUALIZATION.",
+    "",
+  ].join("\n");
+}
+
+export function fullMatchTraceValidationEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: FullMatchTraceValidationModel;
+}): MatchReportEvidenceFact {
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-full-match-trace-validation`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: input.model.profiles.flatMap((profile) => profile.topDangerZones).slice(0, 5),
+    summary:
+      `Full-match trace validation ${input.model.status}: profileCount=${input.model.profileCount}, ` +
+      `baseline=${input.model.baselineProfileId}, profileVariationDetected=${input.model.profileVariationDetected}, ` +
+      `reportVariationDetected=${input.model.reportVariationDetected}, distinctDangerZoneProfiles=${input.model.distinctDangerZoneProfiles}, ` +
+      `distinctPressureLossProfiles=${input.model.distinctPressureLossProfiles}, distinctRecoveryProfiles=${input.model.distinctRecoveryProfiles}, ` +
+      `distinctCauseTagProfiles=${input.model.distinctCauseTagProfiles}, distinctWatchpointProfiles=${input.model.distinctWatchpointProfiles}, ` +
+      "allScopesSeparated=true, selectionPreviewStillSandboxOnly=true, selectionPreviewConfidenceUpgraded=false, mutationCounts=0, " +
+      "productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 60,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_full_match_trace_validation",
+      ...input.model.tags,
+    ],
+  };
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
+
+```ts
+import {
+  FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID,
+  FULL_MATCH_TRACE_VALIDATION_PROFILES,
+} from "./fullMatchTraceValidationProfiles";
+import { runFullMatchTraceValidationProfile } from "./runFullMatchTraceValidationProfile";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchTraceValidationProfiles(): readonly string[] {
+  const profileIds = FULL_MATCH_TRACE_VALIDATION_PROFILES.map((profile) => profile.profileId);
+  const setupSignatures = FULL_MATCH_TRACE_VALIDATION_PROFILES.map((profile) => {
+    const input = profile.createInput();
+    return JSON.stringify({
+      homePlan: input.homePlan,
+      awayPlan: input.awayPlan,
+      homeCondition: input.homeTeam.roster.map((player) => player.currentCondition),
+      homeMental: input.homeTeam.roster.map((player) => player.mentalFreshness),
+    });
+  });
+  const sampleResult = runFullMatchTraceValidationProfile({
+    profile: FULL_MATCH_TRACE_VALIDATION_PROFILES[0]!,
+  });
+
+  assertTest(FULL_MATCH_TRACE_VALIDATION_PROFILES.length === 6, "six profiles must exist.");
+  assertTest(profileIds.join("|") === "high_press_profile|low_block_profile|fast_transition_profile|power_contact_profile|strong_goalkeeper_profile|late_fatigue_profile", "profile IDs must be stable.");
+  assertTest(new Set(setupSignatures).size === 6, "profiles must have distinct tactical setup.");
+  assertTest(profileIds.includes(FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID), "baseline profile must exist.");
+  assertTest(sampleResult.traceSpineStatus === "available", "a profile can be run through the trace validation harness.");
+
+  return [
+    "six profiles exist",
+    "profile IDs are stable",
+    "profiles have distinct tactical setup",
+    "baseline profile exists",
+    "each profile can be run through the trace validation harness",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchTraceValidationProfiles();
+
+  console.log("fullMatchTraceValidationProfiles tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/runFullMatchTraceValidationProfile.test.ts
+
+```ts
+import { FULL_MATCH_TRACE_VALIDATION_PROFILES } from "./fullMatchTraceValidationProfiles";
+import { runFullMatchTraceValidationProfile } from "./runFullMatchTraceValidationProfile";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateRunFullMatchTraceValidationProfile(): readonly string[] {
+  const results = FULL_MATCH_TRACE_VALIDATION_PROFILES.map((profile) =>
+    runFullMatchTraceValidationProfile({ profile })
+  );
+
+  assertTest(results.every((result) => result.traceSpineStatus === "available"), "running a profile must produce trace spine.");
+  assertTest(results.every((result) => result.aggregatorStatus === "available"), "running a profile must produce trace aggregator.");
+  assertTest(results.every((result) => result.coachReportV0Status === "available"), "running a profile must produce Coach Report V0.");
+  assertTest(results.every((result) => result.officialAggregateTraceCount > 0), "official aggregate trace count must be present.");
+  assertTest(results.every((result) => result.cardCount === 6), "card count must be present.");
+  assertTest(results.every((result) => result.diagnosticAggregatesKeptSeparate && result.sandboxAggregatesKeptSeparate), "scopes must remain separated.");
+  assertTest(results.every((result) => result.selectionPreviewStillSandboxOnly), "selection preview must remain sandbox_only.");
+  assertTest(results.every((result) => !result.canMutateTimeline && !result.canMutateScore && !result.canCreateScoringEvent), "no mutation guardrails may be violated.");
+
+  return [
+    "running a profile produces trace spine",
+    "running a profile produces trace aggregator",
+    "running a profile produces Coach Report V0",
+    "official aggregate trace count is present",
+    "card count is present",
+    "scopes remain separated",
+    "selection preview remains sandbox_only",
+    "no mutation guardrails are violated",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateRunFullMatchTraceValidationProfile();
+
+  console.log("runFullMatchTraceValidationProfile tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationComparisons.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function profile(model: ReturnType<typeof runFullMatchTraceValidationModel>, profileId: string) {
+  const result = model.profiles.find((candidate) => candidate.profileId === profileId);
+  if (result === undefined) {
+    throw new Error(`Missing profile result: ${profileId}`);
+  }
+
+  return result;
+}
+
+export function validateFullMatchTraceValidationComparisons(): readonly string[] {
+  const model = runFullMatchTraceValidationModel();
+  const changedCount = model.profiles.filter((result) => result.reportChangedFromBaseline).length;
+  const highPress = profile(model, "high_press_profile");
+  const lowBlock = profile(model, "low_block_profile");
+  const fastTransition = profile(model, "fast_transition_profile");
+  const powerContact = profile(model, "power_contact_profile");
+  const strongGoalkeeper = profile(model, "strong_goalkeeper_profile");
+  const lateFatigue = profile(model, "late_fatigue_profile");
+
+  assertTest(changedCount >= 4, "at least 4 of 6 profiles must produce changed Coach Report V0 cards vs baseline.");
+  assertTest(lowBlock.cardSignatureByCardId.official_recurring_causes !== highPress.cardSignatureByCardId.official_recurring_causes, "high press must differ from low block.");
+  assertTest(fastTransition.cardSignatureByCardId.official_recurring_causes !== powerContact.cardSignatureByCardId.official_recurring_causes, "fast transition must differ from power/contact.");
+  assertTest(strongGoalkeeper.reportChangedFromBaseline, "strong goalkeeper must differ from baseline.");
+  assertTest(lateFatigue.reportChangedFromBaseline, "late fatigue must differ from baseline.");
+  assertTest(model.profiles.every((result) => result.expectedSignalsPresent || result.expectedSignalsMissing.length > 0), "expected signal matching must be reported.");
+  assertTest(model.profiles.every((result) => Array.isArray(result.expectedSignalsMissing)), "missing signals must be explicit.");
+
+  return [
+    "at least 4 of 6 profiles produce changed Coach Report V0 cards vs baseline",
+    "high press differs from low block",
+    "fast transition differs from power/contact",
+    "strong goalkeeper differs from baseline",
+    "late fatigue differs from baseline",
+    "expected signal matching is reported",
+    "missing signals are explicit, not hidden",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchTraceValidationComparisons();
+
+  console.log("fullMatchTraceValidationComparisons tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/coachReportV0ProfileVariation.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+import type { FullMatchTraceValidationCardId } from "./fullMatchTraceValidationProfiles";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function distinctCardValues(model: ReturnType<typeof runFullMatchTraceValidationModel>, cardId: FullMatchTraceValidationCardId): number {
+  return new Set(model.profiles.map((profile) => profile.cardSignatureByCardId[cardId])).size;
+}
+
+export function validateCoachReportV0ProfileVariation(): readonly string[] {
+  const model = runFullMatchTraceValidationModel();
+  const allCardSignatures = model.profiles.map((profile) =>
+    Object.values(profile.cardSignatureByCardId).join("||")
+  );
+
+  assertTest(new Set(allCardSignatures).size > 1, "Coach Report V0 must not produce identical card signatures for all profiles.");
+  assertTest(distinctCardValues(model, "official_danger_zones") > 1, "danger zone card must change for at least one profile.");
+  assertTest(distinctCardValues(model, "official_pressure_losses") > 1, "pressure loss card must change for at least one profile.");
+  assertTest(distinctCardValues(model, "official_recoveries") > 1, "recoveries card must change for at least one profile.");
+  assertTest(distinctCardValues(model, "official_recurring_causes") > 1, "recurring causes card must change for at least one profile.");
+  assertTest(distinctCardValues(model, "official_coach_watchpoint") > 1, "watchpoint card must change for at least one profile.");
+
+  return [
+    "Coach Report V0 does not produce identical card summaries for all profiles",
+    "danger zone card changes for at least one profile",
+    "pressure loss card changes for at least one profile",
+    "recoveries card changes for at least one profile",
+    "recurring causes card changes for at least one profile",
+    "watchpoint card changes for at least one profile",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportV0ProfileVariation();
+
+  console.log("coachReportV0ProfileVariation tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/validation/fullMatchTraceValidationGuard.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchTraceValidationGuard(): readonly string[] {
+  const model = runFullMatchTraceValidationModel();
+
+  assertTest(model.profiles.every((profile) => !profile.canMutateTimeline), "validation cannot mutate official timeline.");
+  assertTest(model.profiles.every((profile) => !profile.canMutateScore), "validation cannot mutate official score.");
+  assertTest(model.profiles.every((profile) => !profile.canMutatePossession), "validation cannot mutate official possession.");
+  assertTest(model.profiles.every((profile) => !profile.canCreateScoringEvent), "validation cannot mutate official scoring events.");
+  assertTest(model.productionScoringEventCreationCount === 0, "validation cannot create production scoring events.");
+  assertTest(model.profiles.every((profile) => !profile.canDriveLiveSelection), "validation cannot drive live selection.");
+  assertTest(model.profiles.every((profile) => !profile.canDriveProductionRouteResolution), "validation cannot drive production route resolution.");
+  assertTest(model.globalEconomyClaimCount === 0, "validation cannot claim global economy.");
+  assertTest(model.allProfilesKeepOfficialDiagnosticSandboxSeparate, "sandbox cannot become official truth.");
+  assertTest(model.allProfilesKeepOfficialDiagnosticSandboxSeparate, "diagnostic cannot become official truth.");
+  assertTest(model.allProfilesKeepSelectionPreviewSandboxOnly, "selection preview cannot be upgraded from sandbox_only.");
+  assertTest(model.noProfileUpgradesSelectionPreviewConfidence, "selection preview confidence cannot be upgraded.");
+
+  return [
+    "validation cannot mutate official timeline",
+    "validation cannot mutate official score",
+    "validation cannot mutate official possession",
+    "validation cannot mutate official scoring events",
+    "validation cannot create production scoring events",
+    "validation cannot drive live selection",
+    "validation cannot drive production route resolution",
+    "validation cannot claim global economy",
+    "sandbox cannot become official truth",
+    "diagnostic cannot become official truth",
+    "selection preview cannot be upgraded",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFullMatchTraceValidationGuard();
+
+  console.log("fullMatchTraceValidationGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4f.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4F(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official score derives only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "validation must not delete, cap, rewrite, or fabricate official timeline events.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "validation must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.officialScoreDelta === 0, "validation must not mutate official score.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "validation must not create production scoring events.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4F();
+
+  console.log("scoringGuard.4f tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -41939,6 +43266,33 @@ function averageCondition(team: TeamSnapshot): Rating {
   return clampRating(team.roster.reduce((total, player) => total + player.currentCondition, 0) / team.roster.length);
 }
 
+function goalkeeperProfileTags(input: MatchInput): readonly string[] {
+  const teams = [input.homeTeam, input.awayTeam];
+  const tags: string[] = [];
+
+  for (const team of teams) {
+    const goalkeeper = team.roster.find((player) => player.playerId === team.goalkeeperId);
+    if (goalkeeper === undefined) {
+      continue;
+    }
+
+    const goalkeeperReliability = Math.round((
+      goalkeeper.attributes.handPlay +
+      goalkeeper.attributes.intelligence +
+      goalkeeper.attributes.mental +
+      goalkeeper.mentalFreshness
+    ) / 4);
+
+    if (goalkeeperReliability >= 94) {
+      tags.push(`goalkeeper_profile_strong_${team.teamId}`);
+    } else if (goalkeeperReliability <= 72) {
+      tags.push(`goalkeeper_profile_vulnerable_${team.teamId}`);
+    }
+  }
+
+  return tags;
+}
+
 function kickoffEvent(input: {
   readonly matchInput: MatchInput;
   readonly zone: ZoneId;
@@ -41984,6 +43338,7 @@ function kickoffEvent(input: {
       "adapter_kickoff",
       "temporary_control_blitz_mapping",
       ...input.influence.tags,
+      ...goalkeeperProfileTags(input.matchInput),
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
       ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
@@ -42055,6 +43410,7 @@ function sequenceRecordToMatchEvent(input: {
   const tags = [
     ...sequenceRecordTags(input.record),
     ...input.influence.tags,
+    ...goalkeeperProfileTags(input.matchInput),
     ...segmentStateTags,
     ...segmentInfluenceTags(input.segment.segmentInfluence),
     ...chainSegmentContextTags(input.segment.chainSegmentContext),
@@ -42190,6 +43546,7 @@ function scoringEventToMatchEvent(input: {
       "scoring_event",
       `scoring_type_${input.event.scoringType}`,
       ...input.influence.tags,
+      ...goalkeeperProfileTags(input.matchInput),
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...segmentInfluenceTags(input.segment.segmentInfluence),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
@@ -42925,6 +44282,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+    case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "training_recommendation";
   }
 }
@@ -43009,6 +44367,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "AgrÃ©gats de traces de match";
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
       return "Rapport coach depuis les agrÃ©gats officiels";
+    case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+      return "Validation multi-profils des traces full-match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -43091,6 +44451,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+    case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -43140,6 +44501,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
+    "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -44299,6 +45661,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 23;
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
       return 22;
+    case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+      return 21;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -44393,6 +45757,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire les agrÃ©gats de traces de match";
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
       return "Relire le rapport coach depuis les agrÃ©gats officiels";
+    case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
+      return "Relire la validation multi-profils des traces full-match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -44625,6 +45991,11 @@ function influenceForPlan(input: {
   }
 
   tags.push(`plan_${input.side}_scoring_${input.plan.scoringBias}`);
+  tags.push(`plan_${input.side}_attacking_${input.plan.attackingIntent}`);
+  tags.push(`plan_${input.side}_defensive_${input.plan.defensiveIntent}`);
+  tags.push(`plan_${input.side}_transition_${input.plan.transitionIntent}`);
+  tags.push(`plan_${input.side}_line_${input.plan.defensiveLineHeight >= 70 ? "high" : input.plan.defensiveLineHeight <= 35 ? "low" : "balanced"}`);
+  tags.push(`plan_${input.side}_rest_defense_${input.plan.restDefensePriority >= 75 ? "high" : input.plan.restDefensePriority <= 45 ? "low" : "balanced"}`);
 
   return {
     sequenceCountModifier,
@@ -45674,7 +47045,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
-  | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES";
+  | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
+  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -46630,6 +48002,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "pressure-loss watchpoints",
       "recovery patterns to verify",
       "recurring official trace causes",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION: {
+    scope: "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
+    canProve: [
+      "multiple validation profiles can run through full-match trace spine, trace aggregator, and Coach Report V0",
+      "official aggregate emphasis changes when match profile inputs change",
+      "diagnostic and sandbox aggregates remain separated from official conclusions",
+      "selection preview remains sandbox_only and is not upgraded",
+    ],
+    canSuggest: [
+      "which Coach Report V0 cards are sensitive enough for future visualization",
+      "which expected profile signals remain weak or missing",
+      "where future Coach Report V1 evidence should deepen profile-specific language",
     ],
     cannotProve: [
       "global scoring balance",

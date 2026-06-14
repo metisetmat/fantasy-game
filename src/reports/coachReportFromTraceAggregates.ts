@@ -157,11 +157,28 @@ function watchpoint(input: {
   readonly pressureLossZones: readonly Entry[];
   readonly recoveryZones: readonly Entry[];
   readonly playerEntries: readonly Entry[];
+  readonly causeEntries: readonly { readonly key: MatchTraceCauseTag; readonly value: number }[];
   readonly fatigueImpactTotal: number;
 }): string {
   const topDanger = input.dangerZones[0];
   const topPlayer = input.playerEntries[0];
+  const topCause = input.causeEntries[0]?.key;
 
+  if (input.fatigueImpactTotal >= 280 || topCause === "fatigue_drop") {
+    return "A surveiller : la fatigue et la lucidite tardive pesent sur la qualite des sequences officielles.";
+  }
+  if (topCause === "goalkeeper_quality") {
+    return "A verifier : l'influence gardien ressort, notamment sur la gestion du second ballon et des tirs subis.";
+  }
+  if (topCause === "defensive_recovery") {
+    return "A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation.";
+  }
+  if (topCause === "speed_advantage") {
+    return "A verifier : les transitions rapides demandent plus de soutien autour du porteur pour rester controlables.";
+  }
+  if (topCause === "power_advantage") {
+    return "A surveiller : le jeu de contact cree du gain, mais peut isoler le porteur si le soutien arrive tard.";
+  }
   if (input.pressureLossZones.length > 0) {
     return "Ã€ surveiller : les sorties sous pression restent un signal officiel Ã  confirmer sur plusieurs matchs.";
   }
@@ -273,6 +290,7 @@ function buildCards(aggregate: MatchTraceAggregateModel): readonly CoachReportTr
           pressureLossZones,
           recoveryZones,
           playerEntries,
+          causeEntries,
           fatigueImpactTotal: official.fatigueImpactTotal,
         }),
       ],
@@ -284,6 +302,14 @@ function buildCards(aggregate: MatchTraceAggregateModel): readonly CoachReportTr
 
 function entriesTag(record: Readonly<Record<string, number>>, limit: number): string {
   return formatEntriesForTag(topEntries(record, limit));
+}
+
+function tagSafeValue(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 96) || "none";
 }
 
 function notAvailableModel(): CoachReportTraceV0Model {
@@ -415,6 +441,9 @@ export function buildCoachReportFromTraceAggregates(input: {
       `coach_report_trace_aggregates_player_involvement_items_${entriesTag(input.aggregate.official.playerInvolvement, 4)}`,
       `coach_report_trace_aggregates_cause_items_${typedTopEntries<MatchTraceCauseTag>(input.aggregate.official.causeTagCounts, 4).map((entry) => `${traceCauseLabelFr(entry.key)}:${entry.value}`).join("|") || "none"}`,
       `coach_report_trace_aggregates_impact_items_${typedTopEntries<MatchTraceImpactTag>(input.aggregate.official.impactTagCounts, 4).map((entry) => `${traceImpactLabelFr(entry.key)}:${entry.value}`).join("|") || "none"}`,
+      `coach_report_trace_aggregates_high_pressure_trace_count_${input.aggregate.official.highPressureTraceCount}`,
+      `coach_report_trace_aggregates_fatigue_impact_total_${Math.round(input.aggregate.official.fatigueImpactTotal)}`,
+      `coach_report_trace_aggregates_watchpoint_${tagSafeValue(cards.find((card) => card.cardId === "official_coach_watchpoint")?.bullets[0] ?? "none")}`,
     ],
   };
 }
@@ -481,4 +510,3 @@ export function coachReportTraceV0Limitations(model: CoachReportTraceV0Model): r
     "COACH_REPORT_TRACE_V0_CANNOT_CLAIM_GLOBAL_ECONOMY",
   ];
 }
-

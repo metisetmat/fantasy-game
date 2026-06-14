@@ -54,7 +54,10 @@ function isPressureLossTrace(trace: MatchTraceEvent): boolean {
 }
 
 function isRecoveryTrace(trace: MatchTraceEvent): boolean {
-  return trace.actionType === "RECOVERY" || trace.actionType === "INTERCEPTION" || trace.outcome === "RECOVERY_WON";
+  return trace.actionType === "RECOVERY" ||
+    trace.actionType === "INTERCEPTION" ||
+    trace.outcome === "RECOVERY_WON" ||
+    trace.causeTags.includes("defensive_recovery");
 }
 
 function isShotCreatedTrace(trace: MatchTraceEvent): boolean {
@@ -400,4 +403,3 @@ export function matchTraceAggregateFromSpine(input: {
     tags: aggregateTags(modelWithoutTags),
   };
 }
-

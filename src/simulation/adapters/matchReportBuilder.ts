@@ -1156,6 +1156,33 @@ function averageCondition(team: TeamSnapshot): Rating {
   return clampRating(team.roster.reduce((total, player) => total + player.currentCondition, 0) / team.roster.length);
 }
 
+function goalkeeperProfileTags(input: MatchInput): readonly string[] {
+  const teams = [input.homeTeam, input.awayTeam];
+  const tags: string[] = [];
+
+  for (const team of teams) {
+    const goalkeeper = team.roster.find((player) => player.playerId === team.goalkeeperId);
+    if (goalkeeper === undefined) {
+      continue;
+    }
+
+    const goalkeeperReliability = Math.round((
+      goalkeeper.attributes.handPlay +
+      goalkeeper.attributes.intelligence +
+      goalkeeper.attributes.mental +
+      goalkeeper.mentalFreshness
+    ) / 4);
+
+    if (goalkeeperReliability >= 94) {
+      tags.push(`goalkeeper_profile_strong_${team.teamId}`);
+    } else if (goalkeeperReliability <= 72) {
+      tags.push(`goalkeeper_profile_vulnerable_${team.teamId}`);
+    }
+  }
+
+  return tags;
+}
+
 function kickoffEvent(input: {
   readonly matchInput: MatchInput;
   readonly zone: ZoneId;
@@ -1201,6 +1228,7 @@ function kickoffEvent(input: {
       "adapter_kickoff",
       "temporary_control_blitz_mapping",
       ...input.influence.tags,
+      ...goalkeeperProfileTags(input.matchInput),
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
       ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
@@ -1272,6 +1300,7 @@ function sequenceRecordToMatchEvent(input: {
   const tags = [
     ...sequenceRecordTags(input.record),
     ...input.influence.tags,
+    ...goalkeeperProfileTags(input.matchInput),
     ...segmentStateTags,
     ...segmentInfluenceTags(input.segment.segmentInfluence),
     ...chainSegmentContextTags(input.segment.chainSegmentContext),
@@ -1407,6 +1436,7 @@ function scoringEventToMatchEvent(input: {
       "scoring_event",
       `scoring_type_${input.event.scoringType}`,
       ...input.influence.tags,
+      ...goalkeeperProfileTags(input.matchInput),
       ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
       ...segmentInfluenceTags(input.segment.segmentInfluence),
       ...chainSegmentContextTags(input.segment.chainSegmentContext),
