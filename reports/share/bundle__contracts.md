@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 4B - Coach Test Plan to Selection Preview. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4C - Match Event Trace Spine. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -430,7 +430,8 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
-  | "WORKBENCH_CHAIN_SELECTION_PREVIEW";
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
+  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

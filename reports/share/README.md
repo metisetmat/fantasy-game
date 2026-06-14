@@ -1,28 +1,33 @@
-# Sprint 4B Share Pack
+# Sprint 4C Share Pack
 
-Current sprint: Sprint 4B - Coach Test Plan to Selection Preview
+Current sprint: Sprint 4C - Match Event Trace Spine
 
 ## Files to review first
 
-- fullmatch-workbench-chain-replay-4b.md
-- validation.fullmatch-workbench-chain-replay-4b.md
+- fullmatch-workbench-chain-replay-4c.md
+- validation.fullmatch-workbench-chain-replay-4c.md
 - coach-report.experimental.html
-- validation.share-pack.md
+- bundle__simulation.md
 
 ## Purpose
 
-Sprint 4B turns the coach-facing test plan into a Selection Preview. The preview is visible only in experimental mode, contains three role/profile cards, and remains non-applied. It does not change lineup, starters, bench, scoring values, official ScoringEvents, MatchBonusEvent, official possession, official timeline, production route resolution, default full-match mode, live selection, or global economy validation. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
+Sprint 4C adds the foundational Match Event Trace Spine. It converts official MatchEvents, mini-match records, and sandbox replay events into shared MatchTraceEvent rows. The trace spine is diagnostic-only: it does not mutate official timeline, score, possession, scoring events, live selection, production route resolution, or global scoring economy proof.
+
+Selection Preview remains available from Sprint 4B, but it is explicitly marked sandbox_only, requires the future match trace spine, and is marked as a future trace consumer.
 
 ## Review order
 
 1. Read validation.share-pack.md.
-2. Read fullmatch-workbench-chain-replay-4b.md.
-3. Inspect validation.fullmatch-workbench-chain-replay-4b.md.
-4. Open coach-report.experimental.html and verify Prévisualisation de sélection appears after Plan de test coach.
-5. Open coach-report.default.html and verify the preview is absent.
+2. Read fullmatch-workbench-chain-replay-4c.md.
+3. Inspect validation.fullmatch-workbench-chain-replay-4c.md.
+4. Open coach-report.experimental.html and confirm the compact Colonne de traces de match section.
+5. Inspect bundle__simulation.md for MatchTraceEvent, the three adapters, trace spine evidence, and tests.
 
-## Expected recommendation
+## Guardrails
 
-- CONFIRM_COACH_TEST_PLAN_TO_SELECTION_PREVIEW.
-- CONFIRM_PREVIEW_REMAINS_NON_APPLIED.
-- PREPARE_SELECTION_PREVIEW_TO_TACTICAL_TRADEOFF_PANEL.
+- Scoring constants unchanged.
+- MatchBonusEvent unchanged.
+- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
+- Sandbox traces are never official truth.
+- Trace adapters cannot create production scoring events.
+- Trace adapters cannot drive live selection or production route resolution.

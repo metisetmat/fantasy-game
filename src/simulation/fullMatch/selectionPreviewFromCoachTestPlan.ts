@@ -24,6 +24,8 @@ export type SelectionPreviewConfidence =
   | "low_medium"
   | "medium";
 
+export type SelectionPreviewTraceBackingStatus = "sandbox_only";
+
 export type SelectionPreviewCard = {
   readonly previewId: SelectionPreviewId;
   readonly linkedCoachTestId: string;
@@ -76,6 +78,9 @@ export type SelectionPreviewModel = {
   readonly diagnosticOnly: true;
   readonly modelAppliedOnlyInSandbox: true;
   readonly modelAppliedToNormalLiveSelection: false;
+  readonly selectionPreviewTraceBackingStatus: SelectionPreviewTraceBackingStatus;
+  readonly selectionPreviewRequiresMatchTraceSpine: true;
+  readonly selectionPreviewFutureTraceConsumer: true;
   readonly tags: readonly string[];
   readonly warnings: readonly string[];
 };
@@ -201,6 +206,9 @@ function buildPreviewTags(previews: readonly SelectionPreviewCard[]): readonly s
     "selection_preview_official_score_unchanged_true",
     "selection_preview_official_possession_unchanged_true",
     "selection_preview_official_scoring_events_unchanged_true",
+    "selection_preview_trace_backing_status_sandbox_only",
+    "selection_preview_requires_match_trace_spine_true",
+    "selection_preview_future_trace_consumer_true",
   ];
 }
 
@@ -262,6 +270,9 @@ export function emptySelectionPreviewModel(input: {
     diagnosticOnly: true,
     modelAppliedOnlyInSandbox: true,
     modelAppliedToNormalLiveSelection: false,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    selectionPreviewRequiresMatchTraceSpine: true,
+    selectionPreviewFutureTraceConsumer: true,
     tags: [],
     warnings: input.warnings,
   };
@@ -320,6 +331,9 @@ export function selectionPreviewModelFromCards(input: {
     diagnosticOnly: true,
     modelAppliedOnlyInSandbox: true,
     modelAppliedToNormalLiveSelection: false,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    selectionPreviewRequiresMatchTraceSpine: true,
+    selectionPreviewFutureTraceConsumer: true,
     tags: buildPreviewTags(input.previews),
     warnings: input.testPlan.warnings,
   };
@@ -356,6 +370,15 @@ export function validateSelectionPreviewModel(model: SelectionPreviewModel): rea
       : []),
     ...(!selectionPreviewCannotClaimGlobalEconomy(model)
       ? ["SELECTION_PREVIEW_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+    ...(model.selectionPreviewTraceBackingStatus !== "sandbox_only"
+      ? ["SELECTION_PREVIEW_TRACE_BACKING_NOT_SANDBOX_ONLY"]
+      : []),
+    ...(!model.selectionPreviewRequiresMatchTraceSpine
+      ? ["SELECTION_PREVIEW_MISSING_TRACE_SPINE_REQUIREMENT"]
+      : []),
+    ...(!model.selectionPreviewFutureTraceConsumer
+      ? ["SELECTION_PREVIEW_MISSING_FUTURE_TRACE_CONSUMER_MARKER"]
       : []),
   ];
 }

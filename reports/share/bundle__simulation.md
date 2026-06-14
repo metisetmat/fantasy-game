@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4B - Coach Test Plan to Selection Preview. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4C - Match Event Trace Spine. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -200,6 +200,12 @@ import { multiScenarioCoachTestPlanFromBatch } from "./fullMatch/multiScenarioCo
 import type { MultiScenarioCoachTestPlanModel } from "./fullMatch/multiScenarioCoachTestPlan";
 import { selectionPreviewFromCoachTestPlan } from "./fullMatch/selectionPreviewFromCoachTestPlanBuilder";
 import type { SelectionPreviewModel } from "./fullMatch/selectionPreviewFromCoachTestPlan";
+import {
+  buildMatchTraceSpine,
+  matchTraceSpineEvidenceFact,
+  matchTraceSpineLimitations,
+  type MatchTraceSpineModel,
+} from "./tracing/matchTraceSpine";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -1068,6 +1074,9 @@ function selectionPreviewModelLimitations(model: SelectionPreviewModel): readonl
     "FULLMATCH_SELECTION_PREVIEW_DID_NOT_MUTATE_OFFICIAL_SCORING_EVENTS",
     "FULLMATCH_SELECTION_PREVIEW_DID_NOT_CREATE_PRODUCTION_SCORING_EVENTS",
     "FULLMATCH_SELECTION_PREVIEW_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "FULLMATCH_SELECTION_PREVIEW_TRACE_BACKING_SANDBOX_ONLY",
+    "FULLMATCH_SELECTION_PREVIEW_REQUIRES_MATCH_TRACE_SPINE",
+    "FULLMATCH_SELECTION_PREVIEW_FUTURE_TRACE_CONSUMER",
     "FULL_MATCH_BATCH_ECONOMY_REMAINS_ONLY_GLOBAL_ECONOMY_PROOF",
     "NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT",
   ];
@@ -2655,7 +2664,10 @@ function selectionPreviewFact(input: {
       `canDriveLiveSelection=${input.model.canDriveLiveSelection}, canDriveProductionRouteResolution=${input.model.canDriveProductionRouteResolution}, ` +
       `officialTimelineUnchanged=${input.model.officialTimelineUnchanged}, officialScoreUnchanged=${input.model.officialScoreUnchanged}, ` +
       `officialPossessionUnchanged=${input.model.officialPossessionUnchanged}, officialScoringEventsUnchanged=${input.model.officialScoringEventsUnchanged}, ` +
-      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}.`,
+      `canCreateProductionScoringEvents=${input.model.canCreateProductionScoringEvents}, canClaimGlobalEconomy=${input.model.canClaimGlobalEconomy}, ` +
+      `selectionPreviewTraceBackingStatus=${input.model.selectionPreviewTraceBackingStatus}, ` +
+      `selectionPreviewRequiresMatchTraceSpine=${input.model.selectionPreviewRequiresMatchTraceSpine}, ` +
+      `selectionPreviewFutureTraceConsumer=${input.model.selectionPreviewFutureTraceConsumer}.`,
     confidence: input.model.status === "available" ? "low" : "low",
     strength: input.model.status === "available" ? 50 : 20,
     coachVisible: false,
@@ -2698,6 +2710,7 @@ function withFullMatchGroundingDiagnosis(
   sandboxDecisionBatchConfidenceCalibrationModel: SandboxDecisionBatchConfidenceCalibrationModel,
   multiScenarioCoachTestPlanModel: MultiScenarioCoachTestPlanModel,
   selectionPreviewModel: SelectionPreviewModel,
+  matchTraceSpineModel: MatchTraceSpineModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2729,7 +2742,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_sandbox_decision_evidence_calibration") ||
     fact.internalTags.includes("workbench_chain_sandbox_decision_batch_confidence_calibration") ||
     fact.internalTags.includes("workbench_chain_multi_scenario_coach_test_plan") ||
-    fact.internalTags.includes("workbench_chain_selection_preview")
+    fact.internalTags.includes("workbench_chain_selection_preview") ||
+    fact.internalTags.includes("workbench_chain_match_event_trace_spine")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2779,8 +2793,11 @@ function withFullMatchGroundingDiagnosis(
     : ` Le plan de test coach multi-scenarios transforme le batch local en ${multiScenarioCoachTestPlanModel.testCount} tests pratiques : ${multiScenarioCoachTestPlanModel.tests.map((test) => test.title).join(", ")}. Il reste une hypothese sandbox, pas une consigne officielle : aucune instruction obligatoire, aucune selection live, aucune resolution production, aucune mutation officielle et aucune preuve d'economie globale.`;
   const selectionPreviewSummary = selectionPreviewModel.status === "not_available"
     ? ""
-    : ` La previsualisation de selection transforme ces tests en ${selectionPreviewModel.previewCount} profils a previsualiser : ${selectionPreviewModel.previews.map((preview) => preview.title).join(", ")}. Elle reste preview-only : aucune composition, aucun titulaire, aucun remplacant, aucune selection live, aucune resolution production, aucune mutation officielle et aucune preuve d'economie globale ne sont crees.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}${selectionPreviewSummary}`;
+    : ` La previsualisation de selection transforme ces tests en ${selectionPreviewModel.previewCount} profils a previsualiser : ${selectionPreviewModel.previews.map((preview) => preview.title).join(", ")}. Elle reste preview-only et son backing trace est ${selectionPreviewModel.selectionPreviewTraceBackingStatus} : aucune composition, aucun titulaire, aucun remplacant, aucune selection live, aucune resolution production, aucune mutation officielle et aucune preuve d'economie globale ne sont crees.`;
+  const matchTraceSummary = matchTraceSpineModel.status === "not_available"
+    ? ""
+    : ` La colonne de traces de match produit ${matchTraceSpineModel.totalTraceCount} traces structurees : ${matchTraceSpineModel.officialTraceCount} officielles, ${matchTraceSpineModel.miniMatchTraceCount} mini-match et ${matchTraceSpineModel.sandboxTraceCount} sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d'economie globale.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}${selectionPreviewSummary}${matchTraceSummary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
     : "La lecture timeline officielle vs sandbox, le panneau de decision sandbox et le plan de test coach sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. La calibration d'evidence affiche une confiance faible, car la piste cree du danger mais ne marque pas, le gardien repond et l'equipe du gardien securise le ballon ; ce n'est pas une preuve d'economie globale. Le batch local multi-scenarios teste cette meme piste dans des variations de soutien, gardien, fatigue et second ballon ; il reste une aide de lecture, pas une consigne officielle ni une preuve d'economie globale. Le plan de test coach transforme ce batch local en hypotheses pratiques : renforcer le soutien autour de Z4-HSR, mieux occuper le second ballon et prevoir une reponse si le gardien adverse gagne la sequence. Ces tests restent suggestifs, ne pilotent pas la selection live, ne pilotent pas la resolution de route production, ne modifient pas la timeline officielle, la possession officielle, le score officiel ou les evenements de score officiels, et ne prouvent aucune economie globale. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only, panneau de decision sandbox, calibration d'evidence, batch de confiance et plan de test coach restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
@@ -3036,11 +3053,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const selectionPreviewModel = selectionPreviewFromCoachTestPlan({
     testPlan: multiScenarioCoachTestPlanModel,
   });
+  const aggregateMiniMatch = aggregateMiniMatchSegments(segmentResults);
 
   const report = buildMatchReport({
     matchInput: input,
     timeline,
-    miniMatch: aggregateMiniMatchSegments(segmentResults),
+    miniMatch: aggregateMiniMatch,
     adapter,
     score,
     influence,
@@ -3085,6 +3103,23 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...selectionPreviewModelLimitations(selectionPreviewModel),
     ],
   });
+  const matchTraceSpineModel = buildMatchTraceSpine({
+    report,
+    matchInput: input,
+    miniMatchRecords: aggregateMiniMatch.state.records,
+    controlledSegmentSandboxTimelineModel,
+    selectionPreviewModel,
+  });
+  const reportWithTraceLimitations: MatchReport = {
+    ...report,
+    reportMeta: {
+      ...report.reportMeta,
+      limitations: [
+        ...report.reportMeta.limitations,
+        ...matchTraceSpineLimitations(matchTraceSpineModel),
+      ],
+    },
+  };
   const chainFact = chainConsumptionEvidenceFact({
     report,
     matchInput: input,
@@ -3225,6 +3260,14 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: selectionPreviewModel,
   });
+  const matchTraceSpineModelFact = matchTraceSpineEvidenceFact({
+    report,
+    matchInput: input,
+    model: matchTraceSpineModel,
+  });
+  const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? matchTraceSpineModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3254,12 +3297,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(sandboxDecisionBatchConfidenceCalibrationModelFact === null ? [] : [sandboxDecisionBatchConfidenceCalibrationModelFact]),
     ...(multiScenarioCoachTestPlanModelFact === null ? [] : [multiScenarioCoachTestPlanModelFact]),
     ...(selectionPreviewModelFact === null ? [] : [selectionPreviewModelFact]),
+    ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
-    ? report
+    ? reportWithTraceLimitations
     : {
-        ...report,
-        evidenceFacts: [...report.evidenceFacts, ...chainEvidenceFacts],
+        ...reportWithTraceLimitations,
+        evidenceFacts: [...reportWithTraceLimitations.evidenceFacts, ...chainEvidenceFacts],
       };
 
   return withFullMatchGroundingDiagnosis(
@@ -3293,6 +3337,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     sandboxDecisionBatchConfidenceCalibrationModel,
     multiScenarioCoachTestPlanModel,
     selectionPreviewModel,
+    matchTraceSpineModel,
   );
 }
 ```
@@ -20544,6 +20589,8 @@ export type SelectionPreviewConfidence =
   | "low_medium"
   | "medium";
 
+export type SelectionPreviewTraceBackingStatus = "sandbox_only";
+
 export type SelectionPreviewCard = {
   readonly previewId: SelectionPreviewId;
   readonly linkedCoachTestId: string;
@@ -20596,6 +20643,9 @@ export type SelectionPreviewModel = {
   readonly diagnosticOnly: true;
   readonly modelAppliedOnlyInSandbox: true;
   readonly modelAppliedToNormalLiveSelection: false;
+  readonly selectionPreviewTraceBackingStatus: SelectionPreviewTraceBackingStatus;
+  readonly selectionPreviewRequiresMatchTraceSpine: true;
+  readonly selectionPreviewFutureTraceConsumer: true;
   readonly tags: readonly string[];
   readonly warnings: readonly string[];
 };
@@ -20721,6 +20771,9 @@ function buildPreviewTags(previews: readonly SelectionPreviewCard[]): readonly s
     "selection_preview_official_score_unchanged_true",
     "selection_preview_official_possession_unchanged_true",
     "selection_preview_official_scoring_events_unchanged_true",
+    "selection_preview_trace_backing_status_sandbox_only",
+    "selection_preview_requires_match_trace_spine_true",
+    "selection_preview_future_trace_consumer_true",
   ];
 }
 
@@ -20782,6 +20835,9 @@ export function emptySelectionPreviewModel(input: {
     diagnosticOnly: true,
     modelAppliedOnlyInSandbox: true,
     modelAppliedToNormalLiveSelection: false,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    selectionPreviewRequiresMatchTraceSpine: true,
+    selectionPreviewFutureTraceConsumer: true,
     tags: [],
     warnings: input.warnings,
   };
@@ -20840,6 +20896,9 @@ export function selectionPreviewModelFromCards(input: {
     diagnosticOnly: true,
     modelAppliedOnlyInSandbox: true,
     modelAppliedToNormalLiveSelection: false,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    selectionPreviewRequiresMatchTraceSpine: true,
+    selectionPreviewFutureTraceConsumer: true,
     tags: buildPreviewTags(input.previews),
     warnings: input.testPlan.warnings,
   };
@@ -20876,6 +20935,15 @@ export function validateSelectionPreviewModel(model: SelectionPreviewModel): rea
       : []),
     ...(!selectionPreviewCannotClaimGlobalEconomy(model)
       ? ["SELECTION_PREVIEW_GLOBAL_ECONOMY_CLAIM_BREACH"]
+      : []),
+    ...(model.selectionPreviewTraceBackingStatus !== "sandbox_only"
+      ? ["SELECTION_PREVIEW_TRACE_BACKING_NOT_SANDBOX_ONLY"]
+      : []),
+    ...(!model.selectionPreviewRequiresMatchTraceSpine
+      ? ["SELECTION_PREVIEW_MISSING_TRACE_SPINE_REQUIREMENT"]
+      : []),
+    ...(!model.selectionPreviewFutureTraceConsumer
+      ? ["SELECTION_PREVIEW_MISSING_FUTURE_TRACE_CONSUMER_MARKER"]
       : []),
   ];
 }
@@ -20919,6 +20987,1025 @@ export function selectionPreviewFromCoachTestPlan(input: {
     status: "failed",
     warnings: [...model.warnings, ...warnings],
   };
+}
+```
+
+## File: src/simulation/tracing/matchTraceEvent.ts
+
+```ts
+import type { MatchId, PlayerId, SequenceId, TeamId } from "../../core/ids";
+import type { ZoneId } from "../../core/zones";
+
+export type MatchTraceSource =
+  | "official_match_event"
+  | "mini_match_record"
+  | "sandbox_event";
+
+export type MatchTracePhase =
+  | "BUILD_UP"
+  | "PROGRESSION"
+  | "OFFENSIVE_TRANSITION"
+  | "DEFENSIVE_TRANSITION"
+  | "FINAL_ZONE_ATTACK"
+  | "HIGH_PRESS"
+  | "MID_BLOCK"
+  | "LOW_BLOCK"
+  | "SET_PIECE"
+  | "GOALKEEPER_SEQUENCE"
+  | "UNKNOWN";
+
+export type MatchTraceActionType =
+  | "PASS"
+  | "CARRY"
+  | "DUEL"
+  | "CONTACT"
+  | "PRESSURE"
+  | "SHOT"
+  | "TRY_ATTEMPT"
+  | "DROP_ATTEMPT"
+  | "RECOVERY"
+  | "INTERCEPTION"
+  | "GOALKEEPER_SAVE"
+  | "GOALKEEPER_DISTRIBUTION"
+  | "SUPPORT_RUN"
+  | "SECOND_BALL_CONTEST"
+  | "TACTICAL_SHIFT"
+  | "UNKNOWN";
+
+export type MatchTraceOutcome =
+  | "SUCCESS"
+  | "FAILURE"
+  | "NEUTRAL"
+  | "LINE_BREAK_CREATED"
+  | "DANGER_CREATED"
+  | "SHOT_CREATED"
+  | "SCORE_CREATED"
+  | "TURNOVER_CONCEDED"
+  | "RECOVERY_WON"
+  | "SAVE_MADE"
+  | "SECOND_CHANCE_CREATED"
+  | "UNKNOWN";
+
+export type MatchTraceCauseTag =
+  | "speed_advantage"
+  | "power_advantage"
+  | "pressure_forced_error"
+  | "fatigue_drop"
+  | "lack_of_support"
+  | "good_support"
+  | "goalkeeper_quality"
+  | "poor_decision"
+  | "good_decision"
+  | "space_behind"
+  | "defensive_recovery"
+  | "second_ball_presence"
+  | "unknown_cause";
+
+export type MatchTraceImpactTag =
+  | "danger_created"
+  | "line_broken"
+  | "fatigue_generated"
+  | "possession_secured"
+  | "possession_lost"
+  | "chance_conceded"
+  | "shot_prevented"
+  | "second_chance_allowed"
+  | "rest_defense_exposed"
+  | "no_clear_impact";
+
+export type MatchTracePressureLevel =
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH"
+  | "UNKNOWN";
+
+export type MatchTraceEvent = {
+  readonly traceId: string;
+  readonly sourceEventId?: string;
+  readonly source: MatchTraceSource;
+  readonly matchId?: MatchId;
+  readonly minute: number;
+  readonly sequenceId?: SequenceId;
+  readonly teamId: TeamId;
+  readonly opponentTeamId: TeamId;
+  readonly phase: MatchTracePhase;
+  readonly zone: ZoneId | string;
+  readonly targetZone?: ZoneId | string;
+  readonly actionType: MatchTraceActionType;
+  readonly outcome: MatchTraceOutcome;
+  readonly primaryPlayerId?: PlayerId | string;
+  readonly secondaryPlayerId?: PlayerId | string;
+  readonly opponentPlayerId?: PlayerId | string;
+  readonly goalkeeperId?: PlayerId | string;
+  readonly pressureLevel: MatchTracePressureLevel;
+  readonly fatigueBefore?: number;
+  readonly fatigueAfter?: number;
+  readonly fatigueImpact?: number;
+  readonly causeTags: readonly MatchTraceCauseTag[];
+  readonly impactTags: readonly MatchTraceImpactTag[];
+  readonly dangerDelta?: number;
+  readonly possessionValueDelta?: number;
+  readonly coachVisible: boolean;
+  readonly diagnosticWeight: number;
+  readonly officialTruth: boolean;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type MatchTraceEventInput = Omit<
+  MatchTraceEvent,
+  | "canMutateTimeline"
+  | "canMutateScore"
+  | "canMutatePossession"
+  | "canCreateScoringEvent"
+  | "canDriveCoachInstruction"
+  | "canDriveLiveSelection"
+  | "canDriveProductionRouteResolution"
+  | "canClaimGlobalEconomy"
+>;
+
+export function createMatchTraceEvent(input: MatchTraceEventInput): MatchTraceEvent {
+  return {
+    ...input,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+  };
+}
+
+export function matchTraceCannotMutateOfficialState(trace: MatchTraceEvent): boolean {
+  return !trace.canMutateTimeline &&
+    !trace.canMutateScore &&
+    !trace.canMutatePossession &&
+    !trace.canCreateScoringEvent;
+}
+
+export function matchTraceCannotDriveProduction(trace: MatchTraceEvent): boolean {
+  return !trace.canDriveCoachInstruction &&
+    !trace.canDriveLiveSelection &&
+    !trace.canDriveProductionRouteResolution &&
+    !trace.canClaimGlobalEconomy;
+}
+
+export function validateMatchTraceEvent(trace: MatchTraceEvent): readonly string[] {
+  return [
+    ...(trace.traceId.length === 0 ? ["MATCH_TRACE_MISSING_TRACE_ID"] : []),
+    ...(trace.source.length === 0 ? ["MATCH_TRACE_MISSING_SOURCE"] : []),
+    ...(trace.phase === "UNKNOWN" && !trace.warnings.includes("MATCH_TRACE_UNKNOWN_PHASE")
+      ? ["MATCH_TRACE_UNKNOWN_PHASE_NOT_EXPLAINED"]
+      : []),
+    ...(trace.zone.length === 0 ? ["MATCH_TRACE_MISSING_ZONE"] : []),
+    ...(trace.causeTags.length === 0 ? ["MATCH_TRACE_MISSING_CAUSE_TAGS"] : []),
+    ...(trace.impactTags.length === 0 ? ["MATCH_TRACE_MISSING_IMPACT_TAGS"] : []),
+    ...(trace.diagnosticWeight < 0 || trace.diagnosticWeight > 100 ? ["MATCH_TRACE_DIAGNOSTIC_WEIGHT_OUT_OF_RANGE"] : []),
+    ...(!matchTraceCannotMutateOfficialState(trace) ? ["MATCH_TRACE_MUTATION_GUARD_BREACH"] : []),
+    ...(!matchTraceCannotDriveProduction(trace) ? ["MATCH_TRACE_PRODUCTION_GUARD_BREACH"] : []),
+    ...(trace.source === "sandbox_event" && trace.officialTruth ? ["MATCH_TRACE_SANDBOX_MARKED_OFFICIAL"] : []),
+  ];
+}
+```
+
+## File: src/simulation/tracing/matchTraceFromMatchEvent.ts
+
+```ts
+import type { EventOutcome, MatchEvent, MatchEventType } from "../../contracts/engineToCoach";
+import {
+  createMatchTraceEvent,
+  type MatchTraceActionType,
+  type MatchTraceCauseTag,
+  type MatchTraceEvent,
+  type MatchTraceImpactTag,
+  type MatchTraceOutcome,
+  type MatchTracePhase,
+  type MatchTracePressureLevel,
+} from "./matchTraceEvent";
+
+function uniqueOrFallback<T extends string>(values: readonly T[], fallback: T): readonly T[] {
+  return values.length === 0 ? [fallback] : [...new Set(values)];
+}
+
+function pressureLevel(value: string): MatchTracePressureLevel {
+  switch (value) {
+    case "high":
+      return "HIGH";
+    case "medium":
+      return "MEDIUM";
+    case "low":
+      return "LOW";
+    default:
+      return "UNKNOWN";
+  }
+}
+
+function phaseForEvent(event: MatchEvent): MatchTracePhase {
+  if (event.eventType === "goalkeeper_action") {
+    return "GOALKEEPER_SEQUENCE";
+  }
+  if (event.eventType === "scoring") {
+    return "FINAL_ZONE_ATTACK";
+  }
+  if (event.eventType === "progression") {
+    return "PROGRESSION";
+  }
+  if (event.eventType === "turnover" || event.eventType === "gain_possession" || event.eventType === "lose_possession") {
+    return "DEFENSIVE_TRANSITION";
+  }
+  if (event.tags.includes("high_press") || event.tags.includes("pressure_high")) {
+    return "HIGH_PRESS";
+  }
+  if (event.tags.includes("low_block")) {
+    return "LOW_BLOCK";
+  }
+  if (event.tags.includes("mid_block")) {
+    return "MID_BLOCK";
+  }
+  if (event.eventType === "kickoff" || event.eventType === "discipline") {
+    return "SET_PIECE";
+  }
+  if (event.eventType === "tactical_shift") {
+    return "BUILD_UP";
+  }
+
+  return "UNKNOWN";
+}
+
+function actionTypeForEvent(event: MatchEvent): MatchTraceActionType {
+  const moveType = event.tacticalContext.moveType?.toLowerCase() ?? "";
+
+  if (event.eventType === "scoring") {
+    if (event.tags.includes("try_touchdown") || moveType.includes("try")) {
+      return "TRY_ATTEMPT";
+    }
+    if (event.tags.includes("drop_goal") || moveType.includes("drop")) {
+      return "DROP_ATTEMPT";
+    }
+    return "SHOT";
+  }
+  if (event.eventType === "goalkeeper_action") {
+    return event.outcome === "success" || event.tags.some((tag) => tag.includes("save"))
+      ? "GOALKEEPER_SAVE"
+      : "GOALKEEPER_DISTRIBUTION";
+  }
+  if (event.eventType === "progression") {
+    if (moveType.includes("carry")) {
+      return "CARRY";
+    }
+    return "PASS";
+  }
+  if (event.eventType === "duel") {
+    return "DUEL";
+  }
+  if (event.eventType === "defensive_action") {
+    return event.tags.includes("interception") ? "INTERCEPTION" : "PRESSURE";
+  }
+  if (event.eventType === "turnover" || event.eventType === "gain_possession") {
+    return "RECOVERY";
+  }
+  if (event.eventType === "fatigue_error" || event.eventType === "tactical_shift") {
+    return "TACTICAL_SHIFT";
+  }
+
+  return "UNKNOWN";
+}
+
+function outcomeForEvent(event: MatchEvent): MatchTraceOutcome {
+  const hasScoreChange = event.consequences.some((consequence) => consequence.type === "score_change");
+
+  if (hasScoreChange || event.outcome === "score") {
+    return "SCORE_CREATED";
+  }
+  if (event.eventType === "goalkeeper_action" && event.outcome === "success") {
+    return "SAVE_MADE";
+  }
+  if (event.eventType === "turnover" || event.eventType === "lose_possession") {
+    return "TURNOVER_CONCEDED";
+  }
+  if (event.tags.includes("second_chance_created")) {
+    return "SECOND_CHANCE_CREATED";
+  }
+  if (event.tags.includes("shot_created")) {
+    return "SHOT_CREATED";
+  }
+  if (event.tags.includes("danger_high") || event.tags.includes("danger_created")) {
+    return "DANGER_CREATED";
+  }
+  if (event.eventType === "progression" && event.outcome === "success") {
+    return "LINE_BREAK_CREATED";
+  }
+
+  return eventOutcome(event.outcome);
+}
+
+function eventOutcome(outcome: EventOutcome): MatchTraceOutcome {
+  switch (outcome) {
+    case "success":
+      return "SUCCESS";
+    case "failure":
+      return "FAILURE";
+    case "neutral":
+      return "NEUTRAL";
+    case "advantage":
+      return "DANGER_CREATED";
+    case "score":
+      return "SCORE_CREATED";
+  }
+}
+
+function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
+  const tags: MatchTraceCauseTag[] = [];
+
+  if (event.tags.some((tag) => tag.includes("speed"))) {
+    tags.push("speed_advantage");
+  }
+  if (event.tags.some((tag) => tag.includes("power"))) {
+    tags.push("power_advantage");
+  }
+  if (event.eventType === "fatigue_error" || event.tags.some((tag) => tag.includes("fatigue"))) {
+    tags.push("fatigue_drop");
+  }
+  if (event.tags.includes("pressure_high") || event.eventType === "turnover") {
+    tags.push("pressure_forced_error");
+  }
+  if (event.tags.some((tag) => tag.includes("support_good") || tag.includes("good_support"))) {
+    tags.push("good_support");
+  }
+  if (event.tags.some((tag) => tag.includes("support_lack") || tag.includes("lack_of_support"))) {
+    tags.push("lack_of_support");
+  }
+  if (event.eventType === "goalkeeper_action" || event.tags.some((tag) => tag.includes("goalkeeper"))) {
+    tags.push("goalkeeper_quality");
+  }
+  if (event.outcome === "success" || event.outcome === "advantage" || event.outcome === "score") {
+    tags.push("good_decision");
+  }
+  if (event.outcome === "failure") {
+    tags.push("poor_decision");
+  }
+  if (event.tags.some((tag) => tag.includes("space"))) {
+    tags.push("space_behind");
+  }
+  if (event.tags.some((tag) => tag.includes("defensive_recovery"))) {
+    tags.push("defensive_recovery");
+  }
+  if (event.tags.some((tag) => tag.includes("second_ball"))) {
+    tags.push("second_ball_presence");
+  }
+
+  return uniqueOrFallback(tags, "unknown_cause");
+}
+
+function impactTagsForEvent(event: MatchEvent): readonly MatchTraceImpactTag[] {
+  const tags: MatchTraceImpactTag[] = [];
+  const consequenceTypes = new Set(event.consequences.map((consequence) => consequence.type));
+
+  if (event.tags.includes("danger_high") || event.tags.includes("danger_created") || event.outcome === "advantage") {
+    tags.push("danger_created");
+  }
+  if (event.eventType === "progression" && event.outcome === "success") {
+    tags.push("line_broken");
+  }
+  if (consequenceTypes.has("fatigue_change") || event.eventType === "fatigue_error") {
+    tags.push("fatigue_generated");
+  }
+  if (event.outcome === "success" && (event.eventType === "progression" || event.eventType === "gain_possession")) {
+    tags.push("possession_secured");
+  }
+  if (event.eventType === "turnover" || event.eventType === "lose_possession" || consequenceTypes.has("possession_change")) {
+    tags.push("possession_lost");
+  }
+  if (event.eventType === "fatigue_error" || event.tags.includes("chance_conceded")) {
+    tags.push("chance_conceded");
+  }
+  if (event.eventType === "goalkeeper_action" && event.outcome === "success") {
+    tags.push("shot_prevented");
+  }
+  if (event.tags.includes("second_chance_created")) {
+    tags.push("second_chance_allowed");
+  }
+  if (event.tags.includes("rest_defense_exposed")) {
+    tags.push("rest_defense_exposed");
+  }
+
+  return uniqueOrFallback(tags, "no_clear_impact");
+}
+
+export function matchTraceFromMatchEvent(input: {
+  readonly event: MatchEvent;
+}): MatchTraceEvent {
+  const phase = phaseForEvent(input.event);
+
+  return createMatchTraceEvent({
+    traceId: `trace-official-${input.event.eventId}`,
+    sourceEventId: input.event.eventId,
+    source: "official_match_event",
+    matchId: input.event.matchId,
+    minute: input.event.timestamp.minute,
+    sequenceId: input.event.sequenceId,
+    teamId: input.event.teamId,
+    opponentTeamId: input.event.opponentTeamId,
+    phase,
+    zone: input.event.zone,
+    ...(input.event.tacticalContext.targetZone === undefined ? {} : { targetZone: input.event.tacticalContext.targetZone }),
+    actionType: actionTypeForEvent(input.event),
+    outcome: outcomeForEvent(input.event),
+    ...(input.event.primaryPlayerId === undefined ? {} : { primaryPlayerId: input.event.primaryPlayerId }),
+    ...(input.event.secondaryPlayerId === undefined ? {} : { secondaryPlayerId: input.event.secondaryPlayerId }),
+    ...(input.event.opposingPlayerId === undefined ? {} : { opponentPlayerId: input.event.opposingPlayerId }),
+    pressureLevel: pressureLevel(input.event.tacticalContext.pressureLevel),
+    ...(input.event.fatigueContext.primaryPlayerCondition === undefined ? {} : { fatigueBefore: input.event.fatigueContext.primaryPlayerCondition }),
+    ...(input.event.fatigueContext.teamCondition === undefined ? {} : { fatigueAfter: input.event.fatigueContext.teamCondition }),
+    causeTags: causeTagsForEvent(input.event),
+    impactTags: impactTagsForEvent(input.event),
+    dangerDelta: input.event.tags.includes("danger_high") ? 20 : 0,
+    possessionValueDelta: input.event.eventType === "turnover" ? -15 : input.event.outcome === "success" ? 8 : 0,
+    coachVisible: input.event.narrativeWeight >= 55 || input.event.eventType === "scoring",
+    diagnosticWeight: input.event.narrativeWeight,
+    officialTruth: true,
+    tags: [
+      "match_event_trace_spine",
+      "match_trace_source_official_match_event",
+      `match_trace_action_${actionTypeForEvent(input.event).toLowerCase()}`,
+      `match_trace_outcome_${outcomeForEvent(input.event).toLowerCase()}`,
+    ],
+    warnings: phase === "UNKNOWN" ? ["MATCH_TRACE_UNKNOWN_PHASE"] : [],
+  });
+}
+```
+
+## File: src/simulation/tracing/matchTraceFromMiniMatchRecord.ts
+
+```ts
+import {
+  createMatchTraceEvent,
+  type MatchTraceActionType,
+  type MatchTraceEvent,
+  type MatchTraceOutcome,
+  type MatchTracePhase,
+  type MatchTracePressureLevel,
+} from "./matchTraceEvent";
+
+export type MiniMatchRecordLike = {
+  readonly recordId?: string;
+  readonly eventId?: string;
+  readonly sequenceNumber?: number;
+  readonly phase?: string;
+  readonly zone?: string;
+  readonly targetZone?: string;
+  readonly actionType?: string;
+  readonly outcome?: string;
+  readonly primaryPlayerId?: string;
+  readonly secondaryPlayerId?: string;
+  readonly pressureLevel?: string;
+  readonly officialTruth?: boolean;
+  readonly tags?: readonly string[];
+  readonly setup?: {
+    readonly sequenceNumber?: number;
+    readonly activeZone?: string;
+    readonly pressureDescription?: string;
+    readonly possessionTeam?: {
+      readonly teamId?: string;
+      readonly team?: {
+        readonly teamId?: string;
+      };
+    };
+    readonly pressingTeam?: {
+      readonly teamId?: string;
+      readonly team?: {
+        readonly teamId?: string;
+      };
+    };
+    readonly routeSelectionResult?: {
+      readonly selectedActionType?: string;
+      readonly targetZone?: string;
+      readonly receiverId?: string;
+    };
+  };
+  readonly result?: object;
+};
+
+function normalizedPhase(value: string | undefined): MatchTracePhase {
+  const normalized = value?.toLowerCase() ?? "";
+
+  if (normalized.includes("build")) {
+    return "BUILD_UP";
+  }
+  if (normalized.includes("progress") || normalized.includes("construction")) {
+    return "PROGRESSION";
+  }
+  if (normalized.includes("transition") && normalized.includes("offensive")) {
+    return "OFFENSIVE_TRANSITION";
+  }
+  if (normalized.includes("transition") && normalized.includes("defensive")) {
+    return "DEFENSIVE_TRANSITION";
+  }
+  if (normalized.includes("finishing") || normalized.includes("shot")) {
+    return "FINAL_ZONE_ATTACK";
+  }
+
+  return "UNKNOWN";
+}
+
+function normalizedAction(value: string | undefined): MatchTraceActionType {
+  const normalized = value?.toUpperCase() ?? "";
+
+  if (normalized.includes("SHOT")) {
+    return "SHOT";
+  }
+  if (normalized.includes("TRY")) {
+    return "TRY_ATTEMPT";
+  }
+  if (normalized.includes("DROP")) {
+    return "DROP_ATTEMPT";
+  }
+  if (normalized.includes("CARRY") || normalized.includes("HOLD")) {
+    return "CARRY";
+  }
+  if (normalized.includes("RECYCLE") || normalized.includes("PASS") || normalized.includes("PROGRESS")) {
+    return "PASS";
+  }
+  if (normalized.includes("DUEL") || normalized.includes("CONTACT")) {
+    return "DUEL";
+  }
+  if (normalized.includes("RECOVERY")) {
+    return "RECOVERY";
+  }
+
+  return "TACTICAL_SHIFT";
+}
+
+function normalizedOutcome(value: string | undefined): MatchTraceOutcome {
+  const normalized = value?.toUpperCase() ?? "";
+
+  if (normalized.includes("SCORE") || normalized.includes("GOAL") || normalized.includes("TRY_TOUCHDOWN")) {
+    return "SCORE_CREATED";
+  }
+  if (normalized.includes("SHOT")) {
+    return "SHOT_CREATED";
+  }
+  if (normalized.includes("DANGER")) {
+    return "DANGER_CREATED";
+  }
+  if (normalized.includes("TURNOVER") || normalized.includes("LOST")) {
+    return "TURNOVER_CONCEDED";
+  }
+  if (normalized.includes("SUCCESS") || normalized.includes("AVAILABLE") || normalized.includes("SELECTED")) {
+    return "SUCCESS";
+  }
+  if (normalized.includes("FAIL") || normalized.includes("REJECTED")) {
+    return "FAILURE";
+  }
+
+  return "NEUTRAL";
+}
+
+function pressureLevel(value: string | undefined): MatchTracePressureLevel {
+  const normalized = value?.toUpperCase() ?? "";
+
+  if (normalized.includes("HIGH")) {
+    return "HIGH";
+  }
+  if (normalized.includes("MEDIUM")) {
+    return "MEDIUM";
+  }
+  if (normalized.includes("LOW")) {
+    return "LOW";
+  }
+
+  return "UNKNOWN";
+}
+
+export function matchTraceFromMiniMatchRecord(input: {
+  readonly record: MiniMatchRecordLike;
+  readonly matchId?: string;
+  readonly minute?: number;
+  readonly sequenceId?: string;
+  readonly teamId: string;
+  readonly opponentTeamId: string;
+}): MatchTraceEvent {
+  const sequenceNumber = input.record.sequenceNumber ?? input.record.setup?.sequenceNumber ?? 0;
+  const selectedAction = input.record.actionType ?? input.record.setup?.routeSelectionResult?.selectedActionType;
+  const zone = input.record.zone ?? input.record.setup?.activeZone ?? "UNKNOWN_ZONE";
+  const resultEventType = input.record.result !== undefined && "eventType" in input.record.result && typeof input.record.result.eventType === "string"
+    ? input.record.result.eventType
+    : undefined;
+  const resultOutcome = input.record.result !== undefined && "outcome" in input.record.result && typeof input.record.result.outcome === "string"
+    ? input.record.result.outcome
+    : undefined;
+  const phase = normalizedPhase(input.record.phase ?? resultEventType ?? selectedAction);
+  const targetZone = input.record.targetZone ?? input.record.setup?.routeSelectionResult?.targetZone;
+  const secondaryPlayerId = input.record.secondaryPlayerId ?? input.record.setup?.routeSelectionResult?.receiverId;
+
+  return createMatchTraceEvent({
+    traceId: `trace-mini-${input.record.recordId ?? input.record.eventId ?? `sequence-${sequenceNumber}`}`,
+    ...(input.record.eventId === undefined ? {} : { sourceEventId: input.record.eventId }),
+    source: "mini_match_record",
+    ...(input.matchId === undefined ? {} : { matchId: input.matchId }),
+    minute: input.minute ?? sequenceNumber,
+    ...(input.sequenceId === undefined ? {} : { sequenceId: input.sequenceId }),
+    teamId: input.record.setup?.possessionTeam?.teamId ?? input.record.setup?.possessionTeam?.team?.teamId ?? input.teamId,
+    opponentTeamId: input.record.setup?.pressingTeam?.teamId ?? input.record.setup?.pressingTeam?.team?.teamId ?? input.opponentTeamId,
+    phase,
+    zone,
+    ...(targetZone === undefined
+      ? {}
+      : { targetZone }),
+    actionType: normalizedAction(selectedAction),
+    outcome: normalizedOutcome(input.record.outcome ?? resultOutcome ?? selectedAction),
+    ...(input.record.primaryPlayerId === undefined ? {} : { primaryPlayerId: input.record.primaryPlayerId }),
+    ...(secondaryPlayerId === undefined
+      ? {}
+      : { secondaryPlayerId }),
+    pressureLevel: pressureLevel(input.record.pressureLevel ?? input.record.setup?.pressureDescription),
+    causeTags: selectedAction === undefined ? ["unknown_cause"] : ["good_decision"],
+    impactTags: selectedAction === undefined ? ["no_clear_impact"] : ["possession_secured"],
+    dangerDelta: normalizedAction(selectedAction) === "SHOT" || normalizedAction(selectedAction) === "TRY_ATTEMPT" ? 15 : 5,
+    possessionValueDelta: 4,
+    coachVisible: false,
+    diagnosticWeight: 35,
+    officialTruth: input.record.officialTruth ?? false,
+    tags: [
+      "match_event_trace_spine",
+      "match_trace_source_mini_match_record",
+      `match_trace_sequence_${sequenceNumber}`,
+      ...(input.record.tags ?? []),
+    ],
+    warnings: phase === "UNKNOWN" ? ["MATCH_TRACE_UNKNOWN_PHASE"] : [],
+  });
+}
+```
+
+## File: src/simulation/tracing/matchTraceFromSandboxReplay.ts
+
+```ts
+import {
+  createMatchTraceEvent,
+  type MatchTraceActionType,
+  type MatchTraceEvent,
+  type MatchTraceOutcome,
+  type MatchTracePhase,
+} from "./matchTraceEvent";
+
+export type SandboxReplayEventLike = {
+  readonly sandboxEventId?: string;
+  readonly sourceStepId?: string;
+  readonly sandboxIndex?: number;
+  readonly sandboxMinuteOffset?: number;
+  readonly eventType?: string;
+  readonly sourceStepType?: string;
+  readonly actorId?: string;
+  readonly teamCandidate?: string;
+  readonly targetZone?: string;
+  readonly outcome?: string;
+  readonly confidence?: number;
+  readonly createsOfficialMatchEvent?: false;
+  readonly insertedIntoOfficialTimeline?: false;
+  readonly mutatesOfficialTimeline?: false;
+  readonly mutatesOfficialPossession?: false;
+  readonly mutatesOfficialScore?: false;
+  readonly mutatesOfficialScoringEvents?: false;
+  readonly createsProductionScoringEvent?: false;
+  readonly mutatesProductionRouteResolution?: false;
+  readonly reasons?: readonly string[];
+  readonly tags?: readonly string[];
+  readonly warnings?: readonly string[];
+};
+
+function phaseForSandbox(eventType: string | undefined): MatchTracePhase {
+  const normalized = eventType ?? "";
+
+  if (normalized.includes("goalkeeper")) {
+    return "GOALKEEPER_SEQUENCE";
+  }
+  if (normalized.includes("shot") || normalized.includes("scoring")) {
+    return "FINAL_ZONE_ATTACK";
+  }
+  if (normalized.includes("route") || normalized.includes("continuation")) {
+    return "PROGRESSION";
+  }
+  if (normalized.includes("rebound")) {
+    return "OFFENSIVE_TRANSITION";
+  }
+
+  return "UNKNOWN";
+}
+
+function actionForSandbox(event: SandboxReplayEventLike): MatchTraceActionType {
+  const combined = `${event.eventType ?? ""} ${event.sourceStepType ?? ""}`.toLowerCase();
+
+  if (combined.includes("goalkeeper_response")) {
+    return "GOALKEEPER_SAVE";
+  }
+  if (combined.includes("shot")) {
+    return "SHOT";
+  }
+  if (combined.includes("rebound") || combined.includes("second")) {
+    return "SECOND_BALL_CONTEST";
+  }
+  if (combined.includes("continuation")) {
+    return "SUPPORT_RUN";
+  }
+  if (combined.includes("route")) {
+    return "PASS";
+  }
+
+  return "TACTICAL_SHIFT";
+}
+
+function outcomeForSandbox(event: SandboxReplayEventLike): MatchTraceOutcome {
+  const eventType = (event.eventType ?? "").toLowerCase();
+  const outcome = (event.outcome ?? "").toLowerCase();
+  const combined = `${eventType} ${outcome}`;
+
+  if (combined.includes("save")) {
+    return "SAVE_MADE";
+  }
+  if (
+    outcome.includes("score") ||
+    outcome.includes("goal") ||
+    eventType.includes("scoring_event") ||
+    eventType.includes("score_created")
+  ) {
+    return "SCORE_CREATED";
+  }
+  if (combined.includes("second_chance")) {
+    return "SECOND_CHANCE_CREATED";
+  }
+  if (combined.includes("danger")) {
+    return "DANGER_CREATED";
+  }
+  if (combined.includes("no_") || combined.includes("blocked")) {
+    return "NEUTRAL";
+  }
+
+  return "UNKNOWN";
+}
+
+export function matchTraceFromSandboxReplay(input: {
+  readonly event: SandboxReplayEventLike;
+  readonly matchId?: string;
+  readonly minute?: number;
+  readonly sequenceId?: string;
+  readonly teamId: string;
+  readonly opponentTeamId: string;
+}): MatchTraceEvent {
+  const phase = phaseForSandbox(input.event.eventType);
+  const actionType = actionForSandbox(input.event);
+  const outcome = outcomeForSandbox(input.event);
+
+  return createMatchTraceEvent({
+    traceId: `trace-sandbox-${input.event.sandboxEventId ?? input.event.sourceStepId ?? input.event.sandboxIndex ?? "event"}`,
+    ...(input.event.sandboxEventId === undefined ? {} : { sourceEventId: input.event.sandboxEventId }),
+    source: "sandbox_event",
+    ...(input.matchId === undefined ? {} : { matchId: input.matchId }),
+    minute: input.minute ?? input.event.sandboxMinuteOffset ?? 0,
+    ...(input.sequenceId === undefined ? {} : { sequenceId: input.sequenceId }),
+    teamId: input.event.teamCandidate ?? input.teamId,
+    opponentTeamId: input.opponentTeamId,
+    phase,
+    zone: input.event.targetZone ?? "SANDBOX_ZONE",
+    ...(input.event.targetZone === undefined ? {} : { targetZone: input.event.targetZone }),
+    actionType,
+    outcome,
+    ...(input.event.actorId === undefined ? {} : { primaryPlayerId: input.event.actorId }),
+    pressureLevel: "UNKNOWN",
+    causeTags: input.event.reasons !== undefined && input.event.reasons.length > 0 ? ["good_decision"] : ["unknown_cause"],
+    impactTags: outcome === "SAVE_MADE"
+      ? ["shot_prevented"]
+      : outcome === "SECOND_CHANCE_CREATED"
+        ? ["second_chance_allowed"]
+        : outcome === "DANGER_CREATED" || outcome === "SCORE_CREATED"
+          ? ["danger_created"]
+          : ["no_clear_impact"],
+    dangerDelta: outcome === "DANGER_CREATED" || outcome === "SECOND_CHANCE_CREATED" || outcome === "SCORE_CREATED" ? 15 : 0,
+    possessionValueDelta: 0,
+    coachVisible: false,
+    diagnosticWeight: input.event.confidence ?? 30,
+    officialTruth: false,
+    tags: [
+      "match_event_trace_spine",
+      "match_trace_source_sandbox_event",
+      ...(input.event.tags ?? []),
+    ],
+    warnings: [
+      ...(phase === "UNKNOWN" ? ["MATCH_TRACE_UNKNOWN_PHASE"] : []),
+      ...(input.event.warnings ?? []),
+    ],
+  });
+}
+```
+
+## File: src/simulation/tracing/matchTraceSpine.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import type { MiniMatchSequenceRecord } from "../miniMatch";
+import type { ControlledSegmentSandboxTimelineModel } from "../fullMatch/controlledSegmentSandboxTimeline";
+import type { SelectionPreviewModel } from "../fullMatch/selectionPreviewFromCoachTestPlan";
+import { matchTraceFromMatchEvent } from "./matchTraceFromMatchEvent";
+import { matchTraceFromMiniMatchRecord } from "./matchTraceFromMiniMatchRecord";
+import { matchTraceFromSandboxReplay } from "./matchTraceFromSandboxReplay";
+import type {
+  MatchTraceCauseTag,
+  MatchTraceEvent,
+  MatchTraceImpactTag,
+  MatchTracePhase,
+  MatchTraceActionType,
+} from "./matchTraceEvent";
+
+export type MatchTraceSpineStatus = "available" | "not_available";
+
+export type MatchTraceSpineModel = {
+  readonly status: MatchTraceSpineStatus;
+  readonly traces: readonly MatchTraceEvent[];
+  readonly totalTraceCount: number;
+  readonly officialTraceCount: number;
+  readonly miniMatchTraceCount: number;
+  readonly sandboxTraceCount: number;
+  readonly phaseCoverageCount: number;
+  readonly actionTypeCoverageCount: number;
+  readonly causeTagCoverageCount: number;
+  readonly impactTagCoverageCount: number;
+  readonly coachVisibleTraceCount: number;
+  readonly officialTruthTrueCount: number;
+  readonly officialTruthFalseCount: number;
+  readonly traceMutationCount: 0;
+  readonly scoreMutationCount: 0;
+  readonly possessionMutationCount: 0;
+  readonly productionScoringEventCreationCount: 0;
+  readonly liveSelectionDriverCount: 0;
+  readonly productionRouteResolutionDriverCount: 0;
+  readonly globalEconomyClaimCount: 0;
+  readonly selectionPreviewTraceBackingStatus: SelectionPreviewModel["selectionPreviewTraceBackingStatus"];
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+function uniqueCount<T extends string>(values: readonly T[]): number {
+  return new Set(values).size;
+}
+
+function traceTags(model: Omit<MatchTraceSpineModel, "tags">): readonly string[] {
+  return [
+    "match_event_trace_spine",
+    "match_event_trace_spine_status_available",
+    ...(model.officialTraceCount > 0 ? ["match_trace_source_official_match_event"] : []),
+    ...(model.miniMatchTraceCount > 0 ? ["match_trace_source_mini_match_record"] : []),
+    ...(model.sandboxTraceCount > 0 ? ["match_trace_source_sandbox_event"] : []),
+    `match_trace_official_truth_true_count_${model.officialTruthTrueCount}`,
+    `match_trace_official_truth_false_count_${model.officialTruthFalseCount}`,
+    `match_trace_phase_coverage_${model.phaseCoverageCount}`,
+    `match_trace_action_type_coverage_${model.actionTypeCoverageCount}`,
+    `match_trace_cause_tag_coverage_${model.causeTagCoverageCount}`,
+    `match_trace_impact_tag_coverage_${model.impactTagCoverageCount}`,
+    `match_trace_coach_visible_count_${model.coachVisibleTraceCount}`,
+    "match_trace_score_mutation_count_0",
+    "match_trace_possession_mutation_count_0",
+    "match_trace_production_scoring_event_creation_count_0",
+    "match_trace_live_selection_driver_count_0",
+    "match_trace_production_route_resolution_driver_count_0",
+    "match_trace_global_economy_claim_forbidden",
+    `selection_preview_trace_backing_status_${model.selectionPreviewTraceBackingStatus}`,
+    "selection_preview_requires_match_trace_spine_true",
+    "selection_preview_future_trace_consumer_true",
+    "scoring_constants_unchanged",
+  ];
+}
+
+export function buildMatchTraceSpine(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly miniMatchRecords: readonly MiniMatchSequenceRecord[];
+  readonly controlledSegmentSandboxTimelineModel: ControlledSegmentSandboxTimelineModel;
+  readonly selectionPreviewModel: SelectionPreviewModel;
+}): MatchTraceSpineModel {
+  const officialTraces = input.report.timeline.map((event) => matchTraceFromMatchEvent({ event }));
+  const miniMatchTraces = input.miniMatchRecords.map((record) =>
+    matchTraceFromMiniMatchRecord({
+      record,
+      matchId: input.matchInput.matchId,
+      minute: record.setup.sequenceNumber,
+      sequenceId: `mini-sequence-${record.sequenceNumber}`,
+      teamId: input.matchInput.homeTeam.teamId,
+      opponentTeamId: input.matchInput.awayTeam.teamId,
+    })
+  );
+  const sandboxTraces = input.controlledSegmentSandboxTimelineModel.override.events.map((event) =>
+    matchTraceFromSandboxReplay({
+      event,
+      matchId: input.matchInput.matchId,
+      minute: event.sandboxMinuteOffset,
+      sequenceId: event.sourceStepId,
+      teamId: input.matchInput.homeTeam.teamId,
+      opponentTeamId: input.matchInput.awayTeam.teamId,
+    })
+  );
+  const traces = [...officialTraces, ...miniMatchTraces, ...sandboxTraces];
+  const modelWithoutTags: Omit<MatchTraceSpineModel, "tags"> = {
+    status: traces.length > 0 ? "available" : "not_available",
+    traces,
+    totalTraceCount: traces.length,
+    officialTraceCount: officialTraces.length,
+    miniMatchTraceCount: miniMatchTraces.length,
+    sandboxTraceCount: sandboxTraces.length,
+    phaseCoverageCount: uniqueCount(traces.map((trace) => trace.phase as MatchTracePhase)),
+    actionTypeCoverageCount: uniqueCount(traces.map((trace) => trace.actionType as MatchTraceActionType)),
+    causeTagCoverageCount: uniqueCount(traces.flatMap((trace) => trace.causeTags as readonly MatchTraceCauseTag[])),
+    impactTagCoverageCount: uniqueCount(traces.flatMap((trace) => trace.impactTags as readonly MatchTraceImpactTag[])),
+    coachVisibleTraceCount: traces.filter((trace) => trace.coachVisible).length,
+    officialTruthTrueCount: traces.filter((trace) => trace.officialTruth).length,
+    officialTruthFalseCount: traces.filter((trace) => !trace.officialTruth).length,
+    traceMutationCount: 0,
+    scoreMutationCount: 0,
+    possessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    liveSelectionDriverCount: 0,
+    productionRouteResolutionDriverCount: 0,
+    globalEconomyClaimCount: 0,
+    selectionPreviewTraceBackingStatus: input.selectionPreviewModel.selectionPreviewTraceBackingStatus,
+    warnings: [
+      ...(officialTraces.length === 0 ? ["MATCH_TRACE_NO_OFFICIAL_TRACES"] : []),
+      ...(miniMatchTraces.length === 0 ? ["MATCH_TRACE_NO_MINI_MATCH_TRACES"] : []),
+      ...(sandboxTraces.length === 0 ? ["MATCH_TRACE_NO_SANDBOX_TRACES"] : []),
+    ],
+  };
+
+  return {
+    ...modelWithoutTags,
+    tags: traceTags(modelWithoutTags),
+  };
+}
+
+export function matchTraceSpineEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: MatchTraceSpineModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-match-event-trace-spine`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [...new Set(input.model.traces.map((trace) => trace.zone))].slice(0, 4),
+    summary:
+      `Match event trace spine ${input.model.status}: totalTraceCount=${input.model.totalTraceCount}, ` +
+      `officialTraceCount=${input.model.officialTraceCount}, miniMatchTraceCount=${input.model.miniMatchTraceCount}, ` +
+      `sandboxTraceCount=${input.model.sandboxTraceCount}, phaseCoverage=${input.model.phaseCoverageCount}, ` +
+      `actionTypeCoverage=${input.model.actionTypeCoverageCount}, causeTagCoverage=${input.model.causeTagCoverageCount}, ` +
+      `impactTagCoverage=${input.model.impactTagCoverageCount}, coachVisibleTraceCount=${input.model.coachVisibleTraceCount}, ` +
+      `officialTruthTrueCount=${input.model.officialTruthTrueCount}, officialTruthFalseCount=${input.model.officialTruthFalseCount}, ` +
+      `traceMutationCount=${input.model.traceMutationCount}, scoreMutationCount=${input.model.scoreMutationCount}, ` +
+      `possessionMutationCount=${input.model.possessionMutationCount}, productionScoringEventCreationCount=${input.model.productionScoringEventCreationCount}, ` +
+      `liveSelectionDriverCount=${input.model.liveSelectionDriverCount}, productionRouteResolutionDriverCount=${input.model.productionRouteResolutionDriverCount}, ` +
+      `globalEconomyClaimCount=${input.model.globalEconomyClaimCount}, selectionPreviewTraceBackingStatus=${input.model.selectionPreviewTraceBackingStatus}, ` +
+      "scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 52,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_match_event_trace_spine",
+      ...input.model.tags,
+    ],
+  };
+}
+
+export function matchTraceSpineLimitations(model: MatchTraceSpineModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["MATCH_TRACE_SPINE_NOT_AVAILABLE"];
+  }
+
+  return [
+    "MATCH_TRACE_SPINE_DIAGNOSTIC_ONLY",
+    "MATCH_TRACE_SPINE_CANNOT_MUTATE_OFFICIAL_TIMELINE",
+    "MATCH_TRACE_SPINE_CANNOT_MUTATE_OFFICIAL_SCORE",
+    "MATCH_TRACE_SPINE_CANNOT_MUTATE_OFFICIAL_POSSESSION",
+    "MATCH_TRACE_SPINE_CANNOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "MATCH_TRACE_SPINE_CANNOT_DRIVE_LIVE_SELECTION",
+    "MATCH_TRACE_SPINE_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "MATCH_TRACE_SPINE_CANNOT_CLAIM_GLOBAL_ECONOMY",
+  ];
 }
 ```
 
@@ -31919,6 +33006,472 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/selectionPreviewTraceBacking.test.ts
+
+```ts
+import { sandboxDecisionEvidenceCalibrationFixture } from "./sandboxDecisionBatchConfidenceTestHelpers";
+import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./sandboxDecisionBatchConfidenceCalibrationFromEvidence";
+import { multiScenarioCoachTestPlanFromBatch } from "./multiScenarioCoachTestPlanFromBatch";
+import { selectionPreviewFromCoachTestPlan } from "./selectionPreviewFromCoachTestPlanBuilder";
+import {
+  selectionPreviewCannotChangeSelection,
+  selectionPreviewCannotMutateOfficialFullMatch,
+} from "./selectionPreviewFromCoachTestPlan";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSelectionPreviewTraceBacking(): readonly string[] {
+  const batch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: sandboxDecisionEvidenceCalibrationFixture(),
+  });
+  const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
+  const preview = selectionPreviewFromCoachTestPlan({ testPlan: plan });
+
+  assertTest(preview.status === "available", "selection preview must remain available.");
+  assertTest(preview.selectionPreviewTraceBackingStatus === "sandbox_only", "selection preview trace backing must be sandbox_only.");
+  assertTest(preview.selectionPreviewRequiresMatchTraceSpine, "selection preview must require match trace spine.");
+  assertTest(preview.selectionPreviewFutureTraceConsumer, "selection preview must be marked as future trace consumer.");
+  assertTest(preview.tags.includes("selection_preview_trace_backing_status_sandbox_only"), "technical trace backing tag must exist.");
+  assertTest(preview.tags.includes("selection_preview_requires_match_trace_spine_true"), "technical trace requirement tag must exist.");
+  assertTest(preview.tags.includes("selection_preview_future_trace_consumer_true"), "technical future consumer tag must exist.");
+  assertTest(selectionPreviewCannotMutateOfficialFullMatch(preview), "preview must not mutate official full match.");
+  assertTest(selectionPreviewCannotChangeSelection(preview), "preview must not change lineup/starters/bench.");
+
+  return [
+    "selection preview remains available",
+    "selection preview trace backing status is sandbox_only",
+    "selection preview requires match trace spine",
+    "selection preview is marked as future trace consumer",
+    "preview still cannot change lineup, starters, or bench",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSelectionPreviewTraceBacking();
+
+  console.log("selectionPreviewTraceBacking tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4c.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4C(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const traceFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "trace spine must not mutate timeline.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "trace spine must not mutate official scoring events.");
+  assertTest(signature.officialScoreDelta === 0, "trace spine must not mutate official score.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "trace spine must not create production scoring events.");
+  assertTest(traceFact !== undefined, "trace spine evidence must exist.");
+  assertTest(traceFact?.internalTags.includes("match_trace_global_economy_claim_forbidden") ?? false, "trace spine must not claim global economy.");
+  assertTest(traceFact?.internalTags.includes("selection_preview_trace_backing_status_sandbox_only") ?? false, "selection preview must remain sandbox-backed.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4C();
+
+  console.log("scoringGuard.4c tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceEventContract.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { matchTraceFromMatchEvent } from "./matchTraceFromMatchEvent";
+import {
+  matchTraceCannotDriveProduction,
+  matchTraceCannotMutateOfficialState,
+  validateMatchTraceEvent,
+} from "./matchTraceEvent";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMatchTraceEventContract(): readonly string[] {
+  const trace = matchTraceFromMatchEvent({
+    event: engineToCoachPublicContractFixtures.eventFixture,
+  });
+
+  assertTest(trace.source === "official_match_event", "trace event must have source.");
+  assertTest(trace.phase !== undefined, "trace event must have phase.");
+  assertTest(trace.zone.length > 0, "trace event must have zone.");
+  assertTest(trace.actionType !== undefined, "trace event must have action type.");
+  assertTest(trace.outcome !== undefined, "trace event must have outcome.");
+  assertTest(trace.causeTags.length > 0, "trace event must have cause tags.");
+  assertTest(trace.impactTags.length > 0, "trace event must have impact tags.");
+  assertTest(trace.diagnosticWeight >= 0, "trace event must have diagnostic weight.");
+  assertTest(trace.officialTruth, "trace event must expose officialTruth.");
+  assertTest(matchTraceCannotMutateOfficialState(trace), "trace cannot mutate official state.");
+  assertTest(matchTraceCannotDriveProduction(trace), "trace cannot drive production.");
+  assertTest(validateMatchTraceEvent(trace).length === 0, "trace validation must pass.");
+
+  return [
+    "trace event has source, phase, zone, action type, outcome, cause tags, impact tags, diagnosticWeight, and officialTruth",
+    "trace cannot mutate timeline, score, possession, or scoring events",
+    "trace cannot drive coach instruction, live selection, production route resolution, or global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceEventContract();
+
+  console.log("matchTraceEventContract tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceFromMatchEvent.test.ts
+
+```ts
+import { MatchPhase, PressureLevel } from "../../models/match";
+import type { MatchEvent } from "../../contracts/engineToCoach";
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { matchTraceFromMatchEvent } from "./matchTraceFromMatchEvent";
+import { matchTraceCannotMutateOfficialState } from "./matchTraceEvent";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function eventWith(input: Partial<MatchEvent>): MatchEvent {
+  return {
+    ...engineToCoachPublicContractFixtures.eventFixture,
+    ...input,
+  };
+}
+
+export function validateMatchTraceFromMatchEvent(): readonly string[] {
+  const baseEvent = engineToCoachPublicContractFixtures.eventFixture;
+  const original = JSON.stringify(baseEvent);
+  const trace = matchTraceFromMatchEvent({ event: baseEvent });
+  const scoringTrace = matchTraceFromMatchEvent({
+    event: eventWith({
+      eventId: "event-scoring",
+      eventType: "scoring",
+      outcome: "score",
+      consequences: [{ type: "score_change", description: "CONTROL scores.", value: 3 }],
+      tags: ["scoring_event"],
+    }),
+  });
+  const goalkeeperTrace = matchTraceFromMatchEvent({
+    event: eventWith({
+      eventId: "event-gk",
+      eventType: "goalkeeper_action",
+      outcome: "success",
+      consequences: [],
+      tags: ["goalkeeper_save"],
+    }),
+  });
+  const turnoverTrace = matchTraceFromMatchEvent({
+    event: eventWith({
+      eventId: "event-turnover",
+      eventType: "turnover",
+      outcome: "failure",
+      consequences: [{ type: "possession_change", description: "Possession lost." }],
+      tags: ["pressure_high"],
+    }),
+  });
+  const uncertainTrace = matchTraceFromMatchEvent({
+    event: eventWith({
+      eventId: "event-uncertain",
+      phase: MatchPhase.InProgress,
+      eventType: "discipline",
+      outcome: "neutral",
+      tacticalContext: {
+        pressureLevel: PressureLevel.Low,
+        ballZone: baseEvent.zone,
+      },
+      consequences: [],
+      tags: [],
+    }),
+  });
+
+  assertTest(trace.source === "official_match_event", "official event source must be preserved.");
+  assertTest(trace.officialTruth, "official match trace must be officialTruth true.");
+  assertTest(trace.teamId === baseEvent.teamId, "team must be preserved.");
+  assertTest(trace.opponentTeamId === baseEvent.opponentTeamId, "opponent must be preserved.");
+  assertTest(trace.zone === baseEvent.zone, "zone must be preserved.");
+  assertTest(trace.minute === baseEvent.timestamp.minute, "minute must be preserved.");
+  assertTest(scoringTrace.outcome === "SCORE_CREATED", "score_change event must become SCORE_CREATED.");
+  assertTest(goalkeeperTrace.actionType === "GOALKEEPER_SAVE", "goalkeeper action must map to goalkeeper trace.");
+  assertTest(goalkeeperTrace.outcome === "SAVE_MADE", "goalkeeper success must map to SAVE_MADE.");
+  assertTest(turnoverTrace.impactTags.includes("possession_lost"), "turnover must map to possession lost impact.");
+  assertTest(uncertainTrace.actionType === "UNKNOWN" || uncertainTrace.phase === "SET_PIECE", "uncertain event must fall back safely.");
+  assertTest(JSON.stringify(baseEvent) === original, "adapter must not mutate original event.");
+  assertTest(matchTraceCannotMutateOfficialState(trace), "official adapter cannot create scoring events or change score.");
+
+  return [
+    "official match event converts to trace with officialTruth true",
+    "team, opponent, zone, and minute are preserved",
+    "scoring, goalkeeper, turnover, and uncertain events map safely",
+    "adapter does not mutate original event or create scoring effects",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceFromMatchEvent();
+
+  console.log("matchTraceFromMatchEvent tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceFromMiniMatchRecord.test.ts
+
+```ts
+import { matchTraceFromMiniMatchRecord, type MiniMatchRecordLike } from "./matchTraceFromMiniMatchRecord";
+import { matchTraceCannotMutateOfficialState } from "./matchTraceEvent";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMatchTraceFromMiniMatchRecord(): readonly string[] {
+  const record: MiniMatchRecordLike = {
+    recordId: "mini-record-1",
+    sequenceNumber: 1,
+    phase: "offensive_construction",
+    zone: "Z3-C",
+    targetZone: "Z4-HSR",
+    actionType: "FORWARD_PROGRESS",
+    outcome: "selected",
+    pressureLevel: "medium",
+    primaryPlayerId: "control-th",
+    secondaryPlayerId: "control-sh",
+    tags: ["mini_match_fixture"],
+  };
+  const trace = matchTraceFromMiniMatchRecord({
+    record,
+    matchId: "match-1",
+    minute: 12,
+    sequenceId: "sequence-1",
+    teamId: "control",
+    opponentTeamId: "blitz",
+  });
+  const unknownTrace = matchTraceFromMiniMatchRecord({
+    record: {},
+    teamId: "control",
+    opponentTeamId: "blitz",
+  });
+
+  assertTest(trace.source === "mini_match_record", "mini-match source must be preserved.");
+  assertTest(trace.phase === "PROGRESSION", "phase must be present.");
+  assertTest(trace.actionType === "PASS", "action type must be present.");
+  assertTest(trace.outcome === "SUCCESS", "outcome must be present.");
+  assertTest(trace.zone === "Z3-C", "zone must be present.");
+  assertTest(trace.causeTags.length > 0, "cause tags must be present.");
+  assertTest(trace.impactTags.length > 0, "impact tags must be present.");
+  assertTest(unknownTrace.zone === "UNKNOWN_ZONE", "unknown fields must fall back safely.");
+  assertTest(unknownTrace.causeTags.includes("unknown_cause"), "unknown cause must be safe.");
+  assertTest(matchTraceCannotMutateOfficialState(trace), "mini-match adapter cannot mutate score or create scoring events.");
+
+  return [
+    "mini-match record converts to trace",
+    "phase, action, outcome, zone, cause, and impact are present",
+    "unknown fields fall back safely",
+    "adapter cannot mutate score or create scoring events",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceFromMiniMatchRecord();
+
+  console.log("matchTraceFromMiniMatchRecord tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceFromSandboxReplay.test.ts
+
+```ts
+import { matchTraceCannotDriveProduction, matchTraceCannotMutateOfficialState } from "./matchTraceEvent";
+import { matchTraceFromSandboxReplay, type SandboxReplayEventLike } from "./matchTraceFromSandboxReplay";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMatchTraceFromSandboxReplay(): readonly string[] {
+  const event: SandboxReplayEventLike = {
+    sandboxEventId: "sandbox-event-1",
+    sandboxIndex: 1,
+    sandboxMinuteOffset: 2,
+    eventType: "sandbox_goalkeeper_response",
+    sourceStepId: "step-1",
+    sourceStepType: "shot_resolution",
+    actorId: "blitz-gk",
+    teamCandidate: "blitz",
+    targetZone: "Z3-HSR",
+    outcome: "save_made",
+    confidence: 72,
+    createsOfficialMatchEvent: false,
+    insertedIntoOfficialTimeline: false,
+    mutatesOfficialTimeline: false,
+    mutatesOfficialPossession: false,
+    mutatesOfficialScore: false,
+    mutatesOfficialScoringEvents: false,
+    createsProductionScoringEvent: false,
+    mutatesProductionRouteResolution: false,
+    reasons: ["goalkeeper positioned well"],
+    tags: ["sandbox_fixture"],
+    warnings: [],
+  };
+  const trace = matchTraceFromSandboxReplay({
+    event,
+    matchId: "match-1",
+    minute: 33,
+    sequenceId: "sandbox-sequence-1",
+    teamId: "control",
+    opponentTeamId: "blitz",
+  });
+
+  assertTest(trace.source === "sandbox_event", "sandbox source must be preserved.");
+  assertTest(!trace.officialTruth, "sandbox trace must not be official truth.");
+  assertTest(trace.actionType === "GOALKEEPER_SAVE", "sandbox goalkeeper response must map to save action.");
+  assertTest(trace.outcome === "SAVE_MADE", "sandbox save outcome must be preserved.");
+  assertTest(matchTraceCannotMutateOfficialState(trace), "sandbox trace cannot mutate official state.");
+  assertTest(matchTraceCannotDriveProduction(trace), "sandbox trace cannot drive live or production selection.");
+  assertTest(!trace.canClaimGlobalEconomy, "sandbox trace cannot claim global economy.");
+
+  return [
+    "sandbox event converts to non-official trace",
+    "sandbox trace cannot mutate timeline, score, possession, or scoring events",
+    "sandbox trace cannot drive live selection, production route resolution, or global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceFromSandboxReplay();
+
+  console.log("matchTraceFromSandboxReplay tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function numberFromTag(tags: readonly string[], prefix: string): number {
+  const tag = tags.find((candidate) => candidate.startsWith(prefix));
+
+  return tag === undefined ? 0 : Number.parseInt(tag.slice(prefix.length), 10);
+}
+
+export function validateMatchTraceGuard(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
+  );
+  const tags = fact?.internalTags ?? [];
+
+  assertTest(fact !== undefined, "trace spine evidence fact must exist.");
+  assertTest(tags.includes("match_trace_score_mutation_count_0"), "traces cannot mutate official score.");
+  assertTest(tags.includes("match_trace_possession_mutation_count_0"), "traces cannot mutate official possession.");
+  assertTest(tags.includes("match_trace_production_scoring_event_creation_count_0"), "traces cannot create production scoring events.");
+  assertTest(tags.includes("match_trace_live_selection_driver_count_0"), "traces cannot drive live selection.");
+  assertTest(tags.includes("match_trace_production_route_resolution_driver_count_0"), "traces cannot drive production route resolution.");
+  assertTest(tags.includes("match_trace_global_economy_claim_forbidden"), "traces cannot claim global economy.");
+  assertTest(numberFromTag(tags, "match_trace_official_truth_true_count_") > 0, "official truth trace count must be positive.");
+  assertTest(numberFromTag(tags, "match_trace_official_truth_false_count_") > 0, "non-official trace count must be positive.");
+
+  return [
+    "traces cannot mutate official timeline, score, possession, or scoring events",
+    "traces cannot create production scoring events",
+    "traces cannot claim global economy",
+    "traces cannot drive live selection or production route resolution",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceGuard();
+
+  console.log("matchTraceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -39854,6 +41407,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
+    case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "training_recommendation";
   }
 }
@@ -39932,6 +41486,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Plan de test coach multi-scenarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return "Prévisualisation de sélection";
+    case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
+      return "Colonne de traces de match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -40011,6 +41567,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
+    case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -40057,6 +41614,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION",
     "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
     "WORKBENCH_CHAIN_SELECTION_PREVIEW",
+    "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -41210,6 +42768,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 26;
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return 25;
+    case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
+      return 24;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -41298,6 +42858,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le plan de test coach multi-scenarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return "Relire la previsualisation de selection";
+    case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
+      return "Relire la colonne de traces de match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -42576,7 +44138,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
-  | "WORKBENCH_CHAIN_SELECTION_PREVIEW";
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
+  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -43441,6 +45004,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "lineup",
       "starters",
       "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE: {
+    scope: "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
+    canProve: [
+      "official match events can be represented as read-only trace events",
+      "mini-match records can be represented as diagnostic trace events",
+      "sandbox events can be represented as non-official trace events",
+      "trace sources remain separated by officialTruth",
+      "trace events expose phase, zone, action, outcome, cause, and impact fields",
+    ],
+    canSuggest: [
+      "which future aggregate dimensions should feed coach reports",
+      "which future diagnostics can consume trace evidence",
+      "where unknown mappings need richer source data later",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "future trace aggregate quality",
+    ],
+    cannotOverride: [
       "live score",
       "official timeline",
       "official possession",

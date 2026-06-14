@@ -741,12 +741,35 @@ function renderSelectionPreview(report: MatchReport): string {
     <section>
       <h2>Prévisualisation de sélection</h2>
       <p>Ces profils sont des pistes de sélection à prévisualiser, pas des changements appliqués.</p>
+      <p>Cette prévisualisation reste fondée sur un signal sandbox local. Elle devra être confirmée par les futures traces de match complet.</p>
       <p>Aucune composition, aucun titulaire, aucun remplaçant et aucune sélection live ne sont modifiés.</p>
       <p>Cette prévisualisation ne modifie ni la timeline officielle, ni le score, ni la possession, ni les événements de score.</p>
       <p>Elle ne constitue pas une preuve d’économie globale.</p>
       <div class="grid">${cardHtml}</div>
       <details class="internal-markers">
         <summary>Détails techniques de la prévisualisation</summary>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
+function renderMatchTraceSpine(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE" &&
+    candidate.internalTags.includes("workbench_chain_match_event_trace_spine")
+  );
+
+  if (fact === undefined) {
+    return "";
+  }
+
+  return `
+    <section>
+      <h2>Colonne de traces de match</h2>
+      <p>Le moteur commence à produire des traces structurées pour expliquer les actions simulées. Ces traces servent à préparer les futurs rapports coach, mais elles ne modifient pas le match officiel.</p>
+      <details class="internal-markers">
+        <summary>Détails techniques des traces</summary>
         <div class="muted">${escapeHtml(fact.summary)}</div>
         <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
       </details>
@@ -853,6 +876,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const sandboxDecisionPanel = renderSandboxDecisionPanel(report);
   const multiScenarioCoachTestPlan = renderMultiScenarioCoachTestPlan(report);
   const selectionPreview = renderSelectionPreview(report);
+  const matchTraceSpine = renderMatchTraceSpine(report);
 
   const html = `<!doctype html>
 <html lang="fr">
@@ -921,6 +945,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     ${sandboxDecisionPanel}
     ${multiScenarioCoachTestPlan}
     ${selectionPreview}
+    ${matchTraceSpine}
 
     <section>
       <h2>Diagnostic tactique</h2>

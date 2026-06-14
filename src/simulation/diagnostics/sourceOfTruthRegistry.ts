@@ -32,7 +32,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
-  | "WORKBENCH_CHAIN_SELECTION_PREVIEW";
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
+  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -897,6 +898,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "lineup",
       "starters",
       "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE: {
+    scope: "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
+    canProve: [
+      "official match events can be represented as read-only trace events",
+      "mini-match records can be represented as diagnostic trace events",
+      "sandbox events can be represented as non-official trace events",
+      "trace sources remain separated by officialTruth",
+      "trace events expose phase, zone, action, outcome, cause, and impact fields",
+    ],
+    canSuggest: [
+      "which future aggregate dimensions should feed coach reports",
+      "which future diagnostics can consume trace evidence",
+      "where unknown mappings need richer source data later",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "future trace aggregate quality",
+    ],
+    cannotOverride: [
       "live score",
       "official timeline",
       "official possession",
