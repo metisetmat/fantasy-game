@@ -236,6 +236,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay4BValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4b.md"));
   const fullMatchWorkbenchChainReplay4C = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4c.md"));
   const fullMatchWorkbenchChainReplay4CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4c.md"));
+  const fullMatchWorkbenchChainReplay4D = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4d.md"));
+  const fullMatchWorkbenchChainReplay4DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4d.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -2123,6 +2125,31 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-4b.md",
     ...sprint4AForbiddenLeftovers,
   ];
+  const sprint4DExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4d.md",
+    "validation.fullmatch-workbench-chain-replay-4d.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4DForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-4c.md",
+    "validation.fullmatch-workbench-chain-replay-4c.md",
+    ...sprint4CForbiddenLeftovers,
+  ];
   const coachHtmlMojibakeMarkers = [
     "Ãƒ",
     "Ã‚",
@@ -2144,6 +2171,58 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "workbench_chain_",
   ];
   const coachExperimentalVisibleHtml = stripHtmlDetailsBlocks(coachExperimentalHtml);
+  const sprint4DChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4D", activeConfig.sprintName === "Sprint 4D - Match Trace Aggregator", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4DExpectedFiles.every((file) => requiredCopied(file)), sprint4DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4DForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4DForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint4DExpectedFiles.every((file) => requiredCopied(file)), sprint4DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 4D", manifest.includes("Sprint 4D - Match Trace Aggregator") && detailedManifest.includes("Sprint 4D - Match Trace Aggregator"), "visible"),
+    check("README is Sprint 4D oriented", readme.includes("# Sprint 4D Share Pack") && readme.includes("fullmatch-workbench-chain-replay-4d.md"), "README current"),
+    check("4D report included", fullMatchWorkbenchChainReplay4D.includes("# FullMatch Workbench Chain Replay 4D") && fullMatchWorkbenchChainReplay4D.includes("Match Trace Aggregator"), "4D doc included"),
+    check("4D validation is PASS", fullMatchWorkbenchChainReplay4DValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay4DValidation.includes("selection preview remains sandbox_only"), "4D validation PASS"),
+    check("trace aggregator evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR") && bundleSimulation.includes("WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"), "4D evidence category bundled"),
+    check("aggregate types bundled", bundleSimulation.includes("src/simulation/tracing/matchTraceAggregateTypes.ts") && bundleSimulation.includes("MatchTraceAggregateModel"), "aggregate types bundled"),
+    check("deduplication helper bundled", bundleSimulation.includes("src/simulation/tracing/deduplicateMatchTraces.ts") && bundleSimulation.includes("DEFAULT_MATCH_TRACE_SOURCE_PRIORITY"), "dedup helper bundled"),
+    check("aggregate from spine bundled", bundleSimulation.includes("src/simulation/tracing/matchTraceAggregateFromSpine.ts") && bundleSimulation.includes("matchTraceAggregateFromSpine"), "aggregate builder bundled"),
+    check("aggregator evidence bundled", bundleSimulation.includes("src/simulation/tracing/matchTraceAggregator.ts") && bundleSimulation.includes("matchTraceAggregatorEvidenceFact"), "aggregator evidence bundled"),
+    check("aggregate guard helpers bundled", bundleSimulation.includes("matchTraceAggregateCannotMutateOfficialState") && bundleSimulation.includes("matchTraceAggregateCannotDriveProduction"), "aggregate guards bundled"),
+    check("aggregate tests bundled", bundleSimulation.includes("matchTraceAggregateTypes.test.ts") && bundleSimulation.includes("deduplicateMatchTraces.test.ts") && bundleSimulation.includes("matchTraceAggregateFromSpine.test.ts") && bundleSimulation.includes("matchTraceAggregateScopeGuard.test.ts") && bundleSimulation.includes("matchTraceAggregatorGuard.test.ts"), "4D aggregate tests bundled"),
+    check("selection preview aggregator backing test bundled", bundleSimulation.includes("selectionPreviewAggregatorBacking.test.ts"), "4D preview backing test bundled"),
+    check("scoring guard 4D bundled", bundleSimulation.includes("scoringGuard.4d.test.ts"), "4D scoring guard bundled"),
+    check("match trace aggregator renderer test bundled", bundleReports.includes("matchTraceAggregatorReport.test.ts") && bundleReports.includes("Agrégats de traces de match"), "4D report test bundled"),
+    check("aggregator tags bundled", (bundleSimulation.includes("match_trace_aggregator_status_${model.status}") || coachExperimentalHtml.includes("match_trace_aggregator_status_available")) && bundleSimulation.includes("match_trace_aggregator_scope_official") && bundleSimulation.includes("match_trace_aggregator_scope_diagnostic") && bundleSimulation.includes("match_trace_aggregator_scope_sandbox"), "4D aggregate tags bundled"),
+    check("selection preview remains sandbox backed", bundleSimulation.includes("selection_preview_trace_backing_status_sandbox_only") && bundleSimulation.includes("selection_preview_confidence_not_upgraded_by_aggregator"), "preview not upgraded"),
+    check("experimental report contains trace aggregator diagnostic", coachExperimentalHtml.includes("Agrégats de traces de match") && coachExperimentalHtml.includes("officiels, diagnostics et sandbox restent séparés"), "aggregator visible"),
+    check("default report hides trace aggregator diagnostic", !coachDefaultHtml.includes("Agrégats de traces de match"), "default aggregator hidden"),
+    check("aggregate details are collapsed", coachExperimentalHtml.includes("Détails techniques des agrégats") && coachExperimentalHtml.includes("match_trace_aggregator_scope_official") && !coachExperimentalVisibleHtml.includes("match_trace_aggregator_scope_official"), "details collapsed"),
+    check("selection preview remains visible experimentally", coachExperimentalHtml.includes("Prévisualisation de sélection") && coachExperimentalHtml.includes("Cette prévisualisation reste fondée sur un signal sandbox local"), "preview visible and sandbox-backed"),
+    check("default report has no selection preview", !coachDefaultHtml.includes("Prévisualisation de sélection"), "default preview hidden"),
+    check("experimental report contains no mojibake markers", !containsAny(coachExperimentalHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("visible coach copy avoids developer jargon", !containsAny(coachExperimentalVisibleHtml, visibleDeveloperJargon), "visible jargon count 0"),
+    check("official aggregate excludes sandbox traces", bundleSimulation.includes("official aggregate excludes sandbox traces") && fullMatchWorkbenchChainReplay4DValidation.includes("official aggregate excludes sandbox traces"), "scope separation visible"),
+    check("diagnostic aggregate does not become official truth", bundleSimulation.includes("diagnostic bucket does not become official truth") && fullMatchWorkbenchChainReplay4DValidation.includes("diagnostic aggregate does not become official truth"), "diagnostic scope visible"),
+    check("sandbox aggregate stays non-official", bundleSimulation.includes("sandbox bucket contains only non-official traces") && fullMatchWorkbenchChainReplay4DValidation.includes("sandbox aggregate contains only non-official traces"), "sandbox scope visible"),
+    check("deduplication priority visible", fullMatchWorkbenchChainReplay4D.includes("official_match_event > mini_match_record > sandbox_event") && bundleSimulation.includes("source priority keeps official over mini-match"), "priority visible"),
+    check("aggregator cannot mutate score", bundleSimulation.includes("match_trace_aggregator_score_mutation_count_0") && fullMatchWorkbenchChainReplay4DValidation.includes("aggregator cannot mutate official score"), "score mutation forbidden"),
+    check("aggregator cannot mutate possession", bundleSimulation.includes("match_trace_aggregator_possession_mutation_count_0") && fullMatchWorkbenchChainReplay4DValidation.includes("aggregator cannot mutate official possession"), "possession mutation forbidden"),
+    check("aggregator cannot create production scoring events", bundleSimulation.includes("match_trace_aggregator_production_scoring_event_creation_count_0") && fullMatchWorkbenchChainReplay4DValidation.includes("aggregator cannot create production scoring events"), "production scoring creation forbidden"),
+    check("aggregator cannot claim global economy", bundleSimulation.includes("match_trace_aggregator_global_economy_claim_forbidden") && fullMatchWorkbenchChainReplay4DValidation.includes("aggregator cannot claim global economy"), "global economy forbidden"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4DValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4DValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4DValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4D.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4DValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay4D.includes("CONFIRM_MATCH_TRACE_AGGREGATOR") && fullMatchWorkbenchChainReplay4D.includes("PREPARE_COACH_REPORT_V0_FROM_TRACE_AGGREGATES"), "4D recommendations visible"),
+  ];
   const sprint4CChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
     check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
@@ -4638,6 +4717,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4D - Match Trace Aggregator")
+      ? sprint4DChecks
     : activeConfig.sprintName.includes("Sprint 4C - Match Event Trace Spine")
       ? sprint4CChecks
     : activeConfig.sprintName.includes("Sprint 4B - Coach Test Plan to Selection Preview")

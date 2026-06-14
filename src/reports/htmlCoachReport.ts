@@ -776,6 +776,44 @@ function renderMatchTraceSpine(report: MatchReport): string {
     </section>`;
 }
 
+function renderMatchTraceAggregator(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR" &&
+    candidate.internalTags.includes("workbench_chain_match_trace_aggregator")
+  );
+
+  if (fact === undefined) {
+    return "";
+  }
+
+  const status = tagValue(fact.internalTags, "match_trace_aggregator_status_") ?? "available";
+  const inputTraceCount = tagValue(fact.internalTags, "match_trace_aggregator_input_trace_count_") ?? "0";
+  const deduplicatedTraceCount = tagValue(fact.internalTags, "match_trace_aggregator_deduplicated_trace_count_") ?? "0";
+  const duplicateTraceCount = tagValue(fact.internalTags, "match_trace_aggregator_duplicate_trace_count_") ?? "0";
+  const officialTraceCount = tagValue(fact.internalTags, "match_trace_aggregator_official_trace_count_") ?? "0";
+  const diagnosticTraceCount = tagValue(fact.internalTags, "match_trace_aggregator_diagnostic_trace_count_") ?? "0";
+  const sandboxTraceCount = tagValue(fact.internalTags, "match_trace_aggregator_sandbox_trace_count_") ?? "0";
+
+  return `
+    <section>
+      <h2>AgrÃ©gats de traces de match</h2>
+      <p>Le moteur regroupe maintenant les traces de match pour prÃ©parer les futurs diagnostics coach. Les agrÃ©gats officiels, diagnostics et sandbox restent sÃ©parÃ©s afin d'Ã©viter les doubles comptes et les conclusions trop fortes.</p>
+      <p>La prÃ©visualisation de sÃ©lection reste fondÃ©e sur un signal sandbox. L'agrÃ©gateur est une premiÃ¨re Ã©tape vers une confiance future fondÃ©e sur les traces, mais aucune confiance de prÃ©visualisation n'est relevÃ©e dans ce sprint.</p>
+      <ul>
+        <li><strong>Statut :</strong> ${escapeHtml(status)}</li>
+        <li><strong>Traces entrantes :</strong> ${escapeHtml(inputTraceCount)}</li>
+        <li><strong>Traces dÃ©dupliquÃ©es :</strong> ${escapeHtml(deduplicatedTraceCount)}</li>
+        <li><strong>Doublons Ã©cartÃ©s :</strong> ${escapeHtml(duplicateTraceCount)}</li>
+        <li><strong>Officiel / diagnostic / sandbox :</strong> ${escapeHtml(officialTraceCount)} / ${escapeHtml(diagnosticTraceCount)} / ${escapeHtml(sandboxTraceCount)}</li>
+      </ul>
+      <details class="internal-markers">
+        <summary>DÃ©tails techniques des agrÃ©gats</summary>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -877,6 +915,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const multiScenarioCoachTestPlan = renderMultiScenarioCoachTestPlan(report);
   const selectionPreview = renderSelectionPreview(report);
   const matchTraceSpine = renderMatchTraceSpine(report);
+  const matchTraceAggregator = renderMatchTraceAggregator(report);
 
   const html = `<!doctype html>
 <html lang="fr">
@@ -946,6 +985,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     ${multiScenarioCoachTestPlan}
     ${selectionPreview}
     ${matchTraceSpine}
+    ${matchTraceAggregator}
 
     <section>
       <h2>Diagnostic tactique</h2>

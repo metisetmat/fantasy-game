@@ -1,33 +1,35 @@
-# Sprint 4C Share Pack
+# Sprint 4D Share Pack
 
-Current sprint: Sprint 4C - Match Event Trace Spine
+Current sprint: Sprint 4D - Match Trace Aggregator
 
 ## Files to review first
 
-- fullmatch-workbench-chain-replay-4c.md
-- validation.fullmatch-workbench-chain-replay-4c.md
+- fullmatch-workbench-chain-replay-4d.md
+- validation.fullmatch-workbench-chain-replay-4d.md
 - coach-report.experimental.html
 - bundle__simulation.md
 
 ## Purpose
 
-Sprint 4C adds the foundational Match Event Trace Spine. It converts official MatchEvents, mini-match records, and sandbox replay events into shared MatchTraceEvent rows. The trace spine is diagnostic-only: it does not mutate official timeline, score, possession, scoring events, live selection, production route resolution, or global scoring economy proof.
+Sprint 4D adds the Match Trace Aggregator. It groups MatchTraceEvent rows into official, diagnostic, and sandbox scopes, applies source-priority deduplication, and exposes aggregate facts for future coach reports.
 
-Selection Preview remains available from Sprint 4B, but it is explicitly marked sandbox_only, requires the future match trace spine, and is marked as a future trace consumer.
+Selection Preview remains available from Sprint 4B, but it stays sandbox_only. The aggregator does not upgrade preview confidence and cannot drive live selection.
 
 ## Review order
 
 1. Read validation.share-pack.md.
-2. Read fullmatch-workbench-chain-replay-4c.md.
-3. Inspect validation.fullmatch-workbench-chain-replay-4c.md.
-4. Open coach-report.experimental.html and confirm the compact Colonne de traces de match section.
-5. Inspect bundle__simulation.md for MatchTraceEvent, the three adapters, trace spine evidence, and tests.
+2. Read fullmatch-workbench-chain-replay-4d.md.
+3. Inspect validation.fullmatch-workbench-chain-replay-4d.md.
+4. Open coach-report.experimental.html and confirm the compact Agregats de traces de match section.
+5. Inspect bundle__simulation.md for aggregate types, deduplication, aggregate builder, evidence, guards, and tests.
 
 ## Guardrails
 
 - Scoring constants unchanged.
 - MatchBonusEvent unchanged.
 - FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
-- Sandbox traces are never official truth.
-- Trace adapters cannot create production scoring events.
-- Trace adapters cannot drive live selection or production route resolution.
+- Official aggregates exclude sandbox traces.
+- Diagnostic aggregates do not become official truth.
+- Sandbox aggregates remain hypothetical.
+- Aggregates cannot create production scoring events.
+- Aggregates cannot drive live selection or production route resolution.

@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4C - Match Event Trace Spine. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4D - Match Trace Aggregator. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -206,6 +206,12 @@ import {
   matchTraceSpineLimitations,
   type MatchTraceSpineModel,
 } from "./tracing/matchTraceSpine";
+import {
+  buildMatchTraceAggregator,
+  matchTraceAggregatorEvidenceFact,
+  matchTraceAggregatorLimitations,
+  type MatchTraceAggregateModel,
+} from "./tracing/matchTraceAggregator";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -2711,6 +2717,7 @@ function withFullMatchGroundingDiagnosis(
   multiScenarioCoachTestPlanModel: MultiScenarioCoachTestPlanModel,
   selectionPreviewModel: SelectionPreviewModel,
   matchTraceSpineModel: MatchTraceSpineModel,
+  matchTraceAggregateModel: MatchTraceAggregateModel,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
@@ -2743,7 +2750,8 @@ function withFullMatchGroundingDiagnosis(
     fact.internalTags.includes("workbench_chain_sandbox_decision_batch_confidence_calibration") ||
     fact.internalTags.includes("workbench_chain_multi_scenario_coach_test_plan") ||
     fact.internalTags.includes("workbench_chain_selection_preview") ||
-    fact.internalTags.includes("workbench_chain_match_event_trace_spine")
+    fact.internalTags.includes("workbench_chain_match_event_trace_spine") ||
+    fact.internalTags.includes("workbench_chain_match_trace_aggregator")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
@@ -2797,7 +2805,10 @@ function withFullMatchGroundingDiagnosis(
   const matchTraceSummary = matchTraceSpineModel.status === "not_available"
     ? ""
     : ` La colonne de traces de match produit ${matchTraceSpineModel.totalTraceCount} traces structurees : ${matchTraceSpineModel.officialTraceCount} officielles, ${matchTraceSpineModel.miniMatchTraceCount} mini-match et ${matchTraceSpineModel.sandboxTraceCount} sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d'economie globale.`;
-  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}${selectionPreviewSummary}${matchTraceSummary}`;
+  const matchTraceAggregateSummary = matchTraceAggregateModel.status === "not_available"
+    ? ""
+    : ` Les agregats de traces separent ${matchTraceAggregateModel.official.deduplicatedTraceCount} traces officielles, ${matchTraceAggregateModel.diagnostic.deduplicatedTraceCount} traces diagnostiques et ${matchTraceAggregateModel.sandbox.deduplicatedTraceCount} traces sandbox, avec ${matchTraceAggregateModel.totalDuplicateTraceCount} doublons ecartes. La previsualisation de selection reste sandbox_only et sa confiance n'est pas relevee par l'agregateur.`;
+  const technicalCoachSummary = `${chainSummary}${opportunitySummary}${scoringCandidateSummary}${scoringResolutionSummary}${attributeDrivenShotSummary}${goalkeeperResponseSummary}${reboundSecondChanceSummary}${multiActionContinuationSummary}${sandboxSequenceSummary}${controlledSegmentSandboxTimelineSummary}${officialTimelineDiffSummary}${sandboxDecisionPanelSummary}${sandboxDecisionEvidenceSummary}${sandboxDecisionBatchConfidenceSummary}${multiScenarioCoachTestPlanSummary}${selectionPreviewSummary}${matchTraceSummary}${matchTraceAggregateSummary}`;
   const coachSummary = coachFacingTimelineReviewModel.status === "not_available"
     ? technicalCoachSummary
     : "La lecture timeline officielle vs sandbox, le panneau de decision sandbox et le plan de test coach sont disponibles dans des sections dediees. Le panneau propose une option coach a tester, pas une verite officielle : soutenir FORWARD_PROGRESS vers control-space-hunter autour de Z4-HSR, tout en surveillant le risque de tir isole et de recuperation par l'equipe du gardien. La calibration d'evidence affiche une confiance faible, car la piste cree du danger mais ne marque pas, le gardien repond et l'equipe du gardien securise le ballon ; ce n'est pas une preuve d'economie globale. Le batch local multi-scenarios teste cette meme piste dans des variations de soutien, gardien, fatigue et second ballon ; il reste une aide de lecture, pas une consigne officielle ni une preuve d'economie globale. Le plan de test coach transforme ce batch local en hypotheses pratiques : renforcer le soutien autour de Z4-HSR, mieux occuper le second ballon et prevoir une reponse si le gardien adverse gagne la sequence. Ces tests restent suggestifs, ne pilotent pas la selection live, ne pilotent pas la resolution de route production, ne modifient pas la timeline officielle, la possession officielle, le score officiel ou les evenements de score officiels, et ne prouvent aucune economie globale. Resume technique reduit : contexte workbench pour control-space-hunter en Z4-HSR, influence candidates sans modifier le score ni les evenements, selection shadow, selection controlee experimentale qui ne pilote pas encore la resolution reelle du full-match, input de route experimental SegmentRouteInput qui ne pilote pas encore la resolution reelle, source de route controlee pour mini-match qui ne pilote pas encore la resolution live du mini-match, override de selection live experimental. Il reste volontairement non applique a la selection live normale. Experience mini-match isolee ou l'override s'applique uniquement dans une experience mini-match isolee, deux replays controles du premier segment, comparaison de replay controle, replay isole reel avec de vrais evenements de replay isole qui ne sont pas des MatchEvents officiels, sandbox de resolution controlee de route, modele sandbox d'opportunite de scoring, candidat sandbox d'evenement de scoring, resolution sandbox d'evenement de scoring, resolution attributaire de tir sandbox, modele de reponse gardien sandbox, sandbox rebond et seconde chance, sandbox de continuation multi-action, mini-sequence sandbox, timeline sandbox separee, diff officiel read-only, panneau de decision sandbox, calibration d'evidence, batch de confiance et plan de test coach restent explicatifs. Ce signal ne modifie pas le full-match normal ; elle ne modifie pas le full-match normal, ne cree aucun MatchEvent officiel, ne modifie pas le score officiel, ne cree aucun score_change, ne cree aucun evenement de score production, ne pilote pas la selection live, ne pilote pas la resolution de route production, et garde aucune mutation de timeline officielle, aucune mutation de possession officielle et aucune preuve d'economie globale.";
@@ -3110,6 +3121,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     controlledSegmentSandboxTimelineModel,
     selectionPreviewModel,
   });
+  const matchTraceAggregateModel = buildMatchTraceAggregator({
+    traceSpine: matchTraceSpineModel,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3117,6 +3131,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       limitations: [
         ...report.reportMeta.limitations,
         ...matchTraceSpineLimitations(matchTraceSpineModel),
+        ...matchTraceAggregatorLimitations(matchTraceAggregateModel),
       ],
     },
   };
@@ -3265,8 +3280,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: matchTraceSpineModel,
   });
+  const matchTraceAggregatorModelFact = matchTraceAggregatorEvidenceFact({
+    report,
+    matchInput: input,
+    model: matchTraceAggregateModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
+    : null;
+  const experimentalMatchTraceAggregatorFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? matchTraceAggregatorModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3298,6 +3321,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(multiScenarioCoachTestPlanModelFact === null ? [] : [multiScenarioCoachTestPlanModelFact]),
     ...(selectionPreviewModelFact === null ? [] : [selectionPreviewModelFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
+    ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? reportWithTraceLimitations
@@ -3338,6 +3362,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     multiScenarioCoachTestPlanModel,
     selectionPreviewModel,
     matchTraceSpineModel,
+    matchTraceAggregateModel,
   );
 }
 ```
@@ -22009,6 +22034,835 @@ export function matchTraceSpineLimitations(model: MatchTraceSpineModel): readonl
 }
 ```
 
+## File: src/simulation/tracing/matchTraceAggregateTypes.ts
+
+```ts
+import type {
+  MatchTraceActionType,
+  MatchTraceCauseTag,
+  MatchTraceEvent,
+  MatchTraceImpactTag,
+  MatchTracePhase,
+  MatchTraceSource,
+} from "./matchTraceEvent";
+
+export type MatchTraceAggregateScope =
+  | "official"
+  | "diagnostic"
+  | "sandbox";
+
+export type MatchTraceAggregateStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "blocked"
+  | "failed";
+
+export type MatchTraceDeduplicationStrategy =
+  | "source_priority"
+  | "event_identity"
+  | "sequence_minute_team_action"
+  | "none";
+
+export type MatchTraceAggregateBucket = {
+  readonly scope: MatchTraceAggregateScope;
+  readonly traceCount: number;
+  readonly deduplicatedTraceCount: number;
+  readonly duplicateTraceCount: number;
+  readonly sourceCounts: Readonly<Record<MatchTraceSource, number>>;
+  readonly officialTruthTrueCount: number;
+  readonly officialTruthFalseCount: number;
+  readonly phaseCounts: Partial<Record<MatchTracePhase, number>>;
+  readonly actionTypeCounts: Partial<Record<MatchTraceActionType, number>>;
+  readonly causeTagCounts: Partial<Record<MatchTraceCauseTag, number>>;
+  readonly impactTagCounts: Partial<Record<MatchTraceImpactTag, number>>;
+  readonly dangerByZone: Readonly<Record<string, number>>;
+  readonly possessionLossByZone: Readonly<Record<string, number>>;
+  readonly pressureLossByZone: Readonly<Record<string, number>>;
+  readonly recoveryByZone: Readonly<Record<string, number>>;
+  readonly shotCreatedByZone: Readonly<Record<string, number>>;
+  readonly secondChanceByZone: Readonly<Record<string, number>>;
+  readonly goalkeeperActionByZone: Readonly<Record<string, number>>;
+  readonly playerInvolvement: Readonly<Record<string, number>>;
+  readonly playerPositiveImpact: Readonly<Record<string, number>>;
+  readonly playerNegativeImpact: Readonly<Record<string, number>>;
+  readonly fatigueImpactTotal: number;
+  readonly highPressureTraceCount: number;
+  readonly coachVisibleTraceCount: number;
+};
+
+export type MatchTraceAggregateModel = {
+  readonly status: MatchTraceAggregateStatus;
+  readonly traceSpineStatus: string;
+  readonly totalInputTraceCount: number;
+  readonly totalDeduplicatedTraceCount: number;
+  readonly totalDuplicateTraceCount: number;
+  readonly deduplicationStrategy: MatchTraceDeduplicationStrategy;
+  readonly sourcePriority: readonly MatchTraceSource[];
+  readonly official: MatchTraceAggregateBucket;
+  readonly diagnostic: MatchTraceAggregateBucket;
+  readonly sandbox: MatchTraceAggregateBucket;
+  readonly topOfficialDangerZones: readonly string[];
+  readonly topOfficialPressureLossZones: readonly string[];
+  readonly topOfficialRecoveryZones: readonly string[];
+  readonly topOfficialPlayerInvolvement: readonly string[];
+  readonly topOfficialCauseTags: readonly MatchTraceCauseTag[];
+  readonly topOfficialImpactTags: readonly MatchTraceImpactTag[];
+  readonly diagnosticSummary: string;
+  readonly coachSummarySeed: string;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+};
+
+export type MatchTraceDeduplicationResult = {
+  readonly deduplicatedTraces: readonly MatchTraceEvent[];
+  readonly duplicateTraces: readonly MatchTraceEvent[];
+  readonly duplicateCount: number;
+  readonly strategy: MatchTraceDeduplicationStrategy;
+};
+```
+
+## File: src/simulation/tracing/deduplicateMatchTraces.ts
+
+```ts
+import type { MatchTraceEvent, MatchTraceSource } from "./matchTraceEvent";
+import type { MatchTraceDeduplicationResult, MatchTraceDeduplicationStrategy } from "./matchTraceAggregateTypes";
+
+export const DEFAULT_MATCH_TRACE_SOURCE_PRIORITY: readonly MatchTraceSource[] = [
+  "official_match_event",
+  "mini_match_record",
+  "sandbox_event",
+];
+
+function sourceRank(source: MatchTraceSource, priority: readonly MatchTraceSource[]): number {
+  const index = priority.indexOf(source);
+  return index === -1 ? priority.length : index;
+}
+
+function traceIdentity(trace: MatchTraceEvent): string {
+  const baseKey = trace.sourceEventId ?? [
+    trace.minute,
+    trace.sequenceId ?? "no-sequence",
+    trace.teamId,
+    trace.actionType,
+    trace.zone,
+    trace.primaryPlayerId ?? "none",
+  ].join(":");
+
+  return trace.source === "sandbox_event" ? `sandbox:${baseKey}` : baseKey;
+}
+
+function shouldReplaceTrace(input: {
+  readonly current: MatchTraceEvent;
+  readonly candidate: MatchTraceEvent;
+  readonly priority: readonly MatchTraceSource[];
+}): boolean {
+  const currentRank = sourceRank(input.current.source, input.priority);
+  const candidateRank = sourceRank(input.candidate.source, input.priority);
+
+  if (candidateRank !== currentRank) {
+    return candidateRank < currentRank;
+  }
+
+  if (input.candidate.officialTruth !== input.current.officialTruth) {
+    return input.candidate.officialTruth;
+  }
+
+  return input.candidate.diagnosticWeight > input.current.diagnosticWeight;
+}
+
+export function deduplicateMatchTraces(input: {
+  readonly traces: readonly MatchTraceEvent[];
+  readonly sourcePriority?: readonly MatchTraceSource[];
+}): MatchTraceDeduplicationResult {
+  const sourcePriority = input.sourcePriority ?? DEFAULT_MATCH_TRACE_SOURCE_PRIORITY;
+  const byIdentity = new Map<string, MatchTraceEvent>();
+  const duplicateTraces: MatchTraceEvent[] = [];
+
+  for (const trace of input.traces) {
+    const key = traceIdentity(trace);
+    const existing = byIdentity.get(key);
+
+    if (existing === undefined) {
+      byIdentity.set(key, trace);
+      continue;
+    }
+
+    if (shouldReplaceTrace({ current: existing, candidate: trace, priority: sourcePriority })) {
+      duplicateTraces.push(existing);
+      byIdentity.set(key, trace);
+    } else {
+      duplicateTraces.push(trace);
+    }
+  }
+
+  const strategy: MatchTraceDeduplicationStrategy = input.traces.some((trace) => trace.sourceEventId !== undefined)
+    ? "event_identity"
+    : "sequence_minute_team_action";
+
+  return {
+    deduplicatedTraces: [...byIdentity.values()],
+    duplicateTraces,
+    duplicateCount: duplicateTraces.length,
+    strategy: duplicateTraces.length > 0 ? "source_priority" : strategy,
+  };
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregateFromSpine.ts
+
+```ts
+import type { MatchTraceSpineModel } from "./matchTraceSpine";
+import type {
+  MatchTraceActionType,
+  MatchTraceCauseTag,
+  MatchTraceEvent,
+  MatchTraceImpactTag,
+  MatchTracePhase,
+  MatchTraceSource,
+} from "./matchTraceEvent";
+import {
+  DEFAULT_MATCH_TRACE_SOURCE_PRIORITY,
+  deduplicateMatchTraces,
+} from "./deduplicateMatchTraces";
+import type {
+  MatchTraceAggregateBucket,
+  MatchTraceAggregateModel,
+  MatchTraceAggregateScope,
+} from "./matchTraceAggregateTypes";
+
+type MutableCountRecord<T extends string> = Partial<Record<T, number>>;
+
+function increment<T extends string>(record: MutableCountRecord<T>, key: T, amount = 1): void {
+  record[key] = (record[key] ?? 0) + amount;
+}
+
+function incrementString(record: Record<string, number>, key: string, amount = 1): void {
+  record[key] = (record[key] ?? 0) + amount;
+}
+
+function sourceCounts(traces: readonly MatchTraceEvent[]): Readonly<Record<MatchTraceSource, number>> {
+  return {
+    official_match_event: traces.filter((trace) => trace.source === "official_match_event").length,
+    mini_match_record: traces.filter((trace) => trace.source === "mini_match_record").length,
+    sandbox_event: traces.filter((trace) => trace.source === "sandbox_event").length,
+  };
+}
+
+function isDangerTrace(trace: MatchTraceEvent): boolean {
+  return trace.impactTags.some((tag) =>
+    tag === "danger_created" ||
+    tag === "line_broken" ||
+    tag === "second_chance_allowed" ||
+    tag === "chance_conceded"
+  );
+}
+
+function isPossessionLossTrace(trace: MatchTraceEvent): boolean {
+  return trace.impactTags.includes("possession_lost") || trace.outcome === "TURNOVER_CONCEDED";
+}
+
+function isPressureLossTrace(trace: MatchTraceEvent): boolean {
+  return trace.pressureLevel === "HIGH" &&
+    (trace.outcome === "FAILURE" || trace.outcome === "TURNOVER_CONCEDED" || isPossessionLossTrace(trace));
+}
+
+function isRecoveryTrace(trace: MatchTraceEvent): boolean {
+  return trace.actionType === "RECOVERY" || trace.actionType === "INTERCEPTION" || trace.outcome === "RECOVERY_WON";
+}
+
+function isShotCreatedTrace(trace: MatchTraceEvent): boolean {
+  return trace.actionType === "SHOT" ||
+    trace.outcome === "SHOT_CREATED" ||
+    (trace.phase === "FINAL_ZONE_ATTACK" && trace.impactTags.includes("danger_created"));
+}
+
+function isSecondChanceTrace(trace: MatchTraceEvent): boolean {
+  return trace.actionType === "SECOND_BALL_CONTEST" ||
+    trace.outcome === "SECOND_CHANCE_CREATED" ||
+    trace.impactTags.includes("second_chance_allowed");
+}
+
+function isGoalkeeperTrace(trace: MatchTraceEvent): boolean {
+  return trace.actionType === "GOALKEEPER_SAVE" ||
+    trace.actionType === "GOALKEEPER_DISTRIBUTION" ||
+    trace.phase === "GOALKEEPER_SEQUENCE";
+}
+
+function positiveImpact(trace: MatchTraceEvent): boolean {
+  return trace.impactTags.some((tag) =>
+    tag === "danger_created" ||
+    tag === "line_broken" ||
+    tag === "possession_secured" ||
+    tag === "shot_prevented" ||
+    tag === "second_chance_allowed"
+  );
+}
+
+function negativeImpact(trace: MatchTraceEvent): boolean {
+  return trace.impactTags.some((tag) =>
+    tag === "possession_lost" ||
+    tag === "chance_conceded" ||
+    tag === "rest_defense_exposed"
+  ) || trace.outcome === "TURNOVER_CONCEDED";
+}
+
+function primaryPlayerKey(trace: MatchTraceEvent): string | undefined {
+  return trace.primaryPlayerId ?? trace.secondaryPlayerId ?? trace.goalkeeperId ?? trace.opponentPlayerId;
+}
+
+function sortedKeys(record: Readonly<Record<string, number>>, limit: number): readonly string[] {
+  return Object.entries(record)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([key]) => key);
+}
+
+function sortedTypedKeys<T extends string>(record: Partial<Record<T, number>>, limit: number): readonly T[] {
+  return Object.entries(record)
+    .sort((a, b) => Number(b[1]) - Number(a[1]) || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([key]) => key as T);
+}
+
+function emptyBucket(scope: MatchTraceAggregateScope): MatchTraceAggregateBucket {
+  return {
+    scope,
+    traceCount: 0,
+    deduplicatedTraceCount: 0,
+    duplicateTraceCount: 0,
+    sourceCounts: {
+      official_match_event: 0,
+      mini_match_record: 0,
+      sandbox_event: 0,
+    },
+    officialTruthTrueCount: 0,
+    officialTruthFalseCount: 0,
+    phaseCounts: {},
+    actionTypeCounts: {},
+    causeTagCounts: {},
+    impactTagCounts: {},
+    dangerByZone: {},
+    possessionLossByZone: {},
+    pressureLossByZone: {},
+    recoveryByZone: {},
+    shotCreatedByZone: {},
+    secondChanceByZone: {},
+    goalkeeperActionByZone: {},
+    playerInvolvement: {},
+    playerPositiveImpact: {},
+    playerNegativeImpact: {},
+    fatigueImpactTotal: 0,
+    highPressureTraceCount: 0,
+    coachVisibleTraceCount: 0,
+  };
+}
+
+function buildBucket(input: {
+  readonly scope: MatchTraceAggregateScope;
+  readonly traces: readonly MatchTraceEvent[];
+  readonly deduplicatedTraces: readonly MatchTraceEvent[];
+  readonly duplicateTraceCount: number;
+}): MatchTraceAggregateBucket {
+  const phaseCounts: Partial<Record<MatchTracePhase, number>> = {};
+  const actionTypeCounts: Partial<Record<MatchTraceActionType, number>> = {};
+  const causeTagCounts: Partial<Record<MatchTraceCauseTag, number>> = {};
+  const impactTagCounts: Partial<Record<MatchTraceImpactTag, number>> = {};
+  const dangerByZone: Record<string, number> = {};
+  const possessionLossByZone: Record<string, number> = {};
+  const pressureLossByZone: Record<string, number> = {};
+  const recoveryByZone: Record<string, number> = {};
+  const shotCreatedByZone: Record<string, number> = {};
+  const secondChanceByZone: Record<string, number> = {};
+  const goalkeeperActionByZone: Record<string, number> = {};
+  const playerInvolvement: Record<string, number> = {};
+  const playerPositiveImpact: Record<string, number> = {};
+  const playerNegativeImpact: Record<string, number> = {};
+  let fatigueImpactTotal = 0;
+
+  for (const trace of input.deduplicatedTraces) {
+    increment(phaseCounts, trace.phase);
+    increment(actionTypeCounts, trace.actionType);
+    for (const tag of trace.causeTags) {
+      increment(causeTagCounts, tag);
+    }
+    for (const tag of trace.impactTags) {
+      increment(impactTagCounts, tag);
+    }
+
+    const zone = String(trace.zone);
+    if (isDangerTrace(trace)) {
+      incrementString(dangerByZone, zone);
+    }
+    if (isPossessionLossTrace(trace)) {
+      incrementString(possessionLossByZone, zone);
+    }
+    if (isPressureLossTrace(trace)) {
+      incrementString(pressureLossByZone, zone);
+    }
+    if (isRecoveryTrace(trace)) {
+      incrementString(recoveryByZone, zone);
+    }
+    if (isShotCreatedTrace(trace)) {
+      incrementString(shotCreatedByZone, zone);
+    }
+    if (isSecondChanceTrace(trace)) {
+      incrementString(secondChanceByZone, zone);
+    }
+    if (isGoalkeeperTrace(trace)) {
+      incrementString(goalkeeperActionByZone, zone);
+    }
+
+    const playerKey = primaryPlayerKey(trace);
+    if (playerKey !== undefined) {
+      incrementString(playerInvolvement, playerKey);
+      if (positiveImpact(trace)) {
+        incrementString(playerPositiveImpact, playerKey);
+      }
+      if (negativeImpact(trace)) {
+        incrementString(playerNegativeImpact, playerKey);
+      }
+    }
+
+    fatigueImpactTotal += trace.fatigueImpact ?? 0;
+  }
+
+  return {
+    scope: input.scope,
+    traceCount: input.traces.length,
+    deduplicatedTraceCount: input.deduplicatedTraces.length,
+    duplicateTraceCount: input.duplicateTraceCount,
+    sourceCounts: sourceCounts(input.deduplicatedTraces),
+    officialTruthTrueCount: input.deduplicatedTraces.filter((trace) => trace.officialTruth).length,
+    officialTruthFalseCount: input.deduplicatedTraces.filter((trace) => !trace.officialTruth).length,
+    phaseCounts,
+    actionTypeCounts,
+    causeTagCounts,
+    impactTagCounts,
+    dangerByZone,
+    possessionLossByZone,
+    pressureLossByZone,
+    recoveryByZone,
+    shotCreatedByZone,
+    secondChanceByZone,
+    goalkeeperActionByZone,
+    playerInvolvement,
+    playerPositiveImpact,
+    playerNegativeImpact,
+    fatigueImpactTotal,
+    highPressureTraceCount: input.deduplicatedTraces.filter((trace) => trace.pressureLevel === "HIGH").length,
+    coachVisibleTraceCount: input.deduplicatedTraces.filter((trace) => trace.coachVisible).length,
+  };
+}
+
+function aggregateTags(model: Omit<MatchTraceAggregateModel, "tags">): readonly string[] {
+  return [
+    "match_trace_aggregator",
+    `match_trace_aggregator_status_${model.status}`,
+    "match_trace_aggregator_scope_official",
+    "match_trace_aggregator_scope_diagnostic",
+    "match_trace_aggregator_scope_sandbox",
+    `match_trace_aggregator_input_trace_count_${model.totalInputTraceCount}`,
+    `match_trace_aggregator_deduplicated_trace_count_${model.totalDeduplicatedTraceCount}`,
+    `match_trace_aggregator_duplicate_trace_count_${model.totalDuplicateTraceCount}`,
+    `match_trace_aggregator_official_trace_count_${model.official.deduplicatedTraceCount}`,
+    `match_trace_aggregator_diagnostic_trace_count_${model.diagnostic.deduplicatedTraceCount}`,
+    `match_trace_aggregator_sandbox_trace_count_${model.sandbox.deduplicatedTraceCount}`,
+    `match_trace_aggregator_official_danger_zone_count_${model.topOfficialDangerZones.length}`,
+    `match_trace_aggregator_pressure_loss_zone_count_${model.topOfficialPressureLossZones.length}`,
+    `match_trace_aggregator_recovery_zone_count_${model.topOfficialRecoveryZones.length}`,
+    `match_trace_aggregator_player_involvement_count_${model.topOfficialPlayerInvolvement.length}`,
+    "match_trace_aggregator_score_mutation_count_0",
+    "match_trace_aggregator_possession_mutation_count_0",
+    "match_trace_aggregator_production_scoring_event_creation_count_0",
+    "match_trace_aggregator_live_selection_driver_count_0",
+    "match_trace_aggregator_production_route_resolution_driver_count_0",
+    "match_trace_aggregator_global_economy_claim_forbidden",
+    "selection_preview_trace_backing_status_sandbox_only",
+    "selection_preview_confidence_not_upgraded_by_aggregator",
+    "scoring_constants_unchanged",
+  ];
+}
+
+function notAvailableModel(traceSpineStatus: string): MatchTraceAggregateModel {
+  const official = emptyBucket("official");
+  const diagnostic = emptyBucket("diagnostic");
+  const sandbox = emptyBucket("sandbox");
+  const modelWithoutTags: Omit<MatchTraceAggregateModel, "tags"> = {
+    status: "not_available",
+    traceSpineStatus,
+    totalInputTraceCount: 0,
+    totalDeduplicatedTraceCount: 0,
+    totalDuplicateTraceCount: 0,
+    deduplicationStrategy: "none",
+    sourcePriority: DEFAULT_MATCH_TRACE_SOURCE_PRIORITY,
+    official,
+    diagnostic,
+    sandbox,
+    topOfficialDangerZones: [],
+    topOfficialPressureLossZones: [],
+    topOfficialRecoveryZones: [],
+    topOfficialPlayerInvolvement: [],
+    topOfficialCauseTags: [],
+    topOfficialImpactTags: [],
+    diagnosticSummary: "Match trace aggregator not available because the trace spine is unavailable.",
+    coachSummarySeed: "No match trace aggregates are available yet.",
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: ["MATCH_TRACE_AGGREGATOR_NOT_AVAILABLE"],
+  };
+
+  return {
+    ...modelWithoutTags,
+    tags: aggregateTags(modelWithoutTags),
+  };
+}
+
+export function matchTraceAggregateFromSpine(input: {
+  readonly traceSpine: MatchTraceSpineModel;
+}): MatchTraceAggregateModel {
+  if (input.traceSpine.status === "not_available") {
+    return notAvailableModel(input.traceSpine.status);
+  }
+
+  const officialInput = input.traceSpine.traces.filter((trace) =>
+    trace.source === "official_match_event" && trace.officialTruth
+  );
+  const diagnosticInput = input.traceSpine.traces.filter((trace) =>
+    trace.source === "mini_match_record"
+  );
+  const sandboxInput = input.traceSpine.traces.filter((trace) =>
+    trace.source === "sandbox_event"
+  );
+  const officialDedup = deduplicateMatchTraces({ traces: officialInput });
+  const diagnosticDedupScope = deduplicateMatchTraces({ traces: [...officialInput, ...diagnosticInput] });
+  const diagnosticDeduplicated = diagnosticDedupScope.deduplicatedTraces.filter((trace) =>
+    trace.source === "mini_match_record"
+  );
+  const sandboxDedup = deduplicateMatchTraces({ traces: sandboxInput });
+  const official = buildBucket({
+    scope: "official",
+    traces: officialInput,
+    deduplicatedTraces: officialDedup.deduplicatedTraces,
+    duplicateTraceCount: officialDedup.duplicateCount,
+  });
+  const diagnostic = buildBucket({
+    scope: "diagnostic",
+    traces: diagnosticInput,
+    deduplicatedTraces: diagnosticDeduplicated,
+    duplicateTraceCount: Math.max(0, diagnosticInput.length - diagnosticDeduplicated.length),
+  });
+  const sandbox = buildBucket({
+    scope: "sandbox",
+    traces: sandboxInput,
+    deduplicatedTraces: sandboxDedup.deduplicatedTraces,
+    duplicateTraceCount: sandboxDedup.duplicateCount,
+  });
+  const totalDeduplicatedTraceCount = official.deduplicatedTraceCount + diagnostic.deduplicatedTraceCount + sandbox.deduplicatedTraceCount;
+  const totalDuplicateTraceCount = input.traceSpine.totalTraceCount - totalDeduplicatedTraceCount;
+  const modelWithoutTags: Omit<MatchTraceAggregateModel, "tags"> = {
+    status: "available",
+    traceSpineStatus: input.traceSpine.status,
+    totalInputTraceCount: input.traceSpine.totalTraceCount,
+    totalDeduplicatedTraceCount,
+    totalDuplicateTraceCount,
+    deduplicationStrategy: totalDuplicateTraceCount > 0 ? "source_priority" : "event_identity",
+    sourcePriority: DEFAULT_MATCH_TRACE_SOURCE_PRIORITY,
+    official,
+    diagnostic,
+    sandbox,
+    topOfficialDangerZones: sortedKeys(official.dangerByZone, 5),
+    topOfficialPressureLossZones: sortedKeys(official.pressureLossByZone, 5),
+    topOfficialRecoveryZones: sortedKeys(official.recoveryByZone, 5),
+    topOfficialPlayerInvolvement: sortedKeys(official.playerInvolvement, 5),
+    topOfficialCauseTags: sortedTypedKeys(official.causeTagCounts, 5),
+    topOfficialImpactTags: sortedTypedKeys(official.impactTagCounts, 5),
+    diagnosticSummary:
+      `Official=${official.deduplicatedTraceCount}, diagnostic=${diagnostic.deduplicatedTraceCount}, ` +
+      `sandbox=${sandbox.deduplicatedTraceCount}, duplicates=${totalDuplicateTraceCount}.`,
+    coachSummarySeed:
+      "Selection Preview remains sandbox-backed. Match Trace Aggregator is the first step toward future trace-backed preview confidence, but no preview confidence is upgraded in this sprint.",
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: [
+      ...(official.officialTruthFalseCount > 0 ? ["MATCH_TRACE_AGGREGATOR_OFFICIAL_SCOPE_HAS_NON_OFFICIAL_TRACE"] : []),
+      ...(sandbox.officialTruthTrueCount > 0 ? ["MATCH_TRACE_AGGREGATOR_SANDBOX_SCOPE_HAS_OFFICIAL_TRACE"] : []),
+      ...(diagnostic.officialTruthTrueCount > 0 ? ["MATCH_TRACE_AGGREGATOR_DIAGNOSTIC_SCOPE_HAS_OFFICIAL_TRUTH"] : []),
+    ],
+  };
+
+  return {
+    ...modelWithoutTags,
+    tags: aggregateTags(modelWithoutTags),
+  };
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregator.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import type { MatchTraceSpineModel } from "./matchTraceSpine";
+import { matchTraceAggregateFromSpine } from "./matchTraceAggregateFromSpine";
+import type { MatchTraceAggregateModel } from "./matchTraceAggregateTypes";
+
+export type { MatchTraceAggregateModel };
+
+export function buildMatchTraceAggregator(input: {
+  readonly traceSpine: MatchTraceSpineModel;
+}): MatchTraceAggregateModel {
+  return matchTraceAggregateFromSpine({ traceSpine: input.traceSpine });
+}
+
+export function matchTraceAggregatorEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: MatchTraceAggregateModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-match-trace-aggregator`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [
+      ...input.model.topOfficialDangerZones,
+      ...input.model.topOfficialPressureLossZones,
+      ...input.model.topOfficialRecoveryZones,
+    ].slice(0, 5),
+    summary:
+      `Match trace aggregator ${input.model.status}: traceSpineStatus=${input.model.traceSpineStatus}, ` +
+      `totalInputTraceCount=${input.model.totalInputTraceCount}, totalDeduplicatedTraceCount=${input.model.totalDeduplicatedTraceCount}, ` +
+      `duplicateTraceCount=${input.model.totalDuplicateTraceCount}, officialTraceCount=${input.model.official.deduplicatedTraceCount}, ` +
+      `diagnosticTraceCount=${input.model.diagnostic.deduplicatedTraceCount}, sandboxTraceCount=${input.model.sandbox.deduplicatedTraceCount}, ` +
+      `officialDangerZoneCount=${input.model.topOfficialDangerZones.length}, officialPressureLossZoneCount=${input.model.topOfficialPressureLossZones.length}, ` +
+      `officialRecoveryZoneCount=${input.model.topOfficialRecoveryZones.length}, phaseCoverage=${Object.keys(input.model.official.phaseCounts).length}, ` +
+      `actionTypeCoverage=${Object.keys(input.model.official.actionTypeCounts).length}, causeTagCoverage=${Object.keys(input.model.official.causeTagCounts).length}, ` +
+      `impactTagCoverage=${Object.keys(input.model.official.impactTagCounts).length}, topOfficialCauseTags=${input.model.topOfficialCauseTags.join("|") || "none"}, ` +
+      `topOfficialImpactTags=${input.model.topOfficialImpactTags.join("|") || "none"}, topOfficialPlayerInvolvement=${input.model.topOfficialPlayerInvolvement.join("|") || "none"}, ` +
+      "selectionPreviewTraceBackingStatus=sandbox_only, mutationCounts=0, productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 56,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_match_trace_aggregator",
+      ...input.model.tags,
+    ],
+  };
+}
+
+export function matchTraceAggregatorLimitations(model: MatchTraceAggregateModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["MATCH_TRACE_AGGREGATOR_NOT_AVAILABLE"];
+  }
+
+  return [
+    "MATCH_TRACE_AGGREGATOR_DIAGNOSTIC_ONLY",
+    "MATCH_TRACE_AGGREGATOR_SCOPE_SEPARATION_OFFICIAL_DIAGNOSTIC_SANDBOX",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_MUTATE_OFFICIAL_TIMELINE",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_MUTATE_OFFICIAL_SCORE",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_MUTATE_OFFICIAL_POSSESSION",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_CREATE_PRODUCTION_SCORING_EVENTS",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_DRIVE_LIVE_SELECTION",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_DRIVE_PRODUCTION_ROUTE_RESOLUTION",
+    "MATCH_TRACE_AGGREGATOR_CANNOT_CLAIM_GLOBAL_ECONOMY",
+    "SELECTION_PREVIEW_CONFIDENCE_NOT_UPGRADED_BY_AGGREGATOR",
+  ];
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregateGuards.ts
+
+```ts
+import type { MatchTraceAggregateModel } from "./matchTraceAggregateTypes";
+
+export function matchTraceAggregateCannotMutateOfficialState(model: MatchTraceAggregateModel): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function matchTraceAggregateCannotDriveProduction(model: MatchTraceAggregateModel): boolean {
+  return !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    !model.canClaimGlobalEconomy;
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregateFixture.ts
+
+```ts
+import { createMatchTraceEvent, type MatchTraceEvent } from "./matchTraceEvent";
+
+export function matchTraceAggregateFixture(): readonly MatchTraceEvent[] {
+  return [
+    createMatchTraceEvent({
+      traceId: "trace-official-1",
+      sourceEventId: "event-1",
+      source: "official_match_event",
+      matchId: "fixture-match",
+      minute: 12,
+      sequenceId: "sequence-1",
+      teamId: "CONTROL",
+      opponentTeamId: "BLITZ",
+      phase: "FINAL_ZONE_ATTACK",
+      zone: "Z5-C",
+      actionType: "SHOT",
+      outcome: "SHOT_CREATED",
+      primaryPlayerId: "control-space-hunter",
+      pressureLevel: "MEDIUM",
+      causeTags: ["good_decision"],
+      impactTags: ["danger_created"],
+      dangerDelta: 22,
+      possessionValueDelta: 4,
+      coachVisible: true,
+      diagnosticWeight: 80,
+      officialTruth: true,
+      tags: ["fixture_official_shot"],
+      warnings: [],
+    }),
+    createMatchTraceEvent({
+      traceId: "trace-mini-duplicate",
+      sourceEventId: "event-1",
+      source: "mini_match_record",
+      matchId: "fixture-match",
+      minute: 12,
+      sequenceId: "sequence-1",
+      teamId: "CONTROL",
+      opponentTeamId: "BLITZ",
+      phase: "FINAL_ZONE_ATTACK",
+      zone: "Z5-C",
+      actionType: "SHOT",
+      outcome: "SHOT_CREATED",
+      primaryPlayerId: "control-space-hunter",
+      pressureLevel: "MEDIUM",
+      causeTags: ["good_decision"],
+      impactTags: ["danger_created"],
+      dangerDelta: 20,
+      possessionValueDelta: 3,
+      coachVisible: true,
+      diagnosticWeight: 60,
+      officialTruth: false,
+      tags: ["fixture_mini_duplicate"],
+      warnings: [],
+    }),
+    createMatchTraceEvent({
+      traceId: "trace-official-2",
+      source: "official_match_event",
+      matchId: "fixture-match",
+      minute: 18,
+      sequenceId: "sequence-2",
+      teamId: "BLITZ",
+      opponentTeamId: "CONTROL",
+      phase: "HIGH_PRESS",
+      zone: "Z3-HSL",
+      actionType: "PRESSURE",
+      outcome: "TURNOVER_CONCEDED",
+      primaryPlayerId: "blitz-forward-leader",
+      pressureLevel: "HIGH",
+      causeTags: ["pressure_forced_error"],
+      impactTags: ["possession_lost", "chance_conceded"],
+      dangerDelta: -12,
+      possessionValueDelta: -18,
+      fatigueImpact: 3,
+      coachVisible: true,
+      diagnosticWeight: 74,
+      officialTruth: true,
+      tags: ["fixture_official_pressure_loss"],
+      warnings: [],
+    }),
+    createMatchTraceEvent({
+      traceId: "trace-mini-2",
+      source: "mini_match_record",
+      matchId: "fixture-match",
+      minute: 19,
+      sequenceId: "sequence-2",
+      teamId: "CONTROL",
+      opponentTeamId: "BLITZ",
+      phase: "DEFENSIVE_TRANSITION",
+      zone: "Z3-C",
+      actionType: "RECOVERY",
+      outcome: "RECOVERY_WON",
+      primaryPlayerId: "control-mobile-lock",
+      pressureLevel: "HIGH",
+      causeTags: ["defensive_recovery"],
+      impactTags: ["possession_secured"],
+      dangerDelta: -5,
+      possessionValueDelta: 12,
+      coachVisible: true,
+      diagnosticWeight: 58,
+      officialTruth: false,
+      tags: ["fixture_mini_recovery"],
+      warnings: [],
+    }),
+    createMatchTraceEvent({
+      traceId: "trace-sandbox-1",
+      source: "sandbox_event",
+      matchId: "fixture-match",
+      minute: 20,
+      sequenceId: "sandbox-sequence",
+      teamId: "CONTROL",
+      opponentTeamId: "BLITZ",
+      phase: "GOALKEEPER_SEQUENCE",
+      zone: "Z5-C",
+      actionType: "GOALKEEPER_SAVE",
+      outcome: "SAVE_MADE",
+      goalkeeperId: "blitz-goalkeeper-free-safety",
+      pressureLevel: "UNKNOWN",
+      causeTags: ["goalkeeper_quality"],
+      impactTags: ["shot_prevented"],
+      dangerDelta: -15,
+      possessionValueDelta: -4,
+      coachVisible: false,
+      diagnosticWeight: 42,
+      officialTruth: false,
+      tags: ["fixture_sandbox_goalkeeper"],
+      warnings: [],
+    }),
+  ];
+}
+```
+
 ## File: src/simulation/grounding/extractWorkbenchTruth.ts
 
 ```ts
@@ -33472,6 +34326,526 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/tracing/matchTraceAggregateTypes.test.ts
+
+```ts
+import { matchTraceAggregateFixture } from "./matchTraceAggregateFixture";
+import { matchTraceAggregateFromSpine } from "./matchTraceAggregateFromSpine";
+import type { MatchTraceSpineModel } from "./matchTraceSpine";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function fixtureSpine(): MatchTraceSpineModel {
+  const traces = matchTraceAggregateFixture();
+
+  return {
+    status: "available",
+    traces,
+    totalTraceCount: traces.length,
+    officialTraceCount: traces.filter((trace) => trace.source === "official_match_event").length,
+    miniMatchTraceCount: traces.filter((trace) => trace.source === "mini_match_record").length,
+    sandboxTraceCount: traces.filter((trace) => trace.source === "sandbox_event").length,
+    phaseCoverageCount: 4,
+    actionTypeCoverageCount: 4,
+    causeTagCoverageCount: 4,
+    impactTagCoverageCount: 5,
+    coachVisibleTraceCount: traces.filter((trace) => trace.coachVisible).length,
+    officialTruthTrueCount: traces.filter((trace) => trace.officialTruth).length,
+    officialTruthFalseCount: traces.filter((trace) => !trace.officialTruth).length,
+    traceMutationCount: 0,
+    scoreMutationCount: 0,
+    possessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    liveSelectionDriverCount: 0,
+    productionRouteResolutionDriverCount: 0,
+    globalEconomyClaimCount: 0,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    tags: ["match_event_trace_spine"],
+    warnings: [],
+  };
+}
+
+export function validateMatchTraceAggregateTypes(): readonly string[] {
+  const aggregate = matchTraceAggregateFromSpine({ traceSpine: fixtureSpine() });
+
+  assertTest(aggregate.official.scope === "official", "aggregate must expose official bucket.");
+  assertTest(aggregate.diagnostic.scope === "diagnostic", "aggregate must expose diagnostic bucket.");
+  assertTest(aggregate.sandbox.scope === "sandbox", "aggregate must expose sandbox bucket.");
+  assertTest(aggregate.official.traceCount > 0, "official bucket must have trace count.");
+  assertTest(aggregate.official.sourceCounts.official_match_event > 0, "official bucket must have source counts.");
+  assertTest(Object.keys(aggregate.official.phaseCounts).length > 0, "official bucket must have phase counts.");
+  assertTest(Object.keys(aggregate.official.actionTypeCounts).length > 0, "official bucket must have action counts.");
+  assertTest(Object.keys(aggregate.official.causeTagCounts).length > 0, "official bucket must have cause counts.");
+  assertTest(Object.keys(aggregate.official.impactTagCounts).length > 0, "official bucket must have impact counts.");
+  assertTest(Object.keys(aggregate.official.dangerByZone).length > 0, "official bucket must have zone aggregates.");
+  assertTest(Object.keys(aggregate.official.playerInvolvement).length > 0, "official bucket must have player involvement.");
+  assertTest(!aggregate.canMutateTimeline && !aggregate.canMutateScore, "aggregate guardrails must be false.");
+  assertTest(!aggregate.canClaimGlobalEconomy, "aggregate cannot claim global economy.");
+
+  return [
+    "aggregate model has official, diagnostic, sandbox buckets",
+    "each bucket exposes trace/source/phase/action/cause/impact counts",
+    "zone aggregates and player involvement exist",
+    "model has mutation guardrails and cannot claim global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceAggregateTypes();
+
+  console.log("matchTraceAggregateTypes tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/deduplicateMatchTraces.test.ts
+
+```ts
+import { matchTraceAggregateFixture } from "./matchTraceAggregateFixture";
+import { createMatchTraceEvent } from "./matchTraceEvent";
+import { deduplicateMatchTraces } from "./deduplicateMatchTraces";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateDeduplicateMatchTraces(): readonly string[] {
+  const traces = matchTraceAggregateFixture();
+  const deduplicated = deduplicateMatchTraces({ traces });
+  const officialDuplicate = deduplicated.deduplicatedTraces.find((trace) => trace.sourceEventId === "event-1");
+  const base = traces[0];
+
+  if (base === undefined) {
+    throw new Error("fixture must contain a base trace.");
+  }
+
+  const fallbackA = createMatchTraceEvent({
+    traceId: "fallback-a",
+    source: "mini_match_record",
+    minute: base.minute,
+    teamId: base.teamId,
+    opponentTeamId: base.opponentTeamId,
+    phase: base.phase,
+    zone: base.zone,
+    actionType: base.actionType,
+    outcome: base.outcome,
+    primaryPlayerId: "fallback-player",
+    pressureLevel: base.pressureLevel,
+    causeTags: base.causeTags,
+    impactTags: base.impactTags,
+    coachVisible: base.coachVisible,
+    diagnosticWeight: base.diagnosticWeight,
+    officialTruth: false,
+    tags: base.tags,
+    warnings: base.warnings,
+  });
+  const fallbackB = createMatchTraceEvent({
+    traceId: "fallback-b",
+    source: "official_match_event",
+    minute: base.minute,
+    teamId: base.teamId,
+    opponentTeamId: base.opponentTeamId,
+    phase: base.phase,
+    zone: base.zone,
+    actionType: base.actionType,
+    outcome: base.outcome,
+    primaryPlayerId: "fallback-player",
+    pressureLevel: base.pressureLevel,
+    causeTags: base.causeTags,
+    impactTags: base.impactTags,
+    coachVisible: base.coachVisible,
+    diagnosticWeight: base.diagnosticWeight,
+    officialTruth: true,
+    tags: base.tags,
+    warnings: base.warnings,
+  });
+  const fallbackDeduplicated = deduplicateMatchTraces({ traces: [fallbackA, fallbackB] });
+
+  assertTest(deduplicated.duplicateCount === 1, "sourceEventId duplicate count must be correct.");
+  assertTest(officialDuplicate?.source === "official_match_event", "source priority must keep official trace.");
+  assertTest(fallbackDeduplicated.duplicateCount === 1, "fallback key duplicate count must be correct.");
+  assertTest(fallbackDeduplicated.deduplicatedTraces[0]?.source === "official_match_event", "fallback priority must keep official.");
+  assertTest(deduplicated.deduplicatedTraces.some((trace) => trace.source === "sandbox_event"), "sandbox traces remain separate.");
+  assertTest(traces.length === 5, "deduplication must not mutate input traces.");
+  assertTest(deduplicated.deduplicatedTraces.every((trace) => !trace.canMutateScore && !trace.canMutateTimeline), "deduplication cannot mutate score or official timeline.");
+
+  return [
+    "deduplicates by sourceEventId when available",
+    "falls back to sequence/minute/team/action/zone/player key",
+    "source priority keeps official over mini-match duplicates",
+    "sandbox traces remain separate and never become official",
+    "deduplication does not mutate traces, score, or official timeline",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateDeduplicateMatchTraces();
+
+  console.log("deduplicateMatchTraces tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregateFromSpine.test.ts
+
+```ts
+import { matchTraceAggregateFixture } from "./matchTraceAggregateFixture";
+import { matchTraceAggregateFromSpine } from "./matchTraceAggregateFromSpine";
+import type { MatchTraceSpineModel } from "./matchTraceSpine";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function spine(status: MatchTraceSpineModel["status"]): MatchTraceSpineModel {
+  const traces = status === "available" ? matchTraceAggregateFixture() : [];
+
+  return {
+    status,
+    traces,
+    totalTraceCount: traces.length,
+    officialTraceCount: traces.filter((trace) => trace.source === "official_match_event").length,
+    miniMatchTraceCount: traces.filter((trace) => trace.source === "mini_match_record").length,
+    sandboxTraceCount: traces.filter((trace) => trace.source === "sandbox_event").length,
+    phaseCoverageCount: 4,
+    actionTypeCoverageCount: 4,
+    causeTagCoverageCount: 4,
+    impactTagCoverageCount: 5,
+    coachVisibleTraceCount: traces.filter((trace) => trace.coachVisible).length,
+    officialTruthTrueCount: traces.filter((trace) => trace.officialTruth).length,
+    officialTruthFalseCount: traces.filter((trace) => !trace.officialTruth).length,
+    traceMutationCount: 0,
+    scoreMutationCount: 0,
+    possessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    liveSelectionDriverCount: 0,
+    productionRouteResolutionDriverCount: 0,
+    globalEconomyClaimCount: 0,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    tags: ["match_event_trace_spine"],
+    warnings: [],
+  };
+}
+
+export function validateMatchTraceAggregateFromSpine(): readonly string[] {
+  const unavailable = matchTraceAggregateFromSpine({ traceSpine: spine("not_available") });
+  const aggregate = matchTraceAggregateFromSpine({ traceSpine: spine("available") });
+
+  assertTest(unavailable.status === "not_available", "unavailable spine must return not_available aggregate.");
+  assertTest(aggregate.status === "available", "available spine must return available aggregate.");
+  assertTest(aggregate.official.officialTruthFalseCount === 0, "official bucket contains only official truth traces.");
+  assertTest(aggregate.sandbox.officialTruthTrueCount === 0, "sandbox bucket contains only non-official traces.");
+  assertTest(aggregate.diagnostic.officialTruthTrueCount === 0, "diagnostic bucket does not become official truth.");
+  assertTest(aggregate.totalInputTraceCount === 5, "input trace count must be preserved.");
+  assertTest(aggregate.totalDeduplicatedTraceCount > 0, "deduplicated count must be present.");
+  assertTest(aggregate.totalDuplicateTraceCount === 1, "duplicate count must be present.");
+  assertTest(aggregate.official.dangerByZone["Z5-C"] === 1, "danger by zone must be computed.");
+  assertTest(aggregate.official.possessionLossByZone["Z3-HSL"] === 1, "possession loss by zone must be computed.");
+  assertTest(aggregate.official.pressureLossByZone["Z3-HSL"] === 1, "pressure loss by zone must be computed.");
+  assertTest(aggregate.diagnostic.recoveryByZone["Z3-C"] === 1, "recovery by zone must be computed.");
+  assertTest(aggregate.official.playerInvolvement["control-space-hunter"] === 1, "player involvement must be computed.");
+  assertTest((aggregate.official.causeTagCounts.good_decision ?? 0) > 0, "cause tag counts must be computed.");
+  assertTest((aggregate.official.impactTagCounts.danger_created ?? 0) > 0, "impact tag counts must be computed.");
+  assertTest(!aggregate.canMutateTimeline && !aggregate.canDriveLiveSelection, "guardrails must remain false.");
+
+  return [
+    "unavailable spine returns not_available",
+    "available spine returns available aggregate",
+    "official, diagnostic, and sandbox scopes remain separated",
+    "input/deduplicated/duplicate counts are present",
+    "zone, player, cause, and impact aggregates are computed",
+    "guardrails remain false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceAggregateFromSpine();
+
+  console.log("matchTraceAggregateFromSpine tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregateScopeGuard.test.ts
+
+```ts
+import { matchTraceAggregateFixture } from "./matchTraceAggregateFixture";
+import { matchTraceAggregateFromSpine } from "./matchTraceAggregateFromSpine";
+import type { MatchTraceSpineModel } from "./matchTraceSpine";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMatchTraceAggregateScopeGuard(): readonly string[] {
+  const traces = matchTraceAggregateFixture();
+  const aggregate = matchTraceAggregateFromSpine({
+    traceSpine: {
+      status: "available",
+      traces,
+      totalTraceCount: traces.length,
+      officialTraceCount: 2,
+      miniMatchTraceCount: 2,
+      sandboxTraceCount: 1,
+      phaseCoverageCount: 4,
+      actionTypeCoverageCount: 4,
+      causeTagCoverageCount: 4,
+      impactTagCoverageCount: 5,
+      coachVisibleTraceCount: 4,
+      officialTruthTrueCount: 2,
+      officialTruthFalseCount: 3,
+      traceMutationCount: 0,
+      scoreMutationCount: 0,
+      possessionMutationCount: 0,
+      productionScoringEventCreationCount: 0,
+      liveSelectionDriverCount: 0,
+      productionRouteResolutionDriverCount: 0,
+      globalEconomyClaimCount: 0,
+      selectionPreviewTraceBackingStatus: "sandbox_only",
+      tags: ["match_event_trace_spine"],
+      warnings: [],
+    } satisfies MatchTraceSpineModel,
+  });
+
+  assertTest(aggregate.official.sourceCounts.sandbox_event === 0, "official aggregate excludes sandbox traces.");
+  assertTest(aggregate.diagnostic.deduplicatedTraceCount === 1, "diagnostic duplicate of official trace must be excluded.");
+  assertTest(aggregate.tags.includes("selection_preview_confidence_not_upgraded_by_aggregator"), "sandbox aggregate cannot upgrade selection preview confidence.");
+  assertTest(aggregate.sandbox.officialTruthTrueCount === 0, "sandbox aggregate cannot become official truth.");
+  assertTest(!aggregate.diagnostic.sourceCounts.official_match_event, "diagnostic aggregate cannot include official traces.");
+  assertTest(!aggregate.canClaimGlobalEconomy, "diagnostic aggregate cannot claim global economy.");
+  assertTest(!aggregate.canDriveLiveSelection, "aggregate cannot drive live selection.");
+  assertTest(!aggregate.canDriveProductionRouteResolution, "aggregate cannot drive production route resolution.");
+
+  return [
+    "official aggregate excludes sandbox traces",
+    "official aggregate excludes diagnostic-only mini-match duplicates when official trace exists",
+    "sandbox aggregate cannot upgrade selection preview confidence or become official truth",
+    "diagnostic aggregate cannot claim global economy",
+    "aggregate cannot drive live selection or production route resolution",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceAggregateScopeGuard();
+
+  console.log("matchTraceAggregateScopeGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/tracing/matchTraceAggregatorGuard.test.ts
+
+```ts
+import { matchTraceAggregateFixture } from "./matchTraceAggregateFixture";
+import { matchTraceAggregateFromSpine } from "./matchTraceAggregateFromSpine";
+import {
+  matchTraceAggregateCannotDriveProduction,
+  matchTraceAggregateCannotMutateOfficialState,
+} from "./matchTraceAggregateGuards";
+import type { MatchTraceSpineModel } from "./matchTraceSpine";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMatchTraceAggregatorGuard(): readonly string[] {
+  const traces = matchTraceAggregateFixture();
+  const aggregate = matchTraceAggregateFromSpine({
+    traceSpine: {
+      status: "available",
+      traces,
+      totalTraceCount: traces.length,
+      officialTraceCount: 2,
+      miniMatchTraceCount: 2,
+      sandboxTraceCount: 1,
+      phaseCoverageCount: 4,
+      actionTypeCoverageCount: 4,
+      causeTagCoverageCount: 4,
+      impactTagCoverageCount: 5,
+      coachVisibleTraceCount: 4,
+      officialTruthTrueCount: 2,
+      officialTruthFalseCount: 3,
+      traceMutationCount: 0,
+      scoreMutationCount: 0,
+      possessionMutationCount: 0,
+      productionScoringEventCreationCount: 0,
+      liveSelectionDriverCount: 0,
+      productionRouteResolutionDriverCount: 0,
+      globalEconomyClaimCount: 0,
+      selectionPreviewTraceBackingStatus: "sandbox_only",
+      tags: ["match_event_trace_spine"],
+      warnings: [],
+    } satisfies MatchTraceSpineModel,
+  });
+
+  assertTest(matchTraceAggregateCannotMutateOfficialState(aggregate), "aggregator cannot mutate official state.");
+  assertTest(matchTraceAggregateCannotDriveProduction(aggregate), "aggregator cannot drive production.");
+  assertTest(!aggregate.canMutateTimeline, "aggregator cannot mutate official timeline.");
+  assertTest(!aggregate.canMutateScore, "aggregator cannot mutate official score.");
+  assertTest(!aggregate.canMutatePossession, "aggregator cannot mutate official possession.");
+  assertTest(!aggregate.canCreateScoringEvent, "aggregator cannot mutate official scoring events or create production events.");
+  assertTest(!aggregate.canClaimGlobalEconomy, "aggregator cannot claim global economy.");
+  assertTest(!aggregate.canDriveLiveSelection, "aggregator cannot drive live selection.");
+  assertTest(!aggregate.canDriveProductionRouteResolution, "aggregator cannot drive production route resolution.");
+
+  return [
+    "aggregator cannot mutate official timeline, score, possession, or scoring events",
+    "aggregator cannot create production scoring events",
+    "aggregator cannot claim global economy",
+    "aggregator cannot drive live selection or production route resolution",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchTraceAggregatorGuard();
+
+  console.log("matchTraceAggregatorGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/selectionPreviewAggregatorBacking.test.ts
+
+```ts
+import { sandboxDecisionEvidenceCalibrationFixture } from "./sandboxDecisionBatchConfidenceTestHelpers";
+import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./sandboxDecisionBatchConfidenceCalibrationFromEvidence";
+import { multiScenarioCoachTestPlanFromBatch } from "./multiScenarioCoachTestPlanFromBatch";
+import { selectionPreviewFromCoachTestPlan } from "./selectionPreviewFromCoachTestPlanBuilder";
+import {
+  selectionPreviewCannotChangeSelection,
+  selectionPreviewCannotMutateOfficialFullMatch,
+} from "./selectionPreviewFromCoachTestPlan";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSelectionPreviewAggregatorBacking(): readonly string[] {
+  const batch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: sandboxDecisionEvidenceCalibrationFixture(),
+  });
+  const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
+  const preview = selectionPreviewFromCoachTestPlan({ testPlan: plan });
+
+  assertTest(preview.status === "available", "selection preview must remain available.");
+  assertTest(preview.selectionPreviewTraceBackingStatus === "sandbox_only", "selection preview must remain sandbox_only.");
+  assertTest(preview.selectionPreviewRequiresMatchTraceSpine, "selection preview must require match trace spine.");
+  assertTest(preview.selectionPreviewFutureTraceConsumer, "selection preview must remain future trace consumer.");
+  assertTest(preview.tags.includes("selection_preview_trace_backing_status_sandbox_only"), "selection preview trace tag must remain.");
+  assertTest(!preview.tags.includes("selection_preview_confidence_upgraded_by_aggregator"), "selection preview confidence must not be upgraded by aggregator.");
+  assertTest(selectionPreviewCannotChangeSelection(preview), "selection preview cannot change lineup/starters/bench.");
+  assertTest(selectionPreviewCannotMutateOfficialFullMatch(preview), "selection preview cannot mutate official full match.");
+  assertTest(!preview.canDriveLiveSelection, "selection preview cannot drive live selection.");
+  assertTest(!preview.canDriveProductionRouteResolution, "selection preview cannot drive production route resolution.");
+
+  return [
+    "selection preview remains available",
+    "selection preview remains sandbox_only and requires match trace spine",
+    "selection preview is future trace consumer",
+    "selection preview confidence is not upgraded by aggregator",
+    "selection preview cannot change lineup/starters/bench or drive live selection",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSelectionPreviewAggregatorBacking();
+
+  console.log("selectionPreviewAggregatorBacking tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4d.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4D(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const aggregateFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official final score must derive only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "aggregator must not mutate official timeline.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "aggregator must not mutate official scoring events.");
+  assertTest(signature.officialScoreDelta === 0, "aggregator must not mutate official score.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "aggregator must not create production scoring events.");
+  assertTest(aggregateFact !== undefined, "aggregate evidence must exist.");
+  assertTest(aggregateFact?.internalTags.includes("match_trace_aggregator_global_economy_claim_forbidden") ?? false, "aggregator must not claim global economy.");
+  assertTest(aggregateFact?.internalTags.includes("scoring_constants_unchanged") ?? false, "aggregator must preserve scoring constants.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4D();
+
+  console.log("scoringGuard.4d tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts
 
 ```ts
@@ -41408,6 +42782,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
       return "training_recommendation";
   }
 }
@@ -41488,6 +42863,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Prévisualisation de sélection";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+      return "AgrÃ©gats de traces de match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Avertissement de plausibilité du harnais";
   }
@@ -41568,6 +42945,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
@@ -41615,6 +42993,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
     "WORKBENCH_CHAIN_SELECTION_PREVIEW",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
+    "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "HARNESS_PLAUSIBILITY_WARNING",
     "SCORING_CONVERSION",
   ];
@@ -42770,6 +44149,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+      return 23;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -42860,6 +44241,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la previsualisation de selection";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+      return "Relire les agrÃ©gats de traces de match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
@@ -44139,7 +45522,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
-  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE";
+  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
+  | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -45035,6 +46419,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "future trace aggregate quality",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR: {
+    scope: "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
+    canProve: [
+      "read-only trace rows can be aggregated into official, diagnostic, and sandbox scopes",
+      "official aggregates exclude sandbox traces",
+      "diagnostic aggregates remain non-official support",
+      "sandbox aggregates remain hypothetical",
+      "source-priority deduplication is visible and bounded",
+    ],
+    canSuggest: [
+      "which future coach-report facts may be built from official aggregates",
+      "which diagnostic or sandbox traces need richer source data later",
+      "where future trace-backed selection preview confidence may need evidence",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that selection preview confidence should be upgraded",
     ],
     cannotOverride: [
       "live score",
