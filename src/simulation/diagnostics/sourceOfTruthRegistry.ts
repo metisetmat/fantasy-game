@@ -31,7 +31,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
-  | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN";
+  | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -859,6 +860,43 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "that a coach must apply the test plan",
     ],
     cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SELECTION_PREVIEW: {
+    scope: "WORKBENCH_CHAIN_SELECTION_PREVIEW",
+    canProve: [
+      "local coach test hypotheses can be translated into selection preview profiles",
+      "each preview remains linked to a coach test and local sandbox scenario",
+      "lineup, starters, bench, and live selection remain unchanged",
+    ],
+    canSuggest: [
+      "which role family could support each coach test",
+      "which player attributes are relevant to preview",
+      "what benefit and trade-off to watch",
+      "what remains unproven before any real selection decision",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "team-wide tactical superiority",
+      "that a coach must apply any selection preview",
+      "that a real player should replace another player",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
       "live score",
       "official timeline",
       "official possession",
