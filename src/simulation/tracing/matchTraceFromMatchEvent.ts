@@ -143,17 +143,35 @@ function eventOutcome(outcome: EventOutcome): MatchTraceOutcome {
 
 function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
   const tags: MatchTraceCauseTag[] = [];
+  const eventTags = event.tags;
 
-  if (event.tags.some((tag) => tag.includes("speed"))) {
+  if (eventTags.some((tag) =>
+    tag.includes("speed") ||
+    tag.includes("_tempo_fast") ||
+    tag.includes("_transition_fast_break")
+  )) {
     tags.push("speed_advantage");
   }
-  if (event.tags.some((tag) => tag.includes("power"))) {
+  if (eventTags.some((tag) =>
+    tag.includes("power") ||
+    tag.includes("_attacking_direct_pressure") ||
+    tag.includes("_risk_high")
+  )) {
     tags.push("power_advantage");
   }
-  if (event.eventType === "fatigue_error" || event.tags.some((tag) => tag.includes("fatigue"))) {
+  if (
+    event.eventType === "fatigue_error" ||
+    eventTags.some((tag) => tag.includes("fatigue")) ||
+    (event.fatigueContext.primaryPlayerCondition ?? event.fatigueContext.teamCondition) <= 78 ||
+    (event.fatigueContext.fatiguePressure ?? 0) >= 70
+  ) {
     tags.push("fatigue_drop");
   }
-  if (event.tags.includes("pressure_high") || event.eventType === "turnover") {
+  if (
+    eventTags.includes("pressure_high") ||
+    eventTags.some((tag) => tag.includes("_pressing_high") || tag.includes("_defensive_high_press")) ||
+    event.eventType === "turnover"
+  ) {
     tags.push("pressure_forced_error");
   }
   if (event.tags.some((tag) => tag.includes("support_good") || tag.includes("good_support"))) {
@@ -162,7 +180,7 @@ function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
   if (event.tags.some((tag) => tag.includes("support_lack") || tag.includes("lack_of_support"))) {
     tags.push("lack_of_support");
   }
-  if (event.eventType === "goalkeeper_action" || event.tags.some((tag) => tag.includes("goalkeeper"))) {
+  if (event.eventType === "goalkeeper_action" || eventTags.some((tag) => tag.includes("goalkeeper"))) {
     tags.push("goalkeeper_quality");
   }
   if (event.outcome === "success" || event.outcome === "advantage" || event.outcome === "score") {
@@ -171,10 +189,15 @@ function causeTagsForEvent(event: MatchEvent): readonly MatchTraceCauseTag[] {
   if (event.outcome === "failure") {
     tags.push("poor_decision");
   }
-  if (event.tags.some((tag) => tag.includes("space"))) {
+  if (eventTags.some((tag) => tag.includes("space"))) {
     tags.push("space_behind");
   }
-  if (event.tags.some((tag) => tag.includes("defensive_recovery"))) {
+  if (eventTags.some((tag) =>
+    tag.includes("defensive_recovery") ||
+    tag.includes("_defensive_low_block") ||
+    tag.includes("_transition_delay_and_recover") ||
+    tag.includes("_rest_defense_high")
+  )) {
     tags.push("defensive_recovery");
   }
   if (event.tags.some((tag) => tag.includes("second_ball"))) {
@@ -223,6 +246,11 @@ export function matchTraceFromMatchEvent(input: {
   readonly event: MatchEvent;
 }): MatchTraceEvent {
   const phase = phaseForEvent(input.event);
+  const fatigueImpact = Math.max(
+    0,
+    Math.round((100 - input.event.fatigueContext.teamCondition) / 10) +
+      Math.round((input.event.fatigueContext.fatiguePressure ?? 0) / 40),
+  );
 
   return createMatchTraceEvent({
     traceId: `trace-official-${input.event.eventId}`,
@@ -244,6 +272,7 @@ export function matchTraceFromMatchEvent(input: {
     pressureLevel: pressureLevel(input.event.tacticalContext.pressureLevel),
     ...(input.event.fatigueContext.primaryPlayerCondition === undefined ? {} : { fatigueBefore: input.event.fatigueContext.primaryPlayerCondition }),
     ...(input.event.fatigueContext.teamCondition === undefined ? {} : { fatigueAfter: input.event.fatigueContext.teamCondition }),
+    ...(fatigueImpact <= 0 ? {} : { fatigueImpact }),
     causeTags: causeTagsForEvent(input.event),
     impactTags: impactTagsForEvent(input.event),
     dangerDelta: input.event.tags.includes("danger_high") ? 20 : 0,

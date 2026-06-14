@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 4E - Coach Report V0 from Trace Aggregates",
+  name: "Sprint 4F - Full Match Trace Validation",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -14,8 +14,9 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-4e.md",
-    "validation.fullmatch-workbench-chain-replay-4e.md",
+    "fullmatch-workbench-chain-replay-4f.md",
+    "validation.fullmatch-workbench-chain-replay-4f.md",
+    "fullmatch-trace-validation-4f.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -35,14 +36,15 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 4E share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-4e.md": "documents Coach Report V0 generated from official trace aggregates, separated diagnostic/sandbox scopes, selection preview continuity, and guardrails",
-    "validation.fullmatch-workbench-chain-replay-4e.md": "validates Coach Report V0 cards, official-only visible evidence, experimental rendering, source-of-truth boundaries, and unchanged sandbox/scoring guardrails",
-    "README.md": "compact reviewer orientation for the 4E share pack",
-    "manifest.md": "compatibility manifest listing the 4E share pack files",
+    "validation.share-pack.md": "proves the 4F share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-4f.md": "summarizes the six-profile full-match trace validation and guardrails",
+    "validation.fullmatch-workbench-chain-replay-4f.md": "validates profile variation, Coach Report V0 variation, expected signals, source separation, and unchanged scoring guardrails",
+    "fullmatch-trace-validation-4f.md": "detailed profile-by-profile trace validation report",
+    "README.md": "compact reviewer orientation for the 4F share pack",
+    "manifest.md": "compatibility manifest listing the 4F share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
+    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
     "bundle__reports.md": "bundles coach report renderer, timeline review, sandbox decision panel, sandbox evidence calibration, batch confidence calibration, coach test plan, selection preview, match trace spine, match trace aggregator, Coach Report V0 from trace aggregates, French trace labels, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
   },
 };

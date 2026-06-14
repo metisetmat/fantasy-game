@@ -856,6 +856,8 @@ function renderCoachReportFromTraceAggregates(report: MatchReport): string {
   const officialTraceCount = tagValue(fact.internalTags, "coach_report_trace_aggregates_official_trace_count_") ?? "0";
   const diagnosticTraceCount = tagValue(fact.internalTags, "coach_report_trace_aggregates_diagnostic_trace_count_") ?? "0";
   const sandboxTraceCount = tagValue(fact.internalTags, "coach_report_trace_aggregates_sandbox_trace_count_") ?? "0";
+  const highPressureTraceCount = tagValue(fact.internalTags, "coach_report_trace_aggregates_high_pressure_trace_count_") ?? "0";
+  const fatigueImpactTotal = tagValue(fact.internalTags, "coach_report_trace_aggregates_fatigue_impact_total_") ?? "0";
   const dangerZones = itemListFromTag(
     fact,
     "coach_report_trace_aggregates_danger_zone_items_",
@@ -908,7 +910,11 @@ function renderCoachReportFromTraceAggregates(report: MatchReport): string {
       title: "Pertes sous pression",
       summary:
         "Les pertes sous pression montrent oÃ¹ l'Ã©quipe a le plus souvent perdu la continuitÃ© quand la pression adverse Ã©tait forte.",
-      bullets: [...pressureLossZones.map((item) => `Sous haute pression : ${item}`), ...possessionLossZones.map((item) => `Perte de possession : ${item}`)],
+      bullets: [
+        ...pressureLossZones.map((item) => `Sous haute pression : ${item}`),
+        ...possessionLossZones.map((item) => `Perte de possession : ${item}`),
+        `Traces haute pression utilisees : ${highPressureTraceCount}.`,
+      ],
     }),
     renderTraceV0Card({
       title: "RÃ©cupÃ©rations utiles",
@@ -926,7 +932,7 @@ function renderCoachReportFromTraceAggregates(report: MatchReport): string {
       title: "Causes rÃ©currentes",
       summary:
         "Les causes rÃ©currentes regroupent les signaux qui reviennent dans les traces officielles : soutien, pression, fatigue, dÃ©cision, rÃ©cupÃ©ration ou qualitÃ© gardien.",
-      bullets: [...causes, ...impacts],
+      bullets: [...causes, ...impacts, `Impact fatigue total : ${fatigueImpactTotal}.`],
     }),
     renderTraceV0Card({
       title: "Point de vigilance coach",
