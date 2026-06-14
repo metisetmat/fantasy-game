@@ -33,7 +33,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
-  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE";
+  | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
+  | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -929,6 +930,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "future trace aggregate quality",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR: {
+    scope: "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
+    canProve: [
+      "read-only trace rows can be aggregated into official, diagnostic, and sandbox scopes",
+      "official aggregates exclude sandbox traces",
+      "diagnostic aggregates remain non-official support",
+      "sandbox aggregates remain hypothetical",
+      "source-priority deduplication is visible and bounded",
+    ],
+    canSuggest: [
+      "which future coach-report facts may be built from official aggregates",
+      "which diagnostic or sandbox traces need richer source data later",
+      "where future trace-backed selection preview confidence may need evidence",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that selection preview confidence should be upgraded",
     ],
     cannotOverride: [
       "live score",

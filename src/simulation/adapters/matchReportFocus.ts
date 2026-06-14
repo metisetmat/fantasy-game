@@ -83,6 +83,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+      return 23;
     case "HARNESS_PLAUSIBILITY_WARNING":
       return 50;
   }
@@ -173,6 +175,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la previsualisation de selection";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
+    case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
+      return "Relire les agrÃ©gats de traces de match";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
