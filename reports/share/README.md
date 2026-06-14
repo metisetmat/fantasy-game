@@ -1,35 +1,37 @@
-# Sprint 4D Share Pack
+# Sprint 4E Share Pack
 
-Current sprint: Sprint 4D - Match Trace Aggregator
+Current sprint: Sprint 4E - Coach Report V0 from Trace Aggregates
 
 ## Files to review first
 
-- fullmatch-workbench-chain-replay-4d.md
-- validation.fullmatch-workbench-chain-replay-4d.md
+- fullmatch-workbench-chain-replay-4e.md
+- validation.fullmatch-workbench-chain-replay-4e.md
 - coach-report.experimental.html
+- bundle__reports.md
 - bundle__simulation.md
 
 ## Purpose
 
-Sprint 4D adds the Match Trace Aggregator. It groups MatchTraceEvent rows into official, diagnostic, and sandbox scopes, applies source-priority deduplication, and exposes aggregate facts for future coach reports.
+Sprint 4E renders the first Coach Report V0 from official trace aggregates. It answers basic coach questions about danger zones, pressure losses, recoveries, player involvement, recurring causes, and watchpoints.
 
-Selection Preview remains available from Sprint 4B, but it stays sandbox_only. The aggregator does not upgrade preview confidence and cannot drive live selection.
+Diagnostic and sandbox aggregates remain separated and never become official truth. Selection Preview remains sandbox_only and is not upgraded by this sprint.
 
 ## Review order
 
 1. Read validation.share-pack.md.
-2. Read fullmatch-workbench-chain-replay-4d.md.
-3. Inspect validation.fullmatch-workbench-chain-replay-4d.md.
-4. Open coach-report.experimental.html and confirm the compact Agregats de traces de match section.
-5. Inspect bundle__simulation.md for aggregate types, deduplication, aggregate builder, evidence, guards, and tests.
+2. Read fullmatch-workbench-chain-replay-4e.md.
+3. Inspect validation.fullmatch-workbench-chain-replay-4e.md.
+4. Open coach-report.experimental.html and confirm the Rapport coach depuis les agrégats officiels section.
+5. Inspect bundle__reports.md for Coach Report V0 model, label mapping, renderer tests, and scope guards.
 
 ## Guardrails
 
 - Scoring constants unchanged.
 - MatchBonusEvent unchanged.
 - FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
-- Official aggregates exclude sandbox traces.
-- Diagnostic aggregates do not become official truth.
-- Sandbox aggregates remain hypothetical.
-- Aggregates cannot create production scoring events.
-- Aggregates cannot drive live selection or production route resolution.
+- Visible cards use official aggregates only.
+- Diagnostic aggregates stay separate.
+- Sandbox aggregates stay separate.
+- Selection Preview remains sandbox_only.
+- Coach Report V0 cannot create scoring events.
+- Coach Report V0 cannot drive live selection or production route resolution.
