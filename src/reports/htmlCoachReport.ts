@@ -657,6 +657,102 @@ function renderMultiScenarioCoachTestPlan(report: MatchReport): string {
     </section>`;
 }
 
+function renderSelectionPreview(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW" &&
+    candidate.internalTags.includes("workbench_chain_selection_preview")
+  );
+
+  if (fact === undefined) {
+    return "";
+  }
+
+  const supportScenario = tagValue(fact.internalTags, "selection_preview_support_near_z4_hsr_scenario_") ??
+    "batch-scenario-better-attacking-support";
+  const secondBallScenario = tagValue(fact.internalTags, "selection_preview_second_ball_presence_scenario_") ??
+    "batch-scenario-better-attacking-rebound-pressure";
+  const goalkeeperScenario = tagValue(fact.internalTags, "selection_preview_strong_goalkeeper_response_scenario_") ??
+    "batch-scenario-stronger-goalkeeper";
+  const cards = [
+    {
+      title: "Soutien proche autour de Z4-HSR",
+      linkedTest: "support_around_z4_hsr",
+      scenario: supportScenario,
+      suggestedProfile: "Profil à prévisualiser : soutien mobile proche de Z4-HSR.",
+      roleFamily: "support runner / mobile lock / hook link / playmaker support",
+      attributes: "anticipation, handling, off-ball support, stamina",
+      benefit:
+        "Prévisualiser un joueur de soutien plus proche de Z4-HSR autour de control-space-hunter. L'objectif est de réduire le risque de tir isolé et d'offrir une solution immédiate après la progression.",
+      tradeoff:
+        "Plus de soutien offensif peut exposer la rest-defense si le ballon est perdu ou repoussé.",
+      observation:
+        "Vérifier si la progression mène à une continuité contrôlée plutôt qu'à une récupération adverse.",
+      confidence: "faible à moyenne",
+    },
+    {
+      title: "Présence sur second ballon",
+      linkedTest: "second_ball_occupation",
+      scenario: secondBallScenario,
+      suggestedProfile: "Profil à prévisualiser : chasseur de rebond et coureur de pression.",
+      roleFamily: "rebound chaser / pressure forward / high work-rate runner",
+      attributes: "anticipation, aggression, reaction, acceleration, balance",
+      benefit:
+        "Prévisualiser un profil capable d'attaquer le second ballon après une parade. L'objectif est de transformer un tir repoussé en seconde action plutôt qu'en récupération propre par BLITZ.",
+      tradeoff:
+        "Presser le second ballon peut augmenter la fatigue et ouvrir une transition si la récupération échoue.",
+      observation:
+        "Vérifier si la pression au rebond augmente les secondes chances sans désorganiser la structure défensive.",
+      confidence: "faible à moyenne",
+    },
+    {
+      title: "Réponse face à un gardien fort",
+      linkedTest: "strong_goalkeeper_fallback",
+      scenario: goalkeeperScenario,
+      suggestedProfile: "Profil à prévisualiser : option de continuité plus sûre après arrêt.",
+      roleFamily: "safer continuity option / secondary playmaker / support receiver / rest-defense anchor",
+      attributes: "decision-making, positioning, composure, tactical discipline",
+      benefit:
+        "Prévisualiser une solution de continuité si le gardien adverse neutralise le tir. L'objectif est de ne pas dépendre uniquement d'une frappe directe et de préparer une sortie sûre après l'arrêt.",
+      tradeoff:
+        "Un plan B plus prudent peut réduire la menace immédiate, mais stabiliser la séquence si le gardien gagne le duel.",
+      observation:
+        "Vérifier si l'équipe garde une structure utile après un arrêt du gardien au lieu de subir une récupération adverse.",
+      confidence: "faible",
+    },
+  ];
+  const cardHtml = cards.map((card) => `
+      <article class="card">
+        <h3>${escapeHtml(card.title)}</h3>
+        <p>${escapeHtml(card.benefit)}</p>
+        <ul>
+          <li><strong>Test coach lié :</strong> ${escapeHtml(card.linkedTest)}</li>
+          <li><strong>Scénario lié :</strong> ${escapeHtml(card.scenario)}</li>
+          <li><strong>Profil suggéré :</strong> ${escapeHtml(card.suggestedProfile)}</li>
+          <li><strong>Famille de rôle :</strong> ${escapeHtml(card.roleFamily)}</li>
+          <li><strong>Attributs utiles :</strong> ${escapeHtml(card.attributes)}</li>
+          <li><strong>Risque / compromis :</strong> ${escapeHtml(card.tradeoff)}</li>
+          <li><strong>À observer :</strong> ${escapeHtml(card.observation)}</li>
+          <li><strong>Confiance :</strong> ${escapeHtml(card.confidence)}</li>
+        </ul>
+        <p class="muted">Prévisualisation uniquement : aucune application automatique.</p>
+      </article>`).join("");
+
+  return `
+    <section>
+      <h2>Prévisualisation de sélection</h2>
+      <p>Ces profils sont des pistes de sélection à prévisualiser, pas des changements appliqués.</p>
+      <p>Aucune composition, aucun titulaire, aucun remplaçant et aucune sélection live ne sont modifiés.</p>
+      <p>Cette prévisualisation ne modifie ni la timeline officielle, ni le score, ni la possession, ni les événements de score.</p>
+      <p>Elle ne constitue pas une preuve d’économie globale.</p>
+      <div class="grid">${cardHtml}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques de la prévisualisation</summary>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -756,6 +852,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const timelineReview = renderTimelineReview(report);
   const sandboxDecisionPanel = renderSandboxDecisionPanel(report);
   const multiScenarioCoachTestPlan = renderMultiScenarioCoachTestPlan(report);
+  const selectionPreview = renderSelectionPreview(report);
 
   const html = `<!doctype html>
 <html lang="fr">
@@ -823,6 +920,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     ${timelineReview}
     ${sandboxDecisionPanel}
     ${multiScenarioCoachTestPlan}
+    ${selectionPreview}
 
     <section>
       <h2>Diagnostic tactique</h2>
