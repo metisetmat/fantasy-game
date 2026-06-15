@@ -31,9 +31,11 @@ function visibleHtml(html: string): string {
 export function validateMatchTraceSpineReport(): readonly string[] {
   const input = engineToCoachPublicContractFixtures.matchInputFixture;
   const defaultHtml = renderHtmlCoachReport(runFullMatch(input));
-  const experimentalHtml = renderHtmlCoachReport(runFullMatch(input, {
-    routeSelectionMode: "workbench_chain_replay_experimental",
-  }));
+  const experimentalHtml = renderHtmlCoachReport(
+    runFullMatch(input, {
+      routeSelectionMode: "workbench_chain_replay_experimental",
+    }),
+  );
   const visible = visibleHtml(experimentalHtml);
 
   assertTest(!defaultHtml.includes("Colonne de traces de match"), "default report must not show experimental trace spine details.");
@@ -43,7 +45,8 @@ export function validateMatchTraceSpineReport(): readonly string[] {
   assertTest(experimentalHtml.includes("miniMatchTraceCount="), "experimental report must contain mini-match trace count.");
   assertTest(experimentalHtml.includes("sandboxTraceCount="), "experimental report must contain sandbox trace count.");
   assertTest(!containsMojibake(experimentalHtml), "visible coach copy must contain no mojibake.");
-  assertTest(visible.includes("Le moteur commence à produire des traces structurées"), "visible trace copy must be coach-readable.");
+  assertTest(experimentalHtml.includes("Le moteur commence à produire des traces structurées"), "trace copy must remain coach-readable in the technical block.");
+  assertTest(!visible.includes("Le moteur commence à produire des traces structurées"), "trace spine copy must be collapsed under technical details.");
   assertTest(!visible.includes("officialTraceCount="), "trace counts must stay inside technical details.");
   assertTest(!visible.includes("workbench_chain_match_event_trace_spine"), "developer tags must stay inside technical details.");
 
@@ -51,6 +54,7 @@ export function validateMatchTraceSpineReport(): readonly string[] {
     "experimental report contains Colonne de traces de match",
     "experimental report contains trace spine status and trace counts in details",
     "default report hides experimental trace spine details",
+    "trace spine details are collapsed by the V1 information hierarchy",
     "visible copy has no mojibake and avoids developer jargon",
   ];
 }

@@ -36,7 +36,10 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
-  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION";
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY"
+  | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
+  | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -1012,6 +1015,71 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     globalScoringEconomyVerdictAllowed: false,
   },
+  WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
+    canProve: [
+      "official trace aggregate cards can be rendered as coach-facing visual summaries",
+      "every visible V1 card can expose source and confidence badges",
+      "diagnostic and sandbox evidence remain separated from official conclusions",
+      "empty pressure-loss zone states can be represented without inventing a zone",
+      "coach-facing visualization remains read-only",
+    ],
+    canSuggest: [
+      "which official signals deserve coach attention",
+      "which official zones are stable enough to visualize",
+      "which signals need more samples before stronger interpretation",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY",
+    canProve: [
+      "official Coach Report V1 sections can be rendered before sandbox and diagnostic sections",
+      "experimental content can be grouped as secondary and collapsed by default",
+      "technical traceability can remain available without dominating visible coach reading",
+      "information hierarchy remains read-only",
+    ],
+    canSuggest: [
+      "which official reading order is easier for coach review",
+      "which experimental sections should stay grouped for future testing",
+      "which technical markers should remain collapsed",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
   WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION: {
     scope: "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
     canProve: [
@@ -1024,6 +1092,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which Coach Report V0 cards are sensitive enough for future visualization",
       "which expected profile signals remain weak or missing",
       "where future Coach Report V1 evidence should deepen profile-specific language",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
+    canProve: [
+      "validation profiles expose expected or accepted fallback tactical signals",
+      "generated profile validation artifacts are free of mojibake markers",
+      "profile signal calibration remains separate from official state mutation",
+      "selection preview remains sandbox_only and is not upgraded",
+    ],
+    canSuggest: [
+      "which profile signals are strong enough for future Coach Report V1 visualization",
+      "which profiles still rely on fallback evidence",
+      "where future fixtures should deepen tactical distinction",
     ],
     cannotProve: [
       "global scoring balance",

@@ -3,29 +3,29 @@ import type { MatchTraceCauseTag, MatchTraceImpactTag } from "../simulation/trac
 export const TRACE_CAUSE_LABELS_FR: Readonly<Record<MatchTraceCauseTag, string>> = {
   speed_advantage: "avantage de vitesse",
   power_advantage: "avantage physique",
-  pressure_forced_error: "erreurs provoquÃ©es par la pression",
+  pressure_forced_error: "erreurs provoquées par la pression",
   fatigue_drop: "fatigue visible",
   lack_of_support: "manque de soutien",
   good_support: "soutien efficace",
-  goalkeeper_quality: "qualitÃ© du gardien",
-  poor_decision: "dÃ©cision fragile",
-  good_decision: "bonne dÃ©cision",
+  goalkeeper_quality: "qualité du gardien",
+  poor_decision: "décision fragile",
+  good_decision: "bonne décision",
   space_behind: "espace dans le dos",
-  defensive_recovery: "rÃ©cupÃ©ration dÃ©fensive",
-  second_ball_presence: "prÃ©sence au second ballon",
-  unknown_cause: "cause encore non prÃ©cisÃ©e",
+  defensive_recovery: "récupération défensive",
+  second_ball_presence: "présence au second ballon",
+  unknown_cause: "cause encore non précisée",
 };
 
 export const TRACE_IMPACT_LABELS_FR: Readonly<Record<MatchTraceImpactTag, string>> = {
-  danger_created: "danger crÃ©Ã©",
-  line_broken: "ligne cassÃ©e",
-  fatigue_generated: "fatigue provoquÃ©e",
-  possession_secured: "possession sÃ©curisÃ©e",
+  danger_created: "danger créé",
+  line_broken: "ligne cassée",
+  fatigue_generated: "fatigue provoquée",
+  possession_secured: "possession sécurisée",
   possession_lost: "possession perdue",
-  chance_conceded: "occasion concÃ©dÃ©e",
-  shot_prevented: "tir empÃªchÃ©",
-  second_chance_allowed: "seconde chance concÃ©dÃ©e",
-  rest_defense_exposed: "rest-defense exposÃ©e",
+  chance_conceded: "occasion concédée",
+  shot_prevented: "tir empêché",
+  second_chance_allowed: "seconde chance concédée",
+  rest_defense_exposed: "rest-defense exposée",
   no_clear_impact: "impact encore peu lisible",
 };
 
@@ -42,4 +42,3 @@ export function traceCauseLabelFr(tag: MatchTraceCauseTag | string): string {
 export function traceImpactLabelFr(tag: MatchTraceImpactTag | string): string {
   return TRACE_IMPACT_LABELS_FR[tag as MatchTraceImpactTag] ?? fallbackLabel(tag);
 }
-

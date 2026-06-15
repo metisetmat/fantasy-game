@@ -25,22 +25,24 @@ export function validateFullMatchTraceValidationComparisons(): readonly string[]
   const strongGoalkeeper = profile(model, "strong_goalkeeper_profile");
   const lateFatigue = profile(model, "late_fatigue_profile");
 
-  assertTest(changedCount >= 4, "at least 4 of 6 profiles must produce changed Coach Report V0 cards vs baseline.");
+  assertTest(changedCount >= 5, "at least 5 of 6 profiles must produce changed Coach Report V0 cards vs baseline.");
   assertTest(lowBlock.cardSignatureByCardId.official_recurring_causes !== highPress.cardSignatureByCardId.official_recurring_causes, "high press must differ from low block.");
   assertTest(fastTransition.cardSignatureByCardId.official_recurring_causes !== powerContact.cardSignatureByCardId.official_recurring_causes, "fast transition must differ from power/contact.");
   assertTest(strongGoalkeeper.reportChangedFromBaseline, "strong goalkeeper must differ from baseline.");
   assertTest(lateFatigue.reportChangedFromBaseline, "late fatigue must differ from baseline.");
   assertTest(model.profiles.every((result) => result.expectedSignalsPresent || result.expectedSignalsMissing.length > 0), "expected signal matching must be reported.");
   assertTest(model.profiles.every((result) => Array.isArray(result.expectedSignalsMissing)), "missing signals must be explicit.");
+  assertTest(model.profiles.every((result) => result.signalCalibrationStatus !== "FAIL"), "each profile must have expected or accepted fallback signal evidence.");
 
   return [
-    "at least 4 of 6 profiles produce changed Coach Report V0 cards vs baseline",
+    "at least 5 of 6 profiles produce changed Coach Report V0 cards vs baseline",
     "high press differs from low block",
     "fast transition differs from power/contact",
     "strong goalkeeper differs from baseline",
     "late fatigue differs from baseline",
     "expected signal matching is reported",
     "missing signals are explicit, not hidden",
+    "each profile has expected or accepted fallback signal evidence",
   ];
 }
 

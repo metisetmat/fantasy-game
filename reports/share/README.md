@@ -1,24 +1,23 @@
-# Sprint 4F Share Pack
+# Sprint 4I Share Pack
 
 Mode: MINIMAL_REVIEW
-Current sprint: Sprint 4F - Full Match Trace Validation
+Current sprint: Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy
 
 ## What to read first
 
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4f.md
-- validation.fullmatch-workbench-chain-replay-4f.md
-- fullmatch-trace-validation-4f.md
+- fullmatch-workbench-chain-replay-4i.md
+- validation.fullmatch-workbench-chain-replay-4i.md
 - coach-report.experimental.html
 
 ## Sprint boundary
 
-Sprint 4F validates that Coach Report V0 changes when the full-match profile changes. It does not add coach cards, does not upgrade Selection Preview, does not change scoring constants, does not mutate official timeline, score, possession, or scoring events, and does not claim global scoring economy. FULL_MATCH_BATCH_ECONOMY remains the only global scoring-economy proof.
+Sprint 4I reorganizes the experimental coach report into official reading, detailed official signals, grouped experimental hypotheses, and collapsed technical traceability. It does not change scoring constants, live score logic, MatchBonusEvent, Selection Preview confidence, official timeline, possession, or production scoring events.
 
 ## Review steps
 
-1. Confirm validation.share-pack.md is PASS.
-2. Read fullmatch-trace-validation-4f.md for all six profile outputs.
-3. Read validation.fullmatch-workbench-chain-replay-4f.md for guardrails and counts.
-4. Use bundle__simulation.md and bundle__reports.md for source excerpts and tests.
-5. Use coach-report.experimental.html only to verify Coach Report V0 remains experimental and coach-readable.
+1. Read validation.share-pack.md to confirm the pack is current and below 20 files.
+2. Read fullmatch-workbench-chain-replay-4i.md for the V1 hierarchy summary.
+3. Read validation.fullmatch-workbench-chain-replay-4i.md for ordering, source scope, grouping, encoding, and guardrail counts.
+4. Open coach-report.experimental.html and verify the reading order: official first, experimental grouped, technical collapsed.
+5. Open coach-report.default.html and verify V1 hierarchy is hidden by default.
