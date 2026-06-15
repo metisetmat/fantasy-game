@@ -7,7 +7,9 @@ export type MatchEvidenceScope =
   | "REPORT_RENDERING_ONLY"
   | "WORKBENCH_CHAIN_CONSUMPTION"
   | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
-  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE";
+  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -167,6 +169,47 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "global scoring balance",
       "production route selection quality",
       "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION: {
+    scope: "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    canProve: [
+      "experimental chain context produced a diagnostic shadow route selection",
+      "shadow selection rejected closed and unavailable candidates",
+      "shadow selection comparison remained production-forbidden",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
+    canProve: [
+      "experimental shadow route selection was exposed as controlled segment metadata",
+      "controlled selection rejected closed and unavailable candidates",
+      "controlled selection remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
     ],
     cannotOverride: [
       "live score",

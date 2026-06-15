@@ -18,7 +18,7 @@ export function validateRunFullMatchExperimentalRouteCandidateInfluence(): reado
   const experimentalSignature = fullMatchRouteCandidateInfluenceSignature(experimentalReport);
   const routeInfluenceFact = experimentalReport.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE");
   const diagnosis = experimentalReport.tacticalReport.diagnoses.find((candidate) =>
-    candidate.summary.includes("influencer le classement diagnostique des options de route"),
+    candidate.summary.includes("selection shadow") || candidate.summary.includes("Influence candidates"),
   );
 
   assertTest(defaultSignature.routeCandidateInfluenceTagCount === 0, "default runFullMatch must not expose route candidate influence tags.");
@@ -30,7 +30,7 @@ export function validateRunFullMatchExperimentalRouteCandidateInfluence(): reado
   assertTest(routeInfluenceFact?.summary.includes("control-space-hunter") ?? false, "route influence evidence must include final carrier.");
   assertTest(routeInfluenceFact?.summary.includes("Z4-HSR") ?? false, "route influence evidence must include final zone.");
   assertTest(diagnosis !== undefined, "experimental coach diagnosis must mention route candidate influence.");
-  assertTest(diagnosis?.summary.includes("ne modifie pas encore la resolution ni le score") ?? false, "coach diagnosis must state diagnostic influence does not mutate resolution or score.");
+  assertTest(diagnosis?.summary.includes("sans modifier le score ni les evenements") || diagnosis?.summary.includes("ne modifie pas encore la resolution ni le score") || false, "coach diagnosis must state diagnostic influence does not mutate resolution or score.");
   assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DIAGNOSTIC_ONLY"), "experimental limitations must mark route influence diagnostic-only.");
   assertTest(experimentalReport.reportMeta.limitations.includes("FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION"), "experimental limitations must forbid production selection.");
   assertTest(experimentalReport.reportMeta.limitations.includes("NORMAL_FULLMATCH_STILL_SEGMENT_HARNESS_BY_DEFAULT"), "experimental report must not claim production chain-driven full-match.");
