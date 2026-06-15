@@ -156,6 +156,11 @@ import {
   selectionPreviewProfileViewEvidenceFact,
   selectionPreviewProfileViewLimitations,
 } from "../reports/selectionPreviewProfileView";
+import { buildCoachProductReportView } from "../reports/buildCoachProductReportView";
+import {
+  coachProductReportViewEvidenceFact,
+  coachProductReportViewLimitations,
+} from "../reports/coachProductReportView";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3106,6 +3111,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     scoringEventsSampleVisible: true,
     batchDiagnosticsVisible: true,
   });
+  const coachProductReportViewModel = buildCoachProductReportView({
+    matchId: report.matchId,
+    scoreLabel: `${report.score.home} - ${report.score.away}`,
+    scoreSourceNote: "Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés.",
+    coachReportV1: coachReportV1VisualizationModel,
+    profileView: selectionPreviewProfileViewModel,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3121,6 +3133,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
         ...coachReportV1LegacyCleanupLimitations(coachReportV1LegacyCleanupModel),
+        ...coachProductReportViewLimitations(coachProductReportViewModel),
       ],
     },
   };
@@ -3309,6 +3322,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportV1LegacyCleanupModel,
   });
+  const coachProductReportViewModelFact = coachProductReportViewEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachProductReportViewModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3335,6 +3353,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : null;
   const experimentalSelectionPreviewProfileViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? selectionPreviewProfileViewModelFact
+    : null;
+  const experimentalCoachProductReportViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachProductReportViewModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3368,6 +3389,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewTraceBackingFact === null ? [] : [experimentalSelectionPreviewTraceBackingFact]),
     ...(experimentalSelectionPreviewCoachCopyFact === null ? [] : [experimentalSelectionPreviewCoachCopyFact]),
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
+    ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),

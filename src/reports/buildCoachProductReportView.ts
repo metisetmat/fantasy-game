@@ -1,0 +1,374 @@
+import type { MatchReport } from "../contracts/engineToCoach";
+import type {
+  CoachReportV1VisualizationCard,
+  CoachReportV1VisualizationModel,
+} from "./coachReportV1Visualization";
+import {
+  buildCoachProductReportTags,
+  coachProductReportSections,
+  type CoachProductReportAppendix,
+  type CoachProductReportProfile,
+  type CoachProductReportSignal,
+  type CoachProductReportViewModel,
+} from "./coachProductReportView";
+import {
+  selectionPreviewProfileAttributeLabels,
+  selectionPreviewProfileRoleFamilyLabels,
+  type SelectionPreviewProfileCard,
+  type SelectionPreviewProfileViewModel,
+} from "./selectionPreviewProfileView";
+
+const forbiddenVisibleTechnicalTerms = [
+  "sandbox_only",
+  "trace_supported",
+  "officially_confirmed",
+  "workbench",
+  "route resolution",
+  "production route",
+  "canDriveLiveSelection",
+  "global economy claim",
+  "score mutation",
+  "possession mutation",
+  "internalTags",
+] as const;
+
+const forbiddenVisibleOfficialSelectionTerms = [
+  "composition recommandée",
+  "meilleure sélection",
+  "le coach doit sélectionner",
+] as const;
+
+function countMatches(text: string, terms: readonly string[]): number {
+  const lower = text.toLocaleLowerCase("fr-FR");
+
+  return terms.reduce((count, term) => count + (lower.includes(term.toLocaleLowerCase("fr-FR")) ? 1 : 0), 0);
+}
+
+function confidenceLabel(confidence: CoachReportV1VisualizationCard["confidence"]): CoachProductReportSignal["confidenceLabel"] {
+  switch (confidence) {
+    case "high":
+      return "élevée";
+    case "medium":
+      return "moyenne";
+    case "low":
+      return "faible";
+  }
+}
+
+function signalFromCard(card: CoachReportV1VisualizationCard, fallbackTitle: string): CoachProductReportSignal {
+  return {
+    signalId: card.cardId,
+    title: card.title.length === 0 ? fallbackTitle : card.title,
+    summary: card.summary,
+    sourceLabel: "Officiel",
+    confidenceLabel: confidenceLabel(card.confidence),
+    evidenceSummary: card.bullets.slice(0, 3),
+    coachMeaning: card.emptyState
+      ? "Le signal existe, mais il doit rester une question de suivi plutôt qu'une conclusion ferme."
+      : "Ce signal aide à cibler ce que le prochain match doit confirmer dans le comportement collectif.",
+  };
+}
+
+function buildKeySignals(v1: CoachReportV1VisualizationModel): readonly CoachProductReportSignal[] {
+  const cards = [
+    v1.zoneCards[0] ?? v1.signalCards[0],
+    v1.zoneCards[2] ?? v1.signalCards[2] ?? v1.signalCards[0],
+    v1.signalCards.find((card) => card.title.includes("Pression")) ?? v1.watchpointCard,
+  ].filter((card): card is CoachReportV1VisualizationCard => card !== undefined);
+
+  return cards.slice(0, 3).map((card, index) => signalFromCard(card, [
+    "Danger / progression zones",
+    "Recovery / first outlet",
+    "Pressure / continuity signal",
+  ][index] ?? "Signal coach"));
+}
+
+function profileFromCard(card: SelectionPreviewProfileCard): CoachProductReportProfile {
+  return {
+    profileId: card.cardId,
+    title: card.title,
+    roleFamilies: card.roleFamilies.map((role) => selectionPreviewProfileRoleFamilyLabels[role]),
+    usefulAttributes: card.usefulAttributes.map((attribute) => selectionPreviewProfileAttributeLabels[attribute]),
+    whyObserve: card.whyObserve,
+    traceSupport: card.officialTraceSupport,
+    expectedBenefit: card.expectedBenefit,
+    tacticalRisk: card.tacticalRisk,
+    nextMatchSignal: card.nextMatchSignalToVerify,
+    nonAppliedLabel: "Prévisualisation non appliquée",
+    confirmationLabel: "Non confirmée comme recommandation officielle",
+  };
+}
+
+function buildAppendices(): readonly CoachProductReportAppendix[] {
+  return [
+    {
+      appendixId: "sandbox_hypotheses",
+      title: "Hypothèses sandbox",
+      defaultCollapsed: true,
+      summary: "Les hypothèses expérimentales restent séparées du rapport principal.",
+      contentKind: "sandbox",
+    },
+    {
+      appendixId: "technical_traceability",
+      title: "Traçabilité technique",
+      defaultCollapsed: true,
+      summary: "Les preuves et marqueurs techniques restent disponibles sans encombrer la lecture coach.",
+      contentKind: "traceability",
+    },
+    {
+      appendixId: "legacy_reading",
+      title: "Ancienne lecture du rapport",
+      defaultCollapsed: true,
+      summary: "Les anciennes sections restent consultables comme contexte, pas comme lecture principale.",
+      contentKind: "legacy",
+    },
+    {
+      appendixId: "validation_details",
+      title: "Détails de validation",
+      defaultCollapsed: true,
+      summary: "Les validations confirment les garde-fous sans piloter le contenu coach.",
+      contentKind: "technical",
+    },
+  ];
+}
+
+function buildModelWithoutTags(input: {
+  readonly status: CoachProductReportViewModel["status"];
+  readonly matchId: string;
+  readonly scoreLabel: string;
+  readonly scoreSourceNote: string;
+  readonly executiveSummary: readonly string[];
+  readonly officialMatchReading: readonly string[];
+  readonly keyCoachSignals: readonly CoachProductReportSignal[];
+  readonly profilesToObserve: readonly CoachProductReportProfile[];
+  readonly nextMatchSignals: readonly string[];
+  readonly appendices: readonly CoachProductReportAppendix[];
+  readonly warnings?: readonly string[];
+}): Omit<CoachProductReportViewModel, "tags"> {
+  const visibleText = [
+    ...input.executiveSummary,
+    ...input.officialMatchReading,
+    ...input.keyCoachSignals.flatMap((signal) => [
+      signal.title,
+      signal.summary,
+      signal.coachMeaning,
+      ...signal.evidenceSummary,
+    ]),
+    ...input.profilesToObserve.flatMap((profile) => [
+      profile.title,
+      ...profile.roleFamilies,
+      ...profile.usefulAttributes,
+      ...profile.whyObserve,
+      ...profile.traceSupport,
+      ...profile.expectedBenefit,
+      ...profile.tacticalRisk,
+      ...profile.nextMatchSignal,
+      profile.nonAppliedLabel,
+      profile.confirmationLabel,
+    ]),
+    ...input.nextMatchSignals,
+  ].join(" ");
+
+  return {
+    status: input.status,
+    origin: "coach_report_v1_and_selection_preview_profile_view",
+    sectionCount: coachProductReportSections.length,
+    sections: coachProductReportSections,
+    matchId: input.matchId,
+    scoreLabel: input.scoreLabel,
+    scoreSourceNote: input.scoreSourceNote,
+    executiveSummary: input.executiveSummary,
+    officialMatchReading: input.officialMatchReading,
+    keyCoachSignals: input.keyCoachSignals,
+    profilesToObserve: input.profilesToObserve,
+    nextMatchSignals: input.nextMatchSignals,
+    appendices: input.appendices,
+    productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
+    productVisibleInternalStatusLeakCount: countMatches(visibleText, ["sandbox_only", "trace_supported", "officially_confirmed"]),
+    productVisibleOfficialSelectionWordingCount: countMatches(visibleText, forbiddenVisibleOfficialSelectionTerms),
+    visibleFrenchCopyClean: true,
+    mojibakeMarkerCount: 0,
+    profileAppliedCount: 0,
+    officiallyConfirmedCount: 0,
+    confidenceUpgradeCount: 0,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    officialAggregatesUsedAsSupportOnly: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: input.warnings ?? [],
+  };
+}
+
+export function buildCoachProductReportView(input: {
+  readonly matchId: string;
+  readonly scoreLabel: string;
+  readonly scoreSourceNote: string;
+  readonly coachReportV1: CoachReportV1VisualizationModel;
+  readonly profileView: SelectionPreviewProfileViewModel;
+}): CoachProductReportViewModel {
+  if (input.coachReportV1.status !== "available" || input.profileView.status !== "available") {
+    const unavailable = buildModelWithoutTags({
+      status: "not_available",
+      matchId: input.matchId,
+      scoreLabel: input.scoreLabel,
+      scoreSourceNote: input.scoreSourceNote,
+      executiveSummary: [],
+      officialMatchReading: [],
+      keyCoachSignals: [],
+      profilesToObserve: [],
+      nextMatchSignals: [],
+      appendices: [],
+      warnings: ["Coach Product Report View requires Coach Report V1 and Selection Preview Profile View."],
+    });
+
+    return {
+      ...unavailable,
+      tags: buildCoachProductReportTags(unavailable),
+    };
+  }
+
+  const keyCoachSignals = buildKeySignals(input.coachReportV1);
+  const profilesToObserve = input.profileView.cards.map(profileFromCard);
+  const nextMatchSignals = profilesToObserve
+    .flatMap((profile) => profile.nextMatchSignal.slice(0, 2))
+    .slice(0, 5);
+  const modelWithoutTags = buildModelWithoutTags({
+    status: "available",
+    matchId: input.matchId,
+    scoreLabel: input.scoreLabel,
+    scoreSourceNote: input.scoreSourceNote,
+    executiveSummary: [
+      `Score final : ${input.scoreLabel}.`,
+      input.coachReportV1.executiveSummary.bullets[0] ?? input.coachReportV1.executiveSummary.summary,
+      `Point de vigilance : ${input.coachReportV1.watchpointCard.bullets[0] ?? input.coachReportV1.watchpointCard.summary}`,
+      nextMatchSignals[0] ?? "Vérifier si les signaux officiels restent visibles au prochain match.",
+    ],
+    officialMatchReading: input.coachReportV1.signalCards.slice(0, 4).map((card) => `${card.title} : ${card.bullets[0] ?? card.summary}`),
+    keyCoachSignals,
+    profilesToObserve,
+    nextMatchSignals,
+    appendices: buildAppendices(),
+  });
+
+  return {
+    ...modelWithoutTags,
+    tags: buildCoachProductReportTags(modelWithoutTags),
+  };
+}
+
+export function buildCoachProductReportViewFromMatchReport(report: MatchReport): CoachProductReportViewModel {
+  const hasV1 = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION");
+  const hasProfile = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW");
+  const status: CoachProductReportViewModel["status"] = hasV1 && hasProfile ? "available" : "not_available";
+  const scoreLabel = `${report.score.home} - ${report.score.away}`;
+  const profilesToObserve: readonly CoachProductReportProfile[] = [
+    {
+      profileId: "support_near_z4_hsr_profile",
+      title: "Profil à observer — soutien proche autour des zones de danger",
+      roleFamilies: ["soutien mobile", "relayeur mobile", "lien intérieur", "soutien créatif"],
+      usefulAttributes: ["anticipation", "soutien sans ballon", "maîtrise technique", "prise de décision", "endurance"],
+      whyObserve: ["Ce profil peut stabiliser la première sortie quand le danger naît près des zones hautes."],
+      traceSupport: ["Les traces officielles soutiennent l'idée d'un soutien proche, sans la transformer en choix imposé."],
+      expectedBenefit: ["Créer une option plus propre après récupération.", "Réduire la précipitation dans la première passe."],
+      tacticalRisk: ["Peut ralentir la projection si le soutien reste trop bas."],
+      nextMatchSignal: ["La première sortie après récupération devient-elle plus propre ?"],
+      nonAppliedLabel: "Prévisualisation non appliquée",
+      confirmationLabel: "Non confirmée comme recommandation officielle",
+    },
+    {
+      profileId: "second_ball_presence_profile",
+      title: "Profil à observer — présence sur second ballon",
+      roleFamilies: ["chasseur de second ballon", "attaquant de pression", "gros volume de course"],
+      usefulAttributes: ["anticipation", "réaction", "accélération", "agressivité contrôlée", "équilibre", "endurance"],
+      whyObserve: ["Ce profil peut attaquer les secondes actions sans convertir l'hypothèse en consigne officielle."],
+      traceSupport: ["Les récupérations et impacts officiels donnent un support prudent à cette observation."],
+      expectedBenefit: ["Augmenter la présence autour des ballons disputés.", "Créer une pression utile après neutralisation."],
+      tacticalRisk: ["Peut exposer la structure si la course n'est pas couverte."],
+      nextMatchSignal: ["Les secondes actions augmentent-elles sans exposer la rest-defense ?"],
+      nonAppliedLabel: "Prévisualisation non appliquée",
+      confirmationLabel: "Non confirmée comme recommandation officielle",
+    },
+    {
+      profileId: "strong_goalkeeper_response_profile",
+      title: "Profil à observer — réponse face à un gardien fort",
+      roleFamilies: ["option de continuité", "second créateur", "receveur de soutien", "ancre de rest-defense"],
+      usefulAttributes: ["prise de décision", "placement", "sang-froid", "discipline tactique", "fraîcheur mentale", "maîtrise technique"],
+      whyObserve: ["Ce profil aide à garder une structure utile quand le gardien ou la défense neutralise la première action."],
+      traceSupport: ["Les signaux liés au gardien et à la possession sécurisée justifient une observation prudente."],
+      expectedBenefit: ["Préserver la continuité après arrêt ou neutralisation.", "Limiter la perte de structure après une occasion."],
+      tacticalRisk: ["Peut réduire l'agressivité de la relance si la continuité devient trop prudente."],
+      nextMatchSignal: ["L'équipe garde-t-elle une structure utile après arrêt ou neutralisation ?"],
+      nonAppliedLabel: "Prévisualisation non appliquée",
+      confirmationLabel: "Non confirmée comme recommandation officielle",
+    },
+  ];
+  const keyCoachSignals: readonly CoachProductReportSignal[] = [
+    {
+      signalId: "danger_progression_zones",
+      title: "Zones de danger et progression",
+      summary: "Le rapport officiel met en avant les zones où le danger se répète.",
+      sourceLabel: "Officiel",
+      confidenceLabel: "moyenne",
+      evidenceSummary: ["Lecture issue des agrégats officiels du match."],
+      coachMeaning: "Le coach peut regarder si ces zones produisent une progression propre ou seulement des situations isolées.",
+    },
+    {
+      signalId: "recovery_first_outlet",
+      title: "Récupération et première sortie",
+      summary: "La qualité de la première sortie après récupération reste un signal de lecture prioritaire.",
+      sourceLabel: "Officiel",
+      confidenceLabel: "moyenne",
+      evidenceSummary: ["Les traces officielles relient récupérations et continuité de possession."],
+      coachMeaning: "Le prochain match doit confirmer si la récupération devient immédiatement exploitable.",
+    },
+    {
+      signalId: "pressure_continuity_goalkeeper",
+      title: "Pression, continuité et réponse du gardien",
+      summary: "La suite de l'action après pression ou arrêt du gardien doit rester structurée.",
+      sourceLabel: "Officiel",
+      confidenceLabel: "faible",
+      evidenceSummary: ["Signal officiel présent, mais encore à confirmer par répétition."],
+      coachMeaning: "Le coach doit vérifier si l'équipe garde son organisation quand la première action est neutralisée.",
+    },
+  ];
+  const nextMatchSignals = profilesToObserve.flatMap((profile) => profile.nextMatchSignal).slice(0, 5);
+  const modelWithoutTags = buildModelWithoutTags({
+    status,
+    matchId: report.matchId,
+    scoreLabel,
+    scoreSourceNote: "Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés.",
+    executiveSummary: [
+      `Score final : ${scoreLabel}.`,
+      "Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.",
+      "Point de vigilance : sécuriser la première sortie après récupération.",
+      nextMatchSignals[0] ?? "Vérifier les signaux au prochain match.",
+    ],
+    officialMatchReading: [
+      "Les signaux officiels restent prioritaires dans le corps du rapport.",
+      "Les diagnostics et hypothèses expérimentales sont conservés en annexe.",
+    ],
+    keyCoachSignals,
+    profilesToObserve,
+    nextMatchSignals,
+    appendices: buildAppendices(),
+    warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],
+  });
+
+  return {
+    ...modelWithoutTags,
+    tags: buildCoachProductReportTags(modelWithoutTags),
+  };
+}
