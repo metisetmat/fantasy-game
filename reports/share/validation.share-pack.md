@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy
+- current sprint: Sprint 4K - Trace-backed Selection Preview
 - final file count: 18
 - share file count: 18
 - minimal allowlist count: 18
@@ -21,43 +21,45 @@ Status: PASS
 - PASS: source reports were not deleted - 0
 - PASS: manifest exposes MINIMAL_REVIEW - mode visible
 - PASS: manifest says upload every file in reports/share - upload instruction visible
-- PASS: current sprint is Sprint 4I - Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy
+- PASS: current sprint is Sprint 4K - Sprint 4K - Trace-backed Selection Preview
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
 - PASS: share pack under 20 files - 18
 - PASS: expected share file count is 18 - 18
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 4I - visible
-- PASS: README is Sprint 4I oriented - README current
-- PASS: 4I report included - 4I doc included
-- PASS: 4I validation is PASS - 4I validation PASS
-- PASS: coach report V1 hierarchy evidence category bundled - 4I evidence category bundled
-- PASS: coach report V1 hierarchy model and builder bundled - 4I model bundled
-- PASS: coach report V1 hierarchy tests bundled - 4I tests bundled
-- PASS: scoring guard 4I bundled - 4I scoring guard bundled
-- PASS: experimental report contains official hierarchy first - official before experimental
-- PASS: experimental report contains grouped experimental section - experimental grouped
-- PASS: experimental report contains technical traceability collapsed - technical collapsed
-- PASS: default report hides hierarchy - default hierarchy hidden
-- PASS: sandbox decision panel grouped under experimental hypotheses - sandbox grouped
-- PASS: selection preview grouped under experimental hypotheses - selection preview grouped
-- PASS: visible V1 copy has no mojibake - mojibake count 0
-- PASS: visible V1 copy avoids developer jargon - visible jargon count 0
-- PASS: visible V1 copy avoids mandatory wording - mandatory wording count 0
+- PASS: manifest lists Sprint 4K - visible
+- PASS: README is Sprint 4K oriented - README current
+- PASS: 4K report included - 4K doc included
+- PASS: 4K validation is PASS - 4K validation PASS
+- PASS: trace backing evidence category bundled - 4K evidence category bundled
+- PASS: trace backing model and matcher bundled - 4K model bundled
+- PASS: trace backing tests bundled - 4K simulation tests bundled
+- PASS: trace backing renderer test bundled - 4K renderer test bundled
+- PASS: scoring guard 4K bundled - 4K scoring guard bundled
+- PASS: experimental report shows Selection Preview - selection preview visible
+- PASS: experimental report shows trace backing status - trace backing visible
+- PASS: experimental report states preview is non-applied - non-applied visible
+- PASS: trace backing tags are emitted - tags emitted
+- PASS: trace backing official aggregates are support only - support only
+- PASS: trace backing confidence not upgraded - confidence not upgraded
 - PASS: diagnostic aggregates remain separate - diagnostic separate
 - PASS: sandbox aggregates remain separate - sandbox separate
-- PASS: Selection Preview remains sandbox_only - selection preview sandbox
-- PASS: Selection Preview confidence not upgraded - confidence not upgraded
-- PASS: hierarchy cannot mutate score - score mutation forbidden
-- PASS: hierarchy cannot create production scoring events - production scoring creation forbidden
-- PASS: hierarchy cannot claim global economy - global economy forbidden
+- PASS: officially_confirmed remains zero - official confirmation zero
+- PASS: trace backing cannot change lineup - lineup false
+- PASS: trace backing cannot drive live selection - live selection false
+- PASS: trace backing cannot drive production route resolution - production route false
+- PASS: trace backing cannot mutate score - score mutation forbidden
+- PASS: trace backing cannot create production scoring events - production scoring creation forbidden
+- PASS: trace backing cannot claim global economy - global economy forbidden
+- PASS: visible copy avoids official selection wording - official selection wording count 0
+- PASS: experimental report contains no mojibake markers - mojibake count 0
 - PASS: no scoring constants changed - scoring constants visible
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendations visible - 4I recommendations visible
+- PASS: recommendations visible - 4K recommendations visible
 
 ## Files
 
@@ -69,7 +71,7 @@ Status: PASS
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.latest.html
-- fullmatch-workbench-chain-replay-4i.md
+- fullmatch-workbench-chain-replay-4k.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -77,5 +79,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-4i.md
+- validation.fullmatch-workbench-chain-replay-4k.md
 - validation.share-pack.md

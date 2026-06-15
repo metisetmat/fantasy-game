@@ -16,6 +16,8 @@
     h3 { font-size: 16px; margin-bottom: 8px; }
     h4 { font-size: 13px; margin: 16px 0 8px; color: #53606b; text-transform: uppercase; letter-spacing: .04em; }
     .score { display: inline-block; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; font-size: 48px; font-weight: 800; line-height: 1; margin: 18px 0 8px; padding: 14px 18px; }
+    .score-source { max-width: 780px; color: #dce6ef; font-size: 13px; line-height: 1.45; margin-top: 6px; }
+    .score-source strong { display: block; color: #ffffff; margin-bottom: 2px; }
     .muted, .card-meta { color: #65717c; font-size: 13px; }
     header .muted { color: #bdc7d1; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
@@ -46,6 +48,11 @@
       <div class="muted">Match : contract-fixture-001</div>
       <h1>Rapport du coach</h1>
       <div class="score">45 - 0</div>
+      
+      <div class="score-source">
+        <strong>Score du rapport full-match</strong>
+        <span>Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés et ne remplacent pas ce score.</span>
+      </div>
       <div class="muted">Généré depuis le rapport de match typé.</div>
     </header>
 
@@ -54,6 +61,7 @@
       <h2>Résumé</h2>
       <article class="card summary-card">
         <p>Score final : <strong>45 - 0</strong>.</p>
+        <p><strong>Score issu des événements officiels du rapport</strong> : les conséquences officielles du rapport restent la source de ce résumé. Les diagnostics batch et les échantillons de scoring-events restent séparés.</p>
         <p>Ce rapport met en avant 5 moments clés, 1 analyse principale et un axe de travail prioritaire : <strong>Sécuriser la séquence qui mène au score</strong>.</p>
         <p>Catégories de lecture : Action décisive, Séquence dangereuse, possession sous pression.</p>
       </article>
@@ -61,6 +69,7 @@
 
     
 
+    
     <section>
       <h2>Moments clés</h2>
       <div class="grid">
@@ -163,7 +172,7 @@
       <details class="internal-markers">
         <summary>Détails techniques développeur</summary>
         <div class="muted">Titre source : Ancrage workbench maintenant partiel</div>
-        <div class="muted">Le full-match normal reste en harnais segmente ; la chaine workbench n&#39;est pas consommee par defaut. La colonne de traces de match produit 110 traces structurees : 63 officielles, 47 simulation et 0 sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d&#39;economie globale. Les agregats de traces separent 63 traces officielles, 11 traces diagnostiques et 0 traces sandbox, avec 36 doublons ecartes. La previsualisation de selection reste sandbox_only et sa confiance n&#39;est pas relevee par l&#39;agregateur. Le rapport coach V0 depuis agregats officiels produit 6 cartes prudentes depuis 63 traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la previsualisation de selection reste sandbox_only sans upgrade de confiance.</div>
+        <div class="muted">Le full-match normal reste en harnais segmente ; la chaine workbench n&#39;est pas consommee par defaut. La colonne de traces de match produit 110 traces structurees : 63 officielles, 47 simulation et 0 sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d&#39;économie globale. Les agregats de traces separent 63 traces officielles, 11 traces diagnostiques et 0 traces sandbox, avec 36 doublons ecartes. La prévisualisation de selection reste sandbox_only et sa confiance n&#39;est pas relevee par l&#39;agregateur. Le rapport coach V0 depuis agregats officiels produit 6 cartes prudentes depuis 63 traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la prévisualisation de selection reste sandbox_only sans upgrade de confiance.</div>
         <div class="muted">Événements de preuve : contract-fixture-001-segment-1-sequence-1</div>
       </details>
     </article></div>
@@ -175,7 +184,7 @@
     <article class="card">
       <div class="card-meta"><span class="badge">info</span> <span class="badge">coach_visible</span></div>
       <h3>Avertissement de harnais full-match</h3>
-      <p>Ce rapport vient d&#39;un run deterministe unique. Il sert a tester la lisibilite du harnais, pas a juger l&#39;economie globale du score.</p>
+      <p>Ce rapport vient d&#39;un run deterministe unique. Il sert a tester la lisibilite du harnais, pas a juger l&#39;économie globale du score.</p>
       <details class="internal-markers">
         <summary>Détails techniques</summary>
         <div class="muted">Type : FULL_MATCH_HARNESS_SINGLE_RUN</div>
@@ -251,11 +260,11 @@
       <details class="internal-markers">
         <summary>Détails techniques développeur</summary>
         <div class="muted">Titre source : Ancrage tactique full-match partiel</div>
-        <div class="muted">Le full-match normal reste en harnais segmente ; la chaine workbench n&#39;est pas consommee par defaut. La colonne de traces de match produit 110 traces structurees : 63 officielles, 47 simulation et 0 sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d&#39;economie globale. Les agregats de traces separent 63 traces officielles, 11 traces diagnostiques et 0 traces sandbox, avec 36 doublons ecartes. La previsualisation de selection reste sandbox_only et sa confiance n&#39;est pas relevee par l&#39;agregateur. Le rapport coach V0 depuis agregats officiels produit 6 cartes prudentes depuis 63 traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la previsualisation de selection reste sandbox_only sans upgrade de confiance.</div>
+        <div class="muted">Le full-match normal reste en harnais segmente ; la chaine workbench n&#39;est pas consommee par defaut. La colonne de traces de match produit 110 traces structurees : 63 officielles, 47 simulation et 0 sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d&#39;économie globale. Les agregats de traces separent 63 traces officielles, 11 traces diagnostiques et 0 traces sandbox, avec 36 doublons ecartes. La prévisualisation de selection reste sandbox_only et sa confiance n&#39;est pas relevee par l&#39;agregateur. Le rapport coach V0 depuis agregats officiels produit 6 cartes prudentes depuis 63 traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la prévisualisation de selection reste sandbox_only sans upgrade de confiance.</div>
         <div class="muted">Type : ADAPTER_LIMITATION</div>
         <div class="muted">Faits d'évidence : contract-fixture-001-workbench-truth-available, contract-fixture-001-spatial-context-adapter-available, contract-fixture-001-workbench-replay-seed-partial, contract-fixture-001-route-attribute-influence-available, contract-fixture-001-spatial-route-selection-path-available, contract-fixture-001-attribute-selection-guard-available, contract-fixture-001-workbench-chain-replay-available, contract-fixture-001-full-match-partial-workbench-grounding</div>
         <div class="muted">Événements : contract-fixture-001-segment-1-sequence-1, contract-fixture-001-segment-1-sequence-2, contract-fixture-001-segment-1-score-1, contract-fixture-001-segment-1-sequence-3, contract-fixture-001-segment-1-sequence-4, contract-fixture-001-segment-1-sequence-5</div>
-        <div class="muted">Grounding warnings: FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED, SPATIAL_CONTEXT_ADAPTER_AVAILABLE, WORKBENCH_REPLAY_SEED_AVAILABLE, TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION, ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE, ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE, ATTRIBUTE_SELECTION_GUARD_ACTIVE, ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE, SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE, CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE, PROTOTYPE_FALLBACK_STILL_ENABLED, NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN, WORKBENCH_CHAIN_REPLAY_AVAILABLE, WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY, NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN, FULLMATCH_STILL_USES_SEGMENT_HARNESS, PROTOTYPE_SELECTION_STILL_PARTIAL, FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN, FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED. Scope: FULL_MATCH_HARNESS_SINGLE_RUN. May invalidate global economy: false. Technical sandbox summary: Le full-match normal reste en harnais segmente ; la chaine workbench n&#39;est pas consommee par defaut. La colonne de traces de match produit 110 traces structurees : 63 officielles, 47 simulation et 0 sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d&#39;economie globale. Les agregats de traces separent 63 traces officielles, 11 traces diagnostiques et 0 traces sandbox, avec 36 doublons ecartes. La previsualisation de selection reste sandbox_only et sa confiance n&#39;est pas relevee par l&#39;agregateur. Le rapport coach V0 depuis agregats officiels produit 6 cartes prudentes depuis 63 traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la previsualisation de selection reste sandbox_only sans upgrade de confiance.</div>
+        <div class="muted">Grounding warnings: FULL_MATCH_PARTIALLY_WORKBENCH_GROUNDED, SPATIAL_CONTEXT_ADAPTER_AVAILABLE, WORKBENCH_REPLAY_SEED_AVAILABLE, TACTICAL_PLAN_NOT_FULLY_DRIVING_RESOLUTION, ROUTE_ATTRIBUTE_INFLUENCE_AVAILABLE, ROUTE_ATTRIBUTE_CANDIDATE_MODIFIER_AVAILABLE, ATTRIBUTE_SELECTION_GUARD_ACTIVE, ATTRIBUTE_SELECTION_NOT_FULLMATCH_AUTHORITATIVE, SPATIAL_ROUTE_SELECTION_PATH_AVAILABLE, CONTROLLED_MINIMATCH_SPATIAL_SELECTION_AVAILABLE, PROTOTYPE_FALLBACK_STILL_ENABLED, NORMAL_FULLMATCH_NOT_YET_SPATIAL_SELECTION_DRIVEN, WORKBENCH_CHAIN_REPLAY_AVAILABLE, WORKBENCH_CHAIN_REPLAY_CONTROLLED_ONLY, NORMAL_FULLMATCH_NOT_YET_CHAIN_REPLAY_DRIVEN, FULLMATCH_STILL_USES_SEGMENT_HARNESS, PROTOTYPE_SELECTION_STILL_PARTIAL, FULLMATCH_NOT_YET_REPLAYING_WORKBENCH_SEQUENCE_CHAIN, FULLMATCH_SCORE_NOT_TACTICALLY_EXPLAINED. Scope: FULL_MATCH_HARNESS_SINGLE_RUN. May invalidate global economy: false. Technical sandbox summary: Le full-match normal reste en harnais segmente ; la chaine workbench n&#39;est pas consommee par defaut. La colonne de traces de match produit 110 traces structurees : 63 officielles, 47 simulation et 0 sandbox. Les traces officielles gardent officialTruth=true, les traces sandbox gardent officialTruth=false, et la colonne reste diagnostic-only : aucune mutation de timeline, score, possession, scoring event, selection live, route production ou preuve d&#39;économie globale. Les agregats de traces separent 63 traces officielles, 11 traces diagnostiques et 0 traces sandbox, avec 36 doublons ecartes. La prévisualisation de selection reste sandbox_only et sa confiance n&#39;est pas relevee par l&#39;agregateur. Le rapport coach V0 depuis agregats officiels produit 6 cartes prudentes depuis 63 traces officielles dedupliquees. Les diagnostics et le sandbox restent separes, et la prévisualisation de selection reste sandbox_only sans upgrade de confiance.</div>
       </details>
     </article></div>
     </section>

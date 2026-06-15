@@ -24,7 +24,10 @@ export type SelectionPreviewConfidence =
   | "low_medium"
   | "medium";
 
-export type SelectionPreviewTraceBackingStatus = "sandbox_only";
+export type SelectionPreviewTraceBackingStatus =
+  | "sandbox_only"
+  | "trace_supported"
+  | "officially_confirmed";
 
 export type SelectionPreviewCard = {
   readonly previewId: SelectionPreviewId;

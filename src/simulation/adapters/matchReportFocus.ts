@@ -82,6 +82,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 26;
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return 25;
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -89,6 +91,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
       return 22;
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -181,6 +184,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le plan de test coach multi-scénarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return "Relire la prévisualisation de sélection";
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return "Relire l'appui des traces a la previsualisation";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -191,6 +196,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la lecture visuelle V1 des agrégats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
       return "Relire la hiérarchie visuelle V1 du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
+      return "Relire le nettoyage legacy du rapport coach V1";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":

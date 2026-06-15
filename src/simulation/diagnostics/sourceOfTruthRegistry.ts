@@ -33,11 +33,13 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
   | "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
   | "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY"
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP"
   | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
   | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
@@ -915,6 +917,42 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     globalScoringEconomyVerdictAllowed: false,
   },
+  WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING: {
+    scope: "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING",
+    canProve: [
+      "official aggregate traces can support a Selection Preview hypothesis",
+      "trace_supported remains non-applied and non-binding",
+      "officially_confirmed exists as a future status but is not used",
+    ],
+    canSuggest: [
+      "which Selection Preview cards have official support",
+      "which official danger, recovery, cause, impact, player, goalkeeper, or second-ball signals support each preview",
+      "which preview ideas remain sandbox_only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any selection preview",
+      "that a selection preview is officially confirmed",
+      "that a real lineup change is recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
   WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE: {
     scope: "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     canProve: [
@@ -1067,6 +1105,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP",
+    canProve: [
+      "legacy key moments and coach analysis can be collapsed under technical traceability",
+      "visible score labels can distinguish full-match report score from live scoring-event samples and batch diagnostics",
+      "visible French coach copy can be normalized without changing match logic",
+      "legacy cleanup remains read-only",
+    ],
+    canSuggest: [
+      "which legacy sections should remain available for traceability",
+      "which visible report labels need copy cleanup",
+      "where score-source wording should appear",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that legacy content is official V1 evidence unless absorbed from official aggregates",
     ],
     cannotOverride: [
       "live score",
