@@ -21,7 +21,7 @@ export function validateCoachProductReportView(): readonly string[] {
   assertTest(model.nextMatchSignals.length > 0, "next-match signals must exist.");
   assertTest(model.appendices.length > 0, "appendices must exist.");
   assertTest(model.appendices.every((appendix) => appendix.defaultCollapsed), "appendices must be collapsed by default.");
-  assertTest(model.scoreSourceNote.includes("rapport full-match"), "score source note must exist.");
+  assertTest(model.scoreSourceNote.includes("diagnostics batch") && model.scoreSourceNote.includes("échantillons live"), "score source note must exist.");
   assertTest(model.profileAppliedCount === 0, "profile applied count must be 0.");
   assertTest(model.officiallyConfirmedCount === 0, "officially confirmed count must be 0.");
   assertTest(model.confidenceUpgradeCount === 0, "confidence upgrade count must be 0.");

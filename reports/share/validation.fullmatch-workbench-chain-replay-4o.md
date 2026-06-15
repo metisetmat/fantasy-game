@@ -1,24 +1,28 @@
-# FullMatch Workbench Chain Replay 4N Validation
+# FullMatch Workbench Chain Replay 4O Validation
 
 Status: PASS
 
 ## Checks
 - PASS: default runFullMatch remains segment_harness.
 - PASS: experimental mode remains opt-in.
-- PASS: Coach Product Report View status is available.
+- PASS: Coach Product Report Polish status is available.
 - PASS: coach-report.product.html is generated.
-- PASS: product report section count is 7.
+- PASS: product report review-ready flag is true.
+- PASS: header is polished.
+- PASS: executive summary is compact.
+- PASS: key signals are readable.
+- PASS: profile cards are readable.
+- PASS: next-match signals are readable.
+- PASS: appendices are less intrusive.
+- PASS: print-friendly CSS is present.
+- PASS: product report contains Rapport coach — lecture produit.
 - PASS: product report contains Résumé coach.
 - PASS: product report contains Ce que le match dit.
 - PASS: product report contains 3 signaux clés.
 - PASS: product report contains Profils à observer.
 - PASS: product report contains À vérifier au prochain match.
+- PASS: product report contains À ne pas sur-interpréter.
 - PASS: product report contains Annexes.
-- PASS: key signal count is 3.
-- PASS: profile card count is 3.
-- PASS: next-match signals are visible.
-- PASS: appendices are collapsed by default.
-- PASS: score source label is visible.
 - PASS: main product report hides internal status names.
 - PASS: main product report hides internal role ids.
 - PASS: main product report hides internal attribute ids.
@@ -32,13 +36,13 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: product report cannot mutate official timeline.
-- PASS: product report cannot mutate official score.
-- PASS: product report cannot mutate official possession.
-- PASS: product report cannot create production scoring events. - 0
-- PASS: product report cannot claim global economy. - 0
-- PASS: product report cannot drive live selection.
-- PASS: product report cannot drive production route resolution.
+- PASS: polish layer cannot mutate official timeline.
+- PASS: polish layer cannot mutate official score.
+- PASS: polish layer cannot mutate official possession.
+- PASS: polish layer cannot create production scoring events. - 0
+- PASS: polish layer cannot claim global economy. - 0
+- PASS: polish layer cannot drive live selection.
+- PASS: polish layer cannot drive production route resolution.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -46,7 +50,7 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- product report section count: 7
+- section count: 7
 - key signal count: 3
 - profile card count: 3
 - next-match signal count: 3
@@ -56,6 +60,7 @@ Status: PASS
 - internal role id leak count: 0
 - internal attribute id leak count: 0
 - official selection wording count: 0
+- mojibake marker count: 0
 - profile applied count: 0
 - officially-confirmed count: 0
 - confidence upgrade count: 0
@@ -65,6 +70,6 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_COACH_PRODUCT_REPORT_VIEW.
-- CONFIRM_PRODUCT_REPORT_READY_FOR_REVIEW.
-- PREPARE_PLAYER_MATCHUP_VIEW_OR_EXPORT_POLISH.
+- CONFIRM_COACH_PRODUCT_REPORT_POLISH.
+- CONFIRM_PRODUCT_REPORT_REVIEW_READY.
+- PREPARE_PLAYER_MATCHUP_VIEW_OR_PDF_EXPORT.

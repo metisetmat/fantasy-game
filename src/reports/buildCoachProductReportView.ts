@@ -349,7 +349,7 @@ export function buildCoachProductReportViewFromMatchReport(report: MatchReport):
     status,
     matchId: report.matchId,
     scoreLabel,
-    scoreSourceNote: "Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés.",
+    scoreSourceNote: "Les diagnostics batch et les échantillons live restent séparés de ce score.",
     executiveSummary: [
       `Score final : ${scoreLabel}.`,
       "Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.",

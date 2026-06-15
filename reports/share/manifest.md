@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-15T19:51:12.297Z
-Task/sprint: Sprint 4N - Coach Report Export / Product View
+Generated: 2026-06-15T20:53:58.102Z
+Task/sprint: Sprint 4O - Product Report Polish & Review Readiness
 Mode: MINIMAL_REVIEW
 Final file count: 19
 
@@ -21,8 +21,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4n.md
-- validation.fullmatch-workbench-chain-replay-4n.md
+- fullmatch-workbench-chain-replay-4o.md
+- validation.fullmatch-workbench-chain-replay-4o.md
 - README.md
 
 ## Bundle Files
