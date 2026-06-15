@@ -4,15 +4,24 @@ export interface MojibakeScanResult {
 }
 
 export const FORBIDDEN_MOJIBAKE_MARKERS: readonly string[] = [
-  "Ãƒ",
-  "Ã‚",
-  "Ã¢â‚¬â„¢",
-  "Ã¢â‚¬Å“",
-  "Ã¢â‚¬",
-  "ÃƒÂ©",
-  "ÃƒÂ¨",
-  "ÃƒÂª",
-  "Ãƒ ",
+  "\u00c3\u0192",
+  "\u00c3\u00a9",
+  "\u00c3\u00a8",
+  "\u00c3\u00aa",
+  "\u00c3\u00ab",
+  "\u00c3\u00a0",
+  "\u00c3\u00a2",
+  "\u00c3\u00ae",
+  "\u00c3\u00b4",
+  "\u00c3\u00b9",
+  "\u00c3\u00bb",
+  "\u00c3\u00a7",
+  "\u00c3\u2030",
+  "\u00c3\u0089",
+  "\u00c3\u0080",
+  "\u00c2",
+  "\u00e2\u20ac",
+  "\ufffd",
 ];
 
 export function findMojibakeMarkers(value: string): readonly string[] {

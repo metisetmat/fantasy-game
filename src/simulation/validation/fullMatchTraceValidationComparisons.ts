@@ -44,7 +44,6 @@ function withComparison(input: {
     profileId: input.result.profileId,
     haystack: [
       ...input.result.expectedSignalTagsPresent,
-      ...input.result.expectedSignalTagsMissing,
       ...input.result.acceptedFallbackSignals,
       ...input.result.topCauseTags,
       ...input.result.topImpactTags,

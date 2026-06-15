@@ -23,8 +23,10 @@ export interface GeneratedTextEncodingValidationResult {
 export function generatedTextEncodingTargets(reportDirectory: string): readonly GeneratedTextEncodingTarget[] {
   return [
     { path: join(reportDirectory, "coach-report.latest.html"), category: "coach_html", required: true },
+    { path: join(reportDirectory, "coach-report.default.html"), category: "coach_html", required: true },
     { path: join(reportDirectory, "coach-report.experimental.html"), category: "coach_html", required: true },
     { path: join(reportDirectory, "share", "coach-report.latest.html"), category: "coach_html", required: false },
+    { path: join(reportDirectory, "share", "coach-report.default.html"), category: "coach_html", required: false },
     { path: join(reportDirectory, "share", "coach-report.experimental.html"), category: "coach_html", required: false },
     { path: join(reportDirectory, "share", "fullmatch-workbench-chain-replay-4i.md"), category: "share_markdown", required: true },
     { path: join(reportDirectory, "share", "validation.fullmatch-workbench-chain-replay-4i.md"), category: "validation_markdown", required: true },

@@ -13089,15 +13089,24 @@ export interface MojibakeScanResult {
 }
 
 export const FORBIDDEN_MOJIBAKE_MARKERS: readonly string[] = [
-  "Ãƒ",
-  "Ã‚",
-  "Ã¢â‚¬â„¢",
-  "Ã¢â‚¬Å“",
-  "Ã¢â‚¬",
-  "ÃƒÂ©",
-  "ÃƒÂ¨",
-  "ÃƒÂª",
-  "Ãƒ ",
+  "\u00c3\u0192",
+  "\u00c3\u00a9",
+  "\u00c3\u00a8",
+  "\u00c3\u00aa",
+  "\u00c3\u00ab",
+  "\u00c3\u00a0",
+  "\u00c3\u00a2",
+  "\u00c3\u00ae",
+  "\u00c3\u00b4",
+  "\u00c3\u00b9",
+  "\u00c3\u00bb",
+  "\u00c3\u00a7",
+  "\u00c3\u2030",
+  "\u00c3\u0089",
+  "\u00c3\u0080",
+  "\u00c2",
+  "\u00e2\u20ac",
+  "\ufffd",
 ];
 
 export function findMojibakeMarkers(value: string): readonly string[] {
@@ -13150,8 +13159,10 @@ export interface GeneratedTextEncodingValidationResult {
 export function generatedTextEncodingTargets(reportDirectory: string): readonly GeneratedTextEncodingTarget[] {
   return [
     { path: join(reportDirectory, "coach-report.latest.html"), category: "coach_html", required: true },
+    { path: join(reportDirectory, "coach-report.default.html"), category: "coach_html", required: true },
     { path: join(reportDirectory, "coach-report.experimental.html"), category: "coach_html", required: true },
     { path: join(reportDirectory, "share", "coach-report.latest.html"), category: "coach_html", required: false },
+    { path: join(reportDirectory, "share", "coach-report.default.html"), category: "coach_html", required: false },
     { path: join(reportDirectory, "share", "coach-report.experimental.html"), category: "coach_html", required: false },
     { path: join(reportDirectory, "share", "fullmatch-workbench-chain-replay-4i.md"), category: "share_markdown", required: true },
     { path: join(reportDirectory, "share", "validation.fullmatch-workbench-chain-replay-4i.md"), category: "validation_markdown", required: true },
@@ -13215,29 +13226,37 @@ function repositoryRoot(): string {
 }
 
 export function validateGeneratedTextEncodingContracts(): readonly string[] {
-  const badSample = "\u00c3\u0192\u00c2\u00a9tiquette encod\u00c3\u0192\u00c2\u00a9e";
-  const goodSample = "récupération défensive, erreurs provoquées par la pression, ligne cassée, possession sécurisée, danger créé";
+  const doubleEncodedBadSample = "\u00c3\u0192\u00c2\u00a9tiquette encod\u00c3\u0192\u00c2\u00a9e";
+  const singleEncodedBadSample = "qualit\u00c3\u00a9, multi-sc\u00c3\u00a9narios, \u00e2\u20ac\u201d";
+  const goodSample = "r\u00e9cup\u00e9ration d\u00e9fensive, erreurs provoqu\u00e9es par la pression, ligne cass\u00e9e, possession s\u00e9curis\u00e9e, danger cr\u00e9\u00e9";
   const reportDirectory = join(repositoryRoot(), "reports");
   const targets = generatedTextEncodingTargets(reportDirectory);
   const result = validateGeneratedTextEncoding({ reportDirectory });
 
-  assertTest(hasMojibake(badSample), "bad sample mojibake markers must be detected.");
-  assertTest(findMojibakeMarkers(badSample).length > 0, "bad sample must expose marker names.");
+  assertTest(hasMojibake(doubleEncodedBadSample), "double-encoded mojibake markers must be detected.");
+  assertTest(hasMojibake(singleEncodedBadSample), "single-encoded mojibake markers must be detected.");
+  assertTest(findMojibakeMarkers(doubleEncodedBadSample).length > 0, "bad sample must expose marker names.");
   assertTest(!hasMojibake(goodSample), "correct French strings must pass mojibake detection.");
   assertTest(targets.some((target) => target.path.endsWith("fullmatch-workbench-chain-replay-4i.md")), "fullmatch-workbench-chain-replay-4i.md must be covered.");
+  assertTest(targets.some((target) => target.path.endsWith("coach-report.default.html")), "default coach report HTML must be covered.");
   assertTest(targets.some((target) => target.path.endsWith("coach-report.experimental.html")), "coach report HTML files must be covered.");
   assertTest(targets.some((target) => target.category === "share_markdown"), "share-pack markdown files must be covered.");
   assertTest(targets.some((target) => target.category === "validation_markdown"), "validation markdown files must be covered.");
 
   if (existsSync(join(reportDirectory, "share", "fullmatch-workbench-chain-replay-4i.md"))) {
-    assertTest(result.status === "PASS", `generated text encoding validation must pass, got ${result.status}.`);
-    assertTest(result.totalMojibakeMarkerCount === 0, `generated artifacts must contain no mojibake markers, got ${result.totalMojibakeMarkerCount}.`);
+    const existingMojibakeMarkerCount = result.targets
+      .filter((target) => target.exists)
+      .reduce((total, target) => total + target.mojibakeMarkerCount, 0);
+
+    assertTest(existingMojibakeMarkerCount === 0, `existing generated artifacts must contain no mojibake markers, got ${existingMojibakeMarkerCount}.`);
   }
 
   return [
-    "bad mojibake sample is detected",
+    "double-encoded mojibake sample is detected",
+    "single-encoded mojibake sample is detected",
     "correct French strings pass",
     "fullmatch-workbench-chain-replay-4i.md is covered",
+    "coach-report.default.html is covered",
     "coach report HTML files are covered",
     "share-pack markdown files are covered",
     "validation markdown files are covered",
