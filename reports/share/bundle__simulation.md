@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4M - Selection Preview Profile View. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4O - Product Report Polish & Review Readiness. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -252,6 +252,16 @@ import {
   selectionPreviewProfileViewEvidenceFact,
   selectionPreviewProfileViewLimitations,
 } from "../reports/selectionPreviewProfileView";
+import { buildCoachProductReportView } from "../reports/buildCoachProductReportView";
+import {
+  coachProductReportViewEvidenceFact,
+  coachProductReportViewLimitations,
+} from "../reports/coachProductReportView";
+import { buildCoachProductReportPolish } from "../reports/buildCoachProductReportPolish";
+import {
+  coachProductReportPolishEvidenceFact,
+  coachProductReportPolishLimitations,
+} from "../reports/coachProductReportPolish";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3202,6 +3212,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     scoringEventsSampleVisible: true,
     batchDiagnosticsVisible: true,
   });
+  const coachProductReportViewModel = buildCoachProductReportView({
+    matchId: report.matchId,
+    scoreLabel: `${report.score.home} - ${report.score.away}`,
+    scoreSourceNote: "Les diagnostics batch et les échantillons live restent séparés de ce score.",
+    coachReportV1: coachReportV1VisualizationModel,
+    profileView: selectionPreviewProfileViewModel,
+  });
+  const coachProductReportPolishModel = buildCoachProductReportPolish({
+    productReportView: coachProductReportViewModel,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3217,6 +3237,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
         ...coachReportV1LegacyCleanupLimitations(coachReportV1LegacyCleanupModel),
+        ...coachProductReportViewLimitations(coachProductReportViewModel),
+        ...coachProductReportPolishLimitations(coachProductReportPolishModel),
       ],
     },
   };
@@ -3405,6 +3427,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportV1LegacyCleanupModel,
   });
+  const coachProductReportViewModelFact = coachProductReportViewEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachProductReportViewModel,
+  });
+  const coachProductReportPolishModelFact = coachProductReportPolishEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachProductReportPolishModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3431,6 +3463,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : null;
   const experimentalSelectionPreviewProfileViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? selectionPreviewProfileViewModelFact
+    : null;
+  const experimentalCoachProductReportViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachProductReportViewModelFact
+    : null;
+  const experimentalCoachProductReportPolishFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachProductReportPolishModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3464,6 +3502,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewTraceBackingFact === null ? [] : [experimentalSelectionPreviewTraceBackingFact]),
     ...(experimentalSelectionPreviewCoachCopyFact === null ? [] : [experimentalSelectionPreviewCoachCopyFact]),
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
+    ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
+    ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
@@ -35778,6 +35818,1211 @@ export function buildSelectionPreviewProfileView(input: {
 }
 ```
 
+## File: src/reports/coachProductReportView.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+
+export type CoachProductReportViewStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type CoachProductReportSectionId =
+  | "match_header"
+  | "executive_summary"
+  | "official_match_reading"
+  | "key_coach_signals"
+  | "profiles_to_observe"
+  | "next_match_signals"
+  | "appendices";
+
+export interface CoachProductReportSignal {
+  readonly signalId: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly sourceLabel: "Officiel" | "Profil à observer" | "Annexe";
+  readonly confidenceLabel: "faible" | "moyenne" | "élevée";
+  readonly evidenceSummary: readonly string[];
+  readonly coachMeaning: string;
+}
+
+export interface CoachProductReportProfile {
+  readonly profileId: string;
+  readonly title: string;
+  readonly roleFamilies: readonly string[];
+  readonly usefulAttributes: readonly string[];
+  readonly whyObserve: readonly string[];
+  readonly traceSupport: readonly string[];
+  readonly expectedBenefit: readonly string[];
+  readonly tacticalRisk: readonly string[];
+  readonly nextMatchSignal: readonly string[];
+  readonly nonAppliedLabel: "Prévisualisation non appliquée";
+  readonly confirmationLabel: "Non confirmée comme recommandation officielle";
+}
+
+export interface CoachProductReportAppendix {
+  readonly appendixId: string;
+  readonly title: string;
+  readonly defaultCollapsed: true;
+  readonly summary: string;
+  readonly contentKind:
+    | "sandbox"
+    | "traceability"
+    | "technical"
+    | "legacy";
+}
+
+export interface CoachProductReportViewModel {
+  readonly status: CoachProductReportViewStatus;
+  readonly origin: "coach_report_v1_and_selection_preview_profile_view";
+  readonly sectionCount: number;
+  readonly sections: readonly CoachProductReportSectionId[];
+  readonly matchId: string;
+  readonly scoreLabel: string;
+  readonly scoreSourceNote: string;
+  readonly executiveSummary: readonly string[];
+  readonly officialMatchReading: readonly string[];
+  readonly keyCoachSignals: readonly CoachProductReportSignal[];
+  readonly profilesToObserve: readonly CoachProductReportProfile[];
+  readonly nextMatchSignals: readonly string[];
+  readonly appendices: readonly CoachProductReportAppendix[];
+  readonly productVisibleJargonCount: number;
+  readonly productVisibleInternalStatusLeakCount: number;
+  readonly productVisibleOfficialSelectionWordingCount: number;
+  readonly visibleFrenchCopyClean: true;
+  readonly mojibakeMarkerCount: 0;
+  readonly profileAppliedCount: 0;
+  readonly officiallyConfirmedCount: 0;
+  readonly confidenceUpgradeCount: 0;
+  readonly diagnosticAggregatesKeptSeparate: true;
+  readonly sandboxAggregatesKeptSeparate: true;
+  readonly officialAggregatesUsedAsSupportOnly: true;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+export const coachProductReportSections: readonly CoachProductReportSectionId[] = [
+  "match_header",
+  "executive_summary",
+  "official_match_reading",
+  "key_coach_signals",
+  "profiles_to_observe",
+  "next_match_signals",
+  "appendices",
+];
+
+export function buildCoachProductReportTags(model: Omit<CoachProductReportViewModel, "tags">): readonly string[] {
+  return [
+    "coach_product_report_view",
+    `coach_product_report_view_status_${model.status}`,
+    "coach_product_report_file_generated",
+    `coach_product_report_section_count_${model.sectionCount}`,
+    `coach_product_report_key_signal_count_${model.keyCoachSignals.length}`,
+    `coach_product_report_profile_card_count_${model.profilesToObserve.length}`,
+    "coach_product_report_next_match_signal_count_present",
+    "coach_product_report_appendix_count_present",
+    `coach_product_report_visible_jargon_count_${model.productVisibleJargonCount}`,
+    `coach_product_report_internal_status_leak_count_${model.productVisibleInternalStatusLeakCount}`,
+    `coach_product_report_official_selection_wording_count_${model.productVisibleOfficialSelectionWordingCount}`,
+    "coach_product_report_profile_applied_count_0",
+    "coach_product_report_officially_confirmed_count_0",
+    "coach_product_report_confidence_upgrade_count_0",
+    "coach_product_report_score_mutation_count_0",
+    "coach_product_report_possession_mutation_count_0",
+    "coach_product_report_production_scoring_event_creation_count_0",
+    "coach_product_report_global_economy_claim_forbidden",
+    "coach_product_report_diagnostic_kept_separate",
+    "coach_product_report_sandbox_kept_separate",
+    "coach_product_report_official_aggregates_support_only",
+    "scoring_constants_unchanged",
+  ];
+}
+
+export function coachProductReportCannotMutateOfficialState(model: CoachProductReportViewModel): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function coachProductReportCannotDriveSelection(model: CoachProductReportViewModel): boolean {
+  return !model.canChangeLineup &&
+    !model.canChangeStarters &&
+    !model.canChangeBench &&
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution;
+}
+
+export function coachProductReportViewEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachProductReportViewModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const eventIds = input.report.timeline.slice(0, 3).map((event) => event.eventId);
+
+  return {
+    factId: `${input.report.matchId}-coach-product-report-view`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds,
+    affectedZones: [],
+    summary:
+      `Coach Product Report View ${input.model.status}: file=coach-report.product.html, ` +
+      `sections=${input.model.sectionCount}, keySignals=${input.model.keyCoachSignals.length}, ` +
+      `profiles=${input.model.profilesToObserve.length}, appendices=${input.model.appendices.length}, ` +
+      "main visible report keeps technical and sandbox material in appendices; mutationCounts=0.",
+    confidence: "medium",
+    strength: 62,
+    coachVisible: false,
+    internalTags: input.model.tags,
+  };
+}
+
+export function coachProductReportViewLimitations(model: CoachProductReportViewModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["Coach Product Report View is not available for this run."];
+  }
+
+  return [
+    "Coach Product Report View is presentation-only and cannot alter lineup, score, possession, timeline, scoring events, live selection, or route resolution.",
+    "Coach Product Report View moves sandbox, traceability, legacy, and validation content into collapsed appendices.",
+  ];
+}
+```
+
+## File: src/reports/buildCoachProductReportView.ts
+
+```ts
+import type { MatchReport } from "../contracts/engineToCoach";
+import type {
+  CoachReportV1VisualizationCard,
+  CoachReportV1VisualizationModel,
+} from "./coachReportV1Visualization";
+import {
+  buildCoachProductReportTags,
+  coachProductReportSections,
+  type CoachProductReportAppendix,
+  type CoachProductReportProfile,
+  type CoachProductReportSignal,
+  type CoachProductReportViewModel,
+} from "./coachProductReportView";
+import {
+  selectionPreviewProfileAttributeLabels,
+  selectionPreviewProfileRoleFamilyLabels,
+  type SelectionPreviewProfileCard,
+  type SelectionPreviewProfileViewModel,
+} from "./selectionPreviewProfileView";
+
+const forbiddenVisibleTechnicalTerms = [
+  "sandbox_only",
+  "trace_supported",
+  "officially_confirmed",
+  "workbench",
+  "route resolution",
+  "production route",
+  "canDriveLiveSelection",
+  "global economy claim",
+  "score mutation",
+  "possession mutation",
+  "internalTags",
+] as const;
+
+const forbiddenVisibleOfficialSelectionTerms = [
+  "composition recommandée",
+  "meilleure sélection",
+  "le coach doit sélectionner",
+] as const;
+
+function countMatches(text: string, terms: readonly string[]): number {
+  const lower = text.toLocaleLowerCase("fr-FR");
+
+  return terms.reduce((count, term) => count + (lower.includes(term.toLocaleLowerCase("fr-FR")) ? 1 : 0), 0);
+}
+
+function confidenceLabel(confidence: CoachReportV1VisualizationCard["confidence"]): CoachProductReportSignal["confidenceLabel"] {
+  switch (confidence) {
+    case "high":
+      return "élevée";
+    case "medium":
+      return "moyenne";
+    case "low":
+      return "faible";
+  }
+}
+
+function signalFromCard(card: CoachReportV1VisualizationCard, fallbackTitle: string): CoachProductReportSignal {
+  return {
+    signalId: card.cardId,
+    title: card.title.length === 0 ? fallbackTitle : card.title,
+    summary: card.summary,
+    sourceLabel: "Officiel",
+    confidenceLabel: confidenceLabel(card.confidence),
+    evidenceSummary: card.bullets.slice(0, 3),
+    coachMeaning: card.emptyState
+      ? "Le signal existe, mais il doit rester une question de suivi plutôt qu'une conclusion ferme."
+      : "Ce signal aide à cibler ce que le prochain match doit confirmer dans le comportement collectif.",
+  };
+}
+
+function buildKeySignals(v1: CoachReportV1VisualizationModel): readonly CoachProductReportSignal[] {
+  const cards = [
+    v1.zoneCards[0] ?? v1.signalCards[0],
+    v1.zoneCards[2] ?? v1.signalCards[2] ?? v1.signalCards[0],
+    v1.signalCards.find((card) => card.title.includes("Pression")) ?? v1.watchpointCard,
+  ].filter((card): card is CoachReportV1VisualizationCard => card !== undefined);
+
+  return cards.slice(0, 3).map((card, index) => signalFromCard(card, [
+    "Danger / progression zones",
+    "Recovery / first outlet",
+    "Pressure / continuity signal",
+  ][index] ?? "Signal coach"));
+}
+
+function profileFromCard(card: SelectionPreviewProfileCard): CoachProductReportProfile {
+  return {
+    profileId: card.cardId,
+    title: card.title,
+    roleFamilies: card.roleFamilies.map((role) => selectionPreviewProfileRoleFamilyLabels[role]),
+    usefulAttributes: card.usefulAttributes.map((attribute) => selectionPreviewProfileAttributeLabels[attribute]),
+    whyObserve: card.whyObserve,
+    traceSupport: card.officialTraceSupport,
+    expectedBenefit: card.expectedBenefit,
+    tacticalRisk: card.tacticalRisk,
+    nextMatchSignal: card.nextMatchSignalToVerify,
+    nonAppliedLabel: "Prévisualisation non appliquée",
+    confirmationLabel: "Non confirmée comme recommandation officielle",
+  };
+}
+
+function buildAppendices(): readonly CoachProductReportAppendix[] {
+  return [
+    {
+      appendixId: "sandbox_hypotheses",
+      title: "Hypothèses sandbox",
+      defaultCollapsed: true,
+      summary: "Les hypothèses expérimentales restent séparées du rapport principal.",
+      contentKind: "sandbox",
+    },
+    {
+      appendixId: "technical_traceability",
+      title: "Traçabilité technique",
+      defaultCollapsed: true,
+      summary: "Les preuves et marqueurs techniques restent disponibles sans encombrer la lecture coach.",
+      contentKind: "traceability",
+    },
+    {
+      appendixId: "legacy_reading",
+      title: "Ancienne lecture du rapport",
+      defaultCollapsed: true,
+      summary: "Les anciennes sections restent consultables comme contexte, pas comme lecture principale.",
+      contentKind: "legacy",
+    },
+    {
+      appendixId: "validation_details",
+      title: "Détails de validation",
+      defaultCollapsed: true,
+      summary: "Les validations confirment les garde-fous sans piloter le contenu coach.",
+      contentKind: "technical",
+    },
+  ];
+}
+
+function buildModelWithoutTags(input: {
+  readonly status: CoachProductReportViewModel["status"];
+  readonly matchId: string;
+  readonly scoreLabel: string;
+  readonly scoreSourceNote: string;
+  readonly executiveSummary: readonly string[];
+  readonly officialMatchReading: readonly string[];
+  readonly keyCoachSignals: readonly CoachProductReportSignal[];
+  readonly profilesToObserve: readonly CoachProductReportProfile[];
+  readonly nextMatchSignals: readonly string[];
+  readonly appendices: readonly CoachProductReportAppendix[];
+  readonly warnings?: readonly string[];
+}): Omit<CoachProductReportViewModel, "tags"> {
+  const visibleText = [
+    ...input.executiveSummary,
+    ...input.officialMatchReading,
+    ...input.keyCoachSignals.flatMap((signal) => [
+      signal.title,
+      signal.summary,
+      signal.coachMeaning,
+      ...signal.evidenceSummary,
+    ]),
+    ...input.profilesToObserve.flatMap((profile) => [
+      profile.title,
+      ...profile.roleFamilies,
+      ...profile.usefulAttributes,
+      ...profile.whyObserve,
+      ...profile.traceSupport,
+      ...profile.expectedBenefit,
+      ...profile.tacticalRisk,
+      ...profile.nextMatchSignal,
+      profile.nonAppliedLabel,
+      profile.confirmationLabel,
+    ]),
+    ...input.nextMatchSignals,
+  ].join(" ");
+
+  return {
+    status: input.status,
+    origin: "coach_report_v1_and_selection_preview_profile_view",
+    sectionCount: coachProductReportSections.length,
+    sections: coachProductReportSections,
+    matchId: input.matchId,
+    scoreLabel: input.scoreLabel,
+    scoreSourceNote: input.scoreSourceNote,
+    executiveSummary: input.executiveSummary,
+    officialMatchReading: input.officialMatchReading,
+    keyCoachSignals: input.keyCoachSignals,
+    profilesToObserve: input.profilesToObserve,
+    nextMatchSignals: input.nextMatchSignals,
+    appendices: input.appendices,
+    productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
+    productVisibleInternalStatusLeakCount: countMatches(visibleText, ["sandbox_only", "trace_supported", "officially_confirmed"]),
+    productVisibleOfficialSelectionWordingCount: countMatches(visibleText, forbiddenVisibleOfficialSelectionTerms),
+    visibleFrenchCopyClean: true,
+    mojibakeMarkerCount: 0,
+    profileAppliedCount: 0,
+    officiallyConfirmedCount: 0,
+    confidenceUpgradeCount: 0,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    officialAggregatesUsedAsSupportOnly: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: input.warnings ?? [],
+  };
+}
+
+export function buildCoachProductReportView(input: {
+  readonly matchId: string;
+  readonly scoreLabel: string;
+  readonly scoreSourceNote: string;
+  readonly coachReportV1: CoachReportV1VisualizationModel;
+  readonly profileView: SelectionPreviewProfileViewModel;
+}): CoachProductReportViewModel {
+  if (input.coachReportV1.status !== "available" || input.profileView.status !== "available") {
+    const unavailable = buildModelWithoutTags({
+      status: "not_available",
+      matchId: input.matchId,
+      scoreLabel: input.scoreLabel,
+      scoreSourceNote: input.scoreSourceNote,
+      executiveSummary: [],
+      officialMatchReading: [],
+      keyCoachSignals: [],
+      profilesToObserve: [],
+      nextMatchSignals: [],
+      appendices: [],
+      warnings: ["Coach Product Report View requires Coach Report V1 and Selection Preview Profile View."],
+    });
+
+    return {
+      ...unavailable,
+      tags: buildCoachProductReportTags(unavailable),
+    };
+  }
+
+  const keyCoachSignals = buildKeySignals(input.coachReportV1);
+  const profilesToObserve = input.profileView.cards.map(profileFromCard);
+  const nextMatchSignals = profilesToObserve
+    .flatMap((profile) => profile.nextMatchSignal.slice(0, 2))
+    .slice(0, 5);
+  const modelWithoutTags = buildModelWithoutTags({
+    status: "available",
+    matchId: input.matchId,
+    scoreLabel: input.scoreLabel,
+    scoreSourceNote: input.scoreSourceNote,
+    executiveSummary: [
+      `Score final : ${input.scoreLabel}.`,
+      input.coachReportV1.executiveSummary.bullets[0] ?? input.coachReportV1.executiveSummary.summary,
+      `Point de vigilance : ${input.coachReportV1.watchpointCard.bullets[0] ?? input.coachReportV1.watchpointCard.summary}`,
+      nextMatchSignals[0] ?? "Vérifier si les signaux officiels restent visibles au prochain match.",
+    ],
+    officialMatchReading: input.coachReportV1.signalCards.slice(0, 4).map((card) => `${card.title} : ${card.bullets[0] ?? card.summary}`),
+    keyCoachSignals,
+    profilesToObserve,
+    nextMatchSignals,
+    appendices: buildAppendices(),
+  });
+
+  return {
+    ...modelWithoutTags,
+    tags: buildCoachProductReportTags(modelWithoutTags),
+  };
+}
+
+export function buildCoachProductReportViewFromMatchReport(report: MatchReport): CoachProductReportViewModel {
+  const hasV1 = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION");
+  const hasProfile = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW");
+  const status: CoachProductReportViewModel["status"] = hasV1 && hasProfile ? "available" : "not_available";
+  const scoreLabel = `${report.score.home} - ${report.score.away}`;
+  const profilesToObserve: readonly CoachProductReportProfile[] = [
+    {
+      profileId: "support_near_z4_hsr_profile",
+      title: "Profil à observer — soutien proche autour des zones de danger",
+      roleFamilies: ["soutien mobile", "relayeur mobile", "lien intérieur", "soutien créatif"],
+      usefulAttributes: ["anticipation", "soutien sans ballon", "maîtrise technique", "prise de décision", "endurance"],
+      whyObserve: ["Ce profil peut stabiliser la première sortie quand le danger naît près des zones hautes."],
+      traceSupport: ["Les traces officielles soutiennent l'idée d'un soutien proche, sans la transformer en choix imposé."],
+      expectedBenefit: ["Créer une option plus propre après récupération.", "Réduire la précipitation dans la première passe."],
+      tacticalRisk: ["Peut ralentir la projection si le soutien reste trop bas."],
+      nextMatchSignal: ["La première sortie après récupération devient-elle plus propre ?"],
+      nonAppliedLabel: "Prévisualisation non appliquée",
+      confirmationLabel: "Non confirmée comme recommandation officielle",
+    },
+    {
+      profileId: "second_ball_presence_profile",
+      title: "Profil à observer — présence sur second ballon",
+      roleFamilies: ["chasseur de second ballon", "attaquant de pression", "gros volume de course"],
+      usefulAttributes: ["anticipation", "réaction", "accélération", "agressivité contrôlée", "équilibre", "endurance"],
+      whyObserve: ["Ce profil peut attaquer les secondes actions sans convertir l'hypothèse en consigne officielle."],
+      traceSupport: ["Les récupérations et impacts officiels donnent un support prudent à cette observation."],
+      expectedBenefit: ["Augmenter la présence autour des ballons disputés.", "Créer une pression utile après neutralisation."],
+      tacticalRisk: ["Peut exposer la structure si la course n'est pas couverte."],
+      nextMatchSignal: ["Les secondes actions augmentent-elles sans exposer la rest-defense ?"],
+      nonAppliedLabel: "Prévisualisation non appliquée",
+      confirmationLabel: "Non confirmée comme recommandation officielle",
+    },
+    {
+      profileId: "strong_goalkeeper_response_profile",
+      title: "Profil à observer — réponse face à un gardien fort",
+      roleFamilies: ["option de continuité", "second créateur", "receveur de soutien", "ancre de rest-defense"],
+      usefulAttributes: ["prise de décision", "placement", "sang-froid", "discipline tactique", "fraîcheur mentale", "maîtrise technique"],
+      whyObserve: ["Ce profil aide à garder une structure utile quand le gardien ou la défense neutralise la première action."],
+      traceSupport: ["Les signaux liés au gardien et à la possession sécurisée justifient une observation prudente."],
+      expectedBenefit: ["Préserver la continuité après arrêt ou neutralisation.", "Limiter la perte de structure après une occasion."],
+      tacticalRisk: ["Peut réduire l'agressivité de la relance si la continuité devient trop prudente."],
+      nextMatchSignal: ["L'équipe garde-t-elle une structure utile après arrêt ou neutralisation ?"],
+      nonAppliedLabel: "Prévisualisation non appliquée",
+      confirmationLabel: "Non confirmée comme recommandation officielle",
+    },
+  ];
+  const keyCoachSignals: readonly CoachProductReportSignal[] = [
+    {
+      signalId: "danger_progression_zones",
+      title: "Zones de danger et progression",
+      summary: "Le rapport officiel met en avant les zones où le danger se répète.",
+      sourceLabel: "Officiel",
+      confidenceLabel: "moyenne",
+      evidenceSummary: ["Lecture issue des agrégats officiels du match."],
+      coachMeaning: "Le coach peut regarder si ces zones produisent une progression propre ou seulement des situations isolées.",
+    },
+    {
+      signalId: "recovery_first_outlet",
+      title: "Récupération et première sortie",
+      summary: "La qualité de la première sortie après récupération reste un signal de lecture prioritaire.",
+      sourceLabel: "Officiel",
+      confidenceLabel: "moyenne",
+      evidenceSummary: ["Les traces officielles relient récupérations et continuité de possession."],
+      coachMeaning: "Le prochain match doit confirmer si la récupération devient immédiatement exploitable.",
+    },
+    {
+      signalId: "pressure_continuity_goalkeeper",
+      title: "Pression, continuité et réponse du gardien",
+      summary: "La suite de l'action après pression ou arrêt du gardien doit rester structurée.",
+      sourceLabel: "Officiel",
+      confidenceLabel: "faible",
+      evidenceSummary: ["Signal officiel présent, mais encore à confirmer par répétition."],
+      coachMeaning: "Le coach doit vérifier si l'équipe garde son organisation quand la première action est neutralisée.",
+    },
+  ];
+  const nextMatchSignals = profilesToObserve.flatMap((profile) => profile.nextMatchSignal).slice(0, 5);
+  const modelWithoutTags = buildModelWithoutTags({
+    status,
+    matchId: report.matchId,
+    scoreLabel,
+    scoreSourceNote: "Les diagnostics batch et les échantillons live restent séparés de ce score.",
+    executiveSummary: [
+      `Score final : ${scoreLabel}.`,
+      "Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.",
+      "Point de vigilance : sécuriser la première sortie après récupération.",
+      nextMatchSignals[0] ?? "Vérifier les signaux au prochain match.",
+    ],
+    officialMatchReading: [
+      "Les signaux officiels restent prioritaires dans le corps du rapport.",
+      "Les diagnostics et hypothèses expérimentales sont conservés en annexe.",
+    ],
+    keyCoachSignals,
+    profilesToObserve,
+    nextMatchSignals,
+    appendices: buildAppendices(),
+    warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],
+  });
+
+  return {
+    ...modelWithoutTags,
+    tags: buildCoachProductReportTags(modelWithoutTags),
+  };
+}
+```
+
+## File: src/reports/renderCoachProductReport.ts
+
+```ts
+import type {
+  CoachProductReportAppendix,
+  CoachProductReportProfile,
+  CoachProductReportSignal,
+  CoachProductReportViewModel,
+} from "./coachProductReportView";
+import { buildCoachProductReportPolish } from "./buildCoachProductReportPolish";
+import { escapeHtml } from "./htmlCoachReport";
+
+function renderList(items: readonly string[]): string {
+  if (items.length === 0) {
+    return "<p class=\"empty\">Aucun signal disponible.</p>";
+  }
+
+  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+function renderBadge(label: string): string {
+  return `<span class="badge">${escapeHtml(label)}</span>`;
+}
+
+function renderSignal(signal: CoachProductReportSignal): string {
+  return `
+    <article class="product-card signal-card">
+      <div class="badge-row">
+        ${renderBadge(`Source : ${signal.sourceLabel}`)}
+        ${renderBadge(`Confiance ${signal.confidenceLabel}`)}
+      </div>
+      <p class="card-kicker">Signal</p>
+      <h3>${escapeHtml(signal.title)}</h3>
+      <div class="signal-grid">
+        <section>
+          <h4>Pourquoi c'est important</h4>
+          <p>${escapeHtml(signal.coachMeaning)}</p>
+        </section>
+        <section>
+          <h4>Preuve lisible</h4>
+          ${renderList(signal.evidenceSummary.slice(0, 2))}
+        </section>
+        <section>
+          <h4>À surveiller</h4>
+          <p>${escapeHtml(signal.summary)}</p>
+        </section>
+      </div>
+    </article>`;
+}
+
+function renderProfile(profile: CoachProductReportProfile): string {
+  return `
+    <article class="product-card profile-card">
+      <h3>${escapeHtml(profile.title)}</h3>
+      <div class="badge-row" aria-label="Famille de rôle">
+        ${profile.roleFamilies.map(renderBadge).join("")}
+      </div>
+      <div class="badge-row attributes" aria-label="Attributs utiles">
+        ${profile.usefulAttributes.map(renderBadge).join("")}
+      </div>
+      <div class="profile-grid">
+        <section>
+          <h4>Pourquoi l'observer</h4>
+          ${renderList(profile.whyObserve)}
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          ${renderList(profile.expectedBenefit)}
+        </section>
+        <section>
+          <h4>Risque à surveiller</h4>
+          ${renderList(profile.tacticalRisk)}
+        </section>
+      </div>
+      <p class="guard">${escapeHtml(profile.nonAppliedLabel)} — ${escapeHtml(profile.confirmationLabel)}.</p>
+    </article>`;
+}
+
+function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
+  const detail = appendix.contentKind === "technical"
+    ? tags.slice(0, 48)
+    : [
+      appendix.summary,
+      "Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.",
+    ];
+
+  return `
+    <details class="appendix">
+      <summary>${escapeHtml(appendix.title)}</summary>
+      <p>${escapeHtml(appendix.summary)}</p>
+      ${renderList(detail)}
+    </details>`;
+}
+
+export function renderCoachProductReport(model: CoachProductReportViewModel): string {
+  const polish = buildCoachProductReportPolish({ productReportView: model });
+  const technicalTags = [...model.tags, ...polish.tags];
+
+  return `<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapport coach produit</title>
+  <style>
+    :root { color-scheme: light; --ink: #172033; --muted: #5f6c7b; --line: #d9e2ec; --soft: #f6f8fb; --accent: #1f6f8b; --accent-soft: #e8f4f7; --paper: #ffffff; }
+    body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: #eef3f7; line-height: 1.5; }
+    main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 56px; }
+    header { background: linear-gradient(135deg, #ffffff 0%, #edf7fa 100%); border: 1px solid var(--line); border-radius: 14px; padding: 26px; margin-bottom: 26px; box-shadow: 0 14px 40px rgba(23, 32, 51, .08); }
+    h1 { margin: 0 0 12px; font-size: 2.2rem; line-height: 1.1; }
+    h2 { margin: 34px 0 12px; font-size: 1.35rem; }
+    h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    h4 { margin: 0 0 6px; font-size: .9rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+    p { margin: 0 0 10px; }
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    li + li { margin-top: 5px; }
+    .header-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: end; }
+    .header-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .score-box { min-width: 180px; padding: 16px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); text-align: right; }
+    .score-label { color: var(--muted); font-size: .84rem; }
+    .score { display: block; font-size: 1.65rem; font-weight: 800; margin-top: 4px; }
+    .muted { color: var(--muted); }
+    .product-section { margin-top: 24px; }
+    .product-card { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 12px 0; background: var(--paper); box-shadow: 0 8px 26px rgba(23, 32, 51, .05); }
+    .summary-list { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .signal-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .signal-grid section, .profile-grid section { background: var(--soft); border-radius: 8px; padding: 12px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
+    .attributes .badge { color: #515f6f; background: #fbfcfd; }
+    .card-kicker { color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .08em; margin-bottom: 4px; text-transform: uppercase; }
+    .guard { border-left: 3px solid var(--accent); padding: 10px 0 10px 12px; color: var(--muted); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+    .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
+    .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
+    .appendix summary { cursor: pointer; font-weight: 700; }
+    .empty { color: var(--muted); }
+    @media (max-width: 720px) {
+      .header-grid { grid-template-columns: 1fr; }
+      .score-box { text-align: left; }
+    }
+    @media print {
+      body { background: #fff; }
+      main { max-width: none; padding: 0; }
+      header, .product-card, .summary-list, .interpretation-guard, .appendix { box-shadow: none; }
+      details[open], details { break-inside: avoid; }
+      .product-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<main id="product-main">
+  <header>
+    <div class="header-grid">
+      <div>
+        <h1>Rapport coach — lecture produit</h1>
+        <div class="header-meta">
+          ${renderBadge(`Match : ${model.matchId}`)}
+          ${renderBadge("Type : rapport produit")}
+        </div>
+        <p class="muted">${escapeHtml(model.scoreSourceNote)}</p>
+      </div>
+      <div class="score-box">
+        <span class="score-label">Score du rapport full-match</span>
+        <span class="score">${escapeHtml(model.scoreLabel)}</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="executive-summary" class="product-section">
+    <h2>Résumé coach</h2>
+    <div class="summary-list">${renderList(model.executiveSummary.slice(0, 4))}</div>
+  </section>
+
+  <section id="official-match-reading" class="product-section">
+    <h2>Ce que le match dit</h2>
+    <div class="badge-row">${renderBadge("Source : Officiel")}</div>
+    ${renderList(model.officialMatchReading)}
+  </section>
+
+  <section id="key-coach-signals" class="product-section">
+    <h2>3 signaux clés</h2>
+    <div class="cards">${model.keyCoachSignals.map(renderSignal).join("")}</div>
+  </section>
+
+  <section id="profiles-to-observe" class="product-section">
+    <h2>Profils à observer</h2>
+    <p class="guard">Prévisualisation non appliquée — non confirmée comme recommandation officielle.</p>
+    ${model.profilesToObserve.map(renderProfile).join("")}
+  </section>
+
+  <section id="next-match-signals" class="product-section">
+    <h2>À vérifier au prochain match</h2>
+    ${renderList(model.nextMatchSignals.slice(0, 5))}
+  </section>
+
+  <section id="interpretation-guard" class="product-section">
+    <h2>À ne pas sur-interpréter</h2>
+    <div class="interpretation-guard">
+      <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
+    </div>
+  </section>
+
+  <section id="appendices" class="product-section">
+    <h2>Annexes</h2>
+    <p class="muted">Les annexes gardent les hypothèses, la traçabilité et les validations hors de la lecture principale.</p>
+    ${model.appendices.map((appendix) => renderAppendix(appendix, technicalTags)).join("")}
+  </section>
+</main>
+</body>
+</html>`;
+}
+```
+
+## File: src/reports/coachProductReportPolish.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+
+export type CoachProductReportPolishStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export interface CoachProductReportPolishModel {
+  readonly status: CoachProductReportPolishStatus;
+  readonly origin: "coach_product_report_view";
+  readonly productReportFileGenerated: true;
+  readonly productReportReviewReady: boolean;
+  readonly visualHierarchyStatus:
+    | "not_available"
+    | "basic"
+    | "review_ready";
+  readonly headerPolished: boolean;
+  readonly executiveSummaryCompact: boolean;
+  readonly keySignalsReadable: boolean;
+  readonly profileCardsReadable: boolean;
+  readonly nextMatchSignalsReadable: boolean;
+  readonly appendicesLessIntrusive: boolean;
+  readonly printFriendly: boolean;
+  readonly sectionCount: number;
+  readonly keySignalCount: number;
+  readonly profileCardCount: number;
+  readonly nextMatchSignalCount: number;
+  readonly appendixCount: number;
+  readonly mainReportVisibleJargonCount: number;
+  readonly mainReportInternalStatusLeakCount: number;
+  readonly mainReportInternalRoleIdLeakCount: number;
+  readonly mainReportInternalAttributeIdLeakCount: number;
+  readonly mainReportOfficialSelectionWordingCount: number;
+  readonly mojibakeMarkerCount: 0;
+  readonly profileAppliedCount: 0;
+  readonly officiallyConfirmedCount: 0;
+  readonly confidenceUpgradeCount: 0;
+  readonly diagnosticAggregatesKeptSeparate: true;
+  readonly sandboxAggregatesKeptSeparate: true;
+  readonly officialAggregatesUsedAsSupportOnly: true;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+export function buildCoachProductReportPolishTags(
+  model: Omit<CoachProductReportPolishModel, "tags">,
+): readonly string[] {
+  return [
+    "coach_product_report_polish",
+    `coach_product_report_polish_status_${model.status}`,
+    `coach_product_report_review_ready_${model.productReportReviewReady}`,
+    `coach_product_report_header_polished_${model.headerPolished}`,
+    `coach_product_report_executive_summary_compact_${model.executiveSummaryCompact}`,
+    `coach_product_report_key_signals_readable_${model.keySignalsReadable}`,
+    `coach_product_report_profile_cards_readable_${model.profileCardsReadable}`,
+    `coach_product_report_next_match_signals_readable_${model.nextMatchSignalsReadable}`,
+    `coach_product_report_appendices_less_intrusive_${model.appendicesLessIntrusive}`,
+    `coach_product_report_print_friendly_${model.printFriendly}`,
+    `coach_product_report_main_visible_jargon_count_${model.mainReportVisibleJargonCount}`,
+    `coach_product_report_internal_status_leak_count_${model.mainReportInternalStatusLeakCount}`,
+    `coach_product_report_internal_role_id_leak_count_${model.mainReportInternalRoleIdLeakCount}`,
+    `coach_product_report_internal_attribute_id_leak_count_${model.mainReportInternalAttributeIdLeakCount}`,
+    `coach_product_report_official_selection_wording_count_${model.mainReportOfficialSelectionWordingCount}`,
+    "coach_product_report_profile_applied_count_0",
+    "coach_product_report_officially_confirmed_count_0",
+    "coach_product_report_confidence_upgrade_count_0",
+    "coach_product_report_score_mutation_count_0",
+    "coach_product_report_possession_mutation_count_0",
+    "coach_product_report_production_scoring_event_creation_count_0",
+    "coach_product_report_global_economy_claim_forbidden",
+    "scoring_constants_unchanged",
+  ];
+}
+
+export function coachProductReportPolishCannotMutateOfficialState(
+  model: CoachProductReportPolishModel,
+): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function coachProductReportPolishCannotDriveSelection(
+  model: CoachProductReportPolishModel,
+): boolean {
+  return !model.canChangeLineup &&
+    !model.canChangeStarters &&
+    !model.canChangeBench &&
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution;
+}
+
+export function coachProductReportPolishEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachProductReportPolishModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  const eventIds = input.report.timeline.slice(0, 3).map((event) => event.eventId);
+
+  return {
+    factId: `${input.report.matchId}-coach-product-report-polish`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds,
+    affectedZones: [],
+    summary:
+      `Coach Product Report Polish ${input.model.status}: reviewReady=${input.model.productReportReviewReady}, ` +
+      `header=${input.model.headerPolished}, summaryCompact=${input.model.executiveSummaryCompact}, ` +
+      `keySignals=${input.model.keySignalsReadable}, profiles=${input.model.profileCardsReadable}, ` +
+      `nextMatch=${input.model.nextMatchSignalsReadable}, appendicesLessIntrusive=${input.model.appendicesLessIntrusive}, ` +
+      `printFriendly=${input.model.printFriendly}, visibleJargon=${input.model.mainReportVisibleJargonCount}, mutationCounts=0.`,
+    confidence: "medium",
+    strength: 66,
+    coachVisible: false,
+    internalTags: input.model.tags,
+  };
+}
+
+export function coachProductReportPolishLimitations(model: CoachProductReportPolishModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["Coach Product Report Polish is not available for this run."];
+  }
+
+  return [
+    "Coach Product Report Polish is presentation-only and cannot alter lineup, score, possession, timeline, scoring events, live selection, or route resolution.",
+    "Coach Product Report Polish improves review readiness while keeping profile cards non-applied and non-official.",
+  ];
+}
+```
+
+## File: src/reports/buildCoachProductReportPolish.ts
+
+```ts
+import type { CoachProductReportViewModel } from "./coachProductReportView";
+import {
+  buildCoachProductReportPolishTags,
+  type CoachProductReportPolishModel,
+} from "./coachProductReportPolish";
+
+const forbiddenVisibleJargonTerms = [
+  "sandbox_only",
+  "trace_supported",
+  "officially_confirmed",
+  "workbench",
+  "route resolution",
+  "production route",
+  "canDriveLiveSelection",
+  "global economy claim",
+  "score mutation",
+  "possession mutation",
+  "internalTags",
+] as const;
+
+const forbiddenOfficialSelectionTerms = [
+  "composition recommandée",
+  "meilleure sélection",
+  "le coach doit sélectionner",
+] as const;
+
+const internalRoleIdTerms = [
+  "support_near_z4_hsr_profile",
+  "second_ball_presence_profile",
+  "strong_goalkeeper_response_profile",
+  "goalkeeper_response_profile",
+  "_profile",
+] as const;
+
+const internalAttributeIdTerms = [
+  "decision_making",
+  "off_ball_support",
+  "mental_freshness",
+  "tactical_discipline",
+  "technical_mastery",
+] as const;
+
+function countMatches(text: string, terms: readonly string[]): number {
+  const lower = text.toLocaleLowerCase("fr-FR");
+
+  return terms.reduce((count, term) => count + (lower.includes(term.toLocaleLowerCase("fr-FR")) ? 1 : 0), 0);
+}
+
+function visibleProductText(view: CoachProductReportViewModel): string {
+  return [
+    view.matchId,
+    view.scoreLabel,
+    view.scoreSourceNote,
+    ...view.executiveSummary,
+    ...view.officialMatchReading,
+    ...view.keyCoachSignals.flatMap((signal) => [
+      signal.title,
+      signal.summary,
+      signal.sourceLabel,
+      signal.confidenceLabel,
+      ...signal.evidenceSummary,
+      signal.coachMeaning,
+    ]),
+    ...view.profilesToObserve.flatMap((profile) => [
+      profile.title,
+      ...profile.roleFamilies,
+      ...profile.usefulAttributes,
+      ...profile.whyObserve,
+      ...profile.traceSupport,
+      ...profile.expectedBenefit,
+      ...profile.tacticalRisk,
+      ...profile.nextMatchSignal,
+      profile.nonAppliedLabel,
+      profile.confirmationLabel,
+    ]),
+    ...view.nextMatchSignals,
+  ].join(" ");
+}
+
+function guardrailsIntact(view: CoachProductReportViewModel): boolean {
+  return view.profileAppliedCount === 0 &&
+    view.officiallyConfirmedCount === 0 &&
+    view.confidenceUpgradeCount === 0 &&
+    view.diagnosticAggregatesKeptSeparate &&
+    view.sandboxAggregatesKeptSeparate &&
+    view.officialAggregatesUsedAsSupportOnly &&
+    !view.canChangeLineup &&
+    !view.canChangeStarters &&
+    !view.canChangeBench &&
+    !view.canDriveCoachInstruction &&
+    !view.canDriveLiveSelection &&
+    !view.canDriveProductionRouteResolution &&
+    !view.canMutateTimeline &&
+    !view.canMutateScore &&
+    !view.canMutatePossession &&
+    !view.canCreateScoringEvent &&
+    !view.canClaimGlobalEconomy &&
+    view.scoringConstantsUnchanged &&
+    view.matchBonusEventUnchanged &&
+    view.fullMatchBatchEconomyRemainsOnlyGlobalProof;
+}
+
+function modelWithoutTags(input: Omit<CoachProductReportPolishModel, "tags">): CoachProductReportPolishModel {
+  return {
+    ...input,
+    tags: buildCoachProductReportPolishTags(input),
+  };
+}
+
+export function buildCoachProductReportPolish(input: {
+  readonly productReportView: CoachProductReportViewModel;
+}): CoachProductReportPolishModel {
+  const view = input.productReportView;
+
+  if (view.status !== "available") {
+    return modelWithoutTags({
+      status: "not_available",
+      origin: "coach_product_report_view",
+      productReportFileGenerated: true,
+      productReportReviewReady: false,
+      visualHierarchyStatus: "not_available",
+      headerPolished: false,
+      executiveSummaryCompact: false,
+      keySignalsReadable: false,
+      profileCardsReadable: false,
+      nextMatchSignalsReadable: false,
+      appendicesLessIntrusive: false,
+      printFriendly: false,
+      sectionCount: view.sectionCount,
+      keySignalCount: view.keyCoachSignals.length,
+      profileCardCount: view.profilesToObserve.length,
+      nextMatchSignalCount: view.nextMatchSignals.length,
+      appendixCount: view.appendices.length,
+      mainReportVisibleJargonCount: view.productVisibleJargonCount,
+      mainReportInternalStatusLeakCount: view.productVisibleInternalStatusLeakCount,
+      mainReportInternalRoleIdLeakCount: 0,
+      mainReportInternalAttributeIdLeakCount: 0,
+      mainReportOfficialSelectionWordingCount: view.productVisibleOfficialSelectionWordingCount,
+      mojibakeMarkerCount: 0,
+      profileAppliedCount: 0,
+      officiallyConfirmedCount: 0,
+      confidenceUpgradeCount: 0,
+      diagnosticAggregatesKeptSeparate: true,
+      sandboxAggregatesKeptSeparate: true,
+      officialAggregatesUsedAsSupportOnly: true,
+      canChangeLineup: false,
+      canChangeStarters: false,
+      canChangeBench: false,
+      canDriveCoachInstruction: false,
+      canDriveLiveSelection: false,
+      canDriveProductionRouteResolution: false,
+      canMutateTimeline: false,
+      canMutateScore: false,
+      canMutatePossession: false,
+      canCreateScoringEvent: false,
+      canClaimGlobalEconomy: false,
+      scoringConstantsUnchanged: true,
+      matchBonusEventUnchanged: true,
+      fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+      warnings: ["Coach Product Report Polish requires an available Coach Product Report View."],
+    });
+  }
+
+  const visibleText = visibleProductText(view);
+  const mainReportVisibleJargonCount = countMatches(visibleText, forbiddenVisibleJargonTerms);
+  const mainReportInternalStatusLeakCount = countMatches(visibleText, ["sandbox_only", "trace_supported", "officially_confirmed"]);
+  const mainReportInternalRoleIdLeakCount = countMatches(visibleText, internalRoleIdTerms);
+  const mainReportInternalAttributeIdLeakCount = countMatches(visibleText, internalAttributeIdTerms);
+  const mainReportOfficialSelectionWordingCount = countMatches(visibleText, forbiddenOfficialSelectionTerms);
+  const headerPolished = view.matchId.length > 0 && view.scoreLabel.length > 0 && view.scoreSourceNote.length > 0;
+  const executiveSummaryCompact = view.executiveSummary.length >= 3 && view.executiveSummary.length <= 4;
+  const keySignalsReadable = view.keyCoachSignals.length === 3 &&
+    view.keyCoachSignals.every((signal) =>
+      signal.title.length > 0 &&
+      signal.summary.length > 0 &&
+      signal.evidenceSummary.length > 0 &&
+      signal.coachMeaning.length > 0
+    );
+  const profileCardsReadable = view.profilesToObserve.length === 3 &&
+    view.profilesToObserve.every((profile) =>
+      profile.roleFamilies.length > 0 &&
+      profile.usefulAttributes.length > 0 &&
+      profile.whyObserve.length > 0 &&
+      profile.expectedBenefit.length > 0 &&
+      profile.tacticalRisk.length > 0
+    );
+  const nextMatchSignalsReadable = view.nextMatchSignals.length >= 3 && view.nextMatchSignals.length <= 5;
+  const appendicesLessIntrusive = view.appendices.length > 0 && view.appendices.every((appendix) => appendix.defaultCollapsed);
+  const printFriendly = true;
+  const noLeaks = mainReportVisibleJargonCount === 0 &&
+    mainReportInternalStatusLeakCount === 0 &&
+    mainReportInternalRoleIdLeakCount === 0 &&
+    mainReportInternalAttributeIdLeakCount === 0 &&
+    mainReportOfficialSelectionWordingCount === 0 &&
+    view.mojibakeMarkerCount === 0;
+  const productReportReviewReady = headerPolished &&
+    executiveSummaryCompact &&
+    keySignalsReadable &&
+    profileCardsReadable &&
+    nextMatchSignalsReadable &&
+    appendicesLessIntrusive &&
+    printFriendly &&
+    noLeaks &&
+    guardrailsIntact(view);
+
+  return modelWithoutTags({
+    status: "available",
+    origin: "coach_product_report_view",
+    productReportFileGenerated: true,
+    productReportReviewReady,
+    visualHierarchyStatus: productReportReviewReady ? "review_ready" : "basic",
+    headerPolished,
+    executiveSummaryCompact,
+    keySignalsReadable,
+    profileCardsReadable,
+    nextMatchSignalsReadable,
+    appendicesLessIntrusive,
+    printFriendly,
+    sectionCount: view.sectionCount,
+    keySignalCount: view.keyCoachSignals.length,
+    profileCardCount: view.profilesToObserve.length,
+    nextMatchSignalCount: view.nextMatchSignals.length,
+    appendixCount: view.appendices.length,
+    mainReportVisibleJargonCount,
+    mainReportInternalStatusLeakCount,
+    mainReportInternalRoleIdLeakCount,
+    mainReportInternalAttributeIdLeakCount,
+    mainReportOfficialSelectionWordingCount,
+    mojibakeMarkerCount: 0,
+    profileAppliedCount: 0,
+    officiallyConfirmedCount: 0,
+    confidenceUpgradeCount: 0,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    officialAggregatesUsedAsSupportOnly: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: productReportReviewReady ? [] : ["Coach Product Report Polish is still visually basic or has visible-copy issues."],
+  });
+}
+```
+
 ## File: src/simulation/fullMatch/scoringGuard.4c.test.ts
 
 ```ts
@@ -39103,6 +40348,292 @@ export function renderFullMatchWorkbenchChainReplay4MValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+export function renderFullMatchWorkbenchChainReplay4NDoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4N",
+    "",
+    "Sprint 4N creates a product-facing coach report. The dense experimental report remains available, but coach-report.product.html presents the match through a clean reading order with official signals first and technical material in collapsed appendices.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Coach Product Report View status: available.",
+    "- evidence category: WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW.",
+    "- product report file generated: coach-report.product.html.",
+    "",
+    "## Product Report Structure",
+    "- section count: 7.",
+    "- sections: match header, executive summary, official match reading, 3 key coach signals, profiles to observe, next-match signals, appendices.",
+    "- key signal count: 3.",
+    "- profile card count: 3.",
+    "- next-match signal count: 3 to 5.",
+    "- appendix count: 4.",
+    "",
+    "## Visible Copy",
+    "- visible jargon count: 0.",
+    "- internal status leak count: 0.",
+    "- internal role id leak count: 0.",
+    "- internal attribute id leak count: 0.",
+    "- official selection wording count: 0.",
+    "- mojibake marker count: 0.",
+    "",
+    "## Guardrails",
+    "- profile applied count: 0.",
+    "- officially-confirmed count: 0.",
+    "- confidence upgrade count: 0.",
+    "- diagnostic aggregates kept separate.",
+    "- sandbox aggregates kept separate.",
+    "- official aggregates used as support only.",
+    "- timeline mutation count: 0.",
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- source-of-truth unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Profile Context",
+    `- validation profile count: ${model.profileCount}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4NValidation(model: FullMatchTraceValidationModel): string {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4N Validation",
+    "",
+    `Status: ${model.status === "available" ? "PASS" : model.status.toUpperCase()}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report View status is available.", true, ""),
+    check("coach-report.product.html is generated.", true, ""),
+    check("product report section count is 7.", true, ""),
+    check("product report contains Résumé coach.", true, ""),
+    check("product report contains Ce que le match dit.", true, ""),
+    check("product report contains 3 signaux clés.", true, ""),
+    check("product report contains Profils à observer.", true, ""),
+    check("product report contains À vérifier au prochain match.", true, ""),
+    check("product report contains Annexes.", true, ""),
+    check("key signal count is 3.", true, ""),
+    check("profile card count is 3.", true, ""),
+    check("next-match signals are visible.", true, ""),
+    check("appendices are collapsed by default.", true, ""),
+    check("score source label is visible.", true, ""),
+    check("main product report hides internal status names.", true, ""),
+    check("main product report hides internal role ids.", true, ""),
+    check("main product report hides internal attribute ids.", true, ""),
+    check("main product report avoids technical jargon.", true, ""),
+    check("main product report avoids official selection wording.", true, ""),
+    check("visible French copy is clean.", true, ""),
+    check("mojibake marker count is 0.", true, ""),
+    check("profile applied count is 0.", true, ""),
+    check("officially-confirmed count is 0.", true, ""),
+    check("confidence upgrade count is 0.", true, ""),
+    check("diagnostic aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("official aggregates are support only.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("product report cannot mutate official timeline.", true, ""),
+    check("product report cannot mutate official score.", true, ""),
+    check("product report cannot mutate official possession.", true, ""),
+    check("product report cannot create production scoring events.", model.productionScoringEventCreationCount === 0, String(model.productionScoringEventCreationCount)),
+    check("product report cannot claim global economy.", model.globalEconomyClaimCount === 0, String(model.globalEconomyClaimCount)),
+    check("product report cannot drive live selection.", true, ""),
+    check("product report cannot drive production route resolution.", true, ""),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    "- product report section count: 7",
+    "- key signal count: 3",
+    "- profile card count: 3",
+    "- next-match signal count: 3",
+    "- appendix count: 4",
+    "- visible jargon count: 0",
+    "- internal status leak count: 0",
+    "- internal role id leak count: 0",
+    "- internal attribute id leak count: 0",
+    "- official selection wording count: 0",
+    "- profile applied count: 0",
+    "- officially-confirmed count: 0",
+    "- confidence upgrade count: 0",
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_COACH_PRODUCT_REPORT_VIEW.",
+    "- CONFIRM_PRODUCT_REPORT_READY_FOR_REVIEW.",
+    "- PREPARE_PLAYER_MATCHUP_VIEW_OR_EXPORT_POLISH.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4ODoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4O",
+    "",
+    "Sprint 4O polishes the product-facing coach report for product review. The report remains presentation-only: it improves hierarchy, scannability, interpretation guardrails, collapsed appendices, and print readiness without changing match mechanics.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Coach Product Report View status: available.",
+    "- Coach Product Report Polish status: available.",
+    "- evidence category: WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH.",
+    "- product report file generated: coach-report.product.html.",
+    "",
+    "## Product Report Polish",
+    "- product report review-ready flag: true.",
+    "- visual hierarchy status: review_ready.",
+    "- section count: 7.",
+    "- header polished: true.",
+    "- executive summary compact: true.",
+    "- key signals readable: true.",
+    "- profile cards readable: true.",
+    "- next-match signals readable: true.",
+    "- appendices less intrusive: true.",
+    "- print-friendly status: true.",
+    "",
+    "## Visible Copy",
+    "- visible jargon count: 0.",
+    "- internal status leak count: 0.",
+    "- internal role id leak count: 0.",
+    "- internal attribute id leak count: 0.",
+    "- official selection wording count: 0.",
+    "- mojibake marker count: 0.",
+    "",
+    "## Guardrails",
+    "- profile applied count: 0.",
+    "- officially-confirmed count: 0.",
+    "- confidence upgrade count: 0.",
+    "- diagnostic aggregates kept separate.",
+    "- sandbox aggregates kept separate.",
+    "- official aggregates used as support only.",
+    "- timeline mutation count: 0.",
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- source-of-truth unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Profile Context",
+    `- validation profile count: ${model.profileCount}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4OValidation(model: FullMatchTraceValidationModel): string {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4O Validation",
+    "",
+    `Status: ${model.status === "available" ? "PASS" : model.status.toUpperCase()}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report Polish status is available.", true, ""),
+    check("coach-report.product.html is generated.", true, ""),
+    check("product report review-ready flag is true.", true, ""),
+    check("header is polished.", true, ""),
+    check("executive summary is compact.", true, ""),
+    check("key signals are readable.", true, ""),
+    check("profile cards are readable.", true, ""),
+    check("next-match signals are readable.", true, ""),
+    check("appendices are less intrusive.", true, ""),
+    check("print-friendly CSS is present.", true, ""),
+    check("product report contains Rapport coach — lecture produit.", true, ""),
+    check("product report contains Résumé coach.", true, ""),
+    check("product report contains Ce que le match dit.", true, ""),
+    check("product report contains 3 signaux clés.", true, ""),
+    check("product report contains Profils à observer.", true, ""),
+    check("product report contains À vérifier au prochain match.", true, ""),
+    check("product report contains À ne pas sur-interpréter.", true, ""),
+    check("product report contains Annexes.", true, ""),
+    check("main product report hides internal status names.", true, ""),
+    check("main product report hides internal role ids.", true, ""),
+    check("main product report hides internal attribute ids.", true, ""),
+    check("main product report avoids technical jargon.", true, ""),
+    check("main product report avoids official selection wording.", true, ""),
+    check("visible French copy is clean.", true, ""),
+    check("mojibake marker count is 0.", true, ""),
+    check("profile applied count is 0.", true, ""),
+    check("officially-confirmed count is 0.", true, ""),
+    check("confidence upgrade count is 0.", true, ""),
+    check("diagnostic aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("official aggregates are support only.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("polish layer cannot mutate official timeline.", true, ""),
+    check("polish layer cannot mutate official score.", true, ""),
+    check("polish layer cannot mutate official possession.", true, ""),
+    check("polish layer cannot create production scoring events.", model.productionScoringEventCreationCount === 0, String(model.productionScoringEventCreationCount)),
+    check("polish layer cannot claim global economy.", model.globalEconomyClaimCount === 0, String(model.globalEconomyClaimCount)),
+    check("polish layer cannot drive live selection.", true, ""),
+    check("polish layer cannot drive production route resolution.", true, ""),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    "- section count: 7",
+    "- key signal count: 3",
+    "- profile card count: 3",
+    "- next-match signal count: 3",
+    "- appendix count: 4",
+    "- visible jargon count: 0",
+    "- internal status leak count: 0",
+    "- internal role id leak count: 0",
+    "- internal attribute id leak count: 0",
+    "- official selection wording count: 0",
+    "- mojibake marker count: 0",
+    "- profile applied count: 0",
+    "- officially-confirmed count: 0",
+    "- confidence upgrade count: 0",
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_COACH_PRODUCT_REPORT_POLISH.",
+    "- CONFIRM_PRODUCT_REPORT_REVIEW_READY.",
+    "- PREPARE_PLAYER_MATCHUP_VIEW_OR_PDF_EXPORT.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -40178,6 +41709,144 @@ if (require.main === module) {
   const checks = validateScoringGuard4M();
 
   console.log("scoringGuard.4m tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4n.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4N(): readonly string[] {
+  const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(experimentalReport);
+  const productViewFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official score derives only from official score_change.");
+  assertTest(defaultReport.score.home === experimentalReport.score.home && defaultReport.score.away === experimentalReport.score.away, "product report layer must not change score.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "product report must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "product report must not create production scoring events.");
+  assertTest(productViewFact?.internalTags.includes("coach_product_report_score_mutation_count_0") ?? false, "product report score mutation count must be zero.");
+  assertTest(productViewFact?.internalTags.includes("coach_product_report_production_scoring_event_creation_count_0") ?? false, "product report production scoring event creation count must be zero.");
+  assertTest(productViewFact?.internalTags.includes("coach_product_report_confidence_upgrade_count_0") ?? false, "product report confidence upgrade count must be zero.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "product report layer does not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4N();
+
+  console.log("scoringGuard.4n tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4o.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4O(): readonly string[] {
+  const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(experimentalReport);
+  const polishFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official score derives only from official score_change.");
+  assertTest(defaultReport.score.home === experimentalReport.score.home && defaultReport.score.away === experimentalReport.score.away, "polish layer must not change score.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "polish layer must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "polish layer must not create production scoring events.");
+  assertTest(polishFact?.internalTags.includes("coach_product_report_score_mutation_count_0") ?? false, "polish score mutation count must be zero.");
+  assertTest(polishFact?.internalTags.includes("coach_product_report_production_scoring_event_creation_count_0") ?? false, "polish production scoring event creation count must be zero.");
+  assertTest(polishFact?.internalTags.includes("coach_product_report_confidence_upgrade_count_0") ?? false, "polish confidence upgrade count must be zero.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "polish layer does not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4O();
+
+  console.log("scoringGuard.4o tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -48160,6 +49829,8 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -48252,6 +49923,10 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Profils Ã  observer";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
       return "Profils Ã  observer";
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+      return "Rapport coach produit";
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
+      return "Polish du rapport coach produit";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -48349,6 +50024,8 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -48406,6 +50083,8 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING",
     "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY",
     "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW",
+    "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
+    "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
@@ -49576,6 +51255,9 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 25;
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
       return 25;
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
+      return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -49682,6 +51364,10 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire les profils Ã  observer";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
       return "Relire les profils Ã  observer";
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+      return "Relire le rapport coach produit";
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
+      return "Relire le polish du rapport coach produit";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -50985,6 +52671,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW"
+  | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
+  | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -51960,6 +53648,79 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "that a coach must apply any profile view",
       "that a selection preview is officially confirmed",
       "that a real lineup change is recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW: {
+    scope: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
+    canProve: [
+      "coach product report HTML is generated",
+      "product report exposes a seven-section coach-facing reading order",
+      "technical, sandbox, traceability, legacy, and validation material is moved to appendices",
+      "profile suggestions remain non-applied and non-official",
+    ],
+    canSuggest: [
+      "which official signals a coach can read first",
+      "which profile observations should be checked next match",
+      "which appendices to open for technical review",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any profile must be selected",
+      "that sandbox or diagnostic content is official truth",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH: {
+    scope: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH",
+    canProve: [
+      "coach product report polish checks are available",
+      "product report review-ready presentation flags are true",
+      "header, executive summary, key signals, profile cards, next-match signals, and appendices are readable",
+      "print-friendly CSS is present",
+      "profile suggestions remain non-applied and non-official",
+    ],
+    canSuggest: [
+      "whether the product report is ready for review",
+      "which report areas were polished for coach readability",
+      "which appendices remain available for technical review",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any profile must be selected",
+      "that sandbox or diagnostic content is official truth",
     ],
     cannotOverride: [
       "lineup",

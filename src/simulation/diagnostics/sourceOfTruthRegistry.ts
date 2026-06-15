@@ -36,6 +36,8 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW"
+  | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
+  | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1011,6 +1013,79 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "that a coach must apply any profile view",
       "that a selection preview is officially confirmed",
       "that a real lineup change is recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW: {
+    scope: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
+    canProve: [
+      "coach product report HTML is generated",
+      "product report exposes a seven-section coach-facing reading order",
+      "technical, sandbox, traceability, legacy, and validation material is moved to appendices",
+      "profile suggestions remain non-applied and non-official",
+    ],
+    canSuggest: [
+      "which official signals a coach can read first",
+      "which profile observations should be checked next match",
+      "which appendices to open for technical review",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any profile must be selected",
+      "that sandbox or diagnostic content is official truth",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH: {
+    scope: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH",
+    canProve: [
+      "coach product report polish checks are available",
+      "product report review-ready presentation flags are true",
+      "header, executive summary, key signals, profile cards, next-match signals, and appendices are readable",
+      "print-friendly CSS is present",
+      "profile suggestions remain non-applied and non-official",
+    ],
+    canSuggest: [
+      "whether the product report is ready for review",
+      "which report areas were polished for coach readability",
+      "which appendices remain available for technical review",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any profile must be selected",
+      "that sandbox or diagnostic content is official truth",
     ],
     cannotOverride: [
       "lineup",

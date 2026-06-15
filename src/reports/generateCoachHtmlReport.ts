@@ -2,7 +2,9 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
+import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
+import { renderCoachProductReport } from "./renderCoachProductReport";
 
 function writeLatestCoachReport(): void {
   const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
@@ -32,11 +34,17 @@ function writeLatestCoachReport(): void {
     renderHtmlCoachReport(experimentalReport),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report.product.html"),
+    renderCoachProductReport(buildCoachProductReportViewFromMatchReport(experimentalReport)),
+    "utf8",
+  );
 
   console.log("Generated reports/match-report.latest.json");
   console.log("Generated reports/coach-report.latest.html");
   console.log("Generated reports/coach-report.default.html");
   console.log("Generated reports/coach-report.experimental.html");
+  console.log("Generated reports/coach-report.product.html");
 }
 
 if (require.main === module) {

@@ -88,6 +88,9 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 25;
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
       return 25;
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
+      return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -194,6 +197,10 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire les profils Ã  observer";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
       return "Relire les profils Ã  observer";
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
+      return "Relire le rapport coach produit";
+    case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
+      return "Relire le polish du rapport coach produit";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
