@@ -35,29 +35,31 @@ export function validateSelectionPreviewCoachCopyRenderer(): readonly string[] {
   }));
   const visible = selectionPreviewCoachCopyVisibleHtml(experimentalHtml);
 
-  assertTest(!defaultHtml.includes("Profils à observer"), "default report must hide coach copy cards.");
-  assertTest(visible.includes("Profils à observer"), "experimental report must show coach copy section.");
-  assertTest(visible.includes("Ces profils restent des prévisualisations non appliquées"), "intro must frame previews as non-applied.");
+  assertTest(!defaultHtml.includes("Profils à observer"), "default report must hide profile view cards.");
+  assertTest(visible.includes("Profils à observer"), "experimental report must show profile view section.");
+  assertTest(visible.includes("Ces profils ne sont pas des choix imposés"), "intro must frame profiles as non-prescriptive.");
   assertTest(visible.includes("Profil à observer — soutien proche autour des zones de danger"), "support card title must be visible.");
   assertTest(visible.includes("Profil à observer — présence sur second ballon"), "second-ball card title must be visible.");
   assertTest(visible.includes("Profil à observer — réponse face à un gardien fort"), "goalkeeper response card title must be visible.");
-  assertTest(visible.includes("Origine :</strong> hypothèse sandbox"), "origin label must be visible.");
-  assertTest(visible.includes("Appui :</strong> appuyé par les traces officielles"), "trace support label must be visible.");
-  assertTest(visible.includes("Décision :</strong> prévisualisation non appliquée"), "decision label must be visible.");
-  assertTest(visible.includes("Confirmation :</strong> non confirmée comme recommandation officielle"), "confirmation label must be visible.");
+  assertTest(visible.includes("Famille de rôle"), "role family label must be visible.");
+  assertTest(visible.includes("Attributs utiles"), "useful attributes label must be visible.");
   assertTest(visible.includes("Pourquoi l’observer"), "why-observe section must be visible.");
   assertTest(visible.includes("Ce que les traces soutiennent"), "trace support section must be visible.");
-  assertTest(visible.includes("Limite"), "limit section must be visible.");
+  assertTest(visible.includes("Bénéfice attendu"), "expected benefit section must be visible.");
+  assertTest(visible.includes("Risque tactique"), "tactical risk section must be visible.");
+  assertTest(visible.includes("Signal à vérifier au prochain match"), "next-match signal section must be visible.");
+  assertTest(visible.includes("Prévisualisation non appliquée"), "decision guard must be visible.");
+  assertTest(visible.includes("non confirmée comme recommandation officielle"), "confirmation guard must be visible.");
   assertTest(!visible.includes("trace_supported"), "internal status must be hidden from visible copy.");
   assertTest(!visible.includes("sandbox_only"), "internal sandbox status must be hidden from visible copy.");
-  assertTest(experimentalHtml.includes("selection_preview_coach_copy"), "technical coach copy tags must be preserved in details.");
+  assertTest(experimentalHtml.includes("selection_preview_profile_view_card_count_3"), "technical profile view tags must be preserved in details.");
 
   return [
-    "default report hides coach copy cards",
+    "default report hides profile view cards",
     "experimental report shows Profils à observer",
-    "origin/support/decision/confirmation labels visible",
+    "role family, attributes, benefit, risk, and next-match signal labels visible",
     "internal status tags hidden from visible copy",
-    "technical tags preserved in details",
+    "technical profile view tags preserved in details",
   ];
 }
 
