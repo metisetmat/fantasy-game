@@ -1,6 +1,6 @@
-# FullMatch Workbench Chain Replay 4N
+# FullMatch Workbench Chain Replay 4O
 
-Sprint 4N creates a product-facing coach report. The dense experimental report remains available, but coach-report.product.html presents the match through a clean reading order with official signals first and technical material in collapsed appendices.
+Sprint 4O polishes the product-facing coach report for product review. The report remains presentation-only: it improves hierarchy, scannability, interpretation guardrails, collapsed appendices, and print readiness without changing match mechanics.
 
 ## Default Mode
 - default runFullMatch remains segment_harness.
@@ -9,16 +9,21 @@ Sprint 4N creates a product-facing coach report. The dense experimental report r
 ## Experimental Mode
 - experimental mode remains opt-in.
 - Coach Product Report View status: available.
-- evidence category: WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW.
+- Coach Product Report Polish status: available.
+- evidence category: WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH.
 - product report file generated: coach-report.product.html.
 
-## Product Report Structure
+## Product Report Polish
+- product report review-ready flag: true.
+- visual hierarchy status: review_ready.
 - section count: 7.
-- sections: match header, executive summary, official match reading, 3 key coach signals, profiles to observe, next-match signals, appendices.
-- key signal count: 3.
-- profile card count: 3.
-- next-match signal count: 3 to 5.
-- appendix count: 4.
+- header polished: true.
+- executive summary compact: true.
+- key signals readable: true.
+- profile cards readable: true.
+- next-match signals readable: true.
+- appendices less intrusive: true.
+- print-friendly status: true.
 
 ## Visible Copy
 - visible jargon count: 0.

@@ -161,6 +161,11 @@ import {
   coachProductReportViewEvidenceFact,
   coachProductReportViewLimitations,
 } from "../reports/coachProductReportView";
+import { buildCoachProductReportPolish } from "../reports/buildCoachProductReportPolish";
+import {
+  coachProductReportPolishEvidenceFact,
+  coachProductReportPolishLimitations,
+} from "../reports/coachProductReportPolish";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3114,9 +3119,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const coachProductReportViewModel = buildCoachProductReportView({
     matchId: report.matchId,
     scoreLabel: `${report.score.home} - ${report.score.away}`,
-    scoreSourceNote: "Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés.",
+    scoreSourceNote: "Les diagnostics batch et les échantillons live restent séparés de ce score.",
     coachReportV1: coachReportV1VisualizationModel,
     profileView: selectionPreviewProfileViewModel,
+  });
+  const coachProductReportPolishModel = buildCoachProductReportPolish({
+    productReportView: coachProductReportViewModel,
   });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
@@ -3134,6 +3142,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
         ...coachReportV1LegacyCleanupLimitations(coachReportV1LegacyCleanupModel),
         ...coachProductReportViewLimitations(coachProductReportViewModel),
+        ...coachProductReportPolishLimitations(coachProductReportPolishModel),
       ],
     },
   };
@@ -3327,6 +3336,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachProductReportViewModel,
   });
+  const coachProductReportPolishModelFact = coachProductReportPolishEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachProductReportPolishModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3356,6 +3370,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : null;
   const experimentalCoachProductReportViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachProductReportViewModelFact
+    : null;
+  const experimentalCoachProductReportPolishFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachProductReportPolishModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3390,6 +3407,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewCoachCopyFact === null ? [] : [experimentalSelectionPreviewCoachCopyFact]),
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
+    ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
