@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-11T10:45:39.659Z
-Task/sprint: Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof
+Generated: 2026-06-11T13:37:06.186Z
+Task/sprint: Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection
 Final file count: 16
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
@@ -15,8 +15,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-2y.md
-- validation.fullmatch-workbench-chain-replay-2y.md
+- fullmatch-workbench-chain-replay-3d.md
+- validation.fullmatch-workbench-chain-replay-3d.md
 - README.md
 
 ## Bundle Files

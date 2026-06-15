@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof
+- current sprint: Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection
 - final file count: 16
 - share file count: 16
 - minimal allowlist count: 16
@@ -16,7 +16,7 @@ Status: PASS
 ## Checks
 
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
-- PASS: current sprint is Sprint 2Y - Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof
+- PASS: current sprint is Sprint 3D - Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection
 - PASS: reports/share exists - C:\Users\mbess\Documents\fantasy-game-engine\reports\share
 - PASS: share pack under 20 files - 16
 - PASS: final file count is 16 - 16
@@ -26,41 +26,37 @@ Status: PASS
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: source files deleted count is 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 2Y - Sprint 2Y visible
-- PASS: README is Sprint 2Y oriented - README current
-- PASS: sequence-1-action-1 workbench copied - action 1 workbench copied
-- PASS: sequence-1-action-2 workbench copied - action 2 workbench copied
-- PASS: sequence-1-action-3 workbench copied - action 3 workbench copied
-- PASS: 2Y report included - 2Y doc included
-- PASS: 2Y validation is PASS - 2Y validation PASS
-- PASS: action 2 fixture bundled - action 2 fixture bundled
-- PASS: action 3 fixture bundled - action 3 fixture bundled
-- PASS: multi-action chain uses visual truth - visual source visible
-- PASS: no synthetic continuation remains in PASS path - synthetic path removed
-- PASS: extractors support action 2 and action 3 - extractors bundled
-- PASS: contract guard validates visual multi-action chain - multi-action guard bundled
-- PASS: visual contract test bundled - visual contract test bundled
-- PASS: visual state test bundled - visual state test bundled
-- PASS: visual replay test bundled - visual replay test bundled
-- PASS: visual mismatch test bundled - visual mismatch test bundled
-- PASS: full-match feature flag guard bundled - feature flag guard bundled
-- PASS: replay aggregate fields bundled - aggregate fields visible
-- PASS: controlled_minimatch spatial selection is 3/3 - 3/3 spatial proof visible
-- PASS: actor receiver action type preserved 3/3 - selection preservation visible
-- PASS: before and after state preserved 3/3 - state preservation visible
-- PASS: prototype fallback remains observable - fallback visible
-- PASS: fallback does not hide mismatch - mismatch visible
-- PASS: normal full-match default unchanged - default mode visible
-- PASS: experimental mode remains opt-in - experimental opt-in visible
-- PASS: normal full-match not claimed as chain-driven - full-match limitation visible
+- PASS: manifest lists Sprint 3D - Sprint 3D visible
+- PASS: README is Sprint 3D oriented - README current
+- PASS: 3D report included - 3D doc included
+- PASS: 3D validation is PASS - 3D validation PASS
+- PASS: controlled selected candidate visible - controlled candidate visible
+- PASS: controlled selected action visible - controlled action visible
+- PASS: controlled receiver and zone visible - controlled receiver/zone visible
+- PASS: controlled selection contract bundled - controlled contract bundled
+- PASS: controlled adapter bundled - controlled adapter bundled
+- PASS: controlled signature bundled - controlled signature bundled
+- PASS: controlled tests bundled - 3D controlled tests bundled
+- PASS: 3D runFullMatch controlled tests bundled - 3D full-match tests bundled
+- PASS: 3D scoring and source-of-truth guards bundled - 3D guards bundled
+- PASS: controlled selection evidence included - controlled evidence visible
+- PASS: closed candidates remain rejected - closed route rejected
+- PASS: unavailable candidates remain rejected - unavailable route rejected
+- PASS: selected controlled candidate legal and available - selected controlled candidate valid
+- PASS: default controlled selection absent - default controlled clean
+- PASS: experimental controlled selection present - experimental controlled visible
+- PASS: default and experimental score signatures remain equal - score signatures equal
+- PASS: controlled selection cannot mutate score - score mutation forbidden
+- PASS: controlled selection cannot mutate scoring events - scoring event mutation forbidden
+- PASS: controlled selection cannot mutate route success rates - route success mutation forbidden
+- PASS: controlled selection cannot drive production full-match - production full-match forbidden
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: no scoring events deleted or capped - scoring event guard visible
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: single full-match harness remains warning-only - single-run warning-only
-- PASS: recommendations visible - 2Y recommendations visible
+- PASS: recommendations visible - 3D recommendations visible
 
 ## Files
 
@@ -70,7 +66,7 @@ Status: PASS
 - bundle__reports.md
 - bundle__simulation.md
 - coach-report.latest.html
-- fullmatch-workbench-chain-replay-2y.md
+- fullmatch-workbench-chain-replay-3d.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -78,5 +74,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-2y.md
+- validation.fullmatch-workbench-chain-replay-3d.md
 - validation.share-pack.md

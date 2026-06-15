@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 2Y - Visual Workbench Expansion + Per-Step Spatial Replay Proof",
+  name: "Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -12,8 +12,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-2y.md",
-    "validation.fullmatch-workbench-chain-replay-2y.md",
+    "fullmatch-workbench-chain-replay-3d.md",
+    "validation.fullmatch-workbench-chain-replay-3d.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -31,14 +31,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 2Y share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-2y.md": "documents visual multi-action WorkbenchChain replay and per-step spatial proof",
-    "validation.fullmatch-workbench-chain-replay-2y.md": "validates visual steps, 3/3 controlled spatial replay, fallback visibility, feature flag default, and source-of-truth invariants",
-    "README.md": "compact reviewer orientation for the 2Y share pack",
-    "manifest.md": "compatibility manifest listing the 2Y share pack files",
+    "validation.share-pack.md": "proves the 3D share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-3d.md": "documents experimental shadow selection to controlled segment selection behind the opt-in flag",
+    "validation.fullmatch-workbench-chain-replay-3d.md": "validates controlled segment selection, shadow source, blocked closed/unavailable routes, no score mutation, and source-of-truth invariants",
+    "README.md": "compact reviewer orientation for the 3D share pack",
+    "manifest.md": "compatibility manifest listing the 3D share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, full-match feature flag skeleton, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
+    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, segment context influence, diagnostic route candidate influence, shadow route selection, controlled segment selection, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and tests",
     "bundle__reports.md": "bundles coach report renderer, summary utilities, copy quality utilities, guards, and share-pack updater",
   },
 };
