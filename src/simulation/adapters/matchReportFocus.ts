@@ -87,6 +87,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 23;
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
       return 22;
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -187,6 +188,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le rapport coach depuis les agrÃƒÂ©gats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
       return "Relire la lecture visuelle V1 des agrégats officiels";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+      return "Relire la hierarchie visuelle V1 du rapport coach";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":

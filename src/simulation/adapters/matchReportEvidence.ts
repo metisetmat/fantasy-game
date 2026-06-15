@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   CoachInsight,
   MatchEvent,
   MatchEventType,
@@ -9,6 +9,7 @@ import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "../..
 import type { TeamId } from "../../core/ids";
 import type { Rating } from "../../core/ratings";
 import type { ZoneId } from "../../core/zones";
+import { normalizeCoachFacingCopy } from "../../reports/coachCopyQuality";
 
 export type MatchEvidenceCategory = MatchReportEvidenceCategory;
 export type MatchEvidenceFact = MatchReportEvidenceFact;
@@ -53,6 +54,13 @@ function representativeZone(events: readonly MatchEvent[], fallbackZone: ZoneId)
 
 function primaryFactZone(fact: MatchEvidenceFact): ZoneId {
   return (fact.affectedZones[0] ?? "Z3-C") as ZoneId;
+}
+
+function normalizeFactCopy(fact: MatchEvidenceFact): MatchEvidenceFact {
+  return {
+    ...fact,
+    summary: normalizeCoachFacingCopy(fact.summary),
+  };
 }
 
 function teamPerspectives(input: MatchInput): readonly TeamPerspective[] {
@@ -102,7 +110,7 @@ function highDangerFact(input: {
     affectedZones: [representativeZone(highDangerEvents, firstHighDangerEvent.zone)],
     category: "DANGER_CREATION",
     scope: "MATCH_REPORT",
-    summary: `${input.perspective.teamName} a créé ${highDangerEvents.length} séquence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} dans les données de simulation actuelles en ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} a crÃ©Ã© ${highDangerEvents.length} sÃ©quence${highDangerEvents.length === 1 ? "" : "s"} dangereuse${highDangerEvents.length === 1 ? "" : "s"} visible${highDangerEvents.length === 1 ? "" : "s"} dans les donnÃ©es de simulation actuelles en ${zones.join(", ")}.`,
     strength: clampRating(45 + highDangerEvents.length * 15),
     confidence: "medium",
     coachVisible: true,
@@ -142,7 +150,7 @@ function unstablePressureFact(input: {
     affectedZones: [representativeZone(unstableEvents, firstUnstableEvent.zone)],
     category: "POSSESSION_INSTABILITY",
     scope: "MATCH_REPORT",
-    summary: `${input.perspective.teamName} a connu ${unstableEvents.length} séquence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} a connu ${unstableEvents.length} sÃ©quence${unstableEvents.length === 1 ? "" : "s"} de possession instable sous pression visible en ${zones.join(", ")}.`,
     strength: clampRating(40 + unstableEvents.length * 12),
     confidence: "medium",
     coachVisible: true,
@@ -177,7 +185,7 @@ function scoringFact(input: {
     affectedZones: [representativeZone(scoringEvents, firstScoringEvent.zone)],
     category: "SCORING_CONVERSION",
     scope: "LIVE_SCORING_STREAM",
-    summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} décisive${scoringEvents.length === 1 ? "" : "s"} identifiée${scoringEvents.length === 1 ? "" : "s"} dans les séquences de score.`,
+    summary: `${input.perspective.teamName} a converti ${scoringEvents.length} action${scoringEvents.length === 1 ? "" : "s"} dÃ©cisive${scoringEvents.length === 1 ? "" : "s"} identifiÃ©e${scoringEvents.length === 1 ? "" : "s"} dans les sÃ©quences de score.`,
     strength: clampRating(55 + scoringEvents.length * 15),
     confidence: "medium",
     coachVisible: true,
@@ -220,7 +228,7 @@ function visiblePressureZoneFact(input: {
     affectedZones: [zone],
     category: "TERRITORIAL_PRESSURE",
     scope: "MATCH_REPORT",
-    summary: `La pression la plus visible pour ${input.perspective.teamName} s'est concentrée en ${zone}.`,
+    summary: `La pression la plus visible pour ${input.perspective.teamName} s'est concentrÃ©e en ${zone}.`,
     strength: clampRating(35 + zoneEventIds.length * 15),
     confidence: "low",
     coachVisible: true,
@@ -277,7 +285,7 @@ function dominatedTeamNoPayoffFact(input: {
     affectedZones: [representativeZone(signalEvents, firstSignalEvent.zone)],
     category: "PRESSURE_WITHOUT_CONVERSION",
     scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
-    summary: `${input.perspective.teamName} apparaît dans plusieurs séquences de pression, de progression ou d'instabilité, mais aucune ne devient un événement de score dans ce run de harnais. La question utile est de savoir si ${input.perspective.teamName} manque de soutien dans le dernier geste, choisit une route trop risquée après pression, ou si le harnais répète une route non convertissante. Zones visibles : ${zones.join(", ")}.`,
+    summary: `${input.perspective.teamName} apparaÃ®t dans plusieurs sÃ©quences de pression, de progression ou d'instabilitÃ©, mais aucune ne devient un Ã©vÃ©nement de score dans ce run de harnais. La question utile est de savoir si ${input.perspective.teamName} manque de soutien dans le dernier geste, choisit une route trop risquÃ©e aprÃ¨s pression, ou si le harnais rÃ©pÃ¨te une route non convertissante. Zones visibles : ${zones.join(", ")}.`,
     strength: clampRating(45 + signalEvents.length * 8),
     confidence: "low",
     coachVisible: true,
@@ -307,7 +315,7 @@ export function createMatchEvidenceFacts(input: {
 
     for (const fact of candidateFacts) {
       if (fact !== null) {
-        facts.push(fact);
+        facts.push(normalizeFactCopy(fact));
       }
     }
   }
@@ -362,6 +370,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "training_recommendation";
@@ -371,19 +380,19 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
 function titleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "DANGER_CREATION":
-      return "Des séquences dangereuses ont émergé";
+      return "Des sÃ©quences dangereuses ont Ã©mergÃ©";
     case "POSSESSION_INSTABILITY":
-      return "La possession s'est fragilisée sous pression";
+      return "La possession s'est fragilisÃ©e sous pression";
     case "SCORING_CONVERSION":
-      return "Les actions décisives sont bien identifiées";
+      return "Les actions dÃ©cisives sont bien identifiÃ©es";
     case "TERRITORIAL_PRESSURE":
-      return "La pression s'est concentrée dans une zone";
+      return "La pression s'est concentrÃ©e dans une zone";
     case "PRESSURE_WITHOUT_CONVERSION":
       return `${(fact.teamId ?? "equipe").toUpperCase()} produit du volume sans conversion`;
     case "FATIGUE_LOAD":
       return "La charge physique devient un fait de match";
     case "MOMENTUM_SHIFT":
-      return "L'élan du match change";
+      return "L'Ã©lan du match change";
     case "TACTICAL_PLAN_SIGNAL":
       return "Le plan de match laisse un signal lisible";
     case "WORKBENCH_CHAIN_CONSUMPTION":
@@ -441,20 +450,22 @@ function titleForFact(fact: MatchEvidenceFact): string {
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
       return "Plan de test coach multi-scenarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
-      return "Prévisualisation de sélection";
+      return "PrÃ©visualisation de sÃ©lection";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
-      return "AgrÃ©gats de traces de match";
+      return "AgrÃƒÂ©gats de traces de match";
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
-      return "Rapport coach depuis les agrÃ©gats officiels";
+      return "Rapport coach depuis les agrÃƒÂ©gats officiels";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+      return "Hierarchie de lecture du rapport coach V1";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "Calibration des signaux de profils full-match";
     case "HARNESS_PLAUSIBILITY_WARNING":
-      return "Avertissement de plausibilité du harnais";
+      return "Avertissement de plausibilitÃ© du harnais";
   }
 }
 
@@ -465,7 +476,7 @@ function confidenceText(value: MatchEvidenceFact["confidence"]): string {
     case "medium":
       return "moyenne";
     case "high":
-      return "élevée";
+      return "Ã©levÃ©e";
   }
 }
 
@@ -474,32 +485,32 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "DANGER_CREATION":
       return {
         actionId: `${fact.factId}-repeat-pattern`,
-        label: `Continuer à répéter les entrées en ${primaryFactZone(fact)}`,
-        tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque échoue.",
+        label: `Continuer Ã  rÃ©pÃ©ter les entrÃ©es en ${primaryFactZone(fact)}`,
+        tradeoff: "Engager du soutien dans le couloir productif peut affaiblir la rest-defense si l'attaque Ã©choue.",
       };
     case "POSSESSION_INSTABILITY":
       return {
         actionId: `${fact.factId}-stabilize-possession`,
-        label: `Ajouter des soutiens plus sûrs autour de ${primaryFactZone(fact)}`,
-        tradeoff: "Des soutiens plus prudents peuvent réduire la menace verticale immédiate et ralentir le tempo de transition.",
+        label: `Ajouter des soutiens plus sÃ»rs autour de ${primaryFactZone(fact)}`,
+        tradeoff: "Des soutiens plus prudents peuvent rÃ©duire la menace verticale immÃ©diate et ralentir le tempo de transition.",
       };
     case "SCORING_CONVERSION":
       return {
         actionId: `${fact.factId}-protect-finishing-platform`,
-        label: "Conserver le schéma qui a créé l'action décisive",
-        tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prévisible.",
+        label: "Conserver le schÃ©ma qui a crÃ©Ã© l'action dÃ©cisive",
+        tradeoff: "Trop insister sur une seule route de conversion peut rendre l'attaque plus prÃ©visible.",
       };
     case "TERRITORIAL_PRESSURE":
       return {
         actionId: `${fact.factId}-pressure-release`,
-        label: `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`,
-        tradeoff: "Une sortie trop précoce peut concéder du terrain si la structure de réception n'est pas sécurisée.",
+        label: `PrÃ©parer une sortie de pression depuis ${primaryFactZone(fact)}`,
+        tradeoff: "Une sortie trop prÃ©coce peut concÃ©der du terrain si la structure de rÃ©ception n'est pas sÃ©curisÃ©e.",
       };
     case "PRESSURE_WITHOUT_CONVERSION":
       return {
         actionId: `${fact.factId}-route-selection-after-pressure`,
-        label: `Revoir la route choisie après pression en ${primaryFactZone(fact)}.`,
-        tradeoff: "Réduire le risque peut stabiliser la plateforme de conversion, mais aussi retirer une partie de la menace immédiate.",
+        label: `Revoir la route choisie aprÃ¨s pression en ${primaryFactZone(fact)}.`,
+        tradeoff: "RÃ©duire le risque peut stabiliser la plateforme de conversion, mais aussi retirer une partie de la menace immÃ©diate.",
       };
     case "FATIGUE_LOAD":
     case "MOMENTUM_SHIFT":
@@ -536,13 +547,14 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
       return {
         actionId: `${fact.factId}-review-signal`,
         label: `Relire le signal autour de ${primaryFactZone(fact)}`,
-        tradeoff: "Agir trop vite sur un signal partiel peut masquer la cause tactique réelle.",
+        tradeoff: "Agir trop vite sur un signal partiel peut masquer la cause tactique rÃ©elle.",
       };
   }
 }
@@ -588,6 +600,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
     "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
+    "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY",
     "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
     "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",
@@ -616,14 +629,14 @@ export function createEvidenceDrivenCoachInsights(input: {
       {
         insightId: `${input.matchInput.matchId}-adapter-insight`,
         type: "training_recommendation",
-        title: "Les preuves du moteur restent limitées",
+        title: "Les preuves du moteur restent limitÃ©es",
         summary:
-          "Le moteur a produit un fil officiel, mais aucun fait de preuve ciblé n'a franchi les seuils légers de Sprint 2C.",
+          "Le moteur a produit un fil officiel, mais aucun fait de preuve ciblÃ© n'a franchi les seuils lÃ©gers de Sprint 2C.",
         evidence: [
           {
             eventIds: [],
-            summary: "Aucun fait de preuve n'a été généré depuis le fil actuellement visible par le moteur.",
-            confidenceNote: "Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.",
+            summary: "Aucun fait de preuve n'a Ã©tÃ© gÃ©nÃ©rÃ© depuis le fil actuellement visible par le moteur.",
+            confidenceNote: "Analyse Ã  faible confiance tant que les plans tactiques ne sont pas entiÃ¨rement branchÃ©s.",
           },
         ],
         affectedPlayers: [],
@@ -632,8 +645,8 @@ export function createEvidenceDrivenCoachInsights(input: {
         recommendedActions: [
           {
             actionId: "expand-evidence-thresholds",
-            label: "Revoir les seuils de taxonomie après la prochaine passe d'adaptation",
-            tradeoff: "Des seuils plus bas peuvent produire des signaux coach plus bruités.",
+            label: "Revoir les seuils de taxonomie aprÃ¨s la prochaine passe d'adaptation",
+            tradeoff: "Des seuils plus bas peuvent produire des signaux coach plus bruitÃ©s.",
           },
         ],
       },
@@ -645,12 +658,14 @@ export function createEvidenceDrivenCoachInsights(input: {
       insightId: `${fact.factId}-insight`,
       type: insightTypeForFact(fact),
       title: titleForFact(fact),
-      summary: fact.summary,
+      summary: normalizeCoachFacingCopy(fact.summary),
       evidence: [
         {
           eventIds: fact.eventIds,
-          summary: `Fait de preuve ${fact.factId} : ${fact.summary}`,
-          confidenceNote: `Confiance ${confidenceText(fact.confidence)}; intensité ${fact.strength}/100. Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.`,
+          summary: normalizeCoachFacingCopy(`Fait de preuve ${fact.factId} : ${fact.summary}`),
+          confidenceNote: normalizeCoachFacingCopy(
+            `Confiance ${confidenceText(fact.confidence)}; intensitÃ© ${fact.strength}/100. Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.`,
+          ),
         },
       ],
       affectedPlayers: [],
@@ -675,9 +690,9 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
       {
         diagnosisId: `${input.matchInput.matchId}-adapter-diagnosis`,
         teamId: input.matchInput.homeTeam.teamId,
-        title: "Diagnostic moteur à faible confiance",
+        title: "Diagnostic moteur Ã  faible confiance",
         summary:
-          "Le fil officiel est présent, mais les faits de preuve de Sprint 2C n'ont pas isolé de motif tactique ciblé.",
+          "Le fil officiel est prÃ©sent, mais les faits de preuve de Sprint 2C n'ont pas isolÃ© de motif tactique ciblÃ©.",
         evidenceEventIds: fallbackEvent === undefined ? [] : [fallbackEvent.eventId],
         affectedZones: fallbackEvent === undefined ? [] : [fallbackEvent.zone],
         confidence: "low",
@@ -690,7 +705,7 @@ export function createEvidenceBasedTacticalDiagnoses(input: {
       diagnosisId: `${fact.factId}-diagnosis`,
       teamId: fact.teamId ?? input.matchInput.homeTeam.teamId,
       title: titleForFact(fact),
-      summary: `${fact.summary} Analyse à faible confiance tant que les plans tactiques ne sont pas entièrement branchés.`,
+      summary: normalizeCoachFacingCopy(`${fact.summary} Analyse Ã  faible confiance tant que les plans tactiques ne sont pas entiÃ¨rement branchÃ©s.`),
       evidenceEventIds: fact.eventIds,
       affectedZones: [primaryFactZone(fact)],
       confidence: "low",

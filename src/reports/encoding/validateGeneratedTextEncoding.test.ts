@@ -26,12 +26,12 @@ export function validateGeneratedTextEncodingContracts(): readonly string[] {
   assertTest(hasMojibake(badSample), "bad sample mojibake markers must be detected.");
   assertTest(findMojibakeMarkers(badSample).length > 0, "bad sample must expose marker names.");
   assertTest(!hasMojibake(goodSample), "correct French strings must pass mojibake detection.");
-  assertTest(targets.some((target) => target.path.endsWith("fullmatch-trace-validation-4g.md")), "fullmatch-trace-validation-4g.md must be covered.");
+  assertTest(targets.some((target) => target.path.endsWith("fullmatch-workbench-chain-replay-4i.md")), "fullmatch-workbench-chain-replay-4i.md must be covered.");
   assertTest(targets.some((target) => target.path.endsWith("coach-report.experimental.html")), "coach report HTML files must be covered.");
   assertTest(targets.some((target) => target.category === "share_markdown"), "share-pack markdown files must be covered.");
   assertTest(targets.some((target) => target.category === "validation_markdown"), "validation markdown files must be covered.");
 
-  if (existsSync(join(reportDirectory, "share", "fullmatch-trace-validation-4g.md"))) {
+  if (existsSync(join(reportDirectory, "share", "fullmatch-workbench-chain-replay-4i.md"))) {
     assertTest(result.status === "PASS", `generated text encoding validation must pass, got ${result.status}.`);
     assertTest(result.totalMojibakeMarkerCount === 0, `generated artifacts must contain no mojibake markers, got ${result.totalMojibakeMarkerCount}.`);
   }
@@ -39,7 +39,7 @@ export function validateGeneratedTextEncodingContracts(): readonly string[] {
   return [
     "bad mojibake sample is detected",
     "correct French strings pass",
-    "fullmatch-trace-validation-4g.md is covered",
+    "fullmatch-workbench-chain-replay-4i.md is covered",
     "coach report HTML files are covered",
     "share-pack markdown files are covered",
     "validation markdown files are covered",

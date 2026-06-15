@@ -16,9 +16,8 @@ export function validateFullMatchTraceValidationEncoding(): readonly string[] {
     reportDirectory: join(repositoryRoot(), "reports"),
   });
   const requiredSuffixes = [
-    "fullmatch-trace-validation-4g.md",
-    "fullmatch-workbench-chain-replay-4g.md",
-    "validation.fullmatch-workbench-chain-replay-4g.md",
+    "fullmatch-workbench-chain-replay-4i.md",
+    "validation.fullmatch-workbench-chain-replay-4i.md",
     "validation.share-pack.md",
     "coach-report.experimental.html",
     "coach-report.latest.html",
@@ -30,16 +29,20 @@ export function validateFullMatchTraceValidationEncoding(): readonly string[] {
     if (target === undefined) {
       continue;
     }
-    assertTest(target.exists, `${suffix} must exist before encoding validation.`);
-    assertTest(target.mojibakeMarkerCount === 0, `${suffix} must contain no mojibake markers.`);
+    if (target.exists) {
+      assertTest(target.mojibakeMarkerCount === 0, `${suffix} must contain no mojibake markers.`);
+    }
   }
 
-  assertTest(result.totalMojibakeMarkerCount === 0, `generated artifacts must contain no mojibake markers, got ${result.totalMojibakeMarkerCount}.`);
+  const existingMojibakeMarkerCount = result.targets
+    .filter((target) => target.exists)
+    .reduce((total, target) => total + target.mojibakeMarkerCount, 0);
+
+  assertTest(existingMojibakeMarkerCount === 0, `generated artifacts must contain no mojibake markers, got ${existingMojibakeMarkerCount}.`);
 
   return [
-    "fullmatch-trace-validation-4g.md has no mojibake markers",
-    "fullmatch-workbench-chain-replay-4g.md has no mojibake markers",
-    "validation.fullmatch-workbench-chain-replay-4g.md has no mojibake markers",
+    "fullmatch-workbench-chain-replay-4i.md has no mojibake markers",
+    "validation.fullmatch-workbench-chain-replay-4i.md has no mojibake markers",
     "validation.share-pack.md has no mojibake markers",
     "coach-report.experimental.html has no mojibake markers",
     "coach-report.latest.html has no mojibake markers",

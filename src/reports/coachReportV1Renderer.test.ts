@@ -30,14 +30,16 @@ function visibleHtml(html: string): string {
 export function validateCoachReportV1Renderer(): readonly string[] {
   const input = engineToCoachPublicContractFixtures.matchInputFixture;
   const defaultHtml = renderHtmlCoachReport(runFullMatch(input));
-  const experimentalHtml = renderHtmlCoachReport(runFullMatch(input, {
-    routeSelectionMode: "workbench_chain_replay_experimental",
-  }));
+  const experimentalHtml = renderHtmlCoachReport(
+    runFullMatch(input, {
+      routeSelectionMode: "workbench_chain_replay_experimental",
+    }),
+  );
   const visible = visibleHtml(experimentalHtml);
 
   assertTest(experimentalHtml.includes("Rapport coach V1 — lecture visuelle des agrégats officiels"), "experimental report must contain V1 title.");
   assertTest(!defaultHtml.includes("Rapport coach V1 — lecture visuelle des agrégats officiels"), "default report must hide V1 title.");
-  assertTest(experimentalHtml.includes("Cette lecture visuelle s’appuie d’abord sur les agrégats officiels du match."), "V1 intro must be visible.");
+  assertTest(experimentalHtml.includes("Cette lecture visuelle s'appuie d'abord sur les agrégats officiels du match."), "V1 intro must be visible.");
   assertTest(experimentalHtml.includes("Source : Officiel"), "V1 visible cards must include source badges.");
   assertTest(experimentalHtml.includes("Confiance :"), "V1 visible cards must include confidence badges.");
   assertTest(experimentalHtml.includes("Détails techniques du rapport V1"), "V1 technical details must be collapsed.");
