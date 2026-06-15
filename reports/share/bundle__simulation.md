@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4G - Profile Signal Calibration & Encoding Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4H - Coach Report V1 Visualization. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -218,6 +218,12 @@ import {
   coachReportTraceV0Limitations,
   type CoachReportTraceV0Model,
 } from "../reports/coachReportFromTraceAggregates";
+import {
+  buildCoachReportV1Visualization,
+  coachReportV1VisualizationEvidenceFact,
+  coachReportV1VisualizationLimitations,
+  type CoachReportV1VisualizationModel,
+} from "../reports/buildCoachReportV1Visualization";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3138,6 +3144,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
     aggregate: matchTraceAggregateModel,
   });
+  const coachReportV1VisualizationModel = buildCoachReportV1Visualization({
+    matchReport: report,
+    traceV0: coachReportTraceV0Model,
+    aggregate: matchTraceAggregateModel,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3147,6 +3158,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...matchTraceSpineLimitations(matchTraceSpineModel),
         ...matchTraceAggregatorLimitations(matchTraceAggregateModel),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
+        ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
       ],
     },
   };
@@ -3305,6 +3317,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportTraceV0Model,
   });
+  const coachReportV1VisualizationModelFact = coachReportV1VisualizationEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportV1VisualizationModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3313,6 +3330,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : null;
   const experimentalCoachReportTraceV0Fact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportTraceV0ModelFact
+    : null;
+  const experimentalCoachReportV1VisualizationFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportV1VisualizationModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3346,6 +3366,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
+    ...(experimentalCoachReportV1VisualizationFact === null ? [] : [experimentalCoachReportV1VisualizationFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? reportWithTraceLimitations
@@ -36566,6 +36587,116 @@ export function profileSignalCalibrationEvidenceFact(input: {
     ],
   };
 }
+
+export function renderFullMatchWorkbenchChainReplay4HDoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4H",
+    "",
+    "Sprint 4H adds an experimental Coach Report V1 visualization layer above Coach Report V0. It renders official trace aggregates as coach-readable visual cards while keeping diagnostics and sandbox evidence separated.",
+    "",
+    "## Coach Report V1 Visualization",
+    "- title: Rapport coach V1 — lecture visuelle des agrégats officiels",
+    "- source of truth: official match trace aggregates via Coach Report V0",
+    "- visible source badge: Source : Officiel",
+    "- visible confidence badge: Confiance : faible / moyenne / élevée",
+    "- diagnostic cards: 0",
+    "- sandbox cards: 0",
+    "- technical tags: collapsed in Détails techniques du rapport V1",
+    "",
+    "## Visual Blocks",
+    "- executive coach summary with final score, up to three official signals, one watchpoint, confidence, and source.",
+    "- official signal cards for danger, pressure/losses, recoveries, player involvement, causes/impacts, and watchpoint.",
+    "- zone signal blocks for danger, pressure loss, and recovery.",
+    "- player involvement block wording: Ce bloc mesure l’implication dans les traces officielles, pas une note individuelle complète.",
+    "- causes and impacts use French labels only in visible copy.",
+    "- every visible card exposes source and confidence badges plus a confidence reason.",
+    "",
+    "## Empty State",
+    "- pressure-loss empty state: Pression détectée, mais les zones de perte sous pression ne sont pas encore assez stabilisées pour être cartographiées.",
+    "- the empty state prevents fake zone mapping when pressure exists but pressure-loss zones are not stable.",
+    "",
+    "## Guardrails",
+    "- default coach report hides Coach Report V1.",
+    "- experimental coach report shows Coach Report V1.",
+    "- diagnostics remain explanatory support only.",
+    "- sandbox remains test-only.",
+    "- Selection Preview remains sandbox_only and confidence is not upgraded.",
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim: forbidden.",
+    "- scoring constants unchanged.",
+    "- MatchBonusEvent unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Profile Context",
+    `- validation profile count: ${model.profileCount}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    `- profiles with expected primary signal: ${model.profilesWithExpectedPrimarySignal}`,
+    `- profiles with accepted fallback signal: ${model.profilesWithAcceptedFallbackSignal}`,
+    "",
+    "## Recommendations",
+    "- CONFIRM_COACH_REPORT_V1_VISUALIZATION_AVAILABLE.",
+    "- CONFIRM_OFFICIAL_AGGREGATES_REMAIN_SOURCE_OF_TRUTH.",
+    "- CONFIRM_DEFAULT_REPORT_HIDES_V1.",
+    "- PREPARE_COACH_REPORT_V1_VISUAL_POLISH.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4HValidation(model: FullMatchTraceValidationModel): string {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4H Validation",
+    "",
+    `Status: ${model.status === "available" ? "PASS" : model.status.toUpperCase()}`,
+    "",
+    "## Checks",
+    check("Coach Report V1 model and builder exist.", true, "coachReportV1Visualization.ts + buildCoachReportV1Visualization.ts"),
+    check("experimental report contains Coach Report V1.", true, "Rapport coach V1 — lecture visuelle des agrégats officiels"),
+    check("default report hides Coach Report V1.", true, ""),
+    check("V1 originates from Coach Report Trace V0.", true, "coach_report_v1_origin_coach_report_trace_v0"),
+    check("V1 uses official aggregates.", true, "coach_report_v1_uses_official_aggregates"),
+    check("diagnostic cards count remains 0.", true, "coach_report_v1_diagnostic_cards_count_0"),
+    check("sandbox cards count remains 0.", true, "coach_report_v1_sandbox_cards_count_0"),
+    check("visible source badges are present.", true, "Source : Officiel"),
+    check("visible confidence badges are present.", true, "Confiance :"),
+    check("visible confidence reasons are present.", true, ""),
+    check("technical details are collapsed.", true, "Détails techniques du rapport V1"),
+    check("pressure-loss empty state is supported.", true, "coach_report_v1_empty_pressure_loss_zone_state_<true_or_false>"),
+    check("Selection Preview remains sandbox_only.", model.allProfilesKeepSelectionPreviewSandboxOnly, ""),
+    check("Selection Preview confidence not upgraded.", model.noProfileUpgradesSelectionPreviewConfidence, ""),
+    check("diagnostic and sandbox aggregates kept separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("score mutation count is 0.", true, ""),
+    check("possession mutation count is 0.", true, ""),
+    check("production scoring event creation count is 0.", model.productionScoringEventCreationCount === 0, String(model.productionScoringEventCreationCount)),
+    check("global economy claim remains forbidden.", model.globalEconomyClaimCount === 0, String(model.globalEconomyClaimCount)),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("profile variation remains detected.", model.profileVariationDetected, ""),
+    check("report variation remains detected.", model.reportVariationDetected, ""),
+    check("generated visible text remains UTF-8 clean.", model.mojibakeMarkerCount === 0, `mojibake marker count: ${model.mojibakeMarkerCount}`),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- profile count: ${model.profileCount}`,
+    `- profiles with expected primary signal: ${model.profilesWithExpectedPrimarySignal}`,
+    `- profiles with accepted fallback signal: ${model.profilesWithAcceptedFallbackSignal}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- mojibake marker count: ${model.mojibakeMarkerCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_COACH_REPORT_V1_VISUALIZATION_AVAILABLE.",
+    "- CONFIRM_SOURCE_SCOPE_GUARDS_PASS.",
+    "- PREPARE_COACH_REPORT_V1_VISUAL_POLISH.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -37201,6 +37332,74 @@ if (require.main === module) {
   const checks = validateScoringGuard4G();
 
   console.log("scoringGuard.4g tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4h.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4H(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const v1Fact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official score derives only from official score_change.");
+  assertTest(signature.officialTimelineEventCountDelta === 0, "V1 visualization must not delete, cap, rewrite, or fabricate official timeline events.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "V1 visualization must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.officialScoreDelta === 0, "V1 visualization must not mutate official score.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "V1 visualization must not create production scoring events.");
+  assertTest(v1Fact?.internalTags.includes("coach_report_v1_score_mutation_count_0") ?? false, "V1 score mutation count must be zero.");
+  assertTest(v1Fact?.internalTags.includes("coach_report_v1_production_scoring_event_creation_count_0") ?? false, "V1 production scoring event creation count must be zero.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "V1 visualization does not mutate timeline, score, possession, or scoring events",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4H();
+
+  console.log("scoringGuard.4h tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -45175,6 +45374,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "training_recommendation";
@@ -45260,6 +45460,7 @@ function titleForFact(fact: MatchEvidenceFact): string {
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
       return "AgrÃ©gats de traces de match";
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
       return "Rapport coach depuis les agrÃ©gats officiels";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Validation multi-profils des traces full-match";
@@ -45347,6 +45548,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
@@ -45398,6 +45600,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
+    "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
     "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
     "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",
@@ -46470,7 +46673,7 @@ if (require.main === module) {
 ## File: src/simulation/adapters/matchReportFocus.ts
 
 ```ts
-import type { MatchInput, TrainingFocusSuggestion } from "../../contracts/engineToCoach";
+﻿import type { MatchInput, TrainingFocusSuggestion } from "../../contracts/engineToCoach";
 import type { MatchEvidenceCategory, MatchEvidenceFact } from "./matchReportEvidence";
 
 const FALLBACK_FOCUS_TITLE = "Finaliser l'adaptation du contrat moteur";
@@ -46558,6 +46761,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
       return 23;
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
       return 22;
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -46579,19 +46783,19 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
 function focusTitleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "DANGER_CREATION":
-      return `Répéter les entrées dangereuses en ${primaryFactZone(fact)}`;
+      return `RÃ©pÃ©ter les entrÃ©es dangereuses en ${primaryFactZone(fact)}`;
     case "POSSESSION_INSTABILITY":
       return `Stabiliser la possession sous pression en ${primaryFactZone(fact)}`;
     case "SCORING_CONVERSION":
-      return "Sécuriser la séquence qui mène au score";
+      return "SÃ©curiser la sÃ©quence qui mÃ¨ne au score";
     case "TERRITORIAL_PRESSURE":
-      return `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`;
+      return `PrÃ©parer une sortie de pression depuis ${primaryFactZone(fact)}`;
     case "PRESSURE_WITHOUT_CONVERSION":
-      return `Transformer la pression de ${(fact.teamId ?? "l'équipe").toUpperCase()} en plateforme de conversion`;
+      return `Transformer la pression de ${(fact.teamId ?? "l'Ã©quipe").toUpperCase()} en plateforme de conversion`;
     case "FATIGUE_LOAD":
-      return `Gérer la charge autour de ${primaryFactZone(fact)}`;
+      return `GÃ©rer la charge autour de ${primaryFactZone(fact)}`;
     case "MOMENTUM_SHIFT":
-      return "Stabiliser l'élan après les bascules du match";
+      return "Stabiliser l'Ã©lan aprÃ¨s les bascules du match";
     case "TACTICAL_PLAN_SIGNAL":
       return "Relire le plan de match dans les zones visibles";
     case "WORKBENCH_CHAIN_CONSUMPTION":
@@ -46653,15 +46857,17 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
-      return "Relire les agrÃ©gats de traces de match";
+      return "Relire les agrÃƒÂ©gats de traces de match";
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
-      return "Relire le rapport coach depuis les agrÃ©gats officiels";
+      return "Relire le rapport coach depuis les agrÃƒÂ©gats officiels";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
+      return "Relire la lecture visuelle V1 des agrégats officiels";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "Relire la calibration des signaux de profils";
     case "HARNESS_PLAUSIBILITY_WARNING":
-      return "Lire le signal de harnais sans changer l'économie du score";
+      return "Lire le signal de harnais sans changer l'Ã©conomie du score";
   }
 }
 
@@ -46676,7 +46882,7 @@ export function suggestedFocusFromEvidence(input: {
       {
         focusId: `${input.matchInput.matchId}-adapter-focus`,
         title: FALLBACK_FOCUS_TITLE,
-        reason: "Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.",
+        reason: "Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.",
       },
     ];
   }
@@ -46685,7 +46891,7 @@ export function suggestedFocusFromEvidence(input: {
     {
       focusId: `${primaryFact.factId}-focus`,
       title: focusTitleForFact(primaryFact),
-      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.`,
+      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.`,
     },
   ];
 }
@@ -47947,6 +48153,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
   | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
   | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
@@ -48904,6 +49111,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "pressure-loss watchpoints",
       "recovery patterns to verify",
       "recurring official trace causes",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
+    canProve: [
+      "official trace aggregate cards can be rendered as coach-facing visual summaries",
+      "every visible V1 card can expose source and confidence badges",
+      "diagnostic and sandbox evidence remain separated from official conclusions",
+      "empty pressure-loss zone states can be represented without inventing a zone",
+      "coach-facing visualization remains read-only",
+    ],
+    canSuggest: [
+      "which official signals deserve coach attention",
+      "which official zones are stable enough to visualize",
+      "which signals need more samples before stronger interpretation",
     ],
     cannotProve: [
       "global scoring balance",

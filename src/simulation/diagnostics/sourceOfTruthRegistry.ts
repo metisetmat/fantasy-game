@@ -36,6 +36,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
   | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
   | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
@@ -993,6 +994,39 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "pressure-loss watchpoints",
       "recovery patterns to verify",
       "recurring official trace causes",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
+    canProve: [
+      "official trace aggregate cards can be rendered as coach-facing visual summaries",
+      "every visible V1 card can expose source and confidence badges",
+      "diagnostic and sandbox evidence remain separated from official conclusions",
+      "empty pressure-loss zone states can be represented without inventing a zone",
+      "coach-facing visualization remains read-only",
+    ],
+    canSuggest: [
+      "which official signals deserve coach attention",
+      "which official zones are stable enough to visualize",
+      "which signals need more samples before stronger interpretation",
     ],
     cannotProve: [
       "global scoring balance",

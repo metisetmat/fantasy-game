@@ -1,9 +1,9 @@
 # Share Pack
 
-Generated: 2026-06-14T21:24:56.685Z
-Task/sprint: Sprint 4G - Profile Signal Calibration & Encoding Fix
+Generated: 2026-06-15T06:39:02.080Z
+Task/sprint: Sprint 4H - Coach Report V1 Visualization
 Mode: MINIMAL_REVIEW
-Final file count: 19
+Final file count: 18
 
 Upload every file in this reports/share directory.
 
@@ -20,9 +20,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4g.md
-- validation.fullmatch-workbench-chain-replay-4g.md
-- fullmatch-trace-validation-4g.md
+- fullmatch-workbench-chain-replay-4h.md
+- validation.fullmatch-workbench-chain-replay-4h.md
 - README.md
 
 ## Bundle Files

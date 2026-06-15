@@ -956,6 +956,198 @@ function renderCoachReportFromTraceAggregates(report: MatchReport): string {
     </section>`;
 }
 
+function renderV1Badge(label: string, value: string): string {
+  return `<span class="badge">${escapeHtml(`${label} : ${value}`)}</span>`;
+}
+
+function confidenceReasonForV1(title: string, confidence: "low" | "medium" | "high", emptyState: boolean): string {
+  if (emptyState) {
+    return "État vide volontaire : le rapport refuse de cartographier une zone instable.";
+  }
+  if (confidence === "medium") {
+    return "Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.";
+  }
+  if (confidence === "high") {
+    return "Signal officiel très dense dans ce run, sans diagnostic ni sandbox comme vérité.";
+  }
+
+  return `${title} reste un signal officiel prudent, encore limité par le volume de traces.`;
+}
+
+function renderV1Card(input: {
+  readonly title: string;
+  readonly summary: string;
+  readonly bullets: readonly string[];
+  readonly confidence: "low" | "medium" | "high";
+  readonly emptyState?: boolean;
+}): string {
+  const emptyState = input.emptyState ?? false;
+  const confidenceLabel = confidenceText(input.confidence).replace("Confiance ", "");
+
+  return `
+      <article class="card coach-v1-card${emptyState ? " empty-state" : ""}">
+        <div>${renderV1Badge("Source", "Officiel")} ${renderV1Badge("Confiance", confidenceLabel)}</div>
+        <h3>${escapeHtml(input.title)}</h3>
+        <p>${escapeHtml(input.summary)}</p>
+        <ul>${input.bullets.map((bullet) => `<li>${escapeHtml(bullet)}</li>`).join("")}</ul>
+        <p class="card-meta">${escapeHtml(confidenceReasonForV1(input.title, input.confidence, emptyState))}</p>
+      </article>`;
+}
+
+function confidenceFromTraceTag(fact: MatchReport["evidenceFacts"][number], cardId: string): "low" | "medium" | "high" {
+  if (fact.internalTags.includes(`coach_report_trace_aggregates_card_${cardId}_confidence_high`)) {
+    return "high";
+  }
+  if (fact.internalTags.includes(`coach_report_trace_aggregates_card_${cardId}_confidence_medium`)) {
+    return "medium";
+  }
+  return "low";
+}
+
+function renderCoachReportV1Visualization(report: MatchReport): string {
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION" &&
+    candidate.internalTags.includes("workbench_chain_coach_report_v1_visualization")
+  );
+  const traceFact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES" &&
+    candidate.internalTags.includes("workbench_chain_coach_report_from_trace_aggregates")
+  );
+
+  if (fact === undefined || traceFact === undefined) {
+    return "";
+  }
+
+  const cardCount = tagValue(fact.internalTags, "coach_report_v1_card_count_") ?? "0";
+  const officialCardsCount = tagValue(fact.internalTags, "coach_report_v1_official_cards_count_") ?? "0";
+  const emptyPressureLoss = tagValue(fact.internalTags, "coach_report_v1_empty_pressure_loss_zone_state_") === "true";
+  const officialTraceCount = tagValue(fact.internalTags, "coach_report_v1_official_trace_count_") ?? "0";
+  const dangerZones = itemListFromTag(
+    traceFact,
+    "coach_report_trace_aggregates_danger_zone_items_",
+    "Aucune zone de danger officielle ne ressort nettement dans ce run.",
+  );
+  const pressureLossZones = emptyPressureLoss
+    ? ["Pression détectée, mais les zones de perte sous pression ne sont pas encore assez stabilisées pour être cartographiées."]
+    : itemListFromTag(
+        traceFact,
+        "coach_report_trace_aggregates_pressure_loss_zone_items_",
+        "Aucune zone de perte sous haute pression ne domine le signal officiel.",
+      );
+  const recoveryZones = itemListFromTag(
+    traceFact,
+    "coach_report_trace_aggregates_recovery_zone_items_",
+    "Aucune zone de récupération ne ressort fortement dans les traces officielles.",
+  );
+  const players = itemListFromTag(
+    traceFact,
+    "coach_report_trace_aggregates_player_involvement_items_",
+    "Aucun joueur ne concentre encore clairement les traces officielles significatives.",
+  );
+  const causes = itemListFromTag(
+    traceFact,
+    "coach_report_trace_aggregates_cause_items_",
+    "Aucune cause officielle ne revient assez souvent pour ressortir clairement.",
+  );
+  const impacts = itemListFromTag(
+    traceFact,
+    "coach_report_trace_aggregates_impact_items_",
+    "Aucun impact officiel ne domine nettement.",
+  );
+  const watchpointRaw = tagValue(fact.internalTags, "coach_report_v1_watchpoint_") ?? "Signal à confirmer.";
+  const watchpoint = watchpointRaw.replaceAll("_", " ");
+  const executiveBullets = [
+    `Danger : ${dangerZones[0] ?? "aucun signal dominant"}`,
+    `Récupération : ${recoveryZones[0] ?? "aucun signal dominant"}`,
+    `Implication : ${players[0] ?? "aucun joueur dominant"}`,
+    `Point de vigilance : ${watchpoint}`,
+  ];
+  const signalCards = [
+    renderV1Card({
+      title: "Synthèse coach",
+      summary: `Score final : ${scoreText(report)}. Lecture officielle compacte des signaux les plus visibles.`,
+      bullets: executiveBullets,
+      confidence: Number(officialTraceCount) >= 20 ? "medium" : "low",
+    }),
+    renderV1Card({
+      title: "Carte signal — Danger officiel",
+      summary: "Où le match a produit des progressions dangereuses ou des situations favorables.",
+      bullets: dangerZones.slice(0, 3),
+      confidence: confidenceFromTraceTag(traceFact, "official_danger_zones"),
+    }),
+    renderV1Card({
+      title: "Carte signal — Pression et pertes",
+      summary: "Où la continuité s'est fragilisée sous pression adverse.",
+      bullets: pressureLossZones.slice(0, 3),
+      confidence: confidenceFromTraceTag(traceFact, "official_pressure_losses"),
+      emptyState: emptyPressureLoss,
+    }),
+    renderV1Card({
+      title: "Carte signal — Récupérations",
+      summary: "Où l'équipe a interrompu ou sécurisé une séquence.",
+      bullets: recoveryZones.slice(0, 3),
+      confidence: confidenceFromTraceTag(traceFact, "official_recoveries"),
+    }),
+    renderV1Card({
+      title: "Carte signal — Causes et impacts",
+      summary: "Les libellés français ci-dessous viennent des agrégats officiels, pas du sandbox.",
+      bullets: [...causes, ...impacts].slice(0, 6),
+      confidence: confidenceFromTraceTag(traceFact, "official_recurring_causes"),
+    }),
+    renderV1Card({
+      title: "Carte signal — Point de vigilance",
+      summary: "Piste prudente issue des agrégats officiels du run.",
+      bullets: [watchpoint],
+      confidence: confidenceFromTraceTag(traceFact, "official_coach_watchpoint"),
+    }),
+  ].join("");
+  const zoneCards = [
+    renderV1Card({
+      title: "Zone signal — Danger",
+      summary: "Lecture zone par zone du danger officiel.",
+      bullets: dangerZones.slice(0, 3),
+      confidence: confidenceFromTraceTag(traceFact, "official_danger_zones"),
+    }),
+    renderV1Card({
+      title: "Zone signal — Perte sous pression",
+      summary: "Le rapport cartographie seulement un signal stabilisé.",
+      bullets: pressureLossZones.slice(0, 3),
+      confidence: confidenceFromTraceTag(traceFact, "official_pressure_losses"),
+      emptyState: emptyPressureLoss,
+    }),
+    renderV1Card({
+      title: "Zone signal — Récupération",
+      summary: "Lecture zone par zone des récupérations utiles.",
+      bullets: recoveryZones.slice(0, 3),
+      confidence: confidenceFromTraceTag(traceFact, "official_recoveries"),
+    }),
+  ].join("");
+  const playerCard = renderV1Card({
+    title: "Implication joueurs",
+    summary: "Ce bloc mesure l’implication dans les traces officielles, pas une note individuelle complète.",
+    bullets: players.slice(0, 4),
+    confidence: confidenceFromTraceTag(traceFact, "official_player_involvement"),
+  });
+
+  return `
+    <section class="coach-report-v1">
+      <h2>Rapport coach V1 — lecture visuelle des agrégats officiels</h2>
+      <p>Cette lecture visuelle s’appuie d’abord sur les agrégats officiels du match. Les diagnostics et le sandbox restent séparés : ils servent à expliquer ou tester, pas à établir la vérité officielle.</p>
+      <h3>Lecture rapide</h3>
+      <div class="grid">${signalCards}</div>
+      <h3>Signaux par zone</h3>
+      <div class="grid">${zoneCards}</div>
+      <h3>Implication et causes</h3>
+      <div class="grid">${playerCard}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques du rapport V1</summary>
+        <div class="muted">Cartes : ${escapeHtml(cardCount)}. Cartes officielles : ${escapeHtml(officialCardsCount)}. Traces officielles : ${escapeHtml(officialTraceCount)}.</div>
+        <div class="muted">${escapeHtml(fact.summary)}</div>
+        <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderFocus(focus: TrainingFocusSuggestion): string {
   return `
     <article class="card compact">
@@ -1058,6 +1250,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
   const selectionPreview = renderSelectionPreview(report);
   const matchTraceSpine = renderMatchTraceSpine(report);
   const matchTraceAggregator = renderMatchTraceAggregator(report);
+  const coachReportV1Visualization = renderCoachReportV1Visualization(report);
   const coachReportTraceAggregates = renderCoachReportFromTraceAggregates(report);
 
   const html = `<!doctype html>
@@ -1129,6 +1322,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     ${selectionPreview}
     ${matchTraceSpine}
     ${matchTraceAggregator}
+    ${coachReportV1Visualization}
     ${coachReportTraceAggregates}
 
     <section>

@@ -350,6 +350,93 @@
       </details>
     </section>
     
+    <section class="coach-report-v1">
+      <h2>Rapport coach V1 — lecture visuelle des agrégats officiels</h2>
+      <p>Cette lecture visuelle s’appuie d’abord sur les agrégats officiels du match. Les diagnostics et le sandbox restent séparés : ils servent à expliquer ou tester, pas à établir la vérité officielle.</p>
+      <h3>Lecture rapide</h3>
+      <div class="grid">
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : moyenne</span></div>
+        <h3>Synthèse coach</h3>
+        <p>Score final : 45 - 0. Lecture officielle compacte des signaux les plus visibles.</p>
+        <ul><li>Danger : Z3-C : 23</li><li>Récupération : Z3-C : 39</li><li>Implication : Aucun joueur ne concentre encore clairement les traces officielles significatives.</li><li>Point de vigilance : A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation.</li></ul>
+        <p class="card-meta">Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.</p>
+      </article>
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : moyenne</span></div>
+        <h3>Carte signal — Danger officiel</h3>
+        <p>Où le match a produit des progressions dangereuses ou des situations favorables.</p>
+        <ul><li>Z3-C : 23</li><li>Z5-C : 16</li><li>Z5-HSR : 5</li></ul>
+        <p class="card-meta">Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.</p>
+      </article>
+      <article class="card coach-v1-card empty-state">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : faible</span></div>
+        <h3>Carte signal — Pression et pertes</h3>
+        <p>Où la continuité s&#39;est fragilisée sous pression adverse.</p>
+        <ul><li>Pression détectée, mais les zones de perte sous pression ne sont pas encore assez stabilisées pour être cartographiées.</li></ul>
+        <p class="card-meta">État vide volontaire : le rapport refuse de cartographier une zone instable.</p>
+      </article>
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : moyenne</span></div>
+        <h3>Carte signal — Récupérations</h3>
+        <p>Où l&#39;équipe a interrompu ou sécurisé une séquence.</p>
+        <ul><li>Z3-C : 39</li><li>Z5-C : 16</li><li>Z5-HSR : 5</li></ul>
+        <p class="card-meta">Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.</p>
+      </article>
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : moyenne</span></div>
+        <h3>Carte signal — Causes et impacts</h3>
+        <p>Les libellés français ci-dessous viennent des agrégats officiels, pas du sandbox.</p>
+        <ul><li>récupération défensive : 63</li><li>fatigue visible : 63</li><li>avantage physique : 63</li><li>erreurs provoquées par la pression : 63</li><li>ligne cassée : 36</li><li>possession sécurisée : 36</li></ul>
+        <p class="card-meta">Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.</p>
+      </article>
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : faible</span></div>
+        <h3>Carte signal — Point de vigilance</h3>
+        <p>Piste prudente issue des agrégats officiels du run.</p>
+        <ul><li>A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation.</li></ul>
+        <p class="card-meta">Carte signal — Point de vigilance reste un signal officiel prudent, encore limité par le volume de traces.</p>
+      </article></div>
+      <h3>Signaux par zone</h3>
+      <div class="grid">
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : moyenne</span></div>
+        <h3>Zone signal — Danger</h3>
+        <p>Lecture zone par zone du danger officiel.</p>
+        <ul><li>Z3-C : 23</li><li>Z5-C : 16</li><li>Z5-HSR : 5</li></ul>
+        <p class="card-meta">Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.</p>
+      </article>
+      <article class="card coach-v1-card empty-state">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : faible</span></div>
+        <h3>Zone signal — Perte sous pression</h3>
+        <p>Le rapport cartographie seulement un signal stabilisé.</p>
+        <ul><li>Pression détectée, mais les zones de perte sous pression ne sont pas encore assez stabilisées pour être cartographiées.</li></ul>
+        <p class="card-meta">État vide volontaire : le rapport refuse de cartographier une zone instable.</p>
+      </article>
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : moyenne</span></div>
+        <h3>Zone signal — Récupération</h3>
+        <p>Lecture zone par zone des récupérations utiles.</p>
+        <ul><li>Z3-C : 39</li><li>Z5-C : 16</li><li>Z5-HSR : 5</li></ul>
+        <p class="card-meta">Signal répété dans les agrégats officiels, à confirmer sur plusieurs matchs.</p>
+      </article></div>
+      <h3>Implication et causes</h3>
+      <div class="grid">
+      <article class="card coach-v1-card">
+        <div><span class="badge">Source : Officiel</span> <span class="badge">Confiance : faible</span></div>
+        <h3>Implication joueurs</h3>
+        <p>Ce bloc mesure l’implication dans les traces officielles, pas une note individuelle complète.</p>
+        <ul><li>Aucun joueur ne concentre encore clairement les traces officielles significatives.</li></ul>
+        <p class="card-meta">Implication joueurs reste un signal officiel prudent, encore limité par le volume de traces.</p>
+      </article></div>
+      <details class="internal-markers">
+        <summary>Détails techniques du rapport V1</summary>
+        <div class="muted">Cartes : 13. Cartes officielles : 13. Traces officielles : 63.</div>
+        <div class="muted">Coach Report V1 visualization available: source=official aggregates via Coach Report V0, cardCount=13, officialCards=13, diagnosticCards=0, sandboxCards=0, emptyPressureLossZoneState=true, mutationCounts=0, productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.</div>
+        <div class="muted">workbench_chain_coach_report_v1_visualization, coach_report_v1_visualization, coach_report_v1_visualization_status_available, coach_report_v1_origin_coach_report_trace_v0, coach_report_v1_card_count_13, coach_report_v1_official_cards_count_13, coach_report_v1_diagnostic_cards_count_0, coach_report_v1_sandbox_cards_count_0, coach_report_v1_uses_official_aggregates, coach_report_v1_diagnostic_kept_separate, coach_report_v1_sandbox_kept_separate, coach_report_v1_selection_preview_still_sandbox_only, coach_report_v1_selection_preview_confidence_not_upgraded, coach_report_v1_empty_pressure_loss_zone_state_true, coach_report_v1_score_mutation_count_0, coach_report_v1_possession_mutation_count_0, coach_report_v1_production_scoring_event_creation_count_0, coach_report_v1_global_economy_claim_forbidden, scoring_constants_unchanged, coach_report_v1_signal_lines_Danger officiel : Z3-C : 23 trace(s) officielle(s) | Pression et pertes : Pression détectée, mais les zones de perte sous pression ne sont pas encore assez stabilisées pour être cartographiées. | Récupérations : Z3-C : 39 trace(s) officielle(s) | Implication joueurs : Aucun joueur ne concentre encore clairement les traces officielles significatives. | Causes et impacts : récupération défensive : 63 | Point de vigilance : A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation., coach_report_v1_watchpoint_A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation., coach_report_v1_official_trace_count_63</div>
+      </details>
+    </section>
+    
     <section>
       <h2>Rapport coach depuis les agrégats officiels</h2>
       <p>Cette lecture s'appuie d'abord sur les agrégats officiels du match. Les diagnostics et le sandbox restent séparés et ne sont pas utilisés comme vérité officielle.</p>
