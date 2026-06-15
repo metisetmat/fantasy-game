@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-15T10:47:26.582Z
-Task/sprint: Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence
+Generated: 2026-06-15T11:43:40.755Z
+Task/sprint: Sprint 4K - Trace-backed Selection Preview
 Mode: MINIMAL_REVIEW
 Final file count: 18
 
@@ -20,8 +20,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4j.md
-- validation.fullmatch-workbench-chain-replay-4j.md
+- fullmatch-workbench-chain-replay-4k.md
+- validation.fullmatch-workbench-chain-replay-4k.md
 - README.md
 
 ## Bundle Files

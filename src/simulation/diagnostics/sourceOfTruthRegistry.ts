@@ -33,6 +33,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -900,6 +901,42 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "team-wide tactical superiority",
       "that a coach must apply any selection preview",
       "that a real player should replace another player",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING: {
+    scope: "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING",
+    canProve: [
+      "official aggregate traces can support a Selection Preview hypothesis",
+      "trace_supported remains non-applied and non-binding",
+      "officially_confirmed exists as a future status but is not used",
+    ],
+    canSuggest: [
+      "which Selection Preview cards have official support",
+      "which official danger, recovery, cause, impact, player, goalkeeper, or second-ball signals support each preview",
+      "which preview ideas remain sandbox_only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any selection preview",
+      "that a selection preview is officially confirmed",
+      "that a real lineup change is recommended",
     ],
     cannotOverride: [
       "lineup",

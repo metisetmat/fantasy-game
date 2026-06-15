@@ -82,6 +82,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 26;
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return 25;
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -182,6 +184,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le plan de test coach multi-scénarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return "Relire la prévisualisation de sélection";
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return "Relire l'appui des traces a la previsualisation";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

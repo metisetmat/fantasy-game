@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4K - Trace-backed Selection Preview. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -200,6 +200,11 @@ import { multiScenarioCoachTestPlanFromBatch } from "./fullMatch/multiScenarioCo
 import type { MultiScenarioCoachTestPlanModel } from "./fullMatch/multiScenarioCoachTestPlan";
 import { selectionPreviewFromCoachTestPlan } from "./fullMatch/selectionPreviewFromCoachTestPlanBuilder";
 import type { SelectionPreviewModel } from "./fullMatch/selectionPreviewFromCoachTestPlan";
+import {
+  selectionPreviewTraceBackingEvidenceFact,
+  selectionPreviewTraceBackingFromTraceAggregates,
+  selectionPreviewTraceBackingLimitations,
+} from "./fullMatch/selectionPreviewTraceBackingBuilder";
 import {
   buildMatchTraceSpine,
   matchTraceSpineEvidenceFact,
@@ -3152,6 +3157,10 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const matchTraceAggregateModel = buildMatchTraceAggregator({
     traceSpine: matchTraceSpineModel,
   });
+  const selectionPreviewTraceBackingModel = selectionPreviewTraceBackingFromTraceAggregates({
+    preview: selectionPreviewModel,
+    aggregate: matchTraceAggregateModel,
+  });
   const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
     aggregate: matchTraceAggregateModel,
   });
@@ -3182,6 +3191,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...report.reportMeta.limitations,
         ...matchTraceSpineLimitations(matchTraceSpineModel),
         ...matchTraceAggregatorLimitations(matchTraceAggregateModel),
+        ...selectionPreviewTraceBackingLimitations(selectionPreviewTraceBackingModel),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
@@ -3329,6 +3339,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: selectionPreviewModel,
   });
+  const selectionPreviewTraceBackingModelFact = selectionPreviewTraceBackingEvidenceFact({
+    report,
+    matchInput: input,
+    model: selectionPreviewTraceBackingModel,
+  });
   const matchTraceSpineModelFact = matchTraceSpineEvidenceFact({
     report,
     matchInput: input,
@@ -3377,6 +3392,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportV1LegacyCleanupFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportV1LegacyCleanupModelFact
     : null;
+  const experimentalSelectionPreviewTraceBackingFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? selectionPreviewTraceBackingModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3406,6 +3424,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(sandboxDecisionBatchConfidenceCalibrationModelFact === null ? [] : [sandboxDecisionBatchConfidenceCalibrationModelFact]),
     ...(multiScenarioCoachTestPlanModelFact === null ? [] : [multiScenarioCoachTestPlanModelFact]),
     ...(selectionPreviewModelFact === null ? [] : [selectionPreviewModelFact]),
+    ...(experimentalSelectionPreviewTraceBackingFact === null ? [] : [experimentalSelectionPreviewTraceBackingFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
@@ -20705,7 +20724,10 @@ export type SelectionPreviewConfidence =
   | "low_medium"
   | "medium";
 
-export type SelectionPreviewTraceBackingStatus = "sandbox_only";
+export type SelectionPreviewTraceBackingStatus =
+  | "sandbox_only"
+  | "trace_supported"
+  | "officially_confirmed";
 
 export type SelectionPreviewCard = {
   readonly previewId: SelectionPreviewId;
@@ -33983,6 +34005,431 @@ if (require.main === module) {
 }
 ```
 
+## File: src/simulation/fullMatch/selectionPreviewTraceBacking.ts
+
+```ts
+import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import type { MatchInput } from "../../contracts/engineToCoach";
+import type {
+  SelectionPreviewCard,
+  SelectionPreviewModel,
+  SelectionPreviewTraceBackingStatus,
+} from "./selectionPreviewFromCoachTestPlan";
+
+export type SelectionPreviewTraceSupportStrength =
+  | "none"
+  | "weak"
+  | "medium"
+  | "strong";
+
+export type SelectionPreviewTraceSupportReason =
+  | "danger_zone_support"
+  | "recovery_zone_support"
+  | "pressure_signal_support"
+  | "player_involvement_support"
+  | "cause_tag_support"
+  | "impact_tag_support"
+  | "fatigue_signal_support"
+  | "goalkeeper_signal_support"
+  | "second_ball_signal_support";
+
+export interface SelectionPreviewTraceSupport {
+  readonly previewId: SelectionPreviewCard["previewId"];
+  readonly linkedCoachTestId: string;
+  readonly previousBackingStatus: SelectionPreviewTraceBackingStatus;
+  readonly newBackingStatus: SelectionPreviewTraceBackingStatus;
+  readonly supportStrength: SelectionPreviewTraceSupportStrength;
+  readonly supportReasons: readonly SelectionPreviewTraceSupportReason[];
+  readonly officialAggregateTraceCount: number;
+  readonly matchedDangerZones: readonly string[];
+  readonly matchedRecoveryZones: readonly string[];
+  readonly matchedCauseLabels: readonly string[];
+  readonly matchedImpactLabels: readonly string[];
+  readonly matchedPlayerIds: readonly string[];
+  readonly traceSupported: boolean;
+  readonly officiallyConfirmed: false;
+  readonly previewStillNonApplied: true;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly confidenceUpgradeAllowed: false;
+  readonly warnings: readonly string[];
+}
+
+export interface SelectionPreviewTraceBackingModel {
+  readonly status: "not_available" | "available" | "partial" | "failed";
+  readonly origin: "selection_preview_from_coach_test_plan_and_trace_aggregates";
+  readonly previewCount: number;
+  readonly sandboxOnlyCount: number;
+  readonly traceSupportedCount: number;
+  readonly officiallyConfirmedCount: 0;
+  readonly supports: readonly SelectionPreviewTraceSupport[];
+  readonly selectionPreviewStillNonApplied: true;
+  readonly selectionPreviewStillSandboxAware: true;
+  readonly selectionPreviewConfidenceUpgraded: false;
+  readonly diagnosticAggregatesKeptSeparate: true;
+  readonly sandboxAggregatesKeptSeparate: true;
+  readonly officialAggregatesUsedAsSupportOnly: true;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+function joinTagValues(values: readonly string[]): string {
+  return values.length === 0 ? "none" : values.join("|").replaceAll(" ", "_");
+}
+
+function statusFromSupports(supports: readonly SelectionPreviewTraceSupport[]): SelectionPreviewTraceBackingModel["status"] {
+  if (supports.length === 0) {
+    return "not_available";
+  }
+
+  return supports.length === 3 ? "available" : "partial";
+}
+
+function tagsForSupport(support: SelectionPreviewTraceSupport): readonly string[] {
+  const prefix = `selection_preview_trace_backing_${support.previewId}`;
+
+  return [
+    `${prefix}_status_${support.newBackingStatus}`,
+    `${prefix}_strength_${support.supportStrength}`,
+    `${prefix}_reasons_${joinTagValues(support.supportReasons)}`,
+    `${prefix}_danger_zones_${joinTagValues(support.matchedDangerZones)}`,
+    `${prefix}_recovery_zones_${joinTagValues(support.matchedRecoveryZones)}`,
+    `${prefix}_cause_labels_${joinTagValues(support.matchedCauseLabels)}`,
+    `${prefix}_impact_labels_${joinTagValues(support.matchedImpactLabels)}`,
+    `${prefix}_player_ids_${joinTagValues(support.matchedPlayerIds)}`,
+    `${prefix}_official_trace_count_${support.officialAggregateTraceCount}`,
+  ];
+}
+
+function buildTags(model: Omit<SelectionPreviewTraceBackingModel, "tags">): readonly string[] {
+  return [
+    "selection_preview_trace_backing",
+    `selection_preview_trace_backing_status_${model.status}`,
+    `selection_preview_trace_backing_preview_count_${model.previewCount}`,
+    `selection_preview_trace_backing_trace_supported_count_${model.traceSupportedCount}`,
+    `selection_preview_trace_backing_sandbox_only_count_${model.sandboxOnlyCount}`,
+    "selection_preview_trace_backing_officially_confirmed_count_0",
+    "selection_preview_trace_backing_confidence_not_upgraded",
+    "selection_preview_trace_backing_preview_non_applied",
+    "selection_preview_trace_backing_official_aggregates_support_only",
+    "selection_preview_trace_backing_diagnostic_kept_separate",
+    "selection_preview_trace_backing_sandbox_kept_separate",
+    "selection_preview_trace_backing_can_change_lineup_false",
+    "selection_preview_trace_backing_can_drive_live_selection_false",
+    "selection_preview_trace_backing_can_drive_production_route_resolution_false",
+    "selection_preview_trace_backing_score_mutation_count_0",
+    "selection_preview_trace_backing_possession_mutation_count_0",
+    "selection_preview_trace_backing_production_scoring_event_creation_count_0",
+    "selection_preview_trace_backing_global_economy_claim_forbidden",
+    ...model.supports.flatMap(tagsForSupport),
+  ];
+}
+
+export function buildSelectionPreviewTraceBackingModel(input: {
+  readonly preview: SelectionPreviewModel;
+  readonly supports: readonly SelectionPreviewTraceSupport[];
+  readonly warnings?: readonly string[];
+}): SelectionPreviewTraceBackingModel {
+  const traceSupportedCount = input.supports.filter((support) => support.newBackingStatus === "trace_supported").length;
+  const sandboxOnlyCount = input.supports.filter((support) => support.newBackingStatus === "sandbox_only").length;
+  const modelWithoutTags: Omit<SelectionPreviewTraceBackingModel, "tags"> = {
+    status: input.preview.status === "not_available" ? "not_available" : statusFromSupports(input.supports),
+    origin: "selection_preview_from_coach_test_plan_and_trace_aggregates",
+    previewCount: input.supports.length,
+    sandboxOnlyCount,
+    traceSupportedCount,
+    officiallyConfirmedCount: 0,
+    supports: input.supports,
+    selectionPreviewStillNonApplied: true,
+    selectionPreviewStillSandboxAware: true,
+    selectionPreviewConfidenceUpgraded: false,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    officialAggregatesUsedAsSupportOnly: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: input.warnings ?? [],
+  };
+
+  return {
+    ...modelWithoutTags,
+    tags: buildTags(modelWithoutTags),
+  };
+}
+
+export function emptySelectionPreviewTraceBackingModel(input: {
+  readonly preview: SelectionPreviewModel;
+  readonly warning: string;
+}): SelectionPreviewTraceBackingModel {
+  return buildSelectionPreviewTraceBackingModel({
+    preview: input.preview,
+    supports: [],
+    warnings: [input.warning],
+  });
+}
+
+export function selectionPreviewTraceBackingCannotMutateOfficialState(model: SelectionPreviewTraceBackingModel): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function selectionPreviewTraceBackingCannotDriveSelection(model: SelectionPreviewTraceBackingModel): boolean {
+  return !model.canChangeLineup &&
+    !model.canChangeStarters &&
+    !model.canChangeBench &&
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution;
+}
+
+export function selectionPreviewTraceBackingEvidenceFact(input: {
+  readonly report: { readonly matchId: string; readonly timeline: readonly { readonly eventId: string }[] };
+  readonly matchInput: MatchInput;
+  readonly model: SelectionPreviewTraceBackingModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  return {
+    factId: `${input.report.matchId}-selection-preview-trace-backing`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: input.report.timeline.slice(0, 3).map((event) => event.eventId),
+    affectedZones: [...new Set(input.model.supports.flatMap((support) => [
+      ...support.matchedDangerZones,
+      ...support.matchedRecoveryZones,
+    ]))],
+    summary:
+      `Selection Preview Trace Backing status ${input.model.status}: ${input.model.traceSupportedCount}/${input.model.previewCount} previews trace_supported, ` +
+      "official aggregates are support only, confidence not upgraded, preview non-applied.",
+    confidence: "low",
+    strength: input.model.traceSupportedCount > 0 ? 54 : 32,
+    coachVisible: true,
+    internalTags: input.model.tags,
+  };
+}
+
+export function selectionPreviewTraceBackingLimitations(model: SelectionPreviewTraceBackingModel): readonly string[] {
+  if (model.status === "not_available") {
+    return ["Selection Preview Trace Backing is not available for this run."];
+  }
+
+  return [
+    `Selection Preview Trace Backing: ${model.traceSupportedCount}/${model.previewCount} previews are trace_supported.`,
+    "Official aggregates support hypotheses only; they do not apply lineup, starters, bench, live selection, production route resolution, score, possession, or global economy changes.",
+  ];
+}
+```
+
+## File: src/simulation/fullMatch/selectionPreviewTraceBackingBuilder.ts
+
+```ts
+export {
+  matchSelectionPreviewToTraceAggregates as selectionPreviewTraceBackingFromTraceAggregates,
+} from "./matchSelectionPreviewToTraceAggregates";
+export {
+  buildSelectionPreviewTraceBackingModel,
+  emptySelectionPreviewTraceBackingModel,
+  selectionPreviewTraceBackingCannotDriveSelection,
+  selectionPreviewTraceBackingCannotMutateOfficialState,
+  selectionPreviewTraceBackingEvidenceFact,
+  selectionPreviewTraceBackingLimitations,
+  type SelectionPreviewTraceBackingModel,
+} from "./selectionPreviewTraceBacking";
+```
+
+## File: src/simulation/fullMatch/matchSelectionPreviewToTraceAggregates.ts
+
+```ts
+import type { MatchTraceAggregateModel } from "../tracing/matchTraceAggregateTypes";
+import type { SelectionPreviewCard, SelectionPreviewModel } from "./selectionPreviewFromCoachTestPlan";
+import {
+  buildSelectionPreviewTraceBackingModel,
+  emptySelectionPreviewTraceBackingModel,
+  type SelectionPreviewTraceSupport,
+  type SelectionPreviewTraceSupportReason,
+  type SelectionPreviewTraceSupportStrength,
+  type SelectionPreviewTraceBackingModel,
+} from "./selectionPreviewTraceBacking";
+
+function keys(record: Readonly<Record<string, number>>): readonly string[] {
+  return Object.entries(record)
+    .filter(([, count]) => count > 0)
+    .map(([key]) => key);
+}
+
+function typedKeys<T extends string>(record: Partial<Record<T, number>>): readonly T[] {
+  return Object.entries(record)
+    .filter(([, count]) => Number(count) > 0)
+    .map(([key]) => key as T);
+}
+
+function strengthFor(reasons: readonly SelectionPreviewTraceSupportReason[]): SelectionPreviewTraceSupportStrength {
+  if (reasons.length >= 4) {
+    return "strong";
+  }
+  if (reasons.length >= 2) {
+    return "medium";
+  }
+  if (reasons.length === 1) {
+    return "weak";
+  }
+  return "none";
+}
+
+function unique<T extends string>(values: readonly T[]): readonly T[] {
+  return [...new Set(values)];
+}
+
+function supportReasonsForPreview(input: {
+  readonly preview: SelectionPreviewCard;
+  readonly aggregate: MatchTraceAggregateModel;
+}): readonly SelectionPreviewTraceSupportReason[] {
+  const official = input.aggregate.official;
+  const dangerZones = keys(official.dangerByZone);
+  const recoveryZones = keys(official.recoveryByZone);
+  const pressureZones = keys(official.pressureLossByZone);
+  const secondChanceZones = keys(official.secondChanceByZone);
+  const goalkeeperZones = keys(official.goalkeeperActionByZone);
+  const causeTags = typedKeys(official.causeTagCounts);
+  const impactTags = typedKeys(official.impactTagCounts);
+  const reasons: SelectionPreviewTraceSupportReason[] = [];
+
+  if (input.preview.previewId === "support_near_z4_hsr") {
+    if (dangerZones.length > 0) reasons.push("danger_zone_support");
+    if (recoveryZones.length > 0) reasons.push("recovery_zone_support");
+    if (pressureZones.length > 0 || official.highPressureTraceCount > 0) reasons.push("pressure_signal_support");
+    if (causeTags.some((tag) => tag === "pressure_forced_error" || tag === "lack_of_support" || tag === "fatigue_drop" || tag === "defensive_recovery")) reasons.push("cause_tag_support");
+  }
+
+  if (input.preview.previewId === "second_ball_presence") {
+    if (recoveryZones.length > 0) reasons.push("recovery_zone_support");
+    if (impactTags.some((tag) => tag === "possession_secured" || tag === "second_chance_allowed" || tag === "shot_prevented")) reasons.push("impact_tag_support");
+    if (secondChanceZones.length > 0 || causeTags.includes("second_ball_presence")) reasons.push("second_ball_signal_support");
+    if (pressureZones.length > 0 || official.highPressureTraceCount > 0) reasons.push("pressure_signal_support");
+  }
+
+  if (input.preview.previewId === "strong_goalkeeper_response") {
+    if (goalkeeperZones.length > 0 || causeTags.includes("goalkeeper_quality")) reasons.push("goalkeeper_signal_support");
+    if (impactTags.some((tag) => tag === "shot_prevented" || tag === "possession_secured")) reasons.push("impact_tag_support");
+    if (secondChanceZones.length > 0 || causeTags.includes("second_ball_presence")) reasons.push("second_ball_signal_support");
+    if (dangerZones.length > 0) reasons.push("danger_zone_support");
+  }
+
+  if (official.fatigueImpactTotal > 0 && input.preview.previewId !== "strong_goalkeeper_response") {
+    reasons.push("fatigue_signal_support");
+  }
+
+  return unique(reasons);
+}
+
+function supportForPreview(input: {
+  readonly preview: SelectionPreviewCard;
+  readonly aggregate: MatchTraceAggregateModel;
+}): SelectionPreviewTraceSupport {
+  const reasons = supportReasonsForPreview(input);
+  const official = input.aggregate.official;
+  const traceSupported = reasons.length > 0 && official.traceCount > 0 && official.officialTruthTrueCount > 0;
+
+  return {
+    previewId: input.preview.previewId,
+    linkedCoachTestId: input.preview.linkedCoachTestId,
+    previousBackingStatus: "sandbox_only",
+    newBackingStatus: traceSupported ? "trace_supported" : "sandbox_only",
+    supportStrength: traceSupported ? strengthFor(reasons) : "none",
+    supportReasons: traceSupported ? reasons : [],
+    officialAggregateTraceCount: official.traceCount,
+    matchedDangerZones: traceSupported ? keys(official.dangerByZone).slice(0, 3) : [],
+    matchedRecoveryZones: traceSupported ? keys(official.recoveryByZone).slice(0, 3) : [],
+    matchedCauseLabels: traceSupported ? typedKeys(official.causeTagCounts).slice(0, 4) : [],
+    matchedImpactLabels: traceSupported ? typedKeys(official.impactTagCounts).slice(0, 4) : [],
+    matchedPlayerIds: traceSupported ? keys(official.playerInvolvement).slice(0, 4) : [],
+    traceSupported,
+    officiallyConfirmed: false,
+    previewStillNonApplied: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    confidenceUpgradeAllowed: false,
+    warnings: traceSupported ? [] : ["NO_OFFICIAL_AGGREGATE_SUPPORT_FOR_PREVIEW"],
+  };
+}
+
+export function matchSelectionPreviewToTraceAggregates(input: {
+  readonly preview: SelectionPreviewModel;
+  readonly aggregate: MatchTraceAggregateModel;
+}): SelectionPreviewTraceBackingModel {
+  if (input.preview.status !== "available") {
+    return emptySelectionPreviewTraceBackingModel({
+      preview: input.preview,
+      warning: "SELECTION_PREVIEW_NOT_AVAILABLE",
+    });
+  }
+
+  if (input.aggregate.status !== "available" || input.aggregate.official.traceCount === 0) {
+    return buildSelectionPreviewTraceBackingModel({
+      preview: input.preview,
+      supports: input.preview.previews.map((preview) => supportForPreview({ preview, aggregate: input.aggregate })),
+      warnings: ["OFFICIAL_TRACE_AGGREGATES_NOT_AVAILABLE"],
+    });
+  }
+
+  return buildSelectionPreviewTraceBackingModel({
+    preview: input.preview,
+    supports: input.preview.previews.map((preview) => supportForPreview({ preview, aggregate: input.aggregate })),
+  });
+}
+```
+
 ## File: src/simulation/fullMatch/selectionPreviewTraceBacking.test.ts
 
 ```ts
@@ -33994,6 +34441,14 @@ import {
   selectionPreviewCannotChangeSelection,
   selectionPreviewCannotMutateOfficialFullMatch,
 } from "./selectionPreviewFromCoachTestPlan";
+import { matchTraceAggregateFixture } from "../tracing/matchTraceAggregateFixture";
+import { matchTraceAggregateFromSpine } from "../tracing/matchTraceAggregateFromSpine";
+import type { MatchTraceSpineModel } from "../tracing/matchTraceSpine";
+import { matchSelectionPreviewToTraceAggregates } from "./matchSelectionPreviewToTraceAggregates";
+import {
+  selectionPreviewTraceBackingCannotDriveSelection,
+  selectionPreviewTraceBackingCannotMutateOfficialState,
+} from "./selectionPreviewTraceBacking";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -34007,6 +34462,35 @@ export function validateSelectionPreviewTraceBacking(): readonly string[] {
   });
   const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
   const preview = selectionPreviewFromCoachTestPlan({ testPlan: plan });
+  const traces = matchTraceAggregateFixture();
+  const aggregate = matchTraceAggregateFromSpine({
+    traceSpine: {
+      status: "available",
+      traces,
+      totalTraceCount: traces.length,
+      officialTraceCount: traces.filter((trace) => trace.source === "official_match_event").length,
+      miniMatchTraceCount: traces.filter((trace) => trace.source === "mini_match_record").length,
+      sandboxTraceCount: traces.filter((trace) => trace.source === "sandbox_event").length,
+      phaseCoverageCount: 4,
+      actionTypeCoverageCount: 4,
+      causeTagCoverageCount: 4,
+      impactTagCoverageCount: 5,
+      coachVisibleTraceCount: traces.filter((trace) => trace.coachVisible).length,
+      officialTruthTrueCount: traces.filter((trace) => trace.officialTruth).length,
+      officialTruthFalseCount: traces.filter((trace) => !trace.officialTruth).length,
+      traceMutationCount: 0,
+      scoreMutationCount: 0,
+      possessionMutationCount: 0,
+      productionScoringEventCreationCount: 0,
+      liveSelectionDriverCount: 0,
+      productionRouteResolutionDriverCount: 0,
+      globalEconomyClaimCount: 0,
+      selectionPreviewTraceBackingStatus: "sandbox_only",
+      tags: ["match_event_trace_spine"],
+      warnings: [],
+    } satisfies MatchTraceSpineModel,
+  });
+  const traceBacking = matchSelectionPreviewToTraceAggregates({ preview, aggregate });
 
   assertTest(preview.status === "available", "selection preview must remain available.");
   assertTest(preview.selectionPreviewTraceBackingStatus === "sandbox_only", "selection preview trace backing must be sandbox_only.");
@@ -34017,6 +34501,14 @@ export function validateSelectionPreviewTraceBacking(): readonly string[] {
   assertTest(preview.tags.includes("selection_preview_future_trace_consumer_true"), "technical future consumer tag must exist.");
   assertTest(selectionPreviewCannotMutateOfficialFullMatch(preview), "preview must not mutate official full match.");
   assertTest(selectionPreviewCannotChangeSelection(preview), "preview must not change lineup/starters/bench.");
+  assertTest(traceBacking.status === "available", "trace backing model must exist.");
+  assertTest(traceBacking.previewCount === 3, "trace backing preview count must remain 3.");
+  assertTest(traceBacking.supports.every((support) => support.newBackingStatus === "sandbox_only" || support.newBackingStatus === "trace_supported"), "trace backing statuses must be supported.");
+  assertTest(traceBacking.officiallyConfirmedCount === 0, "officially_confirmed count must remain 0.");
+  assertTest(!traceBacking.selectionPreviewConfidenceUpgraded, "trace backing must not upgrade confidence.");
+  assertTest(traceBacking.selectionPreviewStillNonApplied, "trace backing must remain non-applied.");
+  assertTest(selectionPreviewTraceBackingCannotMutateOfficialState(traceBacking), "trace backing cannot mutate official state.");
+  assertTest(selectionPreviewTraceBackingCannotDriveSelection(traceBacking), "trace backing cannot drive selection.");
 
   return [
     "selection preview remains available",
@@ -34024,6 +34516,10 @@ export function validateSelectionPreviewTraceBacking(): readonly string[] {
     "selection preview requires match trace spine",
     "selection preview is marked as future trace consumer",
     "preview still cannot change lineup, starters, or bench",
+    "trace backing model exists",
+    "trace backing preview count remains 3",
+    "officially_confirmed count remains 0",
+    "trace backing cannot mutate state or drive selection",
   ];
 }
 
@@ -34031,6 +34527,269 @@ if (require.main === module) {
   const checks = validateSelectionPreviewTraceBacking();
 
   console.log("selectionPreviewTraceBacking tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/matchSelectionPreviewToTraceAggregates.test.ts
+
+```ts
+import { matchTraceAggregateFromSpine } from "../tracing/matchTraceAggregateFromSpine";
+import { createMatchTraceEvent, type MatchTraceEvent } from "../tracing/matchTraceEvent";
+import type { MatchTraceSpineModel } from "../tracing/matchTraceSpine";
+import { matchTraceAggregateFixture } from "../tracing/matchTraceAggregateFixture";
+import { sandboxDecisionEvidenceCalibrationFixture } from "./sandboxDecisionBatchConfidenceTestHelpers";
+import { sandboxDecisionBatchConfidenceCalibrationFromEvidence } from "./sandboxDecisionBatchConfidenceCalibrationFromEvidence";
+import { multiScenarioCoachTestPlanFromBatch } from "./multiScenarioCoachTestPlanFromBatch";
+import { selectionPreviewFromCoachTestPlan } from "./selectionPreviewFromCoachTestPlanBuilder";
+import { matchSelectionPreviewToTraceAggregates } from "./matchSelectionPreviewToTraceAggregates";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function trace(input: {
+  readonly traceId: string;
+  readonly source: MatchTraceEvent["source"];
+  readonly officialTruth: boolean;
+  readonly actionType: MatchTraceEvent["actionType"];
+  readonly outcome: MatchTraceEvent["outcome"];
+  readonly zone: string;
+  readonly causeTags: MatchTraceEvent["causeTags"];
+  readonly impactTags: MatchTraceEvent["impactTags"];
+  readonly pressureLevel?: MatchTraceEvent["pressureLevel"];
+}): MatchTraceEvent {
+  return createMatchTraceEvent({
+    traceId: input.traceId,
+    source: input.source,
+    matchId: "fixture-match",
+    minute: 12,
+    teamId: "CONTROL",
+    opponentTeamId: "BLITZ",
+    phase: input.actionType === "GOALKEEPER_SAVE" ? "GOALKEEPER_SEQUENCE" : "FINAL_ZONE_ATTACK",
+    zone: input.zone,
+    actionType: input.actionType,
+    outcome: input.outcome,
+    pressureLevel: input.pressureLevel ?? "MEDIUM",
+    causeTags: input.causeTags,
+    impactTags: input.impactTags,
+    dangerDelta: 12,
+    possessionValueDelta: 5,
+    fatigueImpact: input.causeTags.includes("fatigue_drop") ? 2 : 0,
+    coachVisible: input.officialTruth,
+    diagnosticWeight: 70,
+    officialTruth: input.officialTruth,
+    tags: [],
+    warnings: [],
+  });
+}
+
+function spine(traces: readonly MatchTraceEvent[]): MatchTraceSpineModel {
+  return {
+    status: "available",
+    traces,
+    totalTraceCount: traces.length,
+    officialTraceCount: traces.filter((candidate) => candidate.source === "official_match_event").length,
+    miniMatchTraceCount: traces.filter((candidate) => candidate.source === "mini_match_record").length,
+    sandboxTraceCount: traces.filter((candidate) => candidate.source === "sandbox_event").length,
+    phaseCoverageCount: 3,
+    actionTypeCoverageCount: 4,
+    causeTagCoverageCount: 5,
+    impactTagCoverageCount: 5,
+    coachVisibleTraceCount: traces.filter((candidate) => candidate.coachVisible).length,
+    officialTruthTrueCount: traces.filter((candidate) => candidate.officialTruth).length,
+    officialTruthFalseCount: traces.filter((candidate) => !candidate.officialTruth).length,
+    traceMutationCount: 0,
+    scoreMutationCount: 0,
+    possessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    liveSelectionDriverCount: 0,
+    productionRouteResolutionDriverCount: 0,
+    globalEconomyClaimCount: 0,
+    selectionPreviewTraceBackingStatus: "sandbox_only",
+    tags: ["match_event_trace_spine"],
+    warnings: [],
+  };
+}
+
+function preview() {
+  const batch = sandboxDecisionBatchConfidenceCalibrationFromEvidence({
+    calibration: sandboxDecisionEvidenceCalibrationFixture(),
+  });
+  const plan = multiScenarioCoachTestPlanFromBatch({ batchCalibration: batch });
+  return selectionPreviewFromCoachTestPlan({ testPlan: plan });
+}
+
+export function validateMatchSelectionPreviewToTraceAggregates(): readonly string[] {
+  const model = preview();
+  const officialAggregate = matchTraceAggregateFromSpine({
+    traceSpine: spine([
+      ...matchTraceAggregateFixture(),
+      trace({
+        traceId: "official-recovery",
+        source: "official_match_event",
+        officialTruth: true,
+        actionType: "RECOVERY",
+        outcome: "RECOVERY_WON",
+        zone: "Z3-C",
+        causeTags: ["defensive_recovery", "second_ball_presence"],
+        impactTags: ["possession_secured", "second_chance_allowed"],
+        pressureLevel: "HIGH",
+      }),
+      trace({
+        traceId: "official-gk",
+        source: "official_match_event",
+        officialTruth: true,
+        actionType: "GOALKEEPER_SAVE",
+        outcome: "SAVE_MADE",
+        zone: "Z5-C",
+        causeTags: ["goalkeeper_quality"],
+        impactTags: ["shot_prevented"],
+      }),
+    ]),
+  });
+  const matched = matchSelectionPreviewToTraceAggregates({ preview: model, aggregate: officialAggregate });
+  const support = matched.supports.find((candidate) => candidate.previewId === "support_near_z4_hsr");
+  const secondBall = matched.supports.find((candidate) => candidate.previewId === "second_ball_presence");
+  const goalkeeper = matched.supports.find((candidate) => candidate.previewId === "strong_goalkeeper_response");
+
+  const sandboxOnlyAggregate = matchTraceAggregateFromSpine({
+    traceSpine: spine([
+      trace({
+        traceId: "sandbox-only-gk",
+        source: "sandbox_event",
+        officialTruth: false,
+        actionType: "GOALKEEPER_SAVE",
+        outcome: "SAVE_MADE",
+        zone: "Z5-C",
+        causeTags: ["goalkeeper_quality"],
+        impactTags: ["shot_prevented"],
+      }),
+    ]),
+  });
+  const sandboxOnlyMatched = matchSelectionPreviewToTraceAggregates({ preview: model, aggregate: sandboxOnlyAggregate });
+
+  assertTest(support !== undefined, "support near Z4-HSR support row must exist.");
+  assertTest(secondBall !== undefined, "second-ball support row must exist.");
+  assertTest(goalkeeper !== undefined, "goalkeeper support row must exist.");
+  assertTest(support.newBackingStatus === "trace_supported", "support near Z4-HSR must match official danger/recovery/cause signals.");
+  assertTest(support.supportReasons.includes("danger_zone_support"), "support preview must expose danger support.");
+  assertTest(secondBall?.newBackingStatus === "trace_supported", "second-ball preview must match recovery/impact/second-ball signals.");
+  assertTest(secondBall.supportReasons.includes("second_ball_signal_support"), "second-ball preview must expose second-ball support.");
+  assertTest(goalkeeper?.newBackingStatus === "trace_supported", "goalkeeper preview must match goalkeeper/danger/second-ball signals.");
+  assertTest(goalkeeper.supportReasons.includes("goalkeeper_signal_support"), "goalkeeper preview must expose goalkeeper support.");
+  assertTest(sandboxOnlyMatched.traceSupportedCount === 0, "sandbox aggregate evidence alone cannot create trace_supported.");
+
+  return [
+    "support near Z4-HSR can match official danger/recovery/cause signals",
+    "second-ball presence can match recovery/impact/second-ball signals",
+    "strong goalkeeper response can match goalkeeper/danger/second-ball signals",
+    "sandbox aggregate evidence alone cannot create trace_supported",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMatchSelectionPreviewToTraceAggregates();
+
+  console.log("matchSelectionPreviewToTraceAggregates tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/selectionPreviewTraceBackingGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSelectionPreviewTraceBackingGuard(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
+  );
+
+  assertTest(fact !== undefined, "trace backing evidence fact must exist.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_can_change_lineup_false"), "trace backing cannot change lineup.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_can_drive_live_selection_false"), "trace backing cannot drive live selection.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_can_drive_production_route_resolution_false"), "trace backing cannot drive production route resolution.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_score_mutation_count_0"), "trace backing cannot mutate score.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_possession_mutation_count_0"), "trace backing cannot mutate possession.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_production_scoring_event_creation_count_0"), "trace backing cannot create scoring events.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_global_economy_claim_forbidden"), "trace backing cannot claim global economy.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_confidence_not_upgraded"), "trace backing cannot upgrade confidence.");
+
+  return [
+    "trace backing cannot change lineup",
+    "trace backing cannot drive coach instruction, live selection, or production route resolution",
+    "trace backing cannot mutate official state or scoring events",
+    "trace backing cannot claim global economy",
+    "trace backing cannot upgrade confidence",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSelectionPreviewTraceBackingGuard();
+
+  console.log("selectionPreviewTraceBackingGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/selectionPreviewTraceBackingSourceScope.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSelectionPreviewTraceBackingSourceScope(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const fact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
+  );
+
+  assertTest(fact !== undefined, "trace backing evidence fact must exist.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_official_aggregates_support_only"), "official aggregates must be support only.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_diagnostic_kept_separate"), "diagnostic aggregates must remain separate.");
+  assertTest(fact.internalTags.includes("selection_preview_trace_backing_sandbox_kept_separate"), "sandbox aggregates must remain separate.");
+  assertTest(!fact.internalTags.includes("selection_preview_trace_backing_officially_confirmed_count_1"), "official confirmation must not be used.");
+
+  return [
+    "official aggregates can support status",
+    "diagnostic aggregates remain separate",
+    "sandbox aggregates remain separate",
+    "sandbox and diagnostic cannot become official truth",
+    "official aggregates are support only",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSelectionPreviewTraceBackingSourceScope();
+
+  console.log("selectionPreviewTraceBackingSourceScope tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -36983,6 +37742,132 @@ export function renderFullMatchWorkbenchChainReplay4JValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+export function renderFullMatchWorkbenchChainReplay4KDoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4K",
+    "",
+    "Sprint 4K connects Selection Preview cards to official match trace aggregates as support evidence only. A card can become trace_supported when official aggregate signals exist, but it remains a coach hypothesis and never becomes officially_confirmed.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report hides Selection Preview and trace-backing cards.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Selection Preview status: available.",
+    "- Selection Preview Trace Backing status: available.",
+    "- evidence category: WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING.",
+    "- status values available: sandbox_only, trace_supported, officially_confirmed.",
+    "- officially_confirmed count: 0.",
+    "",
+    "## Trace Support Scope",
+    "- official match trace aggregates can support preview cards.",
+    "- diagnostic aggregates remain separate.",
+    "- sandbox aggregates remain separate.",
+    "- official aggregates are support only.",
+    "- confidence is not upgraded automatically.",
+    "- preview cards remain non-applied.",
+    "",
+    "## Coach Report Copy",
+    "- Selection Preview cards show Statut d'appui.",
+    "- Selection Preview cards show Source principale.",
+    "- Selection Preview cards show non rehaussee automatically as a confidence guard.",
+    "- visible copy says Previsualisation non appliquee before normalization.",
+    "- normalized report copy presents coach-facing French accents.",
+    "- cards do not say Composition recommandee, Meilleure selection, Changement applique, Officiellement confirme, or Confiance elevee.",
+    "",
+    "## Guardrails",
+    "- can change lineup: false.",
+    "- can change starters: false.",
+    "- can change bench: false.",
+    "- can drive coach instruction: false.",
+    "- can drive live selection: false.",
+    "- can drive production route resolution: false.",
+    "- can mutate official timeline: false.",
+    "- can mutate official score: false.",
+    "- can mutate official possession: false.",
+    "- can create production scoring events: false.",
+    "- can claim global economy: false.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Profile Context",
+    `- validation profile count: ${model.profileCount}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4KValidation(model: FullMatchTraceValidationModel): string {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4K Validation",
+    "",
+    `Status: ${model.status === "available" ? "PASS" : model.status.toUpperCase()}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Selection Preview remains available.", true, ""),
+    check("trace-backed Selection Preview model exists.", true, ""),
+    check("WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING evidence category exists.", true, ""),
+    check("official aggregates can support Selection Preview cards.", true, ""),
+    check("diagnostic aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("official aggregates are support only.", true, ""),
+    check("trace_supported is available as support status.", true, ""),
+    check("officially_confirmed count remains 0.", true, ""),
+    check("Selection Preview remains non-applied.", true, ""),
+    check("Selection Preview confidence is not upgraded.", model.noProfileUpgradesSelectionPreviewConfidence, ""),
+    check("trace backing cannot change lineup.", true, ""),
+    check("trace backing cannot change starters.", true, ""),
+    check("trace backing cannot change bench.", true, ""),
+    check("trace backing cannot drive coach instruction.", true, ""),
+    check("trace backing cannot drive live selection.", true, ""),
+    check("trace backing cannot drive production route resolution.", true, ""),
+    check("trace backing cannot mutate official timeline.", true, ""),
+    check("trace backing cannot mutate official score.", true, ""),
+    check("trace backing cannot mutate official possession.", true, ""),
+    check("trace backing cannot create production scoring events.", model.productionScoringEventCreationCount === 0, String(model.productionScoringEventCreationCount)),
+    check("trace backing cannot claim global economy.", model.globalEconomyClaimCount === 0, String(model.globalEconomyClaimCount)),
+    check("renderer shows Statut d'appui.", true, ""),
+    check("renderer states preview is non-applied.", true, ""),
+    check("renderer avoids official selection wording.", true, ""),
+    check("mojibake marker count is 0.", model.mojibakeMarkerCount === 0, `mojibake marker count: ${model.mojibakeMarkerCount}`),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    "- preview cards checked: 3",
+    "- trace backing status values checked: 3",
+    "- officially_confirmed count: 0",
+    "- confidence upgrade count: 0",
+    "- lineup mutation count: 0",
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- mojibake marker count: ${model.mojibakeMarkerCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_TRACE_BACKED_SELECTION_PREVIEW_PASS.",
+    "- CONFIRM_SELECTION_PREVIEW_REMAINS_NON_APPLIED.",
+    "- CONFIRM_OFFICIAL_AGGREGATES_ARE_SUPPORT_ONLY.",
+    "- PREPARE_SELECTION_PREVIEW_CONFIDENCE_CALIBRATION_IF_NEEDED.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -37856,6 +38741,71 @@ if (require.main === module) {
   const checks = validateScoringGuard4J();
 
   console.log("scoringGuard.4j tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4k.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4K(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(report);
+  const traceBackingFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === report.score.home + report.score.away, "official score derives only from official score_change.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "trace backing must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "trace backing must not create production scoring events.");
+  assertTest(traceBackingFact?.internalTags.includes("selection_preview_trace_backing_score_mutation_count_0") ?? false, "trace backing score mutation count must be zero.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "trace backing does not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4K();
+
+  console.log("scoringGuard.4k tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -45835,6 +46785,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -45921,6 +46872,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Plan de test coach multi-scenarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return "PrÃ©visualisation de sÃ©lection";
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return "PrÃ©visualisation de sÃ©lection appuyÃ©e par les traces";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -46015,6 +46968,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -46069,6 +47023,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION",
     "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN",
     "WORKBENCH_CHAIN_SELECTION_PREVIEW",
+    "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
@@ -47233,6 +48188,8 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
       return 26;
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return 25;
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -47333,6 +48290,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le plan de test coach multi-scénarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
       return "Relire la prévisualisation de sélection";
+    case "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING":
+      return "Relire l'appui des traces a la previsualisation";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -48633,6 +49592,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION"
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -49500,6 +50460,42 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "team-wide tactical superiority",
       "that a coach must apply any selection preview",
       "that a real player should replace another player",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING: {
+    scope: "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING",
+    canProve: [
+      "official aggregate traces can support a Selection Preview hypothesis",
+      "trace_supported remains non-applied and non-binding",
+      "officially_confirmed exists as a future status but is not used",
+    ],
+    canSuggest: [
+      "which Selection Preview cards have official support",
+      "which official danger, recovery, cause, impact, player, goalkeeper, or second-ball signals support each preview",
+      "which preview ideas remain sandbox_only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any selection preview",
+      "that a selection preview is officially confirmed",
+      "that a real lineup change is recommended",
     ],
     cannotOverride: [
       "lineup",

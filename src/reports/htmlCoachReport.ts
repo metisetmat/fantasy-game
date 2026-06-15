@@ -673,6 +673,10 @@ function renderSelectionPreview(report: MatchReport): string {
     candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW" &&
     candidate.internalTags.includes("workbench_chain_selection_preview")
   );
+  const traceBackingFact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING" &&
+    candidate.internalTags.includes("selection_preview_trace_backing")
+  );
 
   if (fact === undefined) {
     return "";
@@ -687,6 +691,7 @@ function renderSelectionPreview(report: MatchReport): string {
   const cards = [
     {
       title: "Soutien proche autour de Z4-HSR",
+      previewId: "support_near_z4_hsr",
       linkedTest: "support_around_z4_hsr",
       scenario: supportScenario,
       suggestedProfile: "Profil à prévisualiser : soutien mobile proche de Z4-HSR.",
@@ -702,6 +707,7 @@ function renderSelectionPreview(report: MatchReport): string {
     },
     {
       title: "Présence sur second ballon",
+      previewId: "second_ball_presence",
       linkedTest: "second_ball_occupation",
       scenario: secondBallScenario,
       suggestedProfile: "Profil à prévisualiser : chasseur de rebond et coureur de pression.",
@@ -717,6 +723,7 @@ function renderSelectionPreview(report: MatchReport): string {
     },
     {
       title: "Réponse face à un gardien fort",
+      previewId: "strong_goalkeeper_response",
       linkedTest: "strong_goalkeeper_fallback",
       scenario: goalkeeperScenario,
       suggestedProfile: "Profil à prévisualiser : option de continuité plus sûre après arrêt.",
@@ -731,11 +738,62 @@ function renderSelectionPreview(report: MatchReport): string {
       confidence: "faible",
     },
   ];
+  const splitTagList = (value: string | null | undefined): readonly string[] =>
+    value === undefined || value === null || value === "none" ? [] : value.split("|");
+  const traceStatus = (previewId: string): string =>
+    traceBackingFact === undefined
+      ? "sandbox_only"
+      : tagValue(traceBackingFact.internalTags, `selection_preview_trace_backing_${previewId}_status_`) ?? "sandbox_only";
+  const traceStrength = (previewId: string): string =>
+    traceBackingFact === undefined
+      ? "none"
+      : tagValue(traceBackingFact.internalTags, `selection_preview_trace_backing_${previewId}_strength_`) ?? "none";
+  const traceReasons = (previewId: string): readonly string[] =>
+    traceBackingFact === undefined
+      ? []
+      : splitTagList(tagValue(traceBackingFact.internalTags, `selection_preview_trace_backing_${previewId}_reasons_`));
+  const traceZones = (previewId: string, suffix: "danger_zones" | "recovery_zones"): readonly string[] =>
+    traceBackingFact === undefined
+      ? []
+      : splitTagList(tagValue(traceBackingFact.internalTags, `selection_preview_trace_backing_${previewId}_${suffix}_`));
+  const reasonLabel = (reason: string): string => {
+    switch (reason) {
+      case "danger_zone_support":
+        return "danger officiel";
+      case "recovery_zone_support":
+        return "recuperation officielle";
+      case "pressure_signal_support":
+        return "pression officielle";
+      case "player_involvement_support":
+        return "implication joueur officielle";
+      case "cause_tag_support":
+        return "cause recurrente officielle";
+      case "impact_tag_support":
+        return "impact officiel";
+      case "fatigue_signal_support":
+        return "fatigue officielle";
+      case "goalkeeper_signal_support":
+        return "signal gardien officiel";
+      case "second_ball_signal_support":
+        return "second ballon officiel";
+      default:
+        return reason;
+    }
+  };
   const cardHtml = cards.map((card) => `
       <article class="card">
-        <h3>${escapeHtml(card.title)}</h3>
+        <h3>Profil a observer — ${escapeHtml(card.title)}</h3>
         <p>${escapeHtml(card.benefit)}</p>
         <ul>
+          <li><strong>Statut d'appui :</strong> ${escapeHtml(traceStatus(card.previewId))}</li>
+          <li><strong>Source principale :</strong> traces officielles en support + hypothese sandbox separee</li>
+          <li><strong>Confiance :</strong> ${escapeHtml(card.confidence)}, non rehaussee automatiquement</li>
+          <li><strong>Force de l'appui trace :</strong> ${escapeHtml(traceStrength(card.previewId))}</li>
+          ${traceReasons(card.previewId).length === 0
+            ? "<li><strong>Signal officiel :</strong> aucun signal officiel suffisant ne confirme encore cette piste.</li>"
+            : `<li><strong>Signal appuye par les traces :</strong> ${escapeHtml(traceReasons(card.previewId).map(reasonLabel).join(", "))}</li>`}
+          ${traceZones(card.previewId, "danger_zones").length === 0 ? "" : `<li><strong>Zones de danger officielles :</strong> ${escapeHtml(traceZones(card.previewId, "danger_zones").join(", "))}</li>`}
+          ${traceZones(card.previewId, "recovery_zones").length === 0 ? "" : `<li><strong>Zones de recuperation officielles :</strong> ${escapeHtml(traceZones(card.previewId, "recovery_zones").join(", "))}</li>`}
           <li><strong>Test coach lié :</strong> ${escapeHtml(card.linkedTest)}</li>
           <li><strong>Scénario lié :</strong> ${escapeHtml(card.scenario)}</li>
           <li><strong>Profil suggéré :</strong> ${escapeHtml(card.suggestedProfile)}</li>
@@ -743,16 +801,15 @@ function renderSelectionPreview(report: MatchReport): string {
           <li><strong>Attributs utiles :</strong> ${escapeHtml(card.attributes)}</li>
           <li><strong>Risque / compromis :</strong> ${escapeHtml(card.tradeoff)}</li>
           <li><strong>À observer :</strong> ${escapeHtml(card.observation)}</li>
-          <li><strong>Confiance :</strong> ${escapeHtml(card.confidence)}</li>
         </ul>
-        <p class="muted">Prévisualisation uniquement : aucune application automatique.</p>
+        <p class="muted">Previsualisation non appliquee. Non confirme comme recommandation officielle. Cette piste ne modifie pas la composition, ne pilote pas la selection live et reste un test coach.</p>
       </article>`).join("");
 
   return `
     <section>
       <h2>Prévisualisation de sélection</h2>
       <p>Ces profils sont des pistes de sélection à prévisualiser, pas des changements appliqués.</p>
-      <p>Cette prévisualisation reste fondée sur un signal sandbox local. Elle devra être confirmée par les futures traces de match complet.</p>
+      <p>Cette previsualisation reste une hypothese coach. Les traces officielles peuvent l'appuyer, mais elles ne la transforment pas en recommandation officielle.</p>
       <p>Aucune composition, aucun titulaire, aucun remplaçant et aucune sélection live ne sont modifiés.</p>
       <p>Cette prévisualisation ne modifie ni la timeline officielle, ni le score, ni la possession, ni les événements de score.</p>
       <p>Elle ne constitue pas une preuve d’économie globale.</p>
@@ -762,6 +819,12 @@ function renderSelectionPreview(report: MatchReport): string {
         <div class="muted">${escapeHtml(fact.summary)}</div>
         <div class="muted">${fact.internalTags.map(escapeHtml).join(", ")}</div>
       </details>
+      ${traceBackingFact === undefined ? "" : `
+      <details class="internal-markers">
+        <summary>Détails techniques de l'appui trace</summary>
+        <div class="muted">${escapeHtml(traceBackingFact.summary)}</div>
+        <div class="muted">${traceBackingFact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>`}
     </section>`;
 }
 

@@ -105,6 +105,11 @@ import type { MultiScenarioCoachTestPlanModel } from "./fullMatch/multiScenarioC
 import { selectionPreviewFromCoachTestPlan } from "./fullMatch/selectionPreviewFromCoachTestPlanBuilder";
 import type { SelectionPreviewModel } from "./fullMatch/selectionPreviewFromCoachTestPlan";
 import {
+  selectionPreviewTraceBackingEvidenceFact,
+  selectionPreviewTraceBackingFromTraceAggregates,
+  selectionPreviewTraceBackingLimitations,
+} from "./fullMatch/selectionPreviewTraceBackingBuilder";
+import {
   buildMatchTraceSpine,
   matchTraceSpineEvidenceFact,
   matchTraceSpineLimitations,
@@ -3056,6 +3061,10 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const matchTraceAggregateModel = buildMatchTraceAggregator({
     traceSpine: matchTraceSpineModel,
   });
+  const selectionPreviewTraceBackingModel = selectionPreviewTraceBackingFromTraceAggregates({
+    preview: selectionPreviewModel,
+    aggregate: matchTraceAggregateModel,
+  });
   const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
     aggregate: matchTraceAggregateModel,
   });
@@ -3086,6 +3095,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...report.reportMeta.limitations,
         ...matchTraceSpineLimitations(matchTraceSpineModel),
         ...matchTraceAggregatorLimitations(matchTraceAggregateModel),
+        ...selectionPreviewTraceBackingLimitations(selectionPreviewTraceBackingModel),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
@@ -3233,6 +3243,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: selectionPreviewModel,
   });
+  const selectionPreviewTraceBackingModelFact = selectionPreviewTraceBackingEvidenceFact({
+    report,
+    matchInput: input,
+    model: selectionPreviewTraceBackingModel,
+  });
   const matchTraceSpineModelFact = matchTraceSpineEvidenceFact({
     report,
     matchInput: input,
@@ -3281,6 +3296,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportV1LegacyCleanupFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportV1LegacyCleanupModelFact
     : null;
+  const experimentalSelectionPreviewTraceBackingFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? selectionPreviewTraceBackingModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3310,6 +3328,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(sandboxDecisionBatchConfidenceCalibrationModelFact === null ? [] : [sandboxDecisionBatchConfidenceCalibrationModelFact]),
     ...(multiScenarioCoachTestPlanModelFact === null ? [] : [multiScenarioCoachTestPlanModelFact]),
     ...(selectionPreviewModelFact === null ? [] : [selectionPreviewModelFact]),
+    ...(experimentalSelectionPreviewTraceBackingFact === null ? [] : [experimentalSelectionPreviewTraceBackingFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
