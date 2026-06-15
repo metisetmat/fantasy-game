@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -436,6 +436,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
   | "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
   | "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY"
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP"
   | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
   | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 

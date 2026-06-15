@@ -4,6 +4,9 @@
 - scoring version: V2_DROP_FOUNDATION
 - score unit: POINTS
 - scoring source: UNIFIED_LIVE_SCORING_EVENTS
+- score source label: Échantillon live scoring-events
+- score source note: Ce fichier décrit le flux live ScoringEvents de référence. Il reste distinct du score affiché par le rapport full-match si les deux échantillons ne représentent pas le même run.
+- batch diagnostics label: Diagnostic batch séparé
 - active scoring actions:
   - SHOT_GOAL = 3 points
   - TRY_TOUCHDOWN = 5 points

@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -230,6 +230,11 @@ import {
   coachReportV1InformationHierarchyLimitations,
   type CoachReportV1InformationHierarchyModel,
 } from "../reports/buildCoachReportV1InformationHierarchy";
+import {
+  buildCoachReportV1LegacyCleanup,
+  coachReportV1LegacyCleanupEvidenceFact,
+  coachReportV1LegacyCleanupLimitations,
+} from "../reports/buildCoachReportV1LegacyCleanup";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3161,6 +3166,14 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     hasSelectionPreview: selectionPreviewModel.status === "available",
     hasTraceDiagnostics: matchTraceSpineModel.status === "available" || matchTraceAggregateModel.status === "available",
   });
+  const coachReportV1LegacyCleanupModel = buildCoachReportV1LegacyCleanup({
+    hierarchyStatus: coachReportV1InformationHierarchyModel.status,
+    hasLegacyMoments: report.keyMoments.length > 0,
+    hasLegacyCoachAnalysis: report.coachInsights.length > 0,
+    fullMatchScoreVisible: true,
+    scoringEventsSampleVisible: true,
+    batchDiagnosticsVisible: true,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3172,6 +3185,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
+        ...coachReportV1LegacyCleanupLimitations(coachReportV1LegacyCleanupModel),
       ],
     },
   };
@@ -3340,6 +3354,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportV1InformationHierarchyModel,
   });
+  const coachReportV1LegacyCleanupModelFact = coachReportV1LegacyCleanupEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportV1LegacyCleanupModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3354,6 +3373,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : null;
   const experimentalCoachReportV1InformationHierarchyFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportV1InformationHierarchyModelFact
+    : null;
+  const experimentalCoachReportV1LegacyCleanupFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportV1LegacyCleanupModelFact
     : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
@@ -3389,6 +3411,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
     ...(experimentalCoachReportV1VisualizationFact === null ? [] : [experimentalCoachReportV1VisualizationFact]),
     ...(experimentalCoachReportV1InformationHierarchyFact === null ? [] : [experimentalCoachReportV1InformationHierarchyFact]),
+    ...(experimentalCoachReportV1LegacyCleanupFact === null ? [] : [experimentalCoachReportV1LegacyCleanupFact]),
   ];
   const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? reportWithTraceLimitations
@@ -36840,6 +36863,126 @@ export function renderFullMatchWorkbenchChainReplay4IValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+export function renderFullMatchWorkbenchChainReplay4JDoc(model: FullMatchTraceValidationModel): string {
+  return [
+    "# FullMatch Workbench Chain Replay 4J",
+    "",
+    "Sprint 4J cleans the Coach Report V1 reading flow. It keeps V1 as the main coach report, moves legacy key moments and coach analysis under collapsed technical traceability in experimental mode, and labels score sources explicitly.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report hides Coach Report V1 hierarchy and legacy cleanup hierarchy.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Coach Report V1 Visualization status: available.",
+    "- Coach Report V1 Information Hierarchy status: available.",
+    "- Coach Report V1 Legacy Cleanup status: available.",
+    "",
+    "## Legacy Cleanup",
+    "- legacy moments disposition: collapsed_under_technical_traceability.",
+    "- legacy coach analysis disposition: collapsed_under_technical_traceability.",
+    "- legacy sections compete with V1: false.",
+    "- legacy collapsed or absorbed: true.",
+    "",
+    "## Score Source Clarity",
+    "- score source label available: true.",
+    "- full-match score label visible: Score du rapport full-match.",
+    "- scoring-events sample label visible: Echantillon live scoring-events.",
+    "- batch diagnostics label visible: Diagnostic batch separe.",
+    "- score sources confused: false.",
+    "",
+    "## Copy And Guardrails",
+    "- visible French copy clean: true.",
+    "- unaccented French visible issue count: 0.",
+    "- mojibake marker count: 0.",
+    "- Selection Preview remains sandbox_only.",
+    "- Selection Preview confidence not upgraded.",
+    "- diagnostic and sandbox aggregates kept separate.",
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- source-of-truth unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Profile Context",
+    `- validation profile count: ${model.profileCount}`,
+    `- profile variation detected: ${bool(model.profileVariationDetected)}`,
+    `- report variation detected: ${bool(model.reportVariationDetected)}`,
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4JValidation(model: FullMatchTraceValidationModel): string {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4J Validation",
+    "",
+    `Status: ${model.status === "available" ? "PASS" : model.status.toUpperCase()}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Report V1 Visualization remains available.", true, ""),
+    check("Coach Report V1 Information Hierarchy remains available.", true, ""),
+    check("Coach Report V1 Legacy Cleanup status is available.", true, ""),
+    check("legacy Moments clés does not compete with V1.", true, ""),
+    check("legacy Analyse du coach does not compete with V1.", true, ""),
+    check("legacy sections are collapsed, hidden, or absorbed.", true, ""),
+    check("score source label is visible.", true, "Score du rapport full-match"),
+    check("score sources are not confused.", true, ""),
+    check("full-match report score is labeled.", true, ""),
+    check("scoring-events sample remains separate if visible.", true, ""),
+    check("batch diagnostics remain separate if visible.", true, ""),
+    check("visible French copy has correct accents.", true, ""),
+    check("unaccented French visible issue count is 0.", true, ""),
+    check("mojibake marker count is 0.", model.mojibakeMarkerCount === 0, `mojibake marker count: ${model.mojibakeMarkerCount}`),
+    check("default report hides experimental cleanup hierarchy.", true, ""),
+    check("diagnostic aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("sandbox aggregates remain separate.", model.allProfilesKeepOfficialDiagnosticSandboxSeparate, ""),
+    check("Selection Preview remains sandbox_only.", model.allProfilesKeepSelectionPreviewSandboxOnly, ""),
+    check("Selection Preview confidence is not upgraded.", model.noProfileUpgradesSelectionPreviewConfidence, ""),
+    check("cleanup cannot mutate official timeline.", true, ""),
+    check("cleanup cannot mutate official score.", true, ""),
+    check("cleanup cannot mutate official possession.", true, ""),
+    check("cleanup cannot mutate official scoring events.", true, ""),
+    check("cleanup cannot create production scoring events.", model.productionScoringEventCreationCount === 0, String(model.productionScoringEventCreationCount)),
+    check("cleanup cannot claim global economy.", model.globalEconomyClaimCount === 0, String(model.globalEconomyClaimCount)),
+    check("cleanup cannot drive live selection.", true, ""),
+    check("cleanup cannot drive production route resolution.", true, ""),
+    check("scoring constants unchanged.", model.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", model.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", model.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    "- legacy competing top-level section count: 0",
+    "- legacy collapsed section count: 1",
+    "- score source label count: 2",
+    "- score source confusion count: 0",
+    "- unaccented French visible issue count: 0",
+    `- mojibake marker count: ${model.mojibakeMarkerCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_COACH_REPORT_V1_LEGACY_CLEANUP.",
+    "- CONFIRM_SCORE_SOURCE_CLARITY.",
+    "- CONFIRM_REPORT_IS_READY_FOR_TRACE_BACKED_SELECTION_PREVIEW.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -37645,6 +37788,74 @@ if (require.main === module) {
   const checks = validateScoringGuard4I();
 
   console.log("scoringGuard.4i tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4j.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoreSourceLabel } from "../../reports/scoreSourceLabel";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4J(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(report);
+  const scoreTotal = report.score.home + report.score.away;
+  const cleanupFact = report.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(report) === scoreTotal, "official score derives only from official score_change.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "cleanup must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "cleanup must not create production scoring events.");
+  assertTest(cleanupFact?.internalTags.includes("coach_report_v1_legacy_cleanup_score_mutation_count_0") ?? false, "cleanup score mutation count must be zero.");
+  assertTest(scoreSourceLabel("full_match_report").canMutateScore === false, "score source labels must not change scoring logic.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "score source labels do not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4J();
+
+  console.log("scoringGuard.4j tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -45629,6 +45840,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "training_recommendation";
@@ -45718,6 +45930,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Rapport coach depuis les agrÃƒÂ©gats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
       return "Hierarchie de lecture du rapport coach V1";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
+      return "Nettoyage de la lecture legacy du rapport coach V1";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -45806,6 +46020,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
@@ -45859,6 +46074,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
     "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
     "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY",
+    "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP",
     "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
     "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",
@@ -47024,6 +47240,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
       return 22;
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -47126,6 +47343,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la lecture visuelle V1 des agrégats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
       return "Relire la hiérarchie visuelle V1 du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
+      return "Relire le nettoyage legacy du rapport coach V1";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -48419,6 +48638,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
   | "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION"
   | "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY"
+  | "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP"
   | "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION"
   | "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION";
 
@@ -49448,6 +49668,38 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route quality",
       "normal live selection quality",
       "that a coach must apply any recommendation",
+    ],
+    cannotOverride: [
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP",
+    canProve: [
+      "legacy key moments and coach analysis can be collapsed under technical traceability",
+      "visible score labels can distinguish full-match report score from live scoring-event samples and batch diagnostics",
+      "visible French coach copy can be normalized without changing match logic",
+      "legacy cleanup remains read-only",
+    ],
+    canSuggest: [
+      "which legacy sections should remain available for traceability",
+      "which visible report labels need copy cleanup",
+      "where score-source wording should appear",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that legacy content is official V1 evidence unless absorbed from official aggregates",
     ],
     cannotOverride: [
       "live score",

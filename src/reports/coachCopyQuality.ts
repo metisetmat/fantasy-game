@@ -19,6 +19,16 @@ const MOJIBAKE_MARKERS: readonly string[] = [
 ];
 
 const COACH_COPY_REPLACEMENTS: readonly [string, string][] = [
+  ["A travailler", "\u00c0 travailler"],
+  ["recuperations", "r\u00e9cup\u00e9rations"],
+  ["recuperation", "r\u00e9cup\u00e9ration"],
+  ["securiser", "s\u00e9curiser"],
+  ["securise", "s\u00e9curise"],
+  ["securisee", "s\u00e9curis\u00e9e"],
+  ["premiere", "premi\u00e8re"],
+  ["apres", "apr\u00e8s"],
+  ["economie globale", "\u00e9conomie globale"],
+  ["economie du score", "\u00e9conomie du score"],
   ["G\u00c3\u0192\u00c2\u00a9n\u00c3\u0192\u00c2\u00a9r\u00c3\u0192\u00c2\u00a9", "G\u00e9n\u00e9r\u00e9"],
   ["G\u00c3\u00a9n\u00c3\u00a9r\u00c3\u00a9", "G\u00e9n\u00e9r\u00e9"],
   ["R\u00c3\u0192\u00c2\u00a9sum\u00c3\u0192\u00c2\u00a9", "R\u00e9sum\u00e9"],

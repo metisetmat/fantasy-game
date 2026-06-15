@@ -1,4 +1,5 @@
 import type { MiniMatchResult } from "../../simulation/miniMatch";
+import { scoreSourceLabel } from "../../reports/scoreSourceLabel";
 import type { ShotOutcomeContract } from "../actions";
 import type { OffensivePossessionDangerPhaseSnapshot } from "../phases";
 import type { ConversionAttemptResult } from "./conversionTypes";
@@ -330,6 +331,9 @@ export function createScoringEventsSummaryReport(input: {
     `- scoring version: ${summary.scoringVersion}`,
     `- score unit: ${summary.scoreUnit}`,
     `- scoring source: ${summary.scoringSource}`,
+    `- score source label: ${scoreSourceLabel("live_scoring_events_sample").label}`,
+    `- score source note: ${scoreSourceLabel("live_scoring_events_sample").compactNote}`,
+    `- batch diagnostics label: ${scoreSourceLabel("batch_diagnostic").label}`,
     "- active scoring actions:",
     `  - ${scoringRuleLabel("SHOT_GOAL")}`,
     `  - ${tryTouchdownRuleLabel()}`,

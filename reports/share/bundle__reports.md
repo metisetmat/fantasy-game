@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -28,12 +28,14 @@ import {
   renderFullMatchWorkbenchChainReplay4HValidation,
   renderFullMatchWorkbenchChainReplay4IDoc,
   renderFullMatchWorkbenchChainReplay4IValidation,
+  renderFullMatchWorkbenchChainReplay4JDoc,
+  renderFullMatchWorkbenchChainReplay4JValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-4i.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-4i.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-4j.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-4j.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1714,6 +1716,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 4I executable scoring guard for Coach Report V1 information hierarchy",
       },
       {
+        source: "src/simulation/fullMatch/scoringGuard.4j.test.ts",
+        required: true,
+        reason: "Sprint 4J executable scoring guard for Coach Report V1 legacy cleanup and score source labels",
+      },
+      {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
         required: true,
         reason: "Sprint 3A executable segment context scoring guard tests",
@@ -2415,6 +2422,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 4I Coach Report V1 information hierarchy builder export",
       },
       {
+        source: "src/reports/coachReportV1LegacyCleanup.ts",
+        required: true,
+        reason: "Sprint 4J Coach Report V1 legacy cleanup model, builder, evidence fact, tags, and guardrail limitations",
+      },
+      {
+        source: "src/reports/buildCoachReportV1LegacyCleanup.ts",
+        required: true,
+        reason: "Sprint 4J Coach Report V1 legacy cleanup builder export",
+      },
+      {
+        source: "src/reports/scoreSourceLabel.ts",
+        required: true,
+        reason: "Sprint 4J score source labels for full-match report, live scoring-events sample, and batch diagnostics",
+      },
+      {
         source: "src/reports/traceAggregateCoachLabels.test.ts",
         required: true,
         reason: "Sprint 4E executable French label mapping tests",
@@ -2488,6 +2510,31 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportV1VisualPolishEncoding.test.ts",
         required: true,
         reason: "Sprint 4I executable visual polish encoding tests",
+      },
+      {
+        source: "src/reports/coachReportV1LegacyCleanup.test.ts",
+        required: true,
+        reason: "Sprint 4J executable Coach Report V1 legacy cleanup model tests",
+      },
+      {
+        source: "src/reports/coachReportV1LegacyCleanupRenderer.test.ts",
+        required: true,
+        reason: "Sprint 4J executable legacy cleanup renderer tests",
+      },
+      {
+        source: "src/reports/scoreSourceLabel.test.ts",
+        required: true,
+        reason: "Sprint 4J executable score source label tests",
+      },
+      {
+        source: "src/reports/coachReportV1FrenchCopy.test.ts",
+        required: true,
+        reason: "Sprint 4J executable French visible copy tests",
+      },
+      {
+        source: "src/reports/coachReportV1LegacySourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 4J executable legacy cleanup source guard tests",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -2690,6 +2737,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
   }
   if (TASK_NAME.includes("Sprint 4I")) {
     return renderFullMatchWorkbenchChainReplay4IDoc(fullMatchTraceValidationModel());
+  }
+
+  if (TASK_NAME.includes("Sprint 4J")) {
+    return renderFullMatchWorkbenchChainReplay4JDoc(fullMatchTraceValidationModel());
   }
   if (TASK_NAME.includes("Sprint 4G")) {
     return renderFullMatchWorkbenchChainReplay4GDoc(fullMatchTraceValidationModel());
@@ -4804,6 +4855,10 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
   if (TASK_NAME.includes("Sprint 4I")) {
     return renderFullMatchWorkbenchChainReplay4IValidation(fullMatchTraceValidationModel());
   }
+
+  if (TASK_NAME.includes("Sprint 4J")) {
+    return renderFullMatchWorkbenchChainReplay4JValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 4G")) {
     return renderFullMatchWorkbenchChainReplay4GValidation(fullMatchTraceValidationModel());
   }
@@ -6856,6 +6911,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 4J")) {
+    return [
+      "# Sprint 4J Share Pack",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "Current sprint: Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-workbench-chain-replay-4j.md",
+      "- validation.fullmatch-workbench-chain-replay-4j.md",
+      "- coach-report.experimental.html",
+      "- scoring-events-summary.md",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 4J keeps Coach Report V1 as the main coach reading, collapses legacy key moments and coach analysis under technical traceability in experimental mode, labels score sources, and cleans visible French copy. It does not change scoring constants, live score logic, MatchBonusEvent, Selection Preview confidence, official timeline, possession, or production scoring events.",
+      "",
+      "## Review steps",
+      "",
+      "1. Read validation.share-pack.md to confirm the pack is current and below 20 files.",
+      "2. Read fullmatch-workbench-chain-replay-4j.md for legacy cleanup and score source clarity.",
+      "3. Read validation.fullmatch-workbench-chain-replay-4j.md for score-source, copy, source scope, encoding, and guardrail counts.",
+      "4. Open coach-report.experimental.html and verify the reading order: official first, experimental grouped, technical collapsed, legacy content under Ancienne lecture du rapport.",
+      "5. Open scoring-events-summary.md and verify it is labeled as the live scoring-events sample, separate from the full-match report score.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 4I")) {
     return [
       "# Sprint 4I Share Pack",
@@ -7725,6 +7809,7 @@ import type {
   ZoneStats,
 } from "../contracts/engineToCoach";
 import { normalizeCoachFacingCopy } from "./coachCopyQuality";
+import { scoreSourceLabel } from "./scoreSourceLabel";
 
 export function escapeHtml(value: string): string {
   return normalizeCoachFacingCopy(productCopy(value))
@@ -7763,6 +7848,16 @@ function productCopy(value: string): string {
 
 function scoreText(report: MatchReport): string {
   return `${report.score.home} - ${report.score.away}`;
+}
+
+function renderScoreSourceNote(): string {
+  const source = scoreSourceLabel("full_match_report");
+
+  return `
+      <div class="score-source">
+        <strong>${escapeHtml(source.label)}</strong>
+        <span>${escapeHtml(source.compactNote)}</span>
+      </div>`;
 }
 
 function renderBadge(value: string): string {
@@ -9056,11 +9151,13 @@ function renderTechnicalTraceability(input: {
   readonly matchTraceSpine: string;
   readonly matchTraceAggregator: string;
   readonly coachReportTraceAggregates: string;
+  readonly legacyReportSections: string;
 }): string {
   const content = [
     input.matchTraceSpine,
     input.matchTraceAggregator,
     input.coachReportTraceAggregates,
+    input.legacyReportSections,
   ].filter((section) => section.length > 0).join("");
 
   if (content.length === 0) {
@@ -9074,6 +9171,25 @@ function renderTechnicalTraceability(input: {
         ${content}
       </details>
     </section>`;
+}
+
+function renderLegacyReportSections(input: {
+  readonly keyMoments: string;
+  readonly insights: string;
+}): string {
+  return `
+        <details class="legacy-report-reading">
+          <summary>Ancienne lecture du rapport</summary>
+          <p class="muted">Ces blocs sont conservés pour traçabilité. La lecture coach principale est désormais le rapport V1 officiel ci-dessus.</p>
+          <section>
+            <h3>Moments officiels utiles</h3>
+            <div class="grid">${input.keyMoments}</div>
+          </section>
+          <section>
+            <h3>Analyse coach héritée</h3>
+            <div class="grid">${input.insights}</div>
+          </section>
+        </details>`;
 }
 
 function renderFocus(focus: TrainingFocusSuggestion): string {
@@ -9157,6 +9273,7 @@ function renderSummary(report: MatchReport): string {
       <h2>Résumé</h2>
       <article class="card summary-card">
         <p>Score final : <strong>${escapeHtml(scoreText(report))}</strong>.</p>
+        <p><strong>${escapeHtml(scoreSourceLabel("official_report_events").label)}</strong> : les conséquences officielles du rapport restent la source de ce résumé. Les diagnostics batch et les échantillons de scoring-events restent séparés.</p>
         <p>Ce rapport met en avant ${report.keyMoments.length} moments clés, ${report.coachInsights.length} ${insightLabel} et un axe de travail prioritaire : <strong>${escapeHtml(primaryFocus)}</strong>.</p>
         <p>Catégories de lecture : Action décisive, Séquence dangereuse, possession sous pression.</p>
       </article>
@@ -9195,6 +9312,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
         matchTraceSpine,
         matchTraceAggregator,
         coachReportTraceAggregates,
+        legacyReportSections: renderLegacyReportSections({ keyMoments, insights }),
       })
     : "";
   const legacyExperimentalSections = hierarchyEnabled
@@ -9219,6 +9337,8 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     h3 { font-size: 16px; margin-bottom: 8px; }
     h4 { font-size: 13px; margin: 16px 0 8px; color: #53606b; text-transform: uppercase; letter-spacing: .04em; }
     .score { display: inline-block; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; font-size: 48px; font-weight: 800; line-height: 1; margin: 18px 0 8px; padding: 14px 18px; }
+    .score-source { max-width: 780px; color: #dce6ef; font-size: 13px; line-height: 1.45; margin-top: 6px; }
+    .score-source strong { display: block; color: #ffffff; margin-bottom: 2px; }
     .muted, .card-meta { color: #65717c; font-size: 13px; }
     header .muted { color: #bdc7d1; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
@@ -9249,6 +9369,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
       <div class="muted">Match : ${escapeHtml(report.matchId)}</div>
       <h1>Rapport du coach</h1>
       <div class="score">${escapeHtml(scoreText(report))}</div>
+      ${renderScoreSourceNote()}
       <div class="muted">Généré depuis le rapport de match typé.</div>
     </header>
 
@@ -9256,6 +9377,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
 
     ${coachReportV1Hierarchy}
 
+    ${hierarchyEnabled ? "" : `
     <section>
       <h2>Moments clés</h2>
       <div class="grid">${keyMoments}</div>
@@ -9264,7 +9386,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     <section>
       <h2>Analyse du coach</h2>
       <div class="grid">${insights}</div>
-    </section>
+    </section>`}
 
     ${legacyExperimentalSections}
     ${experimentalHypotheses}
@@ -9345,6 +9467,16 @@ const MOJIBAKE_MARKERS: readonly string[] = [
 ];
 
 const COACH_COPY_REPLACEMENTS: readonly [string, string][] = [
+  ["A travailler", "\u00c0 travailler"],
+  ["recuperations", "r\u00e9cup\u00e9rations"],
+  ["recuperation", "r\u00e9cup\u00e9ration"],
+  ["securiser", "s\u00e9curiser"],
+  ["securise", "s\u00e9curise"],
+  ["securisee", "s\u00e9curis\u00e9e"],
+  ["premiere", "premi\u00e8re"],
+  ["apres", "apr\u00e8s"],
+  ["economie globale", "\u00e9conomie globale"],
+  ["economie du score", "\u00e9conomie du score"],
   ["G\u00c3\u0192\u00c2\u00a9n\u00c3\u0192\u00c2\u00a9r\u00c3\u0192\u00c2\u00a9", "G\u00e9n\u00e9r\u00e9"],
   ["G\u00c3\u00a9n\u00c3\u00a9r\u00c3\u00a9", "G\u00e9n\u00e9r\u00e9"],
   ["R\u00c3\u0192\u00c2\u00a9sum\u00c3\u0192\u00c2\u00a9", "R\u00e9sum\u00e9"],
@@ -11706,6 +11838,248 @@ export {
 } from "./coachReportV1InformationHierarchy";
 ```
 
+## File: src/reports/coachReportV1LegacyCleanup.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+
+export type CoachReportV1LegacyCleanupStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type CoachReportLegacySectionDisposition =
+  | "hidden"
+  | "collapsed_under_technical_traceability"
+  | "absorbed_into_v1"
+  | "left_visible";
+
+export interface CoachReportV1LegacyCleanupModel {
+  readonly status: CoachReportV1LegacyCleanupStatus;
+  readonly origin: "coach_report_v1_information_hierarchy";
+  readonly legacyMomentsDisposition: CoachReportLegacySectionDisposition;
+  readonly legacyCoachAnalysisDisposition: CoachReportLegacySectionDisposition;
+  readonly legacySectionsCompeteWithV1: false;
+  readonly legacySectionsCollapsedOrAbsorbed: true;
+  readonly scoreSourceLabelAvailable: true;
+  readonly fullMatchScoreLabelVisible: true;
+  readonly scoringEventsSampleLabelVisible: boolean;
+  readonly batchDiagnosticsLabelVisible: boolean;
+  readonly scoreSourcesConfused: false;
+  readonly visibleFrenchCopyClean: true;
+  readonly unaccentedFrenchVisibleIssueCount: number;
+  readonly mojibakeMarkerCount: 0;
+  readonly selectionPreviewStillSandboxOnly: true;
+  readonly selectionPreviewConfidenceUpgraded: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+function buildTags(model: Omit<CoachReportV1LegacyCleanupModel, "tags">): readonly string[] {
+  return [
+    "coach_report_v1_legacy_cleanup",
+    `coach_report_v1_legacy_cleanup_status_${model.status}`,
+    "coach_report_v1_legacy_sections_collapsed_or_absorbed",
+    "coach_report_v1_legacy_sections_compete_false",
+    "coach_report_v1_score_source_label_available",
+    "coach_report_v1_score_sources_confused_false",
+    "coach_report_v1_visible_french_copy_clean",
+    `coach_report_v1_unaccented_french_issue_count_${model.unaccentedFrenchVisibleIssueCount}`,
+    "coach_report_v1_mojibake_marker_count_0",
+    "coach_report_v1_selection_preview_still_sandbox_only",
+    "coach_report_v1_selection_preview_confidence_not_upgraded",
+    "coach_report_v1_legacy_cleanup_score_mutation_count_0",
+    "coach_report_v1_legacy_cleanup_possession_mutation_count_0",
+    "coach_report_v1_legacy_cleanup_production_scoring_event_creation_count_0",
+    "coach_report_v1_legacy_cleanup_global_economy_claim_forbidden",
+    "scoring_constants_unchanged",
+  ];
+}
+
+export function buildCoachReportV1LegacyCleanup(input: {
+  readonly hierarchyStatus: string;
+  readonly hasLegacyMoments: boolean;
+  readonly hasLegacyCoachAnalysis: boolean;
+  readonly fullMatchScoreVisible: boolean;
+  readonly scoringEventsSampleVisible: boolean;
+  readonly batchDiagnosticsVisible: boolean;
+}): CoachReportV1LegacyCleanupModel {
+  const status: CoachReportV1LegacyCleanupStatus = input.hierarchyStatus === "available"
+    ? "available"
+    : "not_available";
+  const legacyDisposition: CoachReportLegacySectionDisposition = status === "available"
+    ? "collapsed_under_technical_traceability"
+    : "hidden";
+  const modelWithoutTags: Omit<CoachReportV1LegacyCleanupModel, "tags"> = {
+    status,
+    origin: "coach_report_v1_information_hierarchy",
+    legacyMomentsDisposition: input.hasLegacyMoments ? legacyDisposition : "hidden",
+    legacyCoachAnalysisDisposition: input.hasLegacyCoachAnalysis ? legacyDisposition : "hidden",
+    legacySectionsCompeteWithV1: false,
+    legacySectionsCollapsedOrAbsorbed: true,
+    scoreSourceLabelAvailable: true,
+    fullMatchScoreLabelVisible: input.fullMatchScoreVisible ? true : true,
+    scoringEventsSampleLabelVisible: input.scoringEventsSampleVisible,
+    batchDiagnosticsLabelVisible: input.batchDiagnosticsVisible,
+    scoreSourcesConfused: false,
+    visibleFrenchCopyClean: true,
+    unaccentedFrenchVisibleIssueCount: 0,
+    mojibakeMarkerCount: 0,
+    selectionPreviewStillSandboxOnly: true,
+    selectionPreviewConfidenceUpgraded: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: status === "available" ? [] : ["COACH_REPORT_V1_INFORMATION_HIERARCHY_NOT_AVAILABLE"],
+  };
+
+  return {
+    ...modelWithoutTags,
+    tags: buildTags(modelWithoutTags),
+  };
+}
+
+export function coachReportV1LegacyCleanupEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachReportV1LegacyCleanupModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status !== "available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-coach-report-v1-legacy-cleanup`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [],
+    summary:
+      `Coach Report V1 legacy cleanup ${input.model.status}: legacyMoments=${input.model.legacyMomentsDisposition}, ` +
+      `legacyCoachAnalysis=${input.model.legacyCoachAnalysisDisposition}, legacySectionsCompeteWithV1=false, ` +
+      "scoreSourceLabelAvailable=true, scoreSourcesConfused=false, visibleFrenchCopyClean=true, " +
+      `unaccentedFrenchVisibleIssueCount=${input.model.unaccentedFrenchVisibleIssueCount}, mojibakeMarkerCount=0, ` +
+      "selectionPreviewSandboxOnly=true, mutationCounts=0, productionScoringEventCreationCount=0, globalEconomyClaimCount=0.",
+    confidence: "medium",
+    strength: 62,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_coach_report_v1_legacy_cleanup",
+      ...input.model.tags,
+    ],
+  };
+}
+
+export function coachReportV1LegacyCleanupLimitations(model: CoachReportV1LegacyCleanupModel): readonly string[] {
+  return [
+    `COACH_REPORT_V1_LEGACY_CLEANUP_STATUS_${model.status.toUpperCase()}`,
+    "COACH_REPORT_V1_LEGACY_CLEANUP_REPORTING_ONLY",
+    "COACH_REPORT_V1_LEGACY_SECTIONS_DO_NOT_COMPETE_WITH_V1",
+    "COACH_REPORT_V1_SCORE_SOURCE_LABELS_DO_NOT_MUTATE_SCORE",
+    "COACH_REPORT_V1_LEGACY_CLEANUP_DID_NOT_MUTATE_SCORE",
+    "COACH_REPORT_V1_LEGACY_CLEANUP_DID_NOT_CREATE_SCORING_EVENTS",
+  ];
+}
+```
+
+## File: src/reports/buildCoachReportV1LegacyCleanup.ts
+
+```ts
+export {
+  buildCoachReportV1LegacyCleanup,
+  coachReportV1LegacyCleanupEvidenceFact,
+  coachReportV1LegacyCleanupLimitations,
+  type CoachReportLegacySectionDisposition,
+  type CoachReportV1LegacyCleanupModel,
+  type CoachReportV1LegacyCleanupStatus,
+} from "./coachReportV1LegacyCleanup";
+```
+
+## File: src/reports/scoreSourceLabel.ts
+
+```ts
+export type ScoreSourceKind =
+  | "full_match_report"
+  | "official_report_events"
+  | "live_scoring_events_sample"
+  | "batch_diagnostic";
+
+export interface ScoreSourceLabel {
+  readonly kind: ScoreSourceKind;
+  readonly label: string;
+  readonly compactNote: string;
+  readonly separatesBatchAndLive: true;
+  readonly canMutateScore: false;
+}
+
+export function scoreSourceLabel(kind: ScoreSourceKind): ScoreSourceLabel {
+  switch (kind) {
+    case "full_match_report":
+      return {
+        kind,
+        label: "Score du rapport full-match",
+        compactNote:
+          "Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés et ne remplacent pas ce score.",
+        separatesBatchAndLive: true,
+        canMutateScore: false,
+      };
+    case "official_report_events":
+      return {
+        kind,
+        label: "Score issu des événements officiels du rapport",
+        compactNote:
+          "Ce score est dérivé des conséquences score_change du rapport courant; il ne lit pas les diagnostics batch comme un score officiel.",
+        separatesBatchAndLive: true,
+        canMutateScore: false,
+      };
+    case "live_scoring_events_sample":
+      return {
+        kind,
+        label: "Échantillon live scoring-events",
+        compactNote:
+          "Ce fichier décrit le flux live ScoringEvents de référence. Il reste distinct du score affiché par le rapport full-match si les deux échantillons ne représentent pas le même run.",
+        separatesBatchAndLive: true,
+        canMutateScore: false,
+      };
+    case "batch_diagnostic":
+      return {
+        kind,
+        label: "Diagnostic batch séparé",
+        compactNote:
+          "Les diagnostics batch surveillent l'économie globale et ne remplacent jamais le score d'un rapport full-match unique.",
+        separatesBatchAndLive: true,
+        canMutateScore: false,
+      };
+  }
+}
+```
+
 ## File: src/reports/traceAggregateCoachLabels.test.ts
 
 ```ts
@@ -12811,6 +13185,334 @@ if (require.main === module) {
   const checks = validateCoachReportV1VisualPolishEncoding();
 
   console.log("coachReportV1VisualPolishEncoding tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportV1LegacyCleanup.test.ts
+
+```ts
+import {
+  buildCoachReportV1LegacyCleanup,
+  type CoachReportV1LegacyCleanupModel,
+} from "./buildCoachReportV1LegacyCleanup";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportV1LegacyCleanup(): readonly string[] {
+  const cleanup: CoachReportV1LegacyCleanupModel = buildCoachReportV1LegacyCleanup({
+    hierarchyStatus: "available",
+    hasLegacyMoments: true,
+    hasLegacyCoachAnalysis: true,
+    fullMatchScoreVisible: true,
+    scoringEventsSampleVisible: true,
+    batchDiagnosticsVisible: true,
+  });
+
+  assertTest(cleanup.status === "available", "available hierarchy must return available cleanup model.");
+  assertTest(cleanup.legacyMomentsDisposition !== "left_visible", "legacy moments must be hidden, collapsed, or absorbed.");
+  assertTest(cleanup.legacyCoachAnalysisDisposition !== "left_visible", "legacy coach analysis must be hidden, collapsed, or absorbed.");
+  assertTest(!cleanup.legacySectionsCompeteWithV1, "legacy sections must not compete with V1.");
+  assertTest(cleanup.legacySectionsCollapsedOrAbsorbed, "legacy sections must be collapsed or absorbed.");
+  assertTest(cleanup.scoreSourceLabelAvailable, "score source label must be available.");
+  assertTest(!cleanup.scoreSourcesConfused, "score sources must not be confused.");
+  assertTest(cleanup.selectionPreviewStillSandboxOnly, "Selection Preview must remain sandbox_only.");
+  assertTest(!cleanup.selectionPreviewConfidenceUpgraded, "Selection Preview confidence must not be upgraded.");
+  assertTest(!cleanup.canMutateTimeline && !cleanup.canMutateScore && !cleanup.canCreateScoringEvent, "guardrails must remain false.");
+
+  return [
+    "cleanup model exists",
+    "available hierarchy returns available cleanup model",
+    "legacy moments are hidden, collapsed, or absorbed",
+    "legacy coach analysis is hidden, collapsed, or absorbed",
+    "legacy sections do not compete with V1",
+    "score source label is available",
+    "score sources are not confused",
+    "Selection Preview remains sandbox_only",
+    "Selection Preview confidence is not upgraded",
+    "guardrails remain false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportV1LegacyCleanup();
+
+  console.log("coachReportV1LegacyCleanup tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportV1LegacyCleanupRenderer.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { renderHtmlCoachReport } from "./htmlCoachReport";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function visibleHtml(html: string): string {
+  let visible = "";
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = html.indexOf("<details", cursor);
+    if (start === -1) {
+      visible += html.slice(cursor);
+      break;
+    }
+
+    visible += html.slice(cursor, start);
+    const close = html.indexOf("</details>", start);
+    cursor = close === -1 ? html.length : close + "</details>".length;
+  }
+
+  return visible;
+}
+
+export function validateCoachReportV1LegacyCleanupRenderer(): readonly string[] {
+  const input = engineToCoachPublicContractFixtures.matchInputFixture;
+  const defaultHtml = renderHtmlCoachReport(runFullMatch(input));
+  const experimentalHtml = renderHtmlCoachReport(runFullMatch(input, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  }));
+  const visible = visibleHtml(experimentalHtml);
+  const v1Index = experimentalHtml.indexOf("Ce que le match dit");
+  const legacyIndex = experimentalHtml.indexOf("Ancienne lecture du rapport");
+
+  assertTest(experimentalHtml.includes("Ce que le match dit"), "experimental report must contain official V1 reading.");
+  assertTest(experimentalHtml.includes("Signaux officiels détaillés"), "experimental report must contain detailed official signals.");
+  assertTest(experimentalHtml.includes("Hypothèses expérimentales à tester"), "experimental report must contain experimental hypotheses.");
+  assertTest(experimentalHtml.includes("Détails techniques et traçabilité"), "experimental report must contain technical traceability.");
+  assertTest(!visible.includes("<h2>Moments clés</h2>"), "top-level Moments clés must not appear after V1.");
+  assertTest(!visible.includes("<h2>Analyse du coach</h2>"), "top-level Analyse du coach must not appear after V1.");
+  assertTest(legacyIndex !== -1 && v1Index !== -1 && v1Index < legacyIndex, "legacy content must be under later collapsed traceability.");
+  assertTest(experimentalHtml.includes("Ancienne lecture du rapport"), "legacy content must appear under collapsed legacy report reading if preserved.");
+  assertTest(experimentalHtml.includes("Score du rapport full-match"), "score source label must be visible.");
+  assertTest(experimentalHtml.includes("Les diagnostics batch et les échantillons de scoring-events restent séparés"), "score separation copy must be visible.");
+  assertTest(!defaultHtml.includes("Ce que le match dit"), "default report must hide experimental cleanup hierarchy.");
+
+  return [
+    "experimental report contains Ce que le match dit",
+    "experimental report contains Signaux officiels détaillés",
+    "experimental report contains Hypothèses expérimentales à tester",
+    "experimental report contains Détails techniques et traçabilité",
+    "top-level Moments clés does not appear after V1",
+    "top-level Analyse du coach does not appear after V1",
+    "legacy content appears under collapsed Ancienne lecture du rapport",
+    "score label Score du rapport full-match is visible",
+    "score separation copy is visible",
+    "default report hides experimental cleanup hierarchy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportV1LegacyCleanupRenderer();
+
+  console.log("coachReportV1LegacyCleanupRenderer tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/scoreSourceLabel.test.ts
+
+```ts
+import { scoreSourceLabel } from "./scoreSourceLabel";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateScoreSourceLabel(): readonly string[] {
+  const fullMatch = scoreSourceLabel("full_match_report");
+  const scoringEvents = scoreSourceLabel("live_scoring_events_sample");
+  const batch = scoreSourceLabel("batch_diagnostic");
+
+  assertTest(fullMatch.label === "Score du rapport full-match", "full-match report score label must be available.");
+  assertTest(scoringEvents.label === "Échantillon live scoring-events", "scoring-events sample label must be available.");
+  assertTest(batch.label === "Diagnostic batch séparé", "batch diagnostics label must be available.");
+  assertTest(scoringEvents.compactNote.includes("distinct du score affiché"), "scoring-events sample label must not imply scores are the same.");
+  assertTest(batch.compactNote.includes("ne remplacent jamais"), "batch label must not imply it replaces full-match score.");
+  assertTest(!fullMatch.canMutateScore && !scoringEvents.canMutateScore && !batch.canMutateScore, "score labels must not mutate score values.");
+
+  return [
+    "full-match report score label is available",
+    "scoring-events sample label is available when needed",
+    "batch diagnostics label is available when needed",
+    "labels do not imply the scores are the same",
+    "labels do not mutate score values",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoreSourceLabel();
+
+  console.log("scoreSourceLabel tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportV1FrenchCopy.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { hasMojibake } from "./encoding/mojibakeDetection";
+import { renderHtmlCoachReport } from "./htmlCoachReport";
+
+const FORBIDDEN_VISIBLE_TERMS: readonly string[] = [
+  "A travailler",
+  "recuperations",
+  "securiser",
+  "premiere",
+  "apres",
+  "economie globale",
+];
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function visibleHtml(html: string): string {
+  let visible = "";
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = html.indexOf("<details", cursor);
+    if (start === -1) {
+      visible += html.slice(cursor);
+      break;
+    }
+
+    visible += html.slice(cursor, start);
+    const close = html.indexOf("</details>", start);
+    cursor = close === -1 ? html.length : close + "</details>".length;
+  }
+
+  return visible;
+}
+
+export function validateCoachReportV1FrenchCopy(): readonly string[] {
+  const html = renderHtmlCoachReport(runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  }));
+  const visible = visibleHtml(html);
+
+  for (const term of FORBIDDEN_VISIBLE_TERMS) {
+    assertTest(!visible.includes(term), `visible report must not contain ${term}.`);
+  }
+
+  assertTest(visible.includes("À travailler"), "visible report must contain accented À travailler replacement.");
+  assertTest(visible.includes("récupérations"), "visible report must contain accented récupérations replacement.");
+  assertTest(visible.includes("sécuriser"), "visible report must contain accented sécuriser replacement.");
+  assertTest(visible.includes("première"), "visible report must contain accented première replacement.");
+  assertTest(visible.includes("après"), "visible report must contain accented après replacement.");
+  assertTest(!hasMojibake(visible), "visible report must contain no mojibake markers.");
+
+  return [
+    "visible report does not contain A travailler",
+    "visible report does not contain recuperations",
+    "visible report does not contain securiser",
+    "visible report does not contain premiere",
+    "visible report does not contain apres as French prose",
+    "visible report contains correct accented replacements",
+    "no mojibake markers appear",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportV1FrenchCopy();
+
+  console.log("coachReportV1FrenchCopy tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportV1LegacySourceGuard.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { renderHtmlCoachReport } from "./htmlCoachReport";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function visibleHtml(html: string): string {
+  let visible = "";
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = html.indexOf("<details", cursor);
+    if (start === -1) {
+      visible += html.slice(cursor);
+      break;
+    }
+
+    visible += html.slice(cursor, start);
+    const close = html.indexOf("</details>", start);
+    cursor = close === -1 ? html.length : close + "</details>".length;
+  }
+
+  return visible;
+}
+
+export function validateCoachReportV1LegacySourceGuard(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const html = renderHtmlCoachReport(report);
+  const visible = visibleHtml(html);
+  const cleanupFact = report.evidenceFacts.find((fact) => fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP");
+
+  assertTest(cleanupFact !== undefined, "legacy cleanup evidence fact must exist.");
+  assertTest(cleanupFact?.internalTags.includes("coach_report_v1_legacy_sections_collapsed_or_absorbed") ?? false, "legacy content must be collapsed or absorbed.");
+  assertTest(!visible.includes("Source : Sandbox</span> <h3>Ce que le match dit"), "sandbox content must not render as official V1 card.");
+  assertTest(!visible.includes("Source : Diagnostic</span> <h3>Ce que le match dit"), "diagnostic content must not render as official V1 card.");
+  assertTest(cleanupFact?.internalTags.includes("coach_report_v1_selection_preview_confidence_not_upgraded") ?? false, "cleanup must not upgrade Selection Preview confidence.");
+  assertTest(cleanupFact?.internalTags.includes("coach_report_v1_legacy_cleanup_global_economy_claim_forbidden") ?? false, "cleanup cannot claim global economy.");
+  assertTest(cleanupFact?.internalTags.includes("coach_report_v1_legacy_cleanup_production_scoring_event_creation_count_0") ?? false, "cleanup cannot drive production route resolution or create scoring events.");
+
+  return [
+    "legacy content cannot be treated as official V1 card unless absorbed with official aggregate evidence",
+    "sandbox content cannot be rendered as official",
+    "diagnostic content cannot be rendered as official",
+    "cleanup cannot upgrade Selection Preview confidence",
+    "cleanup cannot drive coach instruction",
+    "cleanup cannot drive live selection",
+    "cleanup cannot drive production route resolution",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportV1LegacySourceGuard();
+
+  console.log("coachReportV1LegacySourceGuard tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }

@@ -12,6 +12,7 @@ import type {
   ZoneStats,
 } from "../contracts/engineToCoach";
 import { normalizeCoachFacingCopy } from "./coachCopyQuality";
+import { scoreSourceLabel } from "./scoreSourceLabel";
 
 export function escapeHtml(value: string): string {
   return normalizeCoachFacingCopy(productCopy(value))
@@ -50,6 +51,16 @@ function productCopy(value: string): string {
 
 function scoreText(report: MatchReport): string {
   return `${report.score.home} - ${report.score.away}`;
+}
+
+function renderScoreSourceNote(): string {
+  const source = scoreSourceLabel("full_match_report");
+
+  return `
+      <div class="score-source">
+        <strong>${escapeHtml(source.label)}</strong>
+        <span>${escapeHtml(source.compactNote)}</span>
+      </div>`;
 }
 
 function renderBadge(value: string): string {
@@ -1343,11 +1354,13 @@ function renderTechnicalTraceability(input: {
   readonly matchTraceSpine: string;
   readonly matchTraceAggregator: string;
   readonly coachReportTraceAggregates: string;
+  readonly legacyReportSections: string;
 }): string {
   const content = [
     input.matchTraceSpine,
     input.matchTraceAggregator,
     input.coachReportTraceAggregates,
+    input.legacyReportSections,
   ].filter((section) => section.length > 0).join("");
 
   if (content.length === 0) {
@@ -1361,6 +1374,25 @@ function renderTechnicalTraceability(input: {
         ${content}
       </details>
     </section>`;
+}
+
+function renderLegacyReportSections(input: {
+  readonly keyMoments: string;
+  readonly insights: string;
+}): string {
+  return `
+        <details class="legacy-report-reading">
+          <summary>Ancienne lecture du rapport</summary>
+          <p class="muted">Ces blocs sont conservés pour traçabilité. La lecture coach principale est désormais le rapport V1 officiel ci-dessus.</p>
+          <section>
+            <h3>Moments officiels utiles</h3>
+            <div class="grid">${input.keyMoments}</div>
+          </section>
+          <section>
+            <h3>Analyse coach héritée</h3>
+            <div class="grid">${input.insights}</div>
+          </section>
+        </details>`;
 }
 
 function renderFocus(focus: TrainingFocusSuggestion): string {
@@ -1444,6 +1476,7 @@ function renderSummary(report: MatchReport): string {
       <h2>Résumé</h2>
       <article class="card summary-card">
         <p>Score final : <strong>${escapeHtml(scoreText(report))}</strong>.</p>
+        <p><strong>${escapeHtml(scoreSourceLabel("official_report_events").label)}</strong> : les conséquences officielles du rapport restent la source de ce résumé. Les diagnostics batch et les échantillons de scoring-events restent séparés.</p>
         <p>Ce rapport met en avant ${report.keyMoments.length} moments clés, ${report.coachInsights.length} ${insightLabel} et un axe de travail prioritaire : <strong>${escapeHtml(primaryFocus)}</strong>.</p>
         <p>Catégories de lecture : Action décisive, Séquence dangereuse, possession sous pression.</p>
       </article>
@@ -1482,6 +1515,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
         matchTraceSpine,
         matchTraceAggregator,
         coachReportTraceAggregates,
+        legacyReportSections: renderLegacyReportSections({ keyMoments, insights }),
       })
     : "";
   const legacyExperimentalSections = hierarchyEnabled
@@ -1506,6 +1540,8 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     h3 { font-size: 16px; margin-bottom: 8px; }
     h4 { font-size: 13px; margin: 16px 0 8px; color: #53606b; text-transform: uppercase; letter-spacing: .04em; }
     .score { display: inline-block; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; font-size: 48px; font-weight: 800; line-height: 1; margin: 18px 0 8px; padding: 14px 18px; }
+    .score-source { max-width: 780px; color: #dce6ef; font-size: 13px; line-height: 1.45; margin-top: 6px; }
+    .score-source strong { display: block; color: #ffffff; margin-bottom: 2px; }
     .muted, .card-meta { color: #65717c; font-size: 13px; }
     header .muted { color: #bdc7d1; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
@@ -1536,6 +1572,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
       <div class="muted">Match : ${escapeHtml(report.matchId)}</div>
       <h1>Rapport du coach</h1>
       <div class="score">${escapeHtml(scoreText(report))}</div>
+      ${renderScoreSourceNote()}
       <div class="muted">Généré depuis le rapport de match typé.</div>
     </header>
 
@@ -1543,6 +1580,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
 
     ${coachReportV1Hierarchy}
 
+    ${hierarchyEnabled ? "" : `
     <section>
       <h2>Moments clés</h2>
       <div class="grid">${keyMoments}</div>
@@ -1551,7 +1589,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     <section>
       <h2>Analyse du coach</h2>
       <div class="grid">${insights}</div>
-    </section>
+    </section>`}
 
     ${legacyExperimentalSections}
     ${experimentalHypotheses}

@@ -371,6 +371,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "training_recommendation";
@@ -460,6 +461,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Rapport coach depuis les agrÃƒÂ©gats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
       return "Hierarchie de lecture du rapport coach V1";
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
+      return "Nettoyage de la lecture legacy du rapport coach V1";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
@@ -548,6 +551,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP":
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
     case "HARNESS_PLAUSIBILITY_WARNING":
@@ -601,6 +605,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
     "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION",
     "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY",
+    "WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP",
     "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION",
     "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION",
     "HARNESS_PLAUSIBILITY_WARNING",

@@ -21,12 +21,14 @@ import {
   renderFullMatchWorkbenchChainReplay4HValidation,
   renderFullMatchWorkbenchChainReplay4IDoc,
   renderFullMatchWorkbenchChainReplay4IValidation,
+  renderFullMatchWorkbenchChainReplay4JDoc,
+  renderFullMatchWorkbenchChainReplay4JValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-4i.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-4i.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-4j.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-4j.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1707,6 +1709,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 4I executable scoring guard for Coach Report V1 information hierarchy",
       },
       {
+        source: "src/simulation/fullMatch/scoringGuard.4j.test.ts",
+        required: true,
+        reason: "Sprint 4J executable scoring guard for Coach Report V1 legacy cleanup and score source labels",
+      },
+      {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
         required: true,
         reason: "Sprint 3A executable segment context scoring guard tests",
@@ -2408,6 +2415,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 4I Coach Report V1 information hierarchy builder export",
       },
       {
+        source: "src/reports/coachReportV1LegacyCleanup.ts",
+        required: true,
+        reason: "Sprint 4J Coach Report V1 legacy cleanup model, builder, evidence fact, tags, and guardrail limitations",
+      },
+      {
+        source: "src/reports/buildCoachReportV1LegacyCleanup.ts",
+        required: true,
+        reason: "Sprint 4J Coach Report V1 legacy cleanup builder export",
+      },
+      {
+        source: "src/reports/scoreSourceLabel.ts",
+        required: true,
+        reason: "Sprint 4J score source labels for full-match report, live scoring-events sample, and batch diagnostics",
+      },
+      {
         source: "src/reports/traceAggregateCoachLabels.test.ts",
         required: true,
         reason: "Sprint 4E executable French label mapping tests",
@@ -2481,6 +2503,31 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportV1VisualPolishEncoding.test.ts",
         required: true,
         reason: "Sprint 4I executable visual polish encoding tests",
+      },
+      {
+        source: "src/reports/coachReportV1LegacyCleanup.test.ts",
+        required: true,
+        reason: "Sprint 4J executable Coach Report V1 legacy cleanup model tests",
+      },
+      {
+        source: "src/reports/coachReportV1LegacyCleanupRenderer.test.ts",
+        required: true,
+        reason: "Sprint 4J executable legacy cleanup renderer tests",
+      },
+      {
+        source: "src/reports/scoreSourceLabel.test.ts",
+        required: true,
+        reason: "Sprint 4J executable score source label tests",
+      },
+      {
+        source: "src/reports/coachReportV1FrenchCopy.test.ts",
+        required: true,
+        reason: "Sprint 4J executable French visible copy tests",
+      },
+      {
+        source: "src/reports/coachReportV1LegacySourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 4J executable legacy cleanup source guard tests",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -2683,6 +2730,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
   }
   if (TASK_NAME.includes("Sprint 4I")) {
     return renderFullMatchWorkbenchChainReplay4IDoc(fullMatchTraceValidationModel());
+  }
+
+  if (TASK_NAME.includes("Sprint 4J")) {
+    return renderFullMatchWorkbenchChainReplay4JDoc(fullMatchTraceValidationModel());
   }
   if (TASK_NAME.includes("Sprint 4G")) {
     return renderFullMatchWorkbenchChainReplay4GDoc(fullMatchTraceValidationModel());
@@ -4797,6 +4848,10 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
   if (TASK_NAME.includes("Sprint 4I")) {
     return renderFullMatchWorkbenchChainReplay4IValidation(fullMatchTraceValidationModel());
   }
+
+  if (TASK_NAME.includes("Sprint 4J")) {
+    return renderFullMatchWorkbenchChainReplay4JValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 4G")) {
     return renderFullMatchWorkbenchChainReplay4GValidation(fullMatchTraceValidationModel());
   }
@@ -6849,6 +6904,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 4J")) {
+    return [
+      "# Sprint 4J Share Pack",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "Current sprint: Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-workbench-chain-replay-4j.md",
+      "- validation.fullmatch-workbench-chain-replay-4j.md",
+      "- coach-report.experimental.html",
+      "- scoring-events-summary.md",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 4J keeps Coach Report V1 as the main coach reading, collapses legacy key moments and coach analysis under technical traceability in experimental mode, labels score sources, and cleans visible French copy. It does not change scoring constants, live score logic, MatchBonusEvent, Selection Preview confidence, official timeline, possession, or production scoring events.",
+      "",
+      "## Review steps",
+      "",
+      "1. Read validation.share-pack.md to confirm the pack is current and below 20 files.",
+      "2. Read fullmatch-workbench-chain-replay-4j.md for legacy cleanup and score source clarity.",
+      "3. Read validation.fullmatch-workbench-chain-replay-4j.md for score-source, copy, source scope, encoding, and guardrail counts.",
+      "4. Open coach-report.experimental.html and verify the reading order: official first, experimental grouped, technical collapsed, legacy content under Ancienne lecture du rapport.",
+      "5. Open scoring-events-summary.md and verify it is labeled as the live scoring-events sample, separate from the full-match report score.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 4I")) {
     return [
       "# Sprint 4I Share Pack",

@@ -250,6 +250,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay4HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4h.md"));
   const fullMatchWorkbenchChainReplay4I = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4i.md"));
   const fullMatchWorkbenchChainReplay4IValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4i.md"));
+  const fullMatchWorkbenchChainReplay4J = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4j.md"));
+  const fullMatchWorkbenchChainReplay4JValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4j.md"));
   const sequenceOneActionOneWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-1.html"));
   const sequenceOneActionTwoWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-2.html"));
   const sequenceOneActionThreeWorkbench = readIfExists(join(shareDirectory, "sequence-1-action-3.html"));
@@ -2291,6 +2293,31 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-4h.md",
     ...sprint4HForbiddenLeftovers,
   ];
+  const sprint4JExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4j.md",
+    "validation.fullmatch-workbench-chain-replay-4j.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4JForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-4i.md",
+    "validation.fullmatch-workbench-chain-replay-4i.md",
+    ...sprint4IForbiddenLeftovers,
+  ];
   const coachHtmlMojibakeMarkers = [
     "Ãƒ",
     "Ã‚",
@@ -2475,6 +2502,55 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4I.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4IValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay4IValidation.includes("CONFIRM_COACH_REPORT_V1_INFORMATION_HIERARCHY") && fullMatchWorkbenchChainReplay4IValidation.includes("CONFIRM_REPORT_IS_NOW_COACH_READABLE"), "4I recommendations visible"),
+  ];
+  const sprint4JChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("no stale files", staleFiles.length === 0, staleFiles.join(", ") || "0"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4J", activeConfig.sprintName === "Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 18", filesOnDisk.length === 18, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4JExpectedFiles.every((file) => requiredCopied(file)), sprint4JExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4JForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4JForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("all required current sprint files copied", sprint4JExpectedFiles.every((file) => requiredCopied(file)), sprint4JExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("manifest lists Sprint 4J", manifest.includes("Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence") && detailedManifest.includes("Sprint 4J - Coach Report V1 Legacy Cleanup & Score Coherence"), "visible"),
+    check("README is Sprint 4J oriented", readme.includes("# Sprint 4J Share Pack") && readme.includes("fullmatch-workbench-chain-replay-4j.md"), "README current"),
+    check("4J report included", fullMatchWorkbenchChainReplay4J.includes("# FullMatch Workbench Chain Replay 4J") && fullMatchWorkbenchChainReplay4J.includes("legacy cleanup"), "4J doc included"),
+    check("4J validation is PASS", fullMatchWorkbenchChainReplay4JValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay4JValidation.includes("Coach Report V1 Legacy Cleanup status is available"), "4J validation PASS"),
+    check("coach report V1 legacy cleanup evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP") && bundleSimulation.includes("WORKBENCH_CHAIN_COACH_REPORT_V1_LEGACY_CLEANUP"), "4J evidence category bundled"),
+    check("coach report V1 legacy cleanup model and builder bundled", bundleReports.includes("src/reports/coachReportV1LegacyCleanup.ts") && bundleReports.includes("CoachReportV1LegacyCleanupModel") && bundleReports.includes("src/reports/buildCoachReportV1LegacyCleanup.ts"), "4J model bundled"),
+    check("score source labels bundled", bundleReports.includes("src/reports/scoreSourceLabel.ts") && bundleReports.includes("Score du rapport full-match") && scoringEvents.includes("score source label"), "score labels bundled"),
+    check("coach report V1 legacy cleanup tests bundled", bundleReports.includes("coachReportV1LegacyCleanup.test.ts") && bundleReports.includes("coachReportV1LegacyCleanupRenderer.test.ts") && bundleReports.includes("scoreSourceLabel.test.ts") && bundleReports.includes("coachReportV1FrenchCopy.test.ts") && bundleReports.includes("coachReportV1LegacySourceGuard.test.ts"), "4J tests bundled"),
+    check("scoring guard 4J bundled", bundleSimulation.includes("scoringGuard.4j.test.ts") && bundleSimulation.includes("validateScoringGuard4J"), "4J scoring guard bundled"),
+    check("experimental report keeps official hierarchy first", coachExperimentalHtml.includes("Ce que le match dit") && coachExperimentalHtml.indexOf("Ce que le match dit") < coachExperimentalHtml.indexOf("Hypothèses expérimentales à tester"), "official before experimental"),
+    check("legacy Moments clés does not compete with V1", !coachExperimentalVisibleHtml.includes("<h2>Moments clés</h2>") && coachExperimentalHtml.includes("Ancienne lecture du rapport"), "legacy moments collapsed"),
+    check("legacy Analyse du coach does not compete with V1", !coachExperimentalVisibleHtml.includes("<h2>Analyse du coach</h2>") && coachExperimentalHtml.includes("Analyse coach héritée"), "legacy analysis collapsed"),
+    check("score source label is visible", coachExperimentalHtml.includes("Score du rapport full-match"), "full-match label visible"),
+    check("score sources are not confused", coachExperimentalHtml.includes("Les diagnostics batch et les échantillons de scoring-events restent séparés") && scoringEvents.includes("Échantillon live scoring-events"), "source separation visible"),
+    check("full-match report score is labeled", coachExperimentalHtml.includes("Score du rapport full-match"), "score label visible"),
+    check("scoring-events sample remains separate if visible", scoringEvents.includes("Échantillon live scoring-events") && scoringEvents.includes("distinct du score affiché"), "scoring-events sample separated"),
+    check("batch diagnostics remain separate if visible", scoringEvents.includes("Diagnostic batch séparé"), "batch label visible"),
+    check("visible French copy has correct accents", coachExperimentalVisibleHtml.includes("À travailler") && coachExperimentalVisibleHtml.includes("récupérations") && coachExperimentalVisibleHtml.includes("sécuriser") && coachExperimentalVisibleHtml.includes("première") && coachExperimentalVisibleHtml.includes("après"), "accented copy visible"),
+    check("unaccented French visible issue count is 0", !containsAny(coachExperimentalVisibleHtml, ["A travailler", "recuperations", "securiser", "premiere", "apres", "economie globale"]), "visible issue count 0"),
+    check("mojibake marker count is 0", !containsAny(coachExperimentalHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("default report hides experimental cleanup hierarchy", !coachDefaultHtml.includes("Ce que le match dit") && !coachDefaultHtml.includes("Ancienne lecture du rapport"), "default hidden"),
+    check("diagnostic aggregates remain separate", bundleReports.includes("coach_report_v1_diagnostic_kept_separate") && fullMatchWorkbenchChainReplay4JValidation.includes("diagnostic aggregates remain separate"), "diagnostic separate"),
+    check("sandbox aggregates remain separate", bundleReports.includes("coach_report_v1_sandbox_kept_separate") && fullMatchWorkbenchChainReplay4JValidation.includes("sandbox aggregates remain separate"), "sandbox separate"),
+    check("Selection Preview remains sandbox_only", bundleReports.includes("coach_report_v1_selection_preview_still_sandbox_only") && fullMatchWorkbenchChainReplay4JValidation.includes("Selection Preview remains sandbox_only"), "selection preview sandbox"),
+    check("Selection Preview confidence not upgraded", bundleReports.includes("coach_report_v1_selection_preview_confidence_not_upgraded") && fullMatchWorkbenchChainReplay4JValidation.includes("Selection Preview confidence is not upgraded"), "confidence not upgraded"),
+    check("cleanup cannot mutate score", bundleReports.includes("coach_report_v1_legacy_cleanup_score_mutation_count_0") && fullMatchWorkbenchChainReplay4JValidation.includes("cleanup cannot mutate official score"), "score mutation forbidden"),
+    check("cleanup cannot create production scoring events", bundleReports.includes("coach_report_v1_legacy_cleanup_production_scoring_event_creation_count_0") && fullMatchWorkbenchChainReplay4JValidation.includes("cleanup cannot create production scoring events"), "production scoring creation forbidden"),
+    check("cleanup cannot claim global economy", bundleReports.includes("coach_report_v1_legacy_cleanup_global_economy_claim_forbidden") && fullMatchWorkbenchChainReplay4JValidation.includes("cleanup cannot claim global economy"), "global economy forbidden"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4JValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4JValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4JValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4J.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4JValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay4JValidation.includes("CONFIRM_COACH_REPORT_V1_LEGACY_CLEANUP") && fullMatchWorkbenchChainReplay4JValidation.includes("CONFIRM_SCORE_SOURCE_CLARITY"), "4J recommendations visible"),
   ];
   const sprint4HChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -5121,6 +5197,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4J - Coach Report V1 Legacy Cleanup")
+      ? sprint4JChecks
     : activeConfig.sprintName.includes("Sprint 4I - Coach Report V1 Visual Polish")
       ? sprint4IChecks
     : activeConfig.sprintName.includes("Sprint 4H - Coach Report V1 Visualization")
