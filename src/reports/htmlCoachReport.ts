@@ -668,6 +668,176 @@ function renderMultiScenarioCoachTestPlan(report: MatchReport): string {
     </section>`;
 }
 
+interface SelectionPreviewCoachCopyRenderCard {
+  readonly previewId: "support_near_z4_hsr" | "second_ball_presence" | "strong_goalkeeper_response";
+  readonly title: string;
+  readonly summary: string;
+  readonly whyObserve: readonly string[];
+  readonly limits: readonly string[];
+}
+
+const selectionPreviewCoachCopyCards: readonly SelectionPreviewCoachCopyRenderCard[] = [
+  {
+    previewId: "support_near_z4_hsr",
+    title: "soutien proche autour des zones de danger",
+    summary:
+      "Les traces officielles montrent des zones de danger et des récupérations qui peuvent nécessiter une meilleure première sortie.",
+    whyObserve: [
+      "Soutenir la progression après récupération.",
+      "Réduire le risque de tir ou de passe isolée.",
+      "Stabiliser la continuité autour des zones dangereuses.",
+    ],
+    limits: [
+      "Ne change pas la composition.",
+      "Ne devient pas une recommandation officielle.",
+      "À confirmer par d’autres scénarios et par la lecture tactique.",
+    ],
+  },
+  {
+    previewId: "second_ball_presence",
+    title: "présence sur second ballon",
+    summary:
+      "Les traces officielles renforcent l’intérêt de mieux observer la continuité après action dangereuse ou récupération.",
+    whyObserve: [
+      "Attaquer les ballons mal sécurisés.",
+      "Mieux contrôler la suite après tir, arrêt ou récupération.",
+      "Limiter les pertes de continuité après une action dangereuse.",
+    ],
+    limits: [
+      "Risque de sur-engagement si trop de joueurs attaquent le second ballon.",
+      "Peut exposer la rest-defense.",
+      "Reste un test de sélection non appliqué.",
+    ],
+  },
+  {
+    previewId: "strong_goalkeeper_response",
+    title: "réponse face à un gardien fort",
+    summary:
+      "Les traces soutiennent l’idée d’observer une option de continuité lorsque le gardien ou la défense neutralise l’action.",
+    whyObserve: [
+      "Préparer une solution après arrêt ou neutralisation.",
+      "Éviter une attaque dépendante d’un tir direct.",
+      "Garder une structure utile après l’action dangereuse.",
+    ],
+    limits: [
+      "N’indique pas encore quel joueur choisir.",
+      "N’applique aucun changement.",
+      "Non confirmée comme recommandation officielle.",
+    ],
+  },
+];
+
+function splitTagValues(value: string | undefined): readonly string[] {
+  return value === undefined || value === "none" ? [] : value.split("|");
+}
+
+function zonesText(zones: readonly string[]): string {
+  return zones.length === 0 ? "les zones concernées" : zones.join(" / ");
+}
+
+function coachTraceSupportLines(input: {
+  readonly previewId: SelectionPreviewCoachCopyRenderCard["previewId"];
+  readonly traceSupported: boolean;
+  readonly dangerZones: readonly string[];
+  readonly recoveryZones: readonly string[];
+}): readonly string[] {
+  if (!input.traceSupported) {
+    return [
+      "Aucun appui officiel suffisant pour l’instant.",
+      "La piste reste observable, sans devenir une recommandation officielle.",
+    ];
+  }
+
+  switch (input.previewId) {
+    case "support_near_z4_hsr":
+      return [
+        `Danger officiel en ${zonesText(input.dangerZones)}.`,
+        `Récupérations officielles en ${zonesText(input.recoveryZones)}.`,
+        "Point de vigilance V1 : sécuriser la première sortie après récupération.",
+      ];
+    case "second_ball_presence":
+      return [
+        `Récupérations utiles autour de ${zonesText(input.recoveryZones)}.`,
+        "Possession sécurisée ou pression détectée après action dangereuse.",
+        "Danger non converti : la suite de l’action reste importante.",
+      ];
+    case "strong_goalkeeper_response":
+      return [
+        "Gardien ou défense qui sécurise une action dangereuse.",
+        `Danger créé mais non converti en ${zonesText(input.dangerZones)}.`,
+        "Besoin de continuité ou de second ballon après neutralisation.",
+      ];
+  }
+}
+
+function renderSelectionPreviewCoachCopy(input: {
+  readonly selectionPreviewFact: MatchReport["evidenceFacts"][number];
+  readonly traceBackingFact: MatchReport["evidenceFacts"][number] | undefined;
+  readonly coachCopyFact: MatchReport["evidenceFacts"][number];
+}): string {
+  const traceStatus = (previewId: SelectionPreviewCoachCopyRenderCard["previewId"]): string =>
+    input.traceBackingFact === undefined
+      ? "sandbox_only"
+      : tagValue(input.traceBackingFact.internalTags, `selection_preview_trace_backing_${previewId}_status_`) ?? "sandbox_only";
+  const traceZones = (previewId: SelectionPreviewCoachCopyRenderCard["previewId"], suffix: "danger_zones" | "recovery_zones"): readonly string[] =>
+    input.traceBackingFact === undefined
+      ? []
+      : splitTagValues(tagValue(input.traceBackingFact.internalTags, `selection_preview_trace_backing_${previewId}_${suffix}_`));
+
+  const cards = selectionPreviewCoachCopyCards.map((card) => {
+    const status = traceStatus(card.previewId);
+    const traceSupported = status === "trace_supported";
+    const supportLines = coachTraceSupportLines({
+      previewId: card.previewId,
+      traceSupported,
+      dangerZones: traceZones(card.previewId, "danger_zones"),
+      recoveryZones: traceZones(card.previewId, "recovery_zones"),
+    });
+
+    return `
+      <article class="card">
+        <h3>Profil à observer — ${escapeHtml(card.title)}</h3>
+        <p>${escapeHtml(card.summary)}</p>
+        <ul>
+          <li><strong>Origine :</strong> hypothèse sandbox</li>
+          <li><strong>Appui :</strong> ${traceSupported ? "appuyé par les traces officielles" : "non appuyé par les traces officielles pour l’instant"}</li>
+          <li><strong>Décision :</strong> prévisualisation non appliquée</li>
+          <li><strong>Confirmation :</strong> non confirmée comme recommandation officielle</li>
+        </ul>
+        <h4>Pourquoi l’observer</h4>
+        <ul>${card.whyObserve.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        <h4>Ce que les traces soutiennent</h4>
+        <ul>${supportLines.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        <h4>Limite</h4>
+        <ul>${card.limits.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </article>`;
+  }).join("");
+
+  return `
+    <section>
+      <h2>Profils à observer</h2>
+      <p>Ces profils restent des prévisualisations non appliquées. Les traces officielles peuvent appuyer une hypothèse, mais elles ne la transforment pas en recommandation officielle.</p>
+      <p>La confiance n’est pas rehaussée automatiquement et la sélection live reste inchangée.</p>
+      <div class="grid">${cards}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques de la prévisualisation</summary>
+        <div class="muted">${escapeHtml(input.selectionPreviewFact.summary)}</div>
+        <div class="muted">${input.selectionPreviewFact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+      ${input.traceBackingFact === undefined ? "" : `
+      <details class="internal-markers">
+        <summary>Détails techniques de l’appui par traces</summary>
+        <div class="muted">${escapeHtml(input.traceBackingFact.summary)}</div>
+        <div class="muted">${input.traceBackingFact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>`}
+      <details class="internal-markers">
+        <summary>Détails techniques de la copie coach</summary>
+        <div class="muted">${escapeHtml(input.coachCopyFact.summary)}</div>
+        <div class="muted">${input.coachCopyFact.internalTags.map(escapeHtml).join(", ")}</div>
+      </details>
+    </section>`;
+}
+
 function renderSelectionPreview(report: MatchReport): string {
   const fact = report.evidenceFacts.find((candidate) =>
     candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW" &&
@@ -677,9 +847,21 @@ function renderSelectionPreview(report: MatchReport): string {
     candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING" &&
     candidate.internalTags.includes("selection_preview_trace_backing")
   );
+  const coachCopyFact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY" &&
+    candidate.internalTags.includes("selection_preview_coach_copy")
+  );
 
   if (fact === undefined) {
     return "";
+  }
+
+  if (coachCopyFact !== undefined) {
+    return renderSelectionPreviewCoachCopy({
+      selectionPreviewFact: fact,
+      traceBackingFact,
+      coachCopyFact,
+    });
   }
 
   const supportScenario = tagValue(fact.internalTags, "selection_preview_support_near_z4_hsr_scenario_") ??

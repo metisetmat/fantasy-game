@@ -1,24 +1,24 @@
-# Sprint 4K Share Pack
+# Sprint 4L Share Pack
 
 Mode: MINIMAL_REVIEW
-Current sprint: Sprint 4K - Trace-backed Selection Preview
+Current sprint: Sprint 4L - Selection Preview Clarity & Coach-Ready Copy
 
 ## What to read first
 
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4k.md
-- validation.fullmatch-workbench-chain-replay-4k.md
+- fullmatch-workbench-chain-replay-4l.md
+- validation.fullmatch-workbench-chain-replay-4l.md
 - coach-report.experimental.html
 - scoring-events-summary.md
 
 ## Sprint boundary
 
-Sprint 4K connects Selection Preview cards to official match trace aggregates as support evidence only. It can mark preview cards as trace_supported, but it cannot make them officially_confirmed, cannot apply lineup changes, cannot drive live selection, cannot drive production route resolution, cannot mutate score or possession, and cannot claim global economy proof.
+Sprint 4L rewrites Selection Preview into coach-ready observation cards. It separates origin, trace support, decision status, and confirmation status while keeping every preview non-applied and non-official.
 
 ## Review steps
 
 1. Read validation.share-pack.md to confirm the pack is current and below 20 files.
-2. Read fullmatch-workbench-chain-replay-4k.md for trace-backed Selection Preview status and guardrails.
-3. Read validation.fullmatch-workbench-chain-replay-4k.md for source-scope, renderer, and scoring guard counts.
-4. Open coach-report.experimental.html and verify each Selection Preview card shows Statut d'appui while still saying preview-only/non-applied.
+2. Read fullmatch-workbench-chain-replay-4l.md for coach-copy status and guardrails.
+3. Read validation.fullmatch-workbench-chain-replay-4l.md for label, wording, source-scope, and scoring guard counts.
+4. Open coach-report.experimental.html and verify the visible section is Profils à observer with Origine, Appui, Décision, and Confirmation labels.
 5. Open scoring-events-summary.md and verify scoring constants and live score separation remain unchanged.

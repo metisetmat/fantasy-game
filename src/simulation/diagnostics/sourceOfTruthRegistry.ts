@@ -34,6 +34,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
+  | "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -928,6 +929,42 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which Selection Preview cards have official support",
       "which official danger, recovery, cause, impact, player, goalkeeper, or second-ball signals support each preview",
       "which preview ideas remain sandbox_only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a coach must apply any selection preview",
+      "that a selection preview is officially confirmed",
+      "that a real lineup change is recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY: {
+    scope: "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY",
+    canProve: [
+      "Selection Preview coach copy separates sandbox origin, official trace support, non-applied decision, and non-official confirmation",
+      "visible Selection Preview wording avoids official recommendation claims",
+      "coach-copy guardrails preserve non-applied and non-binding status",
+    ],
+    canSuggest: [
+      "which Selection Preview ideas are clearer for coach review",
+      "which trace-supported cards deserve coach observation",
+      "which copy limits should stay visible",
     ],
     cannotProve: [
       "global scoring balance",
