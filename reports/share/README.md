@@ -1,24 +1,24 @@
-# Sprint 4L Share Pack
+# Sprint 4M Share Pack
 
 Mode: MINIMAL_REVIEW
-Current sprint: Sprint 4L - Selection Preview Clarity & Coach-Ready Copy
+Current sprint: Sprint 4M - Selection Preview Profile View
 
 ## What to read first
 
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4l.md
-- validation.fullmatch-workbench-chain-replay-4l.md
+- fullmatch-workbench-chain-replay-4m.md
+- validation.fullmatch-workbench-chain-replay-4m.md
 - coach-report.experimental.html
-- scoring-events-summary.md
 
 ## Sprint boundary
 
-Sprint 4L rewrites Selection Preview into coach-ready observation cards. It separates origin, trace support, decision status, and confirmation status while keeping every preview non-applied and non-official.
+Sprint 4M turns Selection Preview into concrete coach-readable profile cards. It adds role families, useful attributes, expected benefits, tactical risks, and next-match observation signals while keeping every preview non-applied, non-official, and unable to drive lineup, live selection, route resolution, score, possession, or global economy claims.
 
 ## Review steps
 
-1. Read validation.share-pack.md to confirm the pack is current and below 20 files.
-2. Read fullmatch-workbench-chain-replay-4l.md for coach-copy status and guardrails.
-3. Read validation.fullmatch-workbench-chain-replay-4l.md for label, wording, source-scope, and scoring guard counts.
-4. Open coach-report.experimental.html and verify the visible section is Profils à observer with Origine, Appui, Décision, and Confirmation labels.
-5. Open scoring-events-summary.md and verify scoring constants and live score separation remain unchanged.
+Upload every file in this folder.
+
+1. Confirm validation.share-pack.md is PASS.
+2. Read fullmatch-workbench-chain-replay-4m.md for profile-card status and guardrails.
+3. Read validation.fullmatch-workbench-chain-replay-4m.md for role/attribute label, copy leak, source-scope, and scoring guard counts.
+4. Use coach-report.experimental.html to verify visible coach copy.

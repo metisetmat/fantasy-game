@@ -2,6 +2,7 @@ import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.
 import { containsMojibake } from "./coachCopyQuality";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { runFullMatch } from "../simulation/runFullMatch";
+import { selectionPreviewProfileViewVisibleHtml } from "./selectionPreviewProfileViewRenderer.test";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -63,6 +64,7 @@ export function validateCoachReportSelectionPreview(): readonly string[] {
     routeSelectionMode: "workbench_chain_replay_experimental",
   }));
   const experimentalVisibleHtml = visibleHtml(experimentalHtml);
+  const profileViewVisibleHtml = selectionPreviewProfileViewVisibleHtml(experimentalHtml);
   const forbiddenVisibleTerms = [
     "SegmentRouteInput",
     "selection shadow",
@@ -72,28 +74,29 @@ export function validateCoachReportSelectionPreview(): readonly string[] {
     "workbench_chain_",
   ];
 
-  assertTest(!defaultHtml.includes("Profils à observer"), "default report must not show selection preview coach copy.");
-  assertTest(experimentalHtml.includes("Profils à observer"), "experimental report must show selection preview coach copy.");
-  assertTest(experimentalHtml.includes("Profil à observer — soutien proche autour des zones de danger"), "support preview must be visible.");
-  assertTest(experimentalHtml.includes("Profil à observer — présence sur second ballon"), "second-ball preview must be visible.");
-  assertTest(experimentalHtml.includes("Profil à observer — réponse face à un gardien fort"), "strong-goalkeeper-response preview must be visible.");
-  assertTest(experimentalHtml.includes("Ces profils restent des prévisualisations non appliquées"), "profiles must be preview-only.");
-  assertTest(experimentalHtml.includes("La confiance n’est pas rehaussée automatiquement et la sélection live reste inchangée"), "live selection and confidence must remain unchanged.");
-  assertTest(experimentalHtml.includes("Décision :</strong> prévisualisation non appliquée"), "decision status must remain non-applied.");
-  assertTest(experimentalHtml.includes("Confirmation :</strong> non confirmée comme recommandation officielle"), "official recommendation overclaim must be avoided.");
+  assertTest(!defaultHtml.includes("Profils à observer"), "default report must not show selection preview profile view.");
+  assertTest(experimentalHtml.includes("Profils à observer"), "experimental report must show selection preview profile view.");
+  assertTest(profileViewVisibleHtml.includes("Profil à observer — soutien proche autour des zones de danger"), "support profile must be visible.");
+  assertTest(profileViewVisibleHtml.includes("Profil à observer — présence sur second ballon"), "second-ball profile must be visible.");
+  assertTest(profileViewVisibleHtml.includes("Profil à observer — réponse face à un gardien fort"), "strong-goalkeeper-response profile must be visible.");
+  assertTest(profileViewVisibleHtml.includes("Famille de rôle"), "profile view must expose role family.");
+  assertTest(profileViewVisibleHtml.includes("Attributs utiles"), "profile view must expose useful attributes.");
+  assertTest(profileViewVisibleHtml.includes("Bénéfice attendu"), "profile view must expose expected benefit.");
+  assertTest(profileViewVisibleHtml.includes("Risque tactique"), "profile view must expose tactical risk.");
+  assertTest(profileViewVisibleHtml.includes("Signal à vérifier au prochain match"), "profile view must expose next-match signal.");
+  assertTest(profileViewVisibleHtml.includes("Prévisualisation non appliquée"), "profile view must remain non-applied.");
+  assertTest(profileViewVisibleHtml.includes("non confirmée comme recommandation officielle"), "official recommendation overclaim must be avoided.");
   assertTest(!containsMojibake(experimentalHtml), "generated coach report must contain no mojibake.");
   for (const term of forbiddenVisibleTerms) {
     assertTest(!experimentalVisibleHtml.includes(term), `visible coach copy must not expose developer jargon: ${term}.`);
   }
-  assertTest(experimentalHtml.includes("Détails techniques de la prévisualisation"), "technical preview data must remain behind details.");
-  assertTest(experimentalHtml.includes("Détails techniques de la copie coach"), "technical coach copy data must remain behind details.");
-  assertTest(experimentalHtml.includes("selection_preview"), "technical tags must remain available inside details.");
+  assertTest(experimentalHtml.includes("Détails techniques des profils à observer"), "technical profile view data must remain behind details.");
+  assertTest(experimentalHtml.includes("selection_preview_profile_view"), "technical profile view tags must remain available inside details.");
 
   return [
     "experimental report contains Profils à observer",
-    "experimental report contains three coach-ready selection preview cards",
-    "experimental report says profiles are preview-only",
-    "experimental report says live selection and confidence are unchanged",
+    "experimental report contains three concrete profile cards",
+    "experimental report shows role family, attributes, benefit, risk, and next-match signal",
     "experimental report says preview remains non-applied and non-official",
     "default report hides the experimental selection preview",
     "visible coach copy contains no mojibake",

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-15T13:48:55.034Z
-Task/sprint: Sprint 4L - Selection Preview Clarity & Coach-Ready Copy
+Generated: 2026-06-15T15:15:48.642Z
+Task/sprint: Sprint 4M - Selection Preview Profile View
 Mode: MINIMAL_REVIEW
 Final file count: 18
 
@@ -20,8 +20,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4l.md
-- validation.fullmatch-workbench-chain-replay-4l.md
+- fullmatch-workbench-chain-replay-4m.md
+- validation.fullmatch-workbench-chain-replay-4m.md
 - README.md
 
 ## Bundle Files
