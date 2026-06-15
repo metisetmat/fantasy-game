@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapport coach produit</title>
+  <style>
+    :root { color-scheme: light; --ink: #172033; --muted: #5f6c7b; --line: #d9e2ec; --soft: #f6f8fb; --accent: #1f6f8b; }
+    body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: #fff; line-height: 1.5; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 56px; }
+    header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
+    h1 { margin: 0 0 8px; font-size: 2rem; }
+    h2 { margin: 32px 0 12px; font-size: 1.35rem; }
+    h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    h4 { margin: 12px 0 6px; font-size: .95rem; }
+    .score { font-size: 1.35rem; font-weight: 700; }
+    .muted { color: var(--muted); }
+    .product-card { border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin: 12px 0; background: #fff; }
+    .summary-list { background: var(--soft); border-radius: 8px; padding: 16px 18px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
+    .guard { border-left: 3px solid var(--accent); padding-left: 10px; color: var(--muted); }
+    .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--soft); }
+    .appendix summary { cursor: pointer; font-weight: 700; }
+    .empty { color: var(--muted); }
+  </style>
+</head>
+<body>
+<main id="product-main">
+  <header>
+    <p class="muted">Rapport produit disponible.</p>
+    <h1>Rapport coach</h1>
+    <p><strong>Match :</strong> contract-fixture-001</p>
+    <p class="score">45 - 0</p>
+    <p><strong>Score du rapport full-match</strong></p>
+    <p class="muted">Le score affiché correspond au rapport full-match généré pour ce run. Les diagnostics batch et les échantillons de scoring-events restent séparés.</p>
+  </header>
+
+  <section id="executive-summary">
+    <h2>Résumé coach</h2>
+    <div class="summary-list"><ul><li>Score final : 45 - 0.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
+  </section>
+
+  <section id="official-match-reading">
+    <h2>Ce que le match dit</h2>
+    <div class="badge-row"><span class="badge">Source : Officiel</span></div>
+    <ul><li>Les signaux officiels restent prioritaires dans le corps du rapport.</li><li>Les diagnostics et hypothèses expérimentales sont conservés en annexe.</li></ul>
+  </section>
+
+  <section id="key-coach-signals">
+    <h2>3 signaux clés</h2>
+    <div class="cards">
+    <article class="product-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance moyenne</span>
+      </div>
+      <h3>Zones de danger et progression</h3>
+      <p>Le rapport officiel met en avant les zones où le danger se répète.</p>
+      <p><strong>Ce que cela signifie pour le coach :</strong> Le coach peut regarder si ces zones produisent une progression propre ou seulement des situations isolées.</p>
+      <div class="compact-list">
+        <strong>Preuves lisibles :</strong>
+        <ul><li>Lecture issue des agrégats officiels du match.</li></ul>
+      </div>
+    </article>
+    <article class="product-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance moyenne</span>
+      </div>
+      <h3>Récupération et première sortie</h3>
+      <p>La qualité de la première sortie après récupération reste un signal de lecture prioritaire.</p>
+      <p><strong>Ce que cela signifie pour le coach :</strong> Le prochain match doit confirmer si la récupération devient immédiatement exploitable.</p>
+      <div class="compact-list">
+        <strong>Preuves lisibles :</strong>
+        <ul><li>Les traces officielles relient récupérations et continuité de possession.</li></ul>
+      </div>
+    </article>
+    <article class="product-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance faible</span>
+      </div>
+      <h3>Pression, continuité et réponse du gardien</h3>
+      <p>La suite de l&#39;action après pression ou arrêt du gardien doit rester structurée.</p>
+      <p><strong>Ce que cela signifie pour le coach :</strong> Le coach doit vérifier si l&#39;équipe garde son organisation quand la première action est neutralisée.</p>
+      <div class="compact-list">
+        <strong>Preuves lisibles :</strong>
+        <ul><li>Signal officiel présent, mais encore à confirmer par répétition.</li></ul>
+      </div>
+    </article></div>
+  </section>
+
+  <section id="profiles-to-observe">
+    <h2>Profils à observer</h2>
+    <p class="muted">Ces profils aident à regarder le prochain match. Ils ne sont pas appliqués et ne deviennent pas des recommandations officielles.</p>
+    
+    <article class="product-card profile-card">
+      <h3>Profil à observer — soutien proche autour des zones de danger</h3>
+      <p><strong>Famille de rôle :</strong> soutien mobile, relayeur mobile, lien intérieur, soutien créatif</p>
+      <p><strong>Attributs utiles :</strong> anticipation, soutien sans ballon, maîtrise technique, prise de décision, endurance</p>
+      <div class="product-grid">
+        <section>
+          <h4>Pourquoi l’observer</h4>
+          <ul><li>Ce profil peut stabiliser la première sortie quand le danger naît près des zones hautes.</li></ul>
+        </section>
+        <section>
+          <h4>Ce que les traces soutiennent</h4>
+          <ul><li>Les traces officielles soutiennent l&#39;idée d&#39;un soutien proche, sans la transformer en choix imposé.</li></ul>
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          <ul><li>Créer une option plus propre après récupération.</li><li>Réduire la précipitation dans la première passe.</li></ul>
+        </section>
+        <section>
+          <h4>Risque tactique</h4>
+          <ul><li>Peut ralentir la projection si le soutien reste trop bas.</li></ul>
+        </section>
+      </div>
+      <section>
+        <h4>Signal à vérifier au prochain match</h4>
+        <ul><li>La première sortie après récupération devient-elle plus propre ?</li></ul>
+      </section>
+      <p class="guard">Prévisualisation non appliquée — non confirmée comme recommandation officielle.</p>
+    </article>
+    <article class="product-card profile-card">
+      <h3>Profil à observer — présence sur second ballon</h3>
+      <p><strong>Famille de rôle :</strong> chasseur de second ballon, attaquant de pression, gros volume de course</p>
+      <p><strong>Attributs utiles :</strong> anticipation, réaction, accélération, agressivité contrôlée, équilibre, endurance</p>
+      <div class="product-grid">
+        <section>
+          <h4>Pourquoi l’observer</h4>
+          <ul><li>Ce profil peut attaquer les secondes actions sans convertir l&#39;hypothèse en consigne officielle.</li></ul>
+        </section>
+        <section>
+          <h4>Ce que les traces soutiennent</h4>
+          <ul><li>Les récupérations et impacts officiels donnent un support prudent à cette observation.</li></ul>
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          <ul><li>Augmenter la présence autour des ballons disputés.</li><li>Créer une pression utile après neutralisation.</li></ul>
+        </section>
+        <section>
+          <h4>Risque tactique</h4>
+          <ul><li>Peut exposer la structure si la course n&#39;est pas couverte.</li></ul>
+        </section>
+      </div>
+      <section>
+        <h4>Signal à vérifier au prochain match</h4>
+        <ul><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li></ul>
+      </section>
+      <p class="guard">Prévisualisation non appliquée — non confirmée comme recommandation officielle.</p>
+    </article>
+    <article class="product-card profile-card">
+      <h3>Profil à observer — réponse face à un gardien fort</h3>
+      <p><strong>Famille de rôle :</strong> option de continuité, second créateur, receveur de soutien, ancre de rest-defense</p>
+      <p><strong>Attributs utiles :</strong> prise de décision, placement, sang-froid, discipline tactique, fraîcheur mentale, maîtrise technique</p>
+      <div class="product-grid">
+        <section>
+          <h4>Pourquoi l’observer</h4>
+          <ul><li>Ce profil aide à garder une structure utile quand le gardien ou la défense neutralise la première action.</li></ul>
+        </section>
+        <section>
+          <h4>Ce que les traces soutiennent</h4>
+          <ul><li>Les signaux liés au gardien et à la possession sécurisée justifient une observation prudente.</li></ul>
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          <ul><li>Préserver la continuité après arrêt ou neutralisation.</li><li>Limiter la perte de structure après une occasion.</li></ul>
+        </section>
+        <section>
+          <h4>Risque tactique</h4>
+          <ul><li>Peut réduire l&#39;agressivité de la relance si la continuité devient trop prudente.</li></ul>
+        </section>
+      </div>
+      <section>
+        <h4>Signal à vérifier au prochain match</h4>
+        <ul><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
+      </section>
+      <p class="guard">Prévisualisation non appliquée — non confirmée comme recommandation officielle.</p>
+    </article>
+  </section>
+
+  <section id="next-match-signals">
+    <h2>À vérifier au prochain match</h2>
+    <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
+  </section>
+
+  <section id="appendices">
+    <h2>Annexes</h2>
+    <p class="muted">Les annexes gardent les hypothèses, la traçabilité et les validations hors de la lecture principale.</p>
+    
+    <details class="appendix">
+      <summary>Hypothèses sandbox</summary>
+      <p>Les hypothèses expérimentales restent séparées du rapport principal.</p>
+      <ul><li>Les hypothèses expérimentales restent séparées du rapport principal.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Traçabilité technique</summary>
+      <p>Les preuves et marqueurs techniques restent disponibles sans encombrer la lecture coach.</p>
+      <ul><li>Les preuves et marqueurs techniques restent disponibles sans encombrer la lecture coach.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Ancienne lecture du rapport</summary>
+      <p>Les anciennes sections restent consultables comme contexte, pas comme lecture principale.</p>
+      <ul><li>Les anciennes sections restent consultables comme contexte, pas comme lecture principale.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Détails de validation</summary>
+      <p>Les validations confirment les garde-fous sans piloter le contenu coach.</p>
+      <ul><li>coach_product_report_view</li><li>coach_product_report_view_status_available</li><li>coach_product_report_file_generated</li><li>coach_product_report_section_count_7</li><li>coach_product_report_key_signal_count_3</li><li>coach_product_report_profile_card_count_3</li><li>coach_product_report_next_match_signal_count_present</li><li>coach_product_report_appendix_count_present</li><li>coach_product_report_visible_jargon_count_0</li><li>coach_product_report_internal_status_leak_count_0</li><li>coach_product_report_official_selection_wording_count_0</li><li>coach_product_report_profile_applied_count_0</li><li>coach_product_report_officially_confirmed_count_0</li><li>coach_product_report_confidence_upgrade_count_0</li><li>coach_product_report_score_mutation_count_0</li><li>coach_product_report_possession_mutation_count_0</li><li>coach_product_report_production_scoring_event_creation_count_0</li><li>coach_product_report_global_economy_claim_forbidden</li><li>coach_product_report_diagnostic_kept_separate</li><li>coach_product_report_sandbox_kept_separate</li><li>coach_product_report_official_aggregates_support_only</li><li>scoring_constants_unchanged</li></ul>
+    </details>
+  </section>
+</main>
+</body>
+</html>
