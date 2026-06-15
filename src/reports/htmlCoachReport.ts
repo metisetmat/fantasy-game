@@ -13,6 +13,12 @@ import type {
 } from "../contracts/engineToCoach";
 import { normalizeCoachFacingCopy } from "./coachCopyQuality";
 import { scoreSourceLabel } from "./scoreSourceLabel";
+import {
+  selectionPreviewProfileAttributeLabels,
+  selectionPreviewProfileRoleFamilyLabels,
+  type SelectionPreviewProfileAttribute,
+  type SelectionPreviewProfileRoleFamily,
+} from "./selectionPreviewProfileView";
 
 export function escapeHtml(value: string): string {
   return normalizeCoachFacingCopy(productCopy(value))
@@ -838,6 +844,155 @@ function renderSelectionPreviewCoachCopy(input: {
     </section>`;
 }
 
+interface SelectionPreviewProfileRenderCard {
+  readonly title: string;
+  readonly roleFamilies: readonly SelectionPreviewProfileRoleFamily[];
+  readonly usefulAttributes: readonly SelectionPreviewProfileAttribute[];
+  readonly whyObserve: readonly string[];
+  readonly officialTraceSupport: readonly string[];
+  readonly expectedBenefit: readonly string[];
+  readonly tacticalRisk: readonly string[];
+  readonly nextMatchSignalToVerify: readonly string[];
+}
+
+const selectionPreviewProfileRenderCards: readonly SelectionPreviewProfileRenderCard[] = [
+  {
+    title: "Profil à observer — soutien proche autour des zones de danger",
+    roleFamilies: ["support_runner", "mobile_lock", "hook_link", "playmaker_support"],
+    usefulAttributes: ["anticipation", "off_ball_support", "handling", "decision_making", "stamina"],
+    whyObserve: [
+      "Soutenir la progression après récupération.",
+      "Offrir une sortie simple autour des zones dangereuses.",
+      "Éviter que le porteur soit isolé après une progression.",
+    ],
+    officialTraceSupport: [
+      "Zones de danger répétées.",
+      "Récupérations utiles à sécuriser.",
+      "Point de vigilance V1 sur la première sortie après récupération.",
+    ],
+    expectedBenefit: [
+      "Plus de continuité après récupération.",
+      "Moins de pertes après progression.",
+      "Meilleure stabilité dans les zones de danger.",
+    ],
+    tacticalRisk: [
+      "Trop de soutien offensif peut exposer la rest-defense.",
+      "Un soutien trop proche peut réduire la profondeur.",
+      "Cette piste reste à tester contre d’autres profils adverses.",
+    ],
+    nextMatchSignalToVerify: [
+      "Vérifier si la première sortie après récupération devient plus propre.",
+      "Vérifier si les progressions dangereuses mènent à une continuité contrôlée.",
+      "Vérifier si la rest-defense reste stable.",
+    ],
+  },
+  {
+    title: "Profil à observer — présence sur second ballon",
+    roleFamilies: ["rebound_chaser", "pressure_forward", "high_work_rate_runner"],
+    usefulAttributes: ["anticipation", "reaction", "acceleration", "aggression", "balance", "stamina"],
+    whyObserve: [
+      "Attaquer les ballons mal sécurisés.",
+      "Mieux contrôler la suite après tir, arrêt ou récupération.",
+      "Limiter les pertes de continuité après action dangereuse.",
+    ],
+    officialTraceSupport: [
+      "Récupérations utiles.",
+      "Possession sécurisée.",
+      "Pression détectée.",
+      "Danger non converti.",
+    ],
+    expectedBenefit: [
+      "Plus de secondes actions.",
+      "Meilleur contrôle des rebonds ou ballons libres.",
+      "Moins de transitions adverses après action dangereuse.",
+    ],
+    tacticalRisk: [
+      "Sur-engagement.",
+      "Fatigue plus élevée.",
+      "Rest-defense plus exposée si le second ballon est perdu.",
+    ],
+    nextMatchSignalToVerify: [
+      "Vérifier si les secondes actions augmentent.",
+      "Vérifier si la pression au rebond ne désorganise pas l’équipe.",
+      "Vérifier si les récupérations deviennent plus exploitables.",
+    ],
+  },
+  {
+    title: "Profil à observer — réponse face à un gardien fort",
+    roleFamilies: ["continuity_option", "secondary_playmaker", "support_receiver", "rest_defense_anchor"],
+    usefulAttributes: ["decision_making", "positioning", "composure", "tactical_discipline", "mental_freshness", "handling"],
+    whyObserve: [
+      "Préparer une solution après arrêt ou neutralisation.",
+      "Éviter une attaque trop dépendante d’un tir direct.",
+      "Garder une structure utile après une action dangereuse.",
+    ],
+    officialTraceSupport: [
+      "Danger créé mais pas toujours converti.",
+      "Besoin de continuité après neutralisation.",
+      "Signaux liés à la sécurisation de la possession.",
+    ],
+    expectedBenefit: [
+      "Meilleure continuité après arrêt.",
+      "Moins de récupération adverse facile.",
+      "Plan B plus stable contre un gardien ou une défense forte.",
+    ],
+    tacticalRisk: [
+      "Option plus prudente, parfois moins menaçante immédiatement.",
+      "Peut ralentir l’attaque.",
+      "Reste un test, pas une sélection imposée.",
+    ],
+    nextMatchSignalToVerify: [
+      "Vérifier si l’équipe garde une structure utile après un arrêt.",
+      "Vérifier si la possession reste sécurisée après action dangereuse.",
+      "Vérifier si le profil réduit les récupérations adverses propres.",
+    ],
+  },
+];
+
+function renderSelectionPreviewProfileList(items: readonly string[]): string {
+  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+function renderSelectionPreviewProfileView(input: {
+  readonly selectionPreviewFact: MatchReport["evidenceFacts"][number];
+  readonly traceBackingFact: MatchReport["evidenceFacts"][number] | undefined;
+  readonly coachCopyFact: MatchReport["evidenceFacts"][number] | undefined;
+  readonly profileViewFact: MatchReport["evidenceFacts"][number];
+}): string {
+  const cards = selectionPreviewProfileRenderCards.map((card) => `
+      <article class="card">
+        <h3>${escapeHtml(card.title)}</h3>
+        <p><strong>Famille de rôle :</strong> ${card.roleFamilies.map((role) => escapeHtml(selectionPreviewProfileRoleFamilyLabels[role])).join(", ")}</p>
+        <p><strong>Attributs utiles :</strong> ${card.usefulAttributes.map((attribute) => escapeHtml(selectionPreviewProfileAttributeLabels[attribute])).join(", ")}</p>
+        <h4>Pourquoi l’observer</h4>
+        ${renderSelectionPreviewProfileList(card.whyObserve)}
+        <h4>Ce que les traces soutiennent</h4>
+        ${renderSelectionPreviewProfileList(card.officialTraceSupport)}
+        <h4>Bénéfice attendu</h4>
+        ${renderSelectionPreviewProfileList(card.expectedBenefit)}
+        <h4>Risque tactique</h4>
+        ${renderSelectionPreviewProfileList(card.tacticalRisk)}
+        <h4>Signal à vérifier au prochain match</h4>
+        ${renderSelectionPreviewProfileList(card.nextMatchSignalToVerify)}
+        <p><strong>Prévisualisation non appliquée — non confirmée comme recommandation officielle.</strong></p>
+      </article>`).join("");
+
+  return `
+    <section>
+      <h2>Profils à observer</h2>
+      <p>Ces profils ne sont pas des choix imposés. Ils décrivent des profils à observer parce que les hypothèses sandbox et certaines traces officielles pointent vers des besoins possibles.</p>
+      <div class="grid">${cards}</div>
+      <details class="internal-markers">
+        <summary>Détails techniques des profils à observer</summary>
+        <div class="muted">${escapeHtml(input.profileViewFact.summary)}</div>
+        <div class="muted">${input.profileViewFact.internalTags.map(escapeHtml).join(", ")}</div>
+        <div class="muted">${escapeHtml(input.selectionPreviewFact.summary)}</div>
+        ${input.traceBackingFact === undefined ? "" : `<div class="muted">${escapeHtml(input.traceBackingFact.summary)}</div>`}
+        ${input.coachCopyFact === undefined ? "" : `<div class="muted">${escapeHtml(input.coachCopyFact.summary)}</div>`}
+      </details>
+    </section>`;
+}
+
 function renderSelectionPreview(report: MatchReport): string {
   const fact = report.evidenceFacts.find((candidate) =>
     candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW" &&
@@ -851,9 +1006,22 @@ function renderSelectionPreview(report: MatchReport): string {
     candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY" &&
     candidate.internalTags.includes("selection_preview_coach_copy")
   );
+  const profileViewFact = report.evidenceFacts.find((candidate) =>
+    candidate.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW" &&
+    candidate.internalTags.includes("selection_preview_profile_view")
+  );
 
   if (fact === undefined) {
     return "";
+  }
+
+  if (profileViewFact !== undefined) {
+    return renderSelectionPreviewProfileView({
+      selectionPreviewFact: fact,
+      traceBackingFact,
+      coachCopyFact,
+      profileViewFact,
+    });
   }
 
   if (coachCopyFact !== undefined) {
