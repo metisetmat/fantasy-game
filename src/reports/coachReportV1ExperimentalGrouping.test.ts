@@ -29,16 +29,16 @@ export function validateCoachReportV1ExperimentalGrouping(): readonly string[] {
   assertTest(group.includes("Lecture timeline officielle vs sandbox"), "sandbox timeline review must be inside experimental group.");
   assertTest(group.includes("Panneau de décision sandbox"), "sandbox decision panel must be inside experimental group.");
   assertTest(group.includes("Plan de test coach"), "coach test plan must be inside experimental group.");
-  assertTest(group.includes("Prévisualisation de sélection"), "selection preview must be inside experimental group.");
+  assertTest(group.includes("Profils à observer"), "selection preview coach copy must be inside experimental group.");
   assertTest(group.includes(guardrail), "experimental group must have shared guardrail banner.");
   assertTest((html.match(new RegExp(guardrail, "g")) ?? []).length === 1, "shared guardrail copy must be reduced to one visible banner.");
-  assertTest(group.includes("Prévisualisation non appliquée") || group.includes("Prévisualisation : non appliquée"), "selection preview must remain non-applied.");
+  assertTest(group.includes("prévisualisation non appliquée"), "selection preview must remain non-applied.");
 
   return [
     "sandbox timeline review is inside experimental group",
     "sandbox decision panel is inside experimental group",
     "coach test plan is inside experimental group",
-    "selection preview is inside experimental group",
+    "selection preview coach copy is inside experimental group",
     "experimental group has shared guardrail banner",
     "repeated guardrail copy is reduced",
     "selection preview remains non-applied",

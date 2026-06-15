@@ -72,28 +72,29 @@ export function validateCoachReportSelectionPreview(): readonly string[] {
     "workbench_chain_",
   ];
 
-  assertTest(!defaultHtml.includes("Prévisualisation de sélection"), "default report must not show selection preview.");
-  assertTest(experimentalHtml.includes("Prévisualisation de sélection"), "experimental report must show selection preview.");
-  assertTest(experimentalHtml.includes("Soutien proche autour de Z4-HSR"), "support preview must be visible.");
-  assertTest(experimentalHtml.includes("Présence sur second ballon"), "second-ball preview must be visible.");
-  assertTest(experimentalHtml.includes("Réponse face à un gardien fort"), "strong-goalkeeper-response preview must be visible.");
-  assertTest(experimentalHtml.includes("Ces profils sont des pistes de sélection à prévisualiser, pas des changements appliqués"), "profiles must be preview-only.");
-  assertTest(experimentalHtml.includes("Aucune composition, aucun titulaire, aucun remplaçant et aucune sélection live ne sont modifiés"), "lineup, starters, bench, and live selection must remain unchanged.");
-  assertTest(experimentalHtml.includes("Cette prévisualisation ne modifie ni la timeline officielle, ni le score, ni la possession, ni les événements de score"), "official match state must remain unchanged.");
-  assertTest(experimentalHtml.includes("Elle ne constitue pas une preuve d’économie globale"), "global economy overclaim must be avoided.");
-  assertTest(!containsMojibake(experimentalHtml), "visible generated coach report must contain no mojibake.");
+  assertTest(!defaultHtml.includes("Profils à observer"), "default report must not show selection preview coach copy.");
+  assertTest(experimentalHtml.includes("Profils à observer"), "experimental report must show selection preview coach copy.");
+  assertTest(experimentalHtml.includes("Profil à observer — soutien proche autour des zones de danger"), "support preview must be visible.");
+  assertTest(experimentalHtml.includes("Profil à observer — présence sur second ballon"), "second-ball preview must be visible.");
+  assertTest(experimentalHtml.includes("Profil à observer — réponse face à un gardien fort"), "strong-goalkeeper-response preview must be visible.");
+  assertTest(experimentalHtml.includes("Ces profils restent des prévisualisations non appliquées"), "profiles must be preview-only.");
+  assertTest(experimentalHtml.includes("La confiance n’est pas rehaussée automatiquement et la sélection live reste inchangée"), "live selection and confidence must remain unchanged.");
+  assertTest(experimentalHtml.includes("Décision :</strong> prévisualisation non appliquée"), "decision status must remain non-applied.");
+  assertTest(experimentalHtml.includes("Confirmation :</strong> non confirmée comme recommandation officielle"), "official recommendation overclaim must be avoided.");
+  assertTest(!containsMojibake(experimentalHtml), "generated coach report must contain no mojibake.");
   for (const term of forbiddenVisibleTerms) {
     assertTest(!experimentalVisibleHtml.includes(term), `visible coach copy must not expose developer jargon: ${term}.`);
   }
   assertTest(experimentalHtml.includes("Détails techniques de la prévisualisation"), "technical preview data must remain behind details.");
+  assertTest(experimentalHtml.includes("Détails techniques de la copie coach"), "technical coach copy data must remain behind details.");
   assertTest(experimentalHtml.includes("selection_preview"), "technical tags must remain available inside details.");
 
   return [
-    "experimental report contains Prévisualisation de sélection",
-    "experimental report contains three selection preview cards",
+    "experimental report contains Profils à observer",
+    "experimental report contains three coach-ready selection preview cards",
     "experimental report says profiles are preview-only",
-    "experimental report says lineup, starters, bench, and live selection are unchanged",
-    "experimental report says official match state is unchanged",
+    "experimental report says live selection and confidence are unchanged",
+    "experimental report says preview remains non-applied and non-official",
     "default report hides the experimental selection preview",
     "visible coach copy contains no mojibake",
     "visible coach copy avoids developer jargon outside details",
