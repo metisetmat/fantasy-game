@@ -49,6 +49,15 @@ import {
   chainConsumptionToSegmentContext,
   type FullMatchChainSegmentContext,
 } from "./fullMatch/fullMatchChainSegmentContext";
+import {
+  applyChainContextToRouteCandidates,
+  buildDiagnosticRouteCandidatesForSegment,
+} from "./fullMatch/applyChainContextToRouteCandidates";
+import type { FullMatchChainRouteCandidateInfluenceResult } from "./fullMatch/fullMatchChainRouteCandidateInfluence";
+import { selectShadowRouteFromInfluencedCandidates } from "./fullMatch/selectShadowRouteFromInfluencedCandidates";
+import type { FullMatchShadowRouteSelectionResult } from "./fullMatch/fullMatchShadowRouteSelection";
+import { controlledSegmentSelectionFromShadow } from "./fullMatch/controlledSegmentSelectionFromShadow";
+import type { FullMatchControlledSegmentSelectionResult } from "./fullMatch/fullMatchControlledSegmentSelection";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -322,6 +331,55 @@ function chainSegmentContextLimitations(context: FullMatchChainSegmentContext): 
   ];
 }
 
+function routeCandidateInfluenceLimitations(influence: FullMatchChainRouteCandidateInfluenceResult): readonly string[] {
+  if (influence.status === "not_available") {
+    return ["FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_EXPERIMENTAL",
+    `FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_STATUS_${influence.status.toUpperCase()}`,
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_DRIVE_PRODUCTION_SELECTION",
+    "FULLMATCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE_CANNOT_OVERRIDE_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function shadowRouteSelectionLimitations(selection: FullMatchShadowRouteSelectionResult): readonly string[] {
+  if (selection.status === "not_available") {
+    return ["FULLMATCH_SHADOW_ROUTE_SELECTION_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_EXPERIMENTAL",
+    `FULLMATCH_SHADOW_ROUTE_SELECTION_STATUS_${selection.status.toUpperCase()}`,
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_DRIVE_PRODUCTION_SELECTION",
+    "FULLMATCH_SHADOW_ROUTE_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
+function controlledSegmentSelectionLimitations(selection: FullMatchControlledSegmentSelectionResult): readonly string[] {
+  if (selection.status === "not_available") {
+    return ["FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DISABLED_BY_DEFAULT"];
+  }
+
+  return [
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_EXPERIMENTAL",
+    `FULLMATCH_CONTROLLED_SEGMENT_SELECTION_STATUS_${selection.status.toUpperCase()}`,
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DIAGNOSTIC_ONLY",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORE",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_SCORING_EVENTS",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_DID_NOT_MUTATE_ROUTE_SUCCESS_RATES",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_DRIVE_PRODUCTION_FULLMATCH_SELECTION",
+    "FULLMATCH_CONTROLLED_SEGMENT_SELECTION_CANNOT_SELECT_CLOSED_OR_UNAVAILABLE",
+  ];
+}
+
 function chainConsumptionEvidenceFact(input: {
   readonly report: MatchReport;
   readonly matchInput: MatchInput;
@@ -417,22 +475,213 @@ function chainSegmentContextEvidenceFact(input: {
   };
 }
 
+function routeCandidateInfluenceEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly influence: FullMatchChainRouteCandidateInfluenceResult;
+}): MatchReportEvidenceFact | null {
+  if (input.influence.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_route_candidate_influence")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-route-candidate-influence`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.influence.finalZone ?? "Z4-HSR"],
+    summary:
+      `Experimental route candidate influence ${input.influence.status}: segment ${input.influence.segmentLabel ?? "segment-1"} ` +
+      `uses chain ${input.influence.chainId ?? "none"}, final carrier ${input.influence.finalCarrierId ?? "none"} ` +
+      `at ${input.influence.finalZone ?? "none"}, candidates ${input.influence.candidateCount}, influenced ${input.influence.influencedCandidateCount}, ` +
+      `positive deltas ${input.influence.positiveDeltaCount}, negative deltas ${input.influence.negativeDeltaCount}, ` +
+      `closed boosts blocked ${input.influence.illegalCandidateBoostBlockedCount}, unavailable boosts blocked ${input.influence.unavailableCandidateBoostBlockedCount}, ` +
+      `diagnostic selection ${input.influence.selectedCandidateBefore ?? "none"} -> ${input.influence.selectedCandidateAfterDiagnostic ?? "none"}, ` +
+      `selectionChanged=${input.influence.diagnosticSelectionChanged}, diagnosticOnly=${input.influence.diagnosticOnly}, ` +
+      `canMutateScore=${input.influence.canMutateScore}, canMutateScoringEvents=${input.influence.canMutateScoringEvents}, ` +
+      `canDriveProductionSelection=${input.influence.canDriveProductionSelection}.`,
+    confidence: input.influence.status === "available" ? "medium" : "low",
+    strength: input.influence.status === "available" ? 58 : 28,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_route_candidate_influence",
+      "route_candidate_influence_diagnostic_only",
+      "route_candidate_influence_segment_1",
+      "route_candidate_influence_score_mutation_forbidden",
+      "route_candidate_influence_scoring_events_mutation_forbidden",
+      "route_candidate_influence_production_selection_forbidden",
+      "route_candidate_influence_closed_override_blocked",
+      "route_candidate_influence_unavailable_override_blocked",
+      ...(input.influence.chainId === undefined ? [] : [`route_candidate_influence_chain_id_${input.influence.chainId}`]),
+      ...(input.influence.finalCarrierId === undefined ? [] : [`route_candidate_influence_final_carrier_${input.influence.finalCarrierId}`]),
+      ...(input.influence.finalZone === undefined ? [] : [`route_candidate_influence_final_zone_${input.influence.finalZone}`]),
+      `route_candidate_influence_candidate_count_${input.influence.candidateCount}`,
+      `route_candidate_influence_influenced_count_${input.influence.influencedCandidateCount}`,
+      `route_candidate_influence_positive_delta_count_${input.influence.positiveDeltaCount}`,
+      `route_candidate_influence_negative_delta_count_${input.influence.negativeDeltaCount}`,
+      `route_candidate_influence_illegal_boost_blocked_count_${input.influence.illegalCandidateBoostBlockedCount}`,
+      `route_candidate_influence_unavailable_boost_blocked_count_${input.influence.unavailableCandidateBoostBlockedCount}`,
+      `route_candidate_influence_selection_changed_${input.influence.diagnosticSelectionChanged ? "true" : "false"}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+    ],
+  };
+}
+
+function shadowRouteSelectionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly selection: FullMatchShadowRouteSelectionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.selection.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_shadow_route_selection")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-shadow-route-selection`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.selection.shadowSelectionTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental shadow route selection ${input.selection.status}: production proxy ${input.selection.productionSelectionCandidateId ?? "none"} ` +
+      `(${input.selection.productionSelectionActionType ?? "none"}) compared with shadow ${input.selection.shadowSelectionCandidateId ?? "none"} ` +
+      `(${input.selection.shadowSelectionActionType ?? "none"}) to receiver ${input.selection.shadowSelectionReceiverId ?? "none"} ` +
+      `in ${input.selection.shadowSelectionTargetZone ?? "none"}, baseScore=${input.selection.shadowSelectionBaseScore ?? 0}, ` +
+      `influenceDelta=${input.selection.shadowSelectionInfluenceDelta ?? 0}, influencedScore=${input.selection.shadowSelectionInfluencedScore ?? 0}, ` +
+      `selectionChanged=${input.selection.shadowSelectionChangedFromProduction}, closedRejected=${input.selection.closedCandidateRejectedCount}, ` +
+      `unavailableRejected=${input.selection.unavailableCandidateRejectedCount}, diagnosticOnly=${input.selection.diagnosticOnly}, ` +
+      `canMutateScore=${input.selection.canMutateScore}, canMutateScoringEvents=${input.selection.canMutateScoringEvents}, ` +
+      `canDriveProductionSelection=${input.selection.canDriveProductionSelection}. ${input.selection.explanation}`,
+    confidence: input.selection.status === "available" ? "medium" : "low",
+    strength: input.selection.status === "available" ? 62 : 30,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_shadow_route_selection",
+      "shadow_route_selection_diagnostic_only",
+      "shadow_route_selection_production_forbidden",
+      "shadow_route_selection_score_mutation_forbidden",
+      "shadow_route_selection_scoring_events_mutation_forbidden",
+      "shadow_route_selection_closed_candidates_rejected",
+      "shadow_route_selection_unavailable_candidates_rejected",
+      ...(input.selection.chainId === undefined ? [] : [`shadow_route_selection_chain_id_${input.selection.chainId}`]),
+      ...(input.selection.productionSelectionCandidateId === undefined ? [] : [`shadow_route_selection_production_candidate_${input.selection.productionSelectionCandidateId}`]),
+      ...(input.selection.shadowSelectionCandidateId === undefined ? [] : [`shadow_route_selection_candidate_${input.selection.shadowSelectionCandidateId}`]),
+      ...(input.selection.shadowSelectionActionType === undefined ? [] : [`shadow_route_selection_action_${input.selection.shadowSelectionActionType}`]),
+      ...(input.selection.shadowSelectionReceiverId === undefined ? [] : [`shadow_route_selection_receiver_${input.selection.shadowSelectionReceiverId}`]),
+      ...(input.selection.shadowSelectionTargetZone === undefined ? [] : [`shadow_route_selection_zone_${input.selection.shadowSelectionTargetZone}`]),
+      `shadow_route_selection_changed_${input.selection.shadowSelectionChangedFromProduction ? "true" : "false"}`,
+      `shadow_route_selection_candidate_count_${input.selection.candidateCount}`,
+      `shadow_route_selection_eligible_count_${input.selection.eligibleCandidateCount}`,
+      `shadow_route_selection_blocked_count_${input.selection.blockedCandidateCount}`,
+      `shadow_route_selection_closed_rejected_count_${input.selection.closedCandidateRejectedCount}`,
+      `shadow_route_selection_unavailable_rejected_count_${input.selection.unavailableCandidateRejectedCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      ...input.selection.differenceReasons.map((reason) => `shadow_route_selection_reason_${reason}`),
+    ],
+  };
+}
+
+function controlledSegmentSelectionEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly selection: FullMatchControlledSegmentSelectionResult;
+}): MatchReportEvidenceFact | null {
+  if (input.selection.status === "not_available") {
+    return null;
+  }
+
+  const evidenceEvent = input.report.timeline.find((event) =>
+    event.tags.includes("workbench_chain_controlled_segment_selection")
+  ) ?? input.report.timeline.find((event) => event.eventType !== "kickoff") ?? input.report.timeline[0];
+
+  return {
+    factId: `${input.matchInput.matchId}-workbench-chain-controlled-segment-selection`,
+    matchId: input.matchInput.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: evidenceEvent === undefined ? [] : [evidenceEvent.eventId],
+    affectedZones: [input.selection.selectedTargetZone ?? "Z4-HSR"],
+    summary:
+      `Experimental controlled segment selection ${input.selection.status}: shadow candidate ${input.selection.selectedCandidateId ?? "none"} ` +
+      `(${input.selection.selectedActionType ?? "none"}) to receiver ${input.selection.selectedReceiverId ?? "none"} ` +
+      `in ${input.selection.selectedTargetZone ?? "none"}, baseScore=${input.selection.selectedBaseScore ?? 0}, ` +
+      `influenceDelta=${input.selection.selectedInfluenceDelta ?? 0}, influencedScore=${input.selection.selectedInfluencedScore ?? 0}, ` +
+      `selectedLegal=${input.selection.selectedCandidateLegal}, selectedAvailable=${input.selection.selectedCandidateAvailable}, ` +
+      `closedRejected=${input.selection.rejectedClosedCandidateCount}, unavailableRejected=${input.selection.rejectedUnavailableCandidateCount}, ` +
+      `diagnosticOnly=${input.selection.diagnosticOnly}, experimentalControlledSelection=${input.selection.experimentalControlledSelection}, ` +
+      `canMutateScore=${input.selection.canMutateScore}, canMutateScoringEvents=${input.selection.canMutateScoringEvents}, ` +
+      `canMutateRouteSuccessRates=${input.selection.canMutateRouteSuccessRates}, ` +
+      `canDriveProductionFullMatchSelection=${input.selection.canDriveProductionFullMatchSelection}.`,
+    confidence: input.selection.status === "available" ? "medium" : "low",
+    strength: input.selection.status === "available" ? 64 : 25,
+    coachVisible: false,
+    internalTags: [
+      "workbench_chain_controlled_segment_selection",
+      "controlled_segment_selection_experimental",
+      "controlled_segment_selection_diagnostic_only",
+      "controlled_segment_selection_score_mutation_forbidden",
+      "controlled_segment_selection_scoring_events_mutation_forbidden",
+      "controlled_segment_selection_route_success_mutation_forbidden",
+      "controlled_segment_selection_production_fullmatch_forbidden",
+      "controlled_segment_selection_closed_candidates_rejected",
+      "controlled_segment_selection_unavailable_candidates_rejected",
+      ...(input.selection.chainId === undefined ? [] : [`controlled_segment_selection_chain_id_${input.selection.chainId}`]),
+      ...(input.selection.selectedCandidateId === undefined ? [] : [`controlled_segment_selection_candidate_${input.selection.selectedCandidateId}`]),
+      ...(input.selection.selectedActionType === undefined ? [] : [`controlled_segment_selection_action_${input.selection.selectedActionType}`]),
+      ...(input.selection.selectedReceiverId === undefined ? [] : [`controlled_segment_selection_receiver_${input.selection.selectedReceiverId}`]),
+      ...(input.selection.selectedTargetZone === undefined ? [] : [`controlled_segment_selection_zone_${input.selection.selectedTargetZone}`]),
+      `controlled_segment_selection_selected_legal_${input.selection.selectedCandidateLegal ? "true" : "false"}`,
+      `controlled_segment_selection_selected_available_${input.selection.selectedCandidateAvailable ? "true" : "false"}`,
+      `controlled_segment_selection_closed_rejected_count_${input.selection.rejectedClosedCandidateCount}`,
+      `controlled_segment_selection_unavailable_rejected_count_${input.selection.rejectedUnavailableCandidateCount}`,
+      "score_mutation_count_0",
+      "scoring_events_mutation_count_0",
+      "route_success_mutation_count_0",
+      ...input.selection.tags,
+    ],
+  };
+}
+
 function withFullMatchGroundingDiagnosis(
   report: MatchReport,
   input: MatchInput,
   chainConsumption: FullMatchChainConsumptionResult,
   chainSegmentContext: FullMatchChainSegmentContext,
+  routeCandidateInfluence: FullMatchChainRouteCandidateInfluenceResult,
+  shadowRouteSelection: FullMatchShadowRouteSelectionResult,
+  controlledSegmentSelection: FullMatchControlledSegmentSelectionResult,
 ): MatchReport {
   const grounding = analyzeFullMatchGroundingDiagnostics(report);
   const groundingFacts = report.evidenceFacts.filter((fact) => fact.internalTags.includes("tactical_grounding_gap"));
   const chainFacts = report.evidenceFacts.filter((fact) =>
     fact.internalTags.includes("workbench_chain_consumption") ||
-    fact.internalTags.includes("workbench_chain_segment_context")
+    fact.internalTags.includes("workbench_chain_segment_context") ||
+    fact.internalTags.includes("workbench_chain_route_candidate_influence") ||
+    fact.internalTags.includes("workbench_chain_shadow_route_selection") ||
+    fact.internalTags.includes("workbench_chain_controlled_segment_selection")
   );
   const eventIds = groundingFacts.flatMap((fact) => fact.eventIds).slice(0, 6);
   const chainSummary = chainConsumption.status === "not_requested"
     ? "Le full-match normal reste en harnais segmente ; la chaine workbench n'est pas consommee par defaut."
-    : `Le premier segment dispose maintenant d'un contexte experimental issu de la chaine workbench : porteur final ${chainSegmentContext.finalCarrierId ?? "none"} en ${chainSegmentContext.finalZone ?? "none"}. Ce contexte ameliore l'ancrage tactique du diagnostic, mais ne modifie pas encore la resolution ni le score.`;
+    : `Le contexte workbench produit maintenant une selection shadow puis une selection controlee experimentale pour le premier segment : ${controlledSegmentSelection.selectedActionType ?? shadowRouteSelection.shadowSelectionActionType ?? "none"} vers ${controlledSegmentSelection.selectedReceiverId ?? shadowRouteSelection.shadowSelectionReceiverId ?? "none"} en ${controlledSegmentSelection.selectedTargetZone ?? shadowRouteSelection.shadowSelectionTargetZone ?? "none"}. Cette selection vient de la shadow selection workbench, mais elle reste cantonnee au diagnostic sans modifier le score ni les evenements et ne pilote pas encore la resolution reelle du full-match, le score, les evenements de score, ni les taux de succes des routes. Les routes fermees ou indisponibles restent rejetees avant cette selection controlee. Influence candidates: ${routeCandidateInfluence.influencedCandidateCount}/${routeCandidateInfluence.candidateCount}.`;
   const warning: MatchReportWarning = {
     warningId: `${input.matchId}-tactical-grounding-gap`,
     type: "ADAPTER_LIMITATION",
@@ -473,6 +722,22 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     segmentLabel: "segment-1",
   });
   const chainSegmentContext = chainConsumptionToSegmentContext(chainConsumption);
+  const routeCandidateInfluence = applyChainContextToRouteCandidates({
+    segmentContext: chainSegmentContext,
+    candidates: buildDiagnosticRouteCandidatesForSegment({
+      segmentLabel: "segment-1",
+      chainSegmentContext,
+    }),
+  });
+  const shadowRouteSelection = selectShadowRouteFromInfluencedCandidates({
+    influence: routeCandidateInfluence,
+    ...(routeCandidateInfluence.selectedCandidateBefore === undefined ? {} : {
+      productionSelectionCandidateId: routeCandidateInfluence.selectedCandidateBefore,
+    }),
+  });
+  const controlledSegmentSelection = controlledSegmentSelectionFromShadow({
+    shadowSelection: shadowRouteSelection,
+  });
   const adapter = adaptMatchInputToMiniMatch(input);
   const influence = createTacticalPlanInfluence(input);
   const zone = primaryZoneFromPlanInfluence({
@@ -512,6 +777,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           segmentState,
           ...(segmentInfluence === undefined ? {} : { segmentInfluence }),
           ...(index === 0 && chainSegmentContext.status !== "not_available" ? { chainSegmentContext } : {}),
+          ...(index === 0 && routeCandidateInfluence.status !== "not_available" ? { routeCandidateInfluence } : {}),
+          ...(index === 0 && shadowRouteSelection.status !== "not_available" ? { shadowRouteSelection } : {}),
+          ...(index === 0 && controlledSegmentSelection.status !== "not_available" ? { controlledSegmentSelection } : {}),
         },
       });
     const segmentScore = scoreFromTimeline({
@@ -580,6 +848,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...fullMatchRouteSelectionModeDiagnostics(routeSelectionMode),
       ...chainConsumptionLimitations(chainConsumption),
       ...chainSegmentContextLimitations(chainSegmentContext),
+      ...routeCandidateInfluenceLimitations(routeCandidateInfluence),
+      ...shadowRouteSelectionLimitations(shadowRouteSelection),
+      ...controlledSegmentSelectionLimitations(controlledSegmentSelection),
     ],
   });
   const chainFact = chainConsumptionEvidenceFact({
@@ -592,15 +863,33 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     context: chainSegmentContext,
   });
-  const reportWithChainEvidence = chainFact === null
+  const routeInfluenceFact = routeCandidateInfluenceEvidenceFact({
+    report,
+    matchInput: input,
+    influence: routeCandidateInfluence,
+  });
+  const shadowSelectionFact = shadowRouteSelectionEvidenceFact({
+    report,
+    matchInput: input,
+    selection: shadowRouteSelection,
+  });
+  const controlledSelectionFact = controlledSegmentSelectionEvidenceFact({
+    report,
+    matchInput: input,
+    selection: controlledSegmentSelection,
+  });
+  const chainEvidenceFacts = [
+    ...(chainFact === null ? [] : [chainFact]),
+    ...(chainContextFact === null ? [] : [chainContextFact]),
+    ...(routeInfluenceFact === null ? [] : [routeInfluenceFact]),
+    ...(shadowSelectionFact === null ? [] : [shadowSelectionFact]),
+    ...(controlledSelectionFact === null ? [] : [controlledSelectionFact]),
+  ];
+  const reportWithChainEvidence = chainEvidenceFacts.length === 0
     ? report
     : {
         ...report,
-        evidenceFacts: [
-          ...report.evidenceFacts,
-          chainFact,
-          ...(chainContextFact === null ? [] : [chainContextFact]),
-        ],
+        evidenceFacts: [...report.evidenceFacts, ...chainEvidenceFacts],
       };
 
   return withFullMatchGroundingDiagnosis(
@@ -608,5 +897,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     input,
     chainConsumption,
     chainSegmentContext,
+    routeCandidateInfluence,
+    shadowRouteSelection,
+    controlledSegmentSelection,
   );
 }

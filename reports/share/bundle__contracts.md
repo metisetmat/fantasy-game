@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 3A - Experimental Chain Influence on Segment Context. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 3D - Experimental Shadow Selection to Controlled Segment Selection. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -404,7 +404,10 @@ export type MatchReportEvidenceCategory =
   | "TACTICAL_PLAN_SIGNAL"
   | "HARNESS_PLAUSIBILITY_WARNING"
   | "WORKBENCH_CHAIN_CONSUMPTION"
-  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
+  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION";
 
 export type MatchReportEvidenceScope =
   | "MATCH_REPORT"

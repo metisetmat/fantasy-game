@@ -5,7 +5,11 @@ export type MatchEvidenceScope =
   | "BATCH_DIAGNOSTIC_PROJECTION"
   | "LIVE_SCORING_STREAM"
   | "REPORT_RENDERING_ONLY"
-  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT";
+  | "WORKBENCH_CHAIN_CONSUMPTION"
+  | "WORKBENCH_CHAIN_SEGMENT_CONTEXT"
+  | "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE"
+  | "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION"
+  | "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION";
 
 export interface MatchEvidenceScopeDefinition {
   readonly scope: MatchEvidenceScope;
@@ -115,6 +119,26 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     globalScoringEconomyVerdictAllowed: false,
   },
+  WORKBENCH_CHAIN_CONSUMPTION: {
+    scope: "WORKBENCH_CHAIN_CONSUMPTION",
+    canProve: [
+      "experimental workbench chain was consumed behind an opt-in flag",
+      "visual chain steps were replayed for diagnostic grounding",
+      "chain consumption remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "full-match batch economy",
+      "scoring constants",
+      "production route selection",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
   WORKBENCH_CHAIN_SEGMENT_CONTEXT: {
     scope: "WORKBENCH_CHAIN_SEGMENT_CONTEXT",
     canProve: [
@@ -129,6 +153,67 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     cannotOverride: [
       "live score",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE: {
+    scope: "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE",
+    canProve: [
+      "experimental chain context influenced diagnostic route candidate scores",
+      "closed and unavailable route candidates remained blocked",
+      "diagnostic selection changes were shadow-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION: {
+    scope: "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION",
+    canProve: [
+      "experimental chain context produced a diagnostic shadow route selection",
+      "shadow selection rejected closed and unavailable candidates",
+      "shadow selection comparison remained production-forbidden",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION: {
+    scope: "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION",
+    canProve: [
+      "experimental shadow route selection was exposed as controlled segment metadata",
+      "controlled selection rejected closed and unavailable candidates",
+      "controlled selection remained diagnostic-only",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "production route selection quality",
+      "full-match economy coherence",
+      "production chain-driven full-match behavior",
+    ],
+    cannotOverride: [
+      "live score",
+      "production route selection",
       "full-match batch economy",
       "scoring constants",
     ],
