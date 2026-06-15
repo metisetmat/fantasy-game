@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-15T07:50:37.311Z
+Generated timestamp: 2026-06-15T09:22:58.590Z
 Task/sprint name: Sprint 4I - Coach Report V1 Visual Polish & Information Hierarchy
 Final file count: 18
 
@@ -513,26 +513,10 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/coachCopyQuality.ts
- M src/reports/coachReportV1Encoding.test.ts
- M src/reports/coachReportV1Renderer.test.ts
+ M src/reports/encoding/mojibakeDetection.ts
  M src/reports/encoding/validateGeneratedTextEncoding.test.ts
  M src/reports/encoding/validateGeneratedTextEncoding.ts
- M src/reports/htmlCoachReport.ts
- M src/reports/matchTraceSpineReport.test.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
  M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
- M src/simulation/runFullMatch.ts
+ M src/simulation/validation/fullMatchTraceValidationComparisons.test.ts
+ M src/simulation/validation/fullMatchTraceValidationComparisons.ts
  M src/simulation/validation/fullMatchTraceValidationEncoding.test.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportV1InformationHierarchy.ts
-?? src/reports/coachReportV1ExperimentalGrouping.test.ts
-?? src/reports/coachReportV1InformationHierarchy.test.ts
-?? src/reports/coachReportV1InformationHierarchy.ts
-?? src/reports/coachReportV1InformationHierarchyRenderer.test.ts
-?? src/reports/coachReportV1SourceHierarchyGuard.test.ts
-?? src/reports/coachReportV1VisualPolishEncoding.test.ts
-?? src/simulation/fullMatch/scoringGuard.4i.test.ts

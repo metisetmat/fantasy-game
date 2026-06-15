@@ -35927,7 +35927,6 @@ function withComparison(input: {
     profileId: input.result.profileId,
     haystack: [
       ...input.result.expectedSignalTagsPresent,
-      ...input.result.expectedSignalTagsMissing,
       ...input.result.acceptedFallbackSignals,
       ...input.result.topCauseTags,
       ...input.result.topImpactTags,
@@ -36991,7 +36990,11 @@ if (require.main === module) {
 ## File: src/simulation/validation/fullMatchTraceValidationComparisons.test.ts
 
 ```ts
-import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+import {
+  compareFullMatchTraceValidationProfiles,
+  runFullMatchTraceValidationModel,
+} from "./fullMatchTraceValidationComparisons";
+import { FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID } from "./fullMatchTraceValidationProfiles";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -37027,6 +37030,30 @@ export function validateFullMatchTraceValidationComparisons(): readonly string[]
   assertTest(model.profiles.every((result) => Array.isArray(result.expectedSignalsMissing)), "missing signals must be explicit.");
   assertTest(model.profiles.every((result) => result.signalCalibrationStatus !== "FAIL"), "each profile must have expected or accepted fallback signal evidence.");
 
+  const spoofedMissingSignalModel = compareFullMatchTraceValidationProfiles({
+    baselineProfileId: FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID,
+    profileResults: [
+      highPress,
+      {
+        ...strongGoalkeeper,
+        cardSignatureByCardId: highPress.cardSignatureByCardId,
+        topDangerZones: [],
+        topPressureLossZones: [],
+        topRecoveryZones: [],
+        topCauseTags: [],
+        topImpactTags: [],
+        highPressureTraceCount: 0,
+        fatigueImpactTotal: 0,
+        expectedSignalTagsPresent: [],
+        expectedSignalTagsMissing: ["goalkeeper_quality"],
+        acceptedFallbackSignals: [],
+      },
+    ],
+  });
+  const spoofedStrongGoalkeeper = profile(spoofedMissingSignalModel, "strong_goalkeeper_profile");
+  assertTest(spoofedStrongGoalkeeper.signalCalibrationStatus === "FAIL", "missing signal tags must not be fed back into searchable evidence.");
+  assertTest(!spoofedStrongGoalkeeper.expectedSignalTagsPresent.includes("goalkeeper_quality"), "missing goalkeeper_quality tag must not become present.");
+
   return [
     "at least 5 of 6 profiles produce changed Coach Report V0 cards vs baseline",
     "high press differs from low block",
@@ -37036,6 +37063,7 @@ export function validateFullMatchTraceValidationComparisons(): readonly string[]
     "expected signal matching is reported",
     "missing signals are explicit, not hidden",
     "each profile has expected or accepted fallback signal evidence",
+    "missing signal tags are excluded from reassessment haystack",
   ];
 }
 
@@ -37219,6 +37247,7 @@ export function validateFullMatchTraceValidationEncoding(): readonly string[] {
     "fullmatch-workbench-chain-replay-4i.md",
     "validation.fullmatch-workbench-chain-replay-4i.md",
     "validation.share-pack.md",
+    "coach-report.default.html",
     "coach-report.experimental.html",
     "coach-report.latest.html",
   ];
@@ -37244,6 +37273,7 @@ export function validateFullMatchTraceValidationEncoding(): readonly string[] {
     "fullmatch-workbench-chain-replay-4i.md has no mojibake markers",
     "validation.fullmatch-workbench-chain-replay-4i.md has no mojibake markers",
     "validation.share-pack.md has no mojibake markers",
+    "coach-report.default.html has no mojibake markers",
     "coach-report.experimental.html has no mojibake markers",
     "coach-report.latest.html has no mojibake markers",
   ];
@@ -46903,10 +46933,11 @@ if (require.main === module) {
 ## File: src/simulation/adapters/matchReportFocus.ts
 
 ```ts
-﻿import type { MatchInput, TrainingFocusSuggestion } from "../../contracts/engineToCoach";
+import type { MatchInput, TrainingFocusSuggestion } from "../../contracts/engineToCoach";
 import type { MatchEvidenceCategory, MatchEvidenceFact } from "./matchReportEvidence";
 
 const FALLBACK_FOCUS_TITLE = "Finaliser l'adaptation du contrat moteur";
+const PARTIAL_SIGNAL_REASON = "Signal encore partiel : cette analyse sera renforcée quand les plans tactiques seront davantage branchés au moteur.";
 
 function primaryFactZone(fact: MatchEvidenceFact): string {
   return fact.affectedZones[0] ?? "Z3-C";
@@ -47014,93 +47045,93 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
 function focusTitleForFact(fact: MatchEvidenceFact): string {
   switch (fact.category) {
     case "DANGER_CREATION":
-      return `RÃ©pÃ©ter les entrÃ©es dangereuses en ${primaryFactZone(fact)}`;
+      return `Répéter les entrées dangereuses en ${primaryFactZone(fact)}`;
     case "POSSESSION_INSTABILITY":
       return `Stabiliser la possession sous pression en ${primaryFactZone(fact)}`;
     case "SCORING_CONVERSION":
-      return "SÃ©curiser la sÃ©quence qui mÃ¨ne au score";
+      return "Sécuriser la séquence qui mène au score";
     case "TERRITORIAL_PRESSURE":
-      return `PrÃ©parer une sortie de pression depuis ${primaryFactZone(fact)}`;
+      return `Préparer une sortie de pression depuis ${primaryFactZone(fact)}`;
     case "PRESSURE_WITHOUT_CONVERSION":
-      return `Transformer la pression de ${(fact.teamId ?? "l'Ã©quipe").toUpperCase()} en plateforme de conversion`;
+      return `Transformer la pression de ${(fact.teamId ?? "l'équipe").toUpperCase()} en plateforme de conversion`;
     case "FATIGUE_LOAD":
-      return `GÃ©rer la charge autour de ${primaryFactZone(fact)}`;
+      return `Gérer la charge autour de ${primaryFactZone(fact)}`;
     case "MOMENTUM_SHIFT":
-      return "Stabiliser l'Ã©lan aprÃ¨s les bascules du match";
+      return "Stabiliser l'élan après les bascules du match";
     case "TACTICAL_PLAN_SIGNAL":
       return "Relire le plan de match dans les zones visibles";
     case "WORKBENCH_CHAIN_CONSUMPTION":
-      return "Relire la consommation workbench experimentale";
+      return "Relire la consommation workbench expérimentale";
     case "WORKBENCH_CHAIN_SEGMENT_CONTEXT":
-      return "Relire le contexte segmentaire workbench experimental";
+      return "Relire le contexte segmentaire workbench expérimental";
     case "WORKBENCH_CHAIN_ROUTE_CANDIDATE_INFLUENCE":
-      return "Relire l'influence candidate-route workbench experimentale";
+      return "Relire l'influence candidate-route workbench expérimentale";
     case "WORKBENCH_CHAIN_SHADOW_ROUTE_SELECTION":
-      return "Relire la selection shadow de route workbench experimentale";
+      return "Relire la sélection shadow de route workbench expérimentale";
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SELECTION":
-      return "Relire la selection controlee de segment workbench experimentale";
+      return "Relire la sélection contrôlée de segment workbench expérimentale";
     case "WORKBENCH_CHAIN_SEGMENT_ROUTE_INPUT":
-      return "Relire l'input de route segmentaire workbench experimental";
+      return "Relire l'input de route segmentaire workbench expérimental";
     case "WORKBENCH_CHAIN_CONTROLLED_MINIMATCH_ROUTE_SOURCE":
-      return "Relire la source de route controlee mini-match experimentale";
+      return "Relire la source de route contrôlée mini-match expérimentale";
     case "WORKBENCH_CHAIN_LIVE_SELECTION_OVERRIDE_GUARD":
-      return "Relire le garde d'override de selection live experimental";
+      return "Relire le garde d'override de sélection live expérimental";
     case "WORKBENCH_CHAIN_ISOLATED_MINIMATCH_OVERRIDE_EXPERIMENT":
-      return "Relire l'experience mini-match isolee avec override";
+      return "Relire l'expérience mini-match isolée avec override";
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_REPLAY_COMPARISON":
-      return "Relire la comparaison de replay controle du segment";
+      return "Relire la comparaison de replay contrôlé du segment";
     case "WORKBENCH_CHAIN_REAL_ISOLATED_SEGMENT_REPLAY":
-      return "Relire les evenements de replay isole du segment";
+      return "Relire les événements de replay isolé du segment";
     case "WORKBENCH_CHAIN_CONTROLLED_ROUTE_RESOLUTION_SANDBOX":
-      return "Relire la sandbox de resolution controlee de route";
+      return "Relire la sandbox de résolution contrôlée de route";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_OPPORTUNITY_MODEL":
-      return "Relire le modele sandbox d'opportunite de scoring";
+      return "Relire le modèle sandbox d'opportunité de scoring";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_CANDIDATE":
-      return "Relire le candidat sandbox d'evenement de scoring";
+      return "Relire le candidat sandbox d'événement de scoring";
     case "WORKBENCH_CHAIN_SANDBOX_SCORING_EVENT_RESOLUTION":
-      return "Relire la resolution sandbox d'evenement de scoring";
+      return "Relire la résolution sandbox d'événement de scoring";
     case "WORKBENCH_CHAIN_ATTRIBUTE_DRIVEN_SHOT_RESOLUTION_SANDBOX":
-      return "Relire la resolution de tir attributaire sandbox";
+      return "Relire la résolution de tir attributaire sandbox";
     case "WORKBENCH_CHAIN_GOALKEEPER_RESPONSE_MODEL_SANDBOX":
-      return "Relire le modele de reponse gardien sandbox";
+      return "Relire le modèle de réponse gardien sandbox";
     case "WORKBENCH_CHAIN_REBOUND_SECOND_CHANCE_SANDBOX":
       return "Relire le rebond et la seconde chance sandbox";
     case "WORKBENCH_CHAIN_MULTI_ACTION_CONTINUATION_SANDBOX":
       return "Relire la continuation multi-action sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_SEQUENCE_REPLAY":
-      return "Relire le replay de mini-sequence sandbox";
+      return "Relire le replay de mini-séquence sandbox";
     case "WORKBENCH_CHAIN_CONTROLLED_SEGMENT_SANDBOX_TIMELINE":
-      return "Relire la timeline sandbox controlee du segment";
+      return "Relire la timeline sandbox contrôlée du segment";
     case "WORKBENCH_CHAIN_OFFICIAL_TIMELINE_DIFF_VIEW":
       return "Relire le diff read-only entre timeline officielle et sandbox";
     case "WORKBENCH_CHAIN_COACH_FACING_TIMELINE_REVIEW":
       return "Relire la timeline officielle face au sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_PANEL":
-      return "Relire l'option coach proposee par le sandbox";
+      return "Relire l'option coach proposée par le sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_EVIDENCE_CALIBRATION":
       return "Relire la confiance de l'option coach sandbox";
     case "WORKBENCH_CHAIN_SANDBOX_DECISION_BATCH_CONFIDENCE_CALIBRATION":
-      return "Relire la confiance multi-scenarios de l'option sandbox";
+      return "Relire la confiance multi-scénarios de l'option sandbox";
     case "WORKBENCH_CHAIN_MULTI_SCENARIO_COACH_TEST_PLAN":
-      return "Relire le plan de test coach multi-scenarios";
+      return "Relire le plan de test coach multi-scénarios";
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW":
-      return "Relire la previsualisation de selection";
+      return "Relire la prévisualisation de sélection";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
-      return "Relire les agrÃƒÂ©gats de traces de match";
+      return "Relire les agrégats de traces de match";
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
-      return "Relire le rapport coach depuis les agrÃƒÂ©gats officiels";
+      return "Relire le rapport coach depuis les agrégats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION":
       return "Relire la lecture visuelle V1 des agrégats officiels";
     case "WORKBENCH_CHAIN_COACH_REPORT_V1_INFORMATION_HIERARCHY":
-      return "Relire la hierarchie visuelle V1 du rapport coach";
+      return "Relire la hiérarchie visuelle V1 du rapport coach";
     case "WORKBENCH_CHAIN_FULL_MATCH_TRACE_VALIDATION":
       return "Relire la validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "Relire la calibration des signaux de profils";
     case "HARNESS_PLAUSIBILITY_WARNING":
-      return "Lire le signal de harnais sans changer l'Ã©conomie du score";
+      return "Lire le signal de harnais sans changer l'économie du score";
   }
 }
 
@@ -47115,7 +47146,7 @@ export function suggestedFocusFromEvidence(input: {
       {
         focusId: `${input.matchInput.matchId}-adapter-focus`,
         title: FALLBACK_FOCUS_TITLE,
-        reason: "Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.",
+        reason: PARTIAL_SIGNAL_REASON,
       },
     ];
   }
@@ -47124,7 +47155,7 @@ export function suggestedFocusFromEvidence(input: {
     {
       focusId: `${primaryFact.factId}-focus`,
       title: focusTitleForFact(primaryFact),
-      reason: `${primaryFact.summary} Signal encore partiel : cette analyse sera renforcÃ©e quand les plans tactiques seront davantage branchÃ©s au moteur.`,
+      reason: `${primaryFact.summary} ${PARTIAL_SIGNAL_REASON}`,
     },
   ];
 }

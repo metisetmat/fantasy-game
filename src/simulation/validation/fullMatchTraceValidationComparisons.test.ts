@@ -1,4 +1,8 @@
-import { runFullMatchTraceValidationModel } from "./fullMatchTraceValidationComparisons";
+import {
+  compareFullMatchTraceValidationProfiles,
+  runFullMatchTraceValidationModel,
+} from "./fullMatchTraceValidationComparisons";
+import { FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID } from "./fullMatchTraceValidationProfiles";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -34,6 +38,30 @@ export function validateFullMatchTraceValidationComparisons(): readonly string[]
   assertTest(model.profiles.every((result) => Array.isArray(result.expectedSignalsMissing)), "missing signals must be explicit.");
   assertTest(model.profiles.every((result) => result.signalCalibrationStatus !== "FAIL"), "each profile must have expected or accepted fallback signal evidence.");
 
+  const spoofedMissingSignalModel = compareFullMatchTraceValidationProfiles({
+    baselineProfileId: FULL_MATCH_TRACE_VALIDATION_BASELINE_PROFILE_ID,
+    profileResults: [
+      highPress,
+      {
+        ...strongGoalkeeper,
+        cardSignatureByCardId: highPress.cardSignatureByCardId,
+        topDangerZones: [],
+        topPressureLossZones: [],
+        topRecoveryZones: [],
+        topCauseTags: [],
+        topImpactTags: [],
+        highPressureTraceCount: 0,
+        fatigueImpactTotal: 0,
+        expectedSignalTagsPresent: [],
+        expectedSignalTagsMissing: ["goalkeeper_quality"],
+        acceptedFallbackSignals: [],
+      },
+    ],
+  });
+  const spoofedStrongGoalkeeper = profile(spoofedMissingSignalModel, "strong_goalkeeper_profile");
+  assertTest(spoofedStrongGoalkeeper.signalCalibrationStatus === "FAIL", "missing signal tags must not be fed back into searchable evidence.");
+  assertTest(!spoofedStrongGoalkeeper.expectedSignalTagsPresent.includes("goalkeeper_quality"), "missing goalkeeper_quality tag must not become present.");
+
   return [
     "at least 5 of 6 profiles produce changed Coach Report V0 cards vs baseline",
     "high press differs from low block",
@@ -43,6 +71,7 @@ export function validateFullMatchTraceValidationComparisons(): readonly string[]
     "expected signal matching is reported",
     "missing signals are explicit, not hidden",
     "each profile has expected or accepted fallback signal evidence",
+    "missing signal tags are excluded from reassessment haystack",
   ];
 }
 

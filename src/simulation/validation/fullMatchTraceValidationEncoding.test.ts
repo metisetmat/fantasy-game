@@ -19,6 +19,7 @@ export function validateFullMatchTraceValidationEncoding(): readonly string[] {
     "fullmatch-workbench-chain-replay-4i.md",
     "validation.fullmatch-workbench-chain-replay-4i.md",
     "validation.share-pack.md",
+    "coach-report.default.html",
     "coach-report.experimental.html",
     "coach-report.latest.html",
   ];
@@ -44,6 +45,7 @@ export function validateFullMatchTraceValidationEncoding(): readonly string[] {
     "fullmatch-workbench-chain-replay-4i.md has no mojibake markers",
     "validation.fullmatch-workbench-chain-replay-4i.md has no mojibake markers",
     "validation.share-pack.md has no mojibake markers",
+    "coach-report.default.html has no mojibake markers",
     "coach-report.experimental.html has no mojibake markers",
     "coach-report.latest.html has no mojibake markers",
   ];
