@@ -92,6 +92,17 @@ export function validateMatchSelectionPreviewToTraceAggregates(): readonly strin
     traceSpine: spine([
       ...matchTraceAggregateFixture(),
       trace({
+        traceId: "official-hsr-support",
+        source: "official_match_event",
+        officialTruth: true,
+        actionType: "RECOVERY",
+        outcome: "RECOVERY_WON",
+        zone: "Z5-HSR",
+        causeTags: ["defensive_recovery", "pressure_forced_error"],
+        impactTags: ["danger_created", "possession_secured"],
+        pressureLevel: "HIGH",
+      }),
+      trace({
         traceId: "official-recovery",
         source: "official_match_event",
         officialTruth: true,
@@ -134,23 +145,47 @@ export function validateMatchSelectionPreviewToTraceAggregates(): readonly strin
     ]),
   });
   const sandboxOnlyMatched = matchSelectionPreviewToTraceAggregates({ preview: model, aggregate: sandboxOnlyAggregate });
+  const unrelatedOfficialAggregate = matchTraceAggregateFromSpine({
+    traceSpine: spine([
+      trace({
+        traceId: "official-unrelated",
+        source: "official_match_event",
+        officialTruth: true,
+        actionType: "RECOVERY",
+        outcome: "RECOVERY_WON",
+        zone: "Z1-C",
+        causeTags: ["defensive_recovery", "fatigue_drop"],
+        impactTags: ["possession_secured"],
+        pressureLevel: "HIGH",
+      }),
+    ]),
+  });
+  const unrelatedOfficialMatched = matchSelectionPreviewToTraceAggregates({ preview: model, aggregate: unrelatedOfficialAggregate });
+  const unrelatedSupport = unrelatedOfficialMatched.supports.find((candidate) => candidate.previewId === "support_near_z4_hsr");
 
   assertTest(support !== undefined, "support near Z4-HSR support row must exist.");
   assertTest(secondBall !== undefined, "second-ball support row must exist.");
   assertTest(goalkeeper !== undefined, "goalkeeper support row must exist.");
   assertTest(support.newBackingStatus === "trace_supported", "support near Z4-HSR must match official danger/recovery/cause signals.");
   assertTest(support.supportReasons.includes("danger_zone_support"), "support preview must expose danger support.");
+  assertTest(support.matchedDangerZones.every((zone) => zone === "Z4-HSR" || zone === "Z5-HSR" || zone === "Z3-HSR"), "support preview must only expose scoped matched danger zones.");
   assertTest(secondBall?.newBackingStatus === "trace_supported", "second-ball preview must match recovery/impact/second-ball signals.");
   assertTest(secondBall.supportReasons.includes("second_ball_signal_support"), "second-ball preview must expose second-ball support.");
   assertTest(goalkeeper?.newBackingStatus === "trace_supported", "goalkeeper preview must match goalkeeper/danger/second-ball signals.");
   assertTest(goalkeeper.supportReasons.includes("goalkeeper_signal_support"), "goalkeeper preview must expose goalkeeper support.");
-  assertTest(sandboxOnlyMatched.traceSupportedCount === 0, "sandbox aggregate evidence alone cannot create trace_supported.");
+  assertTest(sandboxOnlyMatched.status === "not_available", "sandbox-only aggregate evidence must keep trace backing not_available.");
+  assertTest(sandboxOnlyMatched.supports.length === 0, "sandbox-only aggregate evidence must not create support rows.");
+  assertTest(unrelatedSupport !== undefined, "unrelated official aggregate must still create a support row.");
+  assertTest(unrelatedSupport.newBackingStatus === "sandbox_only", "unrelated official zones must not support the Z4-HSR support preview.");
+  assertTest(unrelatedSupport.supportReasons.length === 0, "unrelated official zones must not create support reasons for the Z4-HSR support preview.");
 
   return [
     "support near Z4-HSR can match official danger/recovery/cause signals",
+    "support near Z4-HSR requires scoped official zones",
     "second-ball presence can match recovery/impact/second-ball signals",
     "strong goalkeeper response can match goalkeeper/danger/second-ball signals",
-    "sandbox aggregate evidence alone cannot create trace_supported",
+    "sandbox aggregate evidence alone keeps trace backing not_available",
+    "unrelated official aggregate evidence alone cannot create trace_supported",
   ];
 }
 

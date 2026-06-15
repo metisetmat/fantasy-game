@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-15T11:43:40.755Z
+Generated timestamp: 2026-06-15T12:48:12.605Z
 Task/sprint name: Sprint 4K - Trace-backed Selection Preview
 Final file count: 18
 
@@ -530,22 +530,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/coachCopyQuality.ts
- M src/reports/htmlCoachReport.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
- M src/simulation/fullMatch/selectionPreviewFromCoachTestPlan.ts
- M src/simulation/fullMatch/selectionPreviewTraceBacking.test.ts
- M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/selectionPreviewTraceBackingRenderer.test.ts
-?? src/simulation/fullMatch/matchSelectionPreviewToTraceAggregates.test.ts
-?? src/simulation/fullMatch/matchSelectionPreviewToTraceAggregates.ts
-?? src/simulation/fullMatch/scoringGuard.4k.test.ts
-?? src/simulation/fullMatch/selectionPreviewTraceBacking.ts
-?? src/simulation/fullMatch/selectionPreviewTraceBackingBuilder.ts
-?? src/simulation/fullMatch/selectionPreviewTraceBackingGuard.test.ts
-?? src/simulation/fullMatch/selectionPreviewTraceBackingSourceScope.test.ts
+ M src/simulation/fullMatch/matchSelectionPreviewToTraceAggregates.test.ts
+ M src/simulation/fullMatch/matchSelectionPreviewToTraceAggregates.ts
