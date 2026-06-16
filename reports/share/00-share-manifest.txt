@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-16T16:07:19.905Z
+Generated timestamp: 2026-06-16T16:45:09.531Z
 Task/sprint name: Sprint 4U - FIFA-inspired HTML Report Layout
 Final file count: 20
 
@@ -619,23 +619,8 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/buildCoachReportExportSnapshot.ts
- M src/reports/coachReportExportHtml.test.ts
+ M src/reports/buildCoachReportPremiumLayout.ts
+ M src/reports/coachReportPremiumExportRenderer.test.ts
+ M src/reports/coachReportPremiumLayout.ts
+ M src/reports/coachReportPremiumSourceGuard.test.ts
  M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
- M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportPremiumLayout.ts
-?? src/reports/coachReportPremiumCopy.test.ts
-?? src/reports/coachReportPremiumDensity.test.ts
-?? src/reports/coachReportPremiumExportRenderer.test.ts
-?? src/reports/coachReportPremiumGuard.test.ts
-?? src/reports/coachReportPremiumLayout.test.ts
-?? src/reports/coachReportPremiumLayout.ts
-?? src/reports/coachReportPremiumPrintCss.test.ts
-?? src/reports/coachReportPremiumSourceGuard.test.ts
-?? src/simulation/fullMatch/scoringGuard.4u.test.ts

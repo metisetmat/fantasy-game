@@ -771,9 +771,16 @@ export function renderCoachReportExportHtml(input: {
   ].join("\n");
   const appendices = renderAppendices(input.productReportHtml, signalCards, premiumBodyBeforeAppendices);
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
+  const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
+
+  if (mainOpenMatch === null || mainOpenMatch.index === undefined) {
+    return withMarkers;
+  }
+
+  const mainOpenTag = mainOpenMatch[0];
 
   return withMarkers.replace(
-    /<section\s+id="executive-summary"[\s\S]*<\/main>/u,
-    `${premiumMain}\n</main>`,
+    /<main\s+id="product-main"[^>]*>[\s\S]*<\/main>/u,
+    `${mainOpenTag}\n${premiumMain}\n</main>`,
   );
 }

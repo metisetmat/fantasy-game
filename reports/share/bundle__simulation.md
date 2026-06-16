@@ -39015,10 +39015,17 @@ export function renderCoachReportExportHtml(input: {
   ].join("\n");
   const appendices = renderAppendices(input.productReportHtml, signalCards, premiumBodyBeforeAppendices);
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
+  const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
+
+  if (mainOpenMatch === null || mainOpenMatch.index === undefined) {
+    return withMarkers;
+  }
+
+  const mainOpenTag = mainOpenMatch[0];
 
   return withMarkers.replace(
-    /<section\s+id="executive-summary"[\s\S]*<\/main>/u,
-    `${premiumMain}\n</main>`,
+    /<main\s+id="product-main"[^>]*>[\s\S]*<\/main>/u,
+    `${mainOpenTag}\n${premiumMain}\n</main>`,
   );
 }
 ```
@@ -39088,9 +39095,9 @@ export interface CoachReportPremiumLayoutModel {
   readonly pitchVisualPlaceholderCount: number;
   readonly controlledEmptyStateCount: number;
   readonly appendixCollapsedByDefault: boolean;
-  readonly productExportScoreMatches: true;
-  readonly productExportCandidateComparisonMatches: true;
-  readonly interpretationGuardMatchesProduct: true;
+  readonly productExportScoreMatches: boolean;
+  readonly productExportCandidateComparisonMatches: boolean;
+  readonly interpretationGuardMatchesProduct: boolean;
   readonly visibleRecommendationWordingCount: 0;
   readonly visibleSelectionWordingCount: 0;
   readonly internalStatusLeakCount: 0;
@@ -39488,9 +39495,9 @@ export function buildCoachReportPremiumLayout(input: {
       pitchVisualPlaceholderCount: 0,
       controlledEmptyStateCount: 0,
       appendixCollapsedByDefault: false,
-      productExportScoreMatches: true,
-      productExportCandidateComparisonMatches: true,
-      interpretationGuardMatchesProduct: true,
+      productExportScoreMatches: false,
+      productExportCandidateComparisonMatches: false,
+      interpretationGuardMatchesProduct: false,
       visibleRecommendationWordingCount: 0,
       visibleSelectionWordingCount: 0,
       internalStatusLeakCount: 0,
@@ -39612,9 +39619,9 @@ export function buildCoachReportPremiumLayout(input: {
     pitchVisualPlaceholderCount,
     controlledEmptyStateCount,
     appendixCollapsedByDefault,
-    productExportScoreMatches: true,
-    productExportCandidateComparisonMatches: true,
-    interpretationGuardMatchesProduct: true,
+    productExportScoreMatches: input.exportSnapshot.scoreMatchesProduct,
+    productExportCandidateComparisonMatches: input.exportSnapshot.candidateComparisonMatchesProduct,
+    interpretationGuardMatchesProduct: input.exportSnapshot.interpretationGuardMatchesProduct,
     visibleRecommendationWordingCount: visibleRecommendationWordingCount as 0,
     visibleSelectionWordingCount: visibleSelectionWordingCount as 0,
     internalStatusLeakCount: internalStatusLeakCount as 0,

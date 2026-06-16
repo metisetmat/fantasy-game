@@ -27,6 +27,7 @@ export function validateCoachReportPremiumExportRenderer(): readonly string[] {
   assertTest(html.includes("Joueurs"), "export HTML must contain Joueurs a etudier.");
   assertTest(html.includes("&Agrave; v&eacute;rifier au prochain match") || html.includes("prochain match"), "export HTML must contain next-match section.");
   assertTest(html.includes("D&eacute;tails du layout premium HTML"), "export HTML must contain premium layout appendix.");
+  assertTest(!html.includes("<header>"), "export HTML must not keep the legacy product header before the premium cover.");
 
   return [
     "reports/coach-report.export.html exists",
@@ -41,6 +42,7 @@ export function validateCoachReportPremiumExportRenderer(): readonly string[] {
     "contains Joueurs a etudier",
     "contains A verifier au prochain match",
     "contains Details du layout premium HTML",
+    "does not keep the legacy product header",
   ];
 }
 

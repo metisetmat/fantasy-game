@@ -60,9 +60,9 @@ export interface CoachReportPremiumLayoutModel {
   readonly pitchVisualPlaceholderCount: number;
   readonly controlledEmptyStateCount: number;
   readonly appendixCollapsedByDefault: boolean;
-  readonly productExportScoreMatches: true;
-  readonly productExportCandidateComparisonMatches: true;
-  readonly interpretationGuardMatchesProduct: true;
+  readonly productExportScoreMatches: boolean;
+  readonly productExportCandidateComparisonMatches: boolean;
+  readonly interpretationGuardMatchesProduct: boolean;
   readonly visibleRecommendationWordingCount: 0;
   readonly visibleSelectionWordingCount: 0;
   readonly internalStatusLeakCount: 0;
