@@ -35,7 +35,7 @@ Status: PASS
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: README is Sprint 4T oriented - README current
 - PASS: 4T report included - 4T doc included
-- PASS: 4T validation is PASS or PARTIAL - 4T validation current
+- PASS: 4T validation is PASS - 4T validation current
 - PASS: product report HTML copied - product HTML visible
 - PASS: export report HTML copied - export HTML visible
 - PASS: export uses single source of truth - single source visible

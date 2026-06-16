@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-16T13:53:34.077Z
+Generated timestamp: 2026-06-16T15:26:59.196Z
 Task/sprint name: Sprint 4T - Coach Report PDF Export & Share Snapshot
 Final file count: 20
 
@@ -609,20 +609,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/generateCoachHtmlReport.ts
+ M src/reports/coachReportExportSnapshot.ts
  M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
- M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportExportSnapshot.ts
-?? src/reports/coachReportExportCopy.test.ts
-?? src/reports/coachReportExportGuard.test.ts
-?? src/reports/coachReportExportHtml.test.ts
-?? src/reports/coachReportExportPrintCss.test.ts
-?? src/reports/coachReportExportSnapshot.test.ts
-?? src/reports/coachReportExportSnapshot.ts
-?? src/reports/renderCoachReportExportHtml.ts
-?? src/simulation/fullMatch/scoringGuard.4t.test.ts

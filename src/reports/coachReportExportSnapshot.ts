@@ -197,6 +197,10 @@ function boolTag(prefix: string, value: boolean): string {
   return `${prefix}_${value ? "true" : "false"}`;
 }
 
+function countTag(prefix: string, value: number): string {
+  return `${prefix}_${value}`;
+}
+
 export function buildCoachReportExportSnapshotTags(
   model: Omit<CoachReportExportSnapshotModel, "tags">,
 ): readonly string[] {
@@ -213,19 +217,19 @@ export function buildCoachReportExportSnapshotTags(
     boolTag("coach_report_export_candidate_comparison_matches_product", model.candidateComparisonMatchesProduct),
     boolTag("coach_report_export_print_css_present", model.printCssPresent),
     boolTag("coach_report_export_page_break_css_present", model.pageBreakCssPresent),
-    "coach_report_export_visible_recommendation_wording_count_0",
-    "coach_report_export_visible_selection_wording_count_0",
-    "coach_report_export_internal_status_leak_count_0",
+    countTag("coach_report_export_visible_recommendation_wording_count", model.visibleRecommendationWordingCount),
+    countTag("coach_report_export_visible_selection_wording_count", model.visibleSelectionWordingCount),
+    countTag("coach_report_export_internal_status_leak_count", model.internalStatusLeakCount),
     "coach_report_export_no_automatic_selection_true",
-    "coach_report_export_player_selected_count_0",
-    "coach_report_export_lineup_mutation_count_0",
-    "coach_report_export_starters_mutation_count_0",
-    "coach_report_export_bench_mutation_count_0",
-    "coach_report_export_live_selection_driver_count_0",
-    "coach_report_export_production_route_resolution_driver_count_0",
-    "coach_report_export_score_mutation_count_0",
-    "coach_report_export_possession_mutation_count_0",
-    "coach_report_export_production_scoring_event_creation_count_0",
+    countTag("coach_report_export_player_selected_count", model.playerSelectedCount),
+    countTag("coach_report_export_lineup_mutation_count", model.lineupMutationCount),
+    countTag("coach_report_export_starters_mutation_count", model.startersMutationCount),
+    countTag("coach_report_export_bench_mutation_count", model.benchMutationCount),
+    countTag("coach_report_export_live_selection_driver_count", model.canDriveLiveSelection ? 1 : 0),
+    countTag("coach_report_export_production_route_resolution_driver_count", model.canDriveProductionRouteResolution ? 1 : 0),
+    countTag("coach_report_export_score_mutation_count", model.canMutateScore ? 1 : 0),
+    countTag("coach_report_export_possession_mutation_count", model.canMutatePossession ? 1 : 0),
+    countTag("coach_report_export_production_scoring_event_creation_count", model.canCreateScoringEvent ? 1 : 0),
     "coach_report_export_global_economy_claim_forbidden",
     "coach_report_export_scoring_constants_unchanged",
   ];
