@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 4O - Product Report Polish & Review Readiness
+- current sprint: Sprint 4P - Player Matchup View
 - final file count: 19
 - share file count: 19
 - minimal allowlist count: 19
@@ -21,46 +21,45 @@ Status: PASS
 - PASS: source reports were not deleted - 0
 - PASS: manifest exposes MINIMAL_REVIEW - mode visible
 - PASS: manifest says upload every file in reports/share - upload instruction visible
-- PASS: current sprint is Sprint 4O - Sprint 4O - Product Report Polish & Review Readiness
+- PASS: current sprint is Sprint 4P - Sprint 4P - Player Matchup View
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
 - PASS: share pack under 20 files - 19
 - PASS: expected share file count is 19 - 19
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
 - PASS: all required current sprint files copied - all copied
-- PASS: manifest lists Sprint 4O - visible
-- PASS: README is Sprint 4O oriented - README current
-- PASS: 4O report included - 4O doc included
-- PASS: 4O validation is PASS - 4O validation PASS
+- PASS: manifest lists Sprint 4P - visible
+- PASS: README is Sprint 4P oriented - README current
+- PASS: 4P report included - 4P doc included
+- PASS: 4P validation is PASS - 4P validation PASS
 - PASS: product report HTML copied - product HTML visible
-- PASS: product polish evidence category bundled - 4O evidence category bundled
-- PASS: product polish model, builder, and renderer bundled - 4O product polish files bundled
-- PASS: product polish tests bundled - 4O report tests bundled
-- PASS: scoring guard 4O bundled - 4O scoring guard bundled
-- PASS: product report has review-ready sections - sections visible
-- PASS: score source label is compact and visible - score source visible
-- PASS: product report profile cards visible - profile cards visible
-- PASS: appendices are collapsed - details present
-- PASS: print-friendly CSS is present - print CSS visible
-- PASS: main product report hides internal status names - internal statuses hidden
-- PASS: main product report hides internal role ids - internal role ids hidden
-- PASS: main product report hides internal attribute ids - internal attribute ids hidden
-- PASS: main product report avoids technical jargon - jargon count 0
-- PASS: main product report avoids official selection wording - forbidden wording count 0
+- PASS: player matchup evidence category bundled - 4P evidence category bundled
+- PASS: player matchup model and builder bundled - 4P player matchup files bundled
+- PASS: player matchup tests bundled - 4P report tests bundled
+- PASS: scoring guard 4P bundled - 4P scoring guard bundled
+- PASS: product report has 4P section order - section order visible
+- PASS: player matchup guard sentence visible - interpretation guard visible
+- PASS: player matchup fit labels visible - fit labels visible
+- PASS: player matchup candidate fields visible - candidate fields visible
+- PASS: comparison remains non-applied - non-applied wording visible
+- PASS: player matchup details appendix present - collapsed appendix present
+- PASS: main product report hides internal profile ids - profile ids hidden
+- PASS: main product report hides technical driver flags - technical flags hidden
+- PASS: main product report avoids lineup recommendation wording - forbidden selection wording count 0
 - PASS: visible French copy is clean - mojibake count 0
-- PASS: product polish tags are emitted in appendices - polish tags emitted
+- PASS: product matchup tags are emitted in appendices - 4P tags emitted
 - PASS: confidence not upgraded - confidence not upgraded
 - PASS: profile remains non-applied - non-applied
-- PASS: polish layer cannot mutate score - score mutation forbidden
-- PASS: polish layer cannot mutate possession - possession mutation forbidden
-- PASS: polish layer cannot create production scoring events - production scoring creation forbidden
-- PASS: polish layer cannot claim global economy - global economy forbidden
+- PASS: player matchup cannot mutate score - score mutation forbidden
+- PASS: player matchup cannot mutate possession - possession mutation forbidden
+- PASS: player matchup cannot create production scoring events - production scoring creation forbidden
+- PASS: player matchup cannot claim global economy - global economy forbidden
 - PASS: no scoring constants changed - scoring constants visible
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendations visible - 4O recommendations visible
+- PASS: recommendations visible - 4P recommendations visible
 
 ## Files
 
@@ -73,7 +72,7 @@ Status: PASS
 - coach-report.experimental.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-workbench-chain-replay-4o.md
+- fullmatch-workbench-chain-replay-4p.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -81,5 +80,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-4o.md
+- validation.fullmatch-workbench-chain-replay-4p.md
 - validation.share-pack.md

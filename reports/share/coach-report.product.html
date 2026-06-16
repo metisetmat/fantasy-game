@@ -13,6 +13,7 @@
     h2 { margin: 34px 0 12px; font-size: 1.35rem; }
     h3 { margin: 0 0 10px; font-size: 1.05rem; }
     h4 { margin: 0 0 6px; font-size: .9rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+    h5 { margin: 0 0 6px; font-size: .82rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
     p { margin: 0 0 10px; }
     ul { margin: 8px 0 0; padding-left: 20px; }
     li + li { margin-top: 5px; }
@@ -28,6 +29,11 @@
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
     .signal-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
     .signal-grid section, .profile-grid section { background: var(--soft); border-radius: 8px; padding: 12px; }
+    .matchup-candidates { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .matchup-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }
+    .matchup-head { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
+    .matchup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .matchup-grid section { background: #fff; border-radius: 8px; padding: 10px; }
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
     .attributes .badge { color: #515f6f; background: #fbfcfd; }
@@ -229,6 +235,119 @@
     </article>
   </section>
 
+  <section id="players-to-study" class="product-section">
+    <h2>Joueurs à étudier</h2>
+    <p class="guard">Ces rapprochements ne sélectionnent aucun joueur. Ils montrent seulement quels joueurs du roster semblent proches des profils à observer.</p>
+    <article class="product-card matchup-block">
+      <h3>Profil à observer — soutien proche autour des zones de danger</h3>
+      <div class="badge-row attributes" aria-label="Attributs de profil">
+        <span class="badge">anticipation</span><span class="badge">soutien sans ballon</span><span class="badge">maîtrise technique</span><span class="badge">prise de décision</span><span class="badge">endurance</span>
+      </div>
+      <div class="matchup-candidates">
+    <article class="matchup-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Control Goalkeeper</h4>
+          <p class="muted">Goalkeeper / Free Safety</p>
+        </div>
+        <span class="badge">Compatibilité forte</span>
+      </div>
+      <p class="card-kicker">Compatibilité profil-joueur</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>anticipation</li><li>soutien sans ballon</li><li>maîtrise technique</li></ul>
+        </section>
+        <section>
+          <h5>Points à vérifier</h5>
+          <ul><li>Aucun manque majeur dans cette comparaison, mais le signal reste à confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilisé dans ce rôle</h5>
+          <ul><li>Risque de sur-interpréter une compatibilité de profil sans répétition sur plusieurs matchs.</li><li>Le risque principal reste le changement de contexte tactique.</li></ul>
+        </section>
+        <section>
+          <h5>Signal à observer au prochain match</h5>
+          <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Observer si la compatibilité reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée — Non confirmée comme recommandation officielle.</p>
+    </article></div>
+    </article>
+    <article class="product-card matchup-block">
+      <h3>Profil à observer — présence sur second ballon</h3>
+      <div class="badge-row attributes" aria-label="Attributs de profil">
+        <span class="badge">anticipation</span><span class="badge">réaction</span><span class="badge">accélération</span><span class="badge">agressivité contrôlée</span><span class="badge">équilibre</span><span class="badge">endurance</span>
+      </div>
+      <div class="matchup-candidates">
+    <article class="matchup-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Control Goalkeeper</h4>
+          <p class="muted">Goalkeeper / Free Safety</p>
+        </div>
+        <span class="badge">Compatibilité forte</span>
+      </div>
+      <p class="card-kicker">Compatibilité profil-joueur</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>anticipation</li><li>réaction</li><li>agressivité contrôlée</li></ul>
+        </section>
+        <section>
+          <h5>Points à vérifier</h5>
+          <ul><li>Aucun manque majeur dans cette comparaison, mais le signal reste à confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilisé dans ce rôle</h5>
+          <ul><li>Risque de sur-interpréter une compatibilité de profil sans répétition sur plusieurs matchs.</li><li>Les signaux partiels (accélération, équilibre) peuvent rendre le rôle instable sous pression.</li></ul>
+        </section>
+        <section>
+          <h5>Signal à observer au prochain match</h5>
+          <ul><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>Observer si la compatibilité reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée — Non confirmée comme recommandation officielle.</p>
+    </article></div>
+    </article>
+    <article class="product-card matchup-block">
+      <h3>Profil à observer — réponse face à un gardien fort</h3>
+      <div class="badge-row attributes" aria-label="Attributs de profil">
+        <span class="badge">prise de décision</span><span class="badge">placement</span><span class="badge">sang-froid</span><span class="badge">discipline tactique</span><span class="badge">fraîcheur mentale</span><span class="badge">maîtrise technique</span>
+      </div>
+      <div class="matchup-candidates">
+    <article class="matchup-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Control Goalkeeper</h4>
+          <p class="muted">Goalkeeper / Free Safety</p>
+        </div>
+        <span class="badge">Compatibilité forte</span>
+      </div>
+      <p class="card-kicker">Compatibilité profil-joueur</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>prise de décision</li><li>placement</li><li>sang-froid</li></ul>
+        </section>
+        <section>
+          <h5>Points à vérifier</h5>
+          <ul><li>Aucun manque majeur dans cette comparaison, mais le signal reste à confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilisé dans ce rôle</h5>
+          <ul><li>Risque de sur-interpréter une compatibilité de profil sans répétition sur plusieurs matchs.</li><li>Le risque principal reste le changement de contexte tactique.</li></ul>
+        </section>
+        <section>
+          <h5>Signal à observer au prochain match</h5>
+          <ul><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li><li>Observer si la compatibilité reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée — Non confirmée comme recommandation officielle.</p>
+    </article></div>
+    </article>
+  </section>
+
   <section id="next-match-signals" class="product-section">
     <h2>À vérifier au prochain match</h2>
     <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
@@ -238,6 +357,7 @@
     <h2>À ne pas sur-interpréter</h2>
     <div class="interpretation-guard">
       <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
+      <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
     </div>
   </section>
 
@@ -261,9 +381,14 @@
       <ul><li>Les anciennes sections restent consultables comme contexte, pas comme lecture principale.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
     </details>
     <details class="appendix">
+      <summary>Détails des rapprochements profil-joueur</summary>
+      <p>Les rapprochements profil-joueur restent séparés des choix de composition.</p>
+      <ul><li>profile block count: 3</li><li>player candidate count: 3</li><li>high fit count: 3</li><li>medium fit count: 0</li><li>low fit count: 0</li><li>no automatic selection: true</li><li>player selected count: 0</li><li>lineup mutation count: 0</li><li>starters mutation count: 0</li><li>bench mutation count: 0</li><li>live selection driver count: 0</li><li>production route resolution driver count: 0</li><li>scoring constants unchanged: true</li></ul>
+    </details>
+    <details class="appendix">
       <summary>Détails de validation</summary>
       <p>Les validations confirment les garde-fous sans piloter le contenu coach.</p>
-      <ul><li>coach_product_report_view</li><li>coach_product_report_view_status_available</li><li>coach_product_report_file_generated</li><li>coach_product_report_section_count_7</li><li>coach_product_report_key_signal_count_3</li><li>coach_product_report_profile_card_count_3</li><li>coach_product_report_next_match_signal_count_present</li><li>coach_product_report_appendix_count_present</li><li>coach_product_report_visible_jargon_count_0</li><li>coach_product_report_internal_status_leak_count_0</li><li>coach_product_report_official_selection_wording_count_0</li><li>coach_product_report_profile_applied_count_0</li><li>coach_product_report_officially_confirmed_count_0</li><li>coach_product_report_confidence_upgrade_count_0</li><li>coach_product_report_score_mutation_count_0</li><li>coach_product_report_possession_mutation_count_0</li><li>coach_product_report_production_scoring_event_creation_count_0</li><li>coach_product_report_global_economy_claim_forbidden</li><li>coach_product_report_diagnostic_kept_separate</li><li>coach_product_report_sandbox_kept_separate</li><li>coach_product_report_official_aggregates_support_only</li><li>scoring_constants_unchanged</li><li>coach_product_report_polish</li><li>coach_product_report_polish_status_available</li><li>coach_product_report_review_ready_true</li><li>coach_product_report_header_polished_true</li><li>coach_product_report_executive_summary_compact_true</li><li>coach_product_report_key_signals_readable_true</li><li>coach_product_report_profile_cards_readable_true</li><li>coach_product_report_next_match_signals_readable_true</li><li>coach_product_report_appendices_less_intrusive_true</li><li>coach_product_report_print_friendly_true</li><li>coach_product_report_main_visible_jargon_count_0</li><li>coach_product_report_internal_status_leak_count_0</li><li>coach_product_report_internal_role_id_leak_count_0</li><li>coach_product_report_internal_attribute_id_leak_count_0</li><li>coach_product_report_official_selection_wording_count_0</li><li>coach_product_report_profile_applied_count_0</li><li>coach_product_report_officially_confirmed_count_0</li><li>coach_product_report_confidence_upgrade_count_0</li><li>coach_product_report_score_mutation_count_0</li><li>coach_product_report_possession_mutation_count_0</li><li>coach_product_report_production_scoring_event_creation_count_0</li><li>coach_product_report_global_economy_claim_forbidden</li><li>scoring_constants_unchanged</li></ul>
+      <ul><li>coach_product_report_view</li><li>coach_product_report_view_status_available</li><li>coach_product_report_file_generated</li><li>coach_product_report_section_count_8</li><li>coach_product_report_key_signal_count_3</li><li>coach_product_report_profile_card_count_3</li><li>coach_product_report_player_matchup_profile_block_count_3</li><li>coach_product_report_player_matchup_candidate_count_3</li><li>coach_product_report_next_match_signal_count_present</li><li>coach_product_report_appendix_count_present</li><li>coach_product_report_visible_jargon_count_0</li><li>coach_product_report_internal_status_leak_count_0</li><li>coach_product_report_official_selection_wording_count_0</li><li>coach_product_report_profile_applied_count_0</li><li>coach_product_report_officially_confirmed_count_0</li><li>coach_product_report_confidence_upgrade_count_0</li><li>coach_product_report_score_mutation_count_0</li><li>coach_product_report_possession_mutation_count_0</li><li>coach_product_report_production_scoring_event_creation_count_0</li><li>coach_product_report_global_economy_claim_forbidden</li><li>coach_product_report_diagnostic_kept_separate</li><li>coach_product_report_sandbox_kept_separate</li><li>coach_product_report_official_aggregates_support_only</li><li>scoring_constants_unchanged</li><li>player_matchup_view</li><li>player_matchup_view_status_available</li><li>player_matchup_profile_block_count_3</li><li>player_matchup_candidate_count_present</li><li>player_matchup_no_automatic_selection_true</li><li>player_matchup_player_selected_count_0</li><li>player_matchup_lineup_mutation_count_0</li><li>player_matchup_starters_mutation_count_0</li><li>player_matchup_bench_mutation_count_0</li><li>player_matchup_live_selection_driver_count_0</li><li>player_matchup_production_route_resolution_driver_count_0</li><li>player_matchup_score_mutation_count_0</li><li>player_matchup_possession_mutation_count_0</li><li>player_matchup_production_scoring_event_creation_count_0</li><li>player_matchup_global_economy_claim_forbidden</li><li>player_matchup_scoring_constants_unchanged</li><li>coach_product_report_polish</li><li>coach_product_report_polish_status_available</li><li>coach_product_report_review_ready_true</li><li>coach_product_report_header_polished_true</li><li>coach_product_report_executive_summary_compact_true</li><li>coach_product_report_key_signals_readable_true</li><li>coach_product_report_profile_cards_readable_true</li><li>coach_product_report_next_match_signals_readable_true</li></ul>
     </details>
   </section>
 </main>

@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 4O - Product Report Polish & Review Readiness. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4P - Player Matchup View. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -434,6 +434,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW"
+  | "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"

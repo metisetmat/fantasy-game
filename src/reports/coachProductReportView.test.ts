@@ -15,7 +15,7 @@ export function validateCoachProductReportView(): readonly string[] {
   const model = buildCoachProductReportViewFromMatchReport(report);
 
   assertTest(model.status === "available", "product report model must be available.");
-  assertTest(model.sectionCount === 7, "section count must be 7.");
+  assertTest(model.sectionCount === 8, "section count must be 8.");
   assertTest(model.keyCoachSignals.length === 3, "key signal count must be 3.");
   assertTest(model.profilesToObserve.length === 3, "profile card count must be 3.");
   assertTest(model.nextMatchSignals.length > 0, "next-match signals must exist.");
@@ -29,7 +29,7 @@ export function validateCoachProductReportView(): readonly string[] {
   return [
     "product report model exists",
     "status is available when V1 and profile view evidence are available",
-    "section count is 7",
+    "section count is 8",
     "key signal count is 3",
     "profile card count is 3",
     "next-match signals exist",

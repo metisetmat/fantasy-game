@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 4O - Product Report Polish & Review Readiness",
+  name: "Sprint 4P - Player Matchup View",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -15,8 +15,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-4o.md",
-    "validation.fullmatch-workbench-chain-replay-4o.md",
+    "fullmatch-workbench-chain-replay-4p.md",
+    "validation.fullmatch-workbench-chain-replay-4p.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -37,14 +37,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 4O share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-4o.md": "summarizes Coach Product Report Polish status, review-ready presentation, print readiness, appendices, guardrails, and unchanged scoring",
-    "validation.fullmatch-workbench-chain-replay-4o.md": "validates polished product report generation, visible wording, no-jargon main view, source separation, review readiness, print CSS, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 4O share pack",
-    "manifest.md": "compatibility manifest listing the 4O share pack files",
+    "validation.share-pack.md": "proves the 4P share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-4p.md": "summarizes Player Matchup View status, profile-player comparison guardrails, section placement, collapsed appendix, and unchanged scoring",
+    "validation.fullmatch-workbench-chain-replay-4p.md": "validates player matchup view generation, visible wording, no-lineup recommendation guardrails, non-applied comparison scope, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 4P share pack",
+    "manifest.md": "compatibility manifest listing the 4P share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
-    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4O",
-    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View and Product Report Polish models/builders/renderers/tests, Selection Preview coach copy model/builder/tests, Selection Preview Profile View model/builder/tests, trace-backing renderer tests, score source labels, Coach Report V1 visualization, information hierarchy and legacy cleanup models/builders/tests, timeline review, sandbox decision panel, sandbox evidence calibration, batch confidence calibration, coach test plan, selection preview, match trace spine, match trace aggregator, Coach Report V0 from trace aggregates, French trace labels, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
+    "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4P",
+    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, and Player Matchup View models/builders/renderers/tests, Selection Preview coach copy model/builder/tests, Selection Preview Profile View model/builder/tests, trace-backing renderer tests, score source labels, Coach Report V1 visualization, information hierarchy and legacy cleanup models/builders/tests, timeline review, sandbox decision panel, sandbox evidence calibration, batch confidence calibration, coach test plan, selection preview, match trace spine, match trace aggregator, Coach Report V0 from trace aggregates, French trace labels, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
   },
 };

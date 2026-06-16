@@ -6,6 +6,11 @@ import type {
 } from "./coachProductReportView";
 import { buildCoachProductReportPolish } from "./buildCoachProductReportPolish";
 import { escapeHtml } from "./htmlCoachReport";
+import {
+  playerMatchupFitBandLabel,
+  type PlayerMatchupCandidate,
+  type PlayerMatchupProfileBlock,
+} from "./playerMatchupView";
 
 function renderList(items: readonly string[]): string {
   if (items.length === 0) {
@@ -73,13 +78,67 @@ function renderProfile(profile: CoachProductReportProfile): string {
     </article>`;
 }
 
+function renderMatchupCandidate(candidate: PlayerMatchupCandidate): string {
+  return `
+    <article class="matchup-card">
+      <div class="matchup-head">
+        <div>
+          <h4>${escapeHtml(candidate.playerName)}</h4>
+          <p class="muted">${escapeHtml(candidate.currentRoleLabel)}</p>
+        </div>
+        ${renderBadge(playerMatchupFitBandLabel(candidate.fitBand))}
+      </div>
+      <p class="card-kicker">Compatibilité profil-joueur</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          ${renderList(candidate.matchedAttributes.length === 0 ? ["Aucun atout net dans ce run."] : candidate.matchedAttributes.slice(0, 3))}
+        </section>
+        <section>
+          <h5>Points à vérifier</h5>
+          ${renderList(candidate.whatIsMissing.slice(0, 3))}
+        </section>
+        <section>
+          <h5>Risque si utilisé dans ce rôle</h5>
+          ${renderList(candidate.riskIfUsed.slice(0, 2))}
+        </section>
+        <section>
+          <h5>Signal à observer au prochain match</h5>
+          ${renderList(candidate.nextObservationSignal.slice(0, 2))}
+        </section>
+      </div>
+      <p class="guard">${escapeHtml(candidate.nonAppliedLabel)} — ${escapeHtml(candidate.confirmationLabel)}.</p>
+    </article>`;
+}
+
+function renderMatchupBlock(block: PlayerMatchupProfileBlock): string {
+  if (block.candidates.length === 0) {
+    return `
+      <article class="product-card matchup-block">
+        <h3>${escapeHtml(block.profileTitle)}</h3>
+        <p class="empty">${escapeHtml(block.emptyState ?? "Aucun joueur ne ressort clairement pour ce profil dans ce run. Le profil reste à observer, sans joueur associé.")}</p>
+      </article>`;
+  }
+
+  return `
+    <article class="product-card matchup-block">
+      <h3>${escapeHtml(block.profileTitle)}</h3>
+      <div class="badge-row attributes" aria-label="Attributs de profil">
+        ${block.usefulAttributes.slice(0, 6).map(renderBadge).join("")}
+      </div>
+      <div class="matchup-candidates">${block.candidates.map(renderMatchupCandidate).join("")}</div>
+    </article>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
-  const detail = appendix.contentKind === "technical"
+  const detail = appendix.details !== undefined
+    ? appendix.details
+    : (appendix.contentKind === "technical"
     ? tags.slice(0, 48)
     : [
       appendix.summary,
       "Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.",
-    ];
+    ]);
 
   return `
     <details class="appendix">
@@ -108,6 +167,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     h2 { margin: 34px 0 12px; font-size: 1.35rem; }
     h3 { margin: 0 0 10px; font-size: 1.05rem; }
     h4 { margin: 0 0 6px; font-size: .9rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+    h5 { margin: 0 0 6px; font-size: .82rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
     p { margin: 0 0 10px; }
     ul { margin: 8px 0 0; padding-left: 20px; }
     li + li { margin-top: 5px; }
@@ -123,6 +183,11 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
     .signal-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
     .signal-grid section, .profile-grid section { background: var(--soft); border-radius: 8px; padding: 12px; }
+    .matchup-candidates { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .matchup-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }
+    .matchup-head { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
+    .matchup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .matchup-grid section { background: #fff; border-radius: 8px; padding: 10px; }
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
     .attributes .badge { color: #515f6f; background: #fbfcfd; }
@@ -186,6 +251,12 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     ${model.profilesToObserve.map(renderProfile).join("")}
   </section>
 
+  <section id="players-to-study" class="product-section">
+    <h2>Joueurs à étudier</h2>
+    <p class="guard">Ces rapprochements ne sélectionnent aucun joueur. Ils montrent seulement quels joueurs du roster semblent proches des profils à observer.</p>
+    ${model.playerMatchupView.blocks.map(renderMatchupBlock).join("").trimStart()}
+  </section>
+
   <section id="next-match-signals" class="product-section">
     <h2>À vérifier au prochain match</h2>
     ${renderList(model.nextMatchSignals.slice(0, 5))}
@@ -195,6 +266,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <h2>À ne pas sur-interpréter</h2>
     <div class="interpretation-guard">
       <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
+      <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
     </div>
   </section>
 

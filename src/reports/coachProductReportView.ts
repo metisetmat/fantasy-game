@@ -1,5 +1,6 @@
 import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+import type { PlayerMatchupViewModel } from "./playerMatchupView";
 
 export type CoachProductReportViewStatus =
   | "not_available"
@@ -13,6 +14,7 @@ export type CoachProductReportSectionId =
   | "official_match_reading"
   | "key_coach_signals"
   | "profiles_to_observe"
+  | "players_to_study"
   | "next_match_signals"
   | "appendices";
 
@@ -50,6 +52,7 @@ export interface CoachProductReportAppendix {
     | "traceability"
     | "technical"
     | "legacy";
+  readonly details?: readonly string[];
 }
 
 export interface CoachProductReportViewModel {
@@ -64,6 +67,7 @@ export interface CoachProductReportViewModel {
   readonly officialMatchReading: readonly string[];
   readonly keyCoachSignals: readonly CoachProductReportSignal[];
   readonly profilesToObserve: readonly CoachProductReportProfile[];
+  readonly playerMatchupView: PlayerMatchupViewModel;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly productVisibleJargonCount: number;
@@ -101,6 +105,7 @@ export const coachProductReportSections: readonly CoachProductReportSectionId[] 
   "official_match_reading",
   "key_coach_signals",
   "profiles_to_observe",
+  "players_to_study",
   "next_match_signals",
   "appendices",
 ];
@@ -113,6 +118,8 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     `coach_product_report_section_count_${model.sectionCount}`,
     `coach_product_report_key_signal_count_${model.keyCoachSignals.length}`,
     `coach_product_report_profile_card_count_${model.profilesToObserve.length}`,
+    `coach_product_report_player_matchup_profile_block_count_${model.playerMatchupView.profileBlockCount}`,
+    `coach_product_report_player_matchup_candidate_count_${model.playerMatchupView.playerCandidateCount}`,
     "coach_product_report_next_match_signal_count_present",
     "coach_product_report_appendix_count_present",
     `coach_product_report_visible_jargon_count_${model.productVisibleJargonCount}`,
@@ -129,6 +136,7 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     "coach_product_report_sandbox_kept_separate",
     "coach_product_report_official_aggregates_support_only",
     "scoring_constants_unchanged",
+    ...model.playerMatchupView.tags,
   ];
 }
 
