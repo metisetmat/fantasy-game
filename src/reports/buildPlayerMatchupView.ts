@@ -1,5 +1,6 @@
 import type { PlayerSnapshot } from "../contracts/engineToCoach";
 import { PlayerRole, type PlayerAttributes } from "../models/player";
+import { buildPlayerMatchupCalibration } from "./buildPlayerMatchupCalibration";
 import {
   buildPlayerMatchupViewTags,
   type PlayerMatchupAttributeComparison,
@@ -9,6 +10,10 @@ import {
   type PlayerMatchupProfileBlock,
   type PlayerMatchupViewModel,
 } from "./playerMatchupView";
+import type {
+  PlayerMatchupCalibrationModel,
+  PlayerMatchupCalibrationResult,
+} from "./playerMatchupCalibration";
 import {
   selectionPreviewProfileAttributeLabels,
   selectionPreviewProfileRoleFamilyLabels,
@@ -122,6 +127,10 @@ function fitBand(score: number): PlayerMatchupFitBand {
   return "low";
 }
 
+function visibleFitBandFromCalibration(result: PlayerMatchupCalibrationResult): PlayerMatchupFitBand {
+  return result.fitBand === "high" ? "high" : "medium";
+}
+
 function roleFitBonus(card: SelectionPreviewProfileCard, player: PlayerSnapshot): number {
   const matchingFamilies = card.roleFamilies.filter((family) => roleFamilyRoleFit[family].includes(player.role));
 
@@ -212,7 +221,7 @@ function blockFromProfile(card: SelectionPreviewProfileCard, rosterPlayers: read
   const candidates = rosterPlayers
     .map((player) => candidateForPlayer(card, player))
     .sort((a, b) => b.fitScore - a.fitScore || a.playerName.localeCompare(b.playerName))
-    .slice(0, 4);
+    .slice(0, Math.max(4, rosterPlayers.length));
   const highFitCount = candidates.filter((candidate) => candidate.fitBand === "high").length;
   const mediumFitCount = candidates.filter((candidate) => candidate.fitBand === "medium").length;
   const lowFitCount = candidates.filter((candidate) => candidate.fitBand === "low").length;
@@ -236,6 +245,119 @@ function blockFromProfile(card: SelectionPreviewProfileCard, rosterPlayers: read
   };
 }
 
+function calibratedWhyVisible(result: PlayerMatchupCalibrationResult, candidate: PlayerMatchupCandidate): readonly string[] {
+  const strongest = candidate.matchedAttributes.slice(0, 3);
+  const profileLabel = result.profileId === "strong_goalkeeper_response_profile" && candidate.currentRoleLabel.includes("Goalkeeper")
+    ? "Profil dÃ©fensif Ã  Ã©tudier pour stabiliser la suite de l'action."
+    : "Pourquoi ce joueur est visible aprÃ¨s filtrage par rÃ´le, attributs et contexte.";
+
+  return [
+    profileLabel,
+    strongest.length > 0
+      ? `Atouts visibles aprÃ¨s calibration : ${strongest.join(", ")}.`
+      : "Le joueur reste visible par compatibilitÃ© contextuelle, mais les atouts doivent Ãªtre confirmÃ©s.",
+    `Score calibrÃ© : ${result.calibratedFitScore}/100; compatibilitÃ© de rÃ´le : ${result.roleCompatibilityScore}/100.`,
+  ];
+}
+
+function calibratedMissing(candidate: PlayerMatchupCandidate): readonly string[] {
+  if (candidate.missingAttributes.length === 0) {
+    return [
+      "VÃ©rifier que les atouts visibles restent prÃ©sents dans un autre contexte de match.",
+      "Confirmer que le rÃ´le ne dÃ©forme pas l'Ã©quilibre collectif.",
+    ];
+  }
+
+  return candidate.missingAttributes.slice(0, 3).map((attribute) => `${attribute} Ã  confirmer avant d'Ã©tendre l'observation.`);
+}
+
+function calibratedRisks(result: PlayerMatchupCalibrationResult): readonly string[] {
+  const risks = [
+    ...result.penaltyReasons,
+    result.requiredAttributeGapCount > 0
+      ? `${result.requiredAttributeGapCount} attribut(s) requis restent Ã  confirmer.`
+      : "Risque principal : sur-interprÃ©ter un signal isolÃ© sans rÃ©pÃ©tition.",
+    result.tacticalRiskScore >= 45
+      ? `Risque tactique calibrÃ© : ${result.tacticalRiskScore}/100.`
+      : "Le risque tactique reste modÃ©rÃ© dans cette comparaison non appliquÃ©e.",
+  ];
+
+  return risks.slice(0, 3);
+}
+
+function calibratedLimits(result: PlayerMatchupCalibrationResult, candidate: PlayerMatchupCandidate): readonly string[] {
+  return [
+    result.eligibilityStatus === "penalized"
+      ? "CompatibilitÃ© plafonnÃ©e par le contexte de rÃ´le."
+      : "CompatibilitÃ© non prescriptive : elle ne transforme pas le joueur en choix de composition.",
+    result.fatigueRiskScore > 35
+      ? `Risque fatigue Ã  surveiller : ${result.fatigueRiskScore}/100.`
+      : "Fatigue non bloquante dans ce run.",
+    candidate.partialAttributes.length > 0
+      ? `Signaux partiels : ${candidate.partialAttributes.slice(0, 2).join(", ")}.`
+      : "Les signaux restent Ã  confirmer par plusieurs matchs.",
+  ];
+}
+
+function applyCalibrationToBlock(
+  block: PlayerMatchupProfileBlock,
+  calibration: PlayerMatchupCalibrationModel,
+): PlayerMatchupProfileBlock {
+  const resultByPlayer = new Map(
+    calibration.calibrationResults
+      .filter((result) => result.profileId === block.profileId)
+      .map((result) => [result.playerId, result] as const),
+  );
+  const visibleCandidates = block.candidates
+    .reduce<PlayerMatchupCandidate[]>((candidates, candidate) => {
+      const result = resultByPlayer.get(candidate.playerId);
+
+      if (result === undefined || !result.visibleAsCandidate || result.fitBand === "low" || result.fitBand === "not_compatible") {
+        return candidates;
+      }
+
+      const whyVisible = calibratedWhyVisible(result, candidate);
+
+      candidates.push({
+        ...candidate,
+        fitBand: visibleFitBandFromCalibration(result),
+        fitScore: result.calibratedFitScore,
+        rawFitScore: result.rawFitScore,
+        calibratedFitScore: result.calibratedFitScore,
+        calibrationWhyVisible: whyVisible,
+        calibrationLimits: calibratedLimits(result, candidate),
+        whyStudy: whyVisible,
+        whatIsMissing: calibratedMissing(candidate),
+        riskIfUsed: calibratedRisks(result),
+        nextObservationSignal: [
+          block.profileId === "strong_goalkeeper_response_profile" && candidate.currentRoleLabel.includes("Goalkeeper")
+            ? "Observer si la stabilisation dÃ©fensive aprÃ¨s action neutralisÃ©e reste propre."
+            : candidate.nextObservationSignal[0],
+          "Confirmer le signal sans changer automatiquement la composition.",
+        ].filter((signal): signal is string => signal !== undefined),
+      });
+
+      return candidates;
+    }, [])
+    .sort((a, b) => b.fitScore - a.fitScore || a.playerName.localeCompare(b.playerName))
+    .slice(0, 3);
+  const highFitCount = visibleCandidates.filter((candidate) => candidate.fitBand === "high").length;
+  const mediumFitCount = visibleCandidates.filter((candidate) => candidate.fitBand === "medium").length;
+  const lowFitCount = visibleCandidates.filter((candidate) => candidate.fitBand === "low").length;
+
+  return {
+    ...block,
+    candidates: visibleCandidates,
+    emptyState: visibleCandidates.length === 0
+      ? "Aucun joueur ne ressort clairement pour ce profil dans ce run. Le profil reste Ã  observer, sans joueur associÃ©."
+      : null,
+    candidateCount: visibleCandidates.length,
+    highFitCount,
+    mediumFitCount,
+    lowFitCount,
+  };
+}
+
 function modelWithTags(input: Omit<PlayerMatchupViewModel, "tags">): PlayerMatchupViewModel {
   return {
     ...input,
@@ -248,7 +370,7 @@ export function buildPlayerMatchupView(input: {
   readonly rosterPlayers: readonly PlayerSnapshot[];
 }): PlayerMatchupViewModel {
   if (input.profileView.status === "not_available") {
-    return modelWithTags({
+    const unavailable = modelWithTags({
       status: "not_available",
       origin: "selection_preview_profile_view",
       profileBlockCount: 0,
@@ -284,9 +406,61 @@ export function buildPlayerMatchupView(input: {
       fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
       warnings: ["Player Matchup View requires an available Selection Preview Profile View."],
     });
+
+    const calibration = buildPlayerMatchupCalibration({
+      matchupView: unavailable,
+      rosterPlayers: input.rosterPlayers,
+    });
+
+    return modelWithTags({
+      ...unavailable,
+      calibration,
+    });
   }
 
-  const blocks = input.profileView.cards.map((card) => blockFromProfile(card, input.rosterPlayers));
+  const rawBlocks = input.profileView.cards.map((card) => blockFromProfile(card, input.rosterPlayers));
+  const rawPlayerCandidateCount = rawBlocks.reduce((sum, block) => sum + block.candidateCount, 0);
+  const rawModel = modelWithTags({
+    status: input.rosterPlayers.length === 0 ? "partial" : "available",
+    origin: "selection_preview_profile_view",
+    profileBlockCount: rawBlocks.length,
+    playerCandidateCount: rawPlayerCandidateCount,
+    highFitCount: rawBlocks.reduce((sum, block) => sum + block.highFitCount, 0),
+    mediumFitCount: rawBlocks.reduce((sum, block) => sum + block.mediumFitCount, 0),
+    lowFitCount: rawBlocks.reduce((sum, block) => sum + block.lowFitCount, 0),
+    blocks: rawBlocks,
+    noAutomaticSelection: true,
+    profileAppliedCount: 0,
+    playerSelectedCount: 0,
+    lineupMutationCount: 0,
+    startersMutationCount: 0,
+    benchMutationCount: 0,
+    officiallyConfirmedCount: 0,
+    confidenceUpgradeCount: 0,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    officialAggregatesUsedAsSupportOnly: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: input.rosterPlayers.length === 0 ? ["PLAYER_MATCHUP_ROSTER_EMPTY"] : [],
+  });
+  const calibration = buildPlayerMatchupCalibration({
+    matchupView: rawModel,
+    rosterPlayers: input.rosterPlayers,
+  });
+  const blocks = rawBlocks.map((block) => applyCalibrationToBlock(block, calibration));
   const playerCandidateCount = blocks.reduce((sum, block) => sum + block.candidateCount, 0);
   const highFitCount = blocks.reduce((sum, block) => sum + block.highFitCount, 0);
   const mediumFitCount = blocks.reduce((sum, block) => sum + block.mediumFitCount, 0);
@@ -301,6 +475,7 @@ export function buildPlayerMatchupView(input: {
     mediumFitCount,
     lowFitCount,
     blocks,
+    calibration,
     noAutomaticSelection: true,
     profileAppliedCount: 0,
     playerSelectedCount: 0,

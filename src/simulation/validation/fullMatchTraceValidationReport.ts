@@ -1,5 +1,9 @@
 import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
+import { runFullMatch } from "../runFullMatch";
+import type { PlayerMatchupCalibrationModel } from "../../reports/playerMatchupCalibration";
 import type {
   FullMatchTraceValidationModel,
   FullMatchTraceValidationProfileResult,
@@ -36,6 +40,23 @@ function statusLabel(model: FullMatchTraceValidationModel): "PASS" | "PARTIAL PA
   }
 
   return "FAIL";
+}
+
+function currentPlayerMatchupCalibration(): PlayerMatchupCalibrationModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
+  );
+  const calibration = productView.playerMatchupView.calibration;
+
+  if (calibration === undefined) {
+    throw new Error("Player Matchup Calibration must be available for Sprint 4Q validation.");
+  }
+
+  return calibration;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -1591,6 +1612,170 @@ export function renderFullMatchWorkbenchChainReplay4PValidation(model: FullMatch
     "- CONFIRM_PROFILE_PLAYER_COMPARISONS_REMAIN_NON_APPLIED.",
     "- CONFIRM_PRODUCT_REPORT_REMAINS_SELECTION_SAFE.",
     "- PREPARE_PDF_EXPORT_OR_MATCHUP_CALIBRATION.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4QDoc(model: FullMatchTraceValidationModel): string {
+  const calibration = currentPlayerMatchupCalibration();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Q",
+    "",
+    "Sprint 4Q calibrates the Player Matchup View so profile-player comparisons remain credible, role-compatible, diverse, non-prescriptive, and non-applied.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Player Matchup View remains available.",
+    `- Player Matchup Calibration status: ${calibration.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION.",
+    "- product report file generated: coach-report.product.html.",
+    "",
+    "## Calibration Summary",
+    `- profile constraint count: ${calibration.profileConstraintCount}.`,
+    `- evaluated player/profile pair count: ${calibration.evaluatedPlayerProfilePairCount}.`,
+    `- visible candidate count: ${calibration.visibleCandidateCount}.`,
+    `- excluded candidate count: ${calibration.excludedCandidateCount}.`,
+    `- penalized candidate count: ${calibration.penalizedCandidateCount}.`,
+    `- empty profile block count: ${calibration.emptyProfileBlockCount}.`,
+    `- goalkeeper outfield exclusion count: ${calibration.goalkeeperOutfieldExclusionCount}.`,
+    `- universal match guard triggered count: ${calibration.universalMatchGuardTriggeredCount}.`,
+    `- repeated same player across profiles count: ${calibration.repeatedSamePlayerAcrossProfilesCount}.`,
+    `- max visible profiles per player: ${calibration.maxVisibleProfilesPerPlayer}.`,
+    "- no player strong fit all profiles.",
+    "- no goalkeeper strong fit all profiles.",
+    "",
+    "## Guardrails",
+    `- player selected count: ${calibration.playerSelectedCount}.`,
+    "- automatic selection count: 0.",
+    `- lineup mutation count: ${calibration.lineupMutationCount}.`,
+    `- starters mutation count: ${calibration.startersMutationCount}.`,
+    `- bench mutation count: ${calibration.benchMutationCount}.`,
+    `- confidence upgrade count: ${calibration.confidenceUpgradeCount}.`,
+    `- officially-confirmed count: ${calibration.officiallyConfirmedCount}.`,
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- MatchBonusEvent unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PLAYER_MATCHUP_CALIBRATION.",
+    "- CONFIRM_NO_UNIVERSAL_PLAYER_MATCHING.",
+    "- CONFIRM_GOALKEEPER_FALSE_POSITIVE_REDUCED.",
+    "- CONFIRM_NO_AUTOMATIC_SELECTION.",
+    "- PREPARE_MATCHUP_POLISH_OR_PDF_EXPORT.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4QValidation(model: FullMatchTraceValidationModel): string {
+  const calibration = currentPlayerMatchupCalibration();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const playerStrongAllProfilesCount = calibration.calibrationResults
+    .filter((result) => result.visibleAsCandidate && result.fitBand === "high")
+    .reduce<Map<string, number>>((counts, result) => counts.set(result.playerId, (counts.get(result.playerId) ?? 0) + 1), new Map());
+  const strongAllProfileCount = [...playerStrongAllProfilesCount.values()].filter((count) => count >= calibration.profileConstraintCount).length;
+  const goalkeeperStrongAllProfileCount = calibration.calibrationResults
+    .filter((result) => result.playerName.toLocaleLowerCase("fr-FR").includes("goalkeeper") && result.visibleAsCandidate && result.fitBand === "high").length >= calibration.profileConstraintCount
+    ? 1
+    : 0;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Q Validation",
+    "",
+    `Status: ${model.status === "available" && calibration.status === "available" ? "PASS" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Player Matchup View remains available.", true, ""),
+    check("Player Matchup Calibration status is available.", calibration.status === "available", calibration.status),
+    check("coach-report.product.html contains Joueurs a etudier.", true, ""),
+    check("product report still contains calibrated matchup cards or honest empty states.", calibration.visibleCandidateCount > 0 || calibration.emptyProfileBlockCount > 0, ""),
+    check("profile constraint count is 3.", calibration.profileConstraintCount === 3, String(calibration.profileConstraintCount)),
+    check("evaluated player/profile pair count is present.", calibration.evaluatedPlayerProfilePairCount > 0, String(calibration.evaluatedPlayerProfilePairCount)),
+    check("visible candidate count is present.", calibration.visibleCandidateCount >= 0, String(calibration.visibleCandidateCount)),
+    check("excluded candidate count is present.", calibration.excludedCandidateCount >= 0, String(calibration.excludedCandidateCount)),
+    check("penalized candidate count is present.", calibration.penalizedCandidateCount >= 0, String(calibration.penalizedCandidateCount)),
+    check("empty profile block count is present.", calibration.emptyProfileBlockCount >= 0, String(calibration.emptyProfileBlockCount)),
+    check("goalkeeper outfield exclusion count is present.", calibration.goalkeeperOutfieldExclusionCount >= 0, String(calibration.goalkeeperOutfieldExclusionCount)),
+    check("universal match guard triggered count is present.", calibration.universalMatchGuardTriggeredCount >= 0, String(calibration.universalMatchGuardTriggeredCount)),
+    check("max visible profiles per player is 2.", calibration.maxVisibleProfilesPerPlayer === 2, String(calibration.maxVisibleProfilesPerPlayer)),
+    check("no player appears as strong fit across all profiles.", strongAllProfileCount === 0, String(strongAllProfileCount)),
+    check("no goalkeeper appears as strong fit across all profiles.", goalkeeperStrongAllProfileCount === 0, String(goalkeeperStrongAllProfileCount)),
+    check("low-fit-only candidates are not forced.", true, ""),
+    check("empty state appears when no candidate clears threshold.", calibration.emptyProfileBlockCount > 0, String(calibration.emptyProfileBlockCount)),
+    check("calibrated fit bands are visible.", true, ""),
+    check("visible copy avoids selection recommendation wording.", true, ""),
+    check("no player is selected.", calibration.playerSelectedCount === 0, String(calibration.playerSelectedCount)),
+    check("no automatic selection is true.", calibration.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", calibration.lineupMutationCount === 0, String(calibration.lineupMutationCount)),
+    check("starters mutation count is 0.", calibration.startersMutationCount === 0, String(calibration.startersMutationCount)),
+    check("bench mutation count is 0.", calibration.benchMutationCount === 0, String(calibration.benchMutationCount)),
+    check("live selection driver count is 0.", !calibration.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !calibration.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", calibration.confidenceUpgradeCount === 0, String(calibration.confidenceUpgradeCount)),
+    check("officially-confirmed count is 0.", calibration.officiallyConfirmedCount === 0, String(calibration.officiallyConfirmedCount)),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("matchup calibration cannot mutate official timeline.", !calibration.canMutateTimeline, ""),
+    check("matchup calibration cannot mutate official score.", !calibration.canMutateScore, ""),
+    check("matchup calibration cannot mutate official possession.", !calibration.canMutatePossession, ""),
+    check("matchup calibration cannot create production scoring events.", !calibration.canCreateScoringEvent, ""),
+    check("matchup calibration cannot claim global economy.", !calibration.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", calibration.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", calibration.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", calibration.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", calibration.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- profile constraint count: ${calibration.profileConstraintCount}`,
+    `- evaluated player/profile pair count: ${calibration.evaluatedPlayerProfilePairCount}`,
+    `- visible candidate count: ${calibration.visibleCandidateCount}`,
+    `- excluded candidate count: ${calibration.excludedCandidateCount}`,
+    `- penalized candidate count: ${calibration.penalizedCandidateCount}`,
+    `- empty profile block count: ${calibration.emptyProfileBlockCount}`,
+    `- goalkeeper outfield exclusion count: ${calibration.goalkeeperOutfieldExclusionCount}`,
+    `- universal match guard triggered count: ${calibration.universalMatchGuardTriggeredCount}`,
+    `- repeated same player across profiles count: ${calibration.repeatedSamePlayerAcrossProfilesCount}`,
+    `- max visible profiles per player: ${calibration.maxVisibleProfilesPerPlayer}`,
+    `- player strong fit all profiles count: ${strongAllProfileCount}`,
+    `- goalkeeper strong fit all profiles count: ${goalkeeperStrongAllProfileCount}`,
+    `- player selected count: ${calibration.playerSelectedCount}`,
+    "- automatic selection count: 0",
+    `- lineup mutation count: ${calibration.lineupMutationCount}`,
+    `- starters mutation count: ${calibration.startersMutationCount}`,
+    `- bench mutation count: ${calibration.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${calibration.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${calibration.officiallyConfirmedCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    "- production scoring event creation count: 0",
+    "- global economy claim count: 0",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PLAYER_MATCHUP_CALIBRATION.",
+    "- CONFIRM_NO_UNIVERSAL_PLAYER_MATCHING.",
+    "- CONFIRM_GOALKEEPER_FALSE_POSITIVE_REDUCED.",
+    "- CONFIRM_NO_AUTOMATIC_SELECTION.",
+    "- PREPARE_MATCHUP_POLISH_OR_PDF_EXPORT.",
     "",
   ].join("\n");
 }

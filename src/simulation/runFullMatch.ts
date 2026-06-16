@@ -161,6 +161,10 @@ import {
   playerMatchupViewEvidenceFact,
   playerMatchupViewLimitations,
 } from "../reports/playerMatchupView";
+import {
+  playerMatchupCalibrationEvidenceFact,
+  playerMatchupCalibrationLimitations,
+} from "../reports/playerMatchupCalibration";
 import { buildCoachProductReportView } from "../reports/buildCoachProductReportView";
 import {
   coachProductReportViewEvidenceFact,
@@ -3148,6 +3152,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...selectionPreviewCoachCopyLimitations(selectionPreviewCoachCopyModel),
         ...selectionPreviewProfileViewLimitations(selectionPreviewProfileViewModel),
         ...playerMatchupViewLimitations(playerMatchupViewModel),
+        ...(playerMatchupViewModel.calibration === undefined ? [] : playerMatchupCalibrationLimitations(playerMatchupViewModel.calibration)),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
@@ -3317,6 +3322,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: playerMatchupViewModel,
   });
+  const playerMatchupCalibrationModelFact = playerMatchupViewModel.calibration === undefined
+    ? null
+    : playerMatchupCalibrationEvidenceFact({
+        report,
+        matchInput: input,
+        model: playerMatchupViewModel.calibration,
+      });
   const matchTraceSpineModelFact = matchTraceSpineEvidenceFact({
     report,
     matchInput: input,
@@ -3387,6 +3399,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalPlayerMatchupViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? playerMatchupViewModelFact
     : null;
+  const experimentalPlayerMatchupCalibrationFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? playerMatchupCalibrationModelFact
+    : null;
   const experimentalCoachProductReportViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachProductReportViewModelFact
     : null;
@@ -3426,6 +3441,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewCoachCopyFact === null ? [] : [experimentalSelectionPreviewCoachCopyFact]),
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
     ...(experimentalPlayerMatchupViewFact === null ? [] : [experimentalPlayerMatchupViewFact]),
+    ...(experimentalPlayerMatchupCalibrationFact === null ? [] : [experimentalPlayerMatchupCalibrationFact]),
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),

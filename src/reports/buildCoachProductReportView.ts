@@ -190,12 +190,27 @@ function profileViewFromProductProfiles(profiles: readonly CoachProductReportPro
 }
 
 function buildPlayerMatchupAppendixDetails(playerMatchupView: PlayerMatchupViewModel): readonly string[] {
+  const calibration = playerMatchupView.calibration;
+
   return [
     `profile block count: ${playerMatchupView.profileBlockCount}`,
     `player candidate count: ${playerMatchupView.playerCandidateCount}`,
     `high fit count: ${playerMatchupView.highFitCount}`,
     `medium fit count: ${playerMatchupView.mediumFitCount}`,
     `low fit count: ${playerMatchupView.lowFitCount}`,
+    ...(calibration === undefined ? [] : [
+      `calibration status: ${calibration.status}`,
+      `profile constraint count: ${calibration.profileConstraintCount}`,
+      `evaluated player/profile pair count: ${calibration.evaluatedPlayerProfilePairCount}`,
+      `visible candidate count: ${calibration.visibleCandidateCount}`,
+      `excluded candidate count: ${calibration.excludedCandidateCount}`,
+      `penalized candidate count: ${calibration.penalizedCandidateCount}`,
+      `empty profile block count: ${calibration.emptyProfileBlockCount}`,
+      `goalkeeper outfield exclusion count: ${calibration.goalkeeperOutfieldExclusionCount}`,
+      `universal match guard triggered count: ${calibration.universalMatchGuardTriggeredCount}`,
+      `repeated same player across profiles count: ${calibration.repeatedSamePlayerAcrossProfilesCount}`,
+      `max visible profiles per player: ${calibration.maxVisibleProfilesPerPlayer}`,
+    ]),
     `no automatic selection: ${String(playerMatchupView.noAutomaticSelection)}`,
     `player selected count: ${playerMatchupView.playerSelectedCount}`,
     `lineup mutation count: ${playerMatchupView.lineupMutationCount}`,
@@ -203,6 +218,10 @@ function buildPlayerMatchupAppendixDetails(playerMatchupView: PlayerMatchupViewM
     `bench mutation count: ${playerMatchupView.benchMutationCount}`,
     `live selection driver count: ${playerMatchupView.canDriveLiveSelection ? 1 : 0}`,
     `production route resolution driver count: ${playerMatchupView.canDriveProductionRouteResolution ? 1 : 0}`,
+    `score mutation count: ${playerMatchupView.canMutateScore ? 1 : 0}`,
+    `possession mutation count: ${playerMatchupView.canMutatePossession ? 1 : 0}`,
+    `production scoring event creation count: ${playerMatchupView.canCreateScoringEvent ? 1 : 0}`,
+    `global economy claim count: ${playerMatchupView.canClaimGlobalEconomy ? 1 : 0}`,
     `scoring constants unchanged: ${String(playerMatchupView.scoringConstantsUnchanged)}`,
   ];
 }
