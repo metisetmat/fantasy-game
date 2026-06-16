@@ -262,7 +262,9 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
 
   <section id="players-to-study" class="product-section">
     <h2>Joueurs à étudier</h2>
-    <p class="guard">Ces rapprochements ne sélectionnent aucun joueur. Ils montrent seulement quels joueurs du roster semblent proches des profils à observer.</p>
+    <p class="guard">Les joueurs affichés sont issus d'une calibration rôle-attributs. Certains profils peuvent rester sans candidat si aucun joueur ne franchit le seuil de crédibilité.</p>
+    <p class="guard">Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
+    <p class="guard">Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
     ${model.playerMatchupView.blocks.map(renderMatchupBlock).join("").trimStart()}
   </section>
 
@@ -276,6 +278,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <div class="interpretation-guard">
       <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
       <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
+      <p>Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
     </div>
   </section>
 

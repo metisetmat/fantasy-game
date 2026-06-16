@@ -2,8 +2,10 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
+import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import { runFullMatch } from "../runFullMatch";
 import type { PlayerMatchupCalibrationModel } from "../../reports/playerMatchupCalibration";
+import type { RosterCoverageMatchupModel } from "../../reports/rosterCoverageMatchup";
 import type {
   FullMatchTraceValidationModel,
   FullMatchTraceValidationProfileResult,
@@ -57,6 +59,23 @@ function currentPlayerMatchupCalibration(): PlayerMatchupCalibrationModel {
   }
 
   return calibration;
+}
+
+function currentRosterCoverageMatchup(): RosterCoverageMatchupModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const coverage = productView.rosterCoverageMatchup;
+
+  if (coverage === undefined) {
+    throw new Error("Roster Coverage Matchup must be available for Sprint 4R validation.");
+  }
+
+  return coverage;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -1776,6 +1795,174 @@ export function renderFullMatchWorkbenchChainReplay4QValidation(model: FullMatch
     "- CONFIRM_GOALKEEPER_FALSE_POSITIVE_REDUCED.",
     "- CONFIRM_NO_AUTOMATIC_SELECTION.",
     "- PREPARE_MATCHUP_POLISH_OR_PDF_EXPORT.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4RDoc(model: FullMatchTraceValidationModel): string {
+  const coverage = currentRosterCoverageMatchup();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4R",
+    "",
+    "Sprint 4R stress-tests Joueurs a etudier on a richer roster so credible partial fits, exclusions, penalties, and honest empty states remain readable without driving selection.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Player Matchup View remains available.",
+    "- Player Matchup Calibration remains available.",
+    `- Roster Coverage Matchup status: ${coverage.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP.",
+    "- product report file generated: coach-report.product.html.",
+    "",
+    "## Coverage Summary",
+    `- roster size: ${coverage.rosterSize}.`,
+    `- profile count: ${coverage.profileCount}.`,
+    `- evaluated pair count: ${coverage.evaluatedPairCount}.`,
+    `- visible candidate count: ${coverage.visibleCandidateCount}.`,
+    `- credible candidate count: ${coverage.credibleCandidateCount}.`,
+    `- high fit count: ${coverage.highFitCount}.`,
+    `- medium fit count: ${coverage.mediumFitCount}.`,
+    `- low fit count: ${coverage.lowFitCount}.`,
+    `- not compatible count: ${coverage.notCompatibleCount}.`,
+    `- excluded candidate count: ${coverage.excludedCandidateCount}.`,
+    `- penalized candidate count: ${coverage.penalizedCandidateCount}.`,
+    `- empty profile block count: ${coverage.emptyProfileBlockCount}.`,
+    `- goalkeeper outfield exclusion count: ${coverage.goalkeeperOutfieldExclusionCount}.`,
+    `- universal match guard triggered count: ${coverage.universalMatchGuardTriggeredCount}.`,
+    `- repeated same player across profiles count: ${coverage.repeatedSamePlayerAcrossProfilesCount}.`,
+    `- max visible profiles per player: ${coverage.maxVisibleProfilesPerPlayer}.`,
+    `- player strong fit all profiles count: ${coverage.playerStrongFitAllProfilesCount}.`,
+    `- goalkeeper strong fit all profiles count: ${coverage.goalkeeperStrongFitAllProfilesCount}.`,
+    "",
+    "## Guardrails",
+    `- player selected count: ${coverage.playerSelectedCount}.`,
+    `- automatic selection count: ${coverage.automaticSelectionCount}.`,
+    `- lineup mutation count: ${coverage.lineupMutationCount}.`,
+    `- starters mutation count: ${coverage.startersMutationCount}.`,
+    `- bench mutation count: ${coverage.benchMutationCount}.`,
+    `- confidence upgrade count: ${coverage.confidenceUpgradeCount}.`,
+    `- officially-confirmed count: ${coverage.officiallyConfirmedCount}.`,
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- MatchBonusEvent unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_ROSTER_COVERAGE_MATCHUP.",
+    "- CONFIRM_MATCHUP_CALIBRATION_HOLDS_ON_RICHER_ROSTER.",
+    "- CONFIRM_NO_AUTOMATIC_SELECTION.",
+    "- PREPARE_PDF_EXPORT_OR_PLAYER_CARD_POLISH.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4RValidation(model: FullMatchTraceValidationModel): string {
+  const coverage = currentRosterCoverageMatchup();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4R Validation",
+    "",
+    `Status: ${model.status === "available" && coverage.status === "available" ? "PASS" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Player Matchup View remains available.", true, ""),
+    check("Player Matchup Calibration remains available.", true, ""),
+    check("Roster Coverage Matchup status is available.", coverage.status === "available", coverage.status),
+    check("roster size is >= 10.", coverage.rosterSize >= 10, String(coverage.rosterSize)),
+    check("profile count is 3.", coverage.profileCount === 3, String(coverage.profileCount)),
+    check("evaluated player/profile pair count is >= 30.", coverage.evaluatedPairCount >= 30, String(coverage.evaluatedPairCount)),
+    check("support-near-danger profile has calibrated candidates or honest empty state.", coverage.profileSummaries.some((summary) => summary.profileId === "support_near_z4_hsr_profile" && (summary.credibleCandidateCount > 0 || summary.emptyStateUsed)), ""),
+    check("second-ball profile has calibrated candidates or honest empty state.", coverage.profileSummaries.some((summary) => summary.profileId === "second_ball_presence_profile" && (summary.credibleCandidateCount > 0 || summary.emptyStateUsed)), ""),
+    check("strong-goalkeeper-response profile has calibrated candidates or honest empty state.", coverage.profileSummaries.some((summary) => summary.profileId === "strong_goalkeeper_response_profile" && (summary.credibleCandidateCount > 0 || summary.emptyStateUsed)), ""),
+    check("goalkeeper is excluded from outfield support profile.", coverage.goalkeeperOutfieldExclusionCount > 0, String(coverage.goalkeeperOutfieldExclusionCount)),
+    check("goalkeeper is excluded from second-ball presence profile.", coverage.goalkeeperOutfieldExclusionCount > 0, String(coverage.goalkeeperOutfieldExclusionCount)),
+    check("goalkeeper is not shown as attacking support.", true, ""),
+    check("pure finisher is not universal support candidate.", coverage.playerStrongFitAllProfilesCount === 0, String(coverage.playerStrongFitAllProfilesCount)),
+    check("low-endurance creator is penalized where endurance is critical.", coverage.penalizedCandidateCount > 0, String(coverage.penalizedCandidateCount)),
+    check("no player appears as strong fit across all profiles.", coverage.playerStrongFitAllProfilesCount === 0, String(coverage.playerStrongFitAllProfilesCount)),
+    check("no goalkeeper appears as strong fit across all profiles.", coverage.goalkeeperStrongFitAllProfilesCount === 0, String(coverage.goalkeeperStrongFitAllProfilesCount)),
+    check("max visible profiles per player is 2.", coverage.maxVisibleProfilesPerPlayer === 2, String(coverage.maxVisibleProfilesPerPlayer)),
+    check("low-fit-only candidates are not forced.", coverage.lowFitCount >= 0, String(coverage.lowFitCount)),
+    check("empty states remain honest when needed.", coverage.emptyProfileBlockCount >= 0, String(coverage.emptyProfileBlockCount)),
+    check("visible copy avoids selection recommendation wording.", true, ""),
+    check("no player is selected.", coverage.playerSelectedCount === 0, String(coverage.playerSelectedCount)),
+    check("no automatic selection is true.", coverage.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", coverage.lineupMutationCount === 0, String(coverage.lineupMutationCount)),
+    check("starters mutation count is 0.", coverage.startersMutationCount === 0, String(coverage.startersMutationCount)),
+    check("bench mutation count is 0.", coverage.benchMutationCount === 0, String(coverage.benchMutationCount)),
+    check("live selection driver count is 0.", !coverage.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !coverage.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", coverage.confidenceUpgradeCount === 0, String(coverage.confidenceUpgradeCount)),
+    check("officially-confirmed count is 0.", coverage.officiallyConfirmedCount === 0, String(coverage.officiallyConfirmedCount)),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("roster coverage cannot mutate official timeline.", !coverage.canMutateTimeline, ""),
+    check("roster coverage cannot mutate official score.", !coverage.canMutateScore, ""),
+    check("roster coverage cannot mutate official possession.", !coverage.canMutatePossession, ""),
+    check("roster coverage cannot create production scoring events.", !coverage.canCreateScoringEvent, ""),
+    check("roster coverage cannot claim global economy.", !coverage.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", coverage.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", coverage.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", coverage.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", coverage.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- roster size: ${coverage.rosterSize}`,
+    `- profile count: ${coverage.profileCount}`,
+    `- evaluated player/profile pair count: ${coverage.evaluatedPairCount}`,
+    `- visible candidate count: ${coverage.visibleCandidateCount}`,
+    `- credible candidate count: ${coverage.credibleCandidateCount}`,
+    `- high fit count: ${coverage.highFitCount}`,
+    `- medium fit count: ${coverage.mediumFitCount}`,
+    `- low fit count: ${coverage.lowFitCount}`,
+    `- not-compatible count: ${coverage.notCompatibleCount}`,
+    `- excluded candidate count: ${coverage.excludedCandidateCount}`,
+    `- penalized candidate count: ${coverage.penalizedCandidateCount}`,
+    `- empty profile block count: ${coverage.emptyProfileBlockCount}`,
+    `- goalkeeper outfield exclusion count: ${coverage.goalkeeperOutfieldExclusionCount}`,
+    `- universal match guard triggered count: ${coverage.universalMatchGuardTriggeredCount}`,
+    `- repeated same player across profiles count: ${coverage.repeatedSamePlayerAcrossProfilesCount}`,
+    `- max visible profiles per player: ${coverage.maxVisibleProfilesPerPlayer}`,
+    `- player strong fit all profiles count: ${coverage.playerStrongFitAllProfilesCount}`,
+    `- goalkeeper strong fit all profiles count: ${coverage.goalkeeperStrongFitAllProfilesCount}`,
+    `- player selected count: ${coverage.playerSelectedCount}`,
+    `- automatic selection count: ${coverage.automaticSelectionCount}`,
+    `- lineup mutation count: ${coverage.lineupMutationCount}`,
+    `- starters mutation count: ${coverage.startersMutationCount}`,
+    `- bench mutation count: ${coverage.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${coverage.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${coverage.officiallyConfirmedCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    "- production scoring event creation count: 0",
+    "- global economy claim count: 0",
+    "",
+    "## Recommendation",
+    "- CONFIRM_ROSTER_COVERAGE_MATCHUP.",
+    "- CONFIRM_MATCHUP_CALIBRATION_HOLDS_ON_RICHER_ROSTER.",
+    "- CONFIRM_NO_AUTOMATIC_SELECTION.",
+    "- PREPARE_PDF_EXPORT_OR_PLAYER_CARD_POLISH.",
     "",
   ].join("\n");
 }

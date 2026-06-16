@@ -1,6 +1,7 @@
 import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import type { PlayerMatchupViewModel } from "./playerMatchupView";
+import type { RosterCoverageMatchupModel } from "./rosterCoverageMatchup";
 
 export type CoachProductReportViewStatus =
   | "not_available"
@@ -68,6 +69,7 @@ export interface CoachProductReportViewModel {
   readonly keyCoachSignals: readonly CoachProductReportSignal[];
   readonly profilesToObserve: readonly CoachProductReportProfile[];
   readonly playerMatchupView: PlayerMatchupViewModel;
+  readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly productVisibleJargonCount: number;
@@ -120,6 +122,7 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     `coach_product_report_profile_card_count_${model.profilesToObserve.length}`,
     `coach_product_report_player_matchup_profile_block_count_${model.playerMatchupView.profileBlockCount}`,
     `coach_product_report_player_matchup_candidate_count_${model.playerMatchupView.playerCandidateCount}`,
+    ...(model.rosterCoverageMatchup?.tags ?? []),
     "coach_product_report_next_match_signal_count_present",
     "coach_product_report_appendix_count_present",
     `coach_product_report_visible_jargon_count_${model.productVisibleJargonCount}`,

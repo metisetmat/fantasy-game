@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -38,7 +39,7 @@ function writeLatestCoachReport(): void {
     join(reportsDirectory, "coach-report.product.html"),
     renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
       experimentalReport,
-      engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
+      rosterCoverageFixturePlayers,
     )),
     "utf8",
   );

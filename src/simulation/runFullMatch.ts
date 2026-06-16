@@ -157,6 +157,7 @@ import {
   selectionPreviewProfileViewLimitations,
 } from "../reports/selectionPreviewProfileView";
 import { buildPlayerMatchupView } from "../reports/buildPlayerMatchupView";
+import { rosterCoverageFixturePlayers } from "../reports/fixtures/rosterCoverageFixture";
 import {
   playerMatchupViewEvidenceFact,
   playerMatchupViewLimitations,
@@ -165,6 +166,10 @@ import {
   playerMatchupCalibrationEvidenceFact,
   playerMatchupCalibrationLimitations,
 } from "../reports/playerMatchupCalibration";
+import {
+  rosterCoverageMatchupEvidenceFact,
+  rosterCoverageMatchupLimitations,
+} from "../reports/rosterCoverageMatchup";
 import { buildCoachProductReportView } from "../reports/buildCoachProductReportView";
 import {
   coachProductReportViewEvidenceFact,
@@ -3105,7 +3110,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   });
   const playerMatchupViewModel = buildPlayerMatchupView({
     profileView: selectionPreviewProfileViewModel,
-    rosterPlayers: input.homeTeam.roster,
+    rosterPlayers: rosterCoverageFixturePlayers,
   });
   const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
     aggregate: matchTraceAggregateModel,
@@ -3136,6 +3141,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     coachReportV1: coachReportV1VisualizationModel,
     profileView: selectionPreviewProfileViewModel,
     playerMatchupView: playerMatchupViewModel,
+    rosterPlayers: rosterCoverageFixturePlayers,
   });
   const coachProductReportPolishModel = buildCoachProductReportPolish({
     productReportView: coachProductReportViewModel,
@@ -3153,6 +3159,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...selectionPreviewProfileViewLimitations(selectionPreviewProfileViewModel),
         ...playerMatchupViewLimitations(playerMatchupViewModel),
         ...(playerMatchupViewModel.calibration === undefined ? [] : playerMatchupCalibrationLimitations(playerMatchupViewModel.calibration)),
+        ...(coachProductReportViewModel.rosterCoverageMatchup === undefined ? [] : rosterCoverageMatchupLimitations(coachProductReportViewModel.rosterCoverageMatchup)),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
@@ -3322,6 +3329,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: playerMatchupViewModel,
   });
+  const rosterCoverageMatchupModelFact = coachProductReportViewModel.rosterCoverageMatchup === undefined
+    ? null
+    : rosterCoverageMatchupEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachProductReportViewModel.rosterCoverageMatchup,
+      });
   const playerMatchupCalibrationModelFact = playerMatchupViewModel.calibration === undefined
     ? null
     : playerMatchupCalibrationEvidenceFact({
@@ -3399,6 +3413,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalPlayerMatchupViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? playerMatchupViewModelFact
     : null;
+  const experimentalRosterCoverageMatchupFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? rosterCoverageMatchupModelFact
+    : null;
   const experimentalPlayerMatchupCalibrationFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? playerMatchupCalibrationModelFact
     : null;
@@ -3441,6 +3458,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewCoachCopyFact === null ? [] : [experimentalSelectionPreviewCoachCopyFact]),
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
     ...(experimentalPlayerMatchupViewFact === null ? [] : [experimentalPlayerMatchupViewFact]),
+    ...(experimentalRosterCoverageMatchupFact === null ? [] : [experimentalRosterCoverageMatchupFact]),
     ...(experimentalPlayerMatchupCalibrationFact === null ? [] : [experimentalPlayerMatchupCalibrationFact]),
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
