@@ -1,10 +1,12 @@
 import type { PlayerSnapshot } from "../contracts/engineToCoach";
 import { PlayerRole } from "../models/player";
+import type { PlayerMatchupViewModel } from "./playerMatchupView";
 import {
   buildRosterCoverageMatchupTags,
   type RosterCoverageMatchupModel,
   type RosterCoveragePlayerSummary,
   type RosterCoverageProfileSummary,
+  type RosterCoverageVisibleCandidate,
 } from "./rosterCoverageMatchup";
 import type { PlayerMatchupCalibrationModel } from "./playerMatchupCalibration";
 
@@ -20,8 +22,73 @@ const profileTitles: Readonly<Record<(typeof profileOrder)[number], string>> = {
   strong_goalkeeper_response_profile: "Profil a etudier - reponse face a un gardien fort",
 };
 
+const roleLabels: Readonly<Record<PlayerRole, string>> = {
+  [PlayerRole.LeftAnchor]: "Left Anchor",
+  [PlayerRole.RightAnchor]: "Right Anchor",
+  [PlayerRole.HookLink]: "Hook Link",
+  [PlayerRole.MobileLock]: "Mobile Lock",
+  [PlayerRole.ForwardLeader]: "Forward Leader",
+  [PlayerRole.TempoHalf]: "Tempo Half",
+  [PlayerRole.Playmaker]: "Playmaker",
+  [PlayerRole.PowerRunner]: "Power Runner",
+  [PlayerRole.SpaceHunter]: "Space Hunter",
+  [PlayerRole.FreeSafety]: "Free Safety",
+  [PlayerRole.GoalkeeperFreeSafety]: "Goalkeeper / Free Safety",
+  [PlayerRole.Pivot]: "Pivot",
+  [PlayerRole.LeftPiston]: "Left Piston",
+  [PlayerRole.RightPiston]: "Right Piston",
+};
+
 function isGoalkeeper(player: PlayerSnapshot): boolean {
   return player.role === PlayerRole.GoalkeeperFreeSafety || player.role === PlayerRole.FreeSafety;
+}
+
+function fallbackVisibleCandidate(input: {
+  readonly player: PlayerSnapshot | undefined;
+  readonly profileId: string;
+  readonly profileTitle: string;
+  readonly result: PlayerMatchupCalibrationModel["calibrationResults"][number];
+}): RosterCoverageVisibleCandidate {
+  const playerName = input.player?.name ?? input.result.playerName;
+  const currentRoleLabel = input.player === undefined ? "Role non disponible" : roleLabels[input.player.role];
+  const visibleTraits = input.player?.traits.map((trait) => trait.replaceAll("_", " ")) ?? [];
+
+  const candidate: RosterCoverageVisibleCandidate = {
+    profileId: input.profileId,
+    profileTitle: input.profileTitle,
+    playerId: input.result.playerId,
+    playerName,
+    currentRoleLabel,
+    fitBand: input.result.fitBand === "high" ? "high" : (input.result.fitBand === "medium" ? "medium" : "low"),
+    fitScore: input.result.calibratedFitScore,
+    matchedAttributes: [],
+    partialAttributes: [],
+    missingAttributes: input.result.requiredAttributeGapCount > 0
+      ? [`${input.result.requiredAttributeGapCount} attribut(s) requis a confirmer`]
+      : [],
+    whyVisible: [
+      `${playerName} reste visible apres calibration role-attributs pour ce profil.`,
+      `Score calibre : ${input.result.calibratedFitScore}/100.`,
+    ],
+    riskNotes: [
+      input.result.tacticalRiskScore >= 45
+        ? `Risque tactique calibre : ${input.result.tacticalRiskScore}/100.`
+        : "Le risque principal reste de confirmer ce signal sur plusieurs matchs.",
+    ],
+    limitNotes: input.result.penaltyReasons.length > 0
+      ? input.result.penaltyReasons
+      : ["Comparaison non appliquee, a confirmer sur plusieurs matchs."],
+    nextObservationSignals: [
+      "Verifier si le signal reste visible sans changer la composition.",
+    ],
+    visibleTraits,
+  };
+
+  return {
+    ...candidate,
+    ...(input.result.rawFitScore === undefined ? {} : { rawFitScore: input.result.rawFitScore }),
+    ...(input.result.calibratedFitScore === undefined ? {} : { calibratedFitScore: input.result.calibratedFitScore }),
+  };
 }
 
 function modelWithTags(input: Omit<RosterCoverageMatchupModel, "tags">): RosterCoverageMatchupModel {
@@ -34,6 +101,7 @@ function modelWithTags(input: Omit<RosterCoverageMatchupModel, "tags">): RosterC
 export function buildRosterCoverageMatchup(input: {
   readonly calibrationModel: PlayerMatchupCalibrationModel;
   readonly rosterPlayers: readonly PlayerSnapshot[];
+  readonly playerMatchupView?: PlayerMatchupViewModel;
 }): RosterCoverageMatchupModel {
   if (input.calibrationModel.status === "not_available") {
     return modelWithTags({
@@ -89,6 +157,32 @@ export function buildRosterCoverageMatchup(input: {
   const visibleResults = results.filter((result) => result.visibleAsCandidate);
   const visibleHighResults = visibleResults.filter((result) => result.fitBand === "high");
   const playerById = new Map(input.rosterPlayers.map((player) => [player.playerId, player] as const));
+  const matchupCandidateByProfileAndPlayer = new Map(
+    (input.playerMatchupView?.blocks ?? []).flatMap((block) =>
+      block.candidates.map((candidate) => [
+        `${block.profileId}::${candidate.playerId}`,
+        {
+          profileId: block.profileId,
+          profileTitle: block.profileTitle,
+          playerId: candidate.playerId,
+          playerName: candidate.playerName,
+          currentRoleLabel: candidate.currentRoleLabel,
+          fitBand: candidate.fitBand,
+          fitScore: candidate.fitScore,
+          matchedAttributes: candidate.matchedAttributes,
+          partialAttributes: candidate.partialAttributes,
+          missingAttributes: candidate.missingAttributes,
+          whyVisible: candidate.calibrationWhyVisible ?? candidate.whyStudy,
+          riskNotes: candidate.riskIfUsed,
+          limitNotes: candidate.calibrationLimits ?? [],
+          nextObservationSignals: candidate.nextObservationSignal,
+          visibleTraits: (playerById.get(candidate.playerId)?.traits ?? []).map((trait) => trait.replaceAll("_", " ")),
+          ...(candidate.rawFitScore === undefined ? {} : { rawFitScore: candidate.rawFitScore }),
+          ...(candidate.calibratedFitScore === undefined ? {} : { calibratedFitScore: candidate.calibratedFitScore }),
+        } satisfies RosterCoverageVisibleCandidate,
+      ] as const),
+    ),
+  );
   const visibleByPlayer = new Map<string, number>();
   const highVisibleByPlayer = new Map<string, number>();
 
@@ -103,6 +197,14 @@ export function buildRosterCoverageMatchup(input: {
   const profileSummaries: readonly RosterCoverageProfileSummary[] = profileOrder.map((profileId) => {
     const profileResults = results.filter((result) => result.profileId === profileId);
     const visibleProfileResults = profileResults.filter((result) => result.visibleAsCandidate);
+    const visibleCandidates = visibleProfileResults.map((result) =>
+      matchupCandidateByProfileAndPlayer.get(`${profileId}::${result.playerId}`) ?? fallbackVisibleCandidate({
+        player: playerById.get(result.playerId),
+        profileId,
+        profileTitle: profileTitles[profileId],
+        result,
+      })
+    );
 
     return {
       profileId,
@@ -116,6 +218,7 @@ export function buildRosterCoverageMatchup(input: {
       penalizedCandidateCount: profileResults.filter((result) => result.eligibilityStatus === "penalized").length,
       emptyStateUsed: visibleProfileResults.length === 0,
       credibleCandidateCount: visibleProfileResults.length,
+      visibleCandidates,
     };
   });
 

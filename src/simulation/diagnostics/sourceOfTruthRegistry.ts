@@ -39,6 +39,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW"
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION"
   | "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP"
+  | "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
@@ -1125,6 +1126,42 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "that a player must be selected",
       "that a lineup change is recommended",
       "that a profile-player matchup is officially confirmed",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW: {
+    scope: "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW",
+    canProve: [
+      "Player Candidate Comparison View can compress a dense candidate pool into readable coach-facing comparison cards",
+      "compact cards can expose why visible, distinctive strength, point to check, risk, and next-match signal",
+      "extra candidates can move into collapsed details without selecting a player",
+    ],
+    canSuggest: [
+      "which visible candidate should be studied first for a given profile",
+      "which alternative or complementary profile should be compared next",
+      "which differentiator should be checked in the next match before any future decision",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a player must be selected",
+      "that a lineup change is recommended",
+      "that a profile-player comparison is officially confirmed",
     ],
     cannotOverride: [
       "lineup",

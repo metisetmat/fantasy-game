@@ -1,4 +1,5 @@
 import type { MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
+import { buildPlayerCandidateComparisonView } from "./buildPlayerCandidateComparisonView";
 import { buildPlayerMatchupView } from "./buildPlayerMatchupView";
 import { buildRosterCoverageMatchup } from "./buildRosterCoverageMatchup";
 import type {
@@ -18,6 +19,7 @@ import {
   fallbackPlayerSnapshotFromStats,
   type PlayerMatchupViewModel,
 } from "./playerMatchupView";
+import type { PlayerCandidateComparisonViewModel } from "./playerCandidateComparisonView";
 import type { RosterCoverageMatchupModel } from "./rosterCoverageMatchup";
 import {
   selectionPreviewProfileAttributeLabels,
@@ -270,9 +272,51 @@ function buildRosterCoverageAppendixDetails(
   ];
 }
 
+function buildPlayerCandidateComparisonAppendixDetails(
+  comparisonView: PlayerCandidateComparisonViewModel | undefined,
+): readonly string[] {
+  if (comparisonView === undefined) {
+    return ["comparison view status: not_available"];
+  }
+
+  return [
+    `profile block count: ${comparisonView.profileBlockCount}`,
+    `total candidate count: ${comparisonView.totalCandidateCount}`,
+    `compact visible candidate count: ${comparisonView.compactVisibleCandidateCount}`,
+    `detail-only candidate count: ${comparisonView.detailOnlyCandidateCount}`,
+    `primary candidate count: ${comparisonView.primaryCandidateCount}`,
+    `alternative candidate count: ${comparisonView.alternativeCandidateCount}`,
+    `complementary candidate count: ${comparisonView.complementaryCandidateCount}`,
+    `max compact candidates per profile: ${comparisonView.maxCompactCandidatesPerProfile}`,
+    `max visible profiles per player: ${comparisonView.maxVisibleProfilesPerPlayer}`,
+    `visible recommendation wording count: ${comparisonView.visibleRecommendationWordingCount}`,
+    `visible selection wording count: ${comparisonView.visibleSelectionWordingCount}`,
+    `internal status leak count: ${comparisonView.internalStatusLeakCount}`,
+    `player selected count: ${comparisonView.playerSelectedCount}`,
+    `automatic selection count: ${comparisonView.automaticSelectionCount}`,
+    `lineup mutation count: ${comparisonView.lineupMutationCount}`,
+    `live selection driver count: ${comparisonView.canDriveLiveSelection ? 1 : 0}`,
+    `production route resolution driver count: ${comparisonView.canDriveProductionRouteResolution ? 1 : 0}`,
+    `score mutation count: ${comparisonView.canMutateScore ? 1 : 0}`,
+    `possession mutation count: ${comparisonView.canMutatePossession ? 1 : 0}`,
+    `production scoring event creation count: ${comparisonView.canCreateScoringEvent ? 1 : 0}`,
+    `global economy claim count: ${comparisonView.canClaimGlobalEconomy ? 1 : 0}`,
+    "player_candidate_comparison_max_compact_candidates_per_profile_3",
+    "player_candidate_comparison_player_selected_count_0",
+    "coach_product_report_score_mutation_count_0",
+    ...comparisonView.tags.filter((tag) =>
+      tag === "player_candidate_comparison_view_status_available" ||
+      tag === "player_candidate_comparison_view_status_partial" ||
+      tag === "player_candidate_comparison_max_compact_candidates_per_profile_3" ||
+      tag === "player_candidate_comparison_player_selected_count_0"
+    ),
+  ];
+}
+
 function buildAppendices(
   playerMatchupView: PlayerMatchupViewModel,
   rosterCoverageMatchup: RosterCoverageMatchupModel | undefined,
+  playerCandidateComparisonView: PlayerCandidateComparisonViewModel | undefined,
 ): readonly CoachProductReportAppendix[] {
   return [
     {
@@ -305,6 +349,14 @@ function buildAppendices(
       details: buildRosterCoverageAppendixDetails(playerMatchupView, rosterCoverageMatchup),
     },
     {
+      appendixId: "candidate_comparison_details",
+      title: "Details de comparaison des candidats",
+      defaultCollapsed: true,
+      summary: "La comparaison des candidats reste une aide de lecture. Elle ne selectionne aucun joueur et ne pilote aucun etat officiel.",
+      contentKind: "technical",
+      details: buildPlayerCandidateComparisonAppendixDetails(playerCandidateComparisonView),
+    },
+    {
       appendixId: "validation_details",
       title: "Détails de validation",
       defaultCollapsed: true,
@@ -325,10 +377,35 @@ function buildModelWithoutTags(input: {
   readonly profilesToObserve: readonly CoachProductReportProfile[];
   readonly playerMatchupView: PlayerMatchupViewModel;
   readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
+  readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
 }): Omit<CoachProductReportViewModel, "tags"> {
+  const comparisonText = input.playerCandidateComparisonView?.profileBlocks.flatMap((block) => [
+    block.profileTitle,
+    block.profileSummary,
+    ...(block.emptyState === null ? [] : [block.emptyState]),
+    ...block.comparisonSummary,
+    ...block.cards.flatMap((card) => [
+      card.playerName,
+      card.roleLabel,
+      card.fitBandLabel,
+      card.nonAppliedLabel,
+      card.confirmationLabel,
+      card.shortWhyVisible,
+      card.strongestVisibleAsset,
+      card.mainGapOrCheck,
+      card.mainRisk,
+      card.nextObservationSignal,
+      ...card.matchedAttributes,
+      ...card.partialAttributes,
+      ...card.missingAttributes,
+      ...card.visibleTraits,
+      ...card.limitNotes,
+      ...card.differentiators.map((differentiator) => `${differentiator.title} ${differentiator.summary}`),
+    ]),
+  ]) ?? [];
   const visibleText = [
     ...input.executiveSummary,
     ...input.officialMatchReading,
@@ -350,25 +427,7 @@ function buildModelWithoutTags(input: {
       profile.nonAppliedLabel,
       profile.confirmationLabel,
     ]),
-    ...input.playerMatchupView.blocks.flatMap((block) => [
-      block.profileTitle,
-      ...block.roleFamilies,
-      ...block.usefulAttributes,
-      ...(block.emptyState === null ? [] : [block.emptyState]),
-      ...block.candidates.flatMap((candidate) => [
-        candidate.playerName,
-        candidate.currentRoleLabel,
-        candidate.nonAppliedLabel,
-        candidate.confirmationLabel,
-        ...candidate.matchedAttributes,
-        ...candidate.partialAttributes,
-        ...candidate.missingAttributes,
-        ...candidate.whyStudy,
-        ...candidate.whatIsMissing,
-        ...candidate.riskIfUsed,
-        ...candidate.nextObservationSignal,
-      ]),
-    ]),
+    ...comparisonText,
     ...input.nextMatchSignals,
   ].join(" ");
 
@@ -386,6 +445,7 @@ function buildModelWithoutTags(input: {
     profilesToObserve: input.profilesToObserve,
     playerMatchupView: input.playerMatchupView,
     ...(input.rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup: input.rosterCoverageMatchup }),
+    ...(input.playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView: input.playerCandidateComparisonView }),
     nextMatchSignals: input.nextMatchSignals,
     appendices: input.appendices,
     productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
@@ -431,6 +491,12 @@ export function buildCoachProductReportView(input: {
     : buildRosterCoverageMatchup({
         calibrationModel: input.playerMatchupView.calibration,
         rosterPlayers: input.rosterPlayers ?? rosterCoverageFixturePlayers,
+        playerMatchupView: input.playerMatchupView,
+      });
+  const playerCandidateComparisonView = rosterCoverageMatchup === undefined
+    ? undefined
+    : buildPlayerCandidateComparisonView({
+        rosterCoverage: rosterCoverageMatchup,
       });
 
   if (input.coachReportV1.status !== "available" || input.profileView.status !== "available") {
@@ -445,6 +511,7 @@ export function buildCoachProductReportView(input: {
       profilesToObserve: [],
       playerMatchupView: input.playerMatchupView,
       ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
+      ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
       nextMatchSignals: [],
       appendices: [],
       warnings: ["Coach Product Report View requires Coach Report V1 and Selection Preview Profile View."],
@@ -477,8 +544,9 @@ export function buildCoachProductReportView(input: {
     profilesToObserve,
     playerMatchupView: input.playerMatchupView,
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
+    ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
     nextMatchSignals,
-    appendices: buildAppendices(input.playerMatchupView, rosterCoverageMatchup),
+    appendices: buildAppendices(input.playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
   });
 
   return {
@@ -579,6 +647,12 @@ export function buildCoachProductReportViewFromMatchReport(
     : buildRosterCoverageMatchup({
         calibrationModel: playerMatchupView.calibration,
         rosterPlayers: productRosterPlayers,
+        playerMatchupView,
+      });
+  const playerCandidateComparisonView = rosterCoverageMatchup === undefined
+    ? undefined
+    : buildPlayerCandidateComparisonView({
+        rosterCoverage: rosterCoverageMatchup,
       });
   const modelWithoutTags = buildModelWithoutTags({
     status,
@@ -599,8 +673,9 @@ export function buildCoachProductReportViewFromMatchReport(
     profilesToObserve,
     playerMatchupView,
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
+    ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
     nextMatchSignals,
-    appendices: buildAppendices(playerMatchupView, rosterCoverageMatchup),
+    appendices: buildAppendices(playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
     warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],
   });
 

@@ -22,19 +22,41 @@ export function validatePlayerMatchupViewRenderer(): readonly string[] {
     engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
   ));
 
-  assertTest(includesAny(html, ["Joueurs à étudier", "Joueurs Ã  Ã©tudier"]), "product report must contain Joueurs à étudier.");
-  assertTest(includesAny(html, ["Compatibilité profil-joueur", "CompatibilitÃ© profil-joueur"]), "product report must contain Compatibilité profil-joueur.");
-  assertTest(html.includes("Atouts visibles"), "product report must contain Atouts visibles.");
-  assertTest(includesAny(html, ["Points à vérifier", "Points Ã  vÃ©rifier"]), "product report must contain Points à vérifier.");
-  assertTest(includesAny(html, ["Risque si utilisé dans ce rôle", "Risque si utilisÃ© dans ce rÃ´le"]), "product report must contain risk heading.");
-  assertTest(includesAny(html, ["Signal à observer au prochain match", "Signal Ã  observer au prochain match"]), "product report must contain next observation signal.");
-  assertTest(includesAny(html, ["Comparaison non appliquée", "Comparaison non appliquÃ©e"]), "product report must contain Comparaison non appliquée.");
-  assertTest(includesAny(html, ["Non confirmée comme recommandation officielle", "Non confirmÃ©e comme recommandation officielle"]), "product report must contain non-official confirmation.");
-  assertTest(html.includes("Les rapprochements profil-joueur ne sont pas des choix de composition."), "interpretation guard must mention profile-player matchups.");
+  assertTest(includesAny(html, ["Joueurs a etudier", "Joueurs à étudier", "Joueurs &agrave; &eacute;tudier"]), "product report must contain Joueurs a etudier.");
+  assertTest(
+    includesAny(html, ["Compatibilite profil-joueur", "Compatibilité profil-joueur", "Compatibilit&eacute; profil-joueur"]),
+    "product report must contain Compatibilite profil-joueur.",
+  );
+  assertTest(includesAny(html, ["Atouts visibles", "Point fort distinctif"]), "product report must contain strengths heading.");
+  assertTest(
+    includesAny(html, ["Points a verifier", "Points à vérifier", "Points &agrave; v&eacute;rifier", "Point a verifier", "Point à vérifier", "Point &agrave; v&eacute;rifier"]),
+    "product report must contain checks heading.",
+  );
+  assertTest(
+    includesAny(html, ["Risque si utilise dans ce role", "Risque si utilisé dans ce rôle", "Risque si utilis&eacute; dans ce r&ocirc;le", "Risque principal"]),
+    "product report must contain risk heading.",
+  );
+  assertTest(
+    includesAny(html, ["Signal a observer au prochain match", "Signal à observer au prochain match", "Signal &agrave; observer au prochain match", "A verifier au prochain match", "À vérifier au prochain match", "&Agrave; v&eacute;rifier au prochain match"]),
+    "product report must contain next observation signal.",
+  );
+  assertTest(
+    includesAny(html, ["Comparaison non appliquee", "Comparaison non appliquée"]),
+    "product report must contain Comparaison non appliquee.",
+  );
+  assertTest(
+    includesAny(html, ["Non confirmee comme recommandation officielle", "Non confirmée comme recommandation officielle"]),
+    "product report must contain non-official confirmation.",
+  );
+  assertTest(
+    html.includes("Les rapprochements profil-joueur ne sont pas des choix de composition.") ||
+      html.includes("Les cartes comparent des pistes d'observation. Elles ne changent ni la composition, ni les titulaires, ni le banc."),
+    "interpretation guard must mention profile-player matchups.",
+  );
   assertTest(!html.includes("player selected count: 1"), "default report must not apply any player matchup.");
 
   return [
-    "Joueurs à étudier section is visible",
+    "Joueurs a etudier section is visible",
     "matchup cards show required headings",
     "comparison guard is visible",
     "interpretation guard mentions profile-player matchups",

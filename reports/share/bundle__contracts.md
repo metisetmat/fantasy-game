@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 4R - Roster Coverage & Matchup Candidate Pool. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4S - Player Card Polish & Candidate Comparison. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -437,6 +437,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW"
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION"
   | "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP"
+  | "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
