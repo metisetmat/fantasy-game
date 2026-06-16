@@ -264,6 +264,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay4OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4o.md"));
   const fullMatchWorkbenchChainReplay4U = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4u.md"));
   const fullMatchWorkbenchChainReplay4UValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4u.md"));
+  const fullMatchWorkbenchChainReplay4V = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4v.md"));
+  const fullMatchWorkbenchChainReplay4VValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4v.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2539,6 +2541,33 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-4q.md",
     ...sprint4PForbiddenLeftovers,
   ];
+  const sprint4VExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "coach-report.product.html",
+    "coach-report.export.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4v.md",
+    "validation.fullmatch-workbench-chain-replay-4v.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4VForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-4u.md",
+    "validation.fullmatch-workbench-chain-replay-4u.md",
+    ...sprint4RForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2943,6 +2972,51 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4L.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4LValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay4LValidation.includes("CONFIRM_SELECTION_PREVIEW_COACH_COPY_PASS") && fullMatchWorkbenchChainReplay4LValidation.includes("CONFIRM_SELECTION_PREVIEW_REMAINS_NON_APPLIED"), "4L recommendations visible"),
+  ];
+  const sprint4VChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("manifest exists", manifest.length > 0, manifestPath),
+    check("README exists", readme.length > 0, readmePath),
+    check("detailed manifest exists", detailedManifest.length > 0, detailedManifestPath),
+    check("validation.share-pack.md copied", sourceExists("validation.share-pack.md") && requiredCopied("validation.share-pack.md"), "validation.share-pack.md"),
+    check("all expected files are copied", sprint4VExpectedFiles.every((file) => requiredCopied(file)), sprint4VExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint4VExpectedFiles.every((file) => manifest.includes(file)), sprint4VExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("no stale files remain in reports/share", staleFiles.length === 0, staleFiles.join(", ") || "none"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4V", activeConfig.sprintName === "Sprint 4V - Phase Visuals & Tactical Pitch Panels", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4VExpectedFiles.every((file) => requiredCopied(file)), sprint4VExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4VForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4VForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 4V oriented", readme.includes("# Sprint 4V Share Pack") && readme.includes("fullmatch-workbench-chain-replay-4v.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("4V report included", fullMatchWorkbenchChainReplay4V.includes("# FullMatch Workbench Chain Replay 4V") && fullMatchWorkbenchChainReplay4V.includes("Phase Visuals"), "4V doc included"),
+    check("4V validation is PASS", fullMatchWorkbenchChainReplay4VValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay4VValidation.includes("three phase panels exist"), "4V validation current"),
+    check("product report HTML copied", coachProductHtml.includes("Rapport coach") && coachProductHtml.includes("Joueurs"), "product HTML visible"),
+    check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
+    check("phase pitch panels are present", coachExportHtml.includes("phase-pitch-grid") && coachExportHtml.includes("Avec ballon") && coachExportHtml.includes("Sans ballon") && coachExportHtml.includes("Dernier rempart"), "phase visuals visible"),
+    check("phase-visual guard remains visible", coachExportHtml.includes("Les cartes terrain affichent uniquement les signaux") && fullMatchWorkbenchChainReplay4VValidation.includes("visible recommendation wording count is 0"), "guard visible"),
+    check("premium export uses single source of truth", coachExportHtml.includes("Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.") && fullMatchWorkbenchChainReplay4VValidation.includes("product/export score matches"), "single source visible"),
+    check("main export hides internal status names", !containsAny(coachExportMainHtml, ["officially_confirmed", "trace_supported", "sandbox_only"]), "internal statuses hidden"),
+    check("main export avoids recommendation wording", !containsAny(coachExportMainHtml, ["meilleur choix", "composition recommand", "selection automatique"]), "recommendation wording count 0"),
+    check("main export avoids selection wording", !containsAny(coachExportMainHtml, ["a selectionner", "player selected"]), "selection wording count 0"),
+    check("visible French copy is clean", !containsAny(coachExportHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("bundle includes phase-visual source files", bundleReports.includes("src/reports/coachReportPhaseVisuals.ts") && bundleReports.includes("src/reports/buildCoachReportPhaseVisuals.ts") && bundleReports.includes("src/reports/renderTacticalPitchPanel.ts"), "4V source bundled"),
+    check("bundle includes phase-visual tests", bundleReports.includes("coachReportPhaseVisuals.test.ts") && bundleReports.includes("tacticalPitchPanelRenderer.test.ts") && bundleReports.includes("coachReportPhaseVisualsExportRenderer.test.ts") && bundleReports.includes("coachReportPhaseVisualsSourceGuard.test.ts") && bundleReports.includes("coachReportPhaseVisualsCopy.test.ts") && bundleReports.includes("coachReportPhaseVisualsPrintCss.test.ts") && bundleReports.includes("coachReportPhaseVisualsGuard.test.ts"), "4V tests bundled"),
+    check("simulation bundle includes scoring guard 4V", bundleSimulation.includes("scoringGuard.4v.test.ts") && bundleSimulation.includes("validateScoringGuard4V"), "4V scoring guard bundled"),
+    check("phase visuals cannot mutate score", coachExportHtml.includes("score mutation count 0") || fullMatchWorkbenchChainReplay4VValidation.includes("phase visuals cannot mutate official score"), "score mutation forbidden"),
+    check("phase visuals cannot mutate possession", coachExportHtml.includes("possession mutation count 0") || fullMatchWorkbenchChainReplay4VValidation.includes("phase visuals cannot mutate official possession"), "possession mutation forbidden"),
+    check("phase visuals cannot create production scoring events", coachExportHtml.includes("production scoring event creation count 0") || fullMatchWorkbenchChainReplay4VValidation.includes("phase visuals cannot create production scoring events"), "production scoring creation forbidden"),
+    check("phase visuals cannot claim global economy", fullMatchWorkbenchChainReplay4VValidation.includes("phase visuals cannot claim global economy"), "global economy forbidden"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4VValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4VValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4VValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4V.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4VValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay4VValidation.includes("CONFIRM_PHASE_VISUALS_FROM_PRODUCT_SOURCE") && fullMatchWorkbenchChainReplay4VValidation.includes("CONFIRM_TACTICAL_PITCH_PANELS_STAY_NON_MUTATING"), "4V recommendations visible"),
   ];
   const sprint4UChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -5982,6 +6056,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4V - Phase Visuals & Tactical Pitch Panels")
+      ? sprint4VChecks
     : activeConfig.sprintName.includes("Sprint 4U - FIFA-inspired HTML Report Layout")
       ? sprint4UChecks
     : activeConfig.sprintName.includes("Sprint 4T - Coach Report PDF Export & Share Snapshot")

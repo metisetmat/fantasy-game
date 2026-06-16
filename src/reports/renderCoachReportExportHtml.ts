@@ -1,3 +1,10 @@
+import {
+  COACH_REPORT_PHASE_VISUALS_GUARD,
+  type TacticalPitchPanelModel,
+} from "./coachReportPhaseVisuals";
+import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
+import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
+
 const EXPORT_TITLE = "Rapport coach - export partageable";
 const CONTROLLED_EMPTY_STATE = "Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.";
 
@@ -253,6 +260,66 @@ const PREMIUM_EXPORT_CSS = `
       padding: 14px;
       font-size: 0.92rem;
       line-height: 1.45;
+    }
+
+    .phase-pitch {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .phase-zone {
+      fill: rgba(255, 255, 255, 0.08);
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 1.5;
+    }
+
+    .phase-zone--danger {
+      fill: rgba(255, 122, 89, 0.82);
+      stroke: rgba(255, 239, 234, 0.72);
+    }
+
+    .phase-zone--recovery {
+      fill: rgba(61, 214, 140, 0.78);
+      stroke: rgba(228, 255, 241, 0.72);
+    }
+
+    .phase-zone--pressure {
+      fill: rgba(255, 192, 76, 0.82);
+      stroke: rgba(255, 244, 214, 0.74);
+    }
+
+    .phase-zone--goalkeeper {
+      fill: rgba(110, 173, 255, 0.8);
+      stroke: rgba(231, 241, 255, 0.74);
+    }
+
+    .phase-zone--empty {
+      fill: rgba(255, 255, 255, 0.05);
+      stroke: rgba(255, 255, 255, 0.28);
+    }
+
+    .phase-zone-label {
+      fill: rgba(255, 255, 255, 0.94);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .phase-zone-value {
+      fill: rgba(255, 255, 255, 0.92);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .phase-panel-reading,
+    .phase-panel-check {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.94);
+    }
+
+    .phase-panel-check strong {
+      color: #fff;
     }
 
     .report-table-card {
@@ -550,49 +617,51 @@ function renderKeyStatistics(html: string): string {
   </section>`;
 }
 
-function renderPhaseSection(input: {
-  id: "with-ball" | "without-ball" | "goalkeeper";
-  title: string;
-  subtitle: string;
-  excerpt: SignalExcerpt | undefined;
-  emptyState: string;
-  sourceProductSection: string;
-}): string {
-  const excerptBlock = input.excerpt === undefined
+function renderPhaseSection(panel: TacticalPitchPanelModel): string {
+  const controlledEmptyBlock = panel.controlledEmptyStateUsed
     ? `
         <article class="report-table-card">
-          <h3>Lecture &agrave; stabiliser</h3>
-          <p class="report-controlled-empty">${input.emptyState}</p>
+          <h3>Etat controle</h3>
+          <p class="report-controlled-empty">${panel.emptyStateReason ?? CONTROLLED_EMPTY_STATE}</p>
+        </article>`
+    : "";
+  const signalSummaryBlock = panel.zoneSignals.length === 0
+    ? `
+        <article class="report-table-card">
+          <h3>Lecture a stabiliser</h3>
+          <p class="report-controlled-empty">${panel.emptyStateReason ?? CONTROLLED_EMPTY_STATE}</p>
         </article>`
     : `
         <article class="report-table-card">
-          <h3>${input.excerpt.title}</h3>
-          <p>${input.excerpt.summary}</p>
+          <h3>Lecture coach</h3>
+          <p>${panel.coachReading}</p>
           <ul class="report-phase-bullet-list">
-            ${input.excerpt.bullets.map((bullet) => `<li>${bullet}</li>`).join("")}
+            ${panel.zoneSignals.map((signal) => `<li><strong>${signal.zone}</strong> - ${signal.explanation}</li>`).join("")}
           </ul>
-        </article>
-        <article class="report-table-card">
-          <h3>D&eacute;tail encore prudent</h3>
-          <p class="report-controlled-empty">${input.emptyState}</p>
         </article>`;
 
   return `
-  <section id="${input.id}" class="premium-section" data-source-product-sections="${input.sourceProductSection}">
-    <div class="report-section-divider">${input.title}</div>
+  <section id="${panel.phase.replace("_", "-")}" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">${panel.title}</div>
     <div class="report-section-header">
       <div>
-        <h2>${input.title}</h2>
-        <p>${input.subtitle}</p>
+        <h2>${panel.title}</h2>
+        <p>${panel.subtitle}</p>
       </div>
     </div>
     <div class="report-phase-layout">
-      <div class="report-pitch-panel">
-        <h3>Bloc visuel &agrave; brancher plus tard</h3>
-        <div class="report-pitch-placeholder">${input.emptyState}</div>
-      </div>
+      ${renderTacticalPitchPanel(panel)}
       <div class="report-phase-cards">
-        ${excerptBlock}
+        <article class="report-table-card">
+          <h3>A verifier au prochain match</h3>
+          <p>${panel.nextMatchCheck}</p>
+        </article>
+        <article class="report-table-card">
+          <h3>Garde-fou visuel</h3>
+          <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUALS_GUARD}</p>
+        </article>
+        ${signalSummaryBlock}
+        ${controlledEmptyBlock}
       </div>
     </div>
   </section>`;
@@ -734,37 +803,16 @@ export function renderCoachReportExportHtml(input: {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
   const withMarkers = injectExportMarkers(withStyle);
+  const phasePanels = deriveCoachReportPhasePanels({
+    productReportHtml: input.productReportHtml,
+  });
   const signalCards = extractSignalCards(extractSection(input.productReportHtml, "key-coach-signals"));
-  const signalExcerpts = signalCards.map(excerptFromSignalCard);
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderMatchStory(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
-    renderPhaseSection({
-      id: "with-ball",
-      title: "Avec ballon",
-      subtitle: "La progression, la menace et la continuit&eacute; offensives restent ancr&eacute;es dans les signaux officiels visibles.",
-      excerpt: signalExcerpts[0],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
-    renderPhaseSection({
-      id: "without-ball",
-      title: "Sans ballon",
-      subtitle: "Cette lecture reste prudente sur ce run: elle garde les signaux de r&eacute;cup&eacute;ration sans inventer une carte d&eacute;fensive plus forte que les preuves disponibles.",
-      excerpt: signalExcerpts[1],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
-    renderPhaseSection({
-      id: "goalkeeper",
-      title: "Dernier rempart",
-      subtitle: "Le bloc gardien reste limit&eacute; &agrave; ce que le rapport produit stabilise vraiment dans ce run.",
-      excerpt: signalExcerpts[2],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
+    ...phasePanels.map(renderPhaseSection),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

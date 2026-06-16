@@ -2,6 +2,7 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
+import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
@@ -150,6 +151,40 @@ function currentCoachReportPremiumLayout(): CoachReportPremiumLayoutModel {
   }
 
   return layout;
+}
+
+function currentCoachReportPhaseVisuals() {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const exportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const premiumLayout = buildCoachReportPremiumLayout({
+    exportSnapshot,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+  });
+  const phaseVisuals = buildCoachReportPhaseVisuals({
+    premiumLayout,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+  });
+
+  if (phaseVisuals.status === "not_available") {
+    throw new Error("Coach Report Phase Visuals must be available for Sprint 4V validation.");
+  }
+
+  return phaseVisuals;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -2534,6 +2569,126 @@ export function renderFullMatchWorkbenchChainReplay4UValidation(model: FullMatch
     "- CONFIRM_HTML_FIRST_REPORT_DIRECTION.",
     "- CONFIRM_SINGLE_SOURCE_OF_TRUTH.",
     "- PREPARE_PHASE_VISUALS_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4VDoc(model: FullMatchTraceValidationModel): string {
+  const premium = currentCoachReportPremiumLayout();
+  const phaseVisuals = currentCoachReportPhaseVisuals();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4V",
+    "",
+    "Sprint 4V upgrades the coach export from premium section shells to real phase visuals derived from official/product-backed signals only.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    `- Premium HTML Layout status: ${premium.status}.`,
+    `- Coach Report Phase Visuals status: ${phaseVisuals.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS.",
+    "",
+    "## Phase Visual Summary",
+    `- panel count: ${phaseVisuals.panelCount}.`,
+    `- with-ball panel available: ${bool(phaseVisuals.withBallPanelAvailable)}.`,
+    `- without-ball panel available: ${bool(phaseVisuals.withoutBallPanelAvailable)}.`,
+    `- goalkeeper panel available: ${bool(phaseVisuals.goalkeeperPanelAvailable)}.`,
+    `- pitch SVG count: ${phaseVisuals.pitchSvgCount}.`,
+    `- zone signal count: ${phaseVisuals.zoneSignalCount}.`,
+    `- controlled empty state count: ${phaseVisuals.controlledEmptyStateCount}.`,
+    `- product/export score matches: ${bool(phaseVisuals.productExportScoreMatches)}.`,
+    `- candidate comparison matches product: ${bool(phaseVisuals.productExportCandidateComparisonMatches)}.`,
+    "",
+    "## Guardrails",
+    "- phase visuals remain presentation-only.",
+    "- hidden phase seed stays inside coach-report.product.html.",
+    "- no fake heatmap statistics are invented.",
+    "- no recommendation or selection wording is introduced.",
+    "- score, lineup, possession, scoring events, and global economy remain unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PHASE_VISUALS_FROM_PRODUCT_SOURCE.",
+    "- CONFIRM_TACTICAL_PITCH_PANELS_STAY_NON_MUTATING.",
+    "- CONFIRM_CONTROLLED_EMPTY_STATES_REMAIN_HONEST.",
+    "- PREPARE_PHASE_VISUAL_COPY_POLISH_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4VValidation(model: FullMatchTraceValidationModel): string {
+  const phaseVisuals = currentCoachReportPhaseVisuals();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4V Validation",
+    "",
+    `Status: ${model.status === "available" && phaseVisuals.status === "available" ? "PASS" : phaseVisuals.status === "partial" ? "PARTIAL" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Report Phase Visuals status is available.", phaseVisuals.status === "available", phaseVisuals.status),
+    check("three phase panels exist.", phaseVisuals.panelCount === 3, String(phaseVisuals.panelCount)),
+    check("with-ball panel is available.", phaseVisuals.withBallPanelAvailable, ""),
+    check("without-ball panel is available.", phaseVisuals.withoutBallPanelAvailable, ""),
+    check("goalkeeper panel is available.", phaseVisuals.goalkeeperPanelAvailable, ""),
+    check("at least two pitch SVGs are rendered.", phaseVisuals.pitchSvgCount >= 2, String(phaseVisuals.pitchSvgCount)),
+    check("zone signals are present.", phaseVisuals.zoneSignalCount >= 2, String(phaseVisuals.zoneSignalCount)),
+    check("product/export score matches.", phaseVisuals.productExportScoreMatches, ""),
+    check("candidate comparison matches product.", phaseVisuals.productExportCandidateComparisonMatches, ""),
+    check("interpretation guard still matches product.", phaseVisuals.interpretationGuardMatchesProduct, ""),
+    check("visible recommendation wording count is 0.", phaseVisuals.visibleRecommendationWordingCount === 0, String(phaseVisuals.visibleRecommendationWordingCount)),
+    check("visible selection wording count is 0.", phaseVisuals.visibleSelectionWordingCount === 0, String(phaseVisuals.visibleSelectionWordingCount)),
+    check("internal status leak count is 0.", phaseVisuals.internalStatusLeakCount === 0, String(phaseVisuals.internalStatusLeakCount)),
+    check("mojibake marker count is 0.", phaseVisuals.mojibakeMarkerCount === 0, String(phaseVisuals.mojibakeMarkerCount)),
+    check("no automatic selection is true.", phaseVisuals.noAutomaticSelection, ""),
+    check("player selected count is 0.", phaseVisuals.playerSelectedCount === 0, String(phaseVisuals.playerSelectedCount)),
+    check("lineup mutation count is 0.", phaseVisuals.lineupMutationCount === 0, String(phaseVisuals.lineupMutationCount)),
+    check("starters mutation count is 0.", phaseVisuals.startersMutationCount === 0, String(phaseVisuals.startersMutationCount)),
+    check("bench mutation count is 0.", phaseVisuals.benchMutationCount === 0, String(phaseVisuals.benchMutationCount)),
+    check("phase visuals cannot drive live selection.", !phaseVisuals.canDriveLiveSelection, ""),
+    check("phase visuals cannot mutate official score.", !phaseVisuals.canMutateScore, ""),
+    check("phase visuals cannot mutate official possession.", !phaseVisuals.canMutatePossession, ""),
+    check("phase visuals cannot create production scoring events.", !phaseVisuals.canCreateScoringEvent, ""),
+    check("phase visuals cannot claim global economy.", !phaseVisuals.canClaimGlobalEconomy, ""),
+    check("invented statistic count is 0.", phaseVisuals.inventedStatisticCount === 0, String(phaseVisuals.inventedStatisticCount)),
+    check("sandbox events promoted to official count is 0.", phaseVisuals.sandboxEventsPromotedToOfficialCount === 0, String(phaseVisuals.sandboxEventsPromotedToOfficialCount)),
+    check("scoring constants unchanged.", phaseVisuals.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", phaseVisuals.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", phaseVisuals.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", phaseVisuals.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- panel count: ${phaseVisuals.panelCount}`,
+    `- pitch SVG count: ${phaseVisuals.pitchSvgCount}`,
+    `- zone signal count: ${phaseVisuals.zoneSignalCount}`,
+    `- controlled empty state count: ${phaseVisuals.controlledEmptyStateCount}`,
+    `- visible recommendation wording count: ${phaseVisuals.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${phaseVisuals.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${phaseVisuals.internalStatusLeakCount}`,
+    `- player selected count: ${phaseVisuals.playerSelectedCount}`,
+    `- lineup mutation count: ${phaseVisuals.lineupMutationCount}`,
+    `- starters mutation count: ${phaseVisuals.startersMutationCount}`,
+    `- bench mutation count: ${phaseVisuals.benchMutationCount}`,
+    `- invented statistic count: ${phaseVisuals.inventedStatisticCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_PHASE_VISUALS_FROM_PRODUCT_SOURCE.",
+    "- CONFIRM_TACTICAL_PITCH_PANELS_STAY_NON_MUTATING.",
+    "- CONFIRM_CONTROLLED_EMPTY_STATES_REMAIN_HONEST.",
+    "- PREPARE_PHASE_VISUAL_COPY_POLISH_OR_UI_WIRING.",
     "",
   ].join("\n");
 }

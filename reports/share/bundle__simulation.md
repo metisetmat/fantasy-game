@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4U - FIFA-inspired HTML Report Layout. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4V - Phase Visuals & Tactical Pitch Panels. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -288,6 +288,11 @@ import {
   coachReportPremiumLayoutEvidenceFact,
   coachReportPremiumLayoutLimitations,
 } from "../reports/coachReportPremiumLayout";
+import { buildCoachReportPhaseVisuals } from "../reports/buildCoachReportPhaseVisuals";
+import {
+  coachReportPhaseVisualsEvidenceFact,
+  coachReportPhaseVisualsLimitations,
+} from "../reports/coachReportPhaseVisuals";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3249,6 +3254,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     coachReportV1: coachReportV1VisualizationModel,
     profileView: selectionPreviewProfileViewModel,
     playerMatchupView: playerMatchupViewModel,
+    matchTraceAggregate: matchTraceAggregateModel,
     rosterPlayers: input.homeTeam.roster,
   });
   const coachProductReportPolishModel = buildCoachProductReportPolish({
@@ -3266,6 +3272,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : "";
   const coachReportPremiumLayoutModel = buildCoachReportPremiumLayout({
     exportSnapshot: coachReportExportSnapshotModel,
+    productReportHtml: coachProductReportHtml,
+    exportReportHtml: coachReportExportHtml,
+  });
+  const coachReportPhaseVisualsModel = buildCoachReportPhaseVisuals({
+    premiumLayout: coachReportPremiumLayoutModel,
     productReportHtml: coachProductReportHtml,
     exportReportHtml: coachReportExportHtml,
   });
@@ -3291,6 +3302,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachProductReportViewLimitations(coachProductReportViewModel),
         ...coachProductReportPolishLimitations(coachProductReportPolishModel),
         ...coachReportPremiumLayoutLimitations(coachReportPremiumLayoutModel),
+        ...coachReportPhaseVisualsLimitations(coachReportPhaseVisualsModel),
       ],
     },
   };
@@ -3525,6 +3537,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportPremiumLayoutModel,
   });
+  const coachReportPhaseVisualsModelFact = coachReportPhaseVisualsEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportPhaseVisualsModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3576,6 +3593,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportPremiumLayoutFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportPremiumLayoutModelFact
     : null;
+  const experimentalCoachReportPhaseVisualsFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportPhaseVisualsModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3616,6 +3636,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalCoachReportExportSnapshotFact === null ? [] : [experimentalCoachReportExportSnapshotFact]),
     ...(experimentalCoachReportPremiumLayoutFact === null ? [] : [experimentalCoachReportPremiumLayoutFact]),
+    ...(experimentalCoachReportPhaseVisualsFact === null ? [] : [experimentalCoachReportPhaseVisualsFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
@@ -35938,6 +35959,7 @@ import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import type { PlayerCandidateComparisonViewModel } from "./playerCandidateComparisonView";
 import type { PlayerMatchupViewModel } from "./playerMatchupView";
 import type { RosterCoverageMatchupModel } from "./rosterCoverageMatchup";
+import type { CoachReportPhaseVisualSeed } from "./coachReportPhaseVisuals";
 
 export type CoachProductReportViewStatus =
   | "not_available"
@@ -36007,6 +36029,7 @@ export interface CoachProductReportViewModel {
   readonly playerMatchupView: PlayerMatchupViewModel;
   readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
+  readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly productVisibleJargonCount: number;
@@ -36061,6 +36084,7 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     `coach_product_report_player_matchup_candidate_count_${model.playerMatchupView.playerCandidateCount}`,
     ...(model.rosterCoverageMatchup?.tags ?? []),
     ...(model.playerCandidateComparisonView?.tags ?? []),
+    ...(model.phaseVisualSeed === undefined ? [] : ["coach_product_report_phase_visual_seed_present"]),
     "coach_product_report_next_match_signal_count_present",
     "coach_product_report_appendix_count_present",
     `coach_product_report_visible_jargon_count_${model.productVisibleJargonCount}`,
@@ -36145,9 +36169,15 @@ export function coachProductReportViewLimitations(model: CoachProductReportViewM
 
 ```ts
 import type { MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
+import type { MatchTraceAggregateModel } from "../simulation/tracing/matchTraceAggregateTypes";
 import { buildPlayerCandidateComparisonView } from "./buildPlayerCandidateComparisonView";
 import { buildPlayerMatchupView } from "./buildPlayerMatchupView";
 import { buildRosterCoverageMatchup } from "./buildRosterCoverageMatchup";
+import {
+  buildCoachReportPhaseVisualSeedFromAggregate,
+  buildCoachReportPhaseVisualSeedFromMatchReport,
+  type CoachReportPhaseVisualSeed,
+} from "./coachReportPhaseVisuals";
 import type {
   CoachReportV1VisualizationCard,
   CoachReportV1VisualizationModel,
@@ -36524,6 +36554,7 @@ function buildModelWithoutTags(input: {
   readonly playerMatchupView: PlayerMatchupViewModel;
   readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
+  readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
@@ -36620,6 +36651,7 @@ function buildModelWithoutTags(input: {
     playerMatchupView: input.playerMatchupView,
     ...(input.rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup: input.rosterCoverageMatchup }),
     ...(input.playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView: input.playerCandidateComparisonView }),
+    ...(input.phaseVisualSeed === undefined ? {} : { phaseVisualSeed: input.phaseVisualSeed }),
     nextMatchSignals: input.nextMatchSignals,
     appendices: input.appendices,
     productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
@@ -36658,6 +36690,7 @@ export function buildCoachProductReportView(input: {
   readonly coachReportV1: CoachReportV1VisualizationModel;
   readonly profileView: SelectionPreviewProfileViewModel;
   readonly playerMatchupView: PlayerMatchupViewModel;
+  readonly matchTraceAggregate?: MatchTraceAggregateModel;
   readonly rosterPlayers?: readonly PlayerSnapshot[];
 }): CoachProductReportViewModel {
   const rosterCoverageMatchup = input.playerMatchupView.calibration === undefined
@@ -36686,6 +36719,9 @@ export function buildCoachProductReportView(input: {
       playerMatchupView: input.playerMatchupView,
       ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
       ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
+      ...(input.matchTraceAggregate === undefined
+        ? {}
+        : { phaseVisualSeed: buildCoachReportPhaseVisualSeedFromAggregate({ aggregate: input.matchTraceAggregate }) }),
       nextMatchSignals: [],
       appendices: [],
       warnings: ["Coach Product Report View requires Coach Report V1 and Selection Preview Profile View."],
@@ -36719,6 +36755,9 @@ export function buildCoachProductReportView(input: {
     playerMatchupView: input.playerMatchupView,
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
     ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
+    ...(input.matchTraceAggregate === undefined
+      ? {}
+      : { phaseVisualSeed: buildCoachReportPhaseVisualSeedFromAggregate({ aggregate: input.matchTraceAggregate }) }),
     nextMatchSignals,
     appendices: buildAppendices(input.playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
   });
@@ -36848,6 +36887,7 @@ export function buildCoachProductReportViewFromMatchReport(
     playerMatchupView,
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
     ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
+    phaseVisualSeed: buildCoachReportPhaseVisualSeedFromMatchReport({ report }),
     nextMatchSignals,
     appendices: buildAppendices(playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
     warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],
@@ -36869,6 +36909,10 @@ import type {
   CoachProductReportSignal,
   CoachProductReportViewModel,
 } from "./coachProductReportView";
+import {
+  COACH_REPORT_PHASE_VISUALS_SCRIPT_ID,
+  serializeCoachReportPhaseVisualSeed,
+} from "./coachReportPhaseVisuals";
 import { buildCoachProductReportPolish } from "./buildCoachProductReportPolish";
 import { escapeHtml } from "./htmlCoachReport";
 import {
@@ -37132,6 +37176,17 @@ function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly str
     </details>`;
 }
 
+function renderPhaseVisualSeedScript(model: CoachProductReportViewModel): string {
+  if (model.phaseVisualSeed === undefined) {
+    return "";
+  }
+
+  return `
+  <script type="application/json" id="${COACH_REPORT_PHASE_VISUALS_SCRIPT_ID}">
+${serializeCoachReportPhaseVisualSeed(model.phaseVisualSeed)}
+  </script>`;
+}
+
 export function renderCoachProductReport(model: CoachProductReportViewModel): string {
   const polish = buildCoachProductReportPolish({ productReportView: model });
   const technicalTags = [...model.tags, ...polish.tags];
@@ -37272,6 +37327,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <p class="muted">Les annexes gardent les hypothèses, la traçabilité et les validations hors de la lecture principale.</p>
     ${model.appendices.map((appendix) => renderAppendix(appendix, technicalTags)).join("")}
   </section>
+  ${renderPhaseVisualSeedScript(model)}
 </main>
 </body>
 </html>`;
@@ -38242,6 +38298,13 @@ export function buildCoachReportExportSnapshot(input: {
 ## File: src/reports/renderCoachReportExportHtml.ts
 
 ```ts
+import {
+  COACH_REPORT_PHASE_VISUALS_GUARD,
+  type TacticalPitchPanelModel,
+} from "./coachReportPhaseVisuals";
+import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
+import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
+
 const EXPORT_TITLE = "Rapport coach - export partageable";
 const CONTROLLED_EMPTY_STATE = "Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.";
 
@@ -38497,6 +38560,66 @@ const PREMIUM_EXPORT_CSS = `
       padding: 14px;
       font-size: 0.92rem;
       line-height: 1.45;
+    }
+
+    .phase-pitch {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .phase-zone {
+      fill: rgba(255, 255, 255, 0.08);
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 1.5;
+    }
+
+    .phase-zone--danger {
+      fill: rgba(255, 122, 89, 0.82);
+      stroke: rgba(255, 239, 234, 0.72);
+    }
+
+    .phase-zone--recovery {
+      fill: rgba(61, 214, 140, 0.78);
+      stroke: rgba(228, 255, 241, 0.72);
+    }
+
+    .phase-zone--pressure {
+      fill: rgba(255, 192, 76, 0.82);
+      stroke: rgba(255, 244, 214, 0.74);
+    }
+
+    .phase-zone--goalkeeper {
+      fill: rgba(110, 173, 255, 0.8);
+      stroke: rgba(231, 241, 255, 0.74);
+    }
+
+    .phase-zone--empty {
+      fill: rgba(255, 255, 255, 0.05);
+      stroke: rgba(255, 255, 255, 0.28);
+    }
+
+    .phase-zone-label {
+      fill: rgba(255, 255, 255, 0.94);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .phase-zone-value {
+      fill: rgba(255, 255, 255, 0.92);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .phase-panel-reading,
+    .phase-panel-check {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.94);
+    }
+
+    .phase-panel-check strong {
+      color: #fff;
     }
 
     .report-table-card {
@@ -38794,49 +38917,51 @@ function renderKeyStatistics(html: string): string {
   </section>`;
 }
 
-function renderPhaseSection(input: {
-  id: "with-ball" | "without-ball" | "goalkeeper";
-  title: string;
-  subtitle: string;
-  excerpt: SignalExcerpt | undefined;
-  emptyState: string;
-  sourceProductSection: string;
-}): string {
-  const excerptBlock = input.excerpt === undefined
+function renderPhaseSection(panel: TacticalPitchPanelModel): string {
+  const controlledEmptyBlock = panel.controlledEmptyStateUsed
     ? `
         <article class="report-table-card">
-          <h3>Lecture &agrave; stabiliser</h3>
-          <p class="report-controlled-empty">${input.emptyState}</p>
+          <h3>Etat controle</h3>
+          <p class="report-controlled-empty">${panel.emptyStateReason ?? CONTROLLED_EMPTY_STATE}</p>
+        </article>`
+    : "";
+  const signalSummaryBlock = panel.zoneSignals.length === 0
+    ? `
+        <article class="report-table-card">
+          <h3>Lecture a stabiliser</h3>
+          <p class="report-controlled-empty">${panel.emptyStateReason ?? CONTROLLED_EMPTY_STATE}</p>
         </article>`
     : `
         <article class="report-table-card">
-          <h3>${input.excerpt.title}</h3>
-          <p>${input.excerpt.summary}</p>
+          <h3>Lecture coach</h3>
+          <p>${panel.coachReading}</p>
           <ul class="report-phase-bullet-list">
-            ${input.excerpt.bullets.map((bullet) => `<li>${bullet}</li>`).join("")}
+            ${panel.zoneSignals.map((signal) => `<li><strong>${signal.zone}</strong> - ${signal.explanation}</li>`).join("")}
           </ul>
-        </article>
-        <article class="report-table-card">
-          <h3>D&eacute;tail encore prudent</h3>
-          <p class="report-controlled-empty">${input.emptyState}</p>
         </article>`;
 
   return `
-  <section id="${input.id}" class="premium-section" data-source-product-sections="${input.sourceProductSection}">
-    <div class="report-section-divider">${input.title}</div>
+  <section id="${panel.phase.replace("_", "-")}" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">${panel.title}</div>
     <div class="report-section-header">
       <div>
-        <h2>${input.title}</h2>
-        <p>${input.subtitle}</p>
+        <h2>${panel.title}</h2>
+        <p>${panel.subtitle}</p>
       </div>
     </div>
     <div class="report-phase-layout">
-      <div class="report-pitch-panel">
-        <h3>Bloc visuel &agrave; brancher plus tard</h3>
-        <div class="report-pitch-placeholder">${input.emptyState}</div>
-      </div>
+      ${renderTacticalPitchPanel(panel)}
       <div class="report-phase-cards">
-        ${excerptBlock}
+        <article class="report-table-card">
+          <h3>A verifier au prochain match</h3>
+          <p>${panel.nextMatchCheck}</p>
+        </article>
+        <article class="report-table-card">
+          <h3>Garde-fou visuel</h3>
+          <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUALS_GUARD}</p>
+        </article>
+        ${signalSummaryBlock}
+        ${controlledEmptyBlock}
       </div>
     </div>
   </section>`;
@@ -38978,37 +39103,16 @@ export function renderCoachReportExportHtml(input: {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
   const withMarkers = injectExportMarkers(withStyle);
+  const phasePanels = deriveCoachReportPhasePanels({
+    productReportHtml: input.productReportHtml,
+  });
   const signalCards = extractSignalCards(extractSection(input.productReportHtml, "key-coach-signals"));
-  const signalExcerpts = signalCards.map(excerptFromSignalCard);
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderMatchStory(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
-    renderPhaseSection({
-      id: "with-ball",
-      title: "Avec ballon",
-      subtitle: "La progression, la menace et la continuit&eacute; offensives restent ancr&eacute;es dans les signaux officiels visibles.",
-      excerpt: signalExcerpts[0],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
-    renderPhaseSection({
-      id: "without-ball",
-      title: "Sans ballon",
-      subtitle: "Cette lecture reste prudente sur ce run: elle garde les signaux de r&eacute;cup&eacute;ration sans inventer une carte d&eacute;fensive plus forte que les preuves disponibles.",
-      excerpt: signalExcerpts[1],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
-    renderPhaseSection({
-      id: "goalkeeper",
-      title: "Dernier rempart",
-      subtitle: "Le bloc gardien reste limit&eacute; &agrave; ce que le rapport produit stabilise vraiment dans ce run.",
-      excerpt: signalExcerpts[2],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
+    ...phasePanels.map(renderPhaseSection),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -39655,6 +39759,1126 @@ export function buildCoachReportPremiumLayout(input: {
         ]
       : ["Coach Report Premium HTML Layout needs more stabilization before it can be treated as fully available."],
   });
+}
+```
+
+## File: src/reports/coachReportPhaseVisuals.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+import type { MatchTraceAggregateModel } from "../simulation/tracing/matchTraceAggregateTypes";
+import type { CoachReportPremiumLayoutModel } from "./coachReportPremiumLayout";
+
+export type CoachReportPhaseVisualsStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type CoachReportPhaseKind =
+  | "with_ball"
+  | "without_ball"
+  | "goalkeeper";
+
+export type TacticalPitchSignalKind =
+  | "danger_zone"
+  | "recovery_zone"
+  | "pressure_instability_zone"
+  | "progression_zone"
+  | "goalkeeper_response_zone"
+  | "controlled_empty_state";
+
+export interface TacticalPitchZoneSignal {
+  readonly zone: string;
+  readonly label: string;
+  readonly value: number;
+  readonly kind: TacticalPitchSignalKind;
+  readonly source: "official_aggregates" | "product_report" | "controlled_empty_state";
+  readonly confidence: "low" | "medium" | "high";
+  readonly explanation: string;
+}
+
+export interface TacticalPitchPanelModel {
+  readonly phase: CoachReportPhaseKind;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly coachReading: string;
+  readonly nextMatchCheck: string;
+  readonly available: boolean;
+  readonly source: "official_aggregates" | "product_report" | "controlled_empty_state";
+  readonly zoneSignals: readonly TacticalPitchZoneSignal[];
+  readonly primarySignal?: TacticalPitchZoneSignal;
+  readonly secondarySignals: readonly TacticalPitchZoneSignal[];
+  readonly pitchSvgAvailable: boolean;
+  readonly controlledEmptyStateUsed: boolean;
+  readonly emptyStateReason?: string;
+  readonly visualTruthOnly: true;
+  readonly sandboxEventsPromotedToOfficial: false;
+  readonly inventedStatisticCount: 0;
+}
+
+export interface CoachReportPhaseVisualsModel {
+  readonly status: CoachReportPhaseVisualsStatus;
+  readonly origin: "coach_report_premium_html_layout";
+  readonly htmlFirst: true;
+  readonly pdfOptional: true;
+  readonly singleSourceOfTruth: true;
+  readonly duplicateReportLogic: false;
+  readonly panelCount: number;
+  readonly withBallPanelAvailable: boolean;
+  readonly withoutBallPanelAvailable: boolean;
+  readonly goalkeeperPanelAvailable: boolean;
+  readonly pitchSvgCount: number;
+  readonly zoneSignalCount: number;
+  readonly controlledEmptyStateCount: number;
+  readonly panels: readonly TacticalPitchPanelModel[];
+  readonly productExportScoreMatches: boolean;
+  readonly productExportCandidateComparisonMatches: boolean;
+  readonly interpretationGuardMatchesProduct: boolean;
+  readonly sandboxEventsPromotedToOfficialCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly visibleRecommendationWordingCount: number;
+  readonly visibleSelectionWordingCount: number;
+  readonly internalStatusLeakCount: number;
+  readonly mojibakeMarkerCount: number;
+  readonly noAutomaticSelection: true;
+  readonly playerSelectedCount: 0;
+  readonly automaticSelectionCount: 0;
+  readonly lineupMutationCount: 0;
+  readonly startersMutationCount: 0;
+  readonly benchMutationCount: 0;
+  readonly confidenceUpgradeCount: 0;
+  readonly officiallyConfirmedCount: 0;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+export interface CoachReportPhaseVisualSeedPanel {
+  readonly phase: CoachReportPhaseKind;
+  readonly source: "official_aggregates" | "controlled_empty_state";
+  readonly signals: readonly TacticalPitchZoneSignal[];
+  readonly emptyStateReason?: string;
+}
+
+export interface CoachReportPhaseVisualSeed {
+  readonly withBall: CoachReportPhaseVisualSeedPanel;
+  readonly withoutBall: CoachReportPhaseVisualSeedPanel;
+  readonly goalkeeper: CoachReportPhaseVisualSeedPanel;
+}
+
+export const COACH_REPORT_PHASE_VISUALS_SCRIPT_ID = "coach-report-phase-visuals-data";
+export const COACH_REPORT_PHASE_VISUALS_GUARD =
+  "Les cartes terrain affichent uniquement les signaux stabilis&eacute;s disponibles dans ce run. Une absence de carte ne signifie pas une absence de ph&eacute;nom&egrave;ne, mais une donn&eacute;e insuffisante pour l'afficher proprement.";
+export const COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE =
+  "Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.";
+
+function countTag(prefix: string, value: number): string {
+  return `${prefix}_${value}`;
+}
+
+function boolTag(prefix: string, value: boolean): string {
+  return `${prefix}_${value ? "true" : "false"}`;
+}
+
+function zoneConfidence(value: number): "low" | "medium" | "high" {
+  if (value >= 5) {
+    return "high";
+  }
+  if (value >= 2) {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function normalizeZoneSignal(input: {
+  readonly zone: string;
+  readonly value: number;
+  readonly kind: TacticalPitchSignalKind;
+  readonly label: string;
+  readonly explanation: string;
+}): TacticalPitchZoneSignal {
+  return {
+    zone: input.zone,
+    label: input.label,
+    value: input.value,
+    kind: input.kind,
+    source: "official_aggregates",
+    confidence: zoneConfidence(input.value),
+    explanation: input.explanation,
+  };
+}
+
+function topZoneEntries(
+  bucket: Readonly<Record<string, number>>,
+  limit: number,
+): readonly { readonly zone: string; readonly value: number }[] {
+  return Object.entries(bucket)
+    .filter((entry) => entry[0].length > 0 && entry[1] > 0)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr-FR"))
+    .slice(0, limit)
+    .map(([zone, value]) => ({ zone, value }));
+}
+
+function mergeSignals(
+  primary: readonly TacticalPitchZoneSignal[],
+  secondary: readonly TacticalPitchZoneSignal[],
+  limit: number,
+): readonly TacticalPitchZoneSignal[] {
+  const merged = new Map<string, TacticalPitchZoneSignal>();
+
+  for (const signal of [...primary, ...secondary]) {
+    if (!merged.has(signal.zone)) {
+      merged.set(signal.zone, signal);
+    }
+  }
+
+  return [...merged.values()].slice(0, limit);
+}
+
+function phaseSeedPanel(input: {
+  readonly phase: CoachReportPhaseKind;
+  readonly signals: readonly TacticalPitchZoneSignal[];
+  readonly emptyStateReason: string;
+}): CoachReportPhaseVisualSeedPanel {
+  if (input.signals.length === 0) {
+    return {
+      phase: input.phase,
+      source: "controlled_empty_state",
+      signals: [],
+      emptyStateReason: input.emptyStateReason,
+    };
+  }
+
+  return {
+    phase: input.phase,
+    source: "official_aggregates",
+    signals: input.signals,
+  };
+}
+
+export function buildCoachReportPhaseVisualSeedFromAggregate(input: {
+  readonly aggregate: MatchTraceAggregateModel;
+}): CoachReportPhaseVisualSeed {
+  const withBallDangerSignals = topZoneEntries(input.aggregate.official.dangerByZone, 2).map((entry) =>
+    normalizeZoneSignal({
+      zone: entry.zone,
+      value: entry.value,
+      kind: "danger_zone",
+      label: "Danger officiel",
+      explanation: `${entry.zone} concentre une part visible du danger officiel dans les agr&eacute;gats du run.`,
+    })
+  );
+  const withBallProgressionSignals = topZoneEntries(input.aggregate.official.shotCreatedByZone, 2).map((entry) =>
+    normalizeZoneSignal({
+      zone: entry.zone,
+      value: entry.value,
+      kind: "progression_zone",
+      label: "Progression vers la finition",
+      explanation: `${entry.zone} soutient une progression ou une pr&eacute;paration de tir visible dans les agr&eacute;gats officiels.`,
+    })
+  );
+  const withoutBallRecoverySignals = topZoneEntries(input.aggregate.official.recoveryByZone, 2).map((entry) =>
+    normalizeZoneSignal({
+      zone: entry.zone,
+      value: entry.value,
+      kind: "recovery_zone",
+      label: "R&eacute;cup&eacute;ration utile",
+      explanation: `${entry.zone} ressort comme zone de r&eacute;cup&eacute;ration officielle dans ce run.`,
+    })
+  );
+  const withoutBallPressureSignals = topZoneEntries(input.aggregate.official.pressureLossByZone, 2).map((entry) =>
+    normalizeZoneSignal({
+      zone: entry.zone,
+      value: entry.value,
+      kind: "pressure_instability_zone",
+      label: "Pression / instabilit&eacute;",
+      explanation: `${entry.zone} porte un signal officiel de pression ou d'instabilit&eacute; &agrave; surveiller.`,
+    })
+  );
+  const goalkeeperSignals = topZoneEntries(input.aggregate.official.goalkeeperActionByZone, 2).map((entry) =>
+    normalizeZoneSignal({
+      zone: entry.zone,
+      value: entry.value,
+      kind: "goalkeeper_response_zone",
+      label: "R&eacute;ponse gardien / dernier rempart",
+      explanation: `${entry.zone} montre une implication visible du dernier rempart dans les agr&eacute;gats officiels.`,
+    })
+  );
+
+  return {
+    withBall: phaseSeedPanel({
+      phase: "with_ball",
+      signals: mergeSignals(withBallDangerSignals, withBallProgressionSignals, 3),
+      emptyStateReason: COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+    }),
+    withoutBall: phaseSeedPanel({
+      phase: "without_ball",
+      signals: mergeSignals(withoutBallRecoverySignals, withoutBallPressureSignals, 3),
+      emptyStateReason: COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+    }),
+    goalkeeper: phaseSeedPanel({
+      phase: "goalkeeper",
+      signals: goalkeeperSignals.slice(0, 3),
+      emptyStateReason: "Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.",
+    }),
+  };
+}
+
+export function buildCoachReportPhaseVisualSeedFromMatchReport(input: {
+  readonly report: MatchReport;
+}): CoachReportPhaseVisualSeed {
+  const zoneStats = [...input.report.zoneStats];
+  const topProgressions = zoneStats
+    .filter((stats) => stats.successfulProgressions > 0 || stats.scoringEvents !== undefined && stats.scoringEvents > 0)
+    .sort((a, b) =>
+      (b.scoringEvents ?? 0) - (a.scoringEvents ?? 0) ||
+      b.successfulProgressions - a.successfulProgressions ||
+      b.entries - a.entries
+    )
+    .slice(0, 3)
+    .map((stats) =>
+      normalizeZoneSignal({
+        zone: stats.zone,
+        value: (stats.scoringEvents ?? 0) > 0 ? (stats.scoringEvents ?? 0) : stats.successfulProgressions,
+        kind: (stats.scoringEvents ?? 0) > 0 ? "danger_zone" : "progression_zone",
+        label: (stats.scoringEvents ?? 0) > 0 ? "Danger officiel" : "Progression utile",
+        explanation: `${stats.zone} ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.`,
+      })
+    );
+  const topRecoveries = zoneStats
+    .filter((stats) => stats.defensiveStops > 0 || stats.pressureEvents !== undefined && stats.pressureEvents > 0)
+    .sort((a, b) =>
+      b.defensiveStops - a.defensiveStops ||
+      (b.pressureEvents ?? 0) - (a.pressureEvents ?? 0) ||
+      a.zone.localeCompare(b.zone, "fr-FR")
+    )
+    .slice(0, 3)
+    .map((stats) =>
+      normalizeZoneSignal({
+        zone: stats.zone,
+        value: stats.defensiveStops > 0 ? stats.defensiveStops : (stats.pressureEvents ?? 0),
+        kind: stats.defensiveStops > 0 ? "recovery_zone" : "pressure_instability_zone",
+        label: stats.defensiveStops > 0 ? "R&eacute;cup&eacute;ration utile" : "Pression / instabilit&eacute;",
+        explanation: `${stats.zone} ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.`,
+      })
+    );
+
+  return {
+    withBall: phaseSeedPanel({
+      phase: "with_ball",
+      signals: topProgressions,
+      emptyStateReason: COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+    }),
+    withoutBall: phaseSeedPanel({
+      phase: "without_ball",
+      signals: topRecoveries,
+      emptyStateReason: COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+    }),
+    goalkeeper: phaseSeedPanel({
+      phase: "goalkeeper",
+      signals: [],
+      emptyStateReason: "Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.",
+    }),
+  };
+}
+
+export function serializeCoachReportPhaseVisualSeed(seed: CoachReportPhaseVisualSeed): string {
+  return JSON.stringify(seed).replace(/</gu, "\\u003c");
+}
+
+function isSignalKind(value: string): value is TacticalPitchSignalKind {
+  return value === "danger_zone" ||
+    value === "recovery_zone" ||
+    value === "pressure_instability_zone" ||
+    value === "progression_zone" ||
+    value === "goalkeeper_response_zone" ||
+    value === "controlled_empty_state";
+}
+
+function isPhase(value: string): value is CoachReportPhaseKind {
+  return value === "with_ball" || value === "without_ball" || value === "goalkeeper";
+}
+
+function sanitizeSignal(value: unknown): TacticalPitchZoneSignal | null {
+  if (typeof value !== "object" || value === null) {
+    return null;
+  }
+
+  const candidate = value as Partial<TacticalPitchZoneSignal>;
+
+  if (typeof candidate.zone !== "string" ||
+    typeof candidate.label !== "string" ||
+    typeof candidate.value !== "number" ||
+    typeof candidate.kind !== "string" ||
+    !isSignalKind(candidate.kind) ||
+    typeof candidate.explanation !== "string") {
+    return null;
+  }
+
+  return {
+    zone: candidate.zone,
+    label: candidate.label,
+    value: candidate.value,
+    kind: candidate.kind,
+    source: candidate.source === "product_report" || candidate.source === "controlled_empty_state"
+      ? candidate.source
+      : "official_aggregates",
+    confidence: candidate.confidence === "high" || candidate.confidence === "medium" ? candidate.confidence : "low",
+    explanation: candidate.explanation,
+  };
+}
+
+function sanitizePanel(value: unknown, phase: CoachReportPhaseKind): CoachReportPhaseVisualSeedPanel {
+  if (typeof value !== "object" || value === null) {
+    return {
+      phase,
+      source: "controlled_empty_state",
+      signals: [],
+      emptyStateReason: COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+    };
+  }
+
+  const candidate = value as Partial<CoachReportPhaseVisualSeedPanel>;
+  const source = candidate.source === "official_aggregates" ? "official_aggregates" : "controlled_empty_state";
+  const signals = Array.isArray(candidate.signals)
+    ? candidate.signals.map(sanitizeSignal).filter((signal): signal is TacticalPitchZoneSignal => signal !== null)
+    : [];
+
+  return {
+    phase: typeof candidate.phase === "string" && isPhase(candidate.phase) ? candidate.phase : phase,
+    source: signals.length === 0 ? "controlled_empty_state" : source,
+    signals,
+    ...(typeof candidate.emptyStateReason === "string" ? { emptyStateReason: candidate.emptyStateReason } : {}),
+  };
+}
+
+export function extractCoachReportPhaseVisualSeed(productReportHtml: string): CoachReportPhaseVisualSeed | null {
+  const matcher = new RegExp(
+    `<script type="application/json" id="${COACH_REPORT_PHASE_VISUALS_SCRIPT_ID}">([\\s\\S]*?)<\\/script>`,
+    "u",
+  );
+  const match = productReportHtml.match(matcher);
+
+  if (match?.[1] === undefined) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(match[1]) as Partial<CoachReportPhaseVisualSeed>;
+
+    return {
+      withBall: sanitizePanel(parsed.withBall, "with_ball"),
+      withoutBall: sanitizePanel(parsed.withoutBall, "without_ball"),
+      goalkeeper: sanitizePanel(parsed.goalkeeper, "goalkeeper"),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function buildCoachReportPhaseVisualsTags(
+  model: Omit<CoachReportPhaseVisualsModel, "tags">,
+): readonly string[] {
+  return [
+    "coach_report_phase_visuals",
+    `coach_report_phase_visuals_status_${model.status}`,
+    "coach_report_phase_visuals_html_first_true",
+    "coach_report_phase_visuals_pdf_optional_true",
+    "coach_report_phase_visuals_single_source_of_truth_true",
+    "coach_report_phase_visuals_duplicate_logic_false",
+    "coach_report_phase_visuals_panel_count_present",
+    "coach_report_phase_visuals_pitch_svg_count_present",
+    "coach_report_phase_visuals_zone_signal_count_present",
+    "coach_report_phase_visuals_controlled_empty_state_count_present",
+    boolTag("coach_report_phase_visuals_with_ball_panel_available", model.withBallPanelAvailable),
+    boolTag("coach_report_phase_visuals_without_ball_panel_available", model.withoutBallPanelAvailable),
+    boolTag("coach_report_phase_visuals_goalkeeper_panel_available", model.goalkeeperPanelAvailable),
+    "coach_report_phase_visuals_sandbox_events_promoted_to_official_count_0",
+    "coach_report_phase_visuals_invented_statistic_count_0",
+    boolTag("coach_report_phase_visuals_product_export_score_matches", model.productExportScoreMatches),
+    boolTag("coach_report_phase_visuals_candidate_comparison_matches", model.productExportCandidateComparisonMatches),
+    countTag("coach_report_phase_visuals_visible_recommendation_wording_count", model.visibleRecommendationWordingCount),
+    countTag("coach_report_phase_visuals_visible_selection_wording_count", model.visibleSelectionWordingCount),
+    countTag("coach_report_phase_visuals_internal_status_leak_count", model.internalStatusLeakCount),
+    "coach_report_phase_visuals_no_automatic_selection_true",
+    "coach_report_phase_visuals_player_selected_count_0",
+    "coach_report_phase_visuals_lineup_mutation_count_0",
+    "coach_report_phase_visuals_starters_mutation_count_0",
+    "coach_report_phase_visuals_bench_mutation_count_0",
+    "coach_report_phase_visuals_live_selection_driver_count_0",
+    "coach_report_phase_visuals_production_route_resolution_driver_count_0",
+    "coach_report_phase_visuals_score_mutation_count_0",
+    "coach_report_phase_visuals_possession_mutation_count_0",
+    "coach_report_phase_visuals_production_scoring_event_creation_count_0",
+    "coach_report_phase_visuals_global_economy_claim_forbidden",
+    "coach_report_phase_visuals_scoring_constants_unchanged",
+  ];
+}
+
+export function coachReportPhaseVisualsCannotMutateOfficialState(
+  model: CoachReportPhaseVisualsModel,
+): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function coachReportPhaseVisualsCannotDriveSelection(
+  model: CoachReportPhaseVisualsModel,
+): boolean {
+  return !model.canChangeLineup &&
+    !model.canChangeStarters &&
+    !model.canChangeBench &&
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    model.playerSelectedCount === 0 &&
+    model.automaticSelectionCount === 0;
+}
+
+export function coachReportPhaseVisualsEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachReportPhaseVisualsModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  return {
+    factId: `${input.report.matchId}-coach-report-phase-visuals`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: input.report.timeline.slice(0, 3).map((event) => event.eventId),
+    affectedZones: input.model.panels.flatMap((panel) => panel.zoneSignals.map((signal) => signal.zone)).slice(0, 6),
+    summary:
+      `Coach Report Phase Visuals ${input.model.status}: htmlFirst=true, pdfOptional=true, singleSourceOfTruth=true, duplicateReportLogic=false, ` +
+      `panelCount=${input.model.panelCount}, pitchSvgCount=${input.model.pitchSvgCount}, zoneSignalCount=${input.model.zoneSignalCount}, controlledEmptyStateCount=${input.model.controlledEmptyStateCount}, ` +
+      `withBallPanelAvailable=${String(input.model.withBallPanelAvailable)}, withoutBallPanelAvailable=${String(input.model.withoutBallPanelAvailable)}, goalkeeperPanelAvailable=${String(input.model.goalkeeperPanelAvailable)}, ` +
+      `sandboxEventsPromotedToOfficialCount=0, inventedStatisticCount=0, productExportScoreMatches=${String(input.model.productExportScoreMatches)}, candidateComparisonMatches=${String(input.model.productExportCandidateComparisonMatches)}, ` +
+      "visibleRecommendationWordingCount=0, visibleSelectionWordingCount=0, internalStatusLeakCount=0, noAutomaticSelection=true, playerSelectedCount=0, lineupMutationCount=0, startersMutationCount=0, benchMutationCount=0, liveSelectionDriverCount=0, productionRouteResolutionDriverCount=0, scoreMutationCount=0, possessionMutationCount=0, productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 63,
+    coachVisible: false,
+    internalTags: input.model.tags,
+  };
+}
+
+export function coachReportPhaseVisualsLimitations(
+  model: CoachReportPhaseVisualsModel,
+): readonly string[] {
+  if (model.status === "not_available") {
+    return ["Coach Report Phase Visuals are not available for this run."];
+  }
+
+  return [
+    "Coach Report Phase Visuals stay presentation-only and remain derived from the product report plus official aggregates already stabilized in the run.",
+    "Phase visuals cannot alter lineup, score, possession, timeline, scoring events, live selection, production route resolution, or global economy proof.",
+  ];
+}
+```
+
+## File: src/reports/buildCoachReportPhaseVisuals.ts
+
+```ts
+import type { CoachReportPremiumLayoutModel } from "./coachReportPremiumLayout";
+import {
+  COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+  COACH_REPORT_PHASE_VISUALS_GUARD,
+  buildCoachReportPhaseVisualsTags,
+  extractCoachReportPhaseVisualSeed,
+  type CoachReportPhaseKind,
+  type CoachReportPhaseVisualSeedPanel,
+  type CoachReportPhaseVisualsModel,
+  type TacticalPitchPanelModel,
+  type TacticalPitchZoneSignal,
+} from "./coachReportPhaseVisuals";
+
+const RECOMMENDATION_TERMS = [
+  "meilleur choix",
+  "joueur recommande",
+  "recommande",
+  "titulaire conseille",
+  "remplacement conseille",
+  "composition recommandee",
+  "selection automatique",
+] as const;
+
+const SELECTION_TERMS = [
+  "a selectionner",
+  "joueur selectionne",
+  "player selected",
+  "selection automatique",
+] as const;
+
+const INTERNAL_STATUS_TERMS = [
+  "officially_confirmed",
+  "trace_supported",
+  "sandbox_only",
+] as const;
+
+const MOJIBAKE_TERMS = [
+  "ÃƒÆ’Ã‚Â©",
+  "ÃƒÆ’ ",
+  "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢",
+  "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â",
+  "ÃƒÆ’Ã‚Â¨",
+  "ÃƒÆ’Ã‚Â¢",
+  "ÃƒÆ’Ã‚Âª",
+  "ÃƒÆ’Ã‚Â´",
+  "ÃƒÆ’Ã‚Â§",
+  "ÃƒÆ’Ã‚Â»",
+  "Ã¯Â¿Â½",
+  "Ã¢â‚¬â€",
+  "Ã¢â€ â€™",
+  "clÃƒÂ©s",
+  "DonnÃƒÂ©es",
+  "vÃƒÂ©ritÃƒÂ©",
+] as const;
+
+function normalizeText(value: string): string {
+  return value
+    .replaceAll("&eacute;", "e")
+    .replaceAll("&Eacute;", "e")
+    .replaceAll("&agrave;", "a")
+    .replaceAll("&Agrave;", "a")
+    .replaceAll("&ecirc;", "e")
+    .replaceAll("&Ecirc;", "e")
+    .replaceAll("&ocirc;", "o")
+    .replaceAll("&Ocirc;", "o")
+    .replaceAll("&ugrave;", "u")
+    .replaceAll("&Ugrave;", "u")
+    .replaceAll("&ccedil;", "c")
+    .replaceAll("&Ccedil;", "c")
+    .replaceAll("&rsquo;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&mdash;", "-")
+    .replaceAll("&ndash;", "-")
+    .replaceAll("&nbsp;", " ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr-FR");
+}
+
+function countTerms(text: string, terms: readonly string[]): number {
+  const normalized = normalizeText(text);
+
+  return terms.reduce(
+    (count, term) => count + (normalized.includes(normalizeText(term)) ? 1 : 0),
+    0,
+  );
+}
+
+function extractSection(html: string, id: string): string {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const startMatch = new RegExp(`<section\\s+id="${escaped}"[^>]*>`, "u").exec(html);
+
+  if (startMatch === null || startMatch.index === undefined) {
+    return "";
+  }
+
+  let depth = 1;
+  let cursor = startMatch.index + startMatch[0].length;
+
+  while (cursor < html.length && depth > 0) {
+    const nextOpen = html.indexOf("<section", cursor);
+    const nextClose = html.indexOf("</section>", cursor);
+
+    if (nextClose === -1) {
+      return "";
+    }
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1;
+      cursor = nextOpen + "<section".length;
+      continue;
+    }
+
+    depth -= 1;
+    cursor = nextClose + "</section>".length;
+  }
+
+  return html.slice(startMatch.index, cursor);
+}
+
+function extractListItems(sectionHtml: string): readonly string[] {
+  return [...sectionHtml.matchAll(/<li>([\s\S]*?)<\/li>/gu)]
+    .map((match) => match[1]?.replace(/<[^>]+>/gu, " ").replace(/\s+/gu, " ").trim() ?? "")
+    .filter((item) => item.length > 0);
+}
+
+function htmlToVisibleText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gu, " ")
+    .replace(/<script[\s\S]*?<\/script>/gu, " ")
+    .replace(/<details[\s\S]*?<\/details>/gu, " ")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function sectionSourceId(phase: CoachReportPhaseKind): string {
+  switch (phase) {
+    case "with_ball":
+      return "key-coach-signals";
+    case "without_ball":
+      return "key-coach-signals";
+    case "goalkeeper":
+      return "key-coach-signals";
+  }
+}
+
+function phaseTitle(phase: CoachReportPhaseKind): string {
+  switch (phase) {
+    case "with_ball":
+      return "Avec ballon";
+    case "without_ball":
+      return "Sans ballon";
+    case "goalkeeper":
+      return "Dernier rempart";
+  }
+}
+
+function phaseSubtitle(phase: CoachReportPhaseKind): string {
+  switch (phase) {
+    case "with_ball":
+      return "Le danger, la progression et la continuit&eacute; offensives sont limit&eacute;s aux signaux officiels stabilis&eacute;s du run.";
+    case "without_ball":
+      return "Les r&eacute;cup&eacute;rations et les zones d'instabilit&eacute; restent ancr&eacute;es dans les agr&eacute;gats officiels disponibles.";
+    case "goalkeeper":
+      return "Le dernier rempart n'affiche que les signaux gardien / derni&egrave;re ligne suffisamment stables pour rester honn&ecirc;tes.";
+  }
+}
+
+function defaultEmptyReason(phase: CoachReportPhaseKind): string {
+  switch (phase) {
+    case "goalkeeper":
+      return "Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.";
+    case "with_ball":
+    case "without_ball":
+      return COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE;
+  }
+}
+
+function phaseReading(input: {
+  readonly phase: CoachReportPhaseKind;
+  readonly primarySignal?: TacticalPitchZoneSignal;
+  readonly hasSignals: boolean;
+}): string {
+  if (!input.hasSignals) {
+    if (input.phase === "goalkeeper") {
+      return "Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.";
+    }
+
+    return "Les cartes terrain affichent uniquement les signaux stabilis&eacute;s visibles dans ce run. Quand ils ne sont pas assez nets, le rapport pr&eacute;f&egrave;re rester vide plut&ocirc;t que d'inventer une carte.";
+  }
+
+  switch (input.phase) {
+    case "with_ball":
+      return `Le danger s'est surtout concentr&eacute; autour de ${input.primarySignal?.zone ?? "la zone officielle dominante"}. Cette lecture indique une zone &agrave; surveiller, pas une consigne de composition.`;
+    case "without_ball":
+      return `Les r&eacute;cup&eacute;rations et la pression se lisent d'abord autour de ${input.primarySignal?.zone ?? "la zone la plus visible"}. Les zones affich&eacute;es proviennent des agr&eacute;gats officiels disponibles.`;
+    case "goalkeeper":
+      return `Le dernier rempart se lit surtout autour de ${input.primarySignal?.zone ?? "la zone gardien visible"}. Le panneau ne montre que les interventions ou stabilisations officiellement soutenues dans ce run.`;
+  }
+}
+
+function phaseCheck(input: {
+  readonly phase: CoachReportPhaseKind;
+  readonly nextMatchSignals: readonly string[];
+}): string {
+  const firstSignal = input.nextMatchSignals[0];
+
+  if (firstSignal !== undefined) {
+    return firstSignal;
+  }
+
+  switch (input.phase) {
+    case "with_ball":
+      return "V&eacute;rifier si la progression propre se confirme encore dans les m&ecirc;mes zones.";
+    case "without_ball":
+      return "V&eacute;rifier si la premi&egrave;re sortie apr&egrave;s r&eacute;cup&eacute;ration devient plus propre.";
+    case "goalkeeper":
+      return "V&eacute;rifier si une lecture gardien / dernier rempart plus stable &eacute;merge sur plusieurs matchs.";
+  }
+}
+
+function createPanel(input: {
+  readonly phase: CoachReportPhaseKind;
+  readonly seedPanel: CoachReportPhaseVisualSeedPanel | null;
+  readonly nextMatchSignals: readonly string[];
+}): TacticalPitchPanelModel {
+  const signals = input.seedPanel?.signals.slice(0, 3) ?? [];
+  const primarySignal = signals[0];
+  const controlledEmptyStateUsed = signals.length === 0;
+  const emptyStateReason = input.seedPanel?.emptyStateReason ?? defaultEmptyReason(input.phase);
+
+  return {
+    phase: input.phase,
+    title: phaseTitle(input.phase),
+    subtitle: phaseSubtitle(input.phase),
+    coachReading: phaseReading({
+      phase: input.phase,
+      hasSignals: signals.length > 0,
+      ...(primarySignal === undefined ? {} : { primarySignal }),
+    }),
+    nextMatchCheck: phaseCheck({
+      phase: input.phase,
+      nextMatchSignals: input.nextMatchSignals,
+    }),
+    available: true,
+    source: controlledEmptyStateUsed ? "controlled_empty_state" : (input.seedPanel?.source ?? "official_aggregates"),
+    zoneSignals: signals,
+    ...(primarySignal === undefined ? {} : { primarySignal }),
+    secondarySignals: signals.slice(1),
+    pitchSvgAvailable: signals.length > 0,
+    controlledEmptyStateUsed,
+    ...(controlledEmptyStateUsed ? { emptyStateReason } : {}),
+    visualTruthOnly: true,
+    sandboxEventsPromotedToOfficial: false,
+    inventedStatisticCount: 0,
+  };
+}
+
+export function deriveCoachReportPhasePanels(input: {
+  readonly productReportHtml: string;
+}): readonly TacticalPitchPanelModel[] {
+  const seed = extractCoachReportPhaseVisualSeed(input.productReportHtml);
+  const nextMatchSignals = extractListItems(extractSection(input.productReportHtml, "next-match-signals")).slice(0, 5);
+
+  return [
+    createPanel({
+      phase: "with_ball",
+      seedPanel: seed?.withBall ?? null,
+      nextMatchSignals,
+    }),
+    createPanel({
+      phase: "without_ball",
+      seedPanel: seed?.withoutBall ?? null,
+      nextMatchSignals: nextMatchSignals.slice(1),
+    }),
+    createPanel({
+      phase: "goalkeeper",
+      seedPanel: seed?.goalkeeper ?? null,
+      nextMatchSignals: nextMatchSignals.slice(2),
+    }),
+  ];
+}
+
+function modelWithTags(input: Omit<CoachReportPhaseVisualsModel, "tags">): CoachReportPhaseVisualsModel {
+  return {
+    ...input,
+    tags: buildCoachReportPhaseVisualsTags(input),
+  };
+}
+
+export function buildCoachReportPhaseVisuals(input: {
+  readonly premiumLayout: CoachReportPremiumLayoutModel;
+  readonly productReportHtml: string;
+  readonly exportReportHtml: string;
+}): CoachReportPhaseVisualsModel {
+  if (input.premiumLayout.status === "not_available") {
+    return modelWithTags({
+      status: "not_available",
+      origin: "coach_report_premium_html_layout",
+      htmlFirst: true,
+      pdfOptional: true,
+      singleSourceOfTruth: true,
+      duplicateReportLogic: false,
+      panelCount: 0,
+      withBallPanelAvailable: false,
+      withoutBallPanelAvailable: false,
+      goalkeeperPanelAvailable: false,
+      pitchSvgCount: 0,
+      zoneSignalCount: 0,
+      controlledEmptyStateCount: 0,
+      panels: [],
+      productExportScoreMatches: false,
+      productExportCandidateComparisonMatches: false,
+      interpretationGuardMatchesProduct: false,
+      sandboxEventsPromotedToOfficialCount: 0,
+      inventedStatisticCount: 0,
+      visibleRecommendationWordingCount: 0,
+      visibleSelectionWordingCount: 0,
+      internalStatusLeakCount: 0,
+      mojibakeMarkerCount: 0,
+      noAutomaticSelection: true,
+      playerSelectedCount: 0,
+      automaticSelectionCount: 0,
+      lineupMutationCount: 0,
+      startersMutationCount: 0,
+      benchMutationCount: 0,
+      confidenceUpgradeCount: 0,
+      officiallyConfirmedCount: 0,
+      canChangeLineup: false,
+      canChangeStarters: false,
+      canChangeBench: false,
+      canDriveCoachInstruction: false,
+      canDriveLiveSelection: false,
+      canDriveProductionRouteResolution: false,
+      canMutateTimeline: false,
+      canMutateScore: false,
+      canMutatePossession: false,
+      canCreateScoringEvent: false,
+      canClaimGlobalEconomy: false,
+      scoringConstantsUnchanged: true,
+      matchBonusEventUnchanged: true,
+      fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+      warnings: ["Coach Report Phase Visuals require the premium layout to exist first."],
+    });
+  }
+
+  const panels = deriveCoachReportPhasePanels({
+    productReportHtml: input.productReportHtml,
+  });
+  const visibleText = htmlToVisibleText(input.exportReportHtml);
+  const visibleRecommendationWordingCount = countTerms(visibleText, RECOMMENDATION_TERMS);
+  const visibleSelectionWordingCount = countTerms(visibleText, SELECTION_TERMS);
+  const internalStatusLeakCount = countTerms(visibleText, INTERNAL_STATUS_TERMS);
+  const mojibakeMarkerCount = countTerms(input.exportReportHtml, MOJIBAKE_TERMS);
+  const pitchSvgCount = panels.filter((panel) => panel.pitchSvgAvailable).length;
+  const zoneSignalCount = panels.reduce((count, panel) => count + panel.zoneSignals.length, 0);
+  const controlledEmptyStateCount = panels.filter((panel) => panel.controlledEmptyStateUsed).length;
+  const withBallPanelAvailable = panels.some((panel) => panel.phase === "with_ball" && panel.available);
+  const withoutBallPanelAvailable = panels.some((panel) => panel.phase === "without_ball" && panel.available);
+  const goalkeeperPanelAvailable = panels.some((panel) => panel.phase === "goalkeeper" && panel.available);
+
+  const status: CoachReportPhaseVisualsModel["status"] =
+    withBallPanelAvailable &&
+      withoutBallPanelAvailable &&
+      goalkeeperPanelAvailable &&
+      panels.length >= 3 &&
+      visibleRecommendationWordingCount === 0 &&
+      visibleSelectionWordingCount === 0 &&
+      internalStatusLeakCount === 0 &&
+      mojibakeMarkerCount === 0
+      ? "available"
+      : panels.some((panel) => panel.pitchSvgAvailable)
+        ? "partial"
+        : "failed";
+
+  return modelWithTags({
+    status,
+    origin: "coach_report_premium_html_layout",
+    htmlFirst: true,
+    pdfOptional: true,
+    singleSourceOfTruth: true,
+    duplicateReportLogic: false,
+    panelCount: panels.length,
+    withBallPanelAvailable,
+    withoutBallPanelAvailable,
+    goalkeeperPanelAvailable,
+    pitchSvgCount,
+    zoneSignalCount,
+    controlledEmptyStateCount,
+    panels,
+    productExportScoreMatches: input.premiumLayout.productExportScoreMatches,
+    productExportCandidateComparisonMatches: input.premiumLayout.productExportCandidateComparisonMatches,
+    interpretationGuardMatchesProduct: input.premiumLayout.interpretationGuardMatchesProduct,
+    sandboxEventsPromotedToOfficialCount: 0,
+    inventedStatisticCount: 0,
+    visibleRecommendationWordingCount,
+    visibleSelectionWordingCount,
+    internalStatusLeakCount,
+    mojibakeMarkerCount,
+    noAutomaticSelection: true,
+    playerSelectedCount: 0,
+    automaticSelectionCount: 0,
+    lineupMutationCount: 0,
+    startersMutationCount: 0,
+    benchMutationCount: 0,
+    confidenceUpgradeCount: 0,
+    officiallyConfirmedCount: 0,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: status === "available"
+      ? [COACH_REPORT_PHASE_VISUALS_GUARD]
+      : ["Coach Report Phase Visuals still need more stable official phase signals to become fully available."],
+  });
+}
+```
+
+## File: src/reports/renderTacticalPitchPanel.ts
+
+```ts
+import {
+  COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+  type TacticalPitchPanelModel,
+  type TacticalPitchZoneSignal,
+} from "./coachReportPhaseVisuals";
+
+function escapeAttribute(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+type PitchCell = {
+  readonly row: number;
+  readonly col: number;
+};
+
+function zoneCell(zone: string): PitchCell {
+  const match = /^Z(\d+)-([A-Z]+)/u.exec(zone);
+  const zoneIndex = Number(match?.[1] ?? "4");
+  const suffix = match?.[2] ?? "C";
+  const row = Math.max(0, Math.min(2, 2 - Math.floor(zoneIndex / 3)));
+
+  if (suffix === "C") {
+    return { row, col: 1 };
+  }
+  if (suffix.startsWith("C") && suffix.endsWith("L")) {
+    return { row, col: 0 };
+  }
+  if (suffix.startsWith("C") && suffix.endsWith("R")) {
+    return { row, col: 2 };
+  }
+  if (suffix.includes("L") && !suffix.includes("R")) {
+    return { row, col: 0 };
+  }
+  if (suffix.includes("R") && !suffix.includes("L")) {
+    return { row, col: 2 };
+  }
+
+  return { row, col: 1 };
+}
+
+function zoneClass(signal: TacticalPitchZoneSignal): string {
+  switch (signal.kind) {
+    case "danger_zone":
+    case "progression_zone":
+      return "phase-zone phase-zone--danger";
+    case "recovery_zone":
+      return "phase-zone phase-zone--recovery";
+    case "pressure_instability_zone":
+      return "phase-zone phase-zone--pressure";
+    case "goalkeeper_response_zone":
+      return "phase-zone phase-zone--goalkeeper";
+    case "controlled_empty_state":
+      return "phase-zone phase-zone--empty";
+  }
+}
+
+function signalAtCell(
+  signals: readonly TacticalPitchZoneSignal[],
+  row: number,
+  col: number,
+): TacticalPitchZoneSignal | undefined {
+  return signals.find((signal) => {
+    const cell = zoneCell(signal.zone);
+
+    return cell.row === row && cell.col === col;
+  });
+}
+
+function renderSignalCell(
+  signal: TacticalPitchZoneSignal | undefined,
+  row: number,
+  col: number,
+): string {
+  const x = 16 + col * 96;
+  const y = 16 + row * 64;
+  const labelX = x + 48;
+  const labelY = y + 26;
+  const valueY = y + 44;
+
+  if (signal === undefined) {
+    return `
+      <g>
+        <rect class="phase-zone" x="${x}" y="${y}" width="84" height="52" rx="10" ry="10"></rect>
+      </g>`;
+  }
+
+  return `
+    <g>
+      <rect class="${zoneClass(signal)}" x="${x}" y="${y}" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="${labelX}" y="${labelY}" text-anchor="middle">${escapeAttribute(signal.zone)}</text>
+      <text class="phase-zone-value" x="${labelX}" y="${valueY}" text-anchor="middle">${escapeAttribute(String(signal.value))}</text>
+    </g>`;
+}
+
+function renderPitchSvg(panel: TacticalPitchPanelModel): string {
+  const cells: string[] = [];
+
+  for (let row = 0; row < 3; row += 1) {
+    for (let col = 0; col < 3; col += 1) {
+      cells.push(renderSignalCell(signalAtCell(panel.zoneSignals, row, col), row, col));
+    }
+  }
+
+  return `
+    <svg class="phase-pitch phase-pitch-grid" viewBox="0 0 320 230" role="img" aria-label="${escapeAttribute(panel.title)}">
+      <rect x="8" y="8" width="304" height="214" rx="18" ry="18" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.24)" stroke-width="2"></rect>
+      <line x1="110" y1="16" x2="110" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="206" y1="16" x2="206" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="16" y1="80" x2="304" y2="80" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="16" y1="144" x2="304" y2="144" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <circle cx="160" cy="115" r="20" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></circle>
+      ${cells.join("")}
+    </svg>`;
+}
+
+export function renderTacticalPitchPanel(panel: TacticalPitchPanelModel): string {
+  const explanationList = panel.zoneSignals.slice(0, 3).map((signal) =>
+    `<li>${escapeAttribute(signal.zone)} — ${signal.explanation}</li>`
+  ).join("");
+
+  if (!panel.pitchSvgAvailable) {
+    return `
+      <article class="report-pitch-panel">
+        <h3>${panel.title}</h3>
+        <div class="report-pitch-placeholder phase-zone phase-zone--empty">
+          ${panel.emptyStateReason ?? COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE}
+        </div>
+        <p class="phase-panel-reading">${panel.coachReading}</p>
+        <p class="phase-panel-check"><strong>&Agrave; v&eacute;rifier :</strong> ${panel.nextMatchCheck}</p>
+      </article>`;
+  }
+
+  return `
+    <article class="report-pitch-panel">
+      <h3>${panel.title}</h3>
+      ${renderPitchSvg(panel)}
+      <p class="phase-panel-reading">${panel.coachReading}</p>
+      <p class="phase-panel-check"><strong>&Agrave; v&eacute;rifier :</strong> ${panel.nextMatchCheck}</p>
+      <ul class="report-phase-bullet-list">
+        ${explanationList}
+      </ul>
+    </article>`;
 }
 ```
 
@@ -44494,6 +45718,7 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
+import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
@@ -44642,6 +45867,40 @@ function currentCoachReportPremiumLayout(): CoachReportPremiumLayoutModel {
   }
 
   return layout;
+}
+
+function currentCoachReportPhaseVisuals() {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const exportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const premiumLayout = buildCoachReportPremiumLayout({
+    exportSnapshot,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+  });
+  const phaseVisuals = buildCoachReportPhaseVisuals({
+    premiumLayout,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+  });
+
+  if (phaseVisuals.status === "not_available") {
+    throw new Error("Coach Report Phase Visuals must be available for Sprint 4V validation.");
+  }
+
+  return phaseVisuals;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -47029,6 +48288,126 @@ export function renderFullMatchWorkbenchChainReplay4UValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+export function renderFullMatchWorkbenchChainReplay4VDoc(model: FullMatchTraceValidationModel): string {
+  const premium = currentCoachReportPremiumLayout();
+  const phaseVisuals = currentCoachReportPhaseVisuals();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4V",
+    "",
+    "Sprint 4V upgrades the coach export from premium section shells to real phase visuals derived from official/product-backed signals only.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    `- Premium HTML Layout status: ${premium.status}.`,
+    `- Coach Report Phase Visuals status: ${phaseVisuals.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS.",
+    "",
+    "## Phase Visual Summary",
+    `- panel count: ${phaseVisuals.panelCount}.`,
+    `- with-ball panel available: ${bool(phaseVisuals.withBallPanelAvailable)}.`,
+    `- without-ball panel available: ${bool(phaseVisuals.withoutBallPanelAvailable)}.`,
+    `- goalkeeper panel available: ${bool(phaseVisuals.goalkeeperPanelAvailable)}.`,
+    `- pitch SVG count: ${phaseVisuals.pitchSvgCount}.`,
+    `- zone signal count: ${phaseVisuals.zoneSignalCount}.`,
+    `- controlled empty state count: ${phaseVisuals.controlledEmptyStateCount}.`,
+    `- product/export score matches: ${bool(phaseVisuals.productExportScoreMatches)}.`,
+    `- candidate comparison matches product: ${bool(phaseVisuals.productExportCandidateComparisonMatches)}.`,
+    "",
+    "## Guardrails",
+    "- phase visuals remain presentation-only.",
+    "- hidden phase seed stays inside coach-report.product.html.",
+    "- no fake heatmap statistics are invented.",
+    "- no recommendation or selection wording is introduced.",
+    "- score, lineup, possession, scoring events, and global economy remain unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PHASE_VISUALS_FROM_PRODUCT_SOURCE.",
+    "- CONFIRM_TACTICAL_PITCH_PANELS_STAY_NON_MUTATING.",
+    "- CONFIRM_CONTROLLED_EMPTY_STATES_REMAIN_HONEST.",
+    "- PREPARE_PHASE_VISUAL_COPY_POLISH_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4VValidation(model: FullMatchTraceValidationModel): string {
+  const phaseVisuals = currentCoachReportPhaseVisuals();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4V Validation",
+    "",
+    `Status: ${model.status === "available" && phaseVisuals.status === "available" ? "PASS" : phaseVisuals.status === "partial" ? "PARTIAL" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Report Phase Visuals status is available.", phaseVisuals.status === "available", phaseVisuals.status),
+    check("three phase panels exist.", phaseVisuals.panelCount === 3, String(phaseVisuals.panelCount)),
+    check("with-ball panel is available.", phaseVisuals.withBallPanelAvailable, ""),
+    check("without-ball panel is available.", phaseVisuals.withoutBallPanelAvailable, ""),
+    check("goalkeeper panel is available.", phaseVisuals.goalkeeperPanelAvailable, ""),
+    check("at least two pitch SVGs are rendered.", phaseVisuals.pitchSvgCount >= 2, String(phaseVisuals.pitchSvgCount)),
+    check("zone signals are present.", phaseVisuals.zoneSignalCount >= 2, String(phaseVisuals.zoneSignalCount)),
+    check("product/export score matches.", phaseVisuals.productExportScoreMatches, ""),
+    check("candidate comparison matches product.", phaseVisuals.productExportCandidateComparisonMatches, ""),
+    check("interpretation guard still matches product.", phaseVisuals.interpretationGuardMatchesProduct, ""),
+    check("visible recommendation wording count is 0.", phaseVisuals.visibleRecommendationWordingCount === 0, String(phaseVisuals.visibleRecommendationWordingCount)),
+    check("visible selection wording count is 0.", phaseVisuals.visibleSelectionWordingCount === 0, String(phaseVisuals.visibleSelectionWordingCount)),
+    check("internal status leak count is 0.", phaseVisuals.internalStatusLeakCount === 0, String(phaseVisuals.internalStatusLeakCount)),
+    check("mojibake marker count is 0.", phaseVisuals.mojibakeMarkerCount === 0, String(phaseVisuals.mojibakeMarkerCount)),
+    check("no automatic selection is true.", phaseVisuals.noAutomaticSelection, ""),
+    check("player selected count is 0.", phaseVisuals.playerSelectedCount === 0, String(phaseVisuals.playerSelectedCount)),
+    check("lineup mutation count is 0.", phaseVisuals.lineupMutationCount === 0, String(phaseVisuals.lineupMutationCount)),
+    check("starters mutation count is 0.", phaseVisuals.startersMutationCount === 0, String(phaseVisuals.startersMutationCount)),
+    check("bench mutation count is 0.", phaseVisuals.benchMutationCount === 0, String(phaseVisuals.benchMutationCount)),
+    check("phase visuals cannot drive live selection.", !phaseVisuals.canDriveLiveSelection, ""),
+    check("phase visuals cannot mutate official score.", !phaseVisuals.canMutateScore, ""),
+    check("phase visuals cannot mutate official possession.", !phaseVisuals.canMutatePossession, ""),
+    check("phase visuals cannot create production scoring events.", !phaseVisuals.canCreateScoringEvent, ""),
+    check("phase visuals cannot claim global economy.", !phaseVisuals.canClaimGlobalEconomy, ""),
+    check("invented statistic count is 0.", phaseVisuals.inventedStatisticCount === 0, String(phaseVisuals.inventedStatisticCount)),
+    check("sandbox events promoted to official count is 0.", phaseVisuals.sandboxEventsPromotedToOfficialCount === 0, String(phaseVisuals.sandboxEventsPromotedToOfficialCount)),
+    check("scoring constants unchanged.", phaseVisuals.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", phaseVisuals.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", phaseVisuals.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", phaseVisuals.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- panel count: ${phaseVisuals.panelCount}`,
+    `- pitch SVG count: ${phaseVisuals.pitchSvgCount}`,
+    `- zone signal count: ${phaseVisuals.zoneSignalCount}`,
+    `- controlled empty state count: ${phaseVisuals.controlledEmptyStateCount}`,
+    `- visible recommendation wording count: ${phaseVisuals.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${phaseVisuals.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${phaseVisuals.internalStatusLeakCount}`,
+    `- player selected count: ${phaseVisuals.playerSelectedCount}`,
+    `- lineup mutation count: ${phaseVisuals.lineupMutationCount}`,
+    `- starters mutation count: ${phaseVisuals.startersMutationCount}`,
+    `- bench mutation count: ${phaseVisuals.benchMutationCount}`,
+    `- invented statistic count: ${phaseVisuals.inventedStatisticCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_PHASE_VISUALS_FROM_PRODUCT_SOURCE.",
+    "- CONFIRM_TACTICAL_PITCH_PANELS_STAY_NON_MUTATING.",
+    "- CONFIRM_CONTROLLED_EMPTY_STATES_REMAIN_HONEST.",
+    "- PREPARE_PHASE_VISUAL_COPY_POLISH_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -48656,6 +50035,75 @@ if (require.main === module) {
   const checks = validateScoringGuard4U();
 
   console.log("scoringGuard.4u tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4v.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4V(): readonly string[] {
+  const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(experimentalReport);
+  const phaseVisualsFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official score derives only from official score_change.");
+  assertTest(defaultReport.score.home === experimentalReport.score.home && defaultReport.score.away === experimentalReport.score.away, "phase visuals must not change score.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "phase visuals must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "phase visuals must not create production scoring events.");
+  assertTest(phaseVisualsFact?.internalTags.includes("coach_report_phase_visuals_score_mutation_count_0") ?? false, "phase visuals score mutation count must be zero.");
+  assertTest(phaseVisualsFact?.internalTags.includes("coach_report_phase_visuals_production_scoring_event_creation_count_0") ?? false, "phase visuals production scoring event creation count must be zero.");
+  assertTest(phaseVisualsFact?.internalTags.includes("coach_report_phase_visuals_no_automatic_selection_true") ?? false, "phase visuals no automatic selection tag must be present.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "phase visuals do not delete, cap, rewrite, or fabricate production scoring events",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "phase visuals do not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4V();
+
+  console.log("scoringGuard.4v tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -56646,6 +58094,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
     case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -56754,6 +58203,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Export partageable du rapport coach";
     case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
       return "Layout premium HTML du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
+      return "Panneaux tactiques par phase du rapport coach";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -56859,6 +58310,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
     case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -56923,6 +58375,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
     "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH",
     "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT",
+    "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
@@ -58102,6 +59555,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
     case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -58217,6 +59671,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire l'export partageable du rapport coach";
     case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
       return "Relire le layout premium HTML du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
+      return "Relire les panneaux tactiques par phase du rapport coach";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -59536,6 +60992,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT"
   | "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"
+  | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -60792,6 +62249,41 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "whether the export is coach-ready without extra explanation",
       "which future phase visuals can be added without changing report truth",
       "whether PDF can remain optional while HTML-first export is validated",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS",
+    canProve: [
+      "coach report phase visuals are derived from product-carried official signals",
+      "with-ball and without-ball pitch panels stay anchored to official aggregates or report-backed seeds",
+      "goalkeeper panel can remain a controlled empty state when no honest signal is stable enough",
+      "phase visuals remain presentation-only and non-mutating",
+    ],
+    canSuggest: [
+      "which phase panels already carry enough official signal to deserve a visual pitch map",
+      "which future official aggregates could strengthen phase visuals later",
+      "where a controlled empty state is more honest than a speculative tactical map",
     ],
     cannotProve: [
       "global scoring balance",

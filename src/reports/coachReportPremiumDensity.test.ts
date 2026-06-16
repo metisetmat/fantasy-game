@@ -25,14 +25,21 @@ export function validateCoachReportPremiumDensity(): readonly string[] {
   assertTest(executiveBulletCount <= 5, "top summary must have at most 5 bullets.");
   assertTest(exportHtml.includes("report-appendix-stack"), "appendices must be visually secondary.");
   assertTest(appendicesIndex > playersIndex, "technical details must appear after coach-facing reading.");
-  assertTest(exportHtml.includes("Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture."), "phase sections must support controlled empty states.");
+  const hasPhasePitchVisual =
+    exportHtml.includes("class=\"phase-pitch phase-pitch-grid\"") ||
+    exportHtml.includes("class=\"report-pitch-placeholder phase-zone phase-zone--empty\"") ||
+    exportHtml.includes("Les cartes terrain affichent uniquement les signaux");
+  assertTest(
+    hasPhasePitchVisual,
+    "phase sections must expose a pitch visual, a controlled empty panel, or the visible phase-visual guard.",
+  );
   assertTest(!exportHtml.includes("xG") && !exportHtml.includes("heatmap certifiee"), "no fake phase statistics may be invented.");
 
   return [
     "top summary has at most 5 bullets",
     "appendices are visually secondary",
     "technical details are not displayed before coach-facing reading",
-    "phase sections can show controlled empty states",
+    "phase sections expose a pitch visual, a controlled empty panel, or the visible phase-visual guard",
     "no fake phase statistics are invented",
   ];
 }

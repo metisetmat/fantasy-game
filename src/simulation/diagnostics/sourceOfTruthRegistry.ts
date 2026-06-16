@@ -44,6 +44,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT"
   | "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"
+  | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1300,6 +1301,41 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "whether the export is coach-ready without extra explanation",
       "which future phase visuals can be added without changing report truth",
       "whether PDF can remain optional while HTML-first export is validated",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS",
+    canProve: [
+      "coach report phase visuals are derived from product-carried official signals",
+      "with-ball and without-ball pitch panels stay anchored to official aggregates or report-backed seeds",
+      "goalkeeper panel can remain a controlled empty state when no honest signal is stable enough",
+      "phase visuals remain presentation-only and non-mutating",
+    ],
+    canSuggest: [
+      "which phase panels already carry enough official signal to deserve a visual pitch map",
+      "which future official aggregates could strengthen phase visuals later",
+      "where a controlled empty state is more honest than a speculative tactical map",
     ],
     cannotProve: [
       "global scoring balance",
