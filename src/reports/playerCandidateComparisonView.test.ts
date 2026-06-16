@@ -1,6 +1,7 @@
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
+import { buildPlayerCandidateComparisonView } from "./buildPlayerCandidateComparisonView";
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
 
 function assertTest(condition: boolean, message: string): asserts condition {
@@ -30,6 +31,19 @@ export function validatePlayerCandidateComparisonView(): readonly string[] {
   assertTest(comparison.complementaryCandidateCount >= 0, "complementary candidate count must be present.");
   assertTest(comparison.noAutomaticSelection, "comparison view must keep no automatic selection true.");
   assertTest(comparison.playerSelectedCount === 0, "comparison view must not select a player.");
+  const failedComparison = buildPlayerCandidateComparisonView({
+    rosterCoverage: {
+      ...buildCoachProductReportViewFromMatchReport(
+        report,
+        rosterCoverageFixturePlayers,
+      ).rosterCoverageMatchup!,
+      status: "failed",
+      warnings: ["synthetic failed coverage for test"],
+    },
+  });
+  assertTest(failedComparison.status === "failed", "failed roster coverage status must be preserved.");
+  assertTest(failedComparison.profileBlockCount === 0, "failed comparison view must not emit profile blocks.");
+  assertTest(failedComparison.totalCandidateCount === 0, "failed comparison view must not emit candidate counts as available.");
 
   return [
     "comparison view model exists",
@@ -39,6 +53,7 @@ export function validatePlayerCandidateComparisonView(): readonly string[] {
     "candidate counts are present",
     "no automatic selection remains true",
     "no player is selected",
+    "failed roster coverage stays failed downstream",
   ];
 }
 

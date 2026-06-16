@@ -270,9 +270,9 @@ function modelWithTags(input: Omit<PlayerCandidateComparisonViewModel, "tags">):
 export function buildPlayerCandidateComparisonView(input: {
   readonly rosterCoverage: RosterCoverageMatchupModel;
 }): PlayerCandidateComparisonViewModel {
-  if (input.rosterCoverage.status === "not_available") {
+  if (input.rosterCoverage.status === "not_available" || input.rosterCoverage.status === "failed") {
     return modelWithTags({
-      status: "not_available",
+      status: input.rosterCoverage.status,
       origin: "roster_coverage_matchup",
       profileBlockCount: 0,
       totalCandidateCount: 0,
@@ -310,7 +310,12 @@ export function buildPlayerCandidateComparisonView(input: {
       scoringConstantsUnchanged: true,
       matchBonusEventUnchanged: true,
       fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
-      warnings: ["Player Candidate Comparison View requires an available Roster Coverage Matchup model."],
+      warnings: input.rosterCoverage.status === "failed"
+        ? [
+            ...input.rosterCoverage.warnings,
+            "Player Candidate Comparison View is blocked because Roster Coverage Matchup failed upstream.",
+          ]
+        : ["Player Candidate Comparison View requires an available Roster Coverage Matchup model."],
     });
   }
 
@@ -323,7 +328,7 @@ export function buildPlayerCandidateComparisonView(input: {
   const complementaryCandidateCount = profileBlocks.reduce((sum, block) => sum + block.complementaryCandidateCount, 0);
 
   return modelWithTags({
-    status: input.rosterCoverage.status === "partial" ? "partial" : "available",
+    status: input.rosterCoverage.status,
     origin: "roster_coverage_matchup",
     profileBlockCount: profileBlocks.length,
     totalCandidateCount,

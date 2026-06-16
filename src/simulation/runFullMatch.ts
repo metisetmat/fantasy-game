@@ -183,6 +183,9 @@ import {
   coachProductReportPolishEvidenceFact,
   coachProductReportPolishLimitations,
 } from "../reports/coachProductReportPolish";
+import { renderCoachProductReport } from "../reports/renderCoachProductReport";
+import { buildCoachReportExportSnapshot } from "../reports/buildCoachReportExportSnapshot";
+import { coachReportExportSnapshotEvidenceFact } from "../reports/coachReportExportSnapshot";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3149,6 +3152,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const coachProductReportPolishModel = buildCoachProductReportPolish({
     productReportView: coachProductReportViewModel,
   });
+  const coachProductReportHtml = renderCoachProductReport(coachProductReportViewModel);
+  const coachReportExportSnapshotModel = buildCoachReportExportSnapshot({
+    productReportHtml: coachProductReportHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3394,6 +3402,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachProductReportPolishModel,
   });
+  const coachReportExportSnapshotModelFact = coachReportExportSnapshotEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportExportSnapshotModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3439,6 +3452,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachProductReportPolishFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachProductReportPolishModelFact
     : null;
+  const experimentalCoachReportExportSnapshotFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportExportSnapshotModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3477,6 +3493,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalPlayerMatchupCalibrationFact === null ? [] : [experimentalPlayerMatchupCalibrationFact]),
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
+    ...(experimentalCoachReportExportSnapshotFact === null ? [] : [experimentalCoachReportExportSnapshotFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),

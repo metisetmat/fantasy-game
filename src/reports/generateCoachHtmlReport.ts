@@ -6,13 +6,21 @@ import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
+import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 
-function writeLatestCoachReport(): void {
+export function writeLatestCoachReport(): void {
   const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
   const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
   const reportsDirectory = join(process.cwd(), "reports");
+  const productHtml = renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
+    experimentalReport,
+    rosterCoverageFixturePlayers,
+  ));
+  const exportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -37,10 +45,12 @@ function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
-      experimentalReport,
-      rosterCoverageFixturePlayers,
-    )),
+    productHtml,
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "coach-report.export.html"),
+    exportHtml,
     "utf8",
   );
 
@@ -49,6 +59,7 @@ function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.default.html");
   console.log("Generated reports/coach-report.experimental.html");
   console.log("Generated reports/coach-report.product.html");
+  console.log("Generated reports/coach-report.export.html");
 }
 
 if (require.main === module) {

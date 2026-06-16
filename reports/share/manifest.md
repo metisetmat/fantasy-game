@@ -1,9 +1,9 @@
 # Share Pack
 
-Generated: 2026-06-16T12:35:15.226Z
-Task/sprint: Sprint 4S - Player Card Polish & Candidate Comparison
+Generated: 2026-06-16T15:26:59.196Z
+Task/sprint: Sprint 4T - Coach Report PDF Export & Share Snapshot
 Mode: MINIMAL_REVIEW
-Final file count: 19
+Final file count: 20
 
 Upload every file in this reports/share directory.
 
@@ -20,13 +20,14 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.product.html
+- coach-report.export.html
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4s.md
-- validation.fullmatch-workbench-chain-replay-4s.md
+- fullmatch-workbench-chain-replay-4t.md
+- validation.fullmatch-workbench-chain-replay-4t.md
 - README.md
 
 ## Bundle Files

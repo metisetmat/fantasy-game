@@ -42,6 +42,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
+  | "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1235,6 +1236,41 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "normal live selection quality",
       "that any profile must be selected",
       "that sandbox or diagnostic content is official truth",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT",
+    canProve: [
+      "coach report export snapshot is derived from coach-report.product.html",
+      "print-ready export HTML keeps the same score, sections, candidate comparison, and interpretation guard",
+      "print CSS and page-break CSS are present",
+      "export remains non-prescriptive and non-mutating",
+    ],
+    canSuggest: [
+      "whether the coach report can be shared outside the app as a print-ready snapshot",
+      "whether PDF generation can stay optional while print-ready HTML is validated",
+      "which export layout constraints still need UI wiring later",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
     ],
     cannotOverride: [
       "lineup",
