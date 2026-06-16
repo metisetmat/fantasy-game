@@ -96,6 +96,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -209,6 +210,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le polish du rapport coach produit";
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
       return "Relire l'export partageable du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
+      return "Relire le layout premium HTML du rapport coach";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

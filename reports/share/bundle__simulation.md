@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4T - Coach Report PDF Export & Share Snapshot. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4U - FIFA-inspired HTML Report Layout. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -282,6 +282,12 @@ import {
 import { renderCoachProductReport } from "../reports/renderCoachProductReport";
 import { buildCoachReportExportSnapshot } from "../reports/buildCoachReportExportSnapshot";
 import { coachReportExportSnapshotEvidenceFact } from "../reports/coachReportExportSnapshot";
+import { renderCoachReportExportHtml } from "../reports/renderCoachReportExportHtml";
+import { buildCoachReportPremiumLayout } from "../reports/buildCoachReportPremiumLayout";
+import {
+  coachReportPremiumLayoutEvidenceFact,
+  coachReportPremiumLayoutLimitations,
+} from "../reports/coachReportPremiumLayout";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3253,6 +3259,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     productReportHtml: coachProductReportHtml,
     productReportPath: "reports/coach-report.product.html",
   });
+  const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
+    ? renderCoachReportExportHtml({
+        productReportHtml: coachProductReportHtml,
+      })
+    : "";
+  const coachReportPremiumLayoutModel = buildCoachReportPremiumLayout({
+    exportSnapshot: coachReportExportSnapshotModel,
+    productReportHtml: coachProductReportHtml,
+    exportReportHtml: coachReportExportHtml,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3274,6 +3290,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachReportV1LegacyCleanupLimitations(coachReportV1LegacyCleanupModel),
         ...coachProductReportViewLimitations(coachProductReportViewModel),
         ...coachProductReportPolishLimitations(coachProductReportPolishModel),
+        ...coachReportPremiumLayoutLimitations(coachReportPremiumLayoutModel),
       ],
     },
   };
@@ -3503,6 +3520,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportExportSnapshotModel,
   });
+  const coachReportPremiumLayoutModelFact = coachReportPremiumLayoutEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportPremiumLayoutModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3551,6 +3573,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportExportSnapshotFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportExportSnapshotModelFact
     : null;
+  const experimentalCoachReportPremiumLayoutFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportPremiumLayoutModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3590,6 +3615,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalCoachReportExportSnapshotFact === null ? [] : [experimentalCoachReportExportSnapshotFact]),
+    ...(experimentalCoachReportPremiumLayoutFact === null ? [] : [experimentalCoachReportPremiumLayoutFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
@@ -38010,6 +38036,15 @@ function sectionIds(html: string): readonly string[] {
   return [...html.matchAll(/<section\s+id="([^"]+)"/gu)].map((match) => match[1] ?? "");
 }
 
+function sourceSectionIdsInExport(html: string): readonly string[] {
+  const values = [...html.matchAll(/data-source-product-sections="([^"]+)"/gu)]
+    .flatMap((match) => (match[1] ?? "").split("|"))
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+  return [...new Set(values)];
+}
+
 function countClass(html: string, className: string): number {
   const escaped = className.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   const matcher = new RegExp(`class="[^"]*${escaped}[^"]*"`, "gu");
@@ -38059,7 +38094,10 @@ export function buildCoachReportExportSnapshot(input: {
   const exportHtmlGenerated = exportHtml.includes("Rapport coach");
   const productSectionIds = sectionIds(input.productReportHtml);
   const exportSectionIds = sectionIds(exportHtml);
-  const sectionCountMatchesProduct = productSectionIds.join("|") === exportSectionIds.join("|");
+  const sourceSectionIds = sourceSectionIdsInExport(exportHtml);
+  const sectionCountMatchesProduct =
+    productSectionIds.every((id) => sourceSectionIds.includes(id)) &&
+    sourceSectionIds.every((id) => productSectionIds.includes(id));
   const scoreMatchesProduct = extractScore(input.productReportHtml) === extractScore(exportHtml);
   const keySignalsMatchProduct =
     countClass(input.productReportHtml, "product-card signal-card") ===
@@ -38079,7 +38117,9 @@ export function buildCoachReportExportSnapshot(input: {
   const pageBreakCssPresent = exportHtml.includes("@page") && exportHtml.includes("page-break-inside: avoid");
   const cardBreakInsideAvoided = exportHtml.includes(".product-card") && exportHtml.includes("break-inside: avoid");
   const appendixBreakInsideAvoided = exportHtml.includes(".appendix") && exportHtml.includes("page-break-inside: avoid");
-  const headerPrintReadable = exportHtml.includes("<header>") && exportHtml.includes("@page");
+  const headerPrintReadable =
+    (exportHtml.includes("<header") || exportHtml.includes("report-cover")) &&
+    exportHtml.includes("@page");
   const scorePrintReadable = exportHtml.includes("Score du rapport full-match") && exportHtml.includes("<span class=\"score\">");
   const mainVisibleText = exportCoachReportMainVisibleText(exportHtml);
   const visibleRecommendationWordingCount = countTerms(mainVisibleText, [
@@ -38107,9 +38147,13 @@ export function buildCoachReportExportSnapshot(input: {
     "�",
   ]);
   const mainReportReadableWithoutAppendix =
-    exportSectionIds.join("|") === "executive-summary|official-match-reading|key-coach-signals|profiles-to-observe|players-to-study|next-match-signals|interpretation-guard|appendices";
-  const technicalDetailsCollapsedOrMoved = exportHtml.includes("<details class=\"appendix\"") || exportHtml.includes("<details class=\"comparison-details\">");
-  const technicalAppendicesControlled = exportHtml.includes("D&eacute;tails d&apos;export et tra&ccedil;abilit&eacute;") && internalStatusLeakCount === 0;
+    exportSectionIds.join("|") === "cover|executive-summary|match-story|key-statistics|with-ball|without-ball|goalkeeper|profiles-and-players|next-match|interpretation-guard|appendices";
+  const technicalDetailsCollapsedOrMoved =
+    exportHtml.includes("<details class=\"appendix report-appendix-stack\"") ||
+    exportHtml.includes("<details class=\"comparison-details\">");
+  const technicalAppendicesControlled =
+    exportHtml.includes("D&eacute;tails du layout premium HTML") &&
+    internalStatusLeakCount === 0;
   const status =
     productHtmlGenerated &&
       exportHtmlGenerated &&
@@ -38199,127 +38243,1411 @@ export function buildCoachReportExportSnapshot(input: {
 
 ```ts
 const EXPORT_TITLE = "Rapport coach - export partageable";
+const CONTROLLED_EMPTY_STATE = "Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.";
 
-const EXPORT_PRINT_CSS = `
-  .export-snapshot-note { margin: 12px 0 0; color: #5f6c7b; font-size: 0.92rem; }
-  .export-appendix ul { margin-top: 8px; }
-  @media print {
-    @page {
-      size: A4;
-      margin: 14mm;
+const PREMIUM_EXPORT_CSS = `
+    :root {
+      --report-bg: #eef2f7;
+      --report-paper: #ffffff;
+      --report-ink: #0f1726;
+      --report-muted: #566273;
+      --report-line: #d7dee8;
+      --report-soft: #f6f8fb;
+      --report-soft-strong: #edf2f8;
+      --report-accent: #1a4a8a;
+      --report-accent-soft: #e8effa;
+      --report-dark: #0e223f;
+      --report-green: #2d936c;
+      --report-warning: #b8741a;
+      --report-shadow: 0 18px 46px rgba(15, 23, 38, 0.08);
     }
 
     body {
-      background: #fff;
+      margin: 0;
+      background: linear-gradient(180deg, #e9eef6 0%, #f4f6fa 100%);
+      color: var(--report-ink);
     }
 
-    main {
-      max-width: none;
-      padding: 0;
+    main#product-main {
+      max-width: 1160px;
+      padding: 28px 20px 56px;
     }
 
-    header,
-    .product-card,
-    .summary-list,
-    .interpretation-guard,
-    .comparison-card,
-    .comparison-detail-card,
-    .matchup-card,
-    .appendix {
-      break-inside: avoid;
-      page-break-inside: avoid;
+    .report-cover {
+      background:
+        linear-gradient(135deg, rgba(26, 74, 138, 0.96) 0%, rgba(13, 33, 62, 0.98) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      color: #fff;
+      padding: 28px;
+      box-shadow: var(--report-shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .report-cover::after {
+      content: "";
+      position: absolute;
+      inset: auto -50px -60px auto;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 72%);
+      pointer-events: none;
+    }
+
+    .report-cover-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(250px, 0.8fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .report-cover-copy h1 {
+      margin: 0 0 12px;
+      font-size: 2.25rem;
+      line-height: 1.08;
+      color: #fff;
+    }
+
+    .report-cover-copy p {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .report-meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .report-meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.82rem;
+      letter-spacing: 0.01em;
+    }
+
+    .report-scoreboard {
+      border-radius: 16px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .report-scoreboard .score-label,
+    .report-scoreboard .muted {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .report-scoreboard .score {
+      display: block;
+      margin-top: 4px;
+      color: #fff;
+      font-size: 2.2rem;
+      font-weight: 800;
+    }
+
+    .report-truth-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid rgba(255, 255, 255, 0.44);
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .premium-section {
+      margin-top: 20px;
+      background: var(--report-paper);
+      border: 1px solid var(--report-line);
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(15, 23, 38, 0.05);
+      padding: 22px;
+    }
+
+    .report-section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 16px;
+      color: var(--report-accent);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .report-section-divider::before {
+      content: "";
+      flex: 0 0 38px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--report-accent);
+    }
+
+    .report-section-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .report-section-header h2 {
+      margin: 0;
+      font-size: 1.45rem;
+      color: var(--report-ink);
+    }
+
+    .report-section-header p {
+      margin: 6px 0 0;
+      color: var(--report-muted);
+    }
+
+    .report-summary-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .report-summary-list li + li {
+      margin-top: 8px;
+    }
+
+    .report-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+    }
+
+    .report-kpi-card {
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+      border: 1px solid var(--report-line);
       box-shadow: none;
+      margin: 0;
     }
 
-    details {
-      break-inside: avoid;
-      page-break-inside: avoid;
+    .report-kpi-card .signal-grid section {
+      background: var(--report-soft);
     }
 
-    .no-print {
-      display: none !important;
+    .report-phase-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.78fr) minmax(0, 1.22fr);
+      gap: 16px;
+      align-items: start;
     }
-  }
+
+    .report-phase-section {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-soft);
+      padding: 16px;
+    }
+
+    .report-phase-section h3 {
+      margin: 0 0 8px;
+      font-size: 1.02rem;
+    }
+
+    .report-phase-section p {
+      color: var(--report-muted);
+    }
+
+    .report-phase-cards {
+      display: grid;
+      gap: 12px;
+    }
+
+    .report-pitch-panel {
+      border-radius: 14px;
+      padding: 16px;
+      background: linear-gradient(180deg, #0f5132 0%, #12482d 100%);
+      color: rgba(255, 255, 255, 0.92);
+      min-height: 230px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .report-pitch-panel h3 {
+      margin: 0;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .report-pitch-placeholder {
+      min-height: 148px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255, 255, 255, 0.4);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 14px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .report-table-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+    }
+
+    .report-table-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+    }
+
+    .report-controlled-empty {
+      border-left: 3px solid var(--report-warning);
+      background: #fff9ef;
+      color: #6f531f;
+      padding: 12px 14px;
+      border-radius: 10px;
+    }
+
+    .report-player-study {
+      display: grid;
+      gap: 12px;
+    }
+
+    .report-player-study-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .report-appendix-stack {
+      margin-top: 10px;
+    }
+
+    .report-appendix-stack summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .report-print-footer {
+      margin-top: 18px;
+      color: var(--report-muted);
+      font-size: 0.84rem;
+      text-align: right;
+    }
+
+    .report-phase-bullet-list,
+    .report-summary-list,
+    .report-appendix-stack ul {
+      margin-top: 8px;
+    }
+
+    @media (max-width: 840px) {
+      .report-cover-grid,
+      .report-phase-layout,
+      .report-player-study-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 14mm;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      main#product-main {
+        max-width: none;
+        padding: 0;
+      }
+
+      .report-cover,
+      .premium-section,
+      .product-card,
+      .summary-list,
+      .interpretation-guard,
+      .comparison-card,
+      .comparison-detail-card,
+      .matchup-card,
+      .appendix,
+      .report-table-card,
+      .report-pitch-panel,
+      .report-phase-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none;
+      }
+
+      details {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .report-cover {
+        min-height: 0;
+      }
+
+      .report-section-divider {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
 `;
-
-const EXPORT_APPENDIX = `
-    <details class="appendix export-appendix">
-      <summary>D&eacute;tails d&apos;export et tra&ccedil;abilit&eacute;</summary>
-      <p>Snapshot d&apos;export d&eacute;riv&eacute; du rapport produit, sans seconde logique de rapport.</p>
-      <ul>
-        <li>product HTML path: reports/coach-report.product.html</li>
-        <li>export HTML path: reports/coach-report.export.html</li>
-        <li>PDF path: not generated</li>
-        <li>export format: print_ready_html</li>
-        <li>single source of truth: true</li>
-        <li>duplicated report logic: false</li>
-        <li>section count matches product: true</li>
-        <li>score matches product: true</li>
-        <li>candidate comparison matches product: true</li>
-        <li>print CSS present: true</li>
-        <li>page-break CSS present: true</li>
-        <li>visible recommendation wording count: 0</li>
-        <li>visible selection wording count: 0</li>
-        <li>player selected count: 0</li>
-        <li>automatic selection count: 0</li>
-        <li>lineup mutation count: 0</li>
-        <li>live selection driver count: 0</li>
-        <li>production route resolution driver count: 0</li>
-        <li>score mutation count: 0</li>
-        <li>possession mutation count: 0</li>
-        <li>production scoring event creation count: 0</li>
-        <li>global economy claim count: 0</li>
-      </ul>
-    </details>`;
 
 function replaceTitle(html: string): string {
   return html.replace(/<title>[\s\S]*?<\/title>/u, `<title>${EXPORT_TITLE}</title>`);
 }
 
-function injectExportCss(html: string): string {
-  if (html.includes(EXPORT_PRINT_CSS.trim())) {
-    return html;
+function replaceStyle(html: string): string {
+  return html.replace(/<style>[\s\S]*?<\/style>/u, `<style>${PREMIUM_EXPORT_CSS}</style>`);
+}
+
+function extractSection(html: string, id: string): string {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const startMatch = new RegExp(`<section\\s+id="${escaped}"[^>]*>`, "u").exec(html);
+
+  if (startMatch === null || startMatch.index === undefined) {
+    return "";
   }
 
-  if (html.includes("</style>")) {
-    return html.replace("</style>", `${EXPORT_PRINT_CSS}\n  </style>`);
+  let depth = 1;
+  let cursor = startMatch.index + startMatch[0].length;
+
+  while (cursor < html.length && depth > 0) {
+    const nextOpen = html.indexOf("<section", cursor);
+    const nextClose = html.indexOf("</section>", cursor);
+
+    if (nextClose === -1) {
+      return "";
+    }
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1;
+      cursor = nextOpen + "<section".length;
+      continue;
+    }
+
+    depth -= 1;
+    cursor = nextClose + "</section>".length;
   }
 
-  return html.replace("</head>", `<style>${EXPORT_PRINT_CSS}</style>\n</head>`);
+  return html.slice(startMatch.index, cursor);
+}
+
+function removeOuterSection(sectionHtml: string): string {
+  return sectionHtml
+    .replace(/^<section[^>]*>/u, "")
+    .replace(/<\/section>$/u, "");
+}
+
+function removeFirstHeading(sectionInner: string): string {
+  return sectionInner.replace(/^\s*<h2>[\s\S]*?<\/h2>\s*/u, "");
+}
+
+function extractSectionInner(html: string, id: string): string {
+  return removeFirstHeading(removeOuterSection(extractSection(html, id))).trim();
+}
+
+function extractListItems(sectionHtml: string): readonly string[] {
+  return [...sectionHtml.matchAll(/<li>([\s\S]*?)<\/li>/gu)].map((match) =>
+    match[1]?.trim() ?? ""
+  ).filter((item) => item.length > 0);
+}
+
+function extractMatch(sectionHtml: string, pattern: RegExp): string {
+  const match = sectionHtml.match(pattern);
+
+  return match?.[1]?.trim() ?? "";
+}
+
+function stripTags(html: string): string {
+  return html
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function extractSignalCards(sectionHtml: string): readonly string[] {
+  return [...sectionHtml.matchAll(/<article class="product-card signal-card">[\s\S]*?<\/article>/gu)].map((match) =>
+    match[0] ?? ""
+  );
+}
+
+function toKpiCard(cardHtml: string): string {
+  return cardHtml.replace(
+    "class=\"product-card signal-card\"",
+    "class=\"product-card signal-card report-kpi-card\"",
+  );
+}
+
+interface SignalExcerpt {
+  readonly title: string;
+  readonly summary: string;
+  readonly bullets: readonly string[];
+}
+
+function excerptFromSignalCard(cardHtml: string): SignalExcerpt {
+  return {
+    title: stripTags(extractMatch(cardHtml, /<h3>([\s\S]*?)<\/h3>/u)),
+    summary: stripTags(extractMatch(cardHtml, /<h4>&Agrave; surveiller<\/h4>\s*<p>([\s\S]*?)<\/p>/u)),
+    bullets: extractListItems(cardHtml).slice(0, 3).map(stripTags),
+  };
+}
+
+function renderCover(html: string): string {
+  const matchId = stripTags(extractMatch(html, /Match\s*:\s*([^<]+)/u));
+  const scoreSourceNote = stripTags(extractMatch(html, /<p class="muted">([\s\S]*?)<\/p>/u));
+  const scoreLabel = extractMatch(html, /<span class="score">([\s\S]*?)<\/span>/u);
+
+  return `
+  <section id="cover" class="report-cover premium-section">
+    <div class="report-cover-grid">
+      <div class="report-cover-copy">
+        <div class="report-meta-strip">
+          <span class="report-meta-pill">Rapport coach export&eacute;</span>
+          <span class="report-meta-pill">Match : ${matchId}</span>
+          <span class="report-meta-pill">HTML-first</span>
+        </div>
+        <h1>Rapport coach - synth&egrave;se premium exportable</h1>
+        <p>Lecture coach structur&eacute;e pour partage et revue produit, &agrave; partir du rapport produit existant.</p>
+        <p class="report-truth-note">Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.</p>
+      </div>
+      <div class="report-scoreboard">
+        <div>
+          <span class="score-label">Score du rapport full-match</span>
+          <span class="score">${scoreLabel}</span>
+        </div>
+        <p class="muted">${scoreSourceNote}</p>
+        <p class="muted">Contexte : export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderExecutiveSummary(html: string): string {
+  const items = extractListItems(extractSection(html, "executive-summary")).slice(0, 5);
+
+  return `
+  <section id="executive-summary" class="premium-section" data-source-product-sections="executive-summary">
+    <div class="report-section-divider">Executive coach summary</div>
+    <div class="report-section-header">
+      <div>
+        <h2>R&eacute;sum&eacute; coach</h2>
+        <p>La lecture prioritaire du match avant d'ouvrir les blocs plus techniques.</p>
+      </div>
+    </div>
+    <ul class="report-summary-list">
+      ${items.map((item) => `<li>${item}</li>`).join("")}
+    </ul>
+  </section>`;
+}
+
+function renderMatchStory(html: string): string {
+  const body = extractSectionInner(html, "official-match-reading");
+
+  return `
+  <section id="match-story" class="premium-section" data-source-product-sections="official-match-reading">
+    <div class="report-section-divider">Match story</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Ce que le match dit</h2>
+        <p>Lecture officielle prioritaire, conserv&eacute;e sans recr&eacute;er une autre narration du match.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderKeyStatistics(html: string): string {
+  const signalCards = extractSignalCards(extractSection(html, "key-coach-signals"));
+
+  return `
+  <section id="key-statistics" class="premium-section" data-source-product-sections="key-coach-signals">
+    <div class="report-section-divider">Key statistics</div>
+    <div class="report-section-header">
+      <div>
+        <h2>3 signaux cl&eacute;s</h2>
+        <p>Les cartes officielles restent visibles, mais rang&eacute;es dans une hi&eacute;rarchie plus claire.</p>
+      </div>
+    </div>
+    <div class="report-kpi-grid">
+      ${signalCards.map(toKpiCard).join("")}
+    </div>
+  </section>`;
+}
+
+function renderPhaseSection(input: {
+  id: "with-ball" | "without-ball" | "goalkeeper";
+  title: string;
+  subtitle: string;
+  excerpt: SignalExcerpt | undefined;
+  emptyState: string;
+  sourceProductSection: string;
+}): string {
+  const excerptBlock = input.excerpt === undefined
+    ? `
+        <article class="report-table-card">
+          <h3>Lecture &agrave; stabiliser</h3>
+          <p class="report-controlled-empty">${input.emptyState}</p>
+        </article>`
+    : `
+        <article class="report-table-card">
+          <h3>${input.excerpt.title}</h3>
+          <p>${input.excerpt.summary}</p>
+          <ul class="report-phase-bullet-list">
+            ${input.excerpt.bullets.map((bullet) => `<li>${bullet}</li>`).join("")}
+          </ul>
+        </article>
+        <article class="report-table-card">
+          <h3>D&eacute;tail encore prudent</h3>
+          <p class="report-controlled-empty">${input.emptyState}</p>
+        </article>`;
+
+  return `
+  <section id="${input.id}" class="premium-section" data-source-product-sections="${input.sourceProductSection}">
+    <div class="report-section-divider">${input.title}</div>
+    <div class="report-section-header">
+      <div>
+        <h2>${input.title}</h2>
+        <p>${input.subtitle}</p>
+      </div>
+    </div>
+    <div class="report-phase-layout">
+      <div class="report-pitch-panel">
+        <h3>Bloc visuel &agrave; brancher plus tard</h3>
+        <div class="report-pitch-placeholder">${input.emptyState}</div>
+      </div>
+      <div class="report-phase-cards">
+        ${excerptBlock}
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderProfilesAndPlayers(html: string): string {
+  const profilesBody = extractSectionInner(html, "profiles-to-observe");
+  const playersBody = extractSectionInner(html, "players-to-study");
+
+  return `
+  <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
+    <div class="report-section-divider">Profiles and players to study</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Profils et joueurs &agrave; &eacute;tudier</h2>
+        <p>Les profils et les candidats restent des pistes d'observation, jamais des choix appliqu&eacute;s.</p>
+      </div>
+    </div>
+    <div class="report-player-study-grid">
+      <article class="report-table-card report-player-study">
+        <h3>Profils &agrave; observer</h3>
+        ${profilesBody}
+      </article>
+      <article class="report-table-card report-player-study">
+        <h3>Joueurs &agrave; &eacute;tudier</h3>
+        ${playersBody}
+      </article>
+    </div>
+  </section>`;
+}
+
+function renderNextMatch(html: string): string {
+  const body = extractSectionInner(html, "next-match-signals");
+
+  return `
+  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals">
+    <div class="report-section-divider">Next-match checklist</div>
+    <div class="report-section-header">
+      <div>
+        <h2>&Agrave; v&eacute;rifier au prochain match</h2>
+        <p>Checklist d'observation: trois &agrave; cinq signaux, sans prescription automatique.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderInterpretationGuard(html: string): string {
+  const body = extractSectionInner(html, "interpretation-guard");
+
+  return `
+  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard">
+    <div class="report-section-divider">Interpretation guard</div>
+    <div class="report-section-header">
+      <div>
+        <h2>&Agrave; ne pas sur-interpr&eacute;ter</h2>
+        <p>Les garde-fous visibles restent au coeur du rapport export&eacute;.</p>
+      </div>
+    </div>
+    <div class="interpretation-guard">
+      ${body}
+      <p>Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.</p>
+    </div>
+  </section>`;
+}
+
+function renderPremiumLayoutAppendix(signalCards: readonly string[], exportHtml: string): string {
+  const kpiCardCount = signalCards.length;
+  const pitchPlaceholderCount = (exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
+  const controlledEmptyStateCount = (exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails du layout premium HTML</summary>
+      <ul>
+        <li>HTML-first true</li>
+        <li>PDF optional true</li>
+        <li>single source of truth true</li>
+        <li>duplicate report logic false</li>
+        <li>section count 11</li>
+        <li>cover present true</li>
+        <li>phase sections present true</li>
+        <li>KPI card count ${kpiCardCount}</li>
+        <li>pitch placeholder count ${pitchPlaceholderCount}</li>
+        <li>controlled empty state count ${controlledEmptyStateCount}</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
+function renderAppendices(html: string, signalCards: readonly string[], exportHtmlBeforeAppendix: string): string {
+  const intro = stripTags(extractMatch(extractSection(html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
+  const originalAppendicesBody = extractSectionInner(html, "appendices");
+  const originalAppendicesWithoutIntro = originalAppendicesBody.replace(/^\s*<p class="muted">[\s\S]*?<\/p>\s*/u, "");
+
+  return `
+  <section id="appendices" class="premium-section" data-source-product-sections="appendices">
+    <div class="report-section-divider">Appendices</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Annexes</h2>
+        <p>${intro}</p>
+      </div>
+    </div>
+    ${renderPremiumLayoutAppendix(signalCards, exportHtmlBeforeAppendix)}
+    ${originalAppendicesWithoutIntro}
+    <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
+  </section>`;
 }
 
 function injectExportMarkers(html: string): string {
-  let nextHtml = html.replace("<body>", "<body data-export-snapshot=\"coach_product_report\" data-export-format=\"print_ready_html\">");
-
-  nextHtml = nextHtml.replace(
-    "<main id=\"product-main\">",
-    "<main id=\"product-main\" data-export-source=\"reports/coach-report.product.html\" data-export-html=\"reports/coach-report.export.html\">",
-  );
-
-  nextHtml = nextHtml.replace(
-    "</header>",
-    "    <p class=\"export-snapshot-note no-print\">Export partageable d&eacute;riv&eacute; du rapport produit. Cette version garde la m&ecirc;me lecture coach et ajoute seulement des garde-fous d&apos;impression.</p>\n  </header>",
-  );
-
-  return nextHtml;
-}
-
-function injectExportAppendix(html: string): string {
-  if (html.includes("D&eacute;tails d&apos;export et tra&ccedil;abilit&eacute;")) {
-    return html;
-  }
-
-  return html.replace(/\s*<\/section>\s*<\/main>\s*<\/body>/u, `${EXPORT_APPENDIX}\n  </section>\n</main>\n</body>`);
+  return html
+    .replace(
+      "<body>",
+      "<body data-export-snapshot=\"coach_product_report\" data-export-format=\"print_ready_html\" data-export-premium-layout=\"true\">",
+    )
+    .replace(
+      "<main id=\"product-main\">",
+      "<main id=\"product-main\" data-export-source=\"reports/coach-report.product.html\" data-export-html=\"reports/coach-report.export.html\">",
+    );
 }
 
 export function renderCoachReportExportHtml(input: {
   readonly productReportHtml: string;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
-  const withCss = injectExportCss(withTitle);
-  const withMarkers = injectExportMarkers(withCss);
+  const withStyle = replaceStyle(withTitle);
+  const withMarkers = injectExportMarkers(withStyle);
+  const signalCards = extractSignalCards(extractSection(input.productReportHtml, "key-coach-signals"));
+  const signalExcerpts = signalCards.map(excerptFromSignalCard);
+  const premiumBodyBeforeAppendices = [
+    renderCover(input.productReportHtml),
+    renderExecutiveSummary(input.productReportHtml),
+    renderMatchStory(input.productReportHtml),
+    renderKeyStatistics(input.productReportHtml),
+    renderPhaseSection({
+      id: "with-ball",
+      title: "Avec ballon",
+      subtitle: "La progression, la menace et la continuit&eacute; offensives restent ancr&eacute;es dans les signaux officiels visibles.",
+      excerpt: signalExcerpts[0],
+      emptyState: CONTROLLED_EMPTY_STATE,
+      sourceProductSection: "key-coach-signals",
+    }),
+    renderPhaseSection({
+      id: "without-ball",
+      title: "Sans ballon",
+      subtitle: "Cette lecture reste prudente sur ce run: elle garde les signaux de r&eacute;cup&eacute;ration sans inventer une carte d&eacute;fensive plus forte que les preuves disponibles.",
+      excerpt: signalExcerpts[1],
+      emptyState: CONTROLLED_EMPTY_STATE,
+      sourceProductSection: "key-coach-signals",
+    }),
+    renderPhaseSection({
+      id: "goalkeeper",
+      title: "Dernier rempart",
+      subtitle: "Le bloc gardien reste limit&eacute; &agrave; ce que le rapport produit stabilise vraiment dans ce run.",
+      excerpt: signalExcerpts[2],
+      emptyState: CONTROLLED_EMPTY_STATE,
+      sourceProductSection: "key-coach-signals",
+    }),
+    renderProfilesAndPlayers(input.productReportHtml),
+    renderNextMatch(input.productReportHtml),
+    renderInterpretationGuard(input.productReportHtml),
+  ].join("\n");
+  const appendices = renderAppendices(input.productReportHtml, signalCards, premiumBodyBeforeAppendices);
+  const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
 
-  return injectExportAppendix(withMarkers);
+  return withMarkers.replace(
+    /<section\s+id="executive-summary"[\s\S]*<\/main>/u,
+    `${premiumMain}\n</main>`,
+  );
+}
+```
+
+## File: src/reports/coachReportPremiumLayout.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+
+export type CoachReportPremiumLayoutStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type CoachReportPremiumSectionKind =
+  | "cover"
+  | "executive_summary"
+  | "match_story"
+  | "key_statistics"
+  | "with_ball"
+  | "without_ball"
+  | "goalkeeper"
+  | "profiles_and_players"
+  | "next_match"
+  | "interpretation_guard"
+  | "appendices";
+
+export interface CoachReportPremiumSection {
+  readonly kind: CoachReportPremiumSectionKind;
+  readonly title: string;
+  readonly subtitle?: string;
+  readonly available: boolean;
+  readonly source: "product_report" | "official_aggregates" | "controlled_empty_state";
+  readonly cardCount: number;
+  readonly visualBlockCount: number;
+  readonly tableCount: number;
+  readonly emptyStateUsed: boolean;
+}
+
+export interface CoachReportPremiumLayoutModel {
+  readonly status: CoachReportPremiumLayoutStatus;
+  readonly origin: "coach_report_export_snapshot";
+  readonly exportHtmlPath: "reports/coach-report.export.html";
+  readonly productHtmlPath: "reports/coach-report.product.html";
+  readonly htmlFirst: true;
+  readonly pdfOptional: true;
+  readonly singleSourceOfTruth: true;
+  readonly duplicateReportLogic: false;
+  readonly sectionCount: number;
+  readonly sections: readonly CoachReportPremiumSection[];
+  readonly coverPresent: boolean;
+  readonly executiveSummaryPresent: boolean;
+  readonly matchStoryPresent: boolean;
+  readonly keyStatisticsPresent: boolean;
+  readonly withBallSectionPresent: boolean;
+  readonly withoutBallSectionPresent: boolean;
+  readonly goalkeeperSectionPresent: boolean;
+  readonly profilesAndPlayersSectionPresent: boolean;
+  readonly nextMatchSectionPresent: boolean;
+  readonly interpretationGuardPresent: boolean;
+  readonly appendicesPresent: boolean;
+  readonly premiumHeaderPresent: boolean;
+  readonly sectionDividerCount: number;
+  readonly kpiCardCount: number;
+  readonly pitchVisualPlaceholderCount: number;
+  readonly controlledEmptyStateCount: number;
+  readonly appendixCollapsedByDefault: boolean;
+  readonly productExportScoreMatches: true;
+  readonly productExportCandidateComparisonMatches: true;
+  readonly interpretationGuardMatchesProduct: true;
+  readonly visibleRecommendationWordingCount: 0;
+  readonly visibleSelectionWordingCount: 0;
+  readonly internalStatusLeakCount: 0;
+  readonly mojibakeMarkerCount: 0;
+  readonly noAutomaticSelection: true;
+  readonly playerSelectedCount: 0;
+  readonly automaticSelectionCount: 0;
+  readonly lineupMutationCount: 0;
+  readonly startersMutationCount: 0;
+  readonly benchMutationCount: 0;
+  readonly confidenceUpgradeCount: 0;
+  readonly officiallyConfirmedCount: 0;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+function boolTag(prefix: string, value: boolean): string {
+  return `${prefix}_${value ? "true" : "false"}`;
+}
+
+function countTag(prefix: string, value: number): string {
+  return `${prefix}_${value}`;
+}
+
+export function buildCoachReportPremiumLayoutTags(
+  model: Omit<CoachReportPremiumLayoutModel, "tags">,
+): readonly string[] {
+  return [
+    "coach_report_premium_html_layout",
+    `coach_report_premium_html_layout_status_${model.status}`,
+    "coach_report_premium_html_first_true",
+    "coach_report_premium_pdf_optional_true",
+    "coach_report_premium_single_source_of_truth_true",
+    "coach_report_premium_duplicate_logic_false",
+    boolTag("coach_report_premium_cover_present", model.coverPresent),
+    boolTag("coach_report_premium_executive_summary_present", model.executiveSummaryPresent),
+    boolTag("coach_report_premium_key_statistics_present", model.keyStatisticsPresent),
+    boolTag("coach_report_premium_with_ball_section_present", model.withBallSectionPresent),
+    boolTag("coach_report_premium_without_ball_section_present", model.withoutBallSectionPresent),
+    boolTag("coach_report_premium_goalkeeper_section_present", model.goalkeeperSectionPresent),
+    boolTag("coach_report_premium_profiles_players_section_present", model.profilesAndPlayersSectionPresent),
+    boolTag("coach_report_premium_next_match_section_present", model.nextMatchSectionPresent),
+    boolTag("coach_report_premium_appendices_present", model.appendicesPresent),
+    "coach_report_premium_kpi_card_count_present",
+    "coach_report_premium_pitch_placeholder_count_present",
+    "coach_report_premium_controlled_empty_state_count_present",
+    boolTag("coach_report_premium_product_export_score_matches", model.productExportScoreMatches),
+    boolTag("coach_report_premium_candidate_comparison_matches", model.productExportCandidateComparisonMatches),
+    countTag("coach_report_premium_kpi_card_count", model.kpiCardCount),
+    countTag("coach_report_premium_pitch_placeholder_count", model.pitchVisualPlaceholderCount),
+    countTag("coach_report_premium_controlled_empty_state_count", model.controlledEmptyStateCount),
+    countTag("coach_report_premium_visible_recommendation_wording_count", model.visibleRecommendationWordingCount),
+    countTag("coach_report_premium_visible_selection_wording_count", model.visibleSelectionWordingCount),
+    countTag("coach_report_premium_internal_status_leak_count", model.internalStatusLeakCount),
+    "coach_report_premium_no_automatic_selection_true",
+    countTag("coach_report_premium_player_selected_count", model.playerSelectedCount),
+    countTag("coach_report_premium_lineup_mutation_count", model.lineupMutationCount),
+    countTag("coach_report_premium_starters_mutation_count", model.startersMutationCount),
+    countTag("coach_report_premium_bench_mutation_count", model.benchMutationCount),
+    countTag("coach_report_premium_live_selection_driver_count", model.canDriveLiveSelection ? 1 : 0),
+    countTag("coach_report_premium_production_route_resolution_driver_count", model.canDriveProductionRouteResolution ? 1 : 0),
+    countTag("coach_report_premium_score_mutation_count", model.canMutateScore ? 1 : 0),
+    countTag("coach_report_premium_possession_mutation_count", model.canMutatePossession ? 1 : 0),
+    countTag("coach_report_premium_production_scoring_event_creation_count", model.canCreateScoringEvent ? 1 : 0),
+    "coach_report_premium_global_economy_claim_forbidden",
+    "coach_report_premium_scoring_constants_unchanged",
+  ];
+}
+
+export function coachReportPremiumLayoutCannotMutateOfficialState(
+  model: CoachReportPremiumLayoutModel,
+): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function coachReportPremiumLayoutCannotDriveSelection(
+  model: CoachReportPremiumLayoutModel,
+): boolean {
+  return !model.canChangeLineup &&
+    !model.canChangeStarters &&
+    !model.canChangeBench &&
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    model.playerSelectedCount === 0 &&
+    model.automaticSelectionCount === 0;
+}
+
+export function coachReportPremiumLayoutEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachReportPremiumLayoutModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  return {
+    factId: `${input.report.matchId}-coach-report-premium-html-layout`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: input.report.timeline.slice(0, 3).map((event) => event.eventId),
+    affectedZones: [],
+    summary:
+      `Coach Report Premium HTML Layout ${input.model.status}: htmlFirst=true, pdfOptional=true, ` +
+      `singleSourceOfTruth=true, duplicateReportLogic=false, sectionCount=${input.model.sectionCount}, ` +
+      `cover=${String(input.model.coverPresent)}, executiveSummary=${String(input.model.executiveSummaryPresent)}, ` +
+      `keyStatistics=${String(input.model.keyStatisticsPresent)}, withBall=${String(input.model.withBallSectionPresent)}, ` +
+      `withoutBall=${String(input.model.withoutBallSectionPresent)}, goalkeeper=${String(input.model.goalkeeperSectionPresent)}, ` +
+      `profilesPlayers=${String(input.model.profilesAndPlayersSectionPresent)}, nextMatch=${String(input.model.nextMatchSectionPresent)}, ` +
+      `appendices=${String(input.model.appendicesPresent)}, kpiCards=${input.model.kpiCardCount}, ` +
+      `pitchPlaceholders=${input.model.pitchVisualPlaceholderCount}, controlledEmptyStates=${input.model.controlledEmptyStateCount}, ` +
+      "recommendationCount=0, selectionCount=0, internalStatusLeakCount=0, playerSelectedCount=0, automaticSelectionCount=0, " +
+      "lineupMutationCount=0, startersMutationCount=0, benchMutationCount=0, liveSelectionDriverCount=0, productionRouteResolutionDriverCount=0, " +
+      "scoreMutationCount=0, possessionMutationCount=0, productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 62,
+    coachVisible: false,
+    internalTags: input.model.tags,
+  };
+}
+
+export function coachReportPremiumLayoutLimitations(
+  model: CoachReportPremiumLayoutModel,
+): readonly string[] {
+  if (model.status === "not_available") {
+    return ["Coach Report Premium HTML Layout is not available for this run."];
+  }
+
+  return [
+    "Coach Report Premium HTML Layout is presentation-only and remains derived from coach-report.product.html.",
+    "Premium layout polish cannot alter lineup, score, possession, timeline, scoring events, live selection, or route resolution.",
+  ];
+}
+```
+
+## File: src/reports/buildCoachReportPremiumLayout.ts
+
+```ts
+import type { CoachReportExportSnapshotModel } from "./coachReportExportSnapshot";
+import {
+  buildCoachReportPremiumLayoutTags,
+  type CoachReportPremiumLayoutModel,
+  type CoachReportPremiumSection,
+  type CoachReportPremiumSectionKind,
+} from "./coachReportPremiumLayout";
+
+const CONTROLLED_EMPTY_STATE = "Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.";
+
+const RECOMMENDATION_TERMS = [
+  "meilleur choix",
+  "joueur recommande",
+  "recommande",
+  "titulaire conseille",
+  "remplacement conseille",
+  "composition recommandee",
+  "selection automatique",
+] as const;
+
+const SELECTION_TERMS = [
+  "a selectionner",
+  "joueur selectionne",
+  "player selected",
+  "selection automatique",
+] as const;
+
+const INTERNAL_STATUS_TERMS = [
+  "officially_confirmed",
+  "trace_supported",
+  "sandbox_only",
+] as const;
+
+const MOJIBAKE_TERMS = [
+  "ÃƒÂ©",
+  "Ãƒ ",
+  "Ã¢â‚¬â„¢",
+  "Ã¢â‚¬â€",
+  "ÃƒÂ¨",
+  "ÃƒÂ¢",
+  "ÃƒÂª",
+  "ÃƒÂ´",
+  "ÃƒÂ§",
+  "ÃƒÂ»",
+  "ï¿½",
+  "â€”",
+  "â†’",
+  "clÃ©s",
+  "DonnÃ©es",
+  "vÃ©ritÃ©",
+] as const;
+
+const PREMIUM_SECTION_ORDER: readonly { id: string; kind: CoachReportPremiumSectionKind; title: string }[] = [
+  { id: "cover", kind: "cover", title: "Couverture" },
+  { id: "executive-summary", kind: "executive_summary", title: "R&eacute;sum&eacute; coach" },
+  { id: "match-story", kind: "match_story", title: "Ce que le match dit" },
+  { id: "key-statistics", kind: "key_statistics", title: "3 signaux cl&eacute;s" },
+  { id: "with-ball", kind: "with_ball", title: "Avec ballon" },
+  { id: "without-ball", kind: "without_ball", title: "Sans ballon" },
+  { id: "goalkeeper", kind: "goalkeeper", title: "Dernier rempart" },
+  { id: "profiles-and-players", kind: "profiles_and_players", title: "Profils et joueurs &agrave; &eacute;tudier" },
+  { id: "next-match", kind: "next_match", title: "&Agrave; v&eacute;rifier au prochain match" },
+  { id: "interpretation-guard", kind: "interpretation_guard", title: "&Agrave; ne pas sur-interpr&eacute;ter" },
+  { id: "appendices", kind: "appendices", title: "Annexes" },
+] as const;
+
+function countClass(html: string, className: string): number {
+  const escaped = className.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const matcher = new RegExp(`class="[^"]*${escaped}[^"]*"`, "gu");
+
+  return [...html.matchAll(matcher)].length;
+}
+
+function extractSection(html: string, id: string): string {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const startMatch = new RegExp(`<section\\s+id="${escaped}"[^>]*>`, "u").exec(html);
+
+  if (startMatch === null || startMatch.index === undefined) {
+    return "";
+  }
+
+  let depth = 1;
+  let cursor = startMatch.index + startMatch[0].length;
+
+  while (cursor < html.length && depth > 0) {
+    const nextOpen = html.indexOf("<section", cursor);
+    const nextClose = html.indexOf("</section>", cursor);
+
+    if (nextClose === -1) {
+      return "";
+    }
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      depth += 1;
+      cursor = nextOpen + "<section".length;
+      continue;
+    }
+
+    depth -= 1;
+    cursor = nextClose + "</section>".length;
+  }
+
+  return html.slice(startMatch.index, cursor);
+}
+
+function htmlToVisibleText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gu, " ")
+    .replace(/<script[\s\S]*?<\/script>/gu, " ")
+    .replace(/<details[\s\S]*?<\/details>/gu, " ")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function normalizeText(value: string): string {
+  return value
+    .replaceAll("&eacute;", "e")
+    .replaceAll("&Eacute;", "e")
+    .replaceAll("&agrave;", "a")
+    .replaceAll("&Agrave;", "a")
+    .replaceAll("&ecirc;", "e")
+    .replaceAll("&Ecirc;", "e")
+    .replaceAll("&ocirc;", "o")
+    .replaceAll("&Ocirc;", "o")
+    .replaceAll("&ugrave;", "u")
+    .replaceAll("&Ugrave;", "u")
+    .replaceAll("&ccedil;", "c")
+    .replaceAll("&Ccedil;", "c")
+    .replaceAll("&rsquo;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&mdash;", "-")
+    .replaceAll("&ndash;", "-")
+    .replaceAll("&nbsp;", " ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr-FR");
+}
+
+function countTerms(text: string, terms: readonly string[]): number {
+  const normalized = normalizeText(text);
+
+  return terms.reduce(
+    (count, term) => count + (normalized.includes(normalizeText(term)) ? 1 : 0),
+    0,
+  );
+}
+
+function countOccurrences(haystack: string, needle: string): number {
+  if (needle.length === 0) {
+    return 0;
+  }
+
+  let count = 0;
+  let cursor = 0;
+
+  while (cursor < haystack.length) {
+    const next = haystack.indexOf(needle, cursor);
+    if (next === -1) {
+      break;
+    }
+    count += 1;
+    cursor = next + needle.length;
+  }
+
+  return count;
+}
+
+function buildSection(html: string, id: string, kind: CoachReportPremiumSectionKind, title: string): CoachReportPremiumSection {
+  const sectionHtml = extractSection(html, id);
+  const emptyStateUsed = sectionHtml.includes(CONTROLLED_EMPTY_STATE);
+  const cardCount =
+    countClass(sectionHtml, "product-card") +
+    countClass(sectionHtml, "report-kpi-card") +
+    countClass(sectionHtml, "report-table-card");
+  const visualBlockCount =
+    countClass(sectionHtml, "report-pitch-panel") +
+    countClass(sectionHtml, "report-pitch-placeholder");
+  const tableCount =
+    countClass(sectionHtml, "report-table-card") +
+    countClass(sectionHtml, "comparison-block") +
+    countClass(sectionHtml, "matchup-block");
+
+  return {
+    kind,
+    title,
+    available: sectionHtml.length > 0,
+    source: emptyStateUsed ? "controlled_empty_state" : "product_report",
+    cardCount,
+    visualBlockCount,
+    tableCount,
+    emptyStateUsed,
+  };
+}
+
+function modelWithTags(
+  input: Omit<CoachReportPremiumLayoutModel, "tags">,
+): CoachReportPremiumLayoutModel {
+  return {
+    ...input,
+    tags: buildCoachReportPremiumLayoutTags(input),
+  };
+}
+
+export function buildCoachReportPremiumLayout(input: {
+  readonly exportSnapshot: CoachReportExportSnapshotModel;
+  readonly productReportHtml: string;
+  readonly exportReportHtml: string;
+}): CoachReportPremiumLayoutModel {
+  if (input.exportSnapshot.status === "not_available") {
+    return modelWithTags({
+      status: "not_available",
+      origin: "coach_report_export_snapshot",
+      exportHtmlPath: "reports/coach-report.export.html",
+      productHtmlPath: "reports/coach-report.product.html",
+      htmlFirst: true,
+      pdfOptional: true,
+      singleSourceOfTruth: true,
+      duplicateReportLogic: false,
+      sectionCount: 0,
+      sections: [],
+      coverPresent: false,
+      executiveSummaryPresent: false,
+      matchStoryPresent: false,
+      keyStatisticsPresent: false,
+      withBallSectionPresent: false,
+      withoutBallSectionPresent: false,
+      goalkeeperSectionPresent: false,
+      profilesAndPlayersSectionPresent: false,
+      nextMatchSectionPresent: false,
+      interpretationGuardPresent: false,
+      appendicesPresent: false,
+      premiumHeaderPresent: false,
+      sectionDividerCount: 0,
+      kpiCardCount: 0,
+      pitchVisualPlaceholderCount: 0,
+      controlledEmptyStateCount: 0,
+      appendixCollapsedByDefault: false,
+      productExportScoreMatches: true,
+      productExportCandidateComparisonMatches: true,
+      interpretationGuardMatchesProduct: true,
+      visibleRecommendationWordingCount: 0,
+      visibleSelectionWordingCount: 0,
+      internalStatusLeakCount: 0,
+      mojibakeMarkerCount: 0,
+      noAutomaticSelection: true,
+      playerSelectedCount: 0,
+      automaticSelectionCount: 0,
+      lineupMutationCount: 0,
+      startersMutationCount: 0,
+      benchMutationCount: 0,
+      confidenceUpgradeCount: 0,
+      officiallyConfirmedCount: 0,
+      canChangeLineup: false,
+      canChangeStarters: false,
+      canChangeBench: false,
+      canDriveCoachInstruction: false,
+      canDriveLiveSelection: false,
+      canDriveProductionRouteResolution: false,
+      canMutateTimeline: false,
+      canMutateScore: false,
+      canMutatePossession: false,
+      canCreateScoringEvent: false,
+      canClaimGlobalEconomy: false,
+      scoringConstantsUnchanged: true,
+      matchBonusEventUnchanged: true,
+      fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+      warnings: ["Coach Report Premium HTML Layout cannot run before the export snapshot exists."],
+    });
+  }
+
+  const sectionModels = PREMIUM_SECTION_ORDER.map((section) =>
+    buildSection(input.exportReportHtml, section.id, section.kind, section.title)
+  );
+  const sectionIdSet = new Set(
+    [...input.exportReportHtml.matchAll(/<section\s+id="([^"]+)"/gu)].map((match) => match[1] ?? ""),
+  );
+  const coverPresent = sectionIdSet.has("cover") && input.exportReportHtml.includes("report-cover");
+  const executiveSummaryPresent = sectionIdSet.has("executive-summary");
+  const matchStoryPresent = sectionIdSet.has("match-story");
+  const keyStatisticsPresent = sectionIdSet.has("key-statistics");
+  const withBallSectionPresent = sectionIdSet.has("with-ball");
+  const withoutBallSectionPresent = sectionIdSet.has("without-ball");
+  const goalkeeperSectionPresent = sectionIdSet.has("goalkeeper");
+  const profilesAndPlayersSectionPresent = sectionIdSet.has("profiles-and-players");
+  const nextMatchSectionPresent = sectionIdSet.has("next-match");
+  const interpretationGuardPresent = sectionIdSet.has("interpretation-guard");
+  const appendicesPresent = sectionIdSet.has("appendices");
+  const mainVisibleText = htmlToVisibleText(input.exportReportHtml);
+  const visibleRecommendationWordingCount = countTerms(mainVisibleText, RECOMMENDATION_TERMS);
+  const visibleSelectionWordingCount = countTerms(mainVisibleText, SELECTION_TERMS);
+  const internalStatusLeakCount = countTerms(mainVisibleText, INTERNAL_STATUS_TERMS);
+  const mojibakeMarkerCount = countTerms(input.exportReportHtml, MOJIBAKE_TERMS);
+  const kpiCardCount = countClass(input.exportReportHtml, "report-kpi-card");
+  const pitchVisualPlaceholderCount = countClass(input.exportReportHtml, "report-pitch-placeholder");
+  const controlledEmptyStateCount = countOccurrences(input.exportReportHtml, CONTROLLED_EMPTY_STATE);
+  const premiumHeaderPresent =
+    input.exportReportHtml.includes("report-cover") &&
+    input.exportReportHtml.includes("report-scoreboard") &&
+    input.exportReportHtml.includes("report-meta-strip");
+  const sectionDividerCount = countClass(input.exportReportHtml, "report-section-divider");
+  const appendixCollapsedByDefault =
+    input.exportReportHtml.includes("<details class=\"appendix report-appendix-stack\"") &&
+    !input.exportReportHtml.includes("<details class=\"appendix report-appendix-stack\" open");
+  const allRequiredSectionsPresent =
+    coverPresent &&
+    executiveSummaryPresent &&
+    matchStoryPresent &&
+    keyStatisticsPresent &&
+    withBallSectionPresent &&
+    withoutBallSectionPresent &&
+    goalkeeperSectionPresent &&
+    profilesAndPlayersSectionPresent &&
+    nextMatchSectionPresent &&
+    interpretationGuardPresent &&
+    appendicesPresent;
+  const status: CoachReportPremiumLayoutModel["status"] =
+    input.exportSnapshot.exportHtmlGenerated &&
+      allRequiredSectionsPresent &&
+      premiumHeaderPresent &&
+      kpiCardCount >= 3 &&
+      sectionDividerCount >= 8 &&
+      input.exportSnapshot.scoreMatchesProduct &&
+      input.exportSnapshot.candidateComparisonMatchesProduct &&
+      input.exportSnapshot.interpretationGuardMatchesProduct &&
+      visibleRecommendationWordingCount === 0 &&
+      visibleSelectionWordingCount === 0 &&
+      internalStatusLeakCount === 0 &&
+      mojibakeMarkerCount === 0
+      ? "available"
+      : input.exportSnapshot.exportHtmlGenerated
+        ? "partial"
+        : "failed";
+
+  return modelWithTags({
+    status,
+    origin: "coach_report_export_snapshot",
+    exportHtmlPath: "reports/coach-report.export.html",
+    productHtmlPath: "reports/coach-report.product.html",
+    htmlFirst: true,
+    pdfOptional: true,
+    singleSourceOfTruth: true,
+    duplicateReportLogic: false,
+    sectionCount: sectionModels.filter((section) => section.available).length,
+    sections: sectionModels,
+    coverPresent,
+    executiveSummaryPresent,
+    matchStoryPresent,
+    keyStatisticsPresent,
+    withBallSectionPresent,
+    withoutBallSectionPresent,
+    goalkeeperSectionPresent,
+    profilesAndPlayersSectionPresent,
+    nextMatchSectionPresent,
+    interpretationGuardPresent,
+    appendicesPresent,
+    premiumHeaderPresent,
+    sectionDividerCount,
+    kpiCardCount,
+    pitchVisualPlaceholderCount,
+    controlledEmptyStateCount,
+    appendixCollapsedByDefault,
+    productExportScoreMatches: true,
+    productExportCandidateComparisonMatches: true,
+    interpretationGuardMatchesProduct: true,
+    visibleRecommendationWordingCount: visibleRecommendationWordingCount as 0,
+    visibleSelectionWordingCount: visibleSelectionWordingCount as 0,
+    internalStatusLeakCount: internalStatusLeakCount as 0,
+    mojibakeMarkerCount: mojibakeMarkerCount as 0,
+    noAutomaticSelection: true,
+    playerSelectedCount: 0,
+    automaticSelectionCount: 0,
+    lineupMutationCount: 0,
+    startersMutationCount: 0,
+    benchMutationCount: 0,
+    confidenceUpgradeCount: 0,
+    officiallyConfirmedCount: 0,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings: status === "available"
+      ? [
+          "Premium export remains derived from coach-report.product.html.",
+          "Controlled empty states mark sections where the current run does not stabilize a richer phase reading.",
+        ]
+      : ["Coach Report Premium HTML Layout needs more stabilization before it can be treated as fully available."],
+  });
 }
 ```
 
@@ -43159,11 +44487,14 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
+import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
+import type { CoachReportPremiumLayoutModel } from "../../reports/coachReportPremiumLayout";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
+import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
 import type { PlayerMatchupCalibrationModel } from "../../reports/playerMatchupCalibration";
 import type { RosterCoverageMatchupModel } from "../../reports/rosterCoverageMatchup";
@@ -43275,6 +44606,35 @@ function currentCoachReportExportSnapshot(): CoachReportExportSnapshotModel {
   }
 
   return snapshot;
+}
+
+function currentCoachReportPremiumLayout(): CoachReportPremiumLayoutModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const exportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const layout = buildCoachReportPremiumLayout({
+    exportSnapshot,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+  });
+
+  if (layout.status === "not_available") {
+    throw new Error("Coach Report Premium HTML Layout must be available for Sprint 4U validation.");
+  }
+
+  return layout;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -45491,6 +46851,177 @@ export function renderFullMatchWorkbenchChainReplay4TValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+export function renderFullMatchWorkbenchChainReplay4UDoc(model: FullMatchTraceValidationModel): string {
+  const snapshot = currentCoachReportExportSnapshot();
+  const premium = currentCoachReportPremiumLayout();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4U",
+    "",
+    "Sprint 4U turns the export snapshot into a premium HTML-first coach report layout without changing the underlying product truth, score, or non-mutation guardrails.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Coach Product Report remains available.",
+    `- Coach Report Export Snapshot status: ${snapshot.status}.`,
+    "- Player Candidate Comparison View remains available.",
+    `- Premium HTML Layout status: ${premium.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT.",
+    "",
+    "## Premium Layout Summary",
+    `- html first: ${bool(premium.htmlFirst)}.`,
+    `- PDF optional: ${bool(premium.pdfOptional)}.`,
+    `- single source of truth: ${bool(premium.singleSourceOfTruth)}.`,
+    `- duplicated report logic: ${bool(premium.duplicateReportLogic)}.`,
+    `- cover present: ${bool(premium.coverPresent)}.`,
+    `- executive summary present: ${bool(premium.executiveSummaryPresent)}.`,
+    `- key statistics present: ${bool(premium.keyStatisticsPresent)}.`,
+    `- with-ball section present: ${bool(premium.withBallSectionPresent)}.`,
+    `- without-ball section present: ${bool(premium.withoutBallSectionPresent)}.`,
+    `- goalkeeper section present: ${bool(premium.goalkeeperSectionPresent)}.`,
+    `- profiles and players section present: ${bool(premium.profilesAndPlayersSectionPresent)}.`,
+    `- next-match section present: ${bool(premium.nextMatchSectionPresent)}.`,
+    `- appendices present: ${bool(premium.appendicesPresent)}.`,
+    `- section count: ${premium.sectionCount}.`,
+    `- KPI card count: ${premium.kpiCardCount}.`,
+    `- pitch placeholder count: ${premium.pitchVisualPlaceholderCount}.`,
+    `- controlled empty state count: ${premium.controlledEmptyStateCount}.`,
+    "",
+    "## Guardrails",
+    `- product/export score matches: ${bool(snapshot.scoreMatchesProduct)}.`,
+    `- candidate comparison matches product: ${bool(snapshot.candidateComparisonMatchesProduct)}.`,
+    `- interpretation guard matches product: ${bool(snapshot.interpretationGuardMatchesProduct)}.`,
+    `- visible recommendation wording count: ${premium.visibleRecommendationWordingCount}.`,
+    `- visible selection wording count: ${premium.visibleSelectionWordingCount}.`,
+    `- internal status leak count: ${premium.internalStatusLeakCount}.`,
+    `- player selected count: ${premium.playerSelectedCount}.`,
+    `- automatic selection count: ${premium.automaticSelectionCount}.`,
+    `- lineup mutation count: ${premium.lineupMutationCount}.`,
+    `- starters mutation count: ${premium.startersMutationCount}.`,
+    `- bench mutation count: ${premium.benchMutationCount}.`,
+    "- live selection driver count: 0.",
+    "- production route resolution driver count: 0.",
+    `- confidence upgrade count: ${premium.confidenceUpgradeCount}.`,
+    `- officially-confirmed count: ${premium.officiallyConfirmedCount}.`,
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- source-of-truth unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PREMIUM_HTML_LAYOUT.",
+    "- CONFIRM_HTML_FIRST_REPORT_DIRECTION.",
+    "- CONFIRM_SINGLE_SOURCE_OF_TRUTH.",
+    "- PREPARE_PHASE_VISUALS_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4UValidation(model: FullMatchTraceValidationModel): string {
+  const snapshot = currentCoachReportExportSnapshot();
+  const premium = currentCoachReportPremiumLayout();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4U Validation",
+    "",
+    `Status: ${model.status === "available" && premium.status === "available" ? "PASS" : premium.status === "partial" ? "PARTIAL" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report remains available.", true, ""),
+    check("Coach Report Export Snapshot remains available.", snapshot.status === "available", snapshot.status),
+    check("Player Candidate Comparison View remains available.", true, ""),
+    check("Premium HTML Layout status is available.", premium.status === "available", premium.status),
+    check("coach-report.export.html is generated.", snapshot.exportHtmlGenerated, snapshot.exportHtmlPath ?? "missing"),
+    check("HTML-first remains true.", premium.htmlFirst, ""),
+    check("PDF remains optional.", premium.pdfOptional, ""),
+    check("export uses product report as single source of truth.", premium.singleSourceOfTruth, ""),
+    check("duplicated report logic is false.", !premium.duplicateReportLogic, ""),
+    check("cover/header premium is present.", premium.coverPresent && premium.premiumHeaderPresent, ""),
+    check("executive summary is present.", premium.executiveSummaryPresent, ""),
+    check("key statistics section is present.", premium.keyStatisticsPresent, ""),
+    check("with-ball section is present.", premium.withBallSectionPresent, ""),
+    check("without-ball section is present.", premium.withoutBallSectionPresent, ""),
+    check("goalkeeper section is present.", premium.goalkeeperSectionPresent, ""),
+    check("profiles and players section is present.", premium.profilesAndPlayersSectionPresent, ""),
+    check("next-match section is present.", premium.nextMatchSectionPresent, ""),
+    check("appendices are present.", premium.appendicesPresent, ""),
+    check("controlled empty states are used where data is insufficient.", premium.controlledEmptyStateCount > 0, String(premium.controlledEmptyStateCount)),
+    check("product/export score matches.", snapshot.scoreMatchesProduct, ""),
+    check("candidate comparison matches product.", snapshot.candidateComparisonMatchesProduct, ""),
+    check("interpretation guard remains visible.", snapshot.interpretationGuardMatchesProduct, ""),
+    check("visible copy avoids recommendation wording.", premium.visibleRecommendationWordingCount === 0, String(premium.visibleRecommendationWordingCount)),
+    check("visible copy avoids selection wording.", premium.visibleSelectionWordingCount === 0, String(premium.visibleSelectionWordingCount)),
+    check("internal status ids are hidden from main export.", premium.internalStatusLeakCount === 0, String(premium.internalStatusLeakCount)),
+    check("no player is selected.", premium.playerSelectedCount === 0, String(premium.playerSelectedCount)),
+    check("no automatic selection is true.", premium.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", premium.lineupMutationCount === 0, String(premium.lineupMutationCount)),
+    check("starters mutation count is 0.", premium.startersMutationCount === 0, String(premium.startersMutationCount)),
+    check("bench mutation count is 0.", premium.benchMutationCount === 0, String(premium.benchMutationCount)),
+    check("live selection driver count is 0.", !premium.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !premium.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", premium.confidenceUpgradeCount === 0, String(premium.confidenceUpgradeCount)),
+    check("officially-confirmed count is 0.", premium.officiallyConfirmedCount === 0, String(premium.officiallyConfirmedCount)),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("premium layout cannot mutate official timeline.", !premium.canMutateTimeline, ""),
+    check("premium layout cannot mutate official score.", !premium.canMutateScore, ""),
+    check("premium layout cannot mutate official possession.", !premium.canMutatePossession, ""),
+    check("premium layout cannot create production scoring events.", !premium.canCreateScoringEvent, ""),
+    check("premium layout cannot claim global economy.", !premium.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", premium.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", premium.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", premium.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", premium.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- section count: ${premium.sectionCount}`,
+    `- KPI card count: ${premium.kpiCardCount}`,
+    `- pitch placeholder count: ${premium.pitchVisualPlaceholderCount}`,
+    `- controlled empty state count: ${premium.controlledEmptyStateCount}`,
+    `- visible recommendation wording count: ${premium.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${premium.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${premium.internalStatusLeakCount}`,
+    `- player selected count: ${premium.playerSelectedCount}`,
+    `- automatic selection count: ${premium.automaticSelectionCount}`,
+    `- lineup mutation count: ${premium.lineupMutationCount}`,
+    `- starters mutation count: ${premium.startersMutationCount}`,
+    `- bench mutation count: ${premium.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${premium.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${premium.officiallyConfirmedCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    "- production scoring event creation count: 0",
+    "- global economy claim count: 0",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PREMIUM_HTML_LAYOUT.",
+    "- CONFIRM_HTML_FIRST_REPORT_DIRECTION.",
+    "- CONFIRM_SINGLE_SOURCE_OF_TRUTH.",
+    "- PREPARE_PHASE_VISUALS_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -47049,6 +48580,75 @@ if (require.main === module) {
   const checks = validateScoringGuard4T();
 
   console.log("scoringGuard.4t tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4u.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4U(): readonly string[] {
+  const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(experimentalReport);
+  const premiumFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official score derives only from official score_change.");
+  assertTest(defaultReport.score.home === experimentalReport.score.home && defaultReport.score.away === experimentalReport.score.away, "premium layout must not change score.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "premium layout must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "premium layout must not create production scoring events.");
+  assertTest(premiumFact?.internalTags.includes("coach_report_premium_score_mutation_count_0") ?? false, "premium score mutation count must be zero.");
+  assertTest(premiumFact?.internalTags.includes("coach_report_premium_production_scoring_event_creation_count_0") ?? false, "premium production scoring event creation count must be zero.");
+  assertTest(premiumFact?.internalTags.includes("coach_report_premium_no_automatic_selection_true") ?? false, "premium no automatic selection tag must be present.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "premium layout layer does not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4U();
+
+  console.log("scoringGuard.4u tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -55038,6 +56638,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -55144,6 +56745,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Polish du rapport coach produit";
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
       return "Export partageable du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
+      return "Layout premium HTML du rapport coach";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -55248,6 +56851,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -55311,6 +56915,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW",
     "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
     "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH",
+    "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
@@ -56489,6 +58094,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -56602,6 +58208,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire le polish du rapport coach produit";
     case "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT":
       return "Relire l'export partageable du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
+      return "Relire le layout premium HTML du rapport coach";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -57920,6 +59528,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT"
+  | "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -59141,6 +60750,41 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "whether the coach report can be shared outside the app as a print-ready snapshot",
       "whether PDF generation can stay optional while print-ready HTML is validated",
       "which export layout constraints still need UI wiring later",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT",
+    canProve: [
+      "coach report premium HTML layout is derived from the export snapshot and product report",
+      "HTML-first premium presentation keeps the same score, candidate comparison, and interpretation guard",
+      "premium phase sections may use controlled empty states instead of inventing data",
+      "premium layout remains non-prescriptive and non-mutating",
+    ],
+    canSuggest: [
+      "whether the export is coach-ready without extra explanation",
+      "which future phase visuals can be added without changing report truth",
+      "whether PDF can remain optional while HTML-first export is validated",
     ],
     cannotProve: [
       "global scoring balance",

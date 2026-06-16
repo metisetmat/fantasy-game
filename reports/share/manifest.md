@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-16T15:26:59.196Z
-Task/sprint: Sprint 4T - Coach Report PDF Export & Share Snapshot
+Generated: 2026-06-16T16:07:19.905Z
+Task/sprint: Sprint 4U - FIFA-inspired HTML Report Layout
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4t.md
-- validation.fullmatch-workbench-chain-replay-4t.md
+- fullmatch-workbench-chain-replay-4u.md
+- validation.fullmatch-workbench-chain-replay-4u.md
 - README.md
 
 ## Bundle Files

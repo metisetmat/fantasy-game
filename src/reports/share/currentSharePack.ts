@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 4T - Coach Report PDF Export & Share Snapshot",
+  name: "Sprint 4U - FIFA-inspired HTML Report Layout",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-4t.md",
-    "validation.fullmatch-workbench-chain-replay-4t.md",
+    "fullmatch-workbench-chain-replay-4u.md",
+    "validation.fullmatch-workbench-chain-replay-4u.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,14 +39,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 4T share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-4t.md": "summarizes Coach Report Export Snapshot status, product/export parity, print readiness, and unchanged scoring guardrails",
-    "validation.fullmatch-workbench-chain-replay-4t.md": "validates export snapshot generation, visible copy guardrails, print CSS/page-break protection, non-selection scope, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 4T share pack",
-    "manifest.md": "compatibility manifest listing the 4T share pack files",
+    "validation.share-pack.md": "proves the 4U share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-4u.md": "summarizes the premium HTML layout status, HTML-first direction, controlled phase placeholders, and unchanged scoring guardrails",
+    "validation.fullmatch-workbench-chain-replay-4u.md": "validates premium export generation, source-of-truth preservation, visible copy guardrails, print CSS/page-break protection, non-selection scope, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 4U share pack",
+    "manifest.md": "compatibility manifest listing the 4U share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",
-    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, and Player Candidate Comparison View models/builders/renderers/tests, Selection Preview coach copy model/builder/tests, Selection Preview Profile View model/builder/tests, trace-backing renderer tests, score source labels, Coach Report V1 visualization, information hierarchy and legacy cleanup models/builders/tests, timeline review, sandbox decision panel, sandbox evidence calibration, batch confidence calibration, coach test plan, selection preview, match trace spine, match trace aggregator, Coach Report V0 from trace aggregates, French trace labels, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
+    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, and Player Candidate Comparison View models/builders/renderers/tests, Selection Preview coach copy model/builder/tests, Selection Preview Profile View model/builder/tests, trace-backing renderer tests, score source labels, Coach Report V1 visualization, information hierarchy and legacy cleanup models/builders/tests, timeline review, sandbox decision panel, sandbox evidence calibration, batch confidence calibration, coach test plan, selection preview, match trace spine, match trace aggregator, Coach Report V0 from trace aggregates, French trace labels, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
   },
 };

@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4T Validation
+# FullMatch Workbench Chain Replay 4U Validation
 
 Status: PASS
 
@@ -6,20 +6,27 @@ Status: PASS
 - PASS: default runFullMatch remains segment_harness.
 - PASS: experimental mode remains opt-in.
 - PASS: Coach Product Report remains available.
+- PASS: Coach Report Export Snapshot remains available. - available
 - PASS: Player Candidate Comparison View remains available.
-- PASS: Coach Report Export Snapshot status is available. - available
-- PASS: coach-report.product.html is generated. - reports/coach-report.product.html
+- PASS: Premium HTML Layout status is available. - available
 - PASS: coach-report.export.html is generated. - reports/coach-report.export.html
-- PASS: export uses product report as single source of truth. - single source
-- PASS: duplicated report logic is false. - false
-- PASS: product/export section counts match. - section ids compared
-- PASS: product/export scores match. - score labels compared
-- PASS: product/export candidate comparison matches. - comparison blocks compared
-- PASS: interpretation guard remains visible. - guard preserved
-- PASS: print CSS is present. - @media print
-- PASS: page-break CSS is present. - @page + page-break-inside
-- PASS: product cards avoid page breaks. - break-inside avoid
-- PASS: appendices avoid page breaks. - appendix break guard
+- PASS: HTML-first remains true.
+- PASS: PDF remains optional.
+- PASS: export uses product report as single source of truth.
+- PASS: duplicated report logic is false.
+- PASS: cover/header premium is present.
+- PASS: executive summary is present.
+- PASS: key statistics section is present.
+- PASS: with-ball section is present.
+- PASS: without-ball section is present.
+- PASS: goalkeeper section is present.
+- PASS: profiles and players section is present.
+- PASS: next-match section is present.
+- PASS: appendices are present.
+- PASS: controlled empty states are used where data is insufficient. - 6
+- PASS: product/export score matches.
+- PASS: candidate comparison matches product.
+- PASS: interpretation guard remains visible.
 - PASS: visible copy avoids recommendation wording. - 0
 - PASS: visible copy avoids selection wording. - 0
 - PASS: internal status ids are hidden from main export. - 0
@@ -35,11 +42,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: export layer cannot mutate official timeline.
-- PASS: export layer cannot mutate official score.
-- PASS: export layer cannot mutate official possession.
-- PASS: export layer cannot create production scoring events.
-- PASS: export layer cannot claim global economy.
+- PASS: premium layout cannot mutate official timeline.
+- PASS: premium layout cannot mutate official score.
+- PASS: premium layout cannot mutate official possession.
+- PASS: premium layout cannot create production scoring events.
+- PASS: premium layout cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -47,10 +54,10 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- product section count: 8
-- export section count: 8
-- score match count: 1
-- candidate comparison match count: 1
+- section count: 11
+- KPI card count: 3
+- pitch placeholder count: 3
+- controlled empty state count: 6
 - visible recommendation wording count: 0
 - visible selection wording count: 0
 - internal status leak count: 0
@@ -68,13 +75,8 @@ Status: PASS
 - production scoring event creation count: 0
 - global economy claim count: 0
 
-## Generated Files
-- coach-report.product.html: generated
-- coach-report.export.html: generated
-- coach-report.product.pdf: not generated
-
 ## Recommendation
-- CONFIRM_COACH_REPORT_EXPORT_SNAPSHOT.
+- CONFIRM_PREMIUM_HTML_LAYOUT.
+- CONFIRM_HTML_FIRST_REPORT_DIRECTION.
 - CONFIRM_SINGLE_SOURCE_OF_TRUTH.
-- CONFIRM_PRINT_READY_EXPORT.
-- PREPARE_UI_WIRING_OR_REPORT_REVIEW_WORKFLOW.
+- PREPARE_PHASE_VISUALS_OR_UI_WIRING.
