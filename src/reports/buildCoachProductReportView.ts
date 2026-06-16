@@ -495,7 +495,8 @@ export function buildCoachProductReportViewFromMatchReport(
   const hasProfile = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW");
   const status: CoachProductReportViewModel["status"] = hasV1 && hasProfile ? "available" : "not_available";
   const scoreLabel = `${report.score.home} - ${report.score.away}`;
-  const productRosterPlayers = rosterPlayers ?? rosterCoverageFixturePlayers;
+  const reportDerivedRosterPlayers = report.playerStats.map((stats) => fallbackPlayerSnapshotFromStats(stats.playerId));
+  const productRosterPlayers = rosterPlayers ?? reportDerivedRosterPlayers;
   const profilesToObserve: readonly CoachProductReportProfile[] = [
     {
       profileId: "support_near_z4_hsr_profile",

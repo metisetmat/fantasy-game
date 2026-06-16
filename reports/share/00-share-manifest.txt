@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-16T10:54:11.725Z
+Generated timestamp: 2026-06-16T11:17:12.166Z
 Task/sprint name: Sprint 4R - Roster Coverage & Matchup Candidate Pool
 Final file count: 19
 
@@ -591,27 +591,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
+ M .github/workflows/ci.yml
+ M package.json
  M src/reports/buildCoachProductReportView.ts
- M src/reports/coachProductReportView.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/playerMatchupCalibrationRenderer.test.ts
- M src/reports/renderCoachProductReport.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
  M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildRosterCoverageMatchup.ts
-?? src/reports/fixtures/
-?? src/reports/rosterCoverageFixture.test.ts
-?? src/reports/rosterCoverageGoalkeeperResponseProfile.test.ts
-?? src/reports/rosterCoverageGuard.test.ts
-?? src/reports/rosterCoverageMatchup.test.ts
-?? src/reports/rosterCoverageMatchup.ts
-?? src/reports/rosterCoverageRenderer.test.ts
-?? src/reports/rosterCoverageSecondBallProfile.test.ts
-?? src/reports/rosterCoverageSupportProfile.test.ts
-?? src/reports/rosterCoverageUniversalGuard.test.ts
-?? src/simulation/fullMatch/scoringGuard.4r.test.ts

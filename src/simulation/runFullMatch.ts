@@ -157,7 +157,6 @@ import {
   selectionPreviewProfileViewLimitations,
 } from "../reports/selectionPreviewProfileView";
 import { buildPlayerMatchupView } from "../reports/buildPlayerMatchupView";
-import { rosterCoverageFixturePlayers } from "../reports/fixtures/rosterCoverageFixture";
 import {
   playerMatchupViewEvidenceFact,
   playerMatchupViewLimitations,
@@ -3110,7 +3109,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   });
   const playerMatchupViewModel = buildPlayerMatchupView({
     profileView: selectionPreviewProfileViewModel,
-    rosterPlayers: rosterCoverageFixturePlayers,
+    rosterPlayers: input.homeTeam.roster,
   });
   const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
     aggregate: matchTraceAggregateModel,
@@ -3141,7 +3140,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     coachReportV1: coachReportV1VisualizationModel,
     profileView: selectionPreviewProfileViewModel,
     playerMatchupView: playerMatchupViewModel,
-    rosterPlayers: rosterCoverageFixturePlayers,
+    rosterPlayers: input.homeTeam.roster,
   });
   const coachProductReportPolishModel = buildCoachProductReportPolish({
     productReportView: coachProductReportViewModel,
