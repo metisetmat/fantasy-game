@@ -1,13 +1,17 @@
 # Share Pack
 
-Generated: 2026-06-16T11:17:12.166Z
-Task/sprint: Sprint 4R - Roster Coverage & Matchup Candidate Pool
+Generated: 2026-06-16T12:35:15.226Z
+Task/sprint: Sprint 4S - Player Card Polish & Candidate Comparison
 Mode: MINIMAL_REVIEW
 Final file count: 19
 
 Upload every file in this reports/share directory.
 
 Source files are bundled by domain to keep the ChatGPT review pack compact.
+
+## Manifest Files
+- manifest.md
+- 00-share-manifest.txt
 
 ## Standalone Files
 - package.json
@@ -21,8 +25,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4r.md
-- validation.fullmatch-workbench-chain-replay-4r.md
+- fullmatch-workbench-chain-replay-4s.md
+- validation.fullmatch-workbench-chain-replay-4s.md
 - README.md
 
 ## Bundle Files

@@ -73,25 +73,29 @@ function visibleProductText(view: CoachProductReportViewModel): string {
       profile.nonAppliedLabel,
       profile.confirmationLabel,
     ]),
-    ...view.playerMatchupView.blocks.flatMap((block) => [
+    ...(view.playerCandidateComparisonView?.profileBlocks.flatMap((block) => [
       block.profileTitle,
-      ...block.roleFamilies,
-      ...block.usefulAttributes,
+      block.profileSummary,
       ...(block.emptyState === null ? [] : [block.emptyState]),
-      ...block.candidates.flatMap((candidate) => [
-        candidate.playerName,
-        candidate.currentRoleLabel,
-        candidate.nonAppliedLabel,
-        candidate.confirmationLabel,
-        ...candidate.matchedAttributes,
-        ...candidate.partialAttributes,
-        ...candidate.missingAttributes,
-        ...candidate.whyStudy,
-        ...candidate.whatIsMissing,
-        ...candidate.riskIfUsed,
-        ...candidate.nextObservationSignal,
+      ...block.comparisonSummary,
+      ...block.cards.flatMap((card) => [
+        card.playerName,
+        card.roleLabel,
+        card.fitBandLabel,
+        card.nonAppliedLabel,
+        card.confirmationLabel,
+        card.shortWhyVisible,
+        card.strongestVisibleAsset,
+        card.mainGapOrCheck,
+        card.mainRisk,
+        card.nextObservationSignal,
+        ...card.matchedAttributes,
+        ...card.partialAttributes,
+        ...card.missingAttributes,
+        ...card.visibleTraits,
+        ...card.limitNotes,
       ]),
-    ]),
+    ]) ?? []),
     ...view.nextMatchSignals,
   ].join(" ");
 }
@@ -203,10 +207,14 @@ export function buildCoachProductReportPolish(input: {
       profile.expectedBenefit.length > 0 &&
       profile.tacticalRisk.length > 0
     );
-  const playerMatchupsReadable = view.playerMatchupView.status === "available" &&
-    view.playerMatchupView.profileBlockCount === 3 &&
-    view.playerMatchupView.blocks.every((block) =>
-      block.candidates.length > 0 || block.emptyState !== null
+  const comparisonView = view.playerCandidateComparisonView;
+  const playerMatchupsReadable = comparisonView !== undefined &&
+    comparisonView.status !== "not_available" &&
+    comparisonView.profileBlockCount === 3 &&
+    comparisonView.profileBlocks.every((block) =>
+      block.compactCandidateCount <= 3 &&
+      (block.cards.length > 0 || block.emptyState !== null) &&
+      block.comparisonSummary.length > 0
     );
   const nextMatchSignalsReadable = view.nextMatchSignals.length >= 3 && view.nextMatchSignals.length <= 5;
   const appendicesLessIntrusive = view.appendices.length > 0 && view.appendices.every((appendix) => appendix.defaultCollapsed);

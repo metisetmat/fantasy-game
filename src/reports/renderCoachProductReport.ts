@@ -7,6 +7,11 @@ import type {
 import { buildCoachProductReportPolish } from "./buildCoachProductReportPolish";
 import { escapeHtml } from "./htmlCoachReport";
 import {
+  candidateDisplayPriorityLabel,
+  type PlayerCandidateComparisonCard,
+  type PlayerCandidateComparisonProfileBlock,
+} from "./playerCandidateComparisonView";
+import {
   playerMatchupFitBandLabel,
   type PlayerMatchupCandidate,
   type PlayerMatchupProfileBlock,
@@ -139,6 +144,111 @@ function renderMatchupBlock(block: PlayerMatchupProfileBlock): string {
     </article>`;
 }
 
+function renderComparisonDifferentiator(card: PlayerCandidateComparisonCard, title: string): string {
+  const differentiator = card.differentiators.find((item) => item.title === title);
+
+  return `<p>${escapeHtml(differentiator?.summary ?? "")}</p>`;
+}
+
+function renderComparisonDetailCard(card: PlayerCandidateComparisonCard): string {
+  return `
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>${escapeHtml(card.playerName)}</h4>
+          <p class="muted">R&ocirc;le actuel : ${escapeHtml(card.roleLabel)}</p>
+        </div>
+        ${renderBadge(candidateDisplayPriorityLabel(card.displayPriority))}
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> ${escapeHtml(card.fitBandLabel)} (${card.calibratedFitScore}/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          ${renderList(card.matchedAttributes.length === 0 ? [card.strongestVisibleAsset] : card.matchedAttributes.slice(0, 3))}
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          ${renderList(card.missingAttributes.length === 0 ? [card.mainGapOrCheck] : card.missingAttributes.slice(0, 3))}
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          ${renderList([card.mainRisk, ...card.limitNotes].slice(0, 3))}
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          ${renderList([card.nextObservationSignal])}
+        </section>
+      </div>
+      <p class="guard">${escapeHtml(card.nonAppliedLabel)} &mdash; ${escapeHtml(card.confirmationLabel)}.</p>
+    </article>`;
+}
+
+function renderComparisonCard(card: PlayerCandidateComparisonCard): string {
+  return `
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>${escapeHtml(card.playerName)}</h4>
+          <p class="muted">R&ocirc;le actuel : ${escapeHtml(card.roleLabel)}</p>
+        </div>
+        ${renderBadge(escapeHtml(candidateDisplayPriorityLabel(card.displayPriority)))}
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> ${escapeHtml(card.fitBandLabel)} (${card.calibratedFitScore}/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>${escapeHtml(card.shortWhyVisible)}</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          ${renderComparisonDifferentiator(card, "Point fort distinctif")}
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          ${renderComparisonDifferentiator(card, "Point a verifier")}
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          ${renderComparisonDifferentiator(card, "Risque principal")}
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          ${renderComparisonDifferentiator(card, "A verifier au prochain match")}
+        </section>
+      </div>
+      <p class="guard">${escapeHtml(card.nonAppliedLabel)} &mdash; ${escapeHtml(card.confirmationLabel)}.</p>
+    </article>`;
+}
+
+function renderComparisonBlock(block: PlayerCandidateComparisonProfileBlock): string {
+  if (block.emptyStateUsed || block.cards.length === 0) {
+    return `
+      <article class="product-card comparison-block">
+        <h3>${escapeHtml(block.profileTitle)}</h3>
+        <p>${escapeHtml(block.profileSummary)}</p>
+        <p class="empty">${escapeHtml(block.emptyState ?? "Aucune piste credible ne ressort encore pour ce profil.")}</p>
+      </article>`;
+  }
+
+  const compactCards = block.cards.filter((card) => card.compactVisible);
+  const detailCards = block.cards.filter((card) => !card.compactVisible);
+
+  return `
+    <article class="product-card comparison-block">
+      <h3>${escapeHtml(block.profileTitle)}</h3>
+      <p>${escapeHtml(block.profileSummary)}</p>
+      ${renderList(block.comparisonSummary.slice(0, 3))}
+      <div class="comparison-cards">${compactCards.map(renderComparisonCard).join("")}</div>
+      ${detailCards.length === 0 ? "" : `
+        <details class="comparison-details">
+          <summary>D&eacute;tails repli&eacute;s (${detailCards.length})</summary>
+          <div class="comparison-detail-list">${detailCards.map(renderComparisonDetailCard).join("")}</div>
+        </details>
+      `}
+    </article>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
   const detail = appendix.details !== undefined
     ? appendix.details
@@ -197,6 +307,13 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .matchup-head { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
     .matchup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
     .matchup-grid section { background: #fff; border-radius: 8px; padding: 10px; }
+    .comparison-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .comparison-card, .comparison-detail-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .comparison-grid section { background: #fff; border-radius: 8px; padding: 10px; }
+    .comparison-details { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 12px; }
+    .comparison-details summary { cursor: pointer; font-weight: 700; }
+    .comparison-detail-list { display: grid; gap: 12px; margin-top: 12px; }
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
     .attributes .badge { color: #515f6f; background: #fbfcfd; }
@@ -265,7 +382,10 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <p class="guard">Les joueurs affichés sont issus d'une calibration rôle-attributs. Certains profils peuvent rester sans candidat si aucun joueur ne franchit le seuil de crédibilité.</p>
     <p class="guard">Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
     <p class="guard">Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
-    ${model.playerMatchupView.blocks.map(renderMatchupBlock).join("").trimStart()}
+        <p class="guard">Les cartes comparent des pistes d'observation. Elles ne changent ni la composition, ni le onze de depart, ni le banc.</p>
+    ${(model.playerCandidateComparisonView?.profileBlocks ?? []).length > 0
+      ? model.playerCandidateComparisonView!.profileBlocks.map(renderComparisonBlock).join("").trimStart()
+      : model.playerMatchupView.blocks.map(renderMatchupBlock).join("").trimStart()}
   </section>
 
   <section id="next-match-signals" class="product-section">

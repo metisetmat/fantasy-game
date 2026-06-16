@@ -169,6 +169,10 @@ import {
   rosterCoverageMatchupEvidenceFact,
   rosterCoverageMatchupLimitations,
 } from "../reports/rosterCoverageMatchup";
+import {
+  playerCandidateComparisonViewEvidenceFact,
+  playerCandidateComparisonViewLimitations,
+} from "../reports/playerCandidateComparisonView";
 import { buildCoachProductReportView } from "../reports/buildCoachProductReportView";
 import {
   coachProductReportViewEvidenceFact,
@@ -3159,6 +3163,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...playerMatchupViewLimitations(playerMatchupViewModel),
         ...(playerMatchupViewModel.calibration === undefined ? [] : playerMatchupCalibrationLimitations(playerMatchupViewModel.calibration)),
         ...(coachProductReportViewModel.rosterCoverageMatchup === undefined ? [] : rosterCoverageMatchupLimitations(coachProductReportViewModel.rosterCoverageMatchup)),
+        ...(coachProductReportViewModel.playerCandidateComparisonView === undefined ? [] : playerCandidateComparisonViewLimitations(coachProductReportViewModel.playerCandidateComparisonView)),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
@@ -3335,6 +3340,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         matchInput: input,
         model: coachProductReportViewModel.rosterCoverageMatchup,
       });
+  const playerCandidateComparisonViewModelFact = coachProductReportViewModel.playerCandidateComparisonView === undefined
+    ? null
+    : playerCandidateComparisonViewEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachProductReportViewModel.playerCandidateComparisonView,
+      });
   const playerMatchupCalibrationModelFact = playerMatchupViewModel.calibration === undefined
     ? null
     : playerMatchupCalibrationEvidenceFact({
@@ -3415,6 +3427,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalRosterCoverageMatchupFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? rosterCoverageMatchupModelFact
     : null;
+  const experimentalPlayerCandidateComparisonViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? playerCandidateComparisonViewModelFact
+    : null;
   const experimentalPlayerMatchupCalibrationFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? playerMatchupCalibrationModelFact
     : null;
@@ -3458,6 +3473,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
     ...(experimentalPlayerMatchupViewFact === null ? [] : [experimentalPlayerMatchupViewFact]),
     ...(experimentalRosterCoverageMatchupFact === null ? [] : [experimentalRosterCoverageMatchupFact]),
+    ...(experimentalPlayerCandidateComparisonViewFact === null ? [] : [experimentalPlayerCandidateComparisonViewFact]),
     ...(experimentalPlayerMatchupCalibrationFact === null ? [] : [experimentalPlayerMatchupCalibrationFact]),
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),

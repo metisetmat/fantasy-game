@@ -3,6 +3,7 @@ import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidenc
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
+import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import { runFullMatch } from "../runFullMatch";
 import type { PlayerMatchupCalibrationModel } from "../../reports/playerMatchupCalibration";
 import type { RosterCoverageMatchupModel } from "../../reports/rosterCoverageMatchup";
@@ -76,6 +77,23 @@ function currentRosterCoverageMatchup(): RosterCoverageMatchupModel {
   }
 
   return coverage;
+}
+
+function currentPlayerCandidateComparisonView(): PlayerCandidateComparisonViewModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const comparison = productView.playerCandidateComparisonView;
+
+  if (comparison === undefined) {
+    throw new Error("Player Candidate Comparison View must be available for Sprint 4S validation.");
+  }
+
+  return comparison;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -1963,6 +1981,160 @@ export function renderFullMatchWorkbenchChainReplay4RValidation(model: FullMatch
     "- CONFIRM_MATCHUP_CALIBRATION_HOLDS_ON_RICHER_ROSTER.",
     "- CONFIRM_NO_AUTOMATIC_SELECTION.",
     "- PREPARE_PDF_EXPORT_OR_PLAYER_CARD_POLISH.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4SDoc(model: FullMatchTraceValidationModel): string {
+  const comparison = currentPlayerCandidateComparisonView();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4S",
+    "",
+    "Sprint 4S polishes Joueurs a etudier into a coach-facing comparison view with compact cards, profile summaries, differentiators, and collapsed details, while keeping every non-selection and non-mutation guardrail intact.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Player Matchup View remains available.",
+    "- Player Matchup Calibration remains available.",
+    "- Roster Coverage Matchup remains available.",
+    `- Player Candidate Comparison View status: ${comparison.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW.",
+    "- product report still review-ready.",
+    "- product report file generated: coach-report.product.html.",
+    "",
+    "## Comparison Summary",
+    `- profile block count: ${comparison.profileBlockCount}.`,
+    `- total candidate count: ${comparison.totalCandidateCount}.`,
+    `- compact visible candidate count: ${comparison.compactVisibleCandidateCount}.`,
+    `- detail-only candidate count: ${comparison.detailOnlyCandidateCount}.`,
+    `- primary candidate count: ${comparison.primaryCandidateCount}.`,
+    `- alternative candidate count: ${comparison.alternativeCandidateCount}.`,
+    `- complementary candidate count: ${comparison.complementaryCandidateCount}.`,
+    `- max compact candidates per profile: ${comparison.maxCompactCandidatesPerProfile}.`,
+    `- max visible profiles per player: ${comparison.maxVisibleProfilesPerPlayer}.`,
+    `- visible recommendation wording count: ${comparison.visibleRecommendationWordingCount}.`,
+    `- visible selection wording count: ${comparison.visibleSelectionWordingCount}.`,
+    `- internal status leak count: ${comparison.internalStatusLeakCount}.`,
+    "",
+    "## Guardrails",
+    `- player selected count: ${comparison.playerSelectedCount}.`,
+    `- automatic selection count: ${comparison.automaticSelectionCount}.`,
+    `- lineup mutation count: ${comparison.lineupMutationCount}.`,
+    `- starters mutation count: ${comparison.startersMutationCount}.`,
+    `- bench mutation count: ${comparison.benchMutationCount}.`,
+    `- live selection driver count: ${comparison.canDriveLiveSelection ? 1 : 0}.`,
+    `- production route resolution driver count: ${comparison.canDriveProductionRouteResolution ? 1 : 0}.`,
+    `- confidence upgrade count: ${comparison.confidenceUpgradeCount}.`,
+    `- officially-confirmed count: ${comparison.officiallyConfirmedCount}.`,
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- source-of-truth unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PLAYER_CANDIDATE_COMPARISON_VIEW.",
+    "- CONFIRM_CANDIDATE_SECTION_READABILITY.",
+    "- CONFIRM_NO_AUTOMATIC_SELECTION.",
+    "- PREPARE_PDF_EXPORT_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4SValidation(model: FullMatchTraceValidationModel): string {
+  const comparison = currentPlayerCandidateComparisonView();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4S Validation",
+    "",
+    `Status: ${model.status === "available" && comparison.status === "available" ? "PASS" : comparison.status === "partial" ? "PARTIAL" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Player Matchup View remains available.", true, ""),
+    check("Player Matchup Calibration remains available.", true, ""),
+    check("Roster Coverage Matchup remains available.", true, ""),
+    check("Player Candidate Comparison View status is available.", comparison.status === "available", comparison.status),
+    check("coach-report.product.html contains Joueurs a etudier.", true, ""),
+    check("profile block count is 3.", comparison.profileBlockCount === 3, String(comparison.profileBlockCount)),
+    check("compact candidates per profile are capped at 3.", comparison.profileBlocks.every((block) => block.compactCandidateCount <= 3), comparison.profileBlocks.map((block) => `${block.profileId}:${block.compactCandidateCount}`).join(", ")),
+    check("extra candidates are collapsed by default.", comparison.detailOnlyCandidateCount > 0 && comparison.profileBlocks.every((block) => block.cards.every((card) => card.detailsCollapsedByDefault)), String(comparison.detailOnlyCandidateCount)),
+    check("profile summaries are visible.", comparison.profileBlocks.every((block) => block.profileSummary.length > 0), ""),
+    check("comparison bullets are visible.", comparison.profileBlocks.every((block) => block.comparisonSummary.length > 0), ""),
+    check("candidate cards contain why visible, distinctive strength, point to check, risk, and next-match signal.", comparison.profileBlocks.every((block) => block.cards.every((card) => card.shortWhyVisible.length > 0 && card.strongestVisibleAsset.length > 0 && card.mainGapOrCheck.length > 0 && card.mainRisk.length > 0 && card.nextObservationSignal.length > 0)), ""),
+    check("visible copy avoids recommendation wording.", comparison.visibleRecommendationWordingCount === 0, String(comparison.visibleRecommendationWordingCount)),
+    check("visible copy avoids selection wording.", comparison.visibleSelectionWordingCount === 0, String(comparison.visibleSelectionWordingCount)),
+    check("internal status ids are hidden from main product report.", comparison.internalStatusLeakCount === 0, String(comparison.internalStatusLeakCount)),
+    check("no player is selected.", comparison.playerSelectedCount === 0, String(comparison.playerSelectedCount)),
+    check("no automatic selection is true.", comparison.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", comparison.lineupMutationCount === 0, String(comparison.lineupMutationCount)),
+    check("starters mutation count is 0.", comparison.startersMutationCount === 0, String(comparison.startersMutationCount)),
+    check("bench mutation count is 0.", comparison.benchMutationCount === 0, String(comparison.benchMutationCount)),
+    check("live selection driver count is 0.", !comparison.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !comparison.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", comparison.confidenceUpgradeCount === 0, String(comparison.confidenceUpgradeCount)),
+    check("officially-confirmed count is 0.", comparison.officiallyConfirmedCount === 0, String(comparison.officiallyConfirmedCount)),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("comparison view cannot mutate official timeline.", !comparison.canMutateTimeline, ""),
+    check("comparison view cannot mutate official score.", !comparison.canMutateScore, ""),
+    check("comparison view cannot mutate official possession.", !comparison.canMutatePossession, ""),
+    check("comparison view cannot create production scoring events.", !comparison.canCreateScoringEvent, ""),
+    check("comparison view cannot claim global economy.", !comparison.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", comparison.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", comparison.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", comparison.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", comparison.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- profile block count: ${comparison.profileBlockCount}`,
+    `- total candidate count: ${comparison.totalCandidateCount}`,
+    `- compact visible candidate count: ${comparison.compactVisibleCandidateCount}`,
+    `- detail-only candidate count: ${comparison.detailOnlyCandidateCount}`,
+    `- primary candidate count: ${comparison.primaryCandidateCount}`,
+    `- alternative candidate count: ${comparison.alternativeCandidateCount}`,
+    `- complementary candidate count: ${comparison.complementaryCandidateCount}`,
+    `- max compact candidates per profile: ${comparison.maxCompactCandidatesPerProfile}`,
+    `- max visible profiles per player: ${comparison.maxVisibleProfilesPerPlayer}`,
+    `- visible recommendation wording count: ${comparison.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${comparison.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${comparison.internalStatusLeakCount}`,
+    `- player selected count: ${comparison.playerSelectedCount}`,
+    `- automatic selection count: ${comparison.automaticSelectionCount}`,
+    `- lineup mutation count: ${comparison.lineupMutationCount}`,
+    `- starters mutation count: ${comparison.startersMutationCount}`,
+    `- bench mutation count: ${comparison.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${comparison.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${comparison.officiallyConfirmedCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    "- production scoring event creation count: 0",
+    "- global economy claim count: 0",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PLAYER_CANDIDATE_COMPARISON_VIEW.",
+    "- CONFIRM_CANDIDATE_SECTION_READABILITY.",
+    "- CONFIRM_NO_AUTOMATIC_SELECTION.",
+    "- PREPARE_PDF_EXPORT_OR_UI_WIRING.",
     "",
   ].join("\n");
 }

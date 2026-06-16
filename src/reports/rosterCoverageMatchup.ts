@@ -22,6 +22,7 @@ export interface RosterCoverageProfileSummary {
   readonly penalizedCandidateCount: number;
   readonly emptyStateUsed: boolean;
   readonly credibleCandidateCount: number;
+  readonly visibleCandidates: readonly RosterCoverageVisibleCandidate[];
 }
 
 export interface RosterCoveragePlayerSummary {
@@ -33,6 +34,31 @@ export interface RosterCoveragePlayerSummary {
   readonly excludedProfileCount: number;
   readonly penalizedProfileCount: number;
   readonly universalGuardApplied: boolean;
+}
+
+export type RosterCoverageVisibleCandidateFitBand =
+  | "low"
+  | "medium"
+  | "high";
+
+export interface RosterCoverageVisibleCandidate {
+  readonly profileId: string;
+  readonly profileTitle: string;
+  readonly playerId: string;
+  readonly playerName: string;
+  readonly currentRoleLabel: string;
+  readonly fitBand: RosterCoverageVisibleCandidateFitBand;
+  readonly fitScore: number;
+  readonly rawFitScore?: number;
+  readonly calibratedFitScore?: number;
+  readonly matchedAttributes: readonly string[];
+  readonly partialAttributes: readonly string[];
+  readonly missingAttributes: readonly string[];
+  readonly whyVisible: readonly string[];
+  readonly riskNotes: readonly string[];
+  readonly limitNotes: readonly string[];
+  readonly nextObservationSignals: readonly string[];
+  readonly visibleTraits: readonly string[];
 }
 
 export interface RosterCoverageMatchupModel {

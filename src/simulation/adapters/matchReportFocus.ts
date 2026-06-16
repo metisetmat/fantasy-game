@@ -91,6 +91,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW":
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION":
     case "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP":
+    case "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW":
       return 25;
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
@@ -227,6 +228,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire les joueurs Ã  Ã©tudier";
     case "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP":
       return "Relire la couverture roster des joueurs a etudier";
+    case "WORKBENCH_CHAIN_PLAYER_CANDIDATE_COMPARISON_VIEW":
+      return "Relire la comparaison des candidats a etudier";
     case "HARNESS_PLAUSIBILITY_WARNING":
       return "Lire le signal de harnais sans changer l'économie du score";
   }
