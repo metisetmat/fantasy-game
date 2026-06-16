@@ -156,6 +156,11 @@ import {
   selectionPreviewProfileViewEvidenceFact,
   selectionPreviewProfileViewLimitations,
 } from "../reports/selectionPreviewProfileView";
+import { buildPlayerMatchupView } from "../reports/buildPlayerMatchupView";
+import {
+  playerMatchupViewEvidenceFact,
+  playerMatchupViewLimitations,
+} from "../reports/playerMatchupView";
 import { buildCoachProductReportView } from "../reports/buildCoachProductReportView";
 import {
   coachProductReportViewEvidenceFact,
@@ -3094,6 +3099,10 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     coachCopyCards: selectionPreviewCoachCopyModel.cards,
     traceBackingModel: selectionPreviewTraceBackingModel,
   });
+  const playerMatchupViewModel = buildPlayerMatchupView({
+    profileView: selectionPreviewProfileViewModel,
+    rosterPlayers: input.homeTeam.roster,
+  });
   const coachReportTraceV0Model = buildCoachReportFromTraceAggregates({
     aggregate: matchTraceAggregateModel,
   });
@@ -3122,6 +3131,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     scoreSourceNote: "Les diagnostics batch et les échantillons live restent séparés de ce score.",
     coachReportV1: coachReportV1VisualizationModel,
     profileView: selectionPreviewProfileViewModel,
+    playerMatchupView: playerMatchupViewModel,
   });
   const coachProductReportPolishModel = buildCoachProductReportPolish({
     productReportView: coachProductReportViewModel,
@@ -3137,6 +3147,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...selectionPreviewTraceBackingLimitations(selectionPreviewTraceBackingModel),
         ...selectionPreviewCoachCopyLimitations(selectionPreviewCoachCopyModel),
         ...selectionPreviewProfileViewLimitations(selectionPreviewProfileViewModel),
+        ...playerMatchupViewLimitations(playerMatchupViewModel),
         ...coachReportTraceV0Limitations(coachReportTraceV0Model),
         ...coachReportV1VisualizationLimitations(coachReportV1VisualizationModel),
         ...coachReportV1InformationHierarchyLimitations(coachReportV1InformationHierarchyModel),
@@ -3301,6 +3312,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: selectionPreviewProfileViewModel,
   });
+  const playerMatchupViewModelFact = playerMatchupViewEvidenceFact({
+    report,
+    matchInput: input,
+    model: playerMatchupViewModel,
+  });
   const matchTraceSpineModelFact = matchTraceSpineEvidenceFact({
     report,
     matchInput: input,
@@ -3368,6 +3384,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalSelectionPreviewProfileViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? selectionPreviewProfileViewModelFact
     : null;
+  const experimentalPlayerMatchupViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? playerMatchupViewModelFact
+    : null;
   const experimentalCoachProductReportViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachProductReportViewModelFact
     : null;
@@ -3406,6 +3425,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalSelectionPreviewTraceBackingFact === null ? [] : [experimentalSelectionPreviewTraceBackingFact]),
     ...(experimentalSelectionPreviewCoachCopyFact === null ? [] : [experimentalSelectionPreviewCoachCopyFact]),
     ...(experimentalSelectionPreviewProfileViewFact === null ? [] : [experimentalSelectionPreviewProfileViewFact]),
+    ...(experimentalPlayerMatchupViewFact === null ? [] : [experimentalPlayerMatchupViewFact]),
     ...(experimentalCoachProductReportViewFact === null ? [] : [experimentalCoachProductReportViewFact]),
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),

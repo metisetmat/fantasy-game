@@ -36,7 +36,10 @@ function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    renderCoachProductReport(buildCoachProductReportViewFromMatchReport(experimentalReport)),
+    renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
+      experimentalReport,
+      engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
+    )),
     "utf8",
   );
 

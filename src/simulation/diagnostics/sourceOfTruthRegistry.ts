@@ -36,6 +36,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_TRACE_BACKING"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW"
+  | "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
@@ -1029,11 +1030,47 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     ],
     globalScoringEconomyVerdictAllowed: false,
   },
+  WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW: {
+    scope: "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW",
+    canProve: [
+      "Player Matchup View can render profile-player compatibility comparisons",
+      "candidate cards can expose visible strengths, gaps, risks, and next observation signals",
+      "profile-player comparisons remain non-applied and non-official",
+    ],
+    canSuggest: [
+      "which roster players could be studied for each profile",
+      "which player attributes currently look close to the profile",
+      "which missing attributes or tactical risks should be observed before any future decision",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a player must be selected",
+      "that a lineup change is recommended",
+      "that a profile-player matchup is officially confirmed",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
   WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW: {
     scope: "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW",
     canProve: [
       "coach product report HTML is generated",
-      "product report exposes a seven-section coach-facing reading order",
+      "product report exposes an eight-section coach-facing reading order",
       "technical, sandbox, traceability, legacy, and validation material is moved to appendices",
       "profile suggestions remain non-applied and non-official",
     ],

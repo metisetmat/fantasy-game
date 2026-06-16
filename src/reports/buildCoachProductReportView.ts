@@ -1,4 +1,5 @@
-import type { MatchReport } from "../contracts/engineToCoach";
+import type { MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
+import { buildPlayerMatchupView } from "./buildPlayerMatchupView";
 import type {
   CoachReportV1VisualizationCard,
   CoachReportV1VisualizationModel,
@@ -12,9 +13,15 @@ import {
   type CoachProductReportViewModel,
 } from "./coachProductReportView";
 import {
+  fallbackPlayerSnapshotFromStats,
+  type PlayerMatchupViewModel,
+} from "./playerMatchupView";
+import {
   selectionPreviewProfileAttributeLabels,
   selectionPreviewProfileRoleFamilyLabels,
+  type SelectionPreviewProfileAttribute,
   type SelectionPreviewProfileCard,
+  type SelectionPreviewProfileRoleFamily,
   type SelectionPreviewProfileViewModel,
 } from "./selectionPreviewProfileView";
 
@@ -99,7 +106,124 @@ function profileFromCard(card: SelectionPreviewProfileCard): CoachProductReportP
   };
 }
 
-function buildAppendices(): readonly CoachProductReportAppendix[] {
+function profileCardFromProductProfile(profile: CoachProductReportProfile): SelectionPreviewProfileCard {
+  const roleFamilyMap: Readonly<Record<string, SelectionPreviewProfileRoleFamily>> = {
+    "soutien mobile": "support_runner",
+    "relayeur mobile": "mobile_lock",
+    "lien intÃ©rieur": "hook_link",
+    "soutien crÃ©atif": "playmaker_support",
+    "chasseur de second ballon": "rebound_chaser",
+    "attaquant de pression": "pressure_forward",
+    "gros volume de course": "high_work_rate_runner",
+    "option de continuitÃ©": "continuity_option",
+    "second crÃ©ateur": "secondary_playmaker",
+    "receveur de soutien": "support_receiver",
+    "ancre de rest-defense": "rest_defense_anchor",
+  };
+  const attributeMap: Readonly<Record<string, SelectionPreviewProfileAttribute>> = {
+    anticipation: "anticipation",
+    "soutien sans ballon": "off_ball_support",
+    "maÃ®trise technique": "handling",
+    "prise de dÃ©cision": "decision_making",
+    endurance: "stamina",
+    "rÃ©action": "reaction",
+    "accÃ©lÃ©ration": "acceleration",
+    "agressivitÃ© contrÃ´lÃ©e": "aggression",
+    "Ã©quilibre": "balance",
+    placement: "positioning",
+    "sang-froid": "composure",
+    "discipline tactique": "tactical_discipline",
+    "fraÃ®cheur mentale": "mental_freshness",
+  };
+
+  return {
+    cardId: profile.profileId as SelectionPreviewProfileCard["cardId"],
+    previewId: profile.profileId.replace("_profile", "") as SelectionPreviewProfileCard["previewId"],
+    title: profile.title,
+    roleFamilies: profile.roleFamilies.map((role) => roleFamilyMap[role]).filter((role): role is SelectionPreviewProfileRoleFamily => role !== undefined),
+    usefulAttributes: profile.usefulAttributes.map((attribute) => attributeMap[attribute]).filter((attribute): attribute is SelectionPreviewProfileAttribute => attribute !== undefined),
+    originLabel: "Profil Ã  observer",
+    traceSupportLabel: "Support officiel prudent",
+    decisionStatusLabel: "Non appliquÃ©",
+    confirmationLabel: profile.confirmationLabel,
+    whyObserve: profile.whyObserve,
+    officialTraceSupport: profile.traceSupport,
+    expectedBenefit: profile.expectedBenefit,
+    tacticalRisk: profile.tacticalRisk,
+    nextMatchSignalToVerify: profile.nextMatchSignal,
+    sourceScope: "coach_preview_non_applied",
+    officialAggregatesUsedAsSupportOnly: true,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    previewStillNonApplied: true,
+    officiallyConfirmed: false,
+    confidenceUpgradeAllowed: false,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    warnings: [],
+  };
+}
+
+function profileViewFromProductProfiles(profiles: readonly CoachProductReportProfile[]): SelectionPreviewProfileViewModel {
+  return {
+    status: profiles.length === 0 ? "not_available" : (profiles.length === 3 ? "available" : "partial"),
+    origin: "selection_preview_coach_copy",
+    profileCardCount: profiles.length,
+    cards: profiles.map(profileCardFromProductProfile),
+    officiallyConfirmedCount: 0,
+    confidenceUpgradeCount: 0,
+    previewAppliedCount: 0,
+    diagnosticAggregatesKeptSeparate: true,
+    sandboxAggregatesKeptSeparate: true,
+    officialAggregatesUsedAsSupportOnly: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    traceBackingStatus: "available",
+    tags: [],
+    warnings: [],
+  };
+}
+
+function buildPlayerMatchupAppendixDetails(playerMatchupView: PlayerMatchupViewModel): readonly string[] {
+  return [
+    `profile block count: ${playerMatchupView.profileBlockCount}`,
+    `player candidate count: ${playerMatchupView.playerCandidateCount}`,
+    `high fit count: ${playerMatchupView.highFitCount}`,
+    `medium fit count: ${playerMatchupView.mediumFitCount}`,
+    `low fit count: ${playerMatchupView.lowFitCount}`,
+    `no automatic selection: ${String(playerMatchupView.noAutomaticSelection)}`,
+    `player selected count: ${playerMatchupView.playerSelectedCount}`,
+    `lineup mutation count: ${playerMatchupView.lineupMutationCount}`,
+    `starters mutation count: ${playerMatchupView.startersMutationCount}`,
+    `bench mutation count: ${playerMatchupView.benchMutationCount}`,
+    `live selection driver count: ${playerMatchupView.canDriveLiveSelection ? 1 : 0}`,
+    `production route resolution driver count: ${playerMatchupView.canDriveProductionRouteResolution ? 1 : 0}`,
+    `scoring constants unchanged: ${String(playerMatchupView.scoringConstantsUnchanged)}`,
+  ];
+}
+
+function buildAppendices(playerMatchupView: PlayerMatchupViewModel): readonly CoachProductReportAppendix[] {
   return [
     {
       appendixId: "sandbox_hypotheses",
@@ -123,6 +247,14 @@ function buildAppendices(): readonly CoachProductReportAppendix[] {
       contentKind: "legacy",
     },
     {
+      appendixId: "player_matchup_details",
+      title: "DÃ©tails des rapprochements profil-joueur",
+      defaultCollapsed: true,
+      summary: "Les rapprochements profil-joueur restent sÃ©parÃ©s des choix de composition.",
+      contentKind: "technical",
+      details: buildPlayerMatchupAppendixDetails(playerMatchupView),
+    },
+    {
       appendixId: "validation_details",
       title: "Détails de validation",
       defaultCollapsed: true,
@@ -141,6 +273,7 @@ function buildModelWithoutTags(input: {
   readonly officialMatchReading: readonly string[];
   readonly keyCoachSignals: readonly CoachProductReportSignal[];
   readonly profilesToObserve: readonly CoachProductReportProfile[];
+  readonly playerMatchupView: PlayerMatchupViewModel;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
@@ -166,6 +299,25 @@ function buildModelWithoutTags(input: {
       profile.nonAppliedLabel,
       profile.confirmationLabel,
     ]),
+    ...input.playerMatchupView.blocks.flatMap((block) => [
+      block.profileTitle,
+      ...block.roleFamilies,
+      ...block.usefulAttributes,
+      ...(block.emptyState === null ? [] : [block.emptyState]),
+      ...block.candidates.flatMap((candidate) => [
+        candidate.playerName,
+        candidate.currentRoleLabel,
+        candidate.nonAppliedLabel,
+        candidate.confirmationLabel,
+        ...candidate.matchedAttributes,
+        ...candidate.partialAttributes,
+        ...candidate.missingAttributes,
+        ...candidate.whyStudy,
+        ...candidate.whatIsMissing,
+        ...candidate.riskIfUsed,
+        ...candidate.nextObservationSignal,
+      ]),
+    ]),
     ...input.nextMatchSignals,
   ].join(" ");
 
@@ -181,6 +333,7 @@ function buildModelWithoutTags(input: {
     officialMatchReading: input.officialMatchReading,
     keyCoachSignals: input.keyCoachSignals,
     profilesToObserve: input.profilesToObserve,
+    playerMatchupView: input.playerMatchupView,
     nextMatchSignals: input.nextMatchSignals,
     appendices: input.appendices,
     productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
@@ -218,6 +371,7 @@ export function buildCoachProductReportView(input: {
   readonly scoreSourceNote: string;
   readonly coachReportV1: CoachReportV1VisualizationModel;
   readonly profileView: SelectionPreviewProfileViewModel;
+  readonly playerMatchupView: PlayerMatchupViewModel;
 }): CoachProductReportViewModel {
   if (input.coachReportV1.status !== "available" || input.profileView.status !== "available") {
     const unavailable = buildModelWithoutTags({
@@ -229,6 +383,7 @@ export function buildCoachProductReportView(input: {
       officialMatchReading: [],
       keyCoachSignals: [],
       profilesToObserve: [],
+      playerMatchupView: input.playerMatchupView,
       nextMatchSignals: [],
       appendices: [],
       warnings: ["Coach Product Report View requires Coach Report V1 and Selection Preview Profile View."],
@@ -259,8 +414,9 @@ export function buildCoachProductReportView(input: {
     officialMatchReading: input.coachReportV1.signalCards.slice(0, 4).map((card) => `${card.title} : ${card.bullets[0] ?? card.summary}`),
     keyCoachSignals,
     profilesToObserve,
+    playerMatchupView: input.playerMatchupView,
     nextMatchSignals,
-    appendices: buildAppendices(),
+    appendices: buildAppendices(input.playerMatchupView),
   });
 
   return {
@@ -269,7 +425,10 @@ export function buildCoachProductReportView(input: {
   };
 }
 
-export function buildCoachProductReportViewFromMatchReport(report: MatchReport): CoachProductReportViewModel {
+export function buildCoachProductReportViewFromMatchReport(
+  report: MatchReport,
+  rosterPlayers?: readonly PlayerSnapshot[],
+): CoachProductReportViewModel {
   const hasV1 = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION");
   const hasProfile = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW");
   const status: CoachProductReportViewModel["status"] = hasV1 && hasProfile ? "available" : "not_available";
@@ -345,6 +504,10 @@ export function buildCoachProductReportViewFromMatchReport(report: MatchReport):
     },
   ];
   const nextMatchSignals = profilesToObserve.flatMap((profile) => profile.nextMatchSignal).slice(0, 5);
+  const playerMatchupView = buildPlayerMatchupView({
+    profileView: profileViewFromProductProfiles(profilesToObserve),
+    rosterPlayers: rosterPlayers ?? report.playerStats.map((stats) => fallbackPlayerSnapshotFromStats(stats.playerId)),
+  });
   const modelWithoutTags = buildModelWithoutTags({
     status,
     matchId: report.matchId,
@@ -362,8 +525,9 @@ export function buildCoachProductReportViewFromMatchReport(report: MatchReport):
     ],
     keyCoachSignals,
     profilesToObserve,
+    playerMatchupView,
     nextMatchSignals,
-    appendices: buildAppendices(),
+    appendices: buildAppendices(playerMatchupView),
     warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],
   });
 
