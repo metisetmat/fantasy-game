@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapport coach - export partageable</title>
+  <style>
+    :root { color-scheme: light; --ink: #172033; --muted: #5f6c7b; --line: #d9e2ec; --soft: #f6f8fb; --accent: #1f6f8b; --accent-soft: #e8f4f7; --paper: #ffffff; }
+    body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: #eef3f7; line-height: 1.5; }
+    main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 56px; }
+    header { background: linear-gradient(135deg, #ffffff 0%, #edf7fa 100%); border: 1px solid var(--line); border-radius: 14px; padding: 26px; margin-bottom: 26px; box-shadow: 0 14px 40px rgba(23, 32, 51, .08); }
+    h1 { margin: 0 0 12px; font-size: 2.2rem; line-height: 1.1; }
+    h2 { margin: 34px 0 12px; font-size: 1.35rem; }
+    h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    h4 { margin: 0 0 6px; font-size: .9rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+    h5 { margin: 0 0 6px; font-size: .82rem; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+    p { margin: 0 0 10px; }
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    li + li { margin-top: 5px; }
+    .header-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: end; }
+    .header-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .score-box { min-width: 180px; padding: 16px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); text-align: right; }
+    .score-label { color: var(--muted); font-size: .84rem; }
+    .score { display: block; font-size: 1.65rem; font-weight: 800; margin-top: 4px; }
+    .muted { color: var(--muted); }
+    .product-section { margin-top: 24px; }
+    .product-card { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 12px 0; background: var(--paper); box-shadow: 0 8px 26px rgba(23, 32, 51, .05); }
+    .summary-list { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+    .signal-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .signal-grid section, .profile-grid section { background: var(--soft); border-radius: 8px; padding: 12px; }
+    .matchup-candidates { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .matchup-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }
+    .matchup-head { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
+    .matchup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .matchup-grid section { background: #fff; border-radius: 8px; padding: 10px; }
+    .comparison-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .comparison-card, .comparison-detail-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--soft); }
+    .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .comparison-grid section { background: #fff; border-radius: 8px; padding: 10px; }
+    .comparison-details { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 12px; }
+    .comparison-details summary { cursor: pointer; font-weight: 700; }
+    .comparison-detail-list { display: grid; gap: 12px; margin-top: 12px; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
+    .attributes .badge { color: #515f6f; background: #fbfcfd; }
+    .card-kicker { color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .08em; margin-bottom: 4px; text-transform: uppercase; }
+    .guard { border-left: 3px solid var(--accent); padding: 10px 0 10px 12px; color: var(--muted); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+    .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
+    .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
+    .appendix summary { cursor: pointer; font-weight: 700; }
+    .empty { color: var(--muted); }
+    @media (max-width: 720px) {
+      .header-grid { grid-template-columns: 1fr; }
+      .score-box { text-align: left; }
+    }
+    @media print {
+      body { background: #fff; }
+      main { max-width: none; padding: 0; }
+      header, .product-card, .summary-list, .interpretation-guard, .appendix { box-shadow: none; }
+      details[open], details { break-inside: avoid; }
+      .product-card { break-inside: avoid; }
+    }
+  
+  .export-snapshot-note { margin: 12px 0 0; color: #5f6c7b; font-size: 0.92rem; }
+  .export-appendix ul { margin-top: 8px; }
+  @media print {
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+
+    body {
+      background: #fff;
+    }
+
+    main {
+      max-width: none;
+      padding: 0;
+    }
+
+    header,
+    .product-card,
+    .summary-list,
+    .interpretation-guard,
+    .comparison-card,
+    .comparison-detail-card,
+    .matchup-card,
+    .appendix {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      box-shadow: none;
+    }
+
+    details {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+  }
+
+  </style>
+</head>
+<body data-export-snapshot="coach_product_report" data-export-format="print_ready_html">
+<main id="product-main" data-export-source="reports/coach-report.product.html" data-export-html="reports/coach-report.export.html">
+  <header>
+    <div class="header-grid">
+      <div>
+        <h1>Rapport coach — lecture produit</h1>
+        <div class="header-meta">
+          <span class="badge">Match : contract-fixture-001</span>
+          <span class="badge">Type : rapport produit</span>
+        </div>
+        <p class="muted">Les diagnostics batch et les échantillons live restent séparés de ce score.</p>
+      </div>
+      <div class="score-box">
+        <span class="score-label">Score du rapport full-match</span>
+        <span class="score">45 - 0</span>
+      </div>
+    </div>
+      <p class="export-snapshot-note no-print">Export partageable d&eacute;riv&eacute; du rapport produit. Cette version garde la m&ecirc;me lecture coach et ajoute seulement des garde-fous d&apos;impression.</p>
+  </header>
+
+  <section id="executive-summary" class="product-section">
+    <h2>Résumé coach</h2>
+    <div class="summary-list"><ul><li>Score final : 45 - 0.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
+  </section>
+
+  <section id="official-match-reading" class="product-section">
+    <h2>Ce que le match dit</h2>
+    <div class="badge-row"><span class="badge">Source : Officiel</span></div>
+    <ul><li>Les signaux officiels restent prioritaires dans le corps du rapport.</li><li>Les diagnostics et hypothèses expérimentales sont conservés en annexe.</li></ul>
+  </section>
+
+  <section id="key-coach-signals" class="product-section">
+    <h2>3 signaux clés</h2>
+    <div class="cards">
+    <article class="product-card signal-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance moyenne</span>
+      </div>
+      <p class="card-kicker">Signal</p>
+      <h3>Zones de danger et progression</h3>
+      <div class="signal-grid">
+        <section>
+          <h4>Pourquoi c'est important</h4>
+          <p>Le coach peut regarder si ces zones produisent une progression propre ou seulement des situations isolées.</p>
+        </section>
+        <section>
+          <h4>Preuve lisible</h4>
+          <ul><li>Lecture issue des agrégats officiels du match.</li></ul>
+        </section>
+        <section>
+          <h4>À surveiller</h4>
+          <p>Le rapport officiel met en avant les zones où le danger se répète.</p>
+        </section>
+      </div>
+    </article>
+    <article class="product-card signal-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance moyenne</span>
+      </div>
+      <p class="card-kicker">Signal</p>
+      <h3>Récupération et première sortie</h3>
+      <div class="signal-grid">
+        <section>
+          <h4>Pourquoi c'est important</h4>
+          <p>Le prochain match doit confirmer si la récupération devient immédiatement exploitable.</p>
+        </section>
+        <section>
+          <h4>Preuve lisible</h4>
+          <ul><li>Les traces officielles relient récupérations et continuité de possession.</li></ul>
+        </section>
+        <section>
+          <h4>À surveiller</h4>
+          <p>La qualité de la première sortie après récupération reste un signal de lecture prioritaire.</p>
+        </section>
+      </div>
+    </article>
+    <article class="product-card signal-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance faible</span>
+      </div>
+      <p class="card-kicker">Signal</p>
+      <h3>Pression, continuité et réponse du gardien</h3>
+      <div class="signal-grid">
+        <section>
+          <h4>Pourquoi c'est important</h4>
+          <p>Le coach doit vérifier si l&#39;équipe garde son organisation quand la première action est neutralisée.</p>
+        </section>
+        <section>
+          <h4>Preuve lisible</h4>
+          <ul><li>Signal officiel présent, mais encore à confirmer par répétition.</li></ul>
+        </section>
+        <section>
+          <h4>À surveiller</h4>
+          <p>La suite de l&#39;action après pression ou arrêt du gardien doit rester structurée.</p>
+        </section>
+      </div>
+    </article></div>
+  </section>
+
+  <section id="profiles-to-observe" class="product-section">
+    <h2>Profils à observer</h2>
+    <p class="guard">Prévisualisation non appliquée — non confirmée comme recommandation officielle.</p>
+    
+    <article class="product-card profile-card">
+      <h3>Profil à observer — soutien proche autour des zones de danger</h3>
+      <div class="badge-row" aria-label="Famille de rôle">
+        <span class="badge">soutien mobile</span><span class="badge">relayeur mobile</span><span class="badge">lien intérieur</span><span class="badge">soutien créatif</span>
+      </div>
+      <div class="badge-row attributes" aria-label="Attributs utiles">
+        <span class="badge">anticipation</span><span class="badge">soutien sans ballon</span><span class="badge">maîtrise technique</span><span class="badge">prise de décision</span><span class="badge">endurance</span>
+      </div>
+      <div class="profile-grid">
+        <section>
+          <h4>Pourquoi l'observer</h4>
+          <ul><li>Ce profil peut stabiliser la première sortie quand le danger naît près des zones hautes.</li></ul>
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          <ul><li>Créer une option plus propre après récupération.</li><li>Réduire la précipitation dans la première passe.</li></ul>
+        </section>
+        <section>
+          <h4>Risque à surveiller</h4>
+          <ul><li>Peut ralentir la projection si le soutien reste trop bas.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Prévisualisation non appliquée — Non confirmée comme recommandation officielle.</p>
+    </article>
+    <article class="product-card profile-card">
+      <h3>Profil à observer — présence sur second ballon</h3>
+      <div class="badge-row" aria-label="Famille de rôle">
+        <span class="badge">chasseur de second ballon</span><span class="badge">attaquant de pression</span><span class="badge">gros volume de course</span>
+      </div>
+      <div class="badge-row attributes" aria-label="Attributs utiles">
+        <span class="badge">anticipation</span><span class="badge">réaction</span><span class="badge">accélération</span><span class="badge">agressivité contrôlée</span><span class="badge">équilibre</span><span class="badge">endurance</span>
+      </div>
+      <div class="profile-grid">
+        <section>
+          <h4>Pourquoi l'observer</h4>
+          <ul><li>Ce profil peut attaquer les secondes actions sans convertir l&#39;hypothèse en consigne officielle.</li></ul>
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          <ul><li>Augmenter la présence autour des ballons disputés.</li><li>Créer une pression utile après neutralisation.</li></ul>
+        </section>
+        <section>
+          <h4>Risque à surveiller</h4>
+          <ul><li>Peut exposer la structure si la course n&#39;est pas couverte.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Prévisualisation non appliquée — Non confirmée comme recommandation officielle.</p>
+    </article>
+    <article class="product-card profile-card">
+      <h3>Profil à observer — réponse face à un gardien fort</h3>
+      <div class="badge-row" aria-label="Famille de rôle">
+        <span class="badge">option de continuité</span><span class="badge">second créateur</span><span class="badge">receveur de soutien</span><span class="badge">ancre de rest-defense</span>
+      </div>
+      <div class="badge-row attributes" aria-label="Attributs utiles">
+        <span class="badge">prise de décision</span><span class="badge">placement</span><span class="badge">sang-froid</span><span class="badge">discipline tactique</span><span class="badge">fraîcheur mentale</span><span class="badge">maîtrise technique</span>
+      </div>
+      <div class="profile-grid">
+        <section>
+          <h4>Pourquoi l'observer</h4>
+          <ul><li>Ce profil aide à garder une structure utile quand le gardien ou la défense neutralise la première action.</li></ul>
+        </section>
+        <section>
+          <h4>Bénéfice attendu</h4>
+          <ul><li>Préserver la continuité après arrêt ou neutralisation.</li><li>Limiter la perte de structure après une occasion.</li></ul>
+        </section>
+        <section>
+          <h4>Risque à surveiller</h4>
+          <ul><li>Peut réduire l&#39;agressivité de la relance si la continuité devient trop prudente.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Prévisualisation non appliquée — Non confirmée comme recommandation officielle.</p>
+    </article>
+  </section>
+
+  <section id="players-to-study" class="product-section">
+    <h2>Joueurs à étudier</h2>
+    <p class="guard">Les joueurs affichés sont issus d'une calibration rôle-attributs. Certains profils peuvent rester sans candidat si aucun joueur ne franchit le seuil de crédibilité.</p>
+    <p class="guard">Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
+    <p class="guard">Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
+        <p class="guard">Les cartes comparent des pistes d'observation. Elles ne changent ni la composition, ni le onze de depart, ni le banc.</p>
+    <article class="product-card comparison-block">
+      <h3>Profil a etudier - soutien proche autour des zones de danger</h3>
+      <p>Ce profil cherche un soutien proche capable de prolonger la progression sans exposer la structure. Les cartes ci-dessous sont des pistes d&#39;observation, pas des choix de composition.</p>
+      <ul><li>Milo Relay apporte d&#39;abord anticipation ressort comme son point fort distinctif.</li><li>Nolan Thread offre une alternative a comparer avec anticipation ressort comme son point fort distinctif.</li><li>Theo Shield propose un profil complementaire, utile si l&#39;on cherche un autre equilibre de risque.</li></ul>
+      <div class="comparison-cards">
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Milo Relay</h4>
+          <p class="muted">R&ocirc;le actuel : Hook Link</p>
+        </div>
+        <span class="badge">A etudier en priorite</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (86/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>anticipation ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>Compatibilité non prescriptive : elle ne transforme pas le joueur en choix de composition.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>La première sortie après récupération devient-elle plus propre ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Nolan Thread</h4>
+          <p class="muted">R&ocirc;le actuel : Playmaker</p>
+        </div>
+        <span class="badge">Alternative a comparer</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (83/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>anticipation ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>Compatibilité non prescriptive : elle ne transforme pas le joueur en choix de composition.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>La première sortie après récupération devient-elle plus propre ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Theo Shield</h4>
+          <p class="muted">R&ocirc;le actuel : Pivot</p>
+        </div>
+        <span class="badge">Profil complementaire</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (78/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>anticipation ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>maîtrise technique doit etre confirme sous pression.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>La première sortie après récupération devient-elle plus propre ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article></div>
+      
+        <details class="comparison-details">
+          <summary>D&eacute;tails repli&eacute;s (2)</summary>
+          <div class="comparison-detail-list">
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Ilyas Chase</h4>
+          <p class="muted">R&ocirc;le actuel : Space Hunter</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite moyenne (74/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>rebound chaser aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Le risque principal reste de confirmer ce signal sur plusieurs matchs.</li><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Sami Fade</h4>
+          <p class="muted">R&ocirc;le actuel : Playmaker</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite moyenne (64/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>technical creator aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>1 attribut(s) requis a confirmer</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Risque tactique calibre : 54/100.</li><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article></div>
+        </details>
+      
+    </article>
+    <article class="product-card comparison-block">
+      <h3>Profil a etudier - presence sur second ballon</h3>
+      <p>Ce profil cherche un joueur capable d&#39;attaquer la deuxieme action et de soutenir la récupération utile. Les cartes ci-dessous servent a comparer des pistes d&#39;observation, pas a figer un choix de composition.</p>
+      <ul><li>Ilyas Chase apporte d&#39;abord anticipation ressort comme son point fort distinctif.</li><li>Aris Clamp offre une alternative a comparer avec anticipation ressort comme son point fort distinctif.</li><li>Noe Balance propose un profil complementaire, utile si l&#39;on cherche un autre equilibre de risque.</li></ul>
+      <div class="comparison-cards">
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Ilyas Chase</h4>
+          <p class="muted">R&ocirc;le actuel : Space Hunter</p>
+        </div>
+        <span class="badge">A etudier en priorite</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (85/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>anticipation ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>Compatibilité non prescriptive : elle ne transforme pas le joueur en choix de composition.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>Les secondes actions augmentent-elles sans exposer la rest-defense ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Aris Clamp</h4>
+          <p class="muted">R&ocirc;le actuel : Mobile Lock</p>
+        </div>
+        <span class="badge">Alternative a comparer</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (80/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>anticipation ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>Compatibilité non prescriptive : elle ne transforme pas le joueur en choix de composition.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>Les secondes actions augmentent-elles sans exposer la rest-defense ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Noe Balance</h4>
+          <p class="muted">R&ocirc;le actuel : Left Piston</p>
+        </div>
+        <span class="badge">Profil complementaire</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (80/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>anticipation ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>agressivité contrôlée doit etre confirme sous pression.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>Les secondes actions augmentent-elles sans exposer la rest-defense ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article></div>
+      
+    </article>
+    <article class="product-card comparison-block">
+      <h3>Profil a etudier - reponse face a un gardien fort</h3>
+      <p>Ce profil cherche une reponse stable quand la première action est neutralisee par le gardien ou la defense. Les cartes ci-dessous restent non appliquées et non officielles.</p>
+      <ul><li>Theo Shield apporte d&#39;abord prise de décision ressort comme son point fort distinctif.</li><li>Milo Relay offre une alternative a comparer avec prise de décision ressort comme son point fort distinctif.</li><li>Nolan Thread propose un profil complementaire, utile si l&#39;on cherche un autre equilibre de risque.</li></ul>
+      <div class="comparison-cards">
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Theo Shield</h4>
+          <p class="muted">R&ocirc;le actuel : Pivot</p>
+        </div>
+        <span class="badge">A etudier en priorite</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (87/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>prise de décision ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>maîtrise technique doit etre confirme sous pression.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Milo Relay</h4>
+          <p class="muted">R&ocirc;le actuel : Hook Link</p>
+        </div>
+        <span class="badge">Alternative a comparer</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (86/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>prise de décision ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>Compatibilité non prescriptive : elle ne transforme pas le joueur en choix de composition.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Nolan Thread</h4>
+          <p class="muted">R&ocirc;le actuel : Playmaker</p>
+        </div>
+        <span class="badge">Profil complementaire</span>
+      </div>
+      <p class="card-kicker">Compatibilit&eacute; profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (86/100)</p>
+      <div class="comparison-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          <p>Pourquoi ce joueur est visible après filtrage par rôle, attributs et contexte.</p>
+        </section>
+        <section>
+          <h5>Point fort distinctif</h5>
+          <p>prise de décision ressort comme son point fort distinctif.</p>
+        </section>
+        <section>
+          <h5>Point &agrave; v&eacute;rifier</h5>
+          <p>Compatibilité non prescriptive : elle ne transforme pas le joueur en choix de composition.</p>
+        </section>
+        <section>
+          <h5>Risque principal</h5>
+          <p>Risque principal : sur-interpréter un signal isolé sans répétition.</p>
+        </section>
+        <section>
+          <h5>&Agrave; v&eacute;rifier au prochain match</h5>
+          <p>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article></div>
+      
+        <details class="comparison-details">
+          <summary>D&eacute;tails repli&eacute;s (5)</summary>
+          <div class="comparison-detail-list">
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Remy Bastion</h4>
+          <p class="muted">R&ocirc;le actuel : Goalkeeper / Free Safety</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite moyenne (81/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>goal-line reader aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>Gardien visible uniquement comme stabilisation défensive, pas comme soutien offensif.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Le risque principal reste de confirmer ce signal sur plusieurs matchs.</li><li>Gardien visible uniquement comme stabilisation défensive, pas comme soutien offensif.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Noe Balance</h4>
+          <p class="muted">R&ocirc;le actuel : Left Piston</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite forte (78/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>hybrid support aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Le risque principal reste de confirmer ce signal sur plusieurs matchs.</li><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Sami Fade</h4>
+          <p class="muted">R&ocirc;le actuel : Playmaker</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite moyenne (74/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>technical creator aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Risque tactique calibre : 46/100.</li><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Aris Clamp</h4>
+          <p class="muted">R&ocirc;le actuel : Mobile Lock</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite moyenne (68/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>recovery runner aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>1 attribut(s) requis a confirmer</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Le risque principal reste de confirmer ce signal sur plusieurs matchs.</li><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article>
+    <article class="comparison-detail-card">
+      <div class="matchup-head">
+        <div>
+          <h4>Jules Wall</h4>
+          <p class="muted">R&ocirc;le actuel : Right Anchor</p>
+        </div>
+        <span class="badge">Detail replie</span>
+      </div>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> Compatibilite moyenne (66/100)</p>
+      <div class="matchup-grid">
+        <section>
+          <h5>Atouts visibles</h5>
+          <ul><li>low block specialist aide a comprendre ce profil.</li></ul>
+        </section>
+        <section>
+          <h5>Points &agrave; v&eacute;rifier</h5>
+          <ul><li>1 attribut(s) requis a confirmer</li></ul>
+        </section>
+        <section>
+          <h5>Risque si utilis&eacute; dans ce r&ocirc;le</h5>
+          <ul><li>Le risque principal reste de confirmer ce signal sur plusieurs matchs.</li><li>Comparaison non appliquée, a confirmer sur plusieurs matchs.</li></ul>
+        </section>
+        <section>
+          <h5>Signal &agrave; observer au prochain match</h5>
+          <ul><li>Verifier si le signal reste visible sans changer la composition.</li></ul>
+        </section>
+      </div>
+      <p class="guard">Comparaison non appliquée &mdash; Non confirmee comme recommandation officielle.</p>
+    </article></div>
+        </details>
+      
+    </article>
+  </section>
+
+  <section id="next-match-signals" class="product-section">
+    <h2>À vérifier au prochain match</h2>
+    <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
+  </section>
+
+  <section id="interpretation-guard" class="product-section">
+    <h2>À ne pas sur-interpréter</h2>
+    <div class="interpretation-guard">
+      <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
+      <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
+      <p>Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
+    </div>
+  </section>
+
+  <section id="appendices" class="product-section">
+    <h2>Annexes</h2>
+    <p class="muted">Les annexes gardent les hypothèses, la traçabilité et les validations hors de la lecture principale.</p>
+    
+    <details class="appendix">
+      <summary>Hypothèses sandbox</summary>
+      <p>Les hypothèses expérimentales restent séparées du rapport principal.</p>
+      <ul><li>Les hypothèses expérimentales restent séparées du rapport principal.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Traçabilité technique</summary>
+      <p>Les preuves et marqueurs techniques restent disponibles sans encombrer la lecture coach.</p>
+      <ul><li>Les preuves et marqueurs techniques restent disponibles sans encombrer la lecture coach.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Ancienne lecture du rapport</summary>
+      <p>Les anciennes sections restent consultables comme contexte, pas comme lecture principale.</p>
+      <ul><li>Les anciennes sections restent consultables comme contexte, pas comme lecture principale.</li><li>Ce contenu reste séparé du corps principal pour préserver une lecture coach claire.</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Details de couverture roster et calibration</summary>
+      <p>La couverture roster reste séparée des choix de composition et documente les garde-fous de calibration.</p>
+      <ul><li>roster size: 10</li><li>profile count: 3</li><li>evaluated pair count: 30</li><li>visible candidate count: 16</li><li>credible candidate count: 16</li><li>high fit count: 10</li><li>medium fit count: 10</li><li>low fit count: 0</li><li>not compatible count: 10</li><li>excluded candidate count: 14</li><li>penalized candidate count: 1</li><li>empty profile block count: 0</li><li>goalkeeper outfield exclusion count: 2</li><li>universal match guard triggered count: 4</li><li>repeated same player across profiles count: 7</li><li>max visible profiles per player: 2</li><li>player strong fit all profiles count: 0</li><li>goalkeeper strong fit all profiles count: 0</li><li>player selected count: 0</li><li>automatic selection count: 0</li><li>lineup mutation count: 0</li><li>starters mutation count: 0</li><li>bench mutation count: 0</li><li>live selection driver count: 0</li><li>production route resolution driver count: 0</li><li>score mutation count: 0</li><li>possession mutation count: 0</li><li>production scoring event creation count: 0</li><li>global economy claim count: 0</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Details de comparaison des candidats</summary>
+      <p>La comparaison des candidats reste une aide de lecture. Elle ne selectionne aucun joueur et ne pilote aucun etat officiel.</p>
+      <ul><li>profile block count: 3</li><li>total candidate count: 16</li><li>compact visible candidate count: 9</li><li>detail-only candidate count: 7</li><li>primary candidate count: 3</li><li>alternative candidate count: 3</li><li>complementary candidate count: 3</li><li>max compact candidates per profile: 3</li><li>max visible profiles per player: 2</li><li>visible recommendation wording count: 0</li><li>visible selection wording count: 0</li><li>internal status leak count: 0</li><li>player selected count: 0</li><li>automatic selection count: 0</li><li>lineup mutation count: 0</li><li>live selection driver count: 0</li><li>production route resolution driver count: 0</li><li>score mutation count: 0</li><li>possession mutation count: 0</li><li>production scoring event creation count: 0</li><li>global economy claim count: 0</li><li>player_candidate_comparison_max_compact_candidates_per_profile_3</li><li>player_candidate_comparison_player_selected_count_0</li><li>coach_product_report_score_mutation_count_0</li><li>player_candidate_comparison_view_status_available</li><li>player_candidate_comparison_max_compact_candidates_per_profile_3</li><li>player_candidate_comparison_player_selected_count_0</li></ul>
+    </details>
+    <details class="appendix">
+      <summary>Détails de validation</summary>
+      <p>Les validations confirment les garde-fous sans piloter le contenu coach.</p>
+      <ul><li>coach_product_report_view</li><li>coach_product_report_view_status_available</li><li>coach_product_report_file_generated</li><li>coach_product_report_section_count_8</li><li>coach_product_report_key_signal_count_3</li><li>coach_product_report_profile_card_count_3</li><li>coach_product_report_player_matchup_profile_block_count_3</li><li>coach_product_report_player_matchup_candidate_count_9</li><li>roster_coverage_matchup</li><li>roster_coverage_matchup_status_available</li><li>roster_coverage_roster_size_10_or_more</li><li>roster_coverage_profile_count_3</li><li>roster_coverage_evaluated_pair_count_30_or_more</li><li>roster_coverage_visible_candidate_count_present</li><li>roster_coverage_credible_candidate_count_present</li><li>roster_coverage_high_fit_count_present</li><li>roster_coverage_medium_fit_count_present</li><li>roster_coverage_low_fit_count_present</li><li>roster_coverage_not_compatible_count_present</li><li>roster_coverage_excluded_candidate_count_present</li><li>roster_coverage_penalized_candidate_count_present</li><li>roster_coverage_empty_profile_block_count_present</li><li>roster_coverage_goalkeeper_outfield_exclusion_count_present</li><li>roster_coverage_universal_guard_checked</li><li>roster_coverage_max_visible_profiles_per_player_2</li><li>roster_coverage_no_player_strong_fit_all_profiles</li><li>roster_coverage_no_goalkeeper_strong_fit_all_profiles</li><li>roster_coverage_no_automatic_selection_true</li><li>roster_coverage_player_selected_count_0</li><li>roster_coverage_lineup_mutation_count_0</li><li>roster_coverage_starters_mutation_count_0</li><li>roster_coverage_bench_mutation_count_0</li><li>roster_coverage_live_selection_driver_count_0</li><li>roster_coverage_production_route_resolution_driver_count_0</li><li>roster_coverage_score_mutation_count_0</li><li>roster_coverage_possession_mutation_count_0</li><li>roster_coverage_production_scoring_event_creation_count_0</li><li>roster_coverage_global_economy_claim_forbidden</li><li>roster_coverage_scoring_constants_unchanged</li><li>player_candidate_comparison_view</li><li>player_candidate_comparison_view_status_available</li><li>player_candidate_comparison_profile_block_count_3</li><li>player_candidate_comparison_total_candidate_count_present</li><li>player_candidate_comparison_compact_visible_candidate_count_present</li><li>player_candidate_comparison_detail_only_candidate_count_present</li><li>player_candidate_comparison_primary_candidate_count_present</li><li>player_candidate_comparison_alternative_candidate_count_present</li><li>player_candidate_comparison_complementary_candidate_count_present</li></ul>
+    </details>
+    <details class="appendix export-appendix">
+      <summary>D&eacute;tails d&apos;export et tra&ccedil;abilit&eacute;</summary>
+      <p>Snapshot d&apos;export d&eacute;riv&eacute; du rapport produit, sans seconde logique de rapport.</p>
+      <ul>
+        <li>product HTML path: reports/coach-report.product.html</li>
+        <li>export HTML path: reports/coach-report.export.html</li>
+        <li>PDF path: not generated</li>
+        <li>export format: print_ready_html</li>
+        <li>single source of truth: true</li>
+        <li>duplicated report logic: false</li>
+        <li>section count matches product: true</li>
+        <li>score matches product: true</li>
+        <li>candidate comparison matches product: true</li>
+        <li>print CSS present: true</li>
+        <li>page-break CSS present: true</li>
+        <li>visible recommendation wording count: 0</li>
+        <li>visible selection wording count: 0</li>
+        <li>player selected count: 0</li>
+        <li>automatic selection count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>score mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>global economy claim count: 0</li>
+      </ul>
+    </details>
+  </section>
+</main>
+</body>
+</html>

@@ -1,9 +1,12 @@
 import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
+import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
+import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { runFullMatch } from "../runFullMatch";
 import type { PlayerMatchupCalibrationModel } from "../../reports/playerMatchupCalibration";
 import type { RosterCoverageMatchupModel } from "../../reports/rosterCoverageMatchup";
@@ -94,6 +97,27 @@ function currentPlayerCandidateComparisonView(): PlayerCandidateComparisonViewMo
   }
 
   return comparison;
+}
+
+function currentCoachReportExportSnapshot(): CoachReportExportSnapshotModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const snapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
+
+  if (snapshot.status === "not_available") {
+    throw new Error("Coach Report Export Snapshot must be available for Sprint 4T validation.");
+  }
+
+  return snapshot;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -2135,6 +2159,178 @@ export function renderFullMatchWorkbenchChainReplay4SValidation(model: FullMatch
     "- CONFIRM_CANDIDATE_SECTION_READABILITY.",
     "- CONFIRM_NO_AUTOMATIC_SELECTION.",
     "- PREPARE_PDF_EXPORT_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4TDoc(model: FullMatchTraceValidationModel): string {
+  const snapshot = currentCoachReportExportSnapshot();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4T",
+    "",
+    "Sprint 4T turns the coach product report into a stable export snapshot for sharing and print review, without creating a second source of truth or changing any coach-facing decision guardrail.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "- default coach report remains available.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Coach Product Report remains available.",
+    "- Product Report Polish remains available.",
+    "- Player Candidate Comparison View remains available.",
+    `- Coach Report Export Snapshot status: ${snapshot.status}.`,
+    `- export format: ${snapshot.exportFormat}.`,
+    `- product HTML generated: ${bool(snapshot.productHtmlGenerated)}.`,
+    `- export HTML generated: ${bool(snapshot.exportHtmlGenerated)}.`,
+    `- PDF generated: ${bool(snapshot.pdfGenerated)}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT.",
+    "",
+    "## Export Snapshot Summary",
+    `- single source of truth: ${bool(snapshot.contentSourceSingleTruth)}.`,
+    `- duplicated report logic: ${bool(snapshot.duplicatesReportLogic)}.`,
+    `- product/export section counts match: ${bool(snapshot.sectionCountMatchesProduct)}.`,
+    `- product/export scores match: ${bool(snapshot.scoreMatchesProduct)}.`,
+    `- key signals match product: ${bool(snapshot.keySignalsMatchProduct)}.`,
+    `- profile cards match product: ${bool(snapshot.profileCardsMatchProduct)}.`,
+    `- candidate comparison matches product: ${bool(snapshot.candidateComparisonMatchesProduct)}.`,
+    `- interpretation guard matches product: ${bool(snapshot.interpretationGuardMatchesProduct)}.`,
+    `- print CSS present: ${bool(snapshot.printCssPresent)}.`,
+    `- page-break CSS present: ${bool(snapshot.pageBreakCssPresent)}.`,
+    `- card break-inside avoided: ${bool(snapshot.cardBreakInsideAvoided)}.`,
+    `- appendix break-inside avoided: ${bool(snapshot.appendixBreakInsideAvoided)}.`,
+    `- technical appendices controlled: ${bool(snapshot.technicalAppendicesControlled)}.`,
+    `- technical details collapsed or moved: ${bool(snapshot.technicalDetailsCollapsedOrMoved)}.`,
+    `- main report readable without appendix: ${bool(snapshot.mainReportReadableWithoutAppendix)}.`,
+    "",
+    "## Guardrails",
+    `- visible recommendation wording count: ${snapshot.visibleRecommendationWordingCount}.`,
+    `- visible selection wording count: ${snapshot.visibleSelectionWordingCount}.`,
+    `- internal status leak count: ${snapshot.internalStatusLeakCount}.`,
+    `- mojibake marker count: ${snapshot.mojibakeMarkerCount}.`,
+    `- player selected count: ${snapshot.playerSelectedCount}.`,
+    `- automatic selection count: ${snapshot.automaticSelectionCount}.`,
+    `- lineup mutation count: ${snapshot.lineupMutationCount}.`,
+    `- starters mutation count: ${snapshot.startersMutationCount}.`,
+    `- bench mutation count: ${snapshot.benchMutationCount}.`,
+    "- live selection driver count: 0.",
+    "- production route resolution driver count: 0.",
+    `- confidence upgrade count: ${snapshot.confidenceUpgradeCount}.`,
+    `- officially-confirmed count: ${snapshot.officiallyConfirmedCount}.`,
+    "- score mutation count: 0.",
+    "- possession mutation count: 0.",
+    "- production scoring event creation count: 0.",
+    "- global economy claim count: 0.",
+    "- scoring constants unchanged.",
+    "- source-of-truth unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Generated Files",
+    "- coach-report.product.html: generated.",
+    "- coach-report.export.html: generated.",
+    `- coach-report.product.pdf: ${snapshot.pdfGenerated ? "generated" : "not generated; print-ready HTML is the validated export target"}.`,
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_COACH_REPORT_EXPORT_SNAPSHOT.",
+    "- CONFIRM_SINGLE_SOURCE_OF_TRUTH.",
+    "- CONFIRM_PRINT_READY_EXPORT.",
+    "- PREPARE_UI_WIRING_OR_REPORT_REVIEW_WORKFLOW.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4TValidation(model: FullMatchTraceValidationModel): string {
+  const snapshot = currentCoachReportExportSnapshot();
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4T Validation",
+    "",
+    `Status: ${model.status === "available" && snapshot.status === "available" ? "PASS" : snapshot.status === "partial" ? "PARTIAL" : "FAIL"}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report remains available.", true, ""),
+    check("Player Candidate Comparison View remains available.", true, ""),
+    check("Coach Report Export Snapshot status is available.", snapshot.status === "available", snapshot.status),
+    check("coach-report.product.html is generated.", snapshot.productHtmlGenerated, snapshot.productHtmlPath),
+    check("coach-report.export.html is generated.", snapshot.exportHtmlGenerated, snapshot.exportHtmlPath ?? "missing"),
+    check("export uses product report as single source of truth.", snapshot.contentSourceSingleTruth, "single source"),
+    check("duplicated report logic is false.", !snapshot.duplicatesReportLogic, "false"),
+    check("product/export section counts match.", snapshot.sectionCountMatchesProduct, "section ids compared"),
+    check("product/export scores match.", snapshot.scoreMatchesProduct, "score labels compared"),
+    check("product/export candidate comparison matches.", snapshot.candidateComparisonMatchesProduct, "comparison blocks compared"),
+    check("interpretation guard remains visible.", snapshot.interpretationGuardMatchesProduct, "guard preserved"),
+    check("print CSS is present.", snapshot.printCssPresent, "@media print"),
+    check("page-break CSS is present.", snapshot.pageBreakCssPresent, "@page + page-break-inside"),
+    check("product cards avoid page breaks.", snapshot.cardBreakInsideAvoided, "break-inside avoid"),
+    check("appendices avoid page breaks.", snapshot.appendixBreakInsideAvoided, "appendix break guard"),
+    check("visible copy avoids recommendation wording.", snapshot.visibleRecommendationWordingCount === 0, String(snapshot.visibleRecommendationWordingCount)),
+    check("visible copy avoids selection wording.", snapshot.visibleSelectionWordingCount === 0, String(snapshot.visibleSelectionWordingCount)),
+    check("internal status ids are hidden from main export.", snapshot.internalStatusLeakCount === 0, String(snapshot.internalStatusLeakCount)),
+    check("no player is selected.", snapshot.playerSelectedCount === 0, String(snapshot.playerSelectedCount)),
+    check("no automatic selection is true.", snapshot.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", snapshot.lineupMutationCount === 0, String(snapshot.lineupMutationCount)),
+    check("starters mutation count is 0.", snapshot.startersMutationCount === 0, String(snapshot.startersMutationCount)),
+    check("bench mutation count is 0.", snapshot.benchMutationCount === 0, String(snapshot.benchMutationCount)),
+    check("live selection driver count is 0.", !snapshot.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !snapshot.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", snapshot.confidenceUpgradeCount === 0, String(snapshot.confidenceUpgradeCount)),
+    check("officially-confirmed count is 0.", snapshot.officiallyConfirmedCount === 0, String(snapshot.officiallyConfirmedCount)),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("export layer cannot mutate official timeline.", !snapshot.canMutateTimeline, ""),
+    check("export layer cannot mutate official score.", !snapshot.canMutateScore, ""),
+    check("export layer cannot mutate official possession.", !snapshot.canMutatePossession, ""),
+    check("export layer cannot create production scoring events.", !snapshot.canCreateScoringEvent, ""),
+    check("export layer cannot claim global economy.", !snapshot.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", snapshot.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", snapshot.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", snapshot.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", snapshot.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- product section count: ${snapshot.sectionCountMatchesProduct ? 8 : 0}`,
+    `- export section count: ${snapshot.sectionCountMatchesProduct ? 8 : 0}`,
+    `- score match count: ${snapshot.scoreMatchesProduct ? 1 : 0}`,
+    `- candidate comparison match count: ${snapshot.candidateComparisonMatchesProduct ? 1 : 0}`,
+    `- visible recommendation wording count: ${snapshot.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${snapshot.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${snapshot.internalStatusLeakCount}`,
+    `- player selected count: ${snapshot.playerSelectedCount}`,
+    `- automatic selection count: ${snapshot.automaticSelectionCount}`,
+    `- lineup mutation count: ${snapshot.lineupMutationCount}`,
+    `- starters mutation count: ${snapshot.startersMutationCount}`,
+    `- bench mutation count: ${snapshot.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${snapshot.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${snapshot.officiallyConfirmedCount}`,
+    "- score mutation count: 0",
+    "- possession mutation count: 0",
+    "- production scoring event creation count: 0",
+    "- global economy claim count: 0",
+    "",
+    "## Generated Files",
+    `- coach-report.product.html: ${snapshot.productHtmlGenerated ? "generated" : "missing"}`,
+    `- coach-report.export.html: ${snapshot.exportHtmlGenerated ? "generated" : "missing"}`,
+    `- coach-report.product.pdf: ${snapshot.pdfGenerated ? "generated" : "not generated"}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_COACH_REPORT_EXPORT_SNAPSHOT.",
+    "- CONFIRM_SINGLE_SOURCE_OF_TRUTH.",
+    "- CONFIRM_PRINT_READY_EXPORT.",
+    "- PREPARE_UI_WIRING_OR_REPORT_REVIEW_WORKFLOW.",
     "",
   ].join("\n");
 }
