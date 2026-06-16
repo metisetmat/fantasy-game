@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-16T07:15:29.125Z
+Generated timestamp: 2026-06-16T07:31:34.493Z
 Task/sprint name: Sprint 4P - Player Matchup View
 Final file count: 19
 
@@ -570,23 +570,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/buildCoachProductReportPolish.ts
  M src/reports/buildCoachProductReportView.ts
- M src/reports/coachProductReportView.test.ts
- M src/reports/coachProductReportView.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachProductReport.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
- M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildPlayerMatchupView.ts
-?? src/reports/playerMatchupView.test.ts
-?? src/reports/playerMatchupView.ts
-?? src/reports/playerMatchupViewCopy.test.ts
-?? src/reports/playerMatchupViewGuard.test.ts
-?? src/reports/playerMatchupViewRenderer.test.ts
-?? src/simulation/fullMatch/scoringGuard.4p.test.ts
+ M src/reports/playerMatchupView.test.ts

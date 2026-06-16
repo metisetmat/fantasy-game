@@ -106,42 +106,26 @@ function profileFromCard(card: SelectionPreviewProfileCard): CoachProductReportP
   };
 }
 
-function profileCardFromProductProfile(profile: CoachProductReportProfile): SelectionPreviewProfileCard {
-  const roleFamilyMap: Readonly<Record<string, SelectionPreviewProfileRoleFamily>> = {
-    "soutien mobile": "support_runner",
-    "relayeur mobile": "mobile_lock",
-    "lien intÃ©rieur": "hook_link",
-    "soutien crÃ©atif": "playmaker_support",
-    "chasseur de second ballon": "rebound_chaser",
-    "attaquant de pression": "pressure_forward",
-    "gros volume de course": "high_work_rate_runner",
-    "option de continuitÃ©": "continuity_option",
-    "second crÃ©ateur": "secondary_playmaker",
-    "receveur de soutien": "support_receiver",
-    "ancre de rest-defense": "rest_defense_anchor",
-  };
-  const attributeMap: Readonly<Record<string, SelectionPreviewProfileAttribute>> = {
-    anticipation: "anticipation",
-    "soutien sans ballon": "off_ball_support",
-    "maÃ®trise technique": "handling",
-    "prise de dÃ©cision": "decision_making",
-    endurance: "stamina",
-    "rÃ©action": "reaction",
-    "accÃ©lÃ©ration": "acceleration",
-    "agressivitÃ© contrÃ´lÃ©e": "aggression",
-    "Ã©quilibre": "balance",
-    placement: "positioning",
-    "sang-froid": "composure",
-    "discipline tactique": "tactical_discipline",
-    "fraÃ®cheur mentale": "mental_freshness",
-  };
+function reverseLabelMap<Key extends string>(labels: Readonly<Record<Key, string>>): Readonly<Record<string, Key>> {
+  const reversed: Record<string, Key> = {};
 
+  for (const key of Object.keys(labels) as Key[]) {
+    reversed[labels[key]] = key;
+  }
+
+  return reversed;
+}
+
+const roleFamilyFromLabel = reverseLabelMap(selectionPreviewProfileRoleFamilyLabels);
+const attributeFromLabel = reverseLabelMap(selectionPreviewProfileAttributeLabels);
+
+function profileCardFromProductProfile(profile: CoachProductReportProfile): SelectionPreviewProfileCard {
   return {
     cardId: profile.profileId as SelectionPreviewProfileCard["cardId"],
     previewId: profile.profileId.replace("_profile", "") as SelectionPreviewProfileCard["previewId"],
     title: profile.title,
-    roleFamilies: profile.roleFamilies.map((role) => roleFamilyMap[role]).filter((role): role is SelectionPreviewProfileRoleFamily => role !== undefined),
-    usefulAttributes: profile.usefulAttributes.map((attribute) => attributeMap[attribute]).filter((attribute): attribute is SelectionPreviewProfileAttribute => attribute !== undefined),
+    roleFamilies: profile.roleFamilies.map((role) => roleFamilyFromLabel[role]).filter((role): role is SelectionPreviewProfileRoleFamily => role !== undefined),
+    usefulAttributes: profile.usefulAttributes.map((attribute) => attributeFromLabel[attribute]).filter((attribute): attribute is SelectionPreviewProfileAttribute => attribute !== undefined),
     originLabel: "Profil Ã  observer",
     traceSupportLabel: "Support officiel prudent",
     decisionStatusLabel: "Non appliquÃ©",
