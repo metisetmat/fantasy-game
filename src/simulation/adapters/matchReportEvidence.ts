@@ -371,6 +371,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW":
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION":
+    case "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
@@ -469,6 +470,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Joueurs Ã  Ã©tudier";
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION":
       return "Calibration des joueurs Ã  Ã©tudier";
+    case "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP":
+      return "Couverture roster des joueurs Ã  Ã©tudier";
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
       return "Rapport coach produit";
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
@@ -572,6 +575,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW":
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION":
+    case "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":

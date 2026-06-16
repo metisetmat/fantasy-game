@@ -1,6 +1,6 @@
-# FullMatch Workbench Chain Replay 4Q
+# FullMatch Workbench Chain Replay 4R
 
-Sprint 4Q calibrates the Player Matchup View so profile-player comparisons remain credible, role-compatible, diverse, non-prescriptive, and non-applied.
+Sprint 4R stress-tests Joueurs a etudier on a richer roster so credible partial fits, exclusions, penalties, and honest empty states remain readable without driving selection.
 
 ## Default Mode
 - default runFullMatch remains segment_harness.
@@ -9,23 +9,30 @@ Sprint 4Q calibrates the Player Matchup View so profile-player comparisons remai
 ## Experimental Mode
 - experimental mode remains opt-in.
 - Player Matchup View remains available.
-- Player Matchup Calibration status: available.
-- evidence category: WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION.
+- Player Matchup Calibration remains available.
+- Roster Coverage Matchup status: available.
+- evidence category: WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP.
 - product report file generated: coach-report.product.html.
 
-## Calibration Summary
-- profile constraint count: 3.
-- evaluated player/profile pair count: 3.
-- visible candidate count: 1.
-- excluded candidate count: 2.
+## Coverage Summary
+- roster size: 10.
+- profile count: 3.
+- evaluated pair count: 30.
+- visible candidate count: 16.
+- credible candidate count: 16.
+- high fit count: 10.
+- medium fit count: 10.
+- low fit count: 0.
+- not compatible count: 10.
+- excluded candidate count: 14.
 - penalized candidate count: 1.
-- empty profile block count: 2.
+- empty profile block count: 0.
 - goalkeeper outfield exclusion count: 2.
-- universal match guard triggered count: 0.
-- repeated same player across profiles count: 0.
+- universal match guard triggered count: 4.
+- repeated same player across profiles count: 7.
 - max visible profiles per player: 2.
-- no player strong fit all profiles.
-- no goalkeeper strong fit all profiles.
+- player strong fit all profiles count: 0.
+- goalkeeper strong fit all profiles count: 0.
 
 ## Guardrails
 - player selected count: 0.
@@ -47,10 +54,9 @@ Sprint 4Q calibrates the Player Matchup View so profile-player comparisons remai
 - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Recommendation
-- CONFIRM_PLAYER_MATCHUP_CALIBRATION.
-- CONFIRM_NO_UNIVERSAL_PLAYER_MATCHING.
-- CONFIRM_GOALKEEPER_FALSE_POSITIVE_REDUCED.
+- CONFIRM_ROSTER_COVERAGE_MATCHUP.
+- CONFIRM_MATCHUP_CALIBRATION_HOLDS_ON_RICHER_ROSTER.
 - CONFIRM_NO_AUTOMATIC_SELECTION.
-- PREPARE_MATCHUP_POLISH_OR_PDF_EXPORT.
+- PREPARE_PDF_EXPORT_OR_PLAYER_CARD_POLISH.
 
 Trace validation status: PASS.

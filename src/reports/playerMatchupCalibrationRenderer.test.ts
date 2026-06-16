@@ -42,7 +42,12 @@ export function validatePlayerMatchupCalibrationRenderer(): readonly string[] {
   assertTest(includesAny(html, ["Signal à observer au prochain match", "Signal Ã  observer au prochain match", "Signal ÃƒÂ  observer au prochain match"]), "product report must contain next-match signal heading.");
   assertTest(includesAny(html, ["Comparaison non appliquée", "Comparaison non appliquÃ©e", "Comparaison non appliquÃƒÂ©e"]), "product report must contain non-applied comparison.");
   assertTest(includesAny(html, ["Non confirmée comme recommandation officielle", "Non confirmÃ©e comme recommandation officielle", "Non confirmÃƒÂ©e comme recommandation officielle"]), "product report must contain non-official confirmation.");
-  assertTest(html.includes("calibration status:"), "product report must contain calibration appendix.");
+  assertTest(
+    includesAny(html, ["Details de couverture roster et calibration", "DÃ©tails de couverture roster et calibration"])
+      && html.includes("roster size:")
+      && html.includes("Les joueurs affich"),
+    "product report must contain roster coverage calibration appendix.",
+  );
   assertTest(forbidden.every((term) => !html.toLocaleLowerCase("fr-FR").includes(term.toLocaleLowerCase("fr-FR"))), "visible copy must avoid selection recommendation wording.");
 
   return [
@@ -50,7 +55,7 @@ export function validatePlayerMatchupCalibrationRenderer(): readonly string[] {
     "calibrated compatibility is visible",
     "why-visible heading is visible",
     "candidate fields are visible",
-    "calibration appendix is visible",
+    "roster coverage calibration appendix is visible",
     "selection recommendation wording is absent",
   ];
 }

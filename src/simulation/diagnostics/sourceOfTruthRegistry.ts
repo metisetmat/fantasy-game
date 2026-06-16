@@ -38,6 +38,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW"
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW"
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION"
+  | "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
@@ -1079,6 +1080,42 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which player/profile pairs remain worth studying after calibration",
       "which player/profile pairs are excluded or penalized by role compatibility",
       "which profile blocks need more roster evidence before showing a candidate",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a player must be selected",
+      "that a lineup change is recommended",
+      "that a profile-player matchup is officially confirmed",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP: {
+    scope: "WORKBENCH_CHAIN_ROSTER_COVERAGE_MATCHUP",
+    canProve: [
+      "Roster Coverage Matchup can stress profile-player calibration across a richer roster",
+      "candidate visibility, exclusions, penalties, and honest empty states remain measurable across the roster",
+      "goalkeeper outfield exclusions and universal-player guards remain active on the richer roster",
+    ],
+    canSuggest: [
+      "which players remain worth studying for each profile on a larger roster",
+      "which profiles still lack credible candidates",
+      "which players are visible for one profile but not for another",
     ],
     cannotProve: [
       "global scoring balance",

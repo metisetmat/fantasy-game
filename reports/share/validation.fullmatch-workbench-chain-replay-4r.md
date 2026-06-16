@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4Q Validation
+# FullMatch Workbench Chain Replay 4R Validation
 
 Status: PASS
 
@@ -6,23 +6,24 @@ Status: PASS
 - PASS: default runFullMatch remains segment_harness.
 - PASS: experimental mode remains opt-in.
 - PASS: Player Matchup View remains available.
-- PASS: Player Matchup Calibration status is available. - available
-- PASS: coach-report.product.html contains Joueurs a etudier.
-- PASS: product report still contains calibrated matchup cards or honest empty states.
-- PASS: profile constraint count is 3. - 3
-- PASS: evaluated player/profile pair count is present. - 3
-- PASS: visible candidate count is present. - 1
-- PASS: excluded candidate count is present. - 2
-- PASS: penalized candidate count is present. - 1
-- PASS: empty profile block count is present. - 2
-- PASS: goalkeeper outfield exclusion count is present. - 2
-- PASS: universal match guard triggered count is present. - 0
-- PASS: max visible profiles per player is 2. - 2
+- PASS: Player Matchup Calibration remains available.
+- PASS: Roster Coverage Matchup status is available. - available
+- PASS: roster size is >= 10. - 10
+- PASS: profile count is 3. - 3
+- PASS: evaluated player/profile pair count is >= 30. - 30
+- PASS: support-near-danger profile has calibrated candidates or honest empty state.
+- PASS: second-ball profile has calibrated candidates or honest empty state.
+- PASS: strong-goalkeeper-response profile has calibrated candidates or honest empty state.
+- PASS: goalkeeper is excluded from outfield support profile. - 2
+- PASS: goalkeeper is excluded from second-ball presence profile. - 2
+- PASS: goalkeeper is not shown as attacking support.
+- PASS: pure finisher is not universal support candidate. - 0
+- PASS: low-endurance creator is penalized where endurance is critical. - 1
 - PASS: no player appears as strong fit across all profiles. - 0
 - PASS: no goalkeeper appears as strong fit across all profiles. - 0
-- PASS: low-fit-only candidates are not forced.
-- PASS: empty state appears when no candidate clears threshold. - 2
-- PASS: calibrated fit bands are visible.
+- PASS: max visible profiles per player is 2. - 2
+- PASS: low-fit-only candidates are not forced. - 0
+- PASS: empty states remain honest when needed. - 0
 - PASS: visible copy avoids selection recommendation wording.
 - PASS: no player is selected. - 0
 - PASS: no automatic selection is true.
@@ -36,11 +37,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: matchup calibration cannot mutate official timeline.
-- PASS: matchup calibration cannot mutate official score.
-- PASS: matchup calibration cannot mutate official possession.
-- PASS: matchup calibration cannot create production scoring events.
-- PASS: matchup calibration cannot claim global economy.
+- PASS: roster coverage cannot mutate official timeline.
+- PASS: roster coverage cannot mutate official score.
+- PASS: roster coverage cannot mutate official possession.
+- PASS: roster coverage cannot create production scoring events.
+- PASS: roster coverage cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -48,15 +49,21 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- profile constraint count: 3
-- evaluated player/profile pair count: 3
-- visible candidate count: 1
-- excluded candidate count: 2
+- roster size: 10
+- profile count: 3
+- evaluated player/profile pair count: 30
+- visible candidate count: 16
+- credible candidate count: 16
+- high fit count: 10
+- medium fit count: 10
+- low fit count: 0
+- not-compatible count: 10
+- excluded candidate count: 14
 - penalized candidate count: 1
-- empty profile block count: 2
+- empty profile block count: 0
 - goalkeeper outfield exclusion count: 2
-- universal match guard triggered count: 0
-- repeated same player across profiles count: 0
+- universal match guard triggered count: 4
+- repeated same player across profiles count: 7
 - max visible profiles per player: 2
 - player strong fit all profiles count: 0
 - goalkeeper strong fit all profiles count: 0
@@ -75,8 +82,7 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_PLAYER_MATCHUP_CALIBRATION.
-- CONFIRM_NO_UNIVERSAL_PLAYER_MATCHING.
-- CONFIRM_GOALKEEPER_FALSE_POSITIVE_REDUCED.
+- CONFIRM_ROSTER_COVERAGE_MATCHUP.
+- CONFIRM_MATCHUP_CALIBRATION_HOLDS_ON_RICHER_ROSTER.
 - CONFIRM_NO_AUTOMATIC_SELECTION.
-- PREPARE_MATCHUP_POLISH_OR_PDF_EXPORT.
+- PREPARE_PDF_EXPORT_OR_PLAYER_CARD_POLISH.
