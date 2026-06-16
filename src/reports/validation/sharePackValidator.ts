@@ -262,6 +262,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay4NValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4n.md"));
   const fullMatchWorkbenchChainReplay4O = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4o.md"));
   const fullMatchWorkbenchChainReplay4OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4o.md"));
+  const fullMatchWorkbenchChainReplay4U = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4u.md"));
+  const fullMatchWorkbenchChainReplay4UValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4u.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2537,6 +2539,33 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-4q.md",
     ...sprint4PForbiddenLeftovers,
   ];
+  const sprint4UExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "coach-report.product.html",
+    "coach-report.export.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4u.md",
+    "validation.fullmatch-workbench-chain-replay-4u.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4UForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-4t.md",
+    "validation.fullmatch-workbench-chain-replay-4t.md",
+    ...sprint4RForbiddenLeftovers,
+  ];
   const sprint4TExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -2914,6 +2943,62 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4L.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4LValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay4LValidation.includes("CONFIRM_SELECTION_PREVIEW_COACH_COPY_PASS") && fullMatchWorkbenchChainReplay4LValidation.includes("CONFIRM_SELECTION_PREVIEW_REMAINS_NON_APPLIED"), "4L recommendations visible"),
+  ];
+  const sprint4UChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("manifest exists", manifest.length > 0, manifestPath),
+    check("README exists", readme.length > 0, readmePath),
+    check("detailed manifest exists", detailedManifest.length > 0, detailedManifestPath),
+    check("validation.share-pack.md copied", sourceExists("validation.share-pack.md") && requiredCopied("validation.share-pack.md"), "validation.share-pack.md"),
+    check("all expected files are copied", sprint4UExpectedFiles.every((file) => requiredCopied(file)), sprint4UExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint4UExpectedFiles.every((file) => manifest.includes(file)), sprint4UExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("no stale files remain in reports/share", staleFiles.length === 0, staleFiles.join(", ") || "none"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4U", activeConfig.sprintName === "Sprint 4U - FIFA-inspired HTML Report Layout", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4UExpectedFiles.every((file) => requiredCopied(file)), sprint4UExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4UForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4UForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 4U oriented", readme.includes("# Sprint 4U Share Pack") && readme.includes("fullmatch-workbench-chain-replay-4u.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("4U report included", fullMatchWorkbenchChainReplay4U.includes("# FullMatch Workbench Chain Replay 4U") && fullMatchWorkbenchChainReplay4U.includes("Premium HTML Layout"), "4U doc included"),
+    check("4U validation is PASS", fullMatchWorkbenchChainReplay4UValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay4UValidation.includes("Premium HTML Layout status is available"), "4U validation current"),
+    check("product report HTML copied", coachProductHtml.includes("Rapport coach") && coachProductHtml.includes("Joueurs"), "product HTML visible"),
+    check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
+    check("premium export uses single source of truth", coachExportHtml.includes("Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.") && fullMatchWorkbenchChainReplay4UValidation.includes("single source of truth"), "single source visible"),
+    check("duplicated report logic is false", fullMatchWorkbenchChainReplay4U.includes("duplicated report logic: NO.") || fullMatchWorkbenchChainReplay4UValidation.includes("duplicated report logic is false"), "duplicate logic false"),
+    check("premium cover is present", coachExportHtml.includes("report-cover") && coachExportHtml.includes("report-scoreboard"), "premium cover visible"),
+    check("phase sections are present", coachExportHtml.includes("Avec ballon") && coachExportHtml.includes("Sans ballon") && coachExportHtml.includes("Dernier rempart"), "phase sections visible"),
+    check("product/export scores match", fullMatchWorkbenchChainReplay4U.includes("product/export score matches: YES.") || fullMatchWorkbenchChainReplay4UValidation.includes("product/export score matches."), "score match visible"),
+    check("candidate comparison matches product", fullMatchWorkbenchChainReplay4U.includes("candidate comparison matches product: YES.") || fullMatchWorkbenchChainReplay4UValidation.includes("candidate comparison matches product."), "comparison match visible"),
+    check("interpretation guard remains visible", coachExportHtml.includes("Les rapprochements profil-joueur ne sont pas des choix de composition.") && fullMatchWorkbenchChainReplay4UValidation.includes("interpretation guard remains visible"), "guard visible"),
+    check("print CSS is present", coachExportHtml.includes("@media print") && coachExportHtml.includes("@page"), "print CSS visible"),
+    check("page-break CSS is present", coachExportHtml.includes("break-inside: avoid") && coachExportHtml.includes("page-break-inside: avoid"), "page break CSS visible"),
+    check("premium cards avoid page breaks", coachExportHtml.includes(".report-table-card") && coachExportHtml.includes(".report-pitch-panel") && coachExportHtml.includes(".appendix"), "break guards visible"),
+    check("main export hides internal status names", !containsAny(coachExportMainHtml, ["officially_confirmed", "trace_supported", "sandbox_only"]), "internal statuses hidden"),
+    check("main export avoids recommendation wording", !containsAny(coachExportMainHtml, ["meilleur choix", "joueur recommandÃƒÂ©", "recommandÃƒÂ©", "titulaire conseillÃƒÂ©", "remplacement conseillÃƒÂ©", "composition recommandÃƒÂ©e", "sÃƒÂ©lection automatique", "selection automatique"]), "recommendation wording count 0"),
+    check("main export avoids selection wording", !containsAny(coachExportMainHtml, ["a sÃƒÂ©lectionner", "a selectionner", "joueur sÃƒÂ©lectionnÃƒÂ©", "player selected"]), "selection wording count 0"),
+    check("visible French copy is clean", !containsAny(coachExportHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("premium appendix contains layout tags", coachExportHtml.includes("D&eacute;tails du layout premium HTML") && coachExportHtml.includes("controlled empty state count") && coachExportHtml.includes("global economy claim count 0"), "appendix visible"),
+    check("premium evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT") && bundleSimulation.includes("WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"), "4U evidence category bundled"),
+    check("premium model, builder, and renderer bundled", bundleReports.includes("src/reports/coachReportPremiumLayout.ts") && bundleReports.includes("src/reports/buildCoachReportPremiumLayout.ts") && bundleReports.includes("src/reports/renderCoachReportExportHtml.ts"), "4U files bundled"),
+    check("premium tests bundled", bundleReports.includes("coachReportPremiumLayout.test.ts") && bundleReports.includes("coachReportPremiumExportRenderer.test.ts") && bundleReports.includes("coachReportPremiumCopy.test.ts") && bundleReports.includes("coachReportPremiumSourceGuard.test.ts") && bundleReports.includes("coachReportPremiumDensity.test.ts") && bundleReports.includes("coachReportPremiumPrintCss.test.ts") && bundleReports.includes("coachReportPremiumGuard.test.ts"), "4U report tests bundled"),
+    check("scoring guard 4U bundled", bundleSimulation.includes("scoringGuard.4u.test.ts") && bundleSimulation.includes("validateScoringGuard4U"), "4U scoring guard bundled"),
+    check("no player is selected", coachExportHtml.includes("player selected count 0") || fullMatchWorkbenchChainReplay4UValidation.includes("no player is selected"), "non-applied"),
+    check("no automatic selection is true", coachExportHtml.includes("automatic selection count 0") || fullMatchWorkbenchChainReplay4UValidation.includes("no automatic selection is true"), "auto-selection forbidden"),
+    check("premium layout cannot mutate score", coachExportHtml.includes("score mutation count 0") && fullMatchWorkbenchChainReplay4UValidation.includes("cannot mutate official score"), "score mutation forbidden"),
+    check("premium layout cannot mutate possession", coachExportHtml.includes("possession mutation count 0") && fullMatchWorkbenchChainReplay4UValidation.includes("cannot mutate official possession"), "possession mutation forbidden"),
+    check("premium layout cannot create production scoring events", coachExportHtml.includes("production scoring event creation count 0") && fullMatchWorkbenchChainReplay4UValidation.includes("cannot create production scoring events"), "production scoring creation forbidden"),
+    check("premium layout cannot claim global economy", coachExportHtml.includes("global economy claim count 0") && fullMatchWorkbenchChainReplay4UValidation.includes("cannot claim global economy"), "global economy forbidden"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4UValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4UValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4UValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4U.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4UValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay4UValidation.includes("CONFIRM_PREMIUM_HTML_LAYOUT") && fullMatchWorkbenchChainReplay4UValidation.includes("CONFIRM_HTML_FIRST_REPORT_DIRECTION"), "4U recommendations visible"),
   ];
   const sprint4TChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -5897,6 +5982,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4U - FIFA-inspired HTML Report Layout")
+      ? sprint4UChecks
     : activeConfig.sprintName.includes("Sprint 4T - Coach Report PDF Export & Share Snapshot")
       ? sprint4TChecks
     : activeConfig.sprintName.includes("Sprint 4S - Player Card Polish & Candidate Comparison")

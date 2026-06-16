@@ -43,6 +43,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT"
+  | "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1264,6 +1265,41 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "whether the coach report can be shared outside the app as a print-ready snapshot",
       "whether PDF generation can stay optional while print-ready HTML is validated",
       "which export layout constraints still need UI wiring later",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT",
+    canProve: [
+      "coach report premium HTML layout is derived from the export snapshot and product report",
+      "HTML-first premium presentation keeps the same score, candidate comparison, and interpretation guard",
+      "premium phase sections may use controlled empty states instead of inventing data",
+      "premium layout remains non-prescriptive and non-mutating",
+    ],
+    canSuggest: [
+      "whether the export is coach-ready without extra explanation",
+      "which future phase visuals can be added without changing report truth",
+      "whether PDF can remain optional while HTML-first export is validated",
     ],
     cannotProve: [
       "global scoring balance",

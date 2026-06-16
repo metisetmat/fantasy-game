@@ -9,6 +9,15 @@ function sectionIds(html: string): readonly string[] {
   return [...html.matchAll(/<section\s+id="([^"]+)"/gu)].map((match) => match[1] ?? "");
 }
 
+function sourceSectionIdsInExport(html: string): readonly string[] {
+  const values = [...html.matchAll(/data-source-product-sections="([^"]+)"/gu)]
+    .flatMap((match) => (match[1] ?? "").split("|"))
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+  return [...new Set(values)];
+}
+
 function countClass(html: string, className: string): number {
   const escaped = className.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   const matcher = new RegExp(`class="[^"]*${escaped}[^"]*"`, "gu");
@@ -58,7 +67,10 @@ export function buildCoachReportExportSnapshot(input: {
   const exportHtmlGenerated = exportHtml.includes("Rapport coach");
   const productSectionIds = sectionIds(input.productReportHtml);
   const exportSectionIds = sectionIds(exportHtml);
-  const sectionCountMatchesProduct = productSectionIds.join("|") === exportSectionIds.join("|");
+  const sourceSectionIds = sourceSectionIdsInExport(exportHtml);
+  const sectionCountMatchesProduct =
+    productSectionIds.every((id) => sourceSectionIds.includes(id)) &&
+    sourceSectionIds.every((id) => productSectionIds.includes(id));
   const scoreMatchesProduct = extractScore(input.productReportHtml) === extractScore(exportHtml);
   const keySignalsMatchProduct =
     countClass(input.productReportHtml, "product-card signal-card") ===
@@ -78,7 +90,9 @@ export function buildCoachReportExportSnapshot(input: {
   const pageBreakCssPresent = exportHtml.includes("@page") && exportHtml.includes("page-break-inside: avoid");
   const cardBreakInsideAvoided = exportHtml.includes(".product-card") && exportHtml.includes("break-inside: avoid");
   const appendixBreakInsideAvoided = exportHtml.includes(".appendix") && exportHtml.includes("page-break-inside: avoid");
-  const headerPrintReadable = exportHtml.includes("<header>") && exportHtml.includes("@page");
+  const headerPrintReadable =
+    (exportHtml.includes("<header") || exportHtml.includes("report-cover")) &&
+    exportHtml.includes("@page");
   const scorePrintReadable = exportHtml.includes("Score du rapport full-match") && exportHtml.includes("<span class=\"score\">");
   const mainVisibleText = exportCoachReportMainVisibleText(exportHtml);
   const visibleRecommendationWordingCount = countTerms(mainVisibleText, [
@@ -106,9 +120,13 @@ export function buildCoachReportExportSnapshot(input: {
     "�",
   ]);
   const mainReportReadableWithoutAppendix =
-    exportSectionIds.join("|") === "executive-summary|official-match-reading|key-coach-signals|profiles-to-observe|players-to-study|next-match-signals|interpretation-guard|appendices";
-  const technicalDetailsCollapsedOrMoved = exportHtml.includes("<details class=\"appendix\"") || exportHtml.includes("<details class=\"comparison-details\">");
-  const technicalAppendicesControlled = exportHtml.includes("D&eacute;tails d&apos;export et tra&ccedil;abilit&eacute;") && internalStatusLeakCount === 0;
+    exportSectionIds.join("|") === "cover|executive-summary|match-story|key-statistics|with-ball|without-ball|goalkeeper|profiles-and-players|next-match|interpretation-guard|appendices";
+  const technicalDetailsCollapsedOrMoved =
+    exportHtml.includes("<details class=\"appendix report-appendix-stack\"") ||
+    exportHtml.includes("<details class=\"comparison-details\">");
+  const technicalAppendicesControlled =
+    exportHtml.includes("D&eacute;tails du layout premium HTML") &&
+    internalStatusLeakCount === 0;
   const status =
     productHtmlGenerated &&
       exportHtmlGenerated &&
