@@ -84,12 +84,17 @@ function renderMatchupCandidate(candidate: PlayerMatchupCandidate): string {
       <div class="matchup-head">
         <div>
           <h4>${escapeHtml(candidate.playerName)}</h4>
-          <p class="muted">${escapeHtml(candidate.currentRoleLabel)}</p>
+          <p class="muted">R&ocirc;le actuel : ${escapeHtml(candidate.currentRoleLabel)}</p>
         </div>
         ${renderBadge(playerMatchupFitBandLabel(candidate.fitBand))}
       </div>
       <p class="card-kicker">Compatibilité profil-joueur</p>
+      <p><strong>Compatibilit&eacute; calibr&eacute;e :</strong> ${escapeHtml(playerMatchupFitBandLabel(candidate.fitBand))}${candidate.calibratedFitScore === undefined ? "" : ` (${candidate.calibratedFitScore}/100)`}</p>
       <div class="matchup-grid">
+        <section>
+          <h5>Pourquoi ce joueur est visible</h5>
+          ${renderList((candidate.calibrationWhyVisible ?? candidate.whyStudy).slice(0, 3))}
+        </section>
         <section>
           <h5>Atouts visibles</h5>
           ${renderList(candidate.matchedAttributes.length === 0 ? ["Aucun atout net dans ce run."] : candidate.matchedAttributes.slice(0, 3))}
@@ -101,6 +106,10 @@ function renderMatchupCandidate(candidate: PlayerMatchupCandidate): string {
         <section>
           <h5>Risque si utilisé dans ce rôle</h5>
           ${renderList(candidate.riskIfUsed.slice(0, 2))}
+        </section>
+        <section>
+          <h5>Limites du profil</h5>
+          ${renderList((candidate.calibrationLimits ?? ["Compatibilit&eacute; non appliqu&eacute;e, &agrave; confirmer par plusieurs matchs."]).slice(0, 3))}
         </section>
         <section>
           <h5>Signal à observer au prochain match</h5>

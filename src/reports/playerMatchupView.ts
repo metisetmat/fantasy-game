@@ -1,6 +1,7 @@
 import type { MatchInput, MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import { PlayerRole } from "../models/player";
+import type { PlayerMatchupCalibrationModel } from "./playerMatchupCalibration";
 
 export type PlayerMatchupViewStatus =
   | "not_available"
@@ -34,6 +35,10 @@ export interface PlayerMatchupCandidate {
   readonly currentRoleLabel: string;
   readonly fitBand: PlayerMatchupFitBand;
   readonly fitScore: number;
+  readonly rawFitScore?: number;
+  readonly calibratedFitScore?: number;
+  readonly calibrationWhyVisible?: readonly string[];
+  readonly calibrationLimits?: readonly string[];
   readonly matchedAttributes: readonly string[];
   readonly partialAttributes: readonly string[];
   readonly missingAttributes: readonly string[];
@@ -82,6 +87,7 @@ export interface PlayerMatchupViewModel {
   readonly mediumFitCount: number;
   readonly lowFitCount: number;
   readonly blocks: readonly PlayerMatchupProfileBlock[];
+  readonly calibration?: PlayerMatchupCalibrationModel;
   readonly noAutomaticSelection: true;
   readonly profileAppliedCount: 0;
   readonly playerSelectedCount: 0;
@@ -140,6 +146,7 @@ export function buildPlayerMatchupViewTags(model: Omit<PlayerMatchupViewModel, "
     "player_matchup_production_scoring_event_creation_count_0",
     "player_matchup_global_economy_claim_forbidden",
     "player_matchup_scoring_constants_unchanged",
+    ...(model.calibration?.tags ?? []),
   ];
 }
 

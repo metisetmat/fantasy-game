@@ -89,6 +89,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW":
       return 25;
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW":
+    case "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION":
       return 25;
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW":
     case "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH":
@@ -219,6 +220,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la validation multi-profils des traces full-match";
     case "WORKBENCH_CHAIN_PROFILE_SIGNAL_CALIBRATION":
       return "Relire la calibration des signaux de profils";
+    case "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION":
+      return "Relire la calibration des joueurs a etudier";
     case "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW":
       return "Relire les joueurs Ã  Ã©tudier";
     case "HARNESS_PLAUSIBILITY_WARNING":

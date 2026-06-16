@@ -37,6 +37,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_COACH_COPY"
   | "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW"
   | "WORKBENCH_CHAIN_PLAYER_MATCHUP_VIEW"
+  | "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_VIEW"
   | "WORKBENCH_CHAIN_COACH_PRODUCT_REPORT_POLISH"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
@@ -1041,6 +1042,43 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which roster players could be studied for each profile",
       "which player attributes currently look close to the profile",
       "which missing attributes or tactical risks should be observed before any future decision",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that a player must be selected",
+      "that a lineup change is recommended",
+      "that a profile-player matchup is officially confirmed",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION: {
+    scope: "WORKBENCH_CHAIN_PLAYER_MATCHUP_CALIBRATION",
+    canProve: [
+      "Player Matchup Calibration can filter profile-player comparisons by role, attributes, and context",
+      "goalkeeper outfield false positives can be excluded or penalized",
+      "visible candidate diversity can be guarded against universal-player matching",
+      "empty profile blocks can remain honest when no candidate clears the calibrated threshold",
+    ],
+    canSuggest: [
+      "which player/profile pairs remain worth studying after calibration",
+      "which player/profile pairs are excluded or penalized by role compatibility",
+      "which profile blocks need more roster evidence before showing a candidate",
     ],
     cannotProve: [
       "global scoring balance",
