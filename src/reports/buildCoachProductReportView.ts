@@ -382,6 +382,33 @@ function buildModelWithoutTags(input: {
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
 }): Omit<CoachProductReportViewModel, "tags"> {
+  const fallbackMatchupText = input.playerCandidateComparisonView === undefined
+    ? input.playerMatchupView.blocks.flatMap((block) => [
+        block.profileTitle,
+        ...block.roleFamilies,
+        ...block.usefulAttributes,
+        ...(block.emptyState === null ? [] : [block.emptyState]),
+        ...block.candidates.flatMap((candidate) => [
+          candidate.playerName,
+          candidate.currentRoleLabel,
+          candidate.nonAppliedLabel,
+          candidate.confirmationLabel,
+          ...candidate.whyStudy,
+          ...candidate.whatIsMissing,
+          ...candidate.riskIfUsed,
+          ...candidate.nextObservationSignal,
+          ...(candidate.calibrationWhyVisible ?? []),
+          ...(candidate.calibrationLimits ?? []),
+          ...candidate.matchedAttributes,
+          ...candidate.partialAttributes,
+          ...candidate.missingAttributes,
+          ...candidate.attributeComparisons.flatMap((comparison) => [
+            comparison.attributeLabel,
+            comparison.explanation,
+          ]),
+        ]),
+      ])
+    : [];
   const comparisonText = input.playerCandidateComparisonView?.profileBlocks.flatMap((block) => [
     block.profileTitle,
     block.profileSummary,
@@ -427,6 +454,7 @@ function buildModelWithoutTags(input: {
       profile.nonAppliedLabel,
       profile.confirmationLabel,
     ]),
+    ...fallbackMatchupText,
     ...comparisonText,
     ...input.nextMatchSignals,
   ].join(" ");
