@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4W Validation
+# FullMatch Workbench Chain Replay 4X Validation
 
 Status: PASS
 
@@ -8,22 +8,24 @@ Status: PASS
 - PASS: Coach Product Report remains available.
 - PASS: Coach Report Export Snapshot remains available.
 - PASS: Premium HTML Layout remains available.
-- PASS: Phase Visuals remain available. - 3
+- PASS: Phase Visuals remain available.
+- PASS: Phase Visual Readability remains available.
 - PASS: Player Candidate Comparison View remains available.
-- PASS: Phase Visual Readability status is available. - available
+- PASS: Multi-Match Phase Comparison status is available or partial. - available
 - PASS: coach-report.export.html is generated. - reports/coach-report.export.html
 - PASS: HTML-first remains true.
 - PASS: PDF remains optional.
 - PASS: export uses product report as single source of truth.
 - PASS: duplicated report logic is false.
-- PASS: phase legend is visible.
-- PASS: legend item count is 5. - 5
-- PASS: phase panels are readable. - 3
-- PASS: primary zone emphasis is visible.
-- PASS: secondary zone emphasis is visible where applicable.
-- PASS: controlled empty states remain honest.
+- PASS: local comparison guard is visible.
+- PASS: sample count is visible. - 4
+- PASS: phase stability labels are visible.
+- PASS: repeated signals are labelled cautiously. - 6
+- PASS: visible-once signals are labelled cautiously. - 2
+- PASS: insufficient or unstable signals remain honest. - 0/1
 - PASS: no invented phase statistic is introduced. - 0
 - PASS: sandbox events are not promoted to official visuals. - 0
+- PASS: no global proof claim is made. - 0
 - PASS: product/export score matches.
 - PASS: candidate comparison matches product.
 - PASS: interpretation guard remains visible.
@@ -42,11 +44,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: readability layer cannot mutate official timeline.
-- PASS: readability layer cannot mutate official score.
-- PASS: readability layer cannot mutate official possession.
-- PASS: readability layer cannot create production scoring events.
-- PASS: readability layer cannot claim global economy.
+- PASS: comparison layer cannot mutate official timeline.
+- PASS: comparison layer cannot mutate official score.
+- PASS: comparison layer cannot mutate official possession.
+- PASS: comparison layer cannot create production scoring events.
+- PASS: comparison layer cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -54,12 +56,14 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- legend item count: 5
+- sample count: 4
 - panel count: 3
-- readable panel count: 3
-- panels with primary zone count: 2
-- panels with secondary zones count: 2
-- controlled empty state count: 1
+- compared signal count: 8
+- repeated signal count: 6
+- visible-once signal count: 2
+- unstable signal count: 0
+- insufficient data count: 1
+- global proof claim count: 0
 - invented statistic count: 0
 - sandbox events promoted to official count: 0
 - visible recommendation wording count: 0
@@ -80,7 +84,7 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_PHASE_VISUAL_READABILITY.
-- CONFIRM_LEGEND_AND_ZONE_HIERARCHY.
-- CONFIRM_NO_INVENTED_PHASE_STATS.
-- PREPARE_UI_WIRING_OR_MULTI_MATCH_PHASE_COMPARISON.
+- CONFIRM_MULTI_MATCH_PHASE_COMPARISON.
+- CONFIRM_LOCAL_STABILITY_LABELS.
+- CONFIRM_NO_GLOBAL_PROOF_CLAIM.
+- PREPARE_UI_WIRING_OR_MULTI_MATCH_HISTORY_VIEW.

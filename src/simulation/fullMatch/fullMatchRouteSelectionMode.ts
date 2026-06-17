@@ -4,6 +4,7 @@ export type FullMatchRouteSelectionMode =
 
 export type FullMatchOptions = {
   readonly routeSelectionMode?: FullMatchRouteSelectionMode;
+  readonly enableCoachReportMultiMatchPhaseComparison?: boolean;
 };
 
 export const DEFAULT_FULL_MATCH_ROUTE_SELECTION_MODE: FullMatchRouteSelectionMode = "segment_harness";

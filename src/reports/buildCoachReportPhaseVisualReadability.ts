@@ -200,7 +200,7 @@ function coachCopyForPanel(panel: TacticalPitchPanelModel): PhaseVisualCoachCopy
     whatItShows: panel.controlledEmptyStateUsed
       ? "Ce run ne contient pas assez de donn&eacute;es stabilis&eacute;es pour cartographier proprement le dernier rempart."
       : `Le signal du dernier rempart appara&icirc;t d'abord dans ${panel.primarySignal?.zone ?? "la zone affich&eacute;e"}, mais il reste une lecture prudente du run.`,
-    whyItMatters: "L'absence de carte &eacute;vite de transformer un signal faible en fausse certitude.",
+    whyItMatters: "L'absence de carte évite de surinterpréter un signal encore trop faible.",
     whatToVerifyNext: "V&eacute;rifier sur plusieurs matchs les zones d'intervention, de s&eacute;curisation et de rebond.",
     limitation: panel.controlledEmptyStateUsed
       ? panel.emptyStateReason ?? "Ce run ne contient pas assez de donn&eacute;es stabilis&eacute;es pour cartographier proprement le dernier rempart."

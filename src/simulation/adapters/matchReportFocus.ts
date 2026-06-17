@@ -99,6 +99,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT":
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY":
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -218,6 +219,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire les panneaux tactiques par phase du rapport coach";
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY":
       return "Relire la lisibilite des cartes terrain du rapport coach";
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
+      return "Relire la stabilite multi-run des signaux de phase";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

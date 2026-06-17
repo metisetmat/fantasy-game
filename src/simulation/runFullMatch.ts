@@ -198,6 +198,11 @@ import {
   coachReportPhaseVisualsLimitations,
 } from "../reports/coachReportPhaseVisuals";
 import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
+import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
+import {
+  coachReportMultiMatchPhaseComparisonEvidenceFact,
+  coachReportMultiMatchPhaseComparisonLimitations,
+} from "../reports/coachReportMultiMatchPhaseComparison";
 import {
   coachReportPhaseVisualReadabilityEvidenceFact,
   coachReportPhaseVisualReadabilityLimitations,
@@ -3174,7 +3179,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     productReportHtml: coachProductReportHtml,
     productReportPath: "reports/coach-report.product.html",
   });
-  const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
+  const baselineCoachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
       })
@@ -3182,18 +3187,36 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const coachReportPremiumLayoutModel = buildCoachReportPremiumLayout({
     exportSnapshot: coachReportExportSnapshotModel,
     productReportHtml: coachProductReportHtml,
-    exportReportHtml: coachReportExportHtml,
+    exportReportHtml: baselineCoachReportExportHtml,
   });
   const coachReportPhaseVisualsModel = buildCoachReportPhaseVisuals({
     premiumLayout: coachReportPremiumLayoutModel,
     productReportHtml: coachProductReportHtml,
-    exportReportHtml: coachReportExportHtml,
+    exportReportHtml: baselineCoachReportExportHtml,
   });
   const coachReportPhaseVisualReadabilityModel = buildCoachReportPhaseVisualReadability({
     phaseVisuals: coachReportPhaseVisualsModel,
     productReportHtml: coachProductReportHtml,
-    exportReportHtml: coachReportExportHtml,
+    exportReportHtml: baselineCoachReportExportHtml,
   });
+  const coachReportMultiMatchPhaseComparisonModel =
+    routeSelectionMode === "workbench_chain_replay_experimental" && options?.enableCoachReportMultiMatchPhaseComparison
+      ? buildCoachReportMultiMatchPhaseComparison({
+          phaseReadability: coachReportPhaseVisualReadabilityModel,
+          comparisonSamples: [],
+          productReportHtml: coachProductReportHtml,
+          exportReportHtml: baselineCoachReportExportHtml,
+        })
+      : null;
+  const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
+    ? renderCoachReportExportHtml({
+        productReportHtml: coachProductReportHtml,
+        phaseReadability: coachReportPhaseVisualReadabilityModel,
+        ...(coachReportMultiMatchPhaseComparisonModel === null
+          ? {}
+          : { multiMatchPhaseComparison: coachReportMultiMatchPhaseComparisonModel }),
+      })
+    : "";
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3218,6 +3241,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachReportPremiumLayoutLimitations(coachReportPremiumLayoutModel),
         ...coachReportPhaseVisualsLimitations(coachReportPhaseVisualsModel),
         ...coachReportPhaseVisualReadabilityLimitations(coachReportPhaseVisualReadabilityModel),
+        ...(coachReportMultiMatchPhaseComparisonModel === null
+          ? []
+          : coachReportMultiMatchPhaseComparisonLimitations(coachReportMultiMatchPhaseComparisonModel)),
       ],
     },
   };
@@ -3462,6 +3488,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportPhaseVisualReadabilityModel,
   });
+  const coachReportMultiMatchPhaseComparisonModelFact = coachReportMultiMatchPhaseComparisonModel === null
+    ? null
+    : coachReportMultiMatchPhaseComparisonEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachReportMultiMatchPhaseComparisonModel,
+      });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3519,6 +3552,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportPhaseVisualReadabilityFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportPhaseVisualReadabilityModelFact
     : null;
+  const experimentalCoachReportMultiMatchPhaseComparisonFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportMultiMatchPhaseComparisonModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3561,6 +3597,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportPremiumLayoutFact === null ? [] : [experimentalCoachReportPremiumLayoutFact]),
     ...(experimentalCoachReportPhaseVisualsFact === null ? [] : [experimentalCoachReportPhaseVisualsFact]),
     ...(experimentalCoachReportPhaseVisualReadabilityFact === null ? [] : [experimentalCoachReportPhaseVisualReadabilityFact]),
+    ...(experimentalCoachReportMultiMatchPhaseComparisonFact === null ? [] : [experimentalCoachReportMultiMatchPhaseComparisonFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
