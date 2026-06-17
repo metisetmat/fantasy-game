@@ -4,14 +4,21 @@ import {
 } from "./coachReportPhaseVisuals";
 import {
   COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD,
+  type CoachReportPhaseVisualReadabilityModel,
   type PhaseVisualCoachCopyBlock,
   type PhaseVisualLegendItem,
   type PhaseVisualZoneHierarchy,
 } from "./coachReportPhaseVisualReadability";
+import type {
+  CoachReportMultiMatchPhaseComparisonModel,
+  MultiMatchPhaseComparisonPanel,
+  MultiMatchPhaseZoneSignal,
+} from "./coachReportMultiMatchPhaseComparison";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
 } from "./buildCoachReportPhaseVisualReadability";
+import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -417,6 +424,104 @@ const PREMIUM_EXPORT_CSS = `
       gap: 16px;
     }
 
+    .phase-stability-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .phase-stability-guard {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .phase-stability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .phase-stability-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-stability-card header {
+      display: grid;
+      gap: 8px;
+    }
+
+    .phase-stability-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .phase-stability-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .phase-stability-badge--repeated {
+      background: #e6f6ef;
+      color: #1d6b4f;
+      border-color: rgba(29, 107, 79, 0.18);
+    }
+
+    .phase-stability-badge--visible-once {
+      background: #eef2f7;
+      color: #445061;
+      border-color: rgba(68, 80, 97, 0.16);
+    }
+
+    .phase-stability-badge--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+      border-color: rgba(154, 90, 20, 0.18);
+    }
+
+    .phase-stability-badge--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+      border-color: rgba(107, 77, 183, 0.18);
+    }
+
+    .phase-stability-zone-list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .phase-stability-zone-list li {
+      color: var(--report-muted);
+      line-height: 1.45;
+    }
+
+    .phase-stability-zone-list strong {
+      color: var(--report-ink);
+    }
+
+    .phase-stability-reading {
+      display: grid;
+      gap: 10px;
+    }
+
     .report-appendix-stack {
       margin-top: 10px;
     }
@@ -442,7 +547,8 @@ const PREMIUM_EXPORT_CSS = `
     @media (max-width: 840px) {
       .report-cover-grid,
       .report-phase-layout,
-      .report-player-study-grid {
+      .report-player-study-grid,
+      .phase-stability-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -795,6 +901,120 @@ function renderPhaseSection(
   </section>`;
 }
 
+function stabilityBadgeLabel(signal: MultiMatchPhaseZoneSignal): string {
+  switch (signal.stability) {
+    case "repeated":
+      return "Signal répété";
+    case "visible_once":
+      return "Visible dans ce run";
+    case "unstable":
+      return "Signal instable";
+    case "insufficient_data":
+      return "Donnée insuffisante";
+  }
+}
+
+function stabilityBadgeClass(signal: MultiMatchPhaseZoneSignal): string {
+  switch (signal.stability) {
+    case "repeated":
+      return "phase-stability-badge phase-stability-badge--repeated";
+    case "visible_once":
+      return "phase-stability-badge phase-stability-badge--visible-once";
+    case "unstable":
+      return "phase-stability-badge phase-stability-badge--unstable";
+    case "insufficient_data":
+      return "phase-stability-badge phase-stability-badge--insufficient";
+  }
+}
+
+function phaseFragilityCopy(panel: MultiMatchPhaseComparisonPanel): string {
+  switch (panel.phase) {
+    case "with_ball":
+      return panel.unstableSignalCount > 0 || panel.visibleOnceSignalCount > 0 || panel.sampleCount < 4
+        ? "Le volume de runs reste limité, donc le signal doit rester une piste d’observation."
+        : "Même répété, le signal reste lié aux runs comparés et ne suffit pas à lui seul pour trancher.";
+    case "without_ball":
+      return panel.unstableSignalCount > 0 || panel.visibleOnceSignalCount > 0 || panel.insufficientDataCount > 0
+        ? "Une récupération répétée ne prouve pas encore une sortie propre après récupération."
+        : "Le signal reste utile pour surveiller un comportement, pas pour conclure à lui seul.";
+    case "goalkeeper":
+      return panel.insufficientDataCount > 0 || panel.visibleOnceSignalCount > 0 || panel.sampleCount < 4
+        ? "Si peu d’actions gardien sont disponibles, le rapport doit garder un état prudent."
+        : "Même répété, le signal gardien doit rester une lecture locale et ouverte au contexte.";
+  }
+}
+
+function renderPhaseStabilityCard(panel: MultiMatchPhaseComparisonPanel): string {
+  const zoneList = panel.zoneSignals.length === 0
+    ? `<p class="report-controlled-empty">Donnée insuffisante : le volume disponible ne permet pas encore de comparer des zones de manière honnête.</p>`
+    : `<ul class="phase-stability-zone-list">
+        ${panel.zoneSignals.map((signal) => `
+          <li>
+            <strong>${signal.zone}</strong>
+            <span class="${stabilityBadgeClass(signal)}">${stabilityBadgeLabel(signal)}</span>
+            <br />
+            ${signal.explanation}
+          </li>`).join("")}
+      </ul>`;
+
+  return `
+    <article class="phase-stability-card">
+      <div class="phase-stability-card-header">
+        <div class="report-section-header">
+          <div>
+            <h3>${panel.title}</h3>
+            <p>${panel.sampleCount} run(s) comparé(s) dans ce périmètre local.</p>
+          </div>
+        </div>
+        <div class="phase-stability-meta">
+          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: ${panel.repeatedSignalCount}</span>
+          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: ${panel.visibleOnceSignalCount}</span>
+          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: ${panel.unstableSignalCount}</span>
+          <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: ${panel.insufficientDataCount}</span>
+        </div>
+      </div>
+      ${panel.primaryRepeatedZone === undefined ? "" : `<p><strong>Zone répétée principale:</strong> ${panel.primaryRepeatedZone}</p>`}
+      ${zoneList}
+      <div class="phase-stability-reading">
+        <div>
+          <h4>Ce qui revient</h4>
+          <p>${panel.coachReading}</p>
+        </div>
+        <div>
+          <h4>Ce qui reste fragile</h4>
+          <p>${phaseFragilityCopy(panel)}</p>
+        </div>
+        <div>
+          <h4>&Agrave; v&eacute;rifier au prochain match</h4>
+          <p>${panel.whatToVerifyNext}</p>
+        </div>
+      </div>
+    </article>`;
+}
+
+function renderMultiMatchPhaseComparison(
+  comparison: CoachReportMultiMatchPhaseComparisonModel,
+): string {
+  if (comparison.status === "not_available") {
+    return "";
+  }
+
+  return `
+  <section id="phase-signal-stability" class="premium-section phase-stability-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Phase signal stability</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Stabilit&eacute; des signaux de phase</h2>
+        <p>Comparaison locale sur ${comparison.sampleCount} run(s) disponibles pour distinguer un signal r&eacute;p&eacute;t&eacute; d'un signal ponctuel.</p>
+      </div>
+    </div>
+    <p class="phase-stability-guard">Cette comparaison reste locale aux runs disponibles. Elle aide &agrave; distinguer un signal r&eacute;p&eacute;t&eacute; d&rsquo;un signal ponctuel, sans transformer ce rep&egrave;re en verdict g&eacute;n&eacute;ral ni en consigne directe.</p>
+    <div class="phase-stability-grid">
+      ${comparison.panels.map((panel) => renderPhaseStabilityCard(panel)).join("\n")}
+    </div>
+  </section>`;
+}
+
 function renderProfilesAndPlayers(html: string): string {
   const profilesBody = extractSectionInner(html, "profiles-to-observe");
   const playersBody = extractSectionInner(html, "players-to-study");
@@ -945,6 +1165,47 @@ function renderPhaseVisualReadabilityAppendix(input: {
     </details>`;
 }
 
+function renderMultiMatchPhaseComparisonAppendix(
+  comparison: CoachReportMultiMatchPhaseComparisonModel,
+): string {
+  if (comparison.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de comparaison multi-run des phases</summary>
+      <ul>
+        <li>multi-match phase comparison status ${comparison.status}</li>
+        <li>sample count ${comparison.sampleCount}</li>
+        <li>panel count ${comparison.panelCount}</li>
+        <li>compared signal count ${comparison.comparedSignalCount}</li>
+        <li>repeated signal count ${comparison.repeatedSignalCount}</li>
+        <li>visible-once signal count ${comparison.visibleOnceSignalCount}</li>
+        <li>unstable signal count ${comparison.unstableSignalCount}</li>
+        <li>insufficient data count ${comparison.insufficientDataCount}</li>
+        <li>local comparison only true</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match ${comparison.productExportScoreMatches ? "true" : "false"}</li>
+        <li>candidate comparison match ${comparison.candidateComparisonMatchesProduct ? "true" : "false"}</li>
+        <li>visible recommendation wording count ${comparison.visibleRecommendationWordingCount}</li>
+        <li>visible selection wording count ${comparison.visibleSelectionWordingCount}</li>
+        <li>internal status leak count ${comparison.internalStatusLeakCount}</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -953,6 +1214,7 @@ function renderAppendices(input: {
   readonly panelsWithPrimaryZoneCount: number;
   readonly panelsWithSecondaryZonesCount: number;
   readonly legendItemCount: number;
+  readonly multiMatchPhaseComparison: CoachReportMultiMatchPhaseComparisonModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -983,6 +1245,7 @@ function renderAppendices(input: {
       panelsWithSecondaryZonesCount: input.panelsWithSecondaryZonesCount,
       legendItemCount: input.legendItemCount,
     })}
+    ${renderMultiMatchPhaseComparisonAppendix(input.multiMatchPhaseComparison)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -1002,6 +1265,8 @@ function injectExportMarkers(html: string): string {
 
 export function renderCoachReportExportHtml(input: {
   readonly productReportHtml: string;
+  readonly phaseReadability?: CoachReportPhaseVisualReadabilityModel;
+  readonly multiMatchPhaseComparison?: CoachReportMultiMatchPhaseComparisonModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -1012,6 +1277,76 @@ export function renderCoachReportExportHtml(input: {
   const readabilityPresentation = deriveCoachReportPhaseVisualReadabilityPresentation({
     panels: phasePanels,
   });
+  const derivedPhaseReadability = input.phaseReadability;
+  const multiMatchPhaseComparison = input.multiMatchPhaseComparison ?? (
+    derivedPhaseReadability === undefined
+      ? buildCoachReportMultiMatchPhaseComparison({
+          phaseReadability: {
+            status: "partial",
+            origin: "coach_report_phase_visuals",
+            htmlFirst: true,
+            pdfOptional: true,
+            singleSourceOfTruth: true,
+            duplicateReportLogic: false,
+            legendItemCount: readabilityPresentation.legendItems.length,
+            legendItems: readabilityPresentation.legendItems,
+            panelCount: phasePanels.length,
+            readablePanelCount: readabilityPresentation.coachCopyBlocks.length,
+            panelsWithPrimaryZoneCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.primaryZone !== undefined).length,
+            panelsWithSecondaryZonesCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.secondaryZones.length > 0).length,
+            controlledEmptyStateCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.controlledEmptyStateUsed).length,
+            zoneHierarchies: readabilityPresentation.zoneHierarchies,
+            coachCopyBlocks: readabilityPresentation.coachCopyBlocks,
+            phaseSpecificGuardVisible: true,
+            legendVisible: true,
+            primaryZoneVisualEmphasisPresent: true,
+            secondaryZoneVisualEmphasisPresent: true,
+            controlledEmptyStateReadable: true,
+            productExportScoreMatches: true,
+            productExportCandidateComparisonMatches: true,
+            interpretationGuardMatchesProduct: true,
+            sandboxEventsPromotedToOfficialCount: 0,
+            inventedStatisticCount: 0,
+            visibleRecommendationWordingCount: 0,
+            visibleSelectionWordingCount: 0,
+            internalStatusLeakCount: 0,
+            mojibakeMarkerCount: 0,
+            noAutomaticSelection: true,
+            playerSelectedCount: 0,
+            automaticSelectionCount: 0,
+            lineupMutationCount: 0,
+            startersMutationCount: 0,
+            benchMutationCount: 0,
+            confidenceUpgradeCount: 0,
+            officiallyConfirmedCount: 0,
+            canChangeLineup: false,
+            canChangeStarters: false,
+            canChangeBench: false,
+            canDriveCoachInstruction: false,
+            canDriveLiveSelection: false,
+            canDriveProductionRouteResolution: false,
+            canMutateTimeline: false,
+            canMutateScore: false,
+            canMutatePossession: false,
+            canCreateScoringEvent: false,
+            canClaimGlobalEconomy: false,
+            scoringConstantsUnchanged: true,
+            matchBonusEventUnchanged: true,
+            fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+            tags: [],
+            warnings: [],
+          },
+          comparisonSamples: [],
+          productReportHtml: input.productReportHtml,
+          exportReportHtml: input.productReportHtml,
+        })
+      : buildCoachReportMultiMatchPhaseComparison({
+          phaseReadability: derivedPhaseReadability,
+          comparisonSamples: [],
+          productReportHtml: input.productReportHtml,
+          exportReportHtml: input.productReportHtml,
+        })
+  );
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
@@ -1021,6 +1356,7 @@ export function renderCoachReportExportHtml(input: {
     ...phasePanels.map((panel) =>
       renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
     ),
+    renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -1033,6 +1369,7 @@ export function renderCoachReportExportHtml(input: {
     panelsWithPrimaryZoneCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.primaryZone !== undefined).length,
     panelsWithSecondaryZonesCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.secondaryZones.length > 0).length,
     legendItemCount: readabilityPresentation.legendItems.length,
+    multiMatchPhaseComparison,
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

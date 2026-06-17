@@ -1,6 +1,12 @@
 import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
+import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
+import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
+import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
+import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
+import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
@@ -18,8 +24,38 @@ export function writeLatestCoachReport(): void {
     experimentalReport,
     rosterCoverageFixturePlayers,
   ));
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const premiumLayout = buildCoachReportPremiumLayout({
+    exportSnapshot,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const phaseVisuals = buildCoachReportPhaseVisuals({
+    premiumLayout,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const phaseReadability = buildCoachReportPhaseVisualReadability({
+    phaseVisuals,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const multiMatchPhaseComparison = buildCoachReportMultiMatchPhaseComparison({
+    phaseReadability,
+    comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
+    phaseReadability,
+    multiMatchPhaseComparison,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
