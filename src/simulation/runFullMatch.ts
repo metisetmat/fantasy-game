@@ -199,6 +199,11 @@ import {
 } from "../reports/coachReportPhaseVisuals";
 import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
+import { buildCoachReportMultiMatchHistoryView } from "../reports/buildCoachReportMultiMatchHistoryView";
+import {
+  coachReportMultiMatchHistoryViewEvidenceFact,
+  coachReportMultiMatchHistoryViewLimitations,
+} from "../reports/coachReportMultiMatchHistoryView";
 import {
   coachReportMultiMatchPhaseComparisonEvidenceFact,
   coachReportMultiMatchPhaseComparisonLimitations,
@@ -3208,13 +3213,25 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           exportReportHtml: baselineCoachReportExportHtml,
         })
       : null;
+  const coachReportMultiMatchHistoryViewModel = coachReportMultiMatchPhaseComparisonModel === null
+    ? null
+    : buildCoachReportMultiMatchHistoryView({
+        multiMatchComparison: coachReportMultiMatchPhaseComparisonModel,
+        productReportHtml: coachProductReportHtml,
+        exportReportHtml: baselineCoachReportExportHtml,
+      });
   const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
         phaseReadability: coachReportPhaseVisualReadabilityModel,
         ...(coachReportMultiMatchPhaseComparisonModel === null
           ? {}
-          : { multiMatchPhaseComparison: coachReportMultiMatchPhaseComparisonModel }),
+          : {
+            multiMatchPhaseComparison: coachReportMultiMatchPhaseComparisonModel,
+            ...(coachReportMultiMatchHistoryViewModel === null
+              ? {}
+              : { multiMatchHistoryView: coachReportMultiMatchHistoryViewModel }),
+          }),
       })
     : "";
   const reportWithTraceLimitations: MatchReport = {
@@ -3244,6 +3261,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...(coachReportMultiMatchPhaseComparisonModel === null
           ? []
           : coachReportMultiMatchPhaseComparisonLimitations(coachReportMultiMatchPhaseComparisonModel)),
+        ...(coachReportMultiMatchHistoryViewModel === null
+          ? []
+          : coachReportMultiMatchHistoryViewLimitations(coachReportMultiMatchHistoryViewModel)),
       ],
     },
   };
@@ -3495,6 +3515,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         matchInput: input,
         model: coachReportMultiMatchPhaseComparisonModel,
       });
+  const coachReportMultiMatchHistoryViewModelFact = coachReportMultiMatchHistoryViewModel === null
+    ? null
+    : coachReportMultiMatchHistoryViewEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachReportMultiMatchHistoryViewModel,
+      });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3555,6 +3582,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportMultiMatchPhaseComparisonFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportMultiMatchPhaseComparisonModelFact
     : null;
+  const experimentalCoachReportMultiMatchHistoryViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportMultiMatchHistoryViewModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3598,6 +3628,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportPhaseVisualsFact === null ? [] : [experimentalCoachReportPhaseVisualsFact]),
     ...(experimentalCoachReportPhaseVisualReadabilityFact === null ? [] : [experimentalCoachReportPhaseVisualReadabilityFact]),
     ...(experimentalCoachReportMultiMatchPhaseComparisonFact === null ? [] : [experimentalCoachReportMultiMatchPhaseComparisonFact]),
+    ...(experimentalCoachReportMultiMatchHistoryViewFact === null ? [] : [experimentalCoachReportMultiMatchHistoryViewFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),

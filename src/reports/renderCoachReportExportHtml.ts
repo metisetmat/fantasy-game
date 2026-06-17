@@ -14,11 +14,13 @@ import type {
   MultiMatchPhaseComparisonPanel,
   MultiMatchPhaseZoneSignal,
 } from "./coachReportMultiMatchPhaseComparison";
+import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
 } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
+import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -522,6 +524,109 @@ const PREMIUM_EXPORT_CSS = `
       gap: 10px;
     }
 
+    .phase-history-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .phase-history-guard {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .phase-history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .phase-history-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-history-strength,
+    .phase-history-presence {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .phase-history-strength--local-repeated {
+      background: #e6f6ef;
+      color: #1d6b4f;
+      border-color: rgba(29, 107, 79, 0.18);
+    }
+
+    .phase-history-strength--visible-once {
+      background: #eef2f7;
+      color: #445061;
+      border-color: rgba(68, 80, 97, 0.16);
+    }
+
+    .phase-history-strength--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+      border-color: rgba(154, 90, 20, 0.18);
+    }
+
+    .phase-history-strength--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+      border-color: rgba(107, 77, 183, 0.18);
+    }
+
+    .phase-history-presence--present {
+      background: #e6f6ef;
+      color: #1d6b4f;
+    }
+
+    .phase-history-presence--absent {
+      background: #eef2f7;
+      color: #445061;
+    }
+
+    .phase-history-presence--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+    }
+
+    .phase-history-presence--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+    }
+
+    .phase-history-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .phase-history-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.9fr) auto minmax(0, 1.2fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--report-soft);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
     .report-appendix-stack {
       margin-top: 10px;
     }
@@ -548,7 +653,8 @@ const PREMIUM_EXPORT_CSS = `
       .report-cover-grid,
       .report-phase-layout,
       .report-player-study-grid,
-      .phase-stability-grid {
+      .phase-stability-grid,
+      .phase-history-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -581,7 +687,9 @@ const PREMIUM_EXPORT_CSS = `
       .report-pitch-panel,
       .report-phase-section,
       .phase-pitch-legend,
-      .phase-legend-item {
+      .phase-legend-item,
+      .phase-history-card,
+      .phase-history-row {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1015,6 +1123,116 @@ function renderMultiMatchPhaseComparison(
   </section>`;
 }
 
+function historyStrengthLabel(drilldown: MultiMatchSignalDrilldown): string {
+  switch (drilldown.strength) {
+    case "local_repeated":
+      return "Revient dans les échantillons disponibles";
+    case "local_visible_once":
+      return "Visible ponctuellement";
+    case "local_unstable":
+      return "Signal encore instable";
+    case "insufficient_data":
+      return "Donnée insuffisante";
+  }
+}
+
+function historyStrengthClass(drilldown: MultiMatchSignalDrilldown): string {
+  switch (drilldown.strength) {
+    case "local_repeated":
+      return "phase-history-strength phase-history-strength--local-repeated";
+    case "local_visible_once":
+      return "phase-history-strength phase-history-strength--visible-once";
+    case "local_unstable":
+      return "phase-history-strength phase-history-strength--unstable";
+    case "insufficient_data":
+      return "phase-history-strength phase-history-strength--insufficient";
+  }
+}
+
+function historyPresenceLabel(presence: MultiMatchSignalDrilldown["samples"][number]["presence"]): string {
+  switch (presence) {
+    case "present":
+      return "Présent";
+    case "absent":
+      return "Absent";
+    case "unstable":
+      return "Instable";
+    case "insufficient_data":
+      return "Insuffisant";
+  }
+}
+
+function historyPresenceClass(presence: MultiMatchSignalDrilldown["samples"][number]["presence"]): string {
+  switch (presence) {
+    case "present":
+      return "phase-history-presence phase-history-presence--present";
+    case "absent":
+      return "phase-history-presence phase-history-presence--absent";
+    case "unstable":
+      return "phase-history-presence phase-history-presence--unstable";
+    case "insufficient_data":
+      return "phase-history-presence phase-history-presence--insufficient";
+  }
+}
+
+function renderHistoryDrilldownCard(drilldown: MultiMatchSignalDrilldown): string {
+  return `
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>${drilldown.label}</h3>
+          <p>${drilldown.phase.replaceAll("_", " ")}${drilldown.primaryZone === undefined ? "" : ` · zone principale ${drilldown.primaryZone}`}</p>
+        </div>
+        <span class="${historyStrengthClass(drilldown)}">${historyStrengthLabel(drilldown)}</span>
+      </div>
+      <p><strong>Échantillons:</strong> ${drilldown.sampleCount} · <strong>Présent:</strong> ${drilldown.presentCount} · <strong>Absent:</strong> ${drilldown.absentCount} · <strong>Instable:</strong> ${drilldown.unstableCount} · <strong>Insuffisant:</strong> ${drilldown.insufficientDataCount}</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>${drilldown.coachReading}</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>${drilldown.whyStillCautious}</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>${drilldown.whatToVerifyNext}</p>
+      </div>
+      <div class="phase-history-table">
+        ${drilldown.samples.map((sample) => `
+          <div class="phase-history-row">
+            <strong>${sample.sampleLabel}</strong>
+            <span class="${historyPresenceClass(sample.presence)}">${historyPresenceLabel(sample.presence)}</span>
+            <span>${sample.explanation}</span>
+          </div>
+        `).join("")}
+      </div>
+    </article>`;
+}
+
+function renderMultiMatchHistoryView(
+  historyView: CoachReportMultiMatchHistoryViewModel,
+): string {
+  if (historyView.status === "not_available") {
+    return "";
+  }
+
+  return `
+  <section id="phase-signal-history" class="premium-section phase-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Phase signal history</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Historique des signaux compar&eacute;s</h2>
+        <p>${historyView.sampleCount} &eacute;chantillon(s) disponibles, ${historyView.drilldownCount} signal(aux) relus dans ce p&eacute;rim&egrave;tre local.</p>
+      </div>
+    </div>
+    <p class="phase-history-guard">Cet historique d&eacute;crit uniquement les &eacute;chantillons disponibles. Il aide &agrave; comprendre pourquoi un signal est affich&eacute; comme r&eacute;p&eacute;t&eacute; ou ponctuel, sans prouver une tendance globale.</p>
+    <div class="phase-history-grid">
+      ${historyView.drilldowns.map((drilldown) => renderHistoryDrilldownCard(drilldown)).join("\n")}
+    </div>
+  </section>`;
+}
+
 function renderProfilesAndPlayers(html: string): string {
   const profilesBody = extractSectionInner(html, "profiles-to-observe");
   const playersBody = extractSectionInner(html, "players-to-study");
@@ -1206,6 +1424,47 @@ function renderMultiMatchPhaseComparisonAppendix(
     </details>`;
 }
 
+function renderMultiMatchHistoryViewAppendix(
+  historyView: CoachReportMultiMatchHistoryViewModel,
+): string {
+  if (historyView.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de l&rsquo;historique multi-run</summary>
+      <ul>
+        <li>history view status ${historyView.status}</li>
+        <li>sample count ${historyView.sampleCount}</li>
+        <li>drilldown count ${historyView.drilldownCount}</li>
+        <li>history sample row count ${historyView.historySampleRowCount}</li>
+        <li>local repeated drilldown count ${historyView.localRepeatedDrilldownCount}</li>
+        <li>local visible-once drilldown count ${historyView.localVisibleOnceDrilldownCount}</li>
+        <li>local unstable drilldown count ${historyView.localUnstableDrilldownCount}</li>
+        <li>insufficient data drilldown count ${historyView.insufficientDataDrilldownCount}</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -1215,6 +1474,7 @@ function renderAppendices(input: {
   readonly panelsWithSecondaryZonesCount: number;
   readonly legendItemCount: number;
   readonly multiMatchPhaseComparison: CoachReportMultiMatchPhaseComparisonModel;
+  readonly multiMatchHistoryView: CoachReportMultiMatchHistoryViewModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -1246,6 +1506,7 @@ function renderAppendices(input: {
       legendItemCount: input.legendItemCount,
     })}
     ${renderMultiMatchPhaseComparisonAppendix(input.multiMatchPhaseComparison)}
+    ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -1267,6 +1528,7 @@ export function renderCoachReportExportHtml(input: {
   readonly productReportHtml: string;
   readonly phaseReadability?: CoachReportPhaseVisualReadabilityModel;
   readonly multiMatchPhaseComparison?: CoachReportMultiMatchPhaseComparisonModel;
+  readonly multiMatchHistoryView?: CoachReportMultiMatchHistoryViewModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -1347,6 +1609,11 @@ export function renderCoachReportExportHtml(input: {
           exportReportHtml: input.productReportHtml,
         })
   );
+  const multiMatchHistoryView = input.multiMatchHistoryView ?? buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: multiMatchPhaseComparison,
+    productReportHtml: input.productReportHtml,
+    exportReportHtml: input.productReportHtml,
+  });
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
@@ -1357,6 +1624,7 @@ export function renderCoachReportExportHtml(input: {
       renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
     ),
     renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
+    renderMultiMatchHistoryView(multiMatchHistoryView),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -1370,6 +1638,7 @@ export function renderCoachReportExportHtml(input: {
     panelsWithSecondaryZonesCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.secondaryZones.length > 0).length,
     legendItemCount: readabilityPresentation.legendItems.length,
     multiMatchPhaseComparison,
+    multiMatchHistoryView,
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

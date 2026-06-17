@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 4X - Multi-Match Phase Comparison",
+  name: "Sprint 4Y - Multi-Match History View & Trend Drilldown",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-4x.md",
-    "validation.fullmatch-workbench-chain-replay-4x.md",
+    "fullmatch-workbench-chain-replay-4y.md",
+    "validation.fullmatch-workbench-chain-replay-4y.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 4X share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-4x.md": "summarizes the local multi-run phase comparison rollout, stability labels, source-of-truth preservation, and unchanged scoring guardrails",
-    "validation.fullmatch-workbench-chain-replay-4x.md": "validates multi-match phase comparison status, cautious stability labels, visible guardrails, print CSS/page-break protection, non-selection scope, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 4X share pack",
-    "manifest.md": "compatibility manifest listing the 4X share pack files",
+    "validation.share-pack.md": "proves the 4Y share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-4y.md": "summarizes the local multi-run history drilldown rollout, cautious trend labels, source-of-truth preservation, and unchanged scoring guardrails",
+    "validation.fullmatch-workbench-chain-replay-4y.md": "validates multi-match history view status, sample rows, cautious trend copy, print CSS/page-break protection, non-selection scope, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 4Y share pack",
+    "manifest.md": "compatibility manifest listing the 4Y share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

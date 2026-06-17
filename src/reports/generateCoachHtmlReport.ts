@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
+import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
@@ -52,10 +53,16 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const multiMatchHistoryView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: multiMatchPhaseComparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
     multiMatchPhaseComparison,
+    multiMatchHistoryView,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

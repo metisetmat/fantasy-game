@@ -47,6 +47,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY"
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON"
+  | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1413,6 +1414,48 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     canSuggest: [
       "which phase signals deserve continued coach observation across future runs",
       "which local repeated zones might justify further validation runs later",
+      "where insufficient data remains more honest than a stronger claim",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    cannotInclude: [
+      "global proof claims",
+      "invented phase statistics",
+      "sandbox-only events presented as official truth",
+      "automatic selection wording",
+      "officially_confirmed status promotion",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW",
+    canProve: [
+      "local phase-signal history rows explain which controlled samples feed a comparison signal",
+      "history drilldowns remain anchored to the existing multi-match phase comparison model",
+      "local repeated and visible-once labels remain cautious and non-prescriptive",
+      "multi-match history view remains presentation-only and non-mutating",
+    ],
+    canSuggest: [
+      "which local signals deserve continued observation across future runs",
+      "which local repeated zones remain watchpoints rather than proof",
       "where insufficient data remains more honest than a stronger claim",
     ],
     cannotProve: [

@@ -502,6 +502,109 @@
       gap: 10px;
     }
 
+    .phase-history-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .phase-history-guard {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .phase-history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .phase-history-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-history-strength,
+    .phase-history-presence {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .phase-history-strength--local-repeated {
+      background: #e6f6ef;
+      color: #1d6b4f;
+      border-color: rgba(29, 107, 79, 0.18);
+    }
+
+    .phase-history-strength--visible-once {
+      background: #eef2f7;
+      color: #445061;
+      border-color: rgba(68, 80, 97, 0.16);
+    }
+
+    .phase-history-strength--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+      border-color: rgba(154, 90, 20, 0.18);
+    }
+
+    .phase-history-strength--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+      border-color: rgba(107, 77, 183, 0.18);
+    }
+
+    .phase-history-presence--present {
+      background: #e6f6ef;
+      color: #1d6b4f;
+    }
+
+    .phase-history-presence--absent {
+      background: #eef2f7;
+      color: #445061;
+    }
+
+    .phase-history-presence--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+    }
+
+    .phase-history-presence--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+    }
+
+    .phase-history-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .phase-history-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.9fr) auto minmax(0, 1.2fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--report-soft);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
     .report-appendix-stack {
       margin-top: 10px;
     }
@@ -528,7 +631,8 @@
       .report-cover-grid,
       .report-phase-layout,
       .report-player-study-grid,
-      .phase-stability-grid {
+      .phase-stability-grid,
+      .phase-history-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -561,7 +665,9 @@
       .report-pitch-panel,
       .report-phase-section,
       .phase-pitch-legend,
-      .phase-legend-item {
+      .phase-legend-item,
+      .phase-history-card,
+      .phase-history-row {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1143,6 +1249,419 @@
           <h4>&Agrave; v&eacute;rifier au prochain match</h4>
           <p>Suivre les interventions, rebonds et sécurisations sur plusieurs matchs.</p>
         </div>
+      </div>
+    </article>
+    </div>
+  </section>
+
+  <section id="phase-signal-history" class="premium-section phase-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Phase signal history</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Historique des signaux compar&eacute;s</h2>
+        <p>4 &eacute;chantillon(s) disponibles, 8 signal(aux) relus dans ce p&eacute;rim&egrave;tre local.</p>
+      </div>
+    </div>
+    <p class="phase-history-guard">Cet historique d&eacute;crit uniquement les &eacute;chantillons disponibles. Il aide &agrave; comprendre pourquoi un signal est affich&eacute; comme r&eacute;p&eacute;t&eacute; ou ponctuel, sans prouver une tendance globale.</p>
+    <div class="phase-history-grid">
+      
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z3-C</h3>
+          <p>with ball · zone principale Z3-C</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z3-C.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z5-C</h3>
+          <p>with ball · zone principale Z5-C</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z5-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z5-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z5-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z5-C.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z5-HSR</h3>
+          <p>with ball · zone principale Z5-HSR</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 3 · <strong>Absent:</strong> 1 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z5-HSR.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z5-HSR.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 2: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z5-HSR.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z2-C</h3>
+          <p>with ball · zone principale Z2-C</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 1 · <strong>Absent:</strong> 3 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : le signal apparaît dans un seul échantillon.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Run actuel: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 1: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z2-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 3: signal non visible dans cette zone.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z3-C</h3>
+          <p>without ball · zone principale Z3-C</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z3-C.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z5-C</h3>
+          <p>without ball · zone principale Z5-C</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z5-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z5-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z5-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z5-C.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z4-HSL</h3>
+          <p>without ball · zone principale Z4-HSL</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 3 · <strong>Absent:</strong> 1 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Run actuel: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z4-HSL.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z4-HSL.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z4-HSL.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z5-HSR</h3>
+          <p>without ball · zone principale Z5-HSR</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 1 · <strong>Absent:</strong> 3 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : le signal apparaît dans un seul échantillon.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z5-HSR.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 1: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 2: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 3: signal non visible dans cette zone.</span>
+          </div>
+        
       </div>
     </article>
     </div>
@@ -1897,6 +2416,38 @@
         <li>unstable signal count 0</li>
         <li>insufficient data count 1</li>
         <li>local comparison only true</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 1</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de l&rsquo;historique multi-run</summary>
+      <ul>
+        <li>history view status available</li>
+        <li>sample count 4</li>
+        <li>drilldown count 8</li>
+        <li>history sample row count 32</li>
+        <li>local repeated drilldown count 6</li>
+        <li>local visible-once drilldown count 2</li>
+        <li>local unstable drilldown count 0</li>
+        <li>insufficient data drilldown count 0</li>
+        <li>trend proof claim count 0</li>
         <li>global proof claim count 0</li>
         <li>invented statistic count 0</li>
         <li>sandbox events promoted to official count 0</li>
