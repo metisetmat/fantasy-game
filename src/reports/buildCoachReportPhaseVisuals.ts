@@ -358,9 +358,16 @@ export function buildCoachReportPhaseVisuals(input: {
   const withBallPanelAvailable = panels.some((panel) => panel.phase === "with_ball" && panel.available);
   const withoutBallPanelAvailable = panels.some((panel) => panel.phase === "without_ball" && panel.available);
   const goalkeeperPanelAvailable = panels.some((panel) => panel.phase === "goalkeeper" && panel.available);
+  const premiumLayoutAvailable = input.premiumLayout.status === "available";
+  const premiumSourceGuardMatches =
+    input.premiumLayout.productExportScoreMatches &&
+    input.premiumLayout.productExportCandidateComparisonMatches &&
+    input.premiumLayout.interpretationGuardMatchesProduct;
 
   const status: CoachReportPhaseVisualsModel["status"] =
-    withBallPanelAvailable &&
+    premiumLayoutAvailable &&
+      premiumSourceGuardMatches &&
+      withBallPanelAvailable &&
       withoutBallPanelAvailable &&
       goalkeeperPanelAvailable &&
       panels.length >= 3 &&

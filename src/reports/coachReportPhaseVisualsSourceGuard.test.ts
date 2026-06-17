@@ -56,8 +56,44 @@ export function validateCoachReportPhaseVisualsSourceGuard(): readonly string[] 
   ];
 }
 
+export function validateCoachReportPhaseVisualsSourceGuardPremiumDependency(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const productHtml = renderCoachProductReport(buildCoachProductReportViewFromMatchReport(report));
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtml,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const exportHtml = renderCoachReportExportHtml({ productReportHtml: productHtml });
+  const phaseVisuals = buildCoachReportPhaseVisuals({
+    premiumLayout: {
+      ...buildCoachReportPremiumLayout({
+        exportSnapshot,
+        productReportHtml: productHtml,
+        exportReportHtml: exportHtml,
+      }),
+      status: "partial",
+      productExportScoreMatches: false,
+    },
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+  });
+
+  assertTest(phaseVisuals.status === "partial", "phase visuals must stay partial when the premium layout source is partial.");
+  assertTest(!phaseVisuals.productExportScoreMatches, "phase visuals must propagate the premium source score mismatch.");
+
+  return [
+    "phase visuals stay partial when the premium layout source is partial",
+    "phase visuals propagate the premium source score mismatch",
+  ];
+}
+
 if (require.main === module) {
-  const checks = validateCoachReportPhaseVisualsSourceGuard();
+  const checks = [
+    ...validateCoachReportPhaseVisualsSourceGuard(),
+    ...validateCoachReportPhaseVisualsSourceGuardPremiumDependency(),
+  ];
 
   console.log("coachReportPhaseVisualsSourceGuard tests passed.");
   for (const check of checks) {
