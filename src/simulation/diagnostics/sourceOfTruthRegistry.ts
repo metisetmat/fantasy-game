@@ -45,6 +45,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_REPORT_EXPORT_SNAPSHOT"
   | "WORKBENCH_CHAIN_COACH_REPORT_PREMIUM_HTML_LAYOUT"
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
+  | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1356,6 +1357,47 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "production route resolution",
       "full-match batch economy",
       "scoring constants",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY",
+    canProve: [
+      "coach report phase visuals are readable with a visible legend and zone hierarchy",
+      "primary and secondary visual emphasis remain presentation-only and derived from existing phase visuals",
+      "controlled empty states stay honest when official signals are insufficient",
+      "phase readability remains non-mutating and non-prescriptive",
+    ],
+    canSuggest: [
+      "which visual labels, swatches, or legend wording make the phase panels easier for a coach to read",
+      "which future official aggregates could improve phase readability without inventing new stats",
+      "where a controlled empty state remains more honest than a false visual certainty",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    cannotInclude: [
+      "invented phase statistics",
+      "sandbox-only events presented as official truth",
+      "automatic selection wording",
+      "officially_confirmed status promotion",
     ],
     globalScoringEconomyVerdictAllowed: false,
   },

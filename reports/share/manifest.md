@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-16T17:41:30.950Z
-Task/sprint: Sprint 4V - Phase Visuals & Tactical Pitch Panels
+Generated: 2026-06-17T06:47:22.706Z
+Task/sprint: Sprint 4W - Phase Visual Readability & Legend Calibration
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4v.md
-- validation.fullmatch-workbench-chain-replay-4v.md
+- fullmatch-workbench-chain-replay-4w.md
+- validation.fullmatch-workbench-chain-replay-4w.md
 - README.md
 
 ## Bundle Files

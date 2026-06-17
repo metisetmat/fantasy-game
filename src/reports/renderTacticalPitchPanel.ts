@@ -3,6 +3,10 @@ import {
   type TacticalPitchPanelModel,
   type TacticalPitchZoneSignal,
 } from "./coachReportPhaseVisuals";
+import type {
+  PhaseVisualCoachCopyBlock,
+  PhaseVisualZoneHierarchy,
+} from "./coachReportPhaseVisualReadability";
 
 function escapeAttribute(value: string): string {
   return value
@@ -72,6 +76,7 @@ function signalAtCell(
 
 function renderSignalCell(
   signal: TacticalPitchZoneSignal | undefined,
+  panel: TacticalPitchPanelModel,
   row: number,
   col: number,
 ): string {
@@ -84,13 +89,19 @@ function renderSignalCell(
   if (signal === undefined) {
     return `
       <g>
-        <rect class="phase-zone" x="${x}" y="${y}" width="84" height="52" rx="10" ry="10"></rect>
+        <rect class="phase-zone phase-zone--muted" x="${x}" y="${y}" width="84" height="52" rx="10" ry="10"></rect>
       </g>`;
   }
 
+  const emphasisClass = panel.primarySignal?.zone === signal.zone
+    ? "phase-zone--primary"
+    : panel.secondarySignals.some((secondary) => secondary.zone === signal.zone)
+      ? "phase-zone--secondary"
+      : "phase-zone--muted";
+
   return `
     <g>
-      <rect class="${zoneClass(signal)}" x="${x}" y="${y}" width="84" height="52" rx="10" ry="10"></rect>
+      <rect class="${zoneClass(signal)} ${emphasisClass}" x="${x}" y="${y}" width="84" height="52" rx="10" ry="10"></rect>
       <text class="phase-zone-label" x="${labelX}" y="${labelY}" text-anchor="middle">${escapeAttribute(signal.zone)}</text>
       <text class="phase-zone-value" x="${labelX}" y="${valueY}" text-anchor="middle">${escapeAttribute(String(signal.value))}</text>
     </g>`;
@@ -101,7 +112,7 @@ function renderPitchSvg(panel: TacticalPitchPanelModel): string {
 
   for (let row = 0; row < 3; row += 1) {
     for (let col = 0; col < 3; col += 1) {
-      cells.push(renderSignalCell(signalAtCell(panel.zoneSignals, row, col), row, col));
+      cells.push(renderSignalCell(signalAtCell(panel.zoneSignals, row, col), panel, row, col));
     }
   }
 
@@ -117,31 +128,83 @@ function renderPitchSvg(panel: TacticalPitchPanelModel): string {
     </svg>`;
 }
 
-export function renderTacticalPitchPanel(panel: TacticalPitchPanelModel): string {
-  const explanationList = panel.zoneSignals.slice(0, 3).map((signal) =>
-    `<li>${escapeAttribute(signal.zone)} — ${signal.explanation}</li>`
-  ).join("");
+function fallbackCopy(panel: TacticalPitchPanelModel): PhaseVisualCoachCopyBlock {
+  return {
+    phase: panel.phase,
+    whatItShows: panel.coachReading,
+    whyItMatters: panel.subtitle,
+    whatToVerifyNext: panel.nextMatchCheck,
+    limitation: panel.emptyStateReason ?? COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE,
+  };
+}
+
+function fallbackHierarchy(panel: TacticalPitchPanelModel): PhaseVisualZoneHierarchy {
+  const secondaryZones = panel.secondarySignals.map((signal) => signal.zone);
+
+  return {
+    phase: panel.phase,
+    ...(panel.primarySignal === undefined
+      ? {}
+      : {
+          primaryZone: panel.primarySignal.zone,
+          primaryZoneLabel: panel.primarySignal.label,
+          primaryZoneValue: panel.primarySignal.value,
+        }),
+    secondaryZones,
+    hierarchyExplanation: panel.controlledEmptyStateUsed
+      ? panel.emptyStateReason ?? COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE
+      : panel.primarySignal === undefined
+        ? "Aucune zone principale n'est assez stable pour &ecirc;tre affich&eacute;e."
+        : `${panel.primarySignal.zone} porte le signal principal ; ${secondaryZones.join(", ") || "pas de zone secondaire stabilis&eacute;e"} donnent le contexte.`,
+    controlledEmptyStateUsed: panel.controlledEmptyStateUsed,
+  };
+}
+
+export function renderTacticalPitchPanel(
+  panel: TacticalPitchPanelModel,
+  readability?: {
+    readonly hierarchy?: PhaseVisualZoneHierarchy;
+    readonly copyBlock?: PhaseVisualCoachCopyBlock;
+  },
+): string {
+  const copyBlock = readability?.copyBlock ?? fallbackCopy(panel);
+  const hierarchy = readability?.hierarchy ?? fallbackHierarchy(panel);
+  const hierarchyItems = [
+    hierarchy.primaryZone === undefined
+      ? `<li><strong>Zone principale :</strong> donn&eacute;e insuffisante dans ce run</li>`
+      : `<li><strong>Zone principale :</strong> ${escapeAttribute(hierarchy.primaryZone)}${hierarchy.primaryZoneLabel === undefined ? "" : ` - ${hierarchy.primaryZoneLabel}`}${hierarchy.primaryZoneValue === undefined ? "" : ` (${hierarchy.primaryZoneValue})`}</li>`,
+    `<li><strong>Zones secondaires :</strong> ${hierarchy.secondaryZones.length === 0 ? "aucune zone secondaire stabilis&eacute;e" : hierarchy.secondaryZones.map(escapeAttribute).join(", ")}</li>`,
+  ].join("");
 
   if (!panel.pitchSvgAvailable) {
     return `
       <article class="report-pitch-panel">
         <h3>${panel.title}</h3>
+        <p class="phase-panel-why">${panel.subtitle}</p>
         <div class="report-pitch-placeholder phase-zone phase-zone--empty">
           ${panel.emptyStateReason ?? COACH_REPORT_PHASE_CONTROLLED_EMPTY_STATE}
         </div>
-        <p class="phase-panel-reading">${panel.coachReading}</p>
-        <p class="phase-panel-check"><strong>&Agrave; v&eacute;rifier :</strong> ${panel.nextMatchCheck}</p>
+        <ul class="report-phase-bullet-list">
+          ${hierarchyItems}
+        </ul>
+        <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> ${copyBlock.whatItShows}</p>
+        <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> ${copyBlock.whyItMatters}</p>
+        <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> ${copyBlock.whatToVerifyNext}</p>
+        <p class="phase-panel-limitation"><strong>Limite :</strong> ${copyBlock.limitation}</p>
       </article>`;
   }
 
   return `
     <article class="report-pitch-panel">
       <h3>${panel.title}</h3>
+      <p class="phase-panel-why">${panel.subtitle}</p>
       ${renderPitchSvg(panel)}
-      <p class="phase-panel-reading">${panel.coachReading}</p>
-      <p class="phase-panel-check"><strong>&Agrave; v&eacute;rifier :</strong> ${panel.nextMatchCheck}</p>
       <ul class="report-phase-bullet-list">
-        ${explanationList}
+        ${hierarchyItems}
       </ul>
+      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> ${copyBlock.whatItShows}</p>
+      <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> ${copyBlock.whyItMatters}</p>
+      <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> ${copyBlock.whatToVerifyNext}</p>
+      <p class="phase-panel-limitation"><strong>Limite :</strong> ${copyBlock.limitation}</p>
     </article>`;
 }

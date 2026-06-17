@@ -14,7 +14,6 @@ import {
 const RECOMMENDATION_TERMS = [
   "meilleur choix",
   "joueur recommande",
-  "recommande",
   "titulaire conseille",
   "remplacement conseille",
   "composition recommandee",

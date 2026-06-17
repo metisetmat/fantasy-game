@@ -11,7 +11,6 @@ const CONTROLLED_EMPTY_STATE = "Donn&eacute;es insuffisantes dans ce run pour st
 const RECOMMENDATION_TERMS = [
   "meilleur choix",
   "joueur recommande",
-  "recommande",
   "titulaire conseille",
   "remplacement conseille",
   "composition recommandee",

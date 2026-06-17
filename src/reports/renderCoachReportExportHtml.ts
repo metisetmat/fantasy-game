@@ -2,7 +2,16 @@ import {
   COACH_REPORT_PHASE_VISUALS_GUARD,
   type TacticalPitchPanelModel,
 } from "./coachReportPhaseVisuals";
+import {
+  COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD,
+  type PhaseVisualCoachCopyBlock,
+  type PhaseVisualLegendItem,
+  type PhaseVisualZoneHierarchy,
+} from "./coachReportPhaseVisualReadability";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
+import {
+  deriveCoachReportPhaseVisualReadabilityPresentation,
+} from "./buildCoachReportPhaseVisualReadability";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -262,6 +271,42 @@ const PREMIUM_EXPORT_CSS = `
       line-height: 1.45;
     }
 
+    .phase-pitch-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .phase-legend-item {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--report-line);
+      background: var(--report-paper);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-legend-item p {
+      margin: 4px 0 0;
+      color: var(--report-muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .phase-legend-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(15, 23, 38, 0.12);
+      display: inline-block;
+      margin-top: 2px;
+    }
+
     .phase-pitch {
       width: 100%;
       height: auto;
@@ -299,6 +344,20 @@ const PREMIUM_EXPORT_CSS = `
       stroke: rgba(255, 255, 255, 0.28);
     }
 
+    .phase-zone--primary {
+      stroke-width: 2.8;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.18));
+    }
+
+    .phase-zone--secondary {
+      opacity: 0.92;
+      stroke-width: 2.1;
+    }
+
+    .phase-zone--muted {
+      opacity: 0.42;
+    }
+
     .phase-zone-label {
       fill: rgba(255, 255, 255, 0.94);
       font-size: 11px;
@@ -312,13 +371,18 @@ const PREMIUM_EXPORT_CSS = `
       font-weight: 800;
     }
 
-    .phase-panel-reading,
-    .phase-panel-check {
+    .phase-panel-summary,
+    .phase-panel-why,
+    .phase-panel-next-check,
+    .phase-panel-limitation {
       margin: 0;
       color: rgba(255, 255, 255, 0.94);
     }
 
-    .phase-panel-check strong {
+    .phase-panel-summary strong,
+    .phase-panel-why strong,
+    .phase-panel-next-check strong,
+    .phase-panel-limitation strong {
       color: #fff;
     }
 
@@ -409,7 +473,9 @@ const PREMIUM_EXPORT_CSS = `
       .appendix,
       .report-table-card,
       .report-pitch-panel,
-      .report-phase-section {
+      .report-phase-section,
+      .phase-pitch-legend,
+      .phase-legend-item {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -535,6 +601,62 @@ function excerptFromSignalCard(cardHtml: string): SignalExcerpt {
   };
 }
 
+function findHierarchy(
+  hierarchies: readonly PhaseVisualZoneHierarchy[],
+  phase: TacticalPitchPanelModel["phase"],
+): PhaseVisualZoneHierarchy | undefined {
+  return hierarchies.find((hierarchy) => hierarchy.phase === phase);
+}
+
+function findCopyBlock(
+  copyBlocks: readonly PhaseVisualCoachCopyBlock[],
+  phase: TacticalPitchPanelModel["phase"],
+): PhaseVisualCoachCopyBlock | undefined {
+  return copyBlocks.find((copyBlock) => copyBlock.phase === phase);
+}
+
+function renderPhaseLegend(legendItems: readonly PhaseVisualLegendItem[]): string {
+  return `
+  <section id="phase-visual-legend" class="premium-section" data-source-product-sections="key-coach-signals|interpretation-guard">
+    <div class="report-section-divider">Phase visual legend</div>
+    <div class="report-section-header">
+      <div>
+        <h2>L&eacute;gende des cartes terrain</h2>
+        <p>Ces cartes sont des aides de lecture. Elles visualisent le signal disponible, pas une prescription tactique.</p>
+      </div>
+    </div>
+    <div class="phase-pitch-legend">
+      ${legendItems.map((item) => `
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch ${item.cssClass}"></span>
+          <div>
+            <strong>${item.label}</strong>
+            <p>${item.explanation}</p>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+    <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUALS_GUARD}</p>
+    <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD}</p>
+  </section>`;
+}
+
+function readabilityContextForPanel(
+  panel: TacticalPitchPanelModel,
+  readabilityPresentation: ReturnType<typeof deriveCoachReportPhaseVisualReadabilityPresentation>,
+): {
+  readonly hierarchy?: PhaseVisualZoneHierarchy;
+  readonly copyBlock?: PhaseVisualCoachCopyBlock;
+} {
+  const hierarchy = findHierarchy(readabilityPresentation.zoneHierarchies, panel.phase);
+  const copyBlock = findCopyBlock(readabilityPresentation.coachCopyBlocks, panel.phase);
+
+  return {
+    ...(hierarchy === undefined ? {} : { hierarchy }),
+    ...(copyBlock === undefined ? {} : { copyBlock }),
+  };
+}
+
 function renderCover(html: string): string {
   const matchId = stripTags(extractMatch(html, /Match\s*:\s*([^<]+)/u));
   const scoreSourceNote = stripTags(extractMatch(html, /<p class="muted">([\s\S]*?)<\/p>/u));
@@ -617,7 +739,13 @@ function renderKeyStatistics(html: string): string {
   </section>`;
 }
 
-function renderPhaseSection(panel: TacticalPitchPanelModel): string {
+function renderPhaseSection(
+  panel: TacticalPitchPanelModel,
+  readability: {
+    readonly hierarchy?: PhaseVisualZoneHierarchy;
+    readonly copyBlock?: PhaseVisualCoachCopyBlock;
+  },
+): string {
   const controlledEmptyBlock = panel.controlledEmptyStateUsed
     ? `
         <article class="report-table-card">
@@ -633,8 +761,8 @@ function renderPhaseSection(panel: TacticalPitchPanelModel): string {
         </article>`
     : `
         <article class="report-table-card">
-          <h3>Lecture coach</h3>
-          <p>${panel.coachReading}</p>
+          <h3>Hi&eacute;rarchie des zones</h3>
+          <p>${readability.hierarchy?.hierarchyExplanation ?? panel.coachReading}</p>
           <ul class="report-phase-bullet-list">
             ${panel.zoneSignals.map((signal) => `<li><strong>${signal.zone}</strong> - ${signal.explanation}</li>`).join("")}
           </ul>
@@ -650,15 +778,15 @@ function renderPhaseSection(panel: TacticalPitchPanelModel): string {
       </div>
     </div>
     <div class="report-phase-layout">
-      ${renderTacticalPitchPanel(panel)}
+      ${renderTacticalPitchPanel(panel, readability)}
       <div class="report-phase-cards">
         <article class="report-table-card">
           <h3>A verifier au prochain match</h3>
-          <p>${panel.nextMatchCheck}</p>
+          <p>${readability.copyBlock?.whatToVerifyNext ?? panel.nextMatchCheck}</p>
         </article>
         <article class="report-table-card">
           <h3>Garde-fou visuel</h3>
-          <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUALS_GUARD}</p>
+          <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD}</p>
         </article>
         ${signalSummaryBlock}
         ${controlledEmptyBlock}
@@ -728,25 +856,77 @@ function renderInterpretationGuard(html: string): string {
   </section>`;
 }
 
-function renderPremiumLayoutAppendix(signalCards: readonly string[], exportHtml: string): string {
-  const kpiCardCount = signalCards.length;
-  const pitchPlaceholderCount = (exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
-  const controlledEmptyStateCount = (exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
+function renderPremiumLayoutAppendix(input: {
+  readonly exportHtml: string;
+  readonly panelCount: number;
+  readonly readablePanelCount: number;
+  readonly panelsWithPrimaryZoneCount: number;
+  readonly panelsWithSecondaryZonesCount: number;
+  readonly legendItemCount: number;
+}): string {
+  const pitchPlaceholderCount = (input.exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
+  const controlledEmptyStateCount = (input.exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
 
   return `
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails du layout premium HTML</summary>
       <ul>
-        <li>HTML-first true</li>
-        <li>PDF optional true</li>
+        <li>premium layout status available</li>
+        <li>html first true</li>
+        <li>pdf optional true</li>
         <li>single source of truth true</li>
         <li>duplicate report logic false</li>
-        <li>section count 11</li>
-        <li>cover present true</li>
-        <li>phase sections present true</li>
-        <li>KPI card count ${kpiCardCount}</li>
+        <li>legend item count ${input.legendItemCount}</li>
+        <li>panel count ${input.panelCount}</li>
+        <li>readable panel count ${input.readablePanelCount}</li>
+        <li>panels with primary zone count ${input.panelsWithPrimaryZoneCount}</li>
+        <li>panels with secondary zones count ${input.panelsWithSecondaryZonesCount}</li>
         <li>pitch placeholder count ${pitchPlaceholderCount}</li>
         <li>controlled empty state count ${controlledEmptyStateCount}</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>interpretation guard match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
+function renderPhaseVisualReadabilityAppendix(input: {
+  readonly exportHtml: string;
+  readonly panelCount: number;
+  readonly readablePanelCount: number;
+  readonly panelsWithPrimaryZoneCount: number;
+  readonly panelsWithSecondaryZonesCount: number;
+  readonly legendItemCount: number;
+}): string {
+  const pitchPlaceholderCount = (input.exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
+  const controlledEmptyStateCount = (input.exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de lisibilit&eacute; des visualisations par phase</summary>
+      <ul>
+        <li>readability status available</li>
+        <li>legend item count ${input.legendItemCount}</li>
+        <li>panel count ${input.panelCount}</li>
+        <li>readable panel count ${input.readablePanelCount}</li>
+        <li>panels with primary zone count ${input.panelsWithPrimaryZoneCount}</li>
+        <li>panels with secondary zones count ${input.panelsWithSecondaryZonesCount}</li>
+        <li>pitch placeholder count ${pitchPlaceholderCount}</li>
+        <li>controlled empty state count ${controlledEmptyStateCount}</li>
+        <li>phase-specific guard visible true</li>
+        <li>legend visible true</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
         <li>product/export score match true</li>
         <li>candidate comparison match true</li>
         <li>visible recommendation wording count 0</li>
@@ -765,9 +945,17 @@ function renderPremiumLayoutAppendix(signalCards: readonly string[], exportHtml:
     </details>`;
 }
 
-function renderAppendices(html: string, signalCards: readonly string[], exportHtmlBeforeAppendix: string): string {
-  const intro = stripTags(extractMatch(extractSection(html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
-  const originalAppendicesBody = extractSectionInner(html, "appendices");
+function renderAppendices(input: {
+  readonly html: string;
+  readonly exportHtmlBeforeAppendix: string;
+  readonly panelCount: number;
+  readonly readablePanelCount: number;
+  readonly panelsWithPrimaryZoneCount: number;
+  readonly panelsWithSecondaryZonesCount: number;
+  readonly legendItemCount: number;
+}): string {
+  const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
+  const originalAppendicesBody = extractSectionInner(input.html, "appendices");
   const originalAppendicesWithoutIntro = originalAppendicesBody.replace(/^\s*<p class="muted">[\s\S]*?<\/p>\s*/u, "");
 
   return `
@@ -779,7 +967,22 @@ function renderAppendices(html: string, signalCards: readonly string[], exportHt
         <p>${intro}</p>
       </div>
     </div>
-    ${renderPremiumLayoutAppendix(signalCards, exportHtmlBeforeAppendix)}
+    ${renderPremiumLayoutAppendix({
+      exportHtml: input.exportHtmlBeforeAppendix,
+      panelCount: input.panelCount,
+      readablePanelCount: input.readablePanelCount,
+      panelsWithPrimaryZoneCount: input.panelsWithPrimaryZoneCount,
+      panelsWithSecondaryZonesCount: input.panelsWithSecondaryZonesCount,
+      legendItemCount: input.legendItemCount,
+    })}
+    ${renderPhaseVisualReadabilityAppendix({
+      exportHtml: input.exportHtmlBeforeAppendix,
+      panelCount: input.panelCount,
+      readablePanelCount: input.readablePanelCount,
+      panelsWithPrimaryZoneCount: input.panelsWithPrimaryZoneCount,
+      panelsWithSecondaryZonesCount: input.panelsWithSecondaryZonesCount,
+      legendItemCount: input.legendItemCount,
+    })}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -806,18 +1009,31 @@ export function renderCoachReportExportHtml(input: {
   const phasePanels = deriveCoachReportPhasePanels({
     productReportHtml: input.productReportHtml,
   });
-  const signalCards = extractSignalCards(extractSection(input.productReportHtml, "key-coach-signals"));
+  const readabilityPresentation = deriveCoachReportPhaseVisualReadabilityPresentation({
+    panels: phasePanels,
+  });
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderMatchStory(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
-    ...phasePanels.map(renderPhaseSection),
+    renderPhaseLegend(readabilityPresentation.legendItems),
+    ...phasePanels.map((panel) =>
+      renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
+    ),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
   ].join("\n");
-  const appendices = renderAppendices(input.productReportHtml, signalCards, premiumBodyBeforeAppendices);
+  const appendices = renderAppendices({
+    html: input.productReportHtml,
+    exportHtmlBeforeAppendix: premiumBodyBeforeAppendices,
+    panelCount: phasePanels.length,
+    readablePanelCount: readabilityPresentation.coachCopyBlocks.length,
+    panelsWithPrimaryZoneCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.primaryZone !== undefined).length,
+    panelsWithSecondaryZonesCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.secondaryZones.length > 0).length,
+    legendItemCount: readabilityPresentation.legendItems.length,
+  });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
 

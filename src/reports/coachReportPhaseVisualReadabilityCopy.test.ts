@@ -1,7 +1,7 @@
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
-import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { exportCoachReportMainVisibleText } from "./coachReportExportSnapshot";
+import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 
@@ -24,7 +24,7 @@ const forbiddenTerms = [
   "sandbox_only",
 ] as const;
 
-export function validateCoachReportPremiumCopy(): readonly string[] {
+export function validateCoachReportPhaseVisualReadabilityCopy(): readonly string[] {
   const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
@@ -33,16 +33,16 @@ export function validateCoachReportPremiumCopy(): readonly string[] {
   const visible = exportCoachReportMainVisibleText(exportHtml).toLocaleLowerCase("fr-FR");
 
   for (const term of forbiddenTerms) {
-    assertTest(!visible.includes(term), `visible premium export copy must not contain ${term}.`);
+    assertTest(!visible.includes(term), `visible readability copy must not contain ${term}.`);
   }
 
   return forbiddenTerms.map((term) => `visible copy does not contain ${term}`);
 }
 
 if (require.main === module) {
-  const checks = validateCoachReportPremiumCopy();
+  const checks = validateCoachReportPhaseVisualReadabilityCopy();
 
-  console.log("coachReportPremiumCopy tests passed.");
+  console.log("coachReportPhaseVisualReadabilityCopy tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }

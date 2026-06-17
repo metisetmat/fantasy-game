@@ -197,6 +197,11 @@ import {
   coachReportPhaseVisualsEvidenceFact,
   coachReportPhaseVisualsLimitations,
 } from "../reports/coachReportPhaseVisuals";
+import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
+import {
+  coachReportPhaseVisualReadabilityEvidenceFact,
+  coachReportPhaseVisualReadabilityLimitations,
+} from "../reports/coachReportPhaseVisualReadability";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3184,6 +3189,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     productReportHtml: coachProductReportHtml,
     exportReportHtml: coachReportExportHtml,
   });
+  const coachReportPhaseVisualReadabilityModel = buildCoachReportPhaseVisualReadability({
+    phaseVisuals: coachReportPhaseVisualsModel,
+    productReportHtml: coachProductReportHtml,
+    exportReportHtml: coachReportExportHtml,
+  });
   const reportWithTraceLimitations: MatchReport = {
     ...report,
     reportMeta: {
@@ -3207,6 +3217,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachProductReportPolishLimitations(coachProductReportPolishModel),
         ...coachReportPremiumLayoutLimitations(coachReportPremiumLayoutModel),
         ...coachReportPhaseVisualsLimitations(coachReportPhaseVisualsModel),
+        ...coachReportPhaseVisualReadabilityLimitations(coachReportPhaseVisualReadabilityModel),
       ],
     },
   };
@@ -3446,6 +3457,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportPhaseVisualsModel,
   });
+  const coachReportPhaseVisualReadabilityModelFact = coachReportPhaseVisualReadabilityEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportPhaseVisualReadabilityModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3500,6 +3516,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportPhaseVisualsFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportPhaseVisualsModelFact
     : null;
+  const experimentalCoachReportPhaseVisualReadabilityFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportPhaseVisualReadabilityModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3541,6 +3560,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportExportSnapshotFact === null ? [] : [experimentalCoachReportExportSnapshotFact]),
     ...(experimentalCoachReportPremiumLayoutFact === null ? [] : [experimentalCoachReportPremiumLayoutFact]),
     ...(experimentalCoachReportPhaseVisualsFact === null ? [] : [experimentalCoachReportPhaseVisualsFact]),
+    ...(experimentalCoachReportPhaseVisualReadabilityFact === null ? [] : [experimentalCoachReportPhaseVisualReadabilityFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
