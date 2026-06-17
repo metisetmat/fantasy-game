@@ -4,6 +4,10 @@ import type {
   CoachProductReportSignal,
   CoachProductReportViewModel,
 } from "./coachProductReportView";
+import {
+  COACH_REPORT_PHASE_VISUALS_SCRIPT_ID,
+  serializeCoachReportPhaseVisualSeed,
+} from "./coachReportPhaseVisuals";
 import { buildCoachProductReportPolish } from "./buildCoachProductReportPolish";
 import { escapeHtml } from "./htmlCoachReport";
 import {
@@ -267,6 +271,17 @@ function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly str
     </details>`;
 }
 
+function renderPhaseVisualSeedScript(model: CoachProductReportViewModel): string {
+  if (model.phaseVisualSeed === undefined) {
+    return "";
+  }
+
+  return `
+  <script type="application/json" id="${COACH_REPORT_PHASE_VISUALS_SCRIPT_ID}">
+${serializeCoachReportPhaseVisualSeed(model.phaseVisualSeed)}
+  </script>`;
+}
+
 export function renderCoachProductReport(model: CoachProductReportViewModel): string {
   const polish = buildCoachProductReportPolish({ productReportView: model });
   const technicalTags = [...model.tags, ...polish.tags];
@@ -407,6 +422,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <p class="muted">Les annexes gardent les hypothèses, la traçabilité et les validations hors de la lecture principale.</p>
     ${model.appendices.map((appendix) => renderAppendix(appendix, technicalTags)).join("")}
   </section>
+  ${renderPhaseVisualSeedScript(model)}
 </main>
 </body>
 </html>`;

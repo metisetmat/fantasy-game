@@ -258,6 +258,121 @@
       line-height: 1.45;
     }
 
+    .phase-pitch-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .phase-legend-item {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--report-line);
+      background: var(--report-paper);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-legend-item p {
+      margin: 4px 0 0;
+      color: var(--report-muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .phase-legend-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(15, 23, 38, 0.12);
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    .phase-pitch {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .phase-zone {
+      fill: rgba(255, 255, 255, 0.08);
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 1.5;
+    }
+
+    .phase-zone--danger {
+      fill: rgba(255, 122, 89, 0.82);
+      stroke: rgba(255, 239, 234, 0.72);
+    }
+
+    .phase-zone--recovery {
+      fill: rgba(61, 214, 140, 0.78);
+      stroke: rgba(228, 255, 241, 0.72);
+    }
+
+    .phase-zone--pressure {
+      fill: rgba(255, 192, 76, 0.82);
+      stroke: rgba(255, 244, 214, 0.74);
+    }
+
+    .phase-zone--goalkeeper {
+      fill: rgba(110, 173, 255, 0.8);
+      stroke: rgba(231, 241, 255, 0.74);
+    }
+
+    .phase-zone--empty {
+      fill: rgba(255, 255, 255, 0.05);
+      stroke: rgba(255, 255, 255, 0.28);
+    }
+
+    .phase-zone--primary {
+      stroke-width: 2.8;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.18));
+    }
+
+    .phase-zone--secondary {
+      opacity: 0.92;
+      stroke-width: 2.1;
+    }
+
+    .phase-zone--muted {
+      opacity: 0.42;
+    }
+
+    .phase-zone-label {
+      fill: rgba(255, 255, 255, 0.94);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .phase-zone-value {
+      fill: rgba(255, 255, 255, 0.92);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .phase-panel-summary,
+    .phase-panel-why,
+    .phase-panel-next-check,
+    .phase-panel-limitation {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.94);
+    }
+
+    .phase-panel-summary strong,
+    .phase-panel-why strong,
+    .phase-panel-next-check strong,
+    .phase-panel-limitation strong {
+      color: #fff;
+    }
+
     .report-table-card {
       border: 1px solid var(--report-line);
       border-radius: 14px;
@@ -345,7 +460,9 @@
       .appendix,
       .report-table-card,
       .report-pitch-panel,
-      .report-phase-section {
+      .report-phase-section,
+      .phase-pitch-legend,
+      .phase-legend-item {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -498,91 +615,271 @@
     </div>
   </section>
 
-  <section id="with-ball" class="premium-section" data-source-product-sections="key-coach-signals">
+  <section id="phase-visual-legend" class="premium-section" data-source-product-sections="key-coach-signals|interpretation-guard">
+    <div class="report-section-divider">Phase visual legend</div>
+    <div class="report-section-header">
+      <div>
+        <h2>L&eacute;gende des cartes terrain</h2>
+        <p>Ces cartes sont des aides de lecture. Elles visualisent le signal disponible, pas une prescription tactique.</p>
+      </div>
+    </div>
+    <div class="phase-pitch-legend">
+      
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch phase-zone--danger"></span>
+          <div>
+            <strong>Danger</strong>
+            <p>Zone o&ugrave; le run a produit un signal offensif stabilis&eacute;.</p>
+          </div>
+        </article>
+      
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch phase-zone--recovery"></span>
+          <div>
+            <strong>R&eacute;cup&eacute;ration</strong>
+            <p>Zone o&ugrave; l'&eacute;quipe a interrompu ou s&eacute;curis&eacute; une s&eacute;quence.</p>
+          </div>
+        </article>
+      
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch phase-zone--pressure"></span>
+          <div>
+            <strong>Pression / instabilit&eacute;</strong>
+            <p>Zone fragile uniquement si le signal est assez stable.</p>
+          </div>
+        </article>
+      
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch phase-zone--goalkeeper"></span>
+          <div>
+            <strong>Dernier rempart</strong>
+            <p>Signal li&eacute; au gardien ou &agrave; la derni&egrave;re ligne.</p>
+          </div>
+        </article>
+      
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch phase-zone--empty"></span>
+          <div>
+            <strong>Donn&eacute;e insuffisante</strong>
+            <p>Le ph&eacute;nom&egrave;ne peut exister, mais le run ne permet pas de l'afficher proprement.</p>
+          </div>
+        </article>
+      
+    </div>
+    <p class="report-controlled-empty">Les cartes terrain affichent uniquement les signaux stabilis&eacute;s disponibles dans ce run. Une absence de carte ne signifie pas une absence de ph&eacute;nom&egrave;ne, mais une donn&eacute;e insuffisante pour l'afficher proprement.</p>
+    <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
+  </section>
+
+  <section id="with-ball" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
     <div class="report-section-divider">Avec ballon</div>
     <div class="report-section-header">
       <div>
         <h2>Avec ballon</h2>
-        <p>La progression, la menace et la continuit&eacute; offensives restent ancr&eacute;es dans les signaux officiels visibles.</p>
+        <p>Le danger, la progression et la continuit&eacute; offensives sont limit&eacute;s aux signaux officiels stabilis&eacute;s du run.</p>
       </div>
     </div>
     <div class="report-phase-layout">
-      <div class="report-pitch-panel">
-        <h3>Bloc visuel &agrave; brancher plus tard</h3>
-        <div class="report-pitch-placeholder">Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.</div>
-      </div>
+      
+    <article class="report-pitch-panel">
+      <h3>Avec ballon</h3>
+      <p class="phase-panel-why">Le danger, la progression et la continuit&eacute; offensives sont limit&eacute;s aux signaux officiels stabilis&eacute;s du run.</p>
+      
+    <svg class="phase-pitch phase-pitch-grid" viewBox="0 0 320 230" role="img" aria-label="Avec ballon">
+      <rect x="8" y="8" width="304" height="214" rx="18" ry="18" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.24)" stroke-width="2"></rect>
+      <line x1="110" y1="16" x2="110" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="206" y1="16" x2="206" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="16" y1="80" x2="304" y2="80" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="16" y1="144" x2="304" y2="144" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <circle cx="160" cy="115" r="20" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></circle>
+      
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="16" y="16" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="112" y="16" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="208" y="16" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="16" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+    <g>
+      <rect class="phase-zone phase-zone--danger phase-zone--primary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="160" y="106" text-anchor="middle">Z3-C</text>
+      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">15</text>
+    </g>
+    <g>
+      <rect class="phase-zone phase-zone--danger phase-zone--secondary" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="256" y="106" text-anchor="middle">Z5-HSR</text>
+      <text class="phase-zone-value" x="256" y="124" text-anchor="middle">5</text>
+    </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="16" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="208" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+    </svg>
+      <ul class="report-phase-bullet-list">
+        <li><strong>Zone principale :</strong> Z3-C - Danger officiel (15)</li><li><strong>Zones secondaires :</strong> Z5-C, Z5-HSR</li>
+      </ul>
+      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Le danger offensif se concentre d'abord dans Z3-C. Les zones secondaires donnent le contexte, pas une consigne de jeu.</p>
+      <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> Cela aide &agrave; rep&eacute;rer o&ugrave; l'&eacute;quipe arrive &agrave; cr&eacute;er un signal stable, sans conclure que cette zone doit &ecirc;tre forc&eacute;e.</p>
+      <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier si cette zone reste dangereuse sur plusieurs matchs et avec d'autres profils en soutien.</p>
+      <p class="phase-panel-limitation"><strong>Limite :</strong> Les zones secondaires donnent le contexte disponible dans ce run, pas une prescription de jeu.</p>
+    </article>
       <div class="report-phase-cards">
+        <article class="report-table-card">
+          <h3>A verifier au prochain match</h3>
+          <p>V&eacute;rifier si cette zone reste dangereuse sur plusieurs matchs et avec d'autres profils en soutien.</p>
+        </article>
+        <article class="report-table-card">
+          <h3>Garde-fou visuel</h3>
+          <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
+        </article>
         
         <article class="report-table-card">
-          <h3>Zones de danger et progression</h3>
-          <p></p>
+          <h3>Hi&eacute;rarchie des zones</h3>
+          <p>Z3-C porte le signal principal ; Z5-C, Z5-HSR donnent le contexte secondaire.</p>
           <ul class="report-phase-bullet-list">
-            <li>Lecture issue des agrégats officiels du match.</li>
+            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-HSR</strong> - Z5-HSR ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li>
           </ul>
         </article>
-        <article class="report-table-card">
-          <h3>D&eacute;tail encore prudent</h3>
-          <p class="report-controlled-empty">Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.</p>
-        </article>
+        
       </div>
     </div>
   </section>
 
-  <section id="without-ball" class="premium-section" data-source-product-sections="key-coach-signals">
+  <section id="without-ball" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
     <div class="report-section-divider">Sans ballon</div>
     <div class="report-section-header">
       <div>
         <h2>Sans ballon</h2>
-        <p>Cette lecture reste prudente sur ce run: elle garde les signaux de r&eacute;cup&eacute;ration sans inventer une carte d&eacute;fensive plus forte que les preuves disponibles.</p>
+        <p>Les r&eacute;cup&eacute;rations et les zones d'instabilit&eacute; restent ancr&eacute;es dans les agr&eacute;gats officiels disponibles.</p>
       </div>
     </div>
     <div class="report-phase-layout">
-      <div class="report-pitch-panel">
-        <h3>Bloc visuel &agrave; brancher plus tard</h3>
-        <div class="report-pitch-placeholder">Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.</div>
-      </div>
+      
+    <article class="report-pitch-panel">
+      <h3>Sans ballon</h3>
+      <p class="phase-panel-why">Les r&eacute;cup&eacute;rations et les zones d'instabilit&eacute; restent ancr&eacute;es dans les agr&eacute;gats officiels disponibles.</p>
+      
+    <svg class="phase-pitch phase-pitch-grid" viewBox="0 0 320 230" role="img" aria-label="Sans ballon">
+      <rect x="8" y="8" width="304" height="214" rx="18" ry="18" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.24)" stroke-width="2"></rect>
+      <line x1="110" y1="16" x2="110" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="206" y1="16" x2="206" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="16" y1="80" x2="304" y2="80" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <line x1="16" y1="144" x2="304" y2="144" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
+      <circle cx="160" cy="115" r="20" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></circle>
+      
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="16" y="16" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="112" y="16" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="208" y="16" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="16" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+    <g>
+      <rect class="phase-zone phase-zone--pressure phase-zone--primary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="160" y="106" text-anchor="middle">Z3-C</text>
+      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">23</text>
+    </g>
+    <g>
+      <rect class="phase-zone phase-zone--pressure phase-zone--secondary" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="256" y="106" text-anchor="middle">Z5-HSR</text>
+      <text class="phase-zone-value" x="256" y="124" text-anchor="middle">5</text>
+    </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="16" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="208" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
+    </svg>
+      <ul class="report-phase-bullet-list">
+        <li><strong>Zone principale :</strong> Z3-C - Pression / instabilit&eacute; (23)</li><li><strong>Zones secondaires :</strong> Z5-C, Z5-HSR</li>
+      </ul>
+      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Les r&eacute;cup&eacute;rations ou stabilisations visibles se concentrent dans les zones affich&eacute;es.</p>
+      <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> Cela montre o&ugrave; l'&eacute;quipe r&eacute;cup&egrave;re ou stabilise le jeu, mais aussi o&ugrave; la premi&egrave;re sortie doit rester propre.</p>
+      <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier si la r&eacute;cup&eacute;ration d&eacute;bouche ensuite sur une sortie ma&icirc;tris&eacute;e ou une nouvelle perte.</p>
+      <p class="phase-panel-limitation"><strong>Limite :</strong> Les zones secondaires donnent le contexte disponible dans ce run, pas une prescription de jeu.</p>
+    </article>
       <div class="report-phase-cards">
+        <article class="report-table-card">
+          <h3>A verifier au prochain match</h3>
+          <p>V&eacute;rifier si la r&eacute;cup&eacute;ration d&eacute;bouche ensuite sur une sortie ma&icirc;tris&eacute;e ou une nouvelle perte.</p>
+        </article>
+        <article class="report-table-card">
+          <h3>Garde-fou visuel</h3>
+          <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
+        </article>
         
         <article class="report-table-card">
-          <h3>Récupération et première sortie</h3>
-          <p></p>
+          <h3>Hi&eacute;rarchie des zones</h3>
+          <p>Z3-C porte le signal principal ; Z5-C, Z5-HSR donnent le contexte secondaire.</p>
           <ul class="report-phase-bullet-list">
-            <li>Les traces officielles relient récupérations et continuité de possession.</li>
+            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.</li><li><strong>Z5-HSR</strong> - Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.</li>
           </ul>
         </article>
-        <article class="report-table-card">
-          <h3>D&eacute;tail encore prudent</h3>
-          <p class="report-controlled-empty">Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.</p>
-        </article>
+        
       </div>
     </div>
   </section>
 
-  <section id="goalkeeper" class="premium-section" data-source-product-sections="key-coach-signals">
+  <section id="goalkeeper" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
     <div class="report-section-divider">Dernier rempart</div>
     <div class="report-section-header">
       <div>
         <h2>Dernier rempart</h2>
-        <p>Le bloc gardien reste limit&eacute; &agrave; ce que le rapport produit stabilise vraiment dans ce run.</p>
+        <p>Le dernier rempart n'affiche que les signaux gardien / derni&egrave;re ligne suffisamment stables pour rester honn&ecirc;tes.</p>
       </div>
     </div>
     <div class="report-phase-layout">
-      <div class="report-pitch-panel">
-        <h3>Bloc visuel &agrave; brancher plus tard</h3>
-        <div class="report-pitch-placeholder">Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.</div>
-      </div>
+      
+      <article class="report-pitch-panel">
+        <h3>Dernier rempart</h3>
+        <p class="phase-panel-why">Le dernier rempart n'affiche que les signaux gardien / derni&egrave;re ligne suffisamment stables pour rester honn&ecirc;tes.</p>
+        <div class="report-pitch-placeholder phase-zone phase-zone--empty">
+          Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.
+        </div>
+        <ul class="report-phase-bullet-list">
+          <li><strong>Zone principale :</strong> donn&eacute;e insuffisante dans ce run</li><li><strong>Zones secondaires :</strong> aucune zone secondaire stabilis&eacute;e</li>
+        </ul>
+        <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Ce run ne contient pas assez de donn&eacute;es stabilis&eacute;es pour cartographier proprement le dernier rempart.</p>
+        <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> L'absence de carte &eacute;vite de transformer un signal faible en fausse certitude.</p>
+        <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier sur plusieurs matchs les zones d'intervention, de s&eacute;curisation et de rebond.</p>
+        <p class="phase-panel-limitation"><strong>Limite :</strong> Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.</p>
+      </article>
       <div class="report-phase-cards">
-        
         <article class="report-table-card">
-          <h3>Pression, continuité et réponse du gardien</h3>
-          <p></p>
-          <ul class="report-phase-bullet-list">
-            <li>Signal officiel présent, mais encore à confirmer par répétition.</li>
-          </ul>
+          <h3>A verifier au prochain match</h3>
+          <p>V&eacute;rifier sur plusieurs matchs les zones d'intervention, de s&eacute;curisation et de rebond.</p>
         </article>
         <article class="report-table-card">
-          <h3>D&eacute;tail encore prudent</h3>
-          <p class="report-controlled-empty">Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.</p>
+          <h3>Garde-fou visuel</h3>
+          <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
+        </article>
+        
+        <article class="report-table-card">
+          <h3>Lecture a stabiliser</h3>
+          <p class="report-controlled-empty">Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.</p>
+        </article>
+        
+        <article class="report-table-card">
+          <h3>Etat controle</h3>
+          <p class="report-controlled-empty">Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.</p>
         </article>
       </div>
     </div>
@@ -1265,16 +1562,49 @@
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails du layout premium HTML</summary>
       <ul>
-        <li>HTML-first true</li>
-        <li>PDF optional true</li>
+        <li>premium layout status available</li>
+        <li>html first true</li>
+        <li>pdf optional true</li>
         <li>single source of truth true</li>
         <li>duplicate report logic false</li>
-        <li>section count 11</li>
-        <li>cover present true</li>
-        <li>phase sections present true</li>
-        <li>KPI card count 3</li>
-        <li>pitch placeholder count 3</li>
-        <li>controlled empty state count 6</li>
+        <li>legend item count 5</li>
+        <li>panel count 3</li>
+        <li>readable panel count 3</li>
+        <li>panels with primary zone count 2</li>
+        <li>panels with secondary zones count 2</li>
+        <li>pitch placeholder count 1</li>
+        <li>controlled empty state count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>interpretation guard match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de lisibilit&eacute; des visualisations par phase</summary>
+      <ul>
+        <li>readability status available</li>
+        <li>legend item count 5</li>
+        <li>panel count 3</li>
+        <li>readable panel count 3</li>
+        <li>panels with primary zone count 2</li>
+        <li>panels with secondary zones count 2</li>
+        <li>pitch placeholder count 1</li>
+        <li>controlled empty state count 0</li>
+        <li>phase-specific guard visible true</li>
+        <li>legend visible true</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
         <li>product/export score match true</li>
         <li>candidate comparison match true</li>
         <li>visible recommendation wording count 0</li>

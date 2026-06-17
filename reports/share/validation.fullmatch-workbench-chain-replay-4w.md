@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4U Validation
+# FullMatch Workbench Chain Replay 4W Validation
 
 Status: PASS
 
@@ -6,24 +6,24 @@ Status: PASS
 - PASS: default runFullMatch remains segment_harness.
 - PASS: experimental mode remains opt-in.
 - PASS: Coach Product Report remains available.
-- PASS: Coach Report Export Snapshot remains available. - available
+- PASS: Coach Report Export Snapshot remains available.
+- PASS: Premium HTML Layout remains available.
+- PASS: Phase Visuals remain available. - 3
 - PASS: Player Candidate Comparison View remains available.
-- PASS: Premium HTML Layout status is available. - available
+- PASS: Phase Visual Readability status is available. - available
 - PASS: coach-report.export.html is generated. - reports/coach-report.export.html
 - PASS: HTML-first remains true.
 - PASS: PDF remains optional.
 - PASS: export uses product report as single source of truth.
 - PASS: duplicated report logic is false.
-- PASS: cover/header premium is present.
-- PASS: executive summary is present.
-- PASS: key statistics section is present.
-- PASS: with-ball section is present.
-- PASS: without-ball section is present.
-- PASS: goalkeeper section is present.
-- PASS: profiles and players section is present.
-- PASS: next-match section is present.
-- PASS: appendices are present.
-- PASS: controlled empty states are used where data is insufficient. - 6
+- PASS: phase legend is visible.
+- PASS: legend item count is 5. - 5
+- PASS: phase panels are readable. - 3
+- PASS: primary zone emphasis is visible.
+- PASS: secondary zone emphasis is visible where applicable.
+- PASS: controlled empty states remain honest.
+- PASS: no invented phase statistic is introduced. - 0
+- PASS: sandbox events are not promoted to official visuals. - 0
 - PASS: product/export score matches.
 - PASS: candidate comparison matches product.
 - PASS: interpretation guard remains visible.
@@ -42,11 +42,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: premium layout cannot mutate official timeline.
-- PASS: premium layout cannot mutate official score.
-- PASS: premium layout cannot mutate official possession.
-- PASS: premium layout cannot create production scoring events.
-- PASS: premium layout cannot claim global economy.
+- PASS: readability layer cannot mutate official timeline.
+- PASS: readability layer cannot mutate official score.
+- PASS: readability layer cannot mutate official possession.
+- PASS: readability layer cannot create production scoring events.
+- PASS: readability layer cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -54,10 +54,14 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- section count: 11
-- KPI card count: 3
-- pitch placeholder count: 3
-- controlled empty state count: 6
+- legend item count: 5
+- panel count: 3
+- readable panel count: 3
+- panels with primary zone count: 2
+- panels with secondary zones count: 2
+- controlled empty state count: 1
+- invented statistic count: 0
+- sandbox events promoted to official count: 0
 - visible recommendation wording count: 0
 - visible selection wording count: 0
 - internal status leak count: 0
@@ -76,7 +80,7 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_PREMIUM_HTML_LAYOUT.
-- CONFIRM_HTML_FIRST_REPORT_DIRECTION.
-- CONFIRM_SINGLE_SOURCE_OF_TRUTH.
-- PREPARE_PHASE_VISUALS_OR_UI_WIRING.
+- CONFIRM_PHASE_VISUAL_READABILITY.
+- CONFIRM_LEGEND_AND_ZONE_HIERARCHY.
+- CONFIRM_NO_INVENTED_PHASE_STATS.
+- PREPARE_UI_WIRING_OR_MULTI_MATCH_PHASE_COMPARISON.

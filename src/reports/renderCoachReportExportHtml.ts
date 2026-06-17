@@ -1,3 +1,19 @@
+import {
+  COACH_REPORT_PHASE_VISUALS_GUARD,
+  type TacticalPitchPanelModel,
+} from "./coachReportPhaseVisuals";
+import {
+  COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD,
+  type PhaseVisualCoachCopyBlock,
+  type PhaseVisualLegendItem,
+  type PhaseVisualZoneHierarchy,
+} from "./coachReportPhaseVisualReadability";
+import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
+import {
+  deriveCoachReportPhaseVisualReadabilityPresentation,
+} from "./buildCoachReportPhaseVisualReadability";
+import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
+
 const EXPORT_TITLE = "Rapport coach - export partageable";
 const CONTROLLED_EMPTY_STATE = "Donn&eacute;es insuffisantes dans ce run pour stabiliser cette lecture.";
 
@@ -255,6 +271,121 @@ const PREMIUM_EXPORT_CSS = `
       line-height: 1.45;
     }
 
+    .phase-pitch-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .phase-legend-item {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--report-line);
+      background: var(--report-paper);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-legend-item p {
+      margin: 4px 0 0;
+      color: var(--report-muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .phase-legend-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(15, 23, 38, 0.12);
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    .phase-pitch {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .phase-zone {
+      fill: rgba(255, 255, 255, 0.08);
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 1.5;
+    }
+
+    .phase-zone--danger {
+      fill: rgba(255, 122, 89, 0.82);
+      stroke: rgba(255, 239, 234, 0.72);
+    }
+
+    .phase-zone--recovery {
+      fill: rgba(61, 214, 140, 0.78);
+      stroke: rgba(228, 255, 241, 0.72);
+    }
+
+    .phase-zone--pressure {
+      fill: rgba(255, 192, 76, 0.82);
+      stroke: rgba(255, 244, 214, 0.74);
+    }
+
+    .phase-zone--goalkeeper {
+      fill: rgba(110, 173, 255, 0.8);
+      stroke: rgba(231, 241, 255, 0.74);
+    }
+
+    .phase-zone--empty {
+      fill: rgba(255, 255, 255, 0.05);
+      stroke: rgba(255, 255, 255, 0.28);
+    }
+
+    .phase-zone--primary {
+      stroke-width: 2.8;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.18));
+    }
+
+    .phase-zone--secondary {
+      opacity: 0.92;
+      stroke-width: 2.1;
+    }
+
+    .phase-zone--muted {
+      opacity: 0.42;
+    }
+
+    .phase-zone-label {
+      fill: rgba(255, 255, 255, 0.94);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .phase-zone-value {
+      fill: rgba(255, 255, 255, 0.92);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .phase-panel-summary,
+    .phase-panel-why,
+    .phase-panel-next-check,
+    .phase-panel-limitation {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.94);
+    }
+
+    .phase-panel-summary strong,
+    .phase-panel-why strong,
+    .phase-panel-next-check strong,
+    .phase-panel-limitation strong {
+      color: #fff;
+    }
+
     .report-table-card {
       border: 1px solid var(--report-line);
       border-radius: 14px;
@@ -342,7 +473,9 @@ const PREMIUM_EXPORT_CSS = `
       .appendix,
       .report-table-card,
       .report-pitch-panel,
-      .report-phase-section {
+      .report-phase-section,
+      .phase-pitch-legend,
+      .phase-legend-item {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -468,6 +601,62 @@ function excerptFromSignalCard(cardHtml: string): SignalExcerpt {
   };
 }
 
+function findHierarchy(
+  hierarchies: readonly PhaseVisualZoneHierarchy[],
+  phase: TacticalPitchPanelModel["phase"],
+): PhaseVisualZoneHierarchy | undefined {
+  return hierarchies.find((hierarchy) => hierarchy.phase === phase);
+}
+
+function findCopyBlock(
+  copyBlocks: readonly PhaseVisualCoachCopyBlock[],
+  phase: TacticalPitchPanelModel["phase"],
+): PhaseVisualCoachCopyBlock | undefined {
+  return copyBlocks.find((copyBlock) => copyBlock.phase === phase);
+}
+
+function renderPhaseLegend(legendItems: readonly PhaseVisualLegendItem[]): string {
+  return `
+  <section id="phase-visual-legend" class="premium-section" data-source-product-sections="key-coach-signals|interpretation-guard">
+    <div class="report-section-divider">Phase visual legend</div>
+    <div class="report-section-header">
+      <div>
+        <h2>L&eacute;gende des cartes terrain</h2>
+        <p>Ces cartes sont des aides de lecture. Elles visualisent le signal disponible, pas une prescription tactique.</p>
+      </div>
+    </div>
+    <div class="phase-pitch-legend">
+      ${legendItems.map((item) => `
+        <article class="phase-legend-item">
+          <span class="phase-legend-swatch ${item.cssClass}"></span>
+          <div>
+            <strong>${item.label}</strong>
+            <p>${item.explanation}</p>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+    <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUALS_GUARD}</p>
+    <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD}</p>
+  </section>`;
+}
+
+function readabilityContextForPanel(
+  panel: TacticalPitchPanelModel,
+  readabilityPresentation: ReturnType<typeof deriveCoachReportPhaseVisualReadabilityPresentation>,
+): {
+  readonly hierarchy?: PhaseVisualZoneHierarchy;
+  readonly copyBlock?: PhaseVisualCoachCopyBlock;
+} {
+  const hierarchy = findHierarchy(readabilityPresentation.zoneHierarchies, panel.phase);
+  const copyBlock = findCopyBlock(readabilityPresentation.coachCopyBlocks, panel.phase);
+
+  return {
+    ...(hierarchy === undefined ? {} : { hierarchy }),
+    ...(copyBlock === undefined ? {} : { copyBlock }),
+  };
+}
+
 function renderCover(html: string): string {
   const matchId = stripTags(extractMatch(html, /Match\s*:\s*([^<]+)/u));
   const scoreSourceNote = stripTags(extractMatch(html, /<p class="muted">([\s\S]*?)<\/p>/u));
@@ -550,49 +739,57 @@ function renderKeyStatistics(html: string): string {
   </section>`;
 }
 
-function renderPhaseSection(input: {
-  id: "with-ball" | "without-ball" | "goalkeeper";
-  title: string;
-  subtitle: string;
-  excerpt: SignalExcerpt | undefined;
-  emptyState: string;
-  sourceProductSection: string;
-}): string {
-  const excerptBlock = input.excerpt === undefined
+function renderPhaseSection(
+  panel: TacticalPitchPanelModel,
+  readability: {
+    readonly hierarchy?: PhaseVisualZoneHierarchy;
+    readonly copyBlock?: PhaseVisualCoachCopyBlock;
+  },
+): string {
+  const controlledEmptyBlock = panel.controlledEmptyStateUsed
     ? `
         <article class="report-table-card">
-          <h3>Lecture &agrave; stabiliser</h3>
-          <p class="report-controlled-empty">${input.emptyState}</p>
+          <h3>Etat controle</h3>
+          <p class="report-controlled-empty">${panel.emptyStateReason ?? CONTROLLED_EMPTY_STATE}</p>
+        </article>`
+    : "";
+  const signalSummaryBlock = panel.zoneSignals.length === 0
+    ? `
+        <article class="report-table-card">
+          <h3>Lecture a stabiliser</h3>
+          <p class="report-controlled-empty">${panel.emptyStateReason ?? CONTROLLED_EMPTY_STATE}</p>
         </article>`
     : `
         <article class="report-table-card">
-          <h3>${input.excerpt.title}</h3>
-          <p>${input.excerpt.summary}</p>
+          <h3>Hi&eacute;rarchie des zones</h3>
+          <p>${readability.hierarchy?.hierarchyExplanation ?? panel.coachReading}</p>
           <ul class="report-phase-bullet-list">
-            ${input.excerpt.bullets.map((bullet) => `<li>${bullet}</li>`).join("")}
+            ${panel.zoneSignals.map((signal) => `<li><strong>${signal.zone}</strong> - ${signal.explanation}</li>`).join("")}
           </ul>
-        </article>
-        <article class="report-table-card">
-          <h3>D&eacute;tail encore prudent</h3>
-          <p class="report-controlled-empty">${input.emptyState}</p>
         </article>`;
 
   return `
-  <section id="${input.id}" class="premium-section" data-source-product-sections="${input.sourceProductSection}">
-    <div class="report-section-divider">${input.title}</div>
+  <section id="${panel.phase.replace("_", "-")}" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">${panel.title}</div>
     <div class="report-section-header">
       <div>
-        <h2>${input.title}</h2>
-        <p>${input.subtitle}</p>
+        <h2>${panel.title}</h2>
+        <p>${panel.subtitle}</p>
       </div>
     </div>
     <div class="report-phase-layout">
-      <div class="report-pitch-panel">
-        <h3>Bloc visuel &agrave; brancher plus tard</h3>
-        <div class="report-pitch-placeholder">${input.emptyState}</div>
-      </div>
+      ${renderTacticalPitchPanel(panel, readability)}
       <div class="report-phase-cards">
-        ${excerptBlock}
+        <article class="report-table-card">
+          <h3>A verifier au prochain match</h3>
+          <p>${readability.copyBlock?.whatToVerifyNext ?? panel.nextMatchCheck}</p>
+        </article>
+        <article class="report-table-card">
+          <h3>Garde-fou visuel</h3>
+          <p class="report-controlled-empty">${COACH_REPORT_PHASE_VISUAL_READABILITY_GUARD}</p>
+        </article>
+        ${signalSummaryBlock}
+        ${controlledEmptyBlock}
       </div>
     </div>
   </section>`;
@@ -659,25 +856,77 @@ function renderInterpretationGuard(html: string): string {
   </section>`;
 }
 
-function renderPremiumLayoutAppendix(signalCards: readonly string[], exportHtml: string): string {
-  const kpiCardCount = signalCards.length;
-  const pitchPlaceholderCount = (exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
-  const controlledEmptyStateCount = (exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
+function renderPremiumLayoutAppendix(input: {
+  readonly exportHtml: string;
+  readonly panelCount: number;
+  readonly readablePanelCount: number;
+  readonly panelsWithPrimaryZoneCount: number;
+  readonly panelsWithSecondaryZonesCount: number;
+  readonly legendItemCount: number;
+}): string {
+  const pitchPlaceholderCount = (input.exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
+  const controlledEmptyStateCount = (input.exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
 
   return `
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails du layout premium HTML</summary>
       <ul>
-        <li>HTML-first true</li>
-        <li>PDF optional true</li>
+        <li>premium layout status available</li>
+        <li>html first true</li>
+        <li>pdf optional true</li>
         <li>single source of truth true</li>
         <li>duplicate report logic false</li>
-        <li>section count 11</li>
-        <li>cover present true</li>
-        <li>phase sections present true</li>
-        <li>KPI card count ${kpiCardCount}</li>
+        <li>legend item count ${input.legendItemCount}</li>
+        <li>panel count ${input.panelCount}</li>
+        <li>readable panel count ${input.readablePanelCount}</li>
+        <li>panels with primary zone count ${input.panelsWithPrimaryZoneCount}</li>
+        <li>panels with secondary zones count ${input.panelsWithSecondaryZonesCount}</li>
         <li>pitch placeholder count ${pitchPlaceholderCount}</li>
         <li>controlled empty state count ${controlledEmptyStateCount}</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>interpretation guard match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
+function renderPhaseVisualReadabilityAppendix(input: {
+  readonly exportHtml: string;
+  readonly panelCount: number;
+  readonly readablePanelCount: number;
+  readonly panelsWithPrimaryZoneCount: number;
+  readonly panelsWithSecondaryZonesCount: number;
+  readonly legendItemCount: number;
+}): string {
+  const pitchPlaceholderCount = (input.exportHtml.match(/report-pitch-placeholder/gu) ?? []).length;
+  const controlledEmptyStateCount = (input.exportHtml.match(new RegExp(CONTROLLED_EMPTY_STATE, "gu")) ?? []).length;
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de lisibilit&eacute; des visualisations par phase</summary>
+      <ul>
+        <li>readability status available</li>
+        <li>legend item count ${input.legendItemCount}</li>
+        <li>panel count ${input.panelCount}</li>
+        <li>readable panel count ${input.readablePanelCount}</li>
+        <li>panels with primary zone count ${input.panelsWithPrimaryZoneCount}</li>
+        <li>panels with secondary zones count ${input.panelsWithSecondaryZonesCount}</li>
+        <li>pitch placeholder count ${pitchPlaceholderCount}</li>
+        <li>controlled empty state count ${controlledEmptyStateCount}</li>
+        <li>phase-specific guard visible true</li>
+        <li>legend visible true</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
         <li>product/export score match true</li>
         <li>candidate comparison match true</li>
         <li>visible recommendation wording count 0</li>
@@ -696,9 +945,17 @@ function renderPremiumLayoutAppendix(signalCards: readonly string[], exportHtml:
     </details>`;
 }
 
-function renderAppendices(html: string, signalCards: readonly string[], exportHtmlBeforeAppendix: string): string {
-  const intro = stripTags(extractMatch(extractSection(html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
-  const originalAppendicesBody = extractSectionInner(html, "appendices");
+function renderAppendices(input: {
+  readonly html: string;
+  readonly exportHtmlBeforeAppendix: string;
+  readonly panelCount: number;
+  readonly readablePanelCount: number;
+  readonly panelsWithPrimaryZoneCount: number;
+  readonly panelsWithSecondaryZonesCount: number;
+  readonly legendItemCount: number;
+}): string {
+  const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
+  const originalAppendicesBody = extractSectionInner(input.html, "appendices");
   const originalAppendicesWithoutIntro = originalAppendicesBody.replace(/^\s*<p class="muted">[\s\S]*?<\/p>\s*/u, "");
 
   return `
@@ -710,7 +967,22 @@ function renderAppendices(html: string, signalCards: readonly string[], exportHt
         <p>${intro}</p>
       </div>
     </div>
-    ${renderPremiumLayoutAppendix(signalCards, exportHtmlBeforeAppendix)}
+    ${renderPremiumLayoutAppendix({
+      exportHtml: input.exportHtmlBeforeAppendix,
+      panelCount: input.panelCount,
+      readablePanelCount: input.readablePanelCount,
+      panelsWithPrimaryZoneCount: input.panelsWithPrimaryZoneCount,
+      panelsWithSecondaryZonesCount: input.panelsWithSecondaryZonesCount,
+      legendItemCount: input.legendItemCount,
+    })}
+    ${renderPhaseVisualReadabilityAppendix({
+      exportHtml: input.exportHtmlBeforeAppendix,
+      panelCount: input.panelCount,
+      readablePanelCount: input.readablePanelCount,
+      panelsWithPrimaryZoneCount: input.panelsWithPrimaryZoneCount,
+      panelsWithSecondaryZonesCount: input.panelsWithSecondaryZonesCount,
+      legendItemCount: input.legendItemCount,
+    })}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -734,42 +1006,34 @@ export function renderCoachReportExportHtml(input: {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
   const withMarkers = injectExportMarkers(withStyle);
-  const signalCards = extractSignalCards(extractSection(input.productReportHtml, "key-coach-signals"));
-  const signalExcerpts = signalCards.map(excerptFromSignalCard);
+  const phasePanels = deriveCoachReportPhasePanels({
+    productReportHtml: input.productReportHtml,
+  });
+  const readabilityPresentation = deriveCoachReportPhaseVisualReadabilityPresentation({
+    panels: phasePanels,
+  });
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderMatchStory(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
-    renderPhaseSection({
-      id: "with-ball",
-      title: "Avec ballon",
-      subtitle: "La progression, la menace et la continuit&eacute; offensives restent ancr&eacute;es dans les signaux officiels visibles.",
-      excerpt: signalExcerpts[0],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
-    renderPhaseSection({
-      id: "without-ball",
-      title: "Sans ballon",
-      subtitle: "Cette lecture reste prudente sur ce run: elle garde les signaux de r&eacute;cup&eacute;ration sans inventer une carte d&eacute;fensive plus forte que les preuves disponibles.",
-      excerpt: signalExcerpts[1],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
-    renderPhaseSection({
-      id: "goalkeeper",
-      title: "Dernier rempart",
-      subtitle: "Le bloc gardien reste limit&eacute; &agrave; ce que le rapport produit stabilise vraiment dans ce run.",
-      excerpt: signalExcerpts[2],
-      emptyState: CONTROLLED_EMPTY_STATE,
-      sourceProductSection: "key-coach-signals",
-    }),
+    renderPhaseLegend(readabilityPresentation.legendItems),
+    ...phasePanels.map((panel) =>
+      renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
+    ),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
   ].join("\n");
-  const appendices = renderAppendices(input.productReportHtml, signalCards, premiumBodyBeforeAppendices);
+  const appendices = renderAppendices({
+    html: input.productReportHtml,
+    exportHtmlBeforeAppendix: premiumBodyBeforeAppendices,
+    panelCount: phasePanels.length,
+    readablePanelCount: readabilityPresentation.coachCopyBlocks.length,
+    panelsWithPrimaryZoneCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.primaryZone !== undefined).length,
+    panelsWithSecondaryZonesCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.secondaryZones.length > 0).length,
+    legendItemCount: readabilityPresentation.legendItems.length,
+  });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
 

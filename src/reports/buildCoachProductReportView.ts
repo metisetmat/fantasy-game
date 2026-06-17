@@ -1,7 +1,13 @@
 import type { MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
+import type { MatchTraceAggregateModel } from "../simulation/tracing/matchTraceAggregateTypes";
 import { buildPlayerCandidateComparisonView } from "./buildPlayerCandidateComparisonView";
 import { buildPlayerMatchupView } from "./buildPlayerMatchupView";
 import { buildRosterCoverageMatchup } from "./buildRosterCoverageMatchup";
+import {
+  buildCoachReportPhaseVisualSeedFromAggregate,
+  buildCoachReportPhaseVisualSeedFromMatchReport,
+  type CoachReportPhaseVisualSeed,
+} from "./coachReportPhaseVisuals";
 import type {
   CoachReportV1VisualizationCard,
   CoachReportV1VisualizationModel,
@@ -378,6 +384,7 @@ function buildModelWithoutTags(input: {
   readonly playerMatchupView: PlayerMatchupViewModel;
   readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
+  readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
@@ -474,6 +481,7 @@ function buildModelWithoutTags(input: {
     playerMatchupView: input.playerMatchupView,
     ...(input.rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup: input.rosterCoverageMatchup }),
     ...(input.playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView: input.playerCandidateComparisonView }),
+    ...(input.phaseVisualSeed === undefined ? {} : { phaseVisualSeed: input.phaseVisualSeed }),
     nextMatchSignals: input.nextMatchSignals,
     appendices: input.appendices,
     productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
@@ -512,6 +520,7 @@ export function buildCoachProductReportView(input: {
   readonly coachReportV1: CoachReportV1VisualizationModel;
   readonly profileView: SelectionPreviewProfileViewModel;
   readonly playerMatchupView: PlayerMatchupViewModel;
+  readonly matchTraceAggregate?: MatchTraceAggregateModel;
   readonly rosterPlayers?: readonly PlayerSnapshot[];
 }): CoachProductReportViewModel {
   const rosterCoverageMatchup = input.playerMatchupView.calibration === undefined
@@ -540,6 +549,9 @@ export function buildCoachProductReportView(input: {
       playerMatchupView: input.playerMatchupView,
       ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
       ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
+      ...(input.matchTraceAggregate === undefined
+        ? {}
+        : { phaseVisualSeed: buildCoachReportPhaseVisualSeedFromAggregate({ aggregate: input.matchTraceAggregate }) }),
       nextMatchSignals: [],
       appendices: [],
       warnings: ["Coach Product Report View requires Coach Report V1 and Selection Preview Profile View."],
@@ -573,6 +585,9 @@ export function buildCoachProductReportView(input: {
     playerMatchupView: input.playerMatchupView,
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
     ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
+    ...(input.matchTraceAggregate === undefined
+      ? {}
+      : { phaseVisualSeed: buildCoachReportPhaseVisualSeedFromAggregate({ aggregate: input.matchTraceAggregate }) }),
     nextMatchSignals,
     appendices: buildAppendices(input.playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
   });
@@ -702,6 +717,7 @@ export function buildCoachProductReportViewFromMatchReport(
     playerMatchupView,
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
     ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
+    phaseVisualSeed: buildCoachReportPhaseVisualSeedFromMatchReport({ report }),
     nextMatchSignals,
     appendices: buildAppendices(playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
     warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],

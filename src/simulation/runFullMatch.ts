@@ -192,6 +192,16 @@ import {
   coachReportPremiumLayoutEvidenceFact,
   coachReportPremiumLayoutLimitations,
 } from "../reports/coachReportPremiumLayout";
+import { buildCoachReportPhaseVisuals } from "../reports/buildCoachReportPhaseVisuals";
+import {
+  coachReportPhaseVisualsEvidenceFact,
+  coachReportPhaseVisualsLimitations,
+} from "../reports/coachReportPhaseVisuals";
+import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
+import {
+  coachReportPhaseVisualReadabilityEvidenceFact,
+  coachReportPhaseVisualReadabilityLimitations,
+} from "../reports/coachReportPhaseVisualReadability";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3153,6 +3163,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     coachReportV1: coachReportV1VisualizationModel,
     profileView: selectionPreviewProfileViewModel,
     playerMatchupView: playerMatchupViewModel,
+    matchTraceAggregate: matchTraceAggregateModel,
     rosterPlayers: input.homeTeam.roster,
   });
   const coachProductReportPolishModel = buildCoachProductReportPolish({
@@ -3170,6 +3181,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     : "";
   const coachReportPremiumLayoutModel = buildCoachReportPremiumLayout({
     exportSnapshot: coachReportExportSnapshotModel,
+    productReportHtml: coachProductReportHtml,
+    exportReportHtml: coachReportExportHtml,
+  });
+  const coachReportPhaseVisualsModel = buildCoachReportPhaseVisuals({
+    premiumLayout: coachReportPremiumLayoutModel,
+    productReportHtml: coachProductReportHtml,
+    exportReportHtml: coachReportExportHtml,
+  });
+  const coachReportPhaseVisualReadabilityModel = buildCoachReportPhaseVisualReadability({
+    phaseVisuals: coachReportPhaseVisualsModel,
     productReportHtml: coachProductReportHtml,
     exportReportHtml: coachReportExportHtml,
   });
@@ -3195,6 +3216,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...coachProductReportViewLimitations(coachProductReportViewModel),
         ...coachProductReportPolishLimitations(coachProductReportPolishModel),
         ...coachReportPremiumLayoutLimitations(coachReportPremiumLayoutModel),
+        ...coachReportPhaseVisualsLimitations(coachReportPhaseVisualsModel),
+        ...coachReportPhaseVisualReadabilityLimitations(coachReportPhaseVisualReadabilityModel),
       ],
     },
   };
@@ -3429,6 +3452,16 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     matchInput: input,
     model: coachReportPremiumLayoutModel,
   });
+  const coachReportPhaseVisualsModelFact = coachReportPhaseVisualsEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportPhaseVisualsModel,
+  });
+  const coachReportPhaseVisualReadabilityModelFact = coachReportPhaseVisualReadabilityEvidenceFact({
+    report,
+    matchInput: input,
+    model: coachReportPhaseVisualReadabilityModel,
+  });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3480,6 +3513,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportPremiumLayoutFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportPremiumLayoutModelFact
     : null;
+  const experimentalCoachReportPhaseVisualsFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportPhaseVisualsModelFact
+    : null;
+  const experimentalCoachReportPhaseVisualReadabilityFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportPhaseVisualReadabilityModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3520,6 +3559,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachProductReportPolishFact === null ? [] : [experimentalCoachProductReportPolishFact]),
     ...(experimentalCoachReportExportSnapshotFact === null ? [] : [experimentalCoachReportExportSnapshotFact]),
     ...(experimentalCoachReportPremiumLayoutFact === null ? [] : [experimentalCoachReportPremiumLayoutFact]),
+    ...(experimentalCoachReportPhaseVisualsFact === null ? [] : [experimentalCoachReportPhaseVisualsFact]),
+    ...(experimentalCoachReportPhaseVisualReadabilityFact === null ? [] : [experimentalCoachReportPhaseVisualReadabilityFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),

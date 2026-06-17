@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 4U - FIFA-inspired HTML Report Layout
+- current sprint: Sprint 4W - Phase Visual Readability & Legend Calibration
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -27,48 +27,39 @@ Status: PASS
 - PASS: source reports were not deleted - 0
 - PASS: manifest exposes MINIMAL_REVIEW - mode visible
 - PASS: manifest says upload every file in reports/share - upload instruction visible
-- PASS: current sprint is Sprint 4U - Sprint 4U - FIFA-inspired HTML Report Layout
+- PASS: current sprint is Sprint 4W - Sprint 4W - Phase Visual Readability & Legend Calibration
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
 - PASS: share pack under 20 files - 20
 - PASS: expected share file count is 20 - 20
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 4U oriented - README current
-- PASS: 4U report included - 4U doc included
-- PASS: 4U validation is PASS - 4U validation current
+- PASS: README is Sprint 4W oriented - README current
+- PASS: 4W report included - 4W doc included
+- PASS: 4W validation is PASS - 4W validation current
 - PASS: product report HTML copied - product HTML visible
 - PASS: export report HTML copied - export HTML visible
+- PASS: phase legend is present - legend visible
+- PASS: phase pitch panels are present - phase visuals visible
+- PASS: primary and secondary emphasis are present - zone emphasis visible
+- PASS: readability guard remains visible - readability guard visible
 - PASS: premium export uses single source of truth - single source visible
-- PASS: duplicated report logic is false - duplicate logic false
-- PASS: premium cover is present - premium cover visible
-- PASS: phase sections are present - phase sections visible
-- PASS: product/export scores match - score match visible
-- PASS: candidate comparison matches product - comparison match visible
-- PASS: interpretation guard remains visible - guard visible
-- PASS: print CSS is present - print CSS visible
-- PASS: page-break CSS is present - page break CSS visible
-- PASS: premium cards avoid page breaks - break guards visible
 - PASS: main export hides internal status names - internal statuses hidden
 - PASS: main export avoids recommendation wording - recommendation wording count 0
 - PASS: main export avoids selection wording - selection wording count 0
 - PASS: visible French copy is clean - mojibake count 0
-- PASS: premium appendix contains layout tags - appendix visible
-- PASS: premium evidence category bundled - 4U evidence category bundled
-- PASS: premium model, builder, and renderer bundled - 4U files bundled
-- PASS: premium tests bundled - 4U report tests bundled
-- PASS: scoring guard 4U bundled - 4U scoring guard bundled
-- PASS: no player is selected - non-applied
-- PASS: no automatic selection is true - auto-selection forbidden
-- PASS: premium layout cannot mutate score - score mutation forbidden
-- PASS: premium layout cannot mutate possession - possession mutation forbidden
-- PASS: premium layout cannot create production scoring events - production scoring creation forbidden
-- PASS: premium layout cannot claim global economy - global economy forbidden
+- PASS: bundle includes phase-visual readability source files - 4W source bundled
+- PASS: bundle includes phase-visual readability tests - 4W tests bundled
+- PASS: simulation bundle includes scoring guard 4W - 4W scoring guard bundled
+- PASS: readability cannot mutate score - score mutation forbidden
+- PASS: readability cannot mutate possession - possession mutation forbidden
+- PASS: readability cannot create production scoring events - production scoring creation forbidden
+- PASS: readability cannot claim global economy - global economy forbidden
 - PASS: no scoring constants changed - scoring constants visible
 - PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendations visible - 4U recommendations visible
+- PASS: recommendations visible - 4W recommendations visible
 
 ## Files
 
@@ -82,7 +73,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-workbench-chain-replay-4u.md
+- fullmatch-workbench-chain-replay-4w.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -90,5 +81,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-4u.md
+- validation.fullmatch-workbench-chain-replay-4w.md
 - validation.share-pack.md

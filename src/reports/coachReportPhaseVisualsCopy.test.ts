@@ -12,19 +12,16 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 const forbiddenTerms = [
-  "meilleur choix",
-  "joueur recommande",
-  "a selectionner",
-  "titulaire conseille",
-  "remplacement conseille",
-  "composition recommandee",
+  "xg",
+  "heatmap certifiee",
+  "statistique inventee",
   "selection automatique",
   "officially_confirmed",
   "trace_supported",
   "sandbox_only",
 ] as const;
 
-export function validateCoachReportPremiumCopy(): readonly string[] {
+export function validateCoachReportPhaseVisualsCopy(): readonly string[] {
   const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
@@ -33,16 +30,16 @@ export function validateCoachReportPremiumCopy(): readonly string[] {
   const visible = exportCoachReportMainVisibleText(exportHtml).toLocaleLowerCase("fr-FR");
 
   for (const term of forbiddenTerms) {
-    assertTest(!visible.includes(term), `visible premium export copy must not contain ${term}.`);
+    assertTest(!visible.includes(term), `visible phase-visual copy must not contain ${term}.`);
   }
 
   return forbiddenTerms.map((term) => `visible copy does not contain ${term}`);
 }
 
 if (require.main === module) {
-  const checks = validateCoachReportPremiumCopy();
+  const checks = validateCoachReportPhaseVisualsCopy();
 
-  console.log("coachReportPremiumCopy tests passed.");
+  console.log("coachReportPhaseVisualsCopy tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
