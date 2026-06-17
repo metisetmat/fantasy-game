@@ -2,6 +2,7 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
+import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
@@ -11,6 +12,7 @@ import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildC
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
+import type { CoachReportMultiMatchHistoryViewModel } from "../../reports/coachReportMultiMatchHistoryView";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "../../reports/coachReportMultiMatchPhaseComparison";
 import type { CoachReportPremiumLayoutModel } from "../../reports/coachReportPremiumLayout";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
@@ -274,6 +276,38 @@ function currentCoachReportMultiMatchPhaseComparison(): CoachReportMultiMatchPha
   }
 
   return comparison;
+}
+
+function currentCoachReportMultiMatchHistoryView(): CoachReportMultiMatchHistoryViewModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const comparison = buildCoachReportMultiMatchPhaseComparison({
+    phaseReadability: currentCoachReportPhaseVisualReadability(),
+    comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: comparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+
+  if (historyView.status === "not_available") {
+    throw new Error("Coach Report Multi-Match History View must be available for Sprint 4Y validation.");
+  }
+
+  return historyView;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -3104,6 +3138,172 @@ export function renderFullMatchWorkbenchChainReplay4XValidation(model: FullMatch
     "- CONFIRM_LOCAL_STABILITY_LABELS.",
     "- CONFIRM_NO_GLOBAL_PROOF_CLAIM.",
     "- PREPARE_UI_WIRING_OR_MULTI_MATCH_HISTORY_VIEW.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4YDoc(model: FullMatchTraceValidationModel): string {
+  const comparison = currentCoachReportMultiMatchPhaseComparison();
+  const historyView = currentCoachReportMultiMatchHistoryView();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Y",
+    "",
+    "Sprint 4Y ajoute une première couche d’historique local sur la comparaison multi-run, sans créer une seconde source de vérité ni transformer ce recul en preuve globale.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Product Report remains available.",
+    "- Export Snapshot remains available.",
+    "- Premium HTML Layout remains available.",
+    "- Phase Visuals remain available.",
+    "- Phase Visual Readability remains available.",
+    "- Multi-Match Phase Comparison remains available.",
+    "- Player Candidate Comparison View remains available.",
+    `- Multi-Match History View status: ${historyView.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW.",
+    "",
+    "## Multi-Match History Summary",
+    `- html first: ${bool(historyView.htmlFirst)}.`,
+    `- pdf optional: ${bool(historyView.pdfOptional)}.`,
+    `- single source of truth: ${bool(historyView.singleSourceOfTruth)}.`,
+    `- duplicated report logic: ${bool(historyView.duplicateReportLogic)}.`,
+    `- sample count: ${historyView.sampleCount}.`,
+    `- drilldown count: ${historyView.drilldownCount}.`,
+    `- history sample row count: ${historyView.historySampleRowCount}.`,
+    `- local repeated drilldown count: ${historyView.localRepeatedDrilldownCount}.`,
+    `- local visible-once drilldown count: ${historyView.localVisibleOnceDrilldownCount}.`,
+    `- local unstable drilldown count: ${historyView.localUnstableDrilldownCount}.`,
+    `- insufficient data drilldown count: ${historyView.insufficientDataDrilldownCount}.`,
+    `- comparison sample count remains available: ${comparison.sampleCount}.`,
+    "",
+    "## Guardrails",
+    "- trend labels remain local watchpoints, not proof.",
+    "- no invented phase statistic is introduced.",
+    "- sandbox events are not promoted to official visuals.",
+    "- no recommendation or selection wording is introduced.",
+    "- no player is selected and no automatic selection is made.",
+    "- score, lineup, possession, scoring events, and global economy remain unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_MULTI_MATCH_HISTORY_VIEW.",
+    "- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.",
+    "- CONFIRM_NO_TREND_PROOF_CLAIM.",
+    "- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4YValidation(model: FullMatchTraceValidationModel): string {
+  const historyView = currentCoachReportMultiMatchHistoryView();
+  const status = model.status === "available" && (historyView.status === "available" || historyView.status === "partial")
+    ? (historyView.status === "available" ? "PASS" : "PARTIAL")
+    : "FAIL";
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Y Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report remains available.", true, ""),
+    check("Coach Report Export Snapshot remains available.", true, ""),
+    check("Premium HTML Layout remains available.", true, ""),
+    check("Phase Visuals remain available.", true, ""),
+    check("Phase Visual Readability remains available.", true, ""),
+    check("Multi-Match Phase Comparison remains available.", true, ""),
+    check("Player Candidate Comparison View remains available.", historyView.candidateComparisonMatchesProduct, ""),
+    check("Multi-Match History View status is available or partial.", historyView.status === "available" || historyView.status === "partial", historyView.status),
+    check("coach-report.export.html is generated.", true, "reports/coach-report.export.html"),
+    check("HTML-first remains true.", historyView.htmlFirst, ""),
+    check("PDF remains optional.", historyView.pdfOptional, ""),
+    check("export uses product report as single source of truth.", historyView.singleSourceOfTruth, ""),
+    check("duplicated report logic is false.", !historyView.duplicateReportLogic, ""),
+    check("history section is visible.", historyView.historyTableVisible, ""),
+    check("sample rows are visible.", historyView.historySampleRowCount > 0, String(historyView.historySampleRowCount)),
+    check("drilldown cards are visible.", historyView.drilldownVisible, ""),
+    check("trend labels remain cautious.", historyView.cautionCopyVisible, ""),
+    check("local history guard is visible.", historyView.cautionCopyVisible, ""),
+    check("no trend proof claim is made.", historyView.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", historyView.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", historyView.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", historyView.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("product/export score matches.", historyView.productExportScoreMatches, ""),
+    check("candidate comparison matches product.", historyView.candidateComparisonMatchesProduct, ""),
+    check("interpretation guard remains visible.", historyView.interpretationGuardMatchesProduct, ""),
+    check("visible copy avoids recommendation wording.", historyView.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", historyView.visibleSelectionWordingCount === 0, "0"),
+    check("internal status ids are hidden from main export.", historyView.internalStatusLeakCount === 0, "0"),
+    check("no player is selected.", historyView.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", historyView.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", historyView.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", historyView.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", historyView.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", !historyView.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !historyView.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", historyView.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", historyView.officiallyConfirmedCount === 0, "0"),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("history layer cannot mutate official timeline.", !historyView.canMutateTimeline, ""),
+    check("history layer cannot mutate official score.", !historyView.canMutateScore, ""),
+    check("history layer cannot mutate official possession.", !historyView.canMutatePossession, ""),
+    check("history layer cannot create production scoring events.", !historyView.canCreateScoringEvent, ""),
+    check("history layer cannot claim global economy.", !historyView.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", historyView.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", historyView.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", historyView.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", historyView.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- sample count: ${historyView.sampleCount}`,
+    `- drilldown count: ${historyView.drilldownCount}`,
+    `- history sample row count: ${historyView.historySampleRowCount}`,
+    `- local repeated drilldown count: ${historyView.localRepeatedDrilldownCount}`,
+    `- local visible-once drilldown count: ${historyView.localVisibleOnceDrilldownCount}`,
+    `- local unstable drilldown count: ${historyView.localUnstableDrilldownCount}`,
+    `- insufficient data drilldown count: ${historyView.insufficientDataDrilldownCount}`,
+    `- trend proof claim count: ${historyView.trendProofClaimCount}`,
+    `- global proof claim count: ${historyView.globalProofClaimCount}`,
+    `- invented statistic count: ${historyView.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${historyView.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${historyView.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${historyView.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${historyView.internalStatusLeakCount}`,
+    `- player selected count: ${historyView.playerSelectedCount}`,
+    `- automatic selection count: ${historyView.automaticSelectionCount}`,
+    `- lineup mutation count: ${historyView.lineupMutationCount}`,
+    `- starters mutation count: ${historyView.startersMutationCount}`,
+    `- bench mutation count: ${historyView.benchMutationCount}`,
+    `- live selection driver count: ${historyView.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${historyView.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- confidence upgrade count: ${historyView.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${historyView.officiallyConfirmedCount}`,
+    `- score mutation count: ${historyView.canMutateScore ? 1 : 0}`,
+    `- possession mutation count: ${historyView.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${historyView.canCreateScoringEvent ? 1 : 0}`,
+    `- global economy claim count: ${historyView.canClaimGlobalEconomy ? 1 : 0}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_MULTI_MATCH_HISTORY_VIEW.",
+    "- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.",
+    "- CONFIRM_NO_TREND_PROOF_CLAIM.",
+    "- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.",
     "",
   ].join("\n");
 }

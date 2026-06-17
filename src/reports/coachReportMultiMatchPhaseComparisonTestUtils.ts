@@ -1,6 +1,7 @@
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
+import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
@@ -8,6 +9,7 @@ import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
+import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
 import type { CoachReportPhaseVisualReadabilityModel } from "./coachReportPhaseVisualReadability";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
@@ -17,6 +19,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly exportHtml: string;
   readonly phaseReadability: CoachReportPhaseVisualReadabilityModel;
   readonly comparison: CoachReportMultiMatchPhaseComparisonModel;
+  readonly historyView: CoachReportMultiMatchHistoryViewModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -54,10 +57,16 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: comparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
     multiMatchPhaseComparison: comparison,
+    multiMatchHistoryView: historyView,
   });
 
   return {
@@ -65,5 +74,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     exportHtml,
     phaseReadability,
     comparison,
+    historyView,
   };
 }

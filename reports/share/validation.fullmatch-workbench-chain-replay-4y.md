@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4X Validation
+# FullMatch Workbench Chain Replay 4Y Validation
 
 Status: PASS
 
@@ -10,22 +10,23 @@ Status: PASS
 - PASS: Premium HTML Layout remains available.
 - PASS: Phase Visuals remain available.
 - PASS: Phase Visual Readability remains available.
+- PASS: Multi-Match Phase Comparison remains available.
 - PASS: Player Candidate Comparison View remains available.
-- PASS: Multi-Match Phase Comparison status is available or partial. - available
+- PASS: Multi-Match History View status is available or partial. - available
 - PASS: coach-report.export.html is generated. - reports/coach-report.export.html
 - PASS: HTML-first remains true.
 - PASS: PDF remains optional.
 - PASS: export uses product report as single source of truth.
 - PASS: duplicated report logic is false.
-- PASS: local comparison guard is visible.
-- PASS: sample count is visible. - 4
-- PASS: phase stability labels are visible.
-- PASS: repeated signals are labelled cautiously. - 6
-- PASS: visible-once signals are labelled cautiously. - 2
-- PASS: insufficient or unstable signals remain honest. - 0/1
+- PASS: history section is visible.
+- PASS: sample rows are visible. - 32
+- PASS: drilldown cards are visible.
+- PASS: trend labels remain cautious.
+- PASS: local history guard is visible.
+- PASS: no trend proof claim is made. - 0
+- PASS: no global proof claim is made. - 0
 - PASS: no invented phase statistic is introduced. - 0
 - PASS: sandbox events are not promoted to official visuals. - 0
-- PASS: no global proof claim is made. - 0
 - PASS: product/export score matches.
 - PASS: candidate comparison matches product.
 - PASS: interpretation guard remains visible.
@@ -44,11 +45,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: comparison layer cannot mutate official timeline.
-- PASS: comparison layer cannot mutate official score.
-- PASS: comparison layer cannot mutate official possession.
-- PASS: comparison layer cannot create production scoring events.
-- PASS: comparison layer cannot claim global economy.
+- PASS: history layer cannot mutate official timeline.
+- PASS: history layer cannot mutate official score.
+- PASS: history layer cannot mutate official possession.
+- PASS: history layer cannot create production scoring events.
+- PASS: history layer cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -57,12 +58,13 @@ Status: PASS
 
 ## Counts
 - sample count: 4
-- panel count: 3
-- compared signal count: 8
-- repeated signal count: 6
-- visible-once signal count: 2
-- unstable signal count: 0
-- insufficient data count: 1
+- drilldown count: 8
+- history sample row count: 32
+- local repeated drilldown count: 6
+- local visible-once drilldown count: 2
+- local unstable drilldown count: 0
+- insufficient data drilldown count: 0
+- trend proof claim count: 0
 - global proof claim count: 0
 - invented statistic count: 0
 - sandbox events promoted to official count: 0
@@ -84,7 +86,7 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_MULTI_MATCH_PHASE_COMPARISON.
-- CONFIRM_LOCAL_STABILITY_LABELS.
-- CONFIRM_NO_GLOBAL_PROOF_CLAIM.
-- PREPARE_UI_WIRING_OR_MULTI_MATCH_HISTORY_VIEW.
+- CONFIRM_MULTI_MATCH_HISTORY_VIEW.
+- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.
+- CONFIRM_NO_TREND_PROOF_CLAIM.
+- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.

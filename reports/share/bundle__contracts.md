@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 4X - Multi-Match Phase Comparison. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4Y - Multi-Match History View & Trend Drilldown. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -445,6 +445,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY"
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON"
+  | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"

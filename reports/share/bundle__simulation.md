@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 4X - Multi-Match Phase Comparison. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 4Y - Multi-Match History View & Trend Drilldown. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -295,6 +295,11 @@ import {
 } from "../reports/coachReportPhaseVisuals";
 import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
+import { buildCoachReportMultiMatchHistoryView } from "../reports/buildCoachReportMultiMatchHistoryView";
+import {
+  coachReportMultiMatchHistoryViewEvidenceFact,
+  coachReportMultiMatchHistoryViewLimitations,
+} from "../reports/coachReportMultiMatchHistoryView";
 import {
   coachReportMultiMatchPhaseComparisonEvidenceFact,
   coachReportMultiMatchPhaseComparisonLimitations,
@@ -3304,13 +3309,25 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           exportReportHtml: baselineCoachReportExportHtml,
         })
       : null;
+  const coachReportMultiMatchHistoryViewModel = coachReportMultiMatchPhaseComparisonModel === null
+    ? null
+    : buildCoachReportMultiMatchHistoryView({
+        multiMatchComparison: coachReportMultiMatchPhaseComparisonModel,
+        productReportHtml: coachProductReportHtml,
+        exportReportHtml: baselineCoachReportExportHtml,
+      });
   const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
         phaseReadability: coachReportPhaseVisualReadabilityModel,
         ...(coachReportMultiMatchPhaseComparisonModel === null
           ? {}
-          : { multiMatchPhaseComparison: coachReportMultiMatchPhaseComparisonModel }),
+          : {
+            multiMatchPhaseComparison: coachReportMultiMatchPhaseComparisonModel,
+            ...(coachReportMultiMatchHistoryViewModel === null
+              ? {}
+              : { multiMatchHistoryView: coachReportMultiMatchHistoryViewModel }),
+          }),
       })
     : "";
   const reportWithTraceLimitations: MatchReport = {
@@ -3340,6 +3357,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...(coachReportMultiMatchPhaseComparisonModel === null
           ? []
           : coachReportMultiMatchPhaseComparisonLimitations(coachReportMultiMatchPhaseComparisonModel)),
+        ...(coachReportMultiMatchHistoryViewModel === null
+          ? []
+          : coachReportMultiMatchHistoryViewLimitations(coachReportMultiMatchHistoryViewModel)),
       ],
     },
   };
@@ -3591,6 +3611,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         matchInput: input,
         model: coachReportMultiMatchPhaseComparisonModel,
       });
+  const coachReportMultiMatchHistoryViewModelFact = coachReportMultiMatchHistoryViewModel === null
+    ? null
+    : coachReportMultiMatchHistoryViewEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachReportMultiMatchHistoryViewModel,
+      });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3651,6 +3678,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportMultiMatchPhaseComparisonFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportMultiMatchPhaseComparisonModelFact
     : null;
+  const experimentalCoachReportMultiMatchHistoryViewFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportMultiMatchHistoryViewModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3694,6 +3724,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportPhaseVisualsFact === null ? [] : [experimentalCoachReportPhaseVisualsFact]),
     ...(experimentalCoachReportPhaseVisualReadabilityFact === null ? [] : [experimentalCoachReportPhaseVisualReadabilityFact]),
     ...(experimentalCoachReportMultiMatchPhaseComparisonFact === null ? [] : [experimentalCoachReportMultiMatchPhaseComparisonFact]),
+    ...(experimentalCoachReportMultiMatchHistoryViewFact === null ? [] : [experimentalCoachReportMultiMatchHistoryViewFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),
@@ -38372,11 +38403,13 @@ import type {
   MultiMatchPhaseComparisonPanel,
   MultiMatchPhaseZoneSignal,
 } from "./coachReportMultiMatchPhaseComparison";
+import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
 } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
+import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -38880,6 +38913,109 @@ const PREMIUM_EXPORT_CSS = `
       gap: 10px;
     }
 
+    .phase-history-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .phase-history-guard {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .phase-history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .phase-history-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .phase-history-strength,
+    .phase-history-presence {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .phase-history-strength--local-repeated {
+      background: #e6f6ef;
+      color: #1d6b4f;
+      border-color: rgba(29, 107, 79, 0.18);
+    }
+
+    .phase-history-strength--visible-once {
+      background: #eef2f7;
+      color: #445061;
+      border-color: rgba(68, 80, 97, 0.16);
+    }
+
+    .phase-history-strength--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+      border-color: rgba(154, 90, 20, 0.18);
+    }
+
+    .phase-history-strength--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+      border-color: rgba(107, 77, 183, 0.18);
+    }
+
+    .phase-history-presence--present {
+      background: #e6f6ef;
+      color: #1d6b4f;
+    }
+
+    .phase-history-presence--absent {
+      background: #eef2f7;
+      color: #445061;
+    }
+
+    .phase-history-presence--unstable {
+      background: #fff4e7;
+      color: #9a5a14;
+    }
+
+    .phase-history-presence--insufficient {
+      background: #f7f3ff;
+      color: #6b4db7;
+    }
+
+    .phase-history-table {
+      display: grid;
+      gap: 8px;
+    }
+
+    .phase-history-row {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.9fr) auto minmax(0, 1.2fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--report-soft);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
     .report-appendix-stack {
       margin-top: 10px;
     }
@@ -38906,7 +39042,8 @@ const PREMIUM_EXPORT_CSS = `
       .report-cover-grid,
       .report-phase-layout,
       .report-player-study-grid,
-      .phase-stability-grid {
+      .phase-stability-grid,
+      .phase-history-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -38939,7 +39076,9 @@ const PREMIUM_EXPORT_CSS = `
       .report-pitch-panel,
       .report-phase-section,
       .phase-pitch-legend,
-      .phase-legend-item {
+      .phase-legend-item,
+      .phase-history-card,
+      .phase-history-row {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -39373,6 +39512,116 @@ function renderMultiMatchPhaseComparison(
   </section>`;
 }
 
+function historyStrengthLabel(drilldown: MultiMatchSignalDrilldown): string {
+  switch (drilldown.strength) {
+    case "local_repeated":
+      return "Revient dans les échantillons disponibles";
+    case "local_visible_once":
+      return "Visible ponctuellement";
+    case "local_unstable":
+      return "Signal encore instable";
+    case "insufficient_data":
+      return "Donnée insuffisante";
+  }
+}
+
+function historyStrengthClass(drilldown: MultiMatchSignalDrilldown): string {
+  switch (drilldown.strength) {
+    case "local_repeated":
+      return "phase-history-strength phase-history-strength--local-repeated";
+    case "local_visible_once":
+      return "phase-history-strength phase-history-strength--visible-once";
+    case "local_unstable":
+      return "phase-history-strength phase-history-strength--unstable";
+    case "insufficient_data":
+      return "phase-history-strength phase-history-strength--insufficient";
+  }
+}
+
+function historyPresenceLabel(presence: MultiMatchSignalDrilldown["samples"][number]["presence"]): string {
+  switch (presence) {
+    case "present":
+      return "Présent";
+    case "absent":
+      return "Absent";
+    case "unstable":
+      return "Instable";
+    case "insufficient_data":
+      return "Insuffisant";
+  }
+}
+
+function historyPresenceClass(presence: MultiMatchSignalDrilldown["samples"][number]["presence"]): string {
+  switch (presence) {
+    case "present":
+      return "phase-history-presence phase-history-presence--present";
+    case "absent":
+      return "phase-history-presence phase-history-presence--absent";
+    case "unstable":
+      return "phase-history-presence phase-history-presence--unstable";
+    case "insufficient_data":
+      return "phase-history-presence phase-history-presence--insufficient";
+  }
+}
+
+function renderHistoryDrilldownCard(drilldown: MultiMatchSignalDrilldown): string {
+  return `
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>${drilldown.label}</h3>
+          <p>${drilldown.phase.replaceAll("_", " ")}${drilldown.primaryZone === undefined ? "" : ` · zone principale ${drilldown.primaryZone}`}</p>
+        </div>
+        <span class="${historyStrengthClass(drilldown)}">${historyStrengthLabel(drilldown)}</span>
+      </div>
+      <p><strong>Échantillons:</strong> ${drilldown.sampleCount} · <strong>Présent:</strong> ${drilldown.presentCount} · <strong>Absent:</strong> ${drilldown.absentCount} · <strong>Instable:</strong> ${drilldown.unstableCount} · <strong>Insuffisant:</strong> ${drilldown.insufficientDataCount}</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>${drilldown.coachReading}</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>${drilldown.whyStillCautious}</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>${drilldown.whatToVerifyNext}</p>
+      </div>
+      <div class="phase-history-table">
+        ${drilldown.samples.map((sample) => `
+          <div class="phase-history-row">
+            <strong>${sample.sampleLabel}</strong>
+            <span class="${historyPresenceClass(sample.presence)}">${historyPresenceLabel(sample.presence)}</span>
+            <span>${sample.explanation}</span>
+          </div>
+        `).join("")}
+      </div>
+    </article>`;
+}
+
+function renderMultiMatchHistoryView(
+  historyView: CoachReportMultiMatchHistoryViewModel,
+): string {
+  if (historyView.status === "not_available") {
+    return "";
+  }
+
+  return `
+  <section id="phase-signal-history" class="premium-section phase-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Phase signal history</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Historique des signaux compar&eacute;s</h2>
+        <p>${historyView.sampleCount} &eacute;chantillon(s) disponibles, ${historyView.drilldownCount} signal(aux) relus dans ce p&eacute;rim&egrave;tre local.</p>
+      </div>
+    </div>
+    <p class="phase-history-guard">Cet historique d&eacute;crit uniquement les &eacute;chantillons disponibles. Il aide &agrave; comprendre pourquoi un signal est affich&eacute; comme r&eacute;p&eacute;t&eacute; ou ponctuel, sans prouver une tendance globale.</p>
+    <div class="phase-history-grid">
+      ${historyView.drilldowns.map((drilldown) => renderHistoryDrilldownCard(drilldown)).join("\n")}
+    </div>
+  </section>`;
+}
+
 function renderProfilesAndPlayers(html: string): string {
   const profilesBody = extractSectionInner(html, "profiles-to-observe");
   const playersBody = extractSectionInner(html, "players-to-study");
@@ -39564,6 +39813,47 @@ function renderMultiMatchPhaseComparisonAppendix(
     </details>`;
 }
 
+function renderMultiMatchHistoryViewAppendix(
+  historyView: CoachReportMultiMatchHistoryViewModel,
+): string {
+  if (historyView.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de l&rsquo;historique multi-run</summary>
+      <ul>
+        <li>history view status ${historyView.status}</li>
+        <li>sample count ${historyView.sampleCount}</li>
+        <li>drilldown count ${historyView.drilldownCount}</li>
+        <li>history sample row count ${historyView.historySampleRowCount}</li>
+        <li>local repeated drilldown count ${historyView.localRepeatedDrilldownCount}</li>
+        <li>local visible-once drilldown count ${historyView.localVisibleOnceDrilldownCount}</li>
+        <li>local unstable drilldown count ${historyView.localUnstableDrilldownCount}</li>
+        <li>insufficient data drilldown count ${historyView.insufficientDataDrilldownCount}</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -39573,6 +39863,7 @@ function renderAppendices(input: {
   readonly panelsWithSecondaryZonesCount: number;
   readonly legendItemCount: number;
   readonly multiMatchPhaseComparison: CoachReportMultiMatchPhaseComparisonModel;
+  readonly multiMatchHistoryView: CoachReportMultiMatchHistoryViewModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -39604,6 +39895,7 @@ function renderAppendices(input: {
       legendItemCount: input.legendItemCount,
     })}
     ${renderMultiMatchPhaseComparisonAppendix(input.multiMatchPhaseComparison)}
+    ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -39625,6 +39917,7 @@ export function renderCoachReportExportHtml(input: {
   readonly productReportHtml: string;
   readonly phaseReadability?: CoachReportPhaseVisualReadabilityModel;
   readonly multiMatchPhaseComparison?: CoachReportMultiMatchPhaseComparisonModel;
+  readonly multiMatchHistoryView?: CoachReportMultiMatchHistoryViewModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -39705,6 +39998,11 @@ export function renderCoachReportExportHtml(input: {
           exportReportHtml: input.productReportHtml,
         })
   );
+  const multiMatchHistoryView = input.multiMatchHistoryView ?? buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: multiMatchPhaseComparison,
+    productReportHtml: input.productReportHtml,
+    exportReportHtml: input.productReportHtml,
+  });
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
@@ -39715,6 +40013,7 @@ export function renderCoachReportExportHtml(input: {
       renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
     ),
     renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
+    renderMultiMatchHistoryView(multiMatchHistoryView),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -39728,6 +40027,7 @@ export function renderCoachReportExportHtml(input: {
     panelsWithSecondaryZonesCount: readabilityPresentation.zoneHierarchies.filter((hierarchy) => hierarchy.secondaryZones.length > 0).length,
     legendItemCount: readabilityPresentation.legendItems.length,
     multiMatchPhaseComparison,
+    multiMatchHistoryView,
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
@@ -41997,6 +42297,28 @@ export type PhaseSignalStability =
   | "unstable"
   | "insufficient_data";
 
+export type MultiMatchHistorySampleSource =
+  | "official_aggregates"
+  | "product_report"
+  | "controlled_sample";
+
+export type SampleSignalPresence =
+  | "present"
+  | "absent"
+  | "unstable"
+  | "insufficient_data";
+
+export interface MultiMatchPhaseSignalSample {
+  readonly sampleId: string;
+  readonly sampleLabel: string;
+  readonly source: MultiMatchHistorySampleSource;
+  readonly phase: "with_ball" | "without_ball" | "goalkeeper";
+  readonly zone?: string;
+  readonly presence: SampleSignalPresence;
+  readonly value?: number;
+  readonly explanation: string;
+}
+
 export interface MultiMatchPhaseZoneSignal {
   readonly phase: "with_ball" | "without_ball" | "goalkeeper";
   readonly zone: string;
@@ -42004,7 +42326,9 @@ export interface MultiMatchPhaseZoneSignal {
   readonly occurrenceCount: number;
   readonly sampleCount: number;
   readonly stability: PhaseSignalStability;
-  readonly source: "official_aggregates" | "product_report" | "controlled_sample";
+  readonly source: MultiMatchHistorySampleSource;
+  readonly zoneVariationCount: number;
+  readonly samples: readonly MultiMatchPhaseSignalSample[];
   readonly explanation: string;
 }
 
@@ -42194,6 +42518,230 @@ export function coachReportMultiMatchPhaseComparisonLimitations(
 }
 ```
 
+## File: src/reports/coachReportMultiMatchHistoryView.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+import type {
+  CoachReportMultiMatchPhaseComparisonModel,
+  MultiMatchPhaseSignalSample,
+} from "./coachReportMultiMatchPhaseComparison";
+
+export type CoachReportMultiMatchHistoryViewStatus =
+  | "not_available"
+  | "available"
+  | "partial"
+  | "failed";
+
+export type SampleSignalPresence =
+  | "present"
+  | "absent"
+  | "unstable"
+  | "insufficient_data";
+
+export type TrendDrilldownStrength =
+  | "local_repeated"
+  | "local_visible_once"
+  | "local_unstable"
+  | "insufficient_data";
+
+export interface MultiMatchHistorySample extends MultiMatchPhaseSignalSample {}
+
+export interface MultiMatchSignalDrilldown {
+  readonly signalId: string;
+  readonly phase: "with_ball" | "without_ball" | "goalkeeper";
+  readonly label: string;
+  readonly primaryZone?: string;
+  readonly sampleCount: number;
+  readonly presentCount: number;
+  readonly absentCount: number;
+  readonly unstableCount: number;
+  readonly insufficientDataCount: number;
+  readonly zoneVariationCount: number;
+  readonly strength: TrendDrilldownStrength;
+  readonly samples: readonly MultiMatchHistorySample[];
+  readonly coachReading: string;
+  readonly whyStillCautious: string;
+  readonly whatToVerifyNext: string;
+}
+
+export interface CoachReportMultiMatchHistoryViewModel {
+  readonly status: CoachReportMultiMatchHistoryViewStatus;
+  readonly origin: "coach_report_multi_match_phase_comparison";
+  readonly htmlFirst: true;
+  readonly pdfOptional: true;
+  readonly singleSourceOfTruth: true;
+  readonly duplicateReportLogic: false;
+  readonly sampleCount: number;
+  readonly drilldownCount: number;
+  readonly historySampleRowCount: number;
+  readonly localRepeatedDrilldownCount: number;
+  readonly localVisibleOnceDrilldownCount: number;
+  readonly localUnstableDrilldownCount: number;
+  readonly insufficientDataDrilldownCount: number;
+  readonly drilldowns: readonly MultiMatchSignalDrilldown[];
+  readonly historyTableVisible: boolean;
+  readonly drilldownVisible: boolean;
+  readonly cautionCopyVisible: boolean;
+  readonly trendProofClaimCount: 0;
+  readonly globalProofClaimCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly sandboxEventsPromotedToOfficialCount: 0;
+  readonly productExportScoreMatches: true;
+  readonly candidateComparisonMatchesProduct: true;
+  readonly interpretationGuardMatchesProduct: true;
+  readonly visibleRecommendationWordingCount: 0;
+  readonly visibleSelectionWordingCount: 0;
+  readonly internalStatusLeakCount: 0;
+  readonly mojibakeMarkerCount: number;
+  readonly noAutomaticSelection: true;
+  readonly playerSelectedCount: 0;
+  readonly automaticSelectionCount: 0;
+  readonly lineupMutationCount: 0;
+  readonly startersMutationCount: 0;
+  readonly benchMutationCount: 0;
+  readonly confidenceUpgradeCount: 0;
+  readonly officiallyConfirmedCount: 0;
+  readonly canChangeLineup: false;
+  readonly canChangeStarters: false;
+  readonly canChangeBench: false;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateTimeline: false;
+  readonly canMutateScore: false;
+  readonly canMutatePossession: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+function countTag(prefix: string, value: number): string {
+  return `${prefix}_${value}`;
+}
+
+export function buildCoachReportMultiMatchHistoryViewTags(
+  model: Omit<CoachReportMultiMatchHistoryViewModel, "tags">,
+): readonly string[] {
+  return [
+    "coach_report_multi_match_history_view",
+    `coach_report_multi_match_history_view_status_${model.status}`,
+    "coach_report_multi_match_history_view_html_first_true",
+    "coach_report_multi_match_history_view_pdf_optional_true",
+    "coach_report_multi_match_history_view_single_source_of_truth_true",
+    "coach_report_multi_match_history_view_duplicate_logic_false",
+    "coach_report_multi_match_history_view_sample_count_present",
+    "coach_report_multi_match_history_view_drilldown_count_present",
+    "coach_report_multi_match_history_view_history_sample_row_count_present",
+    "coach_report_multi_match_history_view_local_repeated_count_present",
+    "coach_report_multi_match_history_view_visible_once_count_present",
+    "coach_report_multi_match_history_view_unstable_count_present",
+    "coach_report_multi_match_history_view_insufficient_count_present",
+    "coach_report_multi_match_history_view_trend_proof_claim_count_0",
+    "coach_report_multi_match_history_view_global_proof_claim_count_0",
+    "coach_report_multi_match_history_view_sandbox_events_promoted_to_official_count_0",
+    "coach_report_multi_match_history_view_invented_statistic_count_0",
+    "coach_report_multi_match_history_view_product_export_score_matches_true",
+    "coach_report_multi_match_history_view_candidate_comparison_matches_true",
+    "coach_report_multi_match_history_view_visible_recommendation_wording_count_0",
+    "coach_report_multi_match_history_view_visible_selection_wording_count_0",
+    "coach_report_multi_match_history_view_internal_status_leak_count_0",
+    "coach_report_multi_match_history_view_no_automatic_selection_true",
+    "coach_report_multi_match_history_view_player_selected_count_0",
+    "coach_report_multi_match_history_view_lineup_mutation_count_0",
+    "coach_report_multi_match_history_view_starters_mutation_count_0",
+    "coach_report_multi_match_history_view_bench_mutation_count_0",
+    "coach_report_multi_match_history_view_live_selection_driver_count_0",
+    "coach_report_multi_match_history_view_production_route_resolution_driver_count_0",
+    "coach_report_multi_match_history_view_score_mutation_count_0",
+    "coach_report_multi_match_history_view_possession_mutation_count_0",
+    "coach_report_multi_match_history_view_production_scoring_event_creation_count_0",
+    "coach_report_multi_match_history_view_global_economy_claim_forbidden",
+    "coach_report_multi_match_history_view_scoring_constants_unchanged",
+    countTag("coach_report_multi_match_history_view_mojibake_marker_count", model.mojibakeMarkerCount),
+  ];
+}
+
+export function coachReportMultiMatchHistoryViewCannotMutateOfficialState(
+  model: CoachReportMultiMatchHistoryViewModel,
+): boolean {
+  return !model.canMutateTimeline &&
+    !model.canMutateScore &&
+    !model.canMutatePossession &&
+    !model.canCreateScoringEvent;
+}
+
+export function coachReportMultiMatchHistoryViewCannotDriveSelection(
+  model: CoachReportMultiMatchHistoryViewModel,
+): boolean {
+  return !model.canChangeLineup &&
+    !model.canChangeStarters &&
+    !model.canChangeBench &&
+    !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    model.playerSelectedCount === 0 &&
+    model.automaticSelectionCount === 0;
+}
+
+export function coachReportMultiMatchHistoryViewEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachReportMultiMatchHistoryViewModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  return {
+    factId: `${input.report.matchId}-coach-report-multi-match-history-view`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: input.report.timeline.slice(0, 3).map((event) => event.eventId),
+    affectedZones: input.model.drilldowns
+      .map((drilldown) => drilldown.primaryZone)
+      .filter((zone): zone is string => zone !== undefined)
+      .slice(0, 6),
+    summary:
+      `Coach Report Multi-Match History View ${input.model.status}: htmlFirst=true, pdfOptional=true, singleSourceOfTruth=true, duplicateReportLogic=false, ` +
+      `sampleCount=${input.model.sampleCount}, drilldownCount=${input.model.drilldownCount}, historySampleRowCount=${input.model.historySampleRowCount}, ` +
+      `localRepeatedDrilldownCount=${input.model.localRepeatedDrilldownCount}, localVisibleOnceDrilldownCount=${input.model.localVisibleOnceDrilldownCount}, localUnstableDrilldownCount=${input.model.localUnstableDrilldownCount}, insufficientDataDrilldownCount=${input.model.insufficientDataDrilldownCount}, ` +
+      "trendProofClaimCount=0, globalProofClaimCount=0, inventedStatisticCount=0, sandboxEventsPromotedToOfficialCount=0, productExportScoreMatches=true, candidateComparisonMatches=true, interpretationGuardMatchesProduct=true, visibleRecommendationWordingCount=0, visibleSelectionWordingCount=0, internalStatusLeakCount=0, noAutomaticSelection=true, playerSelectedCount=0, lineupMutationCount=0, startersMutationCount=0, benchMutationCount=0, liveSelectionDriverCount=0, productionRouteResolutionDriverCount=0, scoreMutationCount=0, possessionMutationCount=0, productionScoringEventCreationCount=0, globalEconomyClaimCount=0, scoringConstantsUnchanged=true.",
+    confidence: "medium",
+    strength: 65,
+    coachVisible: false,
+    internalTags: input.model.tags,
+  };
+}
+
+export function coachReportMultiMatchHistoryViewLimitations(
+  model: CoachReportMultiMatchHistoryViewModel,
+): readonly string[] {
+  if (model.status === "not_available") {
+    return ["Coach Report Multi-Match History View is not available for this run."];
+  }
+
+  return [
+    "Coach Report Multi-Match History View remains a local watchpoint layer built from the existing comparison model only.",
+    "Multi-match history view cannot alter lineup, score, possession, timeline, scoring events, live selection, production route resolution, or batch economy proof.",
+  ];
+}
+
+export function comparisonSupportsHistoryView(
+  model: CoachReportMultiMatchPhaseComparisonModel,
+): boolean {
+  return model.status === "available" || model.status === "partial";
+}
+```
+
 ## File: src/reports/buildCoachReportMultiMatchPhaseComparison.ts
 
 ```ts
@@ -42205,9 +42753,12 @@ import {
   buildCoachReportMultiMatchPhaseComparisonTags,
   type CoachReportMultiMatchPhaseComparisonModel,
   type CoachReportMultiMatchPhaseComparisonStatus,
+  type MultiMatchHistorySampleSource,
   type MultiMatchPhaseComparisonPanel,
+  type MultiMatchPhaseSignalSample,
   type MultiMatchPhaseZoneSignal,
   type PhaseSignalStability,
+  type SampleSignalPresence,
 } from "./coachReportMultiMatchPhaseComparison";
 
 const RECOMMENDATION_TERMS = [
@@ -42260,6 +42811,13 @@ type PhaseKey = "with_ball" | "without_ball" | "goalkeeper";
 interface RunPhasePresence {
   readonly present: boolean;
   readonly currentRun: boolean;
+}
+
+interface SampleDescriptor {
+  readonly sampleId: string;
+  readonly sampleLabel: string;
+  readonly source: MultiMatchHistorySampleSource;
+  readonly model: CoachReportPhaseVisualReadabilityModel;
 }
 
 interface PanelCopy {
@@ -42390,6 +42948,63 @@ function currentPhaseZones(
   return new Set(hierarchy === undefined ? [] : zonesForHierarchy(hierarchy));
 }
 
+function sampleDescriptors(
+  phaseReadability: CoachReportPhaseVisualReadabilityModel,
+  comparisonSamples: readonly CoachReportPhaseVisualReadabilityModel[],
+): readonly SampleDescriptor[] {
+  return [
+    {
+      sampleId: "current_product_run",
+      sampleLabel: "Run actuel",
+      source: "product_report",
+      model: phaseReadability,
+    },
+    ...comparisonSamples.map((model, index) => ({
+      sampleId: `comparison_sample_${index + 1}`,
+      sampleLabel: `Échantillon ${index + 1}`,
+      source: "controlled_sample" as const,
+      model,
+    })),
+  ];
+}
+
+function presenceForSample(input: {
+  readonly model: CoachReportPhaseVisualReadabilityModel;
+  readonly hierarchy: PhaseVisualZoneHierarchy | undefined;
+  readonly zone: string;
+}): SampleSignalPresence {
+  if (input.hierarchy === undefined) {
+    return input.model.status === "partial" || input.model.status === "not_available"
+      ? "insufficient_data"
+      : "absent";
+  }
+
+  if (zonesForHierarchy(input.hierarchy).includes(input.zone)) {
+    return "present";
+  }
+
+  return input.model.status === "partial"
+    ? "unstable"
+    : "absent";
+}
+
+function explanationForSample(input: {
+  readonly presence: SampleSignalPresence;
+  readonly sampleLabel: string;
+  readonly zone: string;
+}): string {
+  switch (input.presence) {
+    case "present":
+      return `${input.sampleLabel}: signal visible autour de ${input.zone}.`;
+    case "absent":
+      return `${input.sampleLabel}: signal non visible dans cette zone.`;
+    case "unstable":
+      return `${input.sampleLabel}: lecture partielle, le signal n'est pas stabilisé dans cette zone.`;
+    case "insufficient_data":
+      return `${input.sampleLabel}: données insuffisantes pour confirmer cette zone.`;
+  }
+}
+
 function buildPanelCopy(input: {
   readonly phase: PhaseKey;
   readonly sampleCount: number;
@@ -42499,10 +43114,10 @@ function buildPanel(input: {
 }): MultiMatchPhaseComparisonPanel {
   const presenceByZone = new Map<string, RunPhasePresence[]>();
   const currentZones = currentPhaseZones(input.phaseReadability, input.phase);
+  const descriptors = sampleDescriptors(input.phaseReadability, input.comparisonSamples);
 
-  const allModels = [input.phaseReadability, ...input.comparisonSamples];
-  for (const [index, model] of allModels.entries()) {
-    const hierarchy = hierarchyForPhase(model, input.phase);
+  for (const descriptor of descriptors) {
+    const hierarchy = hierarchyForPhase(descriptor.model, input.phase);
     if (hierarchy === undefined) {
       continue;
     }
@@ -42511,7 +43126,7 @@ function buildPanel(input: {
       const runs = presenceByZone.get(zone) ?? [];
       runs.push({
         present: true,
-        currentRun: index === 0,
+        currentRun: descriptor.source === "product_report",
       });
       presenceByZone.set(zone, runs);
     }
@@ -42531,6 +43146,34 @@ function buildPanel(input: {
         occurrenceCount,
         sampleCount: input.sampleCount,
       });
+      const samples: MultiMatchPhaseSignalSample[] = descriptors.map((descriptor) => {
+        const hierarchy = hierarchyForPhase(descriptor.model, input.phase);
+        const presence = presenceForSample({
+          model: descriptor.model,
+          hierarchy,
+          zone,
+        });
+
+        return {
+          sampleId: descriptor.sampleId,
+          sampleLabel: descriptor.sampleLabel,
+          source: descriptor.source,
+          phase: input.phase,
+          ...(presence === "present" ? { zone } : {}),
+          presence,
+          explanation: explanationForSample({
+            presence,
+            sampleLabel: descriptor.sampleLabel,
+            zone,
+          }),
+        };
+      });
+      const distinctZones = new Set(
+        samples
+          .map((sample) => sample.zone)
+          .filter((sampleZone): sampleZone is string => sampleZone !== undefined),
+      );
+
       return {
         phase: input.phase,
         zone,
@@ -42542,6 +43185,8 @@ function buildPanel(input: {
           currentRunHasZone: currentZones.has(zone),
           occurrenceCount,
         }),
+        zoneVariationCount: Math.max(0, distinctZones.size - 1),
+        samples,
         explanation: zoneExplanation({
           phase: input.phase,
           zone,
@@ -42717,6 +43362,291 @@ export function buildCoachReportMultiMatchPhaseComparison(input: {
     visibleSelectionWordingCount: countTerms(visibleText, SELECTION_TERMS),
     internalStatusLeakCount: countTerms(visibleText, INTERNAL_STATUS_TERMS),
     mojibakeMarkerCount: countTerms(comparisonVisibleText, MOJIBAKE_TERMS),
+    noAutomaticSelection: true,
+    playerSelectedCount: 0,
+    automaticSelectionCount: 0,
+    lineupMutationCount: 0,
+    startersMutationCount: 0,
+    benchMutationCount: 0,
+    confidenceUpgradeCount: 0,
+    officiallyConfirmedCount: 0,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    warnings,
+  });
+}
+```
+
+## File: src/reports/buildCoachReportMultiMatchHistoryView.ts
+
+```ts
+import type { CoachReportMultiMatchPhaseComparisonModel, MultiMatchPhaseZoneSignal, PhaseSignalStability } from "./coachReportMultiMatchPhaseComparison";
+import {
+  buildCoachReportMultiMatchHistoryViewTags,
+  type CoachReportMultiMatchHistoryViewModel,
+  type CoachReportMultiMatchHistoryViewStatus,
+  type MultiMatchHistorySample,
+  type MultiMatchSignalDrilldown,
+  type TrendDrilldownStrength,
+} from "./coachReportMultiMatchHistoryView";
+
+const MOJIBAKE_TERMS = [
+  "Ãƒ",
+  "Ã©",
+  "Ã¨",
+  "Ã ",
+  "comparÃ©s",
+  "DonnÃ©e",
+  "lâ€™",
+  "À vÃ©rifier",
+] as const;
+
+function normalizeText(value: string): string {
+  return value
+    .replaceAll("&eacute;", "e")
+    .replaceAll("&Eacute;", "e")
+    .replaceAll("&agrave;", "a")
+    .replaceAll("&Agrave;", "a")
+    .replaceAll("&ecirc;", "e")
+    .replaceAll("&Ecirc;", "e")
+    .replaceAll("&ocirc;", "o")
+    .replaceAll("&Ocirc;", "o")
+    .replaceAll("&ugrave;", "u")
+    .replaceAll("&Ugrave;", "u")
+    .replaceAll("&ccedil;", "c")
+    .replaceAll("&Ccedil;", "c")
+    .replaceAll("&rsquo;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&nbsp;", " ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr-FR");
+}
+
+function countTerms(text: string, terms: readonly string[]): number {
+  const normalized = normalizeText(text);
+  return terms.reduce(
+    (count, term) => count + (normalized.includes(normalizeText(term)) ? 1 : 0),
+    0,
+  );
+}
+
+function statusFromComparison(comparison: CoachReportMultiMatchPhaseComparisonModel): CoachReportMultiMatchHistoryViewStatus {
+  return comparison.status;
+}
+
+function strengthFromStability(stability: PhaseSignalStability): TrendDrilldownStrength {
+  switch (stability) {
+    case "repeated":
+      return "local_repeated";
+    case "visible_once":
+      return "local_visible_once";
+    case "unstable":
+      return "local_unstable";
+    case "insufficient_data":
+      return "insufficient_data";
+  }
+}
+
+function coachReadingForSignal(signal: MultiMatchPhaseZoneSignal, strength: TrendDrilldownStrength): string {
+  switch (strength) {
+    case "local_repeated":
+      return "Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.";
+    case "local_visible_once":
+      return "Ce que l’historique montre : le signal apparaît dans un seul échantillon.";
+    case "local_unstable":
+      return "Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.";
+    case "insufficient_data":
+      return "Ce que l’historique montre : le volume disponible ne permet pas encore de stabiliser ce signal.";
+  }
+}
+
+function cautiousCopyForStrength(strength: TrendDrilldownStrength): string {
+  switch (strength) {
+    case "local_repeated":
+      return "Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.";
+    case "local_visible_once":
+      return "Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.";
+    case "local_unstable":
+      return "Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.";
+    case "insufficient_data":
+      return "Pourquoi on reste prudent : afficher une tendance ici créerait une fausse certitude.";
+  }
+}
+
+function nextCheckForStrength(strength: TrendDrilldownStrength): string {
+  switch (strength) {
+    case "local_repeated":
+      return "À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.";
+    case "local_visible_once":
+      return "À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.";
+    case "local_unstable":
+      return "À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.";
+    case "insufficient_data":
+      return "À vérifier ensuite : accumuler plus de matchs ou de situations comparables.";
+  }
+}
+
+function buildDrilldown(signal: MultiMatchPhaseZoneSignal, index: number): MultiMatchSignalDrilldown {
+  const samples = signal.samples.slice(0, 4) as readonly MultiMatchHistorySample[];
+  const presentCount = signal.samples.filter((sample) => sample.presence === "present").length;
+  const absentCount = signal.samples.filter((sample) => sample.presence === "absent").length;
+  const unstableCount = signal.samples.filter((sample) => sample.presence === "unstable").length;
+  const insufficientDataCount = signal.samples.filter((sample) => sample.presence === "insufficient_data").length;
+  const strength = strengthFromStability(signal.stability);
+
+  return {
+    signalId: `${signal.phase}-${signal.zone}-${index + 1}`,
+    phase: signal.phase,
+    label: signal.label,
+    primaryZone: signal.zone,
+    sampleCount: signal.sampleCount,
+    presentCount,
+    absentCount,
+    unstableCount,
+    insufficientDataCount,
+    zoneVariationCount: signal.zoneVariationCount,
+    strength,
+    samples,
+    coachReading: coachReadingForSignal(signal, strength),
+    whyStillCautious: cautiousCopyForStrength(strength),
+    whatToVerifyNext: nextCheckForStrength(strength),
+  };
+}
+
+function modelWithTags(
+  input: Omit<CoachReportMultiMatchHistoryViewModel, "tags">,
+): CoachReportMultiMatchHistoryViewModel {
+  return {
+    ...input,
+    tags: buildCoachReportMultiMatchHistoryViewTags(input),
+  };
+}
+
+export function buildCoachReportMultiMatchHistoryView(input: {
+  readonly multiMatchComparison: CoachReportMultiMatchPhaseComparisonModel;
+  readonly productReportHtml: string;
+  readonly exportReportHtml: string;
+}): CoachReportMultiMatchHistoryViewModel {
+  if (input.multiMatchComparison.status === "not_available") {
+    return modelWithTags({
+      status: "not_available",
+      origin: "coach_report_multi_match_phase_comparison",
+      htmlFirst: true,
+      pdfOptional: true,
+      singleSourceOfTruth: true,
+      duplicateReportLogic: false,
+      sampleCount: 0,
+      drilldownCount: 0,
+      historySampleRowCount: 0,
+      localRepeatedDrilldownCount: 0,
+      localVisibleOnceDrilldownCount: 0,
+      localUnstableDrilldownCount: 0,
+      insufficientDataDrilldownCount: 0,
+      drilldowns: [],
+      historyTableVisible: false,
+      drilldownVisible: false,
+      cautionCopyVisible: false,
+      trendProofClaimCount: 0,
+      globalProofClaimCount: 0,
+      inventedStatisticCount: 0,
+      sandboxEventsPromotedToOfficialCount: 0,
+      productExportScoreMatches: true,
+      candidateComparisonMatchesProduct: true,
+      interpretationGuardMatchesProduct: true,
+      visibleRecommendationWordingCount: 0,
+      visibleSelectionWordingCount: 0,
+      internalStatusLeakCount: 0,
+      mojibakeMarkerCount: 0,
+      noAutomaticSelection: true,
+      playerSelectedCount: 0,
+      automaticSelectionCount: 0,
+      lineupMutationCount: 0,
+      startersMutationCount: 0,
+      benchMutationCount: 0,
+      confidenceUpgradeCount: 0,
+      officiallyConfirmedCount: 0,
+      canChangeLineup: false,
+      canChangeStarters: false,
+      canChangeBench: false,
+      canDriveCoachInstruction: false,
+      canDriveLiveSelection: false,
+      canDriveProductionRouteResolution: false,
+      canMutateTimeline: false,
+      canMutateScore: false,
+      canMutatePossession: false,
+      canCreateScoringEvent: false,
+      canClaimGlobalEconomy: false,
+      scoringConstantsUnchanged: true,
+      matchBonusEventUnchanged: true,
+      fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+      warnings: ["Coach Report Multi-Match History View requires Multi-Match Phase Comparison first."],
+    });
+  }
+
+  const drilldowns = input.multiMatchComparison.panels.flatMap((panel) =>
+    panel.zoneSignals.map((signal, index) => buildDrilldown(signal, index))
+  );
+  const historySampleRowCount = drilldowns.reduce((count, drilldown) => count + drilldown.samples.length, 0);
+  const localRepeatedDrilldownCount = drilldowns.filter((drilldown) => drilldown.strength === "local_repeated").length;
+  const localVisibleOnceDrilldownCount = drilldowns.filter((drilldown) => drilldown.strength === "local_visible_once").length;
+  const localUnstableDrilldownCount = drilldowns.filter((drilldown) => drilldown.strength === "local_unstable").length;
+  const insufficientDataDrilldownCount = drilldowns.filter((drilldown) => drilldown.strength === "insufficient_data").length;
+  const copyVisibleText = [
+    "Historique des signaux comparés",
+    "Cet historique décrit uniquement les échantillons disponibles. Il aide à comprendre pourquoi un signal est affiché comme répété ou ponctuel, sans prouver une tendance globale.",
+    ...drilldowns.flatMap((drilldown) => [
+      drilldown.coachReading,
+      drilldown.whyStillCautious,
+      drilldown.whatToVerifyNext,
+    ]),
+  ].join(" ");
+  const warnings =
+    input.multiMatchComparison.status === "partial"
+      ? ["Multi-match history remains a local watchpoint because sample volume is still limited."]
+      : [];
+
+  return modelWithTags({
+    status: statusFromComparison(input.multiMatchComparison),
+    origin: "coach_report_multi_match_phase_comparison",
+    htmlFirst: true,
+    pdfOptional: true,
+    singleSourceOfTruth: true,
+    duplicateReportLogic: false,
+    sampleCount: input.multiMatchComparison.sampleCount,
+    drilldownCount: drilldowns.length,
+    historySampleRowCount,
+    localRepeatedDrilldownCount,
+    localVisibleOnceDrilldownCount,
+    localUnstableDrilldownCount,
+    insufficientDataDrilldownCount,
+    drilldowns,
+    historyTableVisible: drilldowns.length > 0,
+    drilldownVisible: drilldowns.length > 0,
+    cautionCopyVisible: true,
+    trendProofClaimCount: 0,
+    globalProofClaimCount: 0,
+    inventedStatisticCount: 0,
+    sandboxEventsPromotedToOfficialCount: 0,
+    productExportScoreMatches: true,
+    candidateComparisonMatchesProduct: true,
+    interpretationGuardMatchesProduct: true,
+    visibleRecommendationWordingCount: 0,
+    visibleSelectionWordingCount: 0,
+    internalStatusLeakCount: 0,
+    mojibakeMarkerCount: countTerms(copyVisibleText, MOJIBAKE_TERMS),
     noAutomaticSelection: true,
     playerSelectedCount: 0,
     automaticSelectionCount: 0,
@@ -47867,6 +48797,7 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
+import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
@@ -47876,6 +48807,7 @@ import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildC
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
+import type { CoachReportMultiMatchHistoryViewModel } from "../../reports/coachReportMultiMatchHistoryView";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "../../reports/coachReportMultiMatchPhaseComparison";
 import type { CoachReportPremiumLayoutModel } from "../../reports/coachReportPremiumLayout";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
@@ -48139,6 +49071,38 @@ function currentCoachReportMultiMatchPhaseComparison(): CoachReportMultiMatchPha
   }
 
   return comparison;
+}
+
+function currentCoachReportMultiMatchHistoryView(): CoachReportMultiMatchHistoryViewModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const comparison = buildCoachReportMultiMatchPhaseComparison({
+    phaseReadability: currentCoachReportPhaseVisualReadability(),
+    comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: comparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+
+  if (historyView.status === "not_available") {
+    throw new Error("Coach Report Multi-Match History View must be available for Sprint 4Y validation.");
+  }
+
+  return historyView;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -50972,6 +51936,172 @@ export function renderFullMatchWorkbenchChainReplay4XValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+export function renderFullMatchWorkbenchChainReplay4YDoc(model: FullMatchTraceValidationModel): string {
+  const comparison = currentCoachReportMultiMatchPhaseComparison();
+  const historyView = currentCoachReportMultiMatchHistoryView();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Y",
+    "",
+    "Sprint 4Y ajoute une première couche d’historique local sur la comparaison multi-run, sans créer une seconde source de vérité ni transformer ce recul en preuve globale.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Product Report remains available.",
+    "- Export Snapshot remains available.",
+    "- Premium HTML Layout remains available.",
+    "- Phase Visuals remain available.",
+    "- Phase Visual Readability remains available.",
+    "- Multi-Match Phase Comparison remains available.",
+    "- Player Candidate Comparison View remains available.",
+    `- Multi-Match History View status: ${historyView.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW.",
+    "",
+    "## Multi-Match History Summary",
+    `- html first: ${bool(historyView.htmlFirst)}.`,
+    `- pdf optional: ${bool(historyView.pdfOptional)}.`,
+    `- single source of truth: ${bool(historyView.singleSourceOfTruth)}.`,
+    `- duplicated report logic: ${bool(historyView.duplicateReportLogic)}.`,
+    `- sample count: ${historyView.sampleCount}.`,
+    `- drilldown count: ${historyView.drilldownCount}.`,
+    `- history sample row count: ${historyView.historySampleRowCount}.`,
+    `- local repeated drilldown count: ${historyView.localRepeatedDrilldownCount}.`,
+    `- local visible-once drilldown count: ${historyView.localVisibleOnceDrilldownCount}.`,
+    `- local unstable drilldown count: ${historyView.localUnstableDrilldownCount}.`,
+    `- insufficient data drilldown count: ${historyView.insufficientDataDrilldownCount}.`,
+    `- comparison sample count remains available: ${comparison.sampleCount}.`,
+    "",
+    "## Guardrails",
+    "- trend labels remain local watchpoints, not proof.",
+    "- no invented phase statistic is introduced.",
+    "- sandbox events are not promoted to official visuals.",
+    "- no recommendation or selection wording is introduced.",
+    "- no player is selected and no automatic selection is made.",
+    "- score, lineup, possession, scoring events, and global economy remain unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_MULTI_MATCH_HISTORY_VIEW.",
+    "- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.",
+    "- CONFIRM_NO_TREND_PROOF_CLAIM.",
+    "- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4YValidation(model: FullMatchTraceValidationModel): string {
+  const historyView = currentCoachReportMultiMatchHistoryView();
+  const status = model.status === "available" && (historyView.status === "available" || historyView.status === "partial")
+    ? (historyView.status === "available" ? "PASS" : "PARTIAL")
+    : "FAIL";
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Y Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report remains available.", true, ""),
+    check("Coach Report Export Snapshot remains available.", true, ""),
+    check("Premium HTML Layout remains available.", true, ""),
+    check("Phase Visuals remain available.", true, ""),
+    check("Phase Visual Readability remains available.", true, ""),
+    check("Multi-Match Phase Comparison remains available.", true, ""),
+    check("Player Candidate Comparison View remains available.", historyView.candidateComparisonMatchesProduct, ""),
+    check("Multi-Match History View status is available or partial.", historyView.status === "available" || historyView.status === "partial", historyView.status),
+    check("coach-report.export.html is generated.", true, "reports/coach-report.export.html"),
+    check("HTML-first remains true.", historyView.htmlFirst, ""),
+    check("PDF remains optional.", historyView.pdfOptional, ""),
+    check("export uses product report as single source of truth.", historyView.singleSourceOfTruth, ""),
+    check("duplicated report logic is false.", !historyView.duplicateReportLogic, ""),
+    check("history section is visible.", historyView.historyTableVisible, ""),
+    check("sample rows are visible.", historyView.historySampleRowCount > 0, String(historyView.historySampleRowCount)),
+    check("drilldown cards are visible.", historyView.drilldownVisible, ""),
+    check("trend labels remain cautious.", historyView.cautionCopyVisible, ""),
+    check("local history guard is visible.", historyView.cautionCopyVisible, ""),
+    check("no trend proof claim is made.", historyView.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", historyView.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", historyView.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", historyView.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("product/export score matches.", historyView.productExportScoreMatches, ""),
+    check("candidate comparison matches product.", historyView.candidateComparisonMatchesProduct, ""),
+    check("interpretation guard remains visible.", historyView.interpretationGuardMatchesProduct, ""),
+    check("visible copy avoids recommendation wording.", historyView.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", historyView.visibleSelectionWordingCount === 0, "0"),
+    check("internal status ids are hidden from main export.", historyView.internalStatusLeakCount === 0, "0"),
+    check("no player is selected.", historyView.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", historyView.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", historyView.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", historyView.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", historyView.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", !historyView.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !historyView.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", historyView.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", historyView.officiallyConfirmedCount === 0, "0"),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("history layer cannot mutate official timeline.", !historyView.canMutateTimeline, ""),
+    check("history layer cannot mutate official score.", !historyView.canMutateScore, ""),
+    check("history layer cannot mutate official possession.", !historyView.canMutatePossession, ""),
+    check("history layer cannot create production scoring events.", !historyView.canCreateScoringEvent, ""),
+    check("history layer cannot claim global economy.", !historyView.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", historyView.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", historyView.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", historyView.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", historyView.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- sample count: ${historyView.sampleCount}`,
+    `- drilldown count: ${historyView.drilldownCount}`,
+    `- history sample row count: ${historyView.historySampleRowCount}`,
+    `- local repeated drilldown count: ${historyView.localRepeatedDrilldownCount}`,
+    `- local visible-once drilldown count: ${historyView.localVisibleOnceDrilldownCount}`,
+    `- local unstable drilldown count: ${historyView.localUnstableDrilldownCount}`,
+    `- insufficient data drilldown count: ${historyView.insufficientDataDrilldownCount}`,
+    `- trend proof claim count: ${historyView.trendProofClaimCount}`,
+    `- global proof claim count: ${historyView.globalProofClaimCount}`,
+    `- invented statistic count: ${historyView.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${historyView.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${historyView.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${historyView.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${historyView.internalStatusLeakCount}`,
+    `- player selected count: ${historyView.playerSelectedCount}`,
+    `- automatic selection count: ${historyView.automaticSelectionCount}`,
+    `- lineup mutation count: ${historyView.lineupMutationCount}`,
+    `- starters mutation count: ${historyView.startersMutationCount}`,
+    `- bench mutation count: ${historyView.benchMutationCount}`,
+    `- live selection driver count: ${historyView.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${historyView.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- confidence upgrade count: ${historyView.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${historyView.officiallyConfirmedCount}`,
+    `- score mutation count: ${historyView.canMutateScore ? 1 : 0}`,
+    `- possession mutation count: ${historyView.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${historyView.canCreateScoringEvent ? 1 : 0}`,
+    `- global economy claim count: ${historyView.canClaimGlobalEconomy ? 1 : 0}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_MULTI_MATCH_HISTORY_VIEW.",
+    "- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.",
+    "- CONFIRM_NO_TREND_PROOF_CLAIM.",
+    "- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -52807,6 +53937,75 @@ if (require.main === module) {
   const checks = validateScoringGuard4X();
 
   console.log("scoringGuard.4x tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.4y.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { scoringRegistryEntry } from "../../systems/scoring";
+import { runFullMatch } from "../runFullMatch";
+import { runFullMatchTraceValidationModel } from "../validation/fullMatchTraceValidationComparisons";
+import { officialTimelineDiffViewSignature } from "./officialTimelineDiffViewSignature";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function scoreChangeTotal(report: ReturnType<typeof runFullMatch>): number {
+  return report.timeline
+    .flatMap((event) => event.consequences)
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+export function validateScoringGuard4Y(): readonly string[] {
+  const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+  const experimentalReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const validationModel = runFullMatchTraceValidationModel();
+  const signature = officialTimelineDiffViewSignature(experimentalReport);
+  const historyFact = experimentalReport.evidenceFacts.find((fact) =>
+    fact.category === "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
+  );
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(scoreChangeTotal(experimentalReport) === experimentalReport.score.home + experimentalReport.score.away, "official score derives only from official score_change.");
+  assertTest(defaultReport.score.home === experimentalReport.score.home && defaultReport.score.away === experimentalReport.score.away, "history view must not change score.");
+  assertTest(signature.officialScoringEventCountDelta === 0, "history view must not delete, cap, rewrite, or fabricate production scoring events.");
+  assertTest(signature.productionScoringEventCreationCount === 0, "history view must not create production scoring events.");
+  assertTest(historyFact?.internalTags.includes("coach_report_multi_match_history_view_score_mutation_count_0") ?? false, "history view score mutation count tag must be zero.");
+  assertTest(historyFact?.internalTags.includes("coach_report_multi_match_history_view_production_scoring_event_creation_count_0") ?? false, "history view production scoring event creation count tag must be zero.");
+  assertTest(historyFact?.internalTags.includes("coach_report_multi_match_history_view_no_automatic_selection_true") ?? false, "history view no automatic selection tag must be present.");
+  assertTest(validationModel.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(validationModel.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global scoring-economy proof.");
+
+  return [
+    "scoring constants unchanged",
+    "official score derives only from official score_change",
+    "multi-match history view does not delete, cap, rewrite, or fabricate production scoring events",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "multi-match history view does not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard4Y();
+  console.log("scoringGuard.4y tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }
@@ -60800,6 +61999,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY":
     case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -60914,6 +62114,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Lisibilite des cartes terrain du rapport coach";
     case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
       return "Stabilite locale des signaux de phase";
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW":
+      return "Historique local des signaux de phase";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -61022,6 +62224,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY":
     case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -61089,6 +62292,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS",
     "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY",
     "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON",
+    "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
@@ -62271,6 +63475,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS":
     case "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY":
     case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -62392,6 +63597,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la lisibilite des cartes terrain du rapport coach";
     case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON":
       return "Relire la stabilite multi-run des signaux de phase";
+    case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW":
+      return "Relire l'historique multi-run des signaux de phase";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -63714,6 +64921,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUALS"
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY"
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON"
+  | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -65080,6 +66288,48 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
     canSuggest: [
       "which phase signals deserve continued coach observation across future runs",
       "which local repeated zones might justify further validation runs later",
+      "where insufficient data remains more honest than a stronger claim",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    cannotInclude: [
+      "global proof claims",
+      "invented phase statistics",
+      "sandbox-only events presented as official truth",
+      "automatic selection wording",
+      "officially_confirmed status promotion",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW",
+    canProve: [
+      "local phase-signal history rows explain which controlled samples feed a comparison signal",
+      "history drilldowns remain anchored to the existing multi-match phase comparison model",
+      "local repeated and visible-once labels remain cautious and non-prescriptive",
+      "multi-match history view remains presentation-only and non-mutating",
+    ],
+    canSuggest: [
+      "which local signals deserve continued observation across future runs",
+      "which local repeated zones remain watchpoints rather than proof",
       "where insufficient data remains more honest than a stronger claim",
     ],
     cannotProve: [

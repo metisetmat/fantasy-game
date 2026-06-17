@@ -13,6 +13,28 @@ export type PhaseSignalStability =
   | "unstable"
   | "insufficient_data";
 
+export type MultiMatchHistorySampleSource =
+  | "official_aggregates"
+  | "product_report"
+  | "controlled_sample";
+
+export type SampleSignalPresence =
+  | "present"
+  | "absent"
+  | "unstable"
+  | "insufficient_data";
+
+export interface MultiMatchPhaseSignalSample {
+  readonly sampleId: string;
+  readonly sampleLabel: string;
+  readonly source: MultiMatchHistorySampleSource;
+  readonly phase: "with_ball" | "without_ball" | "goalkeeper";
+  readonly zone?: string;
+  readonly presence: SampleSignalPresence;
+  readonly value?: number;
+  readonly explanation: string;
+}
+
 export interface MultiMatchPhaseZoneSignal {
   readonly phase: "with_ball" | "without_ball" | "goalkeeper";
   readonly zone: string;
@@ -20,7 +42,9 @@ export interface MultiMatchPhaseZoneSignal {
   readonly occurrenceCount: number;
   readonly sampleCount: number;
   readonly stability: PhaseSignalStability;
-  readonly source: "official_aggregates" | "product_report" | "controlled_sample";
+  readonly source: MultiMatchHistorySampleSource;
+  readonly zoneVariationCount: number;
+  readonly samples: readonly MultiMatchPhaseSignalSample[];
   readonly explanation: string;
 }
 

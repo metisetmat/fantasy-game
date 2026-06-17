@@ -6,9 +6,12 @@ import {
   buildCoachReportMultiMatchPhaseComparisonTags,
   type CoachReportMultiMatchPhaseComparisonModel,
   type CoachReportMultiMatchPhaseComparisonStatus,
+  type MultiMatchHistorySampleSource,
   type MultiMatchPhaseComparisonPanel,
+  type MultiMatchPhaseSignalSample,
   type MultiMatchPhaseZoneSignal,
   type PhaseSignalStability,
+  type SampleSignalPresence,
 } from "./coachReportMultiMatchPhaseComparison";
 
 const RECOMMENDATION_TERMS = [
@@ -61,6 +64,13 @@ type PhaseKey = "with_ball" | "without_ball" | "goalkeeper";
 interface RunPhasePresence {
   readonly present: boolean;
   readonly currentRun: boolean;
+}
+
+interface SampleDescriptor {
+  readonly sampleId: string;
+  readonly sampleLabel: string;
+  readonly source: MultiMatchHistorySampleSource;
+  readonly model: CoachReportPhaseVisualReadabilityModel;
 }
 
 interface PanelCopy {
@@ -191,6 +201,63 @@ function currentPhaseZones(
   return new Set(hierarchy === undefined ? [] : zonesForHierarchy(hierarchy));
 }
 
+function sampleDescriptors(
+  phaseReadability: CoachReportPhaseVisualReadabilityModel,
+  comparisonSamples: readonly CoachReportPhaseVisualReadabilityModel[],
+): readonly SampleDescriptor[] {
+  return [
+    {
+      sampleId: "current_product_run",
+      sampleLabel: "Run actuel",
+      source: "product_report",
+      model: phaseReadability,
+    },
+    ...comparisonSamples.map((model, index) => ({
+      sampleId: `comparison_sample_${index + 1}`,
+      sampleLabel: `Échantillon ${index + 1}`,
+      source: "controlled_sample" as const,
+      model,
+    })),
+  ];
+}
+
+function presenceForSample(input: {
+  readonly model: CoachReportPhaseVisualReadabilityModel;
+  readonly hierarchy: PhaseVisualZoneHierarchy | undefined;
+  readonly zone: string;
+}): SampleSignalPresence {
+  if (input.hierarchy === undefined) {
+    return input.model.status === "partial" || input.model.status === "not_available"
+      ? "insufficient_data"
+      : "absent";
+  }
+
+  if (zonesForHierarchy(input.hierarchy).includes(input.zone)) {
+    return "present";
+  }
+
+  return input.model.status === "partial"
+    ? "unstable"
+    : "absent";
+}
+
+function explanationForSample(input: {
+  readonly presence: SampleSignalPresence;
+  readonly sampleLabel: string;
+  readonly zone: string;
+}): string {
+  switch (input.presence) {
+    case "present":
+      return `${input.sampleLabel}: signal visible autour de ${input.zone}.`;
+    case "absent":
+      return `${input.sampleLabel}: signal non visible dans cette zone.`;
+    case "unstable":
+      return `${input.sampleLabel}: lecture partielle, le signal n'est pas stabilisé dans cette zone.`;
+    case "insufficient_data":
+      return `${input.sampleLabel}: données insuffisantes pour confirmer cette zone.`;
+  }
+}
+
 function buildPanelCopy(input: {
   readonly phase: PhaseKey;
   readonly sampleCount: number;
@@ -300,10 +367,10 @@ function buildPanel(input: {
 }): MultiMatchPhaseComparisonPanel {
   const presenceByZone = new Map<string, RunPhasePresence[]>();
   const currentZones = currentPhaseZones(input.phaseReadability, input.phase);
+  const descriptors = sampleDescriptors(input.phaseReadability, input.comparisonSamples);
 
-  const allModels = [input.phaseReadability, ...input.comparisonSamples];
-  for (const [index, model] of allModels.entries()) {
-    const hierarchy = hierarchyForPhase(model, input.phase);
+  for (const descriptor of descriptors) {
+    const hierarchy = hierarchyForPhase(descriptor.model, input.phase);
     if (hierarchy === undefined) {
       continue;
     }
@@ -312,7 +379,7 @@ function buildPanel(input: {
       const runs = presenceByZone.get(zone) ?? [];
       runs.push({
         present: true,
-        currentRun: index === 0,
+        currentRun: descriptor.source === "product_report",
       });
       presenceByZone.set(zone, runs);
     }
@@ -332,6 +399,34 @@ function buildPanel(input: {
         occurrenceCount,
         sampleCount: input.sampleCount,
       });
+      const samples: MultiMatchPhaseSignalSample[] = descriptors.map((descriptor) => {
+        const hierarchy = hierarchyForPhase(descriptor.model, input.phase);
+        const presence = presenceForSample({
+          model: descriptor.model,
+          hierarchy,
+          zone,
+        });
+
+        return {
+          sampleId: descriptor.sampleId,
+          sampleLabel: descriptor.sampleLabel,
+          source: descriptor.source,
+          phase: input.phase,
+          ...(presence === "present" ? { zone } : {}),
+          presence,
+          explanation: explanationForSample({
+            presence,
+            sampleLabel: descriptor.sampleLabel,
+            zone,
+          }),
+        };
+      });
+      const distinctZones = new Set(
+        samples
+          .map((sample) => sample.zone)
+          .filter((sampleZone): sampleZone is string => sampleZone !== undefined),
+      );
+
       return {
         phase: input.phase,
         zone,
@@ -343,6 +438,8 @@ function buildPanel(input: {
           currentRunHasZone: currentZones.has(zone),
           occurrenceCount,
         }),
+        zoneVariationCount: Math.max(0, distinctZones.size - 1),
+        samples,
         explanation: zoneExplanation({
           phase: input.phase,
           zone,
