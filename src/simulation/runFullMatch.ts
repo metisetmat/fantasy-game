@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import type { MatchReportWarning } from "../contracts/matchReportWarnings";
@@ -224,7 +223,7 @@ import {
   coachReportPhaseVisualReadabilityLimitations,
 } from "../reports/coachReportPhaseVisualReadability";
 import { buildCoachMatchHistoryRecord } from "../reports/history/buildCoachMatchHistoryRecord";
-import { createFileBackedCoachMatchHistoryStore } from "../reports/history/fileBackedCoachMatchHistoryStore";
+import { createInMemoryCoachMatchHistoryStore } from "../reports/history/inMemoryCoachMatchHistoryStore";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3235,10 +3234,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       });
   const coachReportPersistentHistoryStore = coachReportMultiMatchHistoryViewModel === null
     ? null
-    : createFileBackedCoachMatchHistoryStore({
-        filePath: join(process.cwd(), "reports", "history", "coach-match-history-runtime.json"),
-        allowWrite: true,
-      });
+    : createInMemoryCoachMatchHistoryStore();
   const coachReportRealMatchHistoryIntegrationModel = coachReportMultiMatchHistoryViewModel === null
     ? null
     : buildCoachReportRealMatchHistoryIntegration({
@@ -3246,10 +3242,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         productReportHtml: coachProductReportHtml,
         exportReportHtml: baselineCoachReportExportHtml,
         multiMatchHistoryView: coachReportMultiMatchHistoryViewModel,
-        historyStore: coachReportPersistentHistoryStore ?? createFileBackedCoachMatchHistoryStore({
-          filePath: join(process.cwd(), "reports", "history", "coach-match-history-runtime.json"),
-          allowWrite: true,
-        }),
+        historyStore: coachReportPersistentHistoryStore ?? createInMemoryCoachMatchHistoryStore(),
         runId: `${report.matchId}:${routeSelectionMode}`,
         generatedAtIso: new Date().toISOString(),
       });

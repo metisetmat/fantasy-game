@@ -23,6 +23,7 @@ import {
 } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
+import { escapeHtml } from "./htmlCoachReport";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -1468,7 +1469,7 @@ function renderPersistentHistoryAdapter(
           <div><span>Location visible</span><strong>${model.storageLocationVisible ? "oui" : "non"}</strong></div>
           <div><span>Lecture report read-only</span><strong class="persistent-history-readonly">${model.reportQueriesReadOnly ? "oui" : "non"}</strong></div>
         </div>
-        ${model.storageLocation === undefined ? "" : `<p><strong>Stockage local :</strong> <code>${model.storageLocation}</code></p>`}
+        ${model.storageLocation === undefined ? "" : `<p><strong>Stockage local :</strong> <code>${escapeHtml(model.storageLocation)}</code></p>`}
       </article>
       <article class="persistent-history-card">
         <h3>Comptes de persistance</h3>

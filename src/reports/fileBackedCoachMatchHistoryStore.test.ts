@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
@@ -69,6 +69,27 @@ export function validateFileBackedCoachMatchHistoryStore(): readonly string[] {
   assertTest(outsideMutation !== null, "record is available after reload.");
   assertTest(reloaded.listAll()[0]?.signals[0]?.explanation !== "changed outside", "store does not mutate records during query.");
 
+  const malformedPath = join(directory, "malformed-history.json");
+  writeFileSync(malformedPath, "{ broken json", "utf8");
+  const guardedStore = createFileBackedCoachMatchHistoryStore({
+    filePath: malformedPath,
+    allowWrite: true,
+    initialRecords: [record],
+  });
+  const malformedBeforeSave = readFileSync(malformedPath, "utf8");
+  guardedStore.save({
+    ...record,
+    historyRecordId: `${record.historyRecordId}-guarded`,
+    runId: "guarded-save",
+  });
+  const malformedAfterSave = readFileSync(malformedPath, "utf8");
+  assertTest(malformedAfterSave === malformedBeforeSave, "parse failure keeps existing history file untouched.");
+  assertTest(!guardedStore.describe().durable, "parse failure disables durable writes until the file is repaired.");
+  assertTest(
+    guardedStore.describe().warning?.includes("preserved without rewrite") ?? false,
+    "parse failure surfaces a read-only warning instead of silently resetting history.",
+  );
+
   return [
     "file-backed store creates a file",
     "file-backed store saves records",
@@ -79,6 +100,9 @@ export function validateFileBackedCoachMatchHistoryStore(): readonly string[] {
     "report queries remain read-only",
     "store description says durable true",
     "store does not mutate records during query",
+    "parse failure keeps existing history file untouched",
+    "parse failure disables durable writes until the file is repaired",
+    "parse failure surfaces a read-only warning instead of silently resetting history",
   ];
 }
 

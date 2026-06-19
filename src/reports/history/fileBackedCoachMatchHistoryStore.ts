@@ -21,6 +21,11 @@ import {
   sortCoachMatchHistoryRecords,
 } from "./coachMatchHistorySerialization";
 
+interface FileBackedStoreRuntimeState {
+  allowWrite: boolean;
+  parseWarning?: string;
+}
+
 function matchesTeam(record: CoachMatchHistoryRecord, teamId: string | undefined): boolean {
   if (teamId === undefined) {
     return true;
@@ -43,10 +48,16 @@ function queryWarnings(records: readonly CoachMatchHistoryRecord[], description:
   return warnings;
 }
 
-function buildDescription(filePath: string, allowWrite: boolean): CoachMatchHistoryStoreDescription {
+function buildDescription(filePath: string, state: FileBackedStoreRuntimeState): CoachMatchHistoryStoreDescription {
+  const warning = state.parseWarning ?? (
+    state.allowWrite
+      ? undefined
+      : "File-backed store is currently read-only and will not persist new writes."
+  );
+
   return {
     storeKind: "file_backed",
-    durable: allowWrite,
+    durable: state.allowWrite && state.parseWarning === undefined,
     readOnlyForReports: true,
     canDriveCoachInstruction: false,
     canDriveLiveSelection: false,
@@ -55,7 +66,7 @@ function buildDescription(filePath: string, allowWrite: boolean): CoachMatchHist
     canCreateScoringEvent: false,
     canClaimGlobalEconomy: false,
     storageLocation: filePath,
-    ...(allowWrite ? {} : { warning: "File-backed store is currently read-only and will not persist new writes." }),
+    ...(warning === undefined ? {} : { warning }),
   };
 }
 
@@ -70,7 +81,9 @@ export function createFileBackedCoachMatchHistoryStore(input: {
   readonly allowWrite: boolean;
 }): CoachMatchHistoryStore {
   const initialRecords = input.initialRecords ?? [];
-  const description = buildDescription(input.filePath, input.allowWrite);
+  const runtimeState: FileBackedStoreRuntimeState = {
+    allowWrite: input.allowWrite,
+  };
   let records: readonly CoachMatchHistoryRecord[] = sortCoachMatchHistoryRecords(initialRecords);
 
   if (existsSync(input.filePath)) {
@@ -83,12 +96,16 @@ export function createFileBackedCoachMatchHistoryStore(input: {
       }
 
       records = sortCoachMatchHistoryRecords([...merged.values()]);
-    } catch {
+    } catch (error) {
+      runtimeState.parseWarning =
+        `Persistent history file could not be parsed and is preserved without rewrite: ${error instanceof Error ? error.message : "unknown error"}.`;
       records = sortCoachMatchHistoryRecords(initialRecords);
     }
-  } else if (input.allowWrite) {
+  } else if (runtimeState.allowWrite) {
     writeRecords(input.filePath, records);
   }
+
+  const description = (): CoachMatchHistoryStoreDescription => buildDescription(input.filePath, runtimeState);
 
   const saveRecord = (record: CoachMatchHistoryRecord): CoachMatchHistoryRecord => {
     const next = cloneCoachMatchHistoryRecord(record);
@@ -98,7 +115,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
     merged.set(next.historyRecordId, next);
     records = sortCoachMatchHistoryRecords([...merged.values()]);
 
-    if (input.allowWrite) {
+    if (runtimeState.allowWrite && runtimeState.parseWarning === undefined) {
       writeRecords(input.filePath, records);
     }
 
@@ -126,7 +143,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
       recordCount: filtered.length,
       signalCount,
       records: filtered,
-      warnings: queryWarnings(filtered, description),
+      warnings: queryWarnings(filtered, description()),
     };
   };
 
@@ -142,7 +159,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
       return records.map(cloneCoachMatchHistoryRecord);
     },
     describe(): CoachMatchHistoryStoreDescription {
-      return description;
+      return description();
     },
   };
 }
