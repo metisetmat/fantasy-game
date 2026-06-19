@@ -1,4 +1,6 @@
+import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { createInMemoryCoachMatchHistoryStore } from "./history/inMemoryCoachMatchHistoryStore";
 
 function assertTest(condition: boolean, message: string): asserts condition {
   if (!condition) {
@@ -7,7 +9,7 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportRealMatchHistoryIntegration(): readonly string[] {
-  const { realMatchHistoryIntegration } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { report, productHtml, exportHtml, historyView, realMatchHistoryIntegration } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
   assertTest(realMatchHistoryIntegration.status === "available" || realMatchHistoryIntegration.status === "partial", "integration status is available or partial.");
   assertTest(realMatchHistoryIntegration.storeKind.length > 0, "store kind is present.");
@@ -27,6 +29,20 @@ export function validateCoachReportRealMatchHistoryIntegration(): readonly strin
   assertTest(realMatchHistoryIntegration.inventedStatisticCount === 0, "invented statistic count is zero.");
   assertTest(realMatchHistoryIntegration.sandboxEventsPromotedToOfficialCount === 0, "sandbox events promoted to official count is zero.");
 
+  const failedUpstreamIntegration = buildCoachReportRealMatchHistoryIntegration({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+    multiMatchHistoryView: {
+      ...historyView,
+      status: "failed",
+    },
+    historyStore: createInMemoryCoachMatchHistoryStore(),
+    runId: "failed-upstream-test",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  assertTest(failedUpstreamIntegration.status === "failed", "integration preserves an upstream failed history-view status.");
+
   return [
     "integration model exists",
     "status is available or partial",
@@ -37,6 +53,7 @@ export function validateCoachReportRealMatchHistoryIntegration(): readonly strin
     "queried signal count is present",
     "controlled/simulated/product history counts are present",
     "history remains read-only",
+    "failed upstream history view remains failed",
     "trend proof claim count is 0",
     "global proof claim count is 0",
     "invented statistic count is 0",
@@ -51,4 +68,3 @@ if (require.main === module) {
     console.log(`- ${check}`);
   }
 }
-

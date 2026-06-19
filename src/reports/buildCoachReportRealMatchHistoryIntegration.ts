@@ -108,6 +108,27 @@ function withTags(
   };
 }
 
+function resolveIntegrationStatus(input: {
+  readonly upstreamStatus: CoachReportMultiMatchHistoryViewModel["status"];
+  readonly currentMatchRecordSaved: boolean;
+  readonly queryStatus: "not_available" | "available" | "partial" | "failed";
+}): CoachReportRealMatchHistoryIntegrationModel["status"] {
+  if (!input.currentMatchRecordSaved || (input.queryStatus !== "available" && input.queryStatus !== "partial")) {
+    return "failed";
+  }
+
+  switch (input.upstreamStatus) {
+    case "available":
+      return "available";
+    case "partial":
+      return "partial";
+    case "failed":
+      return "failed";
+    case "not_available":
+      return "not_available";
+  }
+}
+
 export function buildCoachReportRealMatchHistoryIntegration(input: {
   readonly matchReport: MatchReport;
   readonly productReportHtml: string;
@@ -207,9 +228,11 @@ export function buildCoachReportRealMatchHistoryIntegration(input: {
   const simulatedMatchHistoryRecordCount = allRecords.filter((record) => record.source === "simulated_match_history").length;
   const productHistoryRecordCount = allRecords.filter((record) => record.source === "product_history_store").length;
   const currentMatchRecordSaved = allRecords.some((record) => record.historyRecordId === currentRecord.historyRecordId);
-  const status = currentMatchRecordSaved && (query.status === "available" || query.status === "partial")
-    ? (input.multiMatchHistoryView.status === "available" ? "available" : "partial")
-    : "failed";
+  const status = resolveIntegrationStatus({
+    upstreamStatus: input.multiMatchHistoryView.status,
+    currentMatchRecordSaved,
+    queryStatus: query.status,
+  });
   const warnings = [
     ...query.warnings,
     ...(input.historyStore.storeKind === "in_memory"

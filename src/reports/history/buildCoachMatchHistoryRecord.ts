@@ -48,6 +48,23 @@ function buildSignals(input: {
   }));
 }
 
+function normalizeHtmlForScoreCheck(html: string): string {
+  return html
+    .replace(/&nbsp;|&#160;/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function hasOfficialScoreLabel(html: string, scoreHome: number, scoreAway: number): boolean {
+  const normalized = normalizeHtmlForScoreCheck(html);
+  const scorePatterns = [
+    `${scoreHome} - ${scoreAway}`,
+    `${scoreHome}-${scoreAway}`,
+  ];
+
+  return scorePatterns.some((pattern) => normalized.includes(pattern));
+}
+
 export function buildCoachMatchHistoryRecord(input: {
   readonly matchReport: MatchReport;
   readonly productReportHtml: string;
@@ -59,8 +76,8 @@ export function buildCoachMatchHistoryRecord(input: {
 }): CoachMatchHistoryRecord {
   const { homeTeamId, awayTeamId } = deriveTeamIds(input.matchReport);
   const scoreLooksOfficial =
-    input.productReportHtml.includes(`${input.matchReport.score.home}`) &&
-    input.exportReportHtml.includes(`${input.matchReport.score.home}`);
+    hasOfficialScoreLabel(input.productReportHtml, input.matchReport.score.home, input.matchReport.score.away) &&
+    hasOfficialScoreLabel(input.exportReportHtml, input.matchReport.score.home, input.matchReport.score.away);
 
   return {
     historyRecordId: `${input.matchReport.matchId}:${input.runId}:${input.source}`,
