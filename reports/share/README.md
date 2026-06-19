@@ -1,6 +1,6 @@
-# Sprint 4Y Share Pack
+# Sprint 4Z Share Pack
 
-Current sprint: Sprint 4Y - Multi-Match History View & Trend Drilldown
+Current sprint: Sprint 4Z - Real Match History Store & Report Integration
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-workbench-chain-replay-4y.md
-- validation.fullmatch-workbench-chain-replay-4y.md
+- fullmatch-workbench-chain-replay-4z.md
+- validation.fullmatch-workbench-chain-replay-4z.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,10 +24,10 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Sprint 4Y keeps the product report as the single source of truth and adds a local sample-history drilldown layer above the existing multi-run comparison. It shows where a signal appears or disappears without changing score, selection, lineup, starters, bench, live selection, production route resolution, possession, scoring events, or global economy validation.
+Sprint 4Z keeps the product report as the single source of truth and prepares a product-shaped local history store above the existing multi-run history view. It stores the current match as a read-only local record, keeps controlled samples distinct from simulated history, and never changes score, selection, lineup, starters, bench, live selection, production route resolution, possession, scoring events, or global economy validation.
 
 Review order:
 1. Read README.md for upload scope.
-2. Read fullmatch-workbench-chain-replay-4y.md for history scope and guardrails.
-3. Read validation.fullmatch-workbench-chain-replay-4y.md for source-of-truth, copy, print, and non-mutation checks.
+2. Read fullmatch-workbench-chain-replay-4z.md for the real-history boundary and store summary.
+3. Read validation.fullmatch-workbench-chain-replay-4z.md for source-of-truth, copy, print, and non-mutation checks.
 4. Open coach-report.export.html for the coach-facing HTML result.

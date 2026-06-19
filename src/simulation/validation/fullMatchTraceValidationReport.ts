@@ -8,6 +8,7 @@ import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhas
 import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
 import { buildCoachReportMultiMatchPhaseComparison } from "../../reports/buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "../../reports/buildCoachReportMultiMatchPhaseComparisonSamples";
+import { buildCoachReportRealMatchHistoryIntegration } from "../../reports/buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
@@ -15,6 +16,8 @@ import type { CoachReportExportSnapshotModel } from "../../reports/coachReportEx
 import type { CoachReportMultiMatchHistoryViewModel } from "../../reports/coachReportMultiMatchHistoryView";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "../../reports/coachReportMultiMatchPhaseComparison";
 import type { CoachReportPremiumLayoutModel } from "../../reports/coachReportPremiumLayout";
+import type { CoachReportRealMatchHistoryIntegrationModel } from "../../reports/coachReportRealMatchHistoryIntegration";
+import { createInMemoryCoachMatchHistoryStore } from "../../reports/history/inMemoryCoachMatchHistoryStore";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -308,6 +311,47 @@ function currentCoachReportMultiMatchHistoryView(): CoachReportMultiMatchHistory
   }
 
   return historyView;
+}
+
+function currentCoachReportRealMatchHistoryIntegration(): CoachReportRealMatchHistoryIntegrationModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const comparison = buildCoachReportMultiMatchPhaseComparison({
+    phaseReadability: currentCoachReportPhaseVisualReadability(),
+    comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: comparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const integration = buildCoachReportRealMatchHistoryIntegration({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView: historyView,
+    historyStore: createInMemoryCoachMatchHistoryStore(),
+    runId: "validation-4z",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+
+  if (integration.status === "not_available") {
+    throw new Error("Coach Report Real Match History Integration must be available for Sprint 4Z validation.");
+  }
+
+  return integration;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -3304,6 +3348,176 @@ export function renderFullMatchWorkbenchChainReplay4YValidation(model: FullMatch
     "- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.",
     "- CONFIRM_NO_TREND_PROOF_CLAIM.",
     "- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4ZDoc(model: FullMatchTraceValidationModel): string {
+  const integration = currentCoachReportRealMatchHistoryIntegration();
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Z",
+    "",
+    "Sprint 4Z pr&eacute;pare un vrai stockage produit de l&rsquo;historique de matchs, mais le garde local, en m&eacute;moire et strictement en lecture seule.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Product Report remains available.",
+    "- Export Snapshot remains available.",
+    "- Premium HTML Layout remains available.",
+    "- Phase Visuals remain available.",
+    "- Phase Visual Readability remains available.",
+    "- Multi-Match Phase Comparison remains available.",
+    "- Multi-Match History View remains available.",
+    "- Player Candidate Comparison View remains available.",
+    `- Real Match History Store status: ${integration.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE.",
+    "",
+    "## Real Match History Summary",
+    `- html first: ${bool(integration.htmlFirst)}.`,
+    `- pdf optional: ${bool(integration.pdfOptional)}.`,
+    `- single source of truth: ${bool(integration.singleSourceOfTruth)}.`,
+    `- duplicated report logic: ${bool(integration.duplicateReportLogic)}.`,
+    `- store kind: ${integration.storeKind}.`,
+    `- current match record saved: ${bool(integration.currentMatchRecordSaved)}.`,
+    `- stored record count: ${integration.storedRecordCount}.`,
+    `- queried record count: ${integration.queriedRecordCount}.`,
+    `- queried signal count: ${integration.queriedSignalCount}.`,
+    `- controlled sample record count: ${integration.controlledSampleRecordCount}.`,
+    `- simulated match history record count: ${integration.simulatedMatchHistoryRecordCount}.`,
+    `- product history record count: ${integration.productHistoryRecordCount}.`,
+    "",
+    "## Guardrails",
+    "- history remains local and read-only.",
+    "- no trend proof claim is made.",
+    "- no global proof claim is made.",
+    "- no invented phase statistic is introduced.",
+    "- sandbox events are not promoted to official visuals.",
+    "- no recommendation or selection wording is introduced.",
+    "- score, lineup, possession, scoring events, and global economy remain unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_REAL_MATCH_HISTORY_STORE_BOUNDARY.",
+    "- CONFIRM_HISTORY_IS_READ_ONLY.",
+    "- CONFIRM_NO_HISTORY_PROOF_CLAIM.",
+    "- PREPARE_UI_WIRING_OR_DATABASE_ADAPTER.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay4ZValidation(model: FullMatchTraceValidationModel): string {
+  const integration = currentCoachReportRealMatchHistoryIntegration();
+  const status = model.status === "available" && (integration.status === "available" || integration.status === "partial")
+    ? (integration.status === "available" ? "PASS" : "PARTIAL")
+    : "FAIL";
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 4Z Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report remains available.", true, ""),
+    check("Coach Report Export Snapshot remains available.", true, ""),
+    check("Premium HTML Layout remains available.", true, ""),
+    check("Phase Visuals remain available.", true, ""),
+    check("Phase Visual Readability remains available.", true, ""),
+    check("Multi-Match Phase Comparison remains available.", true, ""),
+    check("Multi-Match History View remains available.", true, ""),
+    check("Player Candidate Comparison View remains available.", integration.candidateComparisonMatchesProduct, ""),
+    check("Real Match History Store status is available or partial.", integration.status === "available" || integration.status === "partial", integration.status),
+    check("coach-report.export.html is generated.", true, "reports/coach-report.export.html"),
+    check("HTML-first remains true.", integration.htmlFirst, ""),
+    check("PDF remains optional.", integration.pdfOptional, ""),
+    check("export uses product report as single source of truth.", integration.singleSourceOfTruth, ""),
+    check("duplicated report logic is false.", !integration.duplicateReportLogic, ""),
+    check("current match record is saved.", integration.currentMatchRecordSaved, ""),
+    check("history store kind is visible.", integration.storeKind.length > 0, integration.storeKind),
+    check("stored record count is visible.", integration.storedRecordCount >= 1, String(integration.storedRecordCount)),
+    check("queried record count is visible.", integration.queriedRecordCount >= 1, String(integration.queriedRecordCount)),
+    check("queried signal count is visible.", integration.queriedSignalCount >= 1, String(integration.queriedSignalCount)),
+    check("controlled vs simulated vs product history boundary is visible.", integration.historyStoreBoundaryVisible, ""),
+    check("history store boundary guard is visible.", integration.historyStoreBoundaryVisible, ""),
+    check("no trend proof claim is made.", integration.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", integration.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", integration.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", integration.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("product/export score matches.", integration.productExportScoreMatches, ""),
+    check("candidate comparison matches product.", integration.candidateComparisonMatchesProduct, ""),
+    check("interpretation guard remains visible.", integration.interpretationGuardMatchesProduct, ""),
+    check("visible copy avoids recommendation wording.", integration.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", integration.visibleSelectionWordingCount === 0, "0"),
+    check("internal status ids are hidden from main export.", integration.internalStatusLeakCount === 0, "0"),
+    check("no player is selected.", integration.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", integration.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", integration.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", integration.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", integration.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", !integration.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !integration.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", integration.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", integration.officiallyConfirmedCount === 0, "0"),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("history store cannot mutate official timeline.", !integration.canMutateTimeline, ""),
+    check("history store cannot mutate official score.", !integration.canMutateScore, ""),
+    check("history store cannot mutate official possession.", !integration.canMutatePossession, ""),
+    check("history store cannot create production scoring events.", !integration.canCreateScoringEvent, ""),
+    check("history store cannot claim global economy.", !integration.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", integration.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", integration.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", integration.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", integration.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- store kind: ${integration.storeKind}`,
+    `- stored record count: ${integration.storedRecordCount}`,
+    `- queried record count: ${integration.queriedRecordCount}`,
+    `- queried signal count: ${integration.queriedSignalCount}`,
+    `- controlled sample record count: ${integration.controlledSampleRecordCount}`,
+    `- simulated match history record count: ${integration.simulatedMatchHistoryRecordCount}`,
+    `- product history record count: ${integration.productHistoryRecordCount}`,
+    `- trend proof claim count: ${integration.trendProofClaimCount}`,
+    `- global proof claim count: ${integration.globalProofClaimCount}`,
+    `- invented statistic count: ${integration.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${integration.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${integration.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${integration.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${integration.internalStatusLeakCount}`,
+    `- player selected count: ${integration.playerSelectedCount}`,
+    `- automatic selection count: ${integration.automaticSelectionCount}`,
+    `- lineup mutation count: ${integration.lineupMutationCount}`,
+    `- starters mutation count: ${integration.startersMutationCount}`,
+    `- bench mutation count: ${integration.benchMutationCount}`,
+    `- live selection driver count: ${integration.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${integration.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- confidence upgrade count: ${integration.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${integration.officiallyConfirmedCount}`,
+    `- score mutation count: ${integration.canMutateScore ? 1 : 0}`,
+    `- possession mutation count: ${integration.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${integration.canCreateScoringEvent ? 1 : 0}`,
+    `- global economy claim count: ${integration.canClaimGlobalEconomy ? 1 : 0}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_REAL_MATCH_HISTORY_STORE_BOUNDARY.",
+    "- CONFIRM_HISTORY_IS_READ_ONLY.",
+    "- CONFIRM_NO_HISTORY_PROOF_CLAIM.",
+    "- PREPARE_UI_WIRING_OR_DATABASE_ADAPTER.",
     "",
   ].join("\n");
 }

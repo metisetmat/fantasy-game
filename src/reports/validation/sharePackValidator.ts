@@ -272,6 +272,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay4XValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4x.md"));
   const fullMatchWorkbenchChainReplay4Y = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4y.md"));
   const fullMatchWorkbenchChainReplay4YValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4y.md"));
+  const fullMatchWorkbenchChainReplay4Z = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4z.md"));
+  const fullMatchWorkbenchChainReplay4ZValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4z.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2655,6 +2657,33 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-4x.md",
     ...sprint4XForbiddenLeftovers,
   ];
+  const sprint4ZExpectedFiles = [
+    "package.json",
+    "tsconfig.json",
+    "coach-report.latest.html",
+    "coach-report.default.html",
+    "coach-report.experimental.html",
+    "coach-report.product.html",
+    "coach-report.export.html",
+    "scoring-events-summary.md",
+    "sequence-1-action-1.html",
+    "sequence-1-action-2.html",
+    "sequence-1-action-3.html",
+    "validation.share-pack.md",
+    "fullmatch-workbench-chain-replay-4z.md",
+    "validation.fullmatch-workbench-chain-replay-4z.md",
+    "README.md",
+    "manifest.md",
+    "00-share-manifest.txt",
+    "bundle__contracts.md",
+    "bundle__simulation.md",
+    "bundle__reports.md",
+  ];
+  const sprint4ZForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-4y.md",
+    "validation.fullmatch-workbench-chain-replay-4y.md",
+    ...sprint4YForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3113,6 +3142,73 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4X.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4XValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay4XValidation.includes("CONFIRM_MULTI_MATCH_PHASE_COMPARISON") && fullMatchWorkbenchChainReplay4XValidation.includes("CONFIRM_LOCAL_STABILITY_LABELS"), "4X recommendations visible"),
+  ];
+  const sprint4ZChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("manifest exists", manifest.length > 0, manifestPath),
+    check("README exists", readme.length > 0, readmePath),
+    check("detailed manifest exists", detailedManifest.length > 0, detailedManifestPath),
+    check("validation.share-pack.md copied", sourceExists("validation.share-pack.md") && requiredCopied("validation.share-pack.md"), "validation.share-pack.md"),
+    check("all expected files are copied", sprint4ZExpectedFiles.every((file) => requiredCopied(file)), sprint4ZExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint4ZExpectedFiles.every((file) => manifest.includes(file)), sprint4ZExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("no stale files remain in reports/share", staleFiles.length === 0, staleFiles.join(", ") || "none"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 4Z", activeConfig.sprintName === "Sprint 4Z - Real Match History Store & Report Integration", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint4ZExpectedFiles.every((file) => requiredCopied(file)), sprint4ZExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint4ZForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint4ZForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 4Z oriented", readme.includes("# Sprint 4Z Share Pack") && readme.includes("fullmatch-workbench-chain-replay-4z.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("4Z report included", fullMatchWorkbenchChainReplay4Z.includes("# FullMatch Workbench Chain Replay 4Z") && fullMatchWorkbenchChainReplay4Z.includes("Real Match History Store"), "4Z doc included"),
+    check("4Z validation is PASS or PARTIAL", (fullMatchWorkbenchChainReplay4ZValidation.includes("Status: PASS") || fullMatchWorkbenchChainReplay4ZValidation.includes("Status: PARTIAL")) && fullMatchWorkbenchChainReplay4ZValidation.includes("Real Match History Store status is available or partial"), "4Z validation current"),
+    check("product report HTML copied", coachProductHtml.includes("Rapport coach") && coachProductHtml.includes("Joueurs"), "product HTML visible"),
+    check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
+    check("phase stability section is still present", coachExportHtml.includes("Stabilit&eacute; des signaux de phase") && coachExportHtml.includes("phase-stability-grid"), "phase stability visible"),
+    check("history section is still present", (coachExportHtml.includes("Historique des signaux compar&eacute;s") || coachExportHtml.includes("Historique des signaux compar")) && coachExportHtml.includes("phase-history-section"), "history section visible"),
+    check("real match history section is present", coachExportHtml.includes("Historique produit des matchs") && coachExportHtml.includes("match-history-section") && coachExportHtml.includes("match-history-grid"), "real match history visible"),
+    check("real match history boundary guard is present", coachExportHtml.includes("reste local et en lecture seule") && coachExportHtml.includes("aucune d&eacute;cision"), "history boundary visible"),
+    check("real match history appendix is present", coachExportHtml.includes("D&eacute;tails du stockage d&rsquo;historique des matchs") || coachExportHtml.includes("Détails du stockage d"), "history appendix visible"),
+    check("main export hides internal status names", !containsAny(coachExportMainHtml, ["officially_confirmed", "trace_supported", "sandbox_only"]), "internal statuses hidden"),
+    check("main export avoids recommendation wording", !containsAny(coachExportMainHtml, ["meilleur choix", "composition recommand", "selection automatique", "preuve globale", "certitude"]), "recommendation wording count 0"),
+    check("main export avoids selection wording", !containsAny(coachExportMainHtml, ["a selectionner", "player selected"]), "selection wording count 0"),
+    check("visible French copy is clean", !containsAny(coachExportHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check(
+      "bundle includes real match history source files",
+      bundleReports.includes("src/reports/history/coachMatchHistory.ts") &&
+        bundleReports.includes("src/reports/history/coachMatchHistoryStore.ts") &&
+        bundleReports.includes("src/reports/history/inMemoryCoachMatchHistoryStore.ts") &&
+        bundleReports.includes("src/reports/history/buildCoachMatchHistoryRecord.ts") &&
+        bundleReports.includes("src/reports/coachReportRealMatchHistoryIntegration.ts") &&
+        bundleReports.includes("src/reports/buildCoachReportRealMatchHistoryIntegration.ts"),
+      "4Z source bundled",
+    ),
+    check(
+      "bundle includes real match history tests",
+      bundleReports.includes("coachMatchHistoryRecord.test.ts") &&
+        bundleReports.includes("inMemoryCoachMatchHistoryStore.test.ts") &&
+        bundleReports.includes("coachReportRealMatchHistoryIntegration.test.ts") &&
+        bundleReports.includes("coachReportRealMatchHistoryRenderer.test.ts") &&
+        bundleReports.includes("coachReportRealMatchHistorySourceGuard.test.ts") &&
+        bundleReports.includes("coachReportRealMatchHistoryCopy.test.ts") &&
+        bundleReports.includes("coachReportRealMatchHistoryPrintCss.test.ts") &&
+        bundleReports.includes("coachReportRealMatchHistoryGuard.test.ts"),
+      "4Z tests bundled",
+    ),
+    check("simulation bundle includes scoring guard 4Z", bundleSimulation.includes("scoringGuard.4z.test.ts"), "4Z scoring guard bundled"),
+    check("history store cannot mutate score", coachExportHtml.includes("score mutation count 0") || fullMatchWorkbenchChainReplay4ZValidation.includes("history store cannot mutate official score"), "score mutation forbidden"),
+    check("history store cannot mutate possession", coachExportHtml.includes("possession mutation count 0") || fullMatchWorkbenchChainReplay4ZValidation.includes("history store cannot mutate official possession"), "possession mutation forbidden"),
+    check("history store cannot create production scoring events", coachExportHtml.includes("production scoring event creation count 0") || fullMatchWorkbenchChainReplay4ZValidation.includes("history store cannot create production scoring events"), "production scoring creation forbidden"),
+    check("history store cannot claim global economy", fullMatchWorkbenchChainReplay4ZValidation.includes("history store cannot claim global economy"), "global economy forbidden"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay4ZValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay4ZValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay4ZValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay4Z.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay4ZValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay4ZValidation.includes("CONFIRM_REAL_MATCH_HISTORY_STORE_BOUNDARY") && fullMatchWorkbenchChainReplay4ZValidation.includes("CONFIRM_HISTORY_IS_READ_ONLY"), "4Z recommendations visible"),
   ];
   const sprint4YChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -6323,6 +6419,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 4Z - Real Match History Store & Report Integration")
+      ? sprint4ZChecks
     : activeConfig.sprintName.includes("Sprint 4Y - Multi-Match History View & Trend Drilldown")
       ? sprint4YChecks
     : activeConfig.sprintName.includes("Sprint 4X - Multi-Match Phase Comparison")

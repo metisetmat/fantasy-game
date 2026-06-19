@@ -8,7 +8,9 @@ import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachRe
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
+import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
+import { createInMemoryCoachMatchHistoryStore } from "./history/inMemoryCoachMatchHistoryStore";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -58,11 +60,21 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
+    matchReport: experimentalReport,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView,
+    historyStore: createInMemoryCoachMatchHistoryStore(),
+    runId: "coach-report-latest",
+    generatedAtIso: new Date().toISOString(),
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
     multiMatchPhaseComparison,
     multiMatchHistoryView,
+    realMatchHistoryIntegration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

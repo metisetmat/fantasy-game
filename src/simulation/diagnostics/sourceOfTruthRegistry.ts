@@ -48,6 +48,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_REPORT_PHASE_VISUAL_READABILITY"
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON"
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
+  | "WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1457,6 +1458,48 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which local signals deserve continued observation across future runs",
       "which local repeated zones remain watchpoints rather than proof",
       "where insufficient data remains more honest than a stronger claim",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    cannotInclude: [
+      "global proof claims",
+      "invented phase statistics",
+      "sandbox-only events presented as official truth",
+      "automatic selection wording",
+      "officially_confirmed status promotion",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE",
+    canProve: [
+      "a product-shaped local match-history record can be stored from the current report",
+      "controlled samples remain distinguishable from the saved simulated match record",
+      "history retrieval remains read-only and bounded to the current team query",
+      "real match history integration remains presentation-only and non-mutating",
+    ],
+    canSuggest: [
+      "which local phase signals deserve re-reading across later matches",
+      "where a durable product adapter should replace the in-memory store next",
+      "how controlled samples and simulated history should stay separated in future UI work",
     ],
     cannotProve: [
       "global scoring balance",
