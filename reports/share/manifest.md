@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-19T17:45:40.724Z
-Task/sprint: Sprint 5B - History Store Consistency & Database Adapter Contract
+Generated: 2026-06-19T18:45:49.316Z
+Task/sprint: Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-5b.md
-- validation.fullmatch-workbench-chain-replay-5b.md
+- fullmatch-workbench-chain-replay-5c.md
+- validation.fullmatch-workbench-chain-replay-5c.md
 - README.md
 
 ## Bundle Files

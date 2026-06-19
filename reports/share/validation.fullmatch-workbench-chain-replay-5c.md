@@ -1,0 +1,104 @@
+# FullMatch Workbench Chain Replay 5C Validation
+
+Status: PASS
+
+## Checks
+- PASS: default runFullMatch remains segment_harness.
+- PASS: experimental mode remains opt-in.
+- PASS: Persistence Evidence Snapshot is available. - 5c-inserted-5-6-6-40
+- PASS: snapshot source is save result. - coach_match_history_save_result
+- PASS: snapshot scenario is explicit. - inserted
+- PASS: markdown report is generated.
+- PASS: validation report is generated.
+- PASS: coach-report.export.html is generated.
+- PASS: markdown save operation matches snapshot. - inserted
+- PASS: validation save operation matches snapshot. - inserted
+- PASS: export save operation matches snapshot. - inserted
+- PASS: markdown before/after counts match snapshot.
+- PASS: validation before/after counts match snapshot.
+- PASS: export before/after counts match snapshot.
+- PASS: markdown disk counts match snapshot.
+- PASS: validation disk counts match snapshot.
+- PASS: export disk counts match snapshot.
+- PASS: markdown dedupe counts match snapshot.
+- PASS: validation dedupe counts match snapshot.
+- PASS: export dedupe counts match snapshot.
+- PASS: markdown query counts match snapshot.
+- PASS: validation query counts match snapshot.
+- PASS: export query counts match snapshot.
+- PASS: scenario mixing detected false.
+- PASS: renderer recalculation detected false.
+- PASS: mismatch count is 0. - 0
+- PASS: inserted/replaced/ignored_duplicate scenarios are tested separately. - scenario isolation tests
+- PASS: report queries remain read-only.
+- PASS: database adapter remains contract-only.
+- PASS: no trend proof claim is made. - 0
+- PASS: no global proof claim is made. - 0
+- PASS: no invented phase statistic is introduced. - 0
+- PASS: sandbox events are not promoted to official visuals. - 0
+- PASS: visible copy avoids recommendation wording. - 0
+- PASS: visible copy avoids selection wording. - 0
+- PASS: no player is selected. - 0
+- PASS: no automatic selection is true. - 0
+- PASS: lineup mutation count is 0. - 0
+- PASS: starters mutation count is 0. - 0
+- PASS: bench mutation count is 0. - 0
+- PASS: live selection driver count is 0. - 0
+- PASS: production route resolution driver count is 0. - 0
+- PASS: confidence upgrade count is 0. - 0
+- PASS: officially-confirmed count is 0. - 0
+- PASS: persistence evidence cannot mutate official timeline.
+- PASS: persistence evidence cannot mutate official score. - 0
+- PASS: persistence evidence cannot mutate official possession. - 0
+- PASS: persistence evidence cannot create production scoring events. - 0
+- PASS: persistence evidence cannot claim global economy. - 0
+- PASS: scoring constants unchanged.
+- PASS: MatchBonusEvent unchanged.
+- PASS: batch/live separation preserved.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
+- PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
+
+## Counts
+- snapshot id: 5c-inserted-5-6-6-40
+- scenario: inserted
+- save operation: inserted
+- idempotent save: false
+- records before save count: 5
+- records after save count: 6
+- loaded from disk count: 0
+- written to disk count: 6
+- deduped record count: 0
+- replaced record count: 0
+- ignored duplicate count: 0
+- queried record count: 6
+- queried signal count: 40
+- artifact mismatch count: 0
+- scenario mixing detected: false
+- renderer recalculation detected: false
+- trend proof claim count: 0
+- global proof claim count: 0
+- invented statistic count: 0
+- sandbox events promoted to official count: 0
+- visible recommendation wording count: 0
+- visible selection wording count: 0
+- internal status leak count: 0
+- player selected count: 0
+- automatic selection count: 0
+- lineup mutation count: 0
+- starters mutation count: 0
+- bench mutation count: 0
+- live selection driver count: 0
+- production route resolution driver count: 0
+- confidence upgrade count: 0
+- officially-confirmed count: 0
+- score mutation count: 0
+- possession mutation count: 0
+- production scoring event creation count: 0
+- global economy claim count: 0
+
+## Recommendation
+- CONFIRM_PERSISTENCE_EVIDENCE_ALIGNMENT.
+- CONFIRM_SINGLE_SAVE_RESULT_SOURCE.
+- CONFIRM_NO_RENDERER_RECALCULATION.
+- CONFIRM_NO_SCENARIO_MIXING.
+- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.

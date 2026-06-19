@@ -1,4 +1,5 @@
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
@@ -6,6 +7,7 @@ import { buildCoachReportHistoryStoreConsistency } from "./buildCoachReportHisto
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -63,8 +65,9 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-coach-report-5c-"));
   const historyStore = createFileBackedCoachMatchHistoryStore({
-    filePath: join(reportsDirectory, "history", "coach-match-history-store.json"),
+    filePath: join(historyStoreDirectory, "coach-match-history-store.json"),
     allowWrite: true,
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
@@ -113,6 +116,16 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const persistenceEvidenceSnapshot = historyStoreConsistency === undefined || persistentHistoryAdapter.saveResult === undefined
+    ? undefined
+    : buildCoachReportPersistenceEvidenceSnapshot({
+        consistency: historyStoreConsistency,
+        saveResult: persistentHistoryAdapter.saveResult,
+        queriedRecordCount: historyStoreConsistency.queriedRecordCount,
+        queriedSignalCount: historyStoreConsistency.queriedSignalCount,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -121,6 +134,7 @@ export function writeLatestCoachReport(): void {
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
     ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
+    ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
@@ -161,6 +175,7 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.experimental.html");
   console.log("Generated reports/coach-report.product.html");
   console.log("Generated reports/coach-report.export.html");
+  rmSync(historyStoreDirectory, { recursive: true, force: true });
 }
 
 if (require.main === module) {

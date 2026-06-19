@@ -57,14 +57,16 @@ import {
   renderFullMatchWorkbenchChainReplay5AValidation,
   renderFullMatchWorkbenchChainReplay5BDoc,
   renderFullMatchWorkbenchChainReplay5BValidation,
+  renderFullMatchWorkbenchChainReplay5CDoc,
+  renderFullMatchWorkbenchChainReplay5CValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5B - History Store Consistency & Database Adapter Contract";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5b.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5b.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5c.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5c.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1787,6 +1789,26 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5B builder deriving consistency counters from CoachMatchHistorySaveResult and exposing the database contract",
       },
       {
+        source: "src/reports/coachReportPersistenceEvidenceSnapshot.ts",
+        required: true,
+        reason: "Sprint 5C single persistence evidence snapshot model shared by markdown, validation, export HTML, appendix, and share-pack validation",
+      },
+      {
+        source: "src/reports/buildCoachReportPersistenceEvidenceSnapshot.ts",
+        required: true,
+        reason: "Sprint 5C builder deriving persistence evidence counters from CoachMatchHistorySaveResult and post-save query counts",
+      },
+      {
+        source: "src/reports/validation/persistenceEvidenceArtifactAlignment.ts",
+        required: true,
+        reason: "Sprint 5C artifact alignment validator comparing markdown, validation, and export HTML to the same persistence snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceTestFixtures.ts",
+        required: true,
+        reason: "Sprint 5C reusable persistence evidence fixtures for scenario and artifact alignment tests",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -2110,6 +2132,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5b.test.ts",
         required: true,
         reason: "Sprint 5B executable scoring guard proving history-store consistency does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5c.test.ts",
+        required: true,
+        reason: "Sprint 5C executable scoring guard proving persistence evidence alignment does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3478,6 +3505,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5B executable non-selection and non-mutation guard tests for history-store consistency",
       },
       {
+        source: "src/reports/persistenceEvidenceSnapshot.test.ts",
+        required: true,
+        reason: "Sprint 5C executable snapshot tests proving counters come from CoachMatchHistorySaveResult and post-save query counts",
+      },
+      {
+        source: "src/reports/persistenceEvidenceScenarioIsolation.test.ts",
+        required: true,
+        reason: "Sprint 5C executable scenario isolation tests for inserted, replaced, and ignored_duplicate persistence evidence",
+      },
+      {
+        source: "src/reports/persistenceEvidenceRendererAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable renderer alignment tests proving export HTML consumes the supplied snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceMarkdownAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable markdown alignment tests proving the report consumes the supplied snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceValidationAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable validation alignment tests proving validation consumes the supplied snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceArtifactAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable artifact alignment validator tests for markdown, validation, and export HTML",
+      },
+      {
+        source: "src/reports/persistenceEvidenceNoRendererSideEffects.test.ts",
+        required: true,
+        reason: "Sprint 5C executable renderer side-effect guard proving no save/query/file read is performed by rendering",
+      },
+      {
+        source: "src/reports/persistenceEvidenceCopy.test.ts",
+        required: true,
+        reason: "Sprint 5C executable copy guard tests for proof, recommendation, selection, and internal-status wording",
+      },
+      {
+        source: "src/reports/persistenceEvidenceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5C executable non-selection and non-mutation guard tests for persistence evidence",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -3673,6 +3745,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5C")) {
+    return renderFullMatchWorkbenchChainReplay5CDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5B")) {
     return renderFullMatchWorkbenchChainReplay5BDoc(fullMatchTraceValidationModel());
   }
@@ -5857,6 +5933,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5C")) {
+    return renderFullMatchWorkbenchChainReplay5CValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5B")) {
     return renderFullMatchWorkbenchChainReplay5BValidation(fullMatchTraceValidationModel());
   }
@@ -7986,6 +8066,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5C")) {
+    return [
+      "# Sprint 5C Share Pack",
+      "",
+      "Current sprint: Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5c.md",
+      "- validation.fullmatch-workbench-chain-replay-5c.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5c.md and validation.fullmatch-workbench-chain-replay-5c.md.",
+      "",
+      "Sprint 5C proves that the Markdown report, validation report, export HTML, appendix, and share-pack validation consume one persistence evidence snapshot.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5B")) {
     return [
       "# Sprint 5B Share Pack",

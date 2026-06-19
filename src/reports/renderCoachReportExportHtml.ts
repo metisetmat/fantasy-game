@@ -16,6 +16,7 @@ import type {
 } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
 import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
+import type { CoachReportPersistenceEvidenceSnapshot } from "./coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
@@ -1516,56 +1517,94 @@ function renderRealMatchHistoryIntegration(
 
 function renderHistoryStoreConsistency(
   model: CoachReportHistoryStoreConsistencyModel | undefined,
+  persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot,
 ): string {
-  if (model === undefined || model.status === "not_available") {
+  if ((model === undefined || model.status === "not_available") && persistenceEvidenceSnapshot === undefined) {
     return "";
   }
+  const values = persistenceEvidenceSnapshot ?? {
+    saveOperation: model?.saveOperation ?? "not_available",
+    idempotentSave: model?.idempotentSave ?? false,
+    recordsBeforeSaveCount: model?.recordsBeforeSaveCount ?? 0,
+    recordsAfterSaveCount: model?.recordsAfterSaveCount ?? 0,
+    loadedFromDiskCount: model?.loadedFromDiskCount ?? 0,
+    writtenToDiskCount: model?.writtenToDiskCount ?? 0,
+    dedupedRecordCount: model?.dedupedRecordCount ?? 0,
+    replacedRecordCount: model?.replacedRecordCount ?? 0,
+    ignoredDuplicateCount: model?.ignoredDuplicateCount ?? 0,
+    queriedRecordCount: model?.queriedRecordCount ?? 0,
+    queriedSignalCount: model?.queriedSignalCount ?? 0,
+    databaseAdapterImplemented: model?.databaseContractImplemented ?? false,
+    migrationFromFileBackedRequired: model?.databaseMigrationRequired ?? true,
+    snapshotId: "not_available",
+    scenario: model?.saveOperation ?? "not_available",
+  };
 
   return `
     <section class="history-consistency-section" aria-label="Coh&eacute;rence du stockage historique">
       <div>
         <h3>Coh&eacute;rence du stockage</h3>
-        <p>La sauvegarde expose maintenant une op&eacute;ration explicite, des compteurs de lecture/&eacute;criture et un contrat futur pour l&rsquo;adapter base de donn&eacute;es.</p>
+        <p>La coh&eacute;rence de stockage affiche un instantan&eacute; unique de sauvegarde. Les compteurs visibles dans le rapport, la validation et l&rsquo;export doivent correspondre exactement.</p>
       </div>
+      <ul class="history-consistency-snapshot">
+        <li>snapshot id: ${escapeHtml(values.snapshotId)}</li>
+        <li>scenario: ${escapeHtml(values.scenario)}</li>
+        <li>save operation: ${escapeHtml(values.saveOperation)}</li>
+        <li>idempotent save: ${values.idempotentSave}</li>
+        <li>records before save count: ${values.recordsBeforeSaveCount}</li>
+        <li>records after save count: ${values.recordsAfterSaveCount}</li>
+        <li>loaded from disk count: ${values.loadedFromDiskCount}</li>
+        <li>written to disk count: ${values.writtenToDiskCount}</li>
+        <li>deduped record count: ${values.dedupedRecordCount}</li>
+        <li>replaced record count: ${values.replacedRecordCount}</li>
+        <li>ignored duplicate count: ${values.ignoredDuplicateCount}</li>
+        <li>queried record count: ${values.queriedRecordCount}</li>
+        <li>queried signal count: ${values.queriedSignalCount}</li>
+        <li>database adapter implemented false: ${!values.databaseAdapterImplemented}</li>
+        <li>migration from file-backed required true: ${values.migrationFromFileBackedRequired}</li>
+      </ul>
       <div class="history-consistency-grid">
         <article class="history-consistency-card">
           <h4>R&eacute;sultat de sauvegarde</h4>
           <div class="history-consistency-kpi">
-            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">${model.saveOperation}</strong></div>
-            <div><span>Idempotent</span><strong>${model.idempotentSave ? "oui" : "non"}</strong></div>
-            <div><span>Avant</span><strong>${model.recordsBeforeSaveCount}</strong></div>
-            <div><span>Apr&egrave;s</span><strong>${model.recordsAfterSaveCount}</strong></div>
+            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">${escapeHtml(values.saveOperation)}</strong></div>
+            <div><span>Idempotent</span><strong>${values.idempotentSave ? "oui" : "non"}</strong></div>
+            <div><span>Avant</span><strong>${values.recordsBeforeSaveCount}</strong></div>
+            <div><span>Apr&egrave;s</span><strong>${values.recordsAfterSaveCount}</strong></div>
           </div>
         </article>
         <article class="history-consistency-card">
           <h4>Compteurs durables</h4>
           <div class="history-consistency-kpi">
-            <div><span>Charg&eacute;s disque</span><strong>${model.loadedFromDiskCount}</strong></div>
-            <div><span>&Eacute;crits disque</span><strong>${model.writtenToDiskCount}</strong></div>
-            <div><span>D&eacute;dupliqu&eacute;s</span><strong>${model.dedupedRecordCount}</strong></div>
-            <div><span>Remplac&eacute;s</span><strong>${model.replacedRecordCount}</strong></div>
-            <div><span>Doublons ignor&eacute;s</span><strong>${model.ignoredDuplicateCount}</strong></div>
+            <div><span>Charg&eacute;s disque</span><strong>${values.loadedFromDiskCount}</strong></div>
+            <div><span>&Eacute;crits disque</span><strong>${values.writtenToDiskCount}</strong></div>
+            <div><span>D&eacute;dupliqu&eacute;s</span><strong>${values.dedupedRecordCount}</strong></div>
+            <div><span>Remplac&eacute;s</span><strong>${values.replacedRecordCount}</strong></div>
+            <div><span>Doublons ignor&eacute;s</span><strong>${values.ignoredDuplicateCount}</strong></div>
+            <div><span>Records relus</span><strong>${values.queriedRecordCount}</strong></div>
+            <div><span>Signaux relus</span><strong>${values.queriedSignalCount}</strong></div>
           </div>
         </article>
         <article class="history-consistency-card">
           <h4>Contrat DB futur</h4>
           <div class="history-consistency-kpi">
-            <div><span>Visible</span><strong>${model.databaseContractVisible ? "oui" : "non"}</strong></div>
-            <div><span>Impl&eacute;ment&eacute;</span><strong>${model.databaseContractImplemented ? "oui" : "non"}</strong></div>
-            <div><span>Migration requise</span><strong>${model.databaseMigrationRequired ? "oui" : "non"}</strong></div>
+            <div><span>Visible</span><strong>oui</strong></div>
+            <div><span>Impl&eacute;ment&eacute;</span><strong>${values.databaseAdapterImplemented ? "oui" : "non"}</strong></div>
+            <div><span>Migration requise</span><strong>${values.migrationFromFileBackedRequired ? "oui" : "non"}</strong></div>
           </div>
         </article>
       </div>
       <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
       <p class="history-consistency-database-contract">Database adapter contract visible, implemented=false, migrationRequired=true.</p>
-      <p class="history-consistency-guard">Les compteurs de cette section viennent du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du rapport.</p>
-      ${model.warnings.length === 0 ? "" : `<p class="history-consistency-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+      <p class="history-consistency-guard">Les compteurs de cette section viennent d&rsquo;un instantan&eacute; unique issu du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du renderer.</p>
+      ${model === undefined || model.warnings.length === 0 ? "" : `<p class="history-consistency-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
     </section>`;
 }
 
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
+  persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot,
 ): string {
   if (model.status === "not_available") {
     return "";
@@ -1611,7 +1650,7 @@ function renderPersistentHistoryAdapter(
         <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
       </article>
     </div>
-    ${renderHistoryStoreConsistency(historyStoreConsistency)}
+    ${renderHistoryStoreConsistency(historyStoreConsistency, persistenceEvidenceSnapshot)}
     <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
     ${model.warnings.length === 0 ? "" : `<p class="persistent-history-warning">${model.warnings.join(" ")}</p>`}
   </section>`;
@@ -1940,32 +1979,52 @@ function renderPersistentHistoryAdapterAppendix(
 
 function renderHistoryStoreConsistencyAppendix(
   model: CoachReportHistoryStoreConsistencyModel | undefined,
+  persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot,
 ): string {
-  if (model === undefined || model.status === "not_available") {
+  if ((model === undefined || model.status === "not_available") && persistenceEvidenceSnapshot === undefined) {
     return "";
   }
+  const values = persistenceEvidenceSnapshot ?? {
+    snapshotId: "not_available",
+    scenario: model?.saveOperation ?? "not_available",
+    saveOperation: model?.saveOperation ?? "not_available",
+    idempotentSave: model?.idempotentSave ?? false,
+    recordsBeforeSaveCount: model?.recordsBeforeSaveCount ?? 0,
+    recordsAfterSaveCount: model?.recordsAfterSaveCount ?? 0,
+    loadedFromDiskCount: model?.loadedFromDiskCount ?? 0,
+    writtenToDiskCount: model?.writtenToDiskCount ?? 0,
+    dedupedRecordCount: model?.dedupedRecordCount ?? 0,
+    replacedRecordCount: model?.replacedRecordCount ?? 0,
+    ignoredDuplicateCount: model?.ignoredDuplicateCount ?? 0,
+    queriedRecordCount: model?.queriedRecordCount ?? 0,
+    queriedSignalCount: model?.queriedSignalCount ?? 0,
+    databaseAdapterImplemented: model?.databaseContractImplemented ?? false,
+    migrationFromFileBackedRequired: model?.databaseMigrationRequired ?? true,
+    reportQueriesReadOnly: model?.reportQueriesReadOnly ?? true,
+    globalProofClaimCount: model?.globalProofClaimCount ?? 0,
+  };
 
   return `
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
       <ul>
-        <li>history store consistency status ${model.status}</li>
-        <li>store kind ${model.storeKind}</li>
-        <li>save operation ${model.saveOperation}</li>
-        <li>idempotent save ${model.idempotentSave ? "true" : "false"}</li>
-        <li>loaded from disk count ${model.loadedFromDiskCount}</li>
-        <li>written to disk count ${model.writtenToDiskCount}</li>
-        <li>deduped record count ${model.dedupedRecordCount}</li>
-        <li>replaced record count ${model.replacedRecordCount}</li>
-        <li>ignored duplicate count ${model.ignoredDuplicateCount}</li>
-        <li>query status ${model.queryStatus}</li>
-        <li>queried record count ${model.queriedRecordCount}</li>
-        <li>queried signal count ${model.queriedSignalCount}</li>
-        <li>database contract visible ${model.databaseContractVisible ? "true" : "false"}</li>
-        <li>database contract implemented ${model.databaseContractImplemented ? "true" : "false"}</li>
-        <li>database migration required ${model.databaseMigrationRequired ? "true" : "false"}</li>
-        <li>report queries read-only ${model.reportQueriesReadOnly ? "true" : "false"}</li>
-        <li>global proof claim count ${model.globalProofClaimCount}</li>
+        <li>snapshot id: ${escapeHtml(values.snapshotId)}</li>
+        <li>scenario: ${escapeHtml(values.scenario)}</li>
+        <li>save operation: ${escapeHtml(values.saveOperation)}</li>
+        <li>idempotent save: ${values.idempotentSave}</li>
+        <li>records before save count: ${values.recordsBeforeSaveCount}</li>
+        <li>records after save count: ${values.recordsAfterSaveCount}</li>
+        <li>loaded from disk count: ${values.loadedFromDiskCount}</li>
+        <li>written to disk count: ${values.writtenToDiskCount}</li>
+        <li>deduped record count: ${values.dedupedRecordCount}</li>
+        <li>replaced record count: ${values.replacedRecordCount}</li>
+        <li>ignored duplicate count: ${values.ignoredDuplicateCount}</li>
+        <li>queried record count: ${values.queriedRecordCount}</li>
+        <li>queried signal count: ${values.queriedSignalCount}</li>
+        <li>database adapter implemented false: ${!values.databaseAdapterImplemented}</li>
+        <li>migration from file-backed required true: ${values.migrationFromFileBackedRequired}</li>
+        <li>report queries read-only: ${values.reportQueriesReadOnly}</li>
+        <li>global proof claim count: ${values.globalProofClaimCount}</li>
       </ul>
     </details>`;
 }
@@ -1983,6 +2042,7 @@ function renderAppendices(input: {
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
+  readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -2017,7 +2077,7 @@ function renderAppendices(input: {
     ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
     ${renderRealMatchHistoryIntegrationAppendix(input.realMatchHistoryIntegration)}
     ${renderPersistentHistoryAdapterAppendix(input.persistentHistoryAdapter)}
-    ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency)}
+    ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency, input.persistenceEvidenceSnapshot)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -2043,6 +2103,7 @@ export function renderCoachReportExportHtml(input: {
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
+  readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -2141,7 +2202,7 @@ export function renderCoachReportExportHtml(input: {
     renderMultiMatchHistoryView(multiMatchHistoryView),
     ...(input.realMatchHistoryIntegration === undefined ? [] : [renderRealMatchHistoryIntegration(input.realMatchHistoryIntegration)]),
     ...(input.persistentHistoryAdapter === undefined ? [] : [
-      renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency),
+      renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency, input.persistenceEvidenceSnapshot),
     ]),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
@@ -2166,6 +2227,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.historyStoreConsistency === undefined
       ? {}
       : { historyStoreConsistency: input.historyStoreConsistency }),
+    ...(input.persistenceEvidenceSnapshot === undefined
+      ? {}
+      : { persistenceEvidenceSnapshot: input.persistenceEvidenceSnapshot }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

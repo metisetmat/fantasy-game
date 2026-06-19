@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 5B - History Store Consistency & Database Adapter Contract",
+  name: "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-5b.md",
-    "validation.fullmatch-workbench-chain-replay-5b.md",
+    "fullmatch-workbench-chain-replay-5c.md",
+    "validation.fullmatch-workbench-chain-replay-5c.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 5B share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-5b.md": "summarizes history-store save-result consistency, idempotent duplicate handling, durable counters, database adapter contract visibility, and unchanged scoring guardrails",
-    "validation.fullmatch-workbench-chain-replay-5b.md": "validates save operation semantics, loaded/written/dedupe/replaced/ignored counts, database contract guardrails, non-selection scope, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 5B share pack",
-    "manifest.md": "compatibility manifest listing the 5B share pack files",
+    "validation.share-pack.md": "proves the 5C share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-5c.md": "summarizes the single persistence evidence snapshot shared by markdown, validation, export HTML, appendix, and share-pack validation",
+    "validation.fullmatch-workbench-chain-replay-5c.md": "validates persistence evidence alignment, counter consistency, scenario isolation, no renderer-side recomputation, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 5C share pack",
+    "manifest.md": "compatibility manifest listing the 5C share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

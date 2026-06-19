@@ -1,6 +1,6 @@
-# Sprint 5B Share Pack
+# Sprint 5C Share Pack
 
-Current sprint: Sprint 5B - History Store Consistency & Database Adapter Contract
+Current sprint: Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-workbench-chain-replay-5b.md
-- validation.fullmatch-workbench-chain-replay-5b.md
+- fullmatch-workbench-chain-replay-5c.md
+- validation.fullmatch-workbench-chain-replay-5c.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5b.md and validation.fullmatch-workbench-chain-replay-5b.md.
+Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5c.md and validation.fullmatch-workbench-chain-replay-5c.md.
 
-Sprint 5B proves save-result consistency for the history store, idempotent duplicate handling, database adapter contract visibility, and unchanged scoring guardrails.
+Sprint 5C proves that the Markdown report, validation report, export HTML, appendix, and share-pack validation consume one persistence evidence snapshot.
 
 Upload every file in this reports/share directory.

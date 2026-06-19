@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5B - History Store Consistency & Database Adapter Contract. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -64,14 +64,16 @@ import {
   renderFullMatchWorkbenchChainReplay5AValidation,
   renderFullMatchWorkbenchChainReplay5BDoc,
   renderFullMatchWorkbenchChainReplay5BValidation,
+  renderFullMatchWorkbenchChainReplay5CDoc,
+  renderFullMatchWorkbenchChainReplay5CValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5B - History Store Consistency & Database Adapter Contract";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5b.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5b.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5c.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5c.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1794,6 +1796,26 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5B builder deriving consistency counters from CoachMatchHistorySaveResult and exposing the database contract",
       },
       {
+        source: "src/reports/coachReportPersistenceEvidenceSnapshot.ts",
+        required: true,
+        reason: "Sprint 5C single persistence evidence snapshot model shared by markdown, validation, export HTML, appendix, and share-pack validation",
+      },
+      {
+        source: "src/reports/buildCoachReportPersistenceEvidenceSnapshot.ts",
+        required: true,
+        reason: "Sprint 5C builder deriving persistence evidence counters from CoachMatchHistorySaveResult and post-save query counts",
+      },
+      {
+        source: "src/reports/validation/persistenceEvidenceArtifactAlignment.ts",
+        required: true,
+        reason: "Sprint 5C artifact alignment validator comparing markdown, validation, and export HTML to the same persistence snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceTestFixtures.ts",
+        required: true,
+        reason: "Sprint 5C reusable persistence evidence fixtures for scenario and artifact alignment tests",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -2117,6 +2139,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5b.test.ts",
         required: true,
         reason: "Sprint 5B executable scoring guard proving history-store consistency does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5c.test.ts",
+        required: true,
+        reason: "Sprint 5C executable scoring guard proving persistence evidence alignment does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3485,6 +3512,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5B executable non-selection and non-mutation guard tests for history-store consistency",
       },
       {
+        source: "src/reports/persistenceEvidenceSnapshot.test.ts",
+        required: true,
+        reason: "Sprint 5C executable snapshot tests proving counters come from CoachMatchHistorySaveResult and post-save query counts",
+      },
+      {
+        source: "src/reports/persistenceEvidenceScenarioIsolation.test.ts",
+        required: true,
+        reason: "Sprint 5C executable scenario isolation tests for inserted, replaced, and ignored_duplicate persistence evidence",
+      },
+      {
+        source: "src/reports/persistenceEvidenceRendererAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable renderer alignment tests proving export HTML consumes the supplied snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceMarkdownAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable markdown alignment tests proving the report consumes the supplied snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceValidationAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable validation alignment tests proving validation consumes the supplied snapshot",
+      },
+      {
+        source: "src/reports/persistenceEvidenceArtifactAlignment.test.ts",
+        required: true,
+        reason: "Sprint 5C executable artifact alignment validator tests for markdown, validation, and export HTML",
+      },
+      {
+        source: "src/reports/persistenceEvidenceNoRendererSideEffects.test.ts",
+        required: true,
+        reason: "Sprint 5C executable renderer side-effect guard proving no save/query/file read is performed by rendering",
+      },
+      {
+        source: "src/reports/persistenceEvidenceCopy.test.ts",
+        required: true,
+        reason: "Sprint 5C executable copy guard tests for proof, recommendation, selection, and internal-status wording",
+      },
+      {
+        source: "src/reports/persistenceEvidenceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5C executable non-selection and non-mutation guard tests for persistence evidence",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -3680,6 +3752,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5C")) {
+    return renderFullMatchWorkbenchChainReplay5CDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5B")) {
     return renderFullMatchWorkbenchChainReplay5BDoc(fullMatchTraceValidationModel());
   }
@@ -5864,6 +5940,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5C")) {
+    return renderFullMatchWorkbenchChainReplay5CValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5B")) {
     return renderFullMatchWorkbenchChainReplay5BValidation(fullMatchTraceValidationModel());
   }
@@ -7993,6 +8073,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5C")) {
+    return [
+      "# Sprint 5C Share Pack",
+      "",
+      "Current sprint: Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5c.md",
+      "- validation.fullmatch-workbench-chain-replay-5c.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5c.md and validation.fullmatch-workbench-chain-replay-5c.md.",
+      "",
+      "Sprint 5C proves that the Markdown report, validation report, export HTML, appendix, and share-pack validation consume one persistence evidence snapshot.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5B")) {
     return [
       "# Sprint 5B Share Pack",
@@ -22438,10 +22554,440 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/persistenceEvidenceSnapshot.test.ts
+
+```ts
+import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
+import {
+  persistenceEvidenceConsistency,
+  persistenceEvidenceSaveResult,
+} from "./persistenceEvidenceTestFixtures";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceSnapshot(): readonly string[] {
+  const saveResult = persistenceEvidenceSaveResult("inserted");
+  const consistency = persistenceEvidenceConsistency("inserted");
+  const snapshot = buildCoachReportPersistenceEvidenceSnapshot({
+    consistency,
+    saveResult,
+    queriedRecordCount: consistency.queriedRecordCount,
+    queriedSignalCount: consistency.queriedSignalCount,
+    productReportHtml: "<main>product</main>",
+    exportReportHtml: "<main>export</main>",
+  });
+
+  assertTest(snapshot.source === "coach_match_history_save_result", "snapshot source must be CoachMatchHistorySaveResult.");
+  assertTest(snapshot.scenario === saveResult.operation, "snapshot scenario must be explicit.");
+  assertTest(snapshot.saveOperation === saveResult.operation, "save operation must come from save result.");
+  assertTest(snapshot.recordsBeforeSaveCount === saveResult.recordsBeforeSaveCount, "before count must come from save result.");
+  assertTest(snapshot.recordsAfterSaveCount === saveResult.recordsAfterSaveCount, "after count must come from save result.");
+  assertTest(snapshot.loadedFromDiskCount === saveResult.loadedFromDiskCount, "loaded count must come from save result.");
+  assertTest(snapshot.writtenToDiskCount === saveResult.writtenToDiskCount, "written count must come from save result.");
+  assertTest(snapshot.dedupedRecordCount === saveResult.dedupedRecordCount, "dedupe count must come from save result.");
+  assertTest(snapshot.replacedRecordCount === saveResult.replacedRecordCount, "replaced count must come from save result.");
+  assertTest(snapshot.ignoredDuplicateCount === saveResult.ignoredDuplicateCount, "ignored duplicate count must come from save result.");
+  assertTest(snapshot.queriedRecordCount === consistency.queriedRecordCount, "queried record count must come from post-save query.");
+  assertTest(snapshot.queriedSignalCount === consistency.queriedSignalCount, "queried signal count must come from post-save query.");
+  assertTest(snapshot.scoreMutationCount === 0 && snapshot.productionScoringEventCreationCount === 0, "snapshot must have no mutation permissions.");
+  assertTest(snapshot.globalProofClaimCount === 0, "snapshot must not claim global proof.");
+
+  return [
+    "snapshot source is CoachMatchHistorySaveResult",
+    "snapshot scenario is explicit",
+    "snapshot counters come from save result and post-save query",
+    "snapshot has no mutation permissions or global proof claim",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceSnapshot();
+  console.log("persistenceEvidenceSnapshot tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceScenarioIsolation.test.ts
+
+```ts
+import { persistenceEvidenceSnapshot } from "./persistenceEvidenceTestFixtures";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceScenarioIsolation(): readonly string[] {
+  const inserted = persistenceEvidenceSnapshot("inserted");
+  const replaced = persistenceEvidenceSnapshot("replaced");
+  const ignored = persistenceEvidenceSnapshot("ignored_duplicate");
+
+  assertTest(inserted.scenario === "inserted" && inserted.saveOperation === "inserted", "inserted scenario must be isolated.");
+  assertTest(replaced.scenario === "replaced" && replaced.replacedRecordCount === 1, "replaced scenario must be isolated.");
+  assertTest(ignored.scenario === "ignored_duplicate" && ignored.ignoredDuplicateCount === 1, "ignored duplicate scenario must be isolated.");
+  assertTest(inserted.replacedRecordCount === 0 && inserted.ignoredDuplicateCount === 0, "default inserted scenario must not mix replaced or ignored counters.");
+  assertTest(inserted.snapshotId !== replaced.snapshotId && inserted.snapshotId !== ignored.snapshotId, "scenario snapshots must remain distinct.");
+
+  return [
+    "inserted scenario is isolated",
+    "replaced scenario is isolated",
+    "ignored duplicate scenario is isolated",
+    "default report generation does not mix replacement counters",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceScenarioIsolation();
+  console.log("persistenceEvidenceScenarioIsolation tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceRendererAlignment.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceRendererAlignment(): readonly string[] {
+  const { exportHtml, persistenceEvidenceSnapshot: snapshot } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes(`save operation: ${snapshot.saveOperation}`), "export HTML must contain same save operation as snapshot.");
+  assertTest(exportHtml.includes(`records before save count: ${snapshot.recordsBeforeSaveCount}`), "export HTML must contain same before count as snapshot.");
+  assertTest(exportHtml.includes(`records after save count: ${snapshot.recordsAfterSaveCount}`), "export HTML must contain same after count as snapshot.");
+  assertTest(exportHtml.includes(`loaded from disk count: ${snapshot.loadedFromDiskCount}`), "export HTML must contain same loaded count as snapshot.");
+  assertTest(exportHtml.includes(`written to disk count: ${snapshot.writtenToDiskCount}`), "export HTML must contain same written count as snapshot.");
+  assertTest(exportHtml.includes(`deduped record count: ${snapshot.dedupedRecordCount}`), "export HTML must contain same dedupe count as snapshot.");
+  assertTest(exportHtml.includes(`replaced record count: ${snapshot.replacedRecordCount}`), "export HTML must contain same replaced count as snapshot.");
+  assertTest(exportHtml.includes(`ignored duplicate count: ${snapshot.ignoredDuplicateCount}`), "export HTML must contain same ignored count as snapshot.");
+  assertTest(exportHtml.includes(`queried record count: ${snapshot.queriedRecordCount}`), "export HTML must contain same queried record count as snapshot.");
+  assertTest(exportHtml.includes(`queried signal count: ${snapshot.queriedSignalCount}`), "export HTML must contain same queried signal count as snapshot.");
+  assertTest(exportHtml.includes("instantan&eacute; unique de sauvegarde"), "export HTML must contain single-snapshot guard.");
+
+  return [
+    "export HTML contains snapshot save operation",
+    "export HTML contains snapshot counters",
+    "export HTML contains single-snapshot guard",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceRendererAlignment();
+  console.log("persistenceEvidenceRendererAlignment tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceMarkdownAlignment.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "../simulation/validation/fullMatchTraceValidationComparisons";
+import { renderFullMatchWorkbenchChainReplay5CDoc } from "../simulation/validation/fullMatchTraceValidationReport";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceMarkdownAlignment(): readonly string[] {
+  const markdown = renderFullMatchWorkbenchChainReplay5CDoc(runFullMatchTraceValidationModel());
+
+  assertTest(markdown.includes("## Persistence Evidence Alignment Summary"), "markdown must contain alignment summary.");
+  assertTest(markdown.includes("- save operation: inserted"), "markdown must contain snapshot save operation.");
+  assertTest(markdown.includes("- records before save count: 5"), "markdown must contain snapshot before count.");
+  assertTest(markdown.includes("- records after save count: 6"), "markdown must contain snapshot after count.");
+  assertTest(markdown.includes("- loaded from disk count: 0"), "markdown must contain snapshot loaded count.");
+  assertTest(markdown.includes("- written to disk count: 6"), "markdown must contain snapshot written count.");
+  assertTest(markdown.includes("- deduped record count: 0"), "markdown must contain snapshot dedupe count.");
+  assertTest(markdown.includes("- replaced record count: 0"), "markdown must contain snapshot replaced count.");
+  assertTest(markdown.includes("- ignored duplicate count: 0"), "markdown must contain snapshot ignored count.");
+  assertTest(markdown.includes("- queried record count: 6"), "markdown must contain snapshot queried record count.");
+  assertTest(markdown.includes("- queried signal count: 40"), "markdown must contain snapshot queried signal count.");
+
+  return [
+    "markdown contains snapshot save operation",
+    "markdown contains snapshot counters",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceMarkdownAlignment();
+  console.log("persistenceEvidenceMarkdownAlignment tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceValidationAlignment.test.ts
+
+```ts
+import { runFullMatchTraceValidationModel } from "../simulation/validation/fullMatchTraceValidationComparisons";
+import { renderFullMatchWorkbenchChainReplay5CValidation } from "../simulation/validation/fullMatchTraceValidationReport";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceValidationAlignment(): readonly string[] {
+  const validation = renderFullMatchWorkbenchChainReplay5CValidation(runFullMatchTraceValidationModel());
+
+  assertTest(validation.includes("Status: PASS"), "validation report must pass.");
+  assertTest(validation.includes("- save operation: inserted"), "validation must contain snapshot save operation.");
+  assertTest(validation.includes("- records before save count: 5"), "validation must contain snapshot before count.");
+  assertTest(validation.includes("- records after save count: 6"), "validation must contain snapshot after count.");
+  assertTest(validation.includes("- loaded from disk count: 0"), "validation must contain snapshot loaded count.");
+  assertTest(validation.includes("- written to disk count: 6"), "validation must contain snapshot written count.");
+  assertTest(validation.includes("- deduped record count: 0"), "validation must contain snapshot dedupe count.");
+  assertTest(validation.includes("- replaced record count: 0"), "validation must contain snapshot replaced count.");
+  assertTest(validation.includes("- ignored duplicate count: 0"), "validation must contain snapshot ignored count.");
+  assertTest(validation.includes("- queried record count: 6"), "validation must contain snapshot queried record count.");
+  assertTest(validation.includes("- queried signal count: 40"), "validation must contain snapshot queried signal count.");
+
+  return [
+    "validation contains snapshot save operation",
+    "validation contains snapshot counters",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceValidationAlignment();
+  console.log("persistenceEvidenceValidationAlignment tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceArtifactAlignment.test.ts
+
+```ts
+import { validatePersistenceEvidenceArtifactAlignment } from "./validation/persistenceEvidenceArtifactAlignment";
+import { persistenceEvidenceSnapshot } from "./persistenceEvidenceTestFixtures";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function artifact(snapshot: ReturnType<typeof persistenceEvidenceSnapshot>): string {
+  return [
+    `snapshot id: ${snapshot.snapshotId}`,
+    `scenario: ${snapshot.scenario}`,
+    `save operation: ${snapshot.saveOperation}`,
+    `idempotent save: ${snapshot.idempotentSave}`,
+    `records before save count: ${snapshot.recordsBeforeSaveCount}`,
+    `records after save count: ${snapshot.recordsAfterSaveCount}`,
+    `loaded from disk count: ${snapshot.loadedFromDiskCount}`,
+    `written to disk count: ${snapshot.writtenToDiskCount}`,
+    `deduped record count: ${snapshot.dedupedRecordCount}`,
+    `replaced record count: ${snapshot.replacedRecordCount}`,
+    `ignored duplicate count: ${snapshot.ignoredDuplicateCount}`,
+    `queried record count: ${snapshot.queriedRecordCount}`,
+    `queried signal count: ${snapshot.queriedSignalCount}`,
+  ].join("\n");
+}
+
+export function validatePersistenceEvidenceArtifactAlignmentTest(): readonly string[] {
+  const snapshot = persistenceEvidenceSnapshot("inserted");
+  const result = validatePersistenceEvidenceArtifactAlignment({
+    snapshot,
+    markdownReport: artifact(snapshot),
+    validationReport: artifact(snapshot),
+    exportHtml: artifact(snapshot),
+  });
+
+  assertTest(result.status === "pass", "artifact alignment must pass.");
+  assertTest(result.markdownMatchesSnapshot, "markdown must match snapshot.");
+  assertTest(result.validationMatchesSnapshot, "validation must match snapshot.");
+  assertTest(result.exportMatchesSnapshot, "export must match snapshot.");
+  assertTest(result.saveOperationAligned, "save operation must align.");
+  assertTest(result.beforeAfterCountsAligned, "before/after counts must align.");
+  assertTest(result.diskCountsAligned, "disk counts must align.");
+  assertTest(result.dedupeCountsAligned, "dedupe counts must align.");
+  assertTest(result.queryCountsAligned, "query counts must align.");
+  assertTest(!result.scenarioMixingDetected, "scenario mixing must be false.");
+  assertTest(!result.rendererRecalculationDetected, "renderer recalculation must be false.");
+  assertTest(result.mismatchCount === 0, "mismatch count must be 0.");
+
+  return [
+    "markdown, validation, and export match snapshot",
+    "all counter groups align",
+    "scenario mixing and renderer recalculation are false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceArtifactAlignmentTest();
+  console.log("persistenceEvidenceArtifactAlignment tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceNoRendererSideEffects.test.ts
+
+```ts
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceNoRendererSideEffects(): readonly string[] {
+  const source = readFileSync(join(process.cwd(), "src", "reports", "renderCoachReportExportHtml.ts"), "utf8");
+
+  assertTest(!/\.save\s*\(/u.test(source), "renderer must not call save.");
+  assertTest(!/\.query\s*\(/u.test(source), "renderer must not call query.");
+  assertTest(!source.includes("createFileBackedCoachMatchHistoryStore"), "renderer must not create or read a file-backed store.");
+  assertTest(!source.includes("readFileSync"), "renderer must not read files.");
+  assertTest(source.includes("persistenceEvidenceSnapshot"), "renderer must consume supplied persistence snapshot.");
+
+  return [
+    "renderer does not call save",
+    "renderer does not call query",
+    "renderer does not read or create file-backed stores",
+    "renderer consumes supplied persistence snapshot",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceNoRendererSideEffects();
+  console.log("persistenceEvidenceNoRendererSideEffects tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceCopy.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceCopy(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const sectionStart = exportHtml.indexOf("history-consistency-section");
+  const sectionEnd = exportHtml.indexOf("</section>", sectionStart);
+  const visibleMain = sectionStart === -1 || sectionEnd === -1
+    ? exportHtml
+    : exportHtml.slice(sectionStart, sectionEnd);
+  const forbidden = [
+    "preuve statistique",
+    "preuve globale",
+    "certitude",
+    "d&eacute;montr&eacute;",
+    "valid&eacute; d&eacute;finitivement",
+    "officiellement confirm&eacute;",
+    "joueur recommand&eacute;",
+    "&agrave; s&eacute;lectionner",
+    "titulaire conseill&eacute;",
+    "remplacement conseill&eacute;",
+    "composition recommand&eacute;e",
+    "s&eacute;lection automatique",
+    "officially_confirmed",
+    "trace_supported",
+    "sandbox_only",
+  ];
+
+  for (const phrase of forbidden) {
+    assertTest(!visibleMain.includes(phrase), `visible copy must not contain ${phrase}.`);
+  }
+
+  return [
+    "visible copy avoids proof wording",
+    "visible copy avoids recommendation wording",
+    "visible copy avoids selection wording",
+    "visible copy avoids internal status wording",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceCopy();
+  console.log("persistenceEvidenceCopy tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/persistenceEvidenceGuard.test.ts
+
+```ts
+import { persistenceEvidenceSnapshot } from "./persistenceEvidenceTestFixtures";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validatePersistenceEvidenceGuard(): readonly string[] {
+  const snapshot = persistenceEvidenceSnapshot("inserted");
+
+  assertTest(snapshot.lineupMutationCount === 0, "persistence evidence cannot change lineup.");
+  assertTest(snapshot.startersMutationCount === 0, "persistence evidence cannot change starters.");
+  assertTest(snapshot.benchMutationCount === 0, "persistence evidence cannot change bench.");
+  assertTest(snapshot.noAutomaticSelection && snapshot.playerSelectedCount === 0, "persistence evidence cannot select a player.");
+  assertTest(snapshot.automaticSelectionCount === 0, "persistence evidence cannot make automatic selection.");
+  assertTest(snapshot.confidenceUpgradeCount === 0, "persistence evidence cannot upgrade confidence.");
+  assertTest(snapshot.officiallyConfirmedCount === 0, "persistence evidence cannot mark officially confirmed.");
+  assertTest(snapshot.scoreMutationCount === 0, "persistence evidence cannot mutate official score.");
+  assertTest(snapshot.possessionMutationCount === 0, "persistence evidence cannot mutate official possession.");
+  assertTest(snapshot.productionScoringEventCreationCount === 0, "persistence evidence cannot create production scoring events.");
+  assertTest(snapshot.globalEconomyClaimCount === 0, "persistence evidence cannot claim global economy.");
+
+  return [
+    "persistence evidence cannot change lineup, starters, or bench",
+    "persistence evidence cannot select players or upgrade confidence",
+    "persistence evidence cannot mutate score, possession, scoring events, or global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validatePersistenceEvidenceGuard();
+  console.log("persistenceEvidenceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
-import { mkdirSync, writeFileSync } from "fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
@@ -22449,6 +22995,7 @@ import { buildCoachReportHistoryStoreConsistency } from "./buildCoachReportHisto
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -22506,8 +23053,9 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-coach-report-5c-"));
   const historyStore = createFileBackedCoachMatchHistoryStore({
-    filePath: join(reportsDirectory, "history", "coach-match-history-store.json"),
+    filePath: join(historyStoreDirectory, "coach-match-history-store.json"),
     allowWrite: true,
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
@@ -22556,6 +23104,16 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const persistenceEvidenceSnapshot = historyStoreConsistency === undefined || persistentHistoryAdapter.saveResult === undefined
+    ? undefined
+    : buildCoachReportPersistenceEvidenceSnapshot({
+        consistency: historyStoreConsistency,
+        saveResult: persistentHistoryAdapter.saveResult,
+        queriedRecordCount: historyStoreConsistency.queriedRecordCount,
+        queriedSignalCount: historyStoreConsistency.queriedSignalCount,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -22564,6 +23122,7 @@ export function writeLatestCoachReport(): void {
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
     ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
+    ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
@@ -22604,6 +23163,7 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.experimental.html");
   console.log("Generated reports/coach-report.product.html");
   console.log("Generated reports/coach-report.export.html");
+  rmSync(historyStoreDirectory, { recursive: true, force: true });
 }
 
 if (require.main === module) {

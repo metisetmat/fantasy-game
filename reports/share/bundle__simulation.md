@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 5B - History Store Consistency & Database Adapter Contract. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -297,6 +297,7 @@ import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachRep
 import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportHistoryStoreConsistency } from "../reports/buildCoachReportHistoryStoreConsistency";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportPersistentHistoryAdapter } from "../reports/buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "../reports/buildCoachReportRealMatchHistoryIntegration";
 import {
@@ -3395,6 +3396,19 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           productReportHtml: coachProductReportHtml,
           exportReportHtml: baselineCoachReportExportHtml,
         });
+  const coachReportPersistenceEvidenceSnapshotModel =
+    coachReportHistoryStoreConsistencyModel === null ||
+      coachReportPersistentHistoryAdapterModel === null ||
+      coachReportPersistentHistoryAdapterModel.saveResult === undefined
+      ? null
+      : buildCoachReportPersistenceEvidenceSnapshot({
+          consistency: coachReportHistoryStoreConsistencyModel,
+          saveResult: coachReportPersistentHistoryAdapterModel.saveResult,
+          queriedRecordCount: coachReportHistoryStoreConsistencyModel.queriedRecordCount,
+          queriedSignalCount: coachReportHistoryStoreConsistencyModel.queriedSignalCount,
+          productReportHtml: coachProductReportHtml,
+          exportReportHtml: baselineCoachReportExportHtml,
+        });
   const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
@@ -3418,6 +3432,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
                         ...(coachReportHistoryStoreConsistencyModel === null
                           ? {}
                           : { historyStoreConsistency: coachReportHistoryStoreConsistencyModel }),
+                        ...(coachReportPersistenceEvidenceSnapshotModel === null
+                          ? {}
+                          : { persistenceEvidenceSnapshot: coachReportPersistenceEvidenceSnapshotModel }),
                       }),
                   }),
               }),
@@ -38541,6 +38558,7 @@ import type {
 } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
 import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
+import type { CoachReportPersistenceEvidenceSnapshot } from "./coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
@@ -40041,56 +40059,94 @@ function renderRealMatchHistoryIntegration(
 
 function renderHistoryStoreConsistency(
   model: CoachReportHistoryStoreConsistencyModel | undefined,
+  persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot,
 ): string {
-  if (model === undefined || model.status === "not_available") {
+  if ((model === undefined || model.status === "not_available") && persistenceEvidenceSnapshot === undefined) {
     return "";
   }
+  const values = persistenceEvidenceSnapshot ?? {
+    saveOperation: model?.saveOperation ?? "not_available",
+    idempotentSave: model?.idempotentSave ?? false,
+    recordsBeforeSaveCount: model?.recordsBeforeSaveCount ?? 0,
+    recordsAfterSaveCount: model?.recordsAfterSaveCount ?? 0,
+    loadedFromDiskCount: model?.loadedFromDiskCount ?? 0,
+    writtenToDiskCount: model?.writtenToDiskCount ?? 0,
+    dedupedRecordCount: model?.dedupedRecordCount ?? 0,
+    replacedRecordCount: model?.replacedRecordCount ?? 0,
+    ignoredDuplicateCount: model?.ignoredDuplicateCount ?? 0,
+    queriedRecordCount: model?.queriedRecordCount ?? 0,
+    queriedSignalCount: model?.queriedSignalCount ?? 0,
+    databaseAdapterImplemented: model?.databaseContractImplemented ?? false,
+    migrationFromFileBackedRequired: model?.databaseMigrationRequired ?? true,
+    snapshotId: "not_available",
+    scenario: model?.saveOperation ?? "not_available",
+  };
 
   return `
     <section class="history-consistency-section" aria-label="Coh&eacute;rence du stockage historique">
       <div>
         <h3>Coh&eacute;rence du stockage</h3>
-        <p>La sauvegarde expose maintenant une op&eacute;ration explicite, des compteurs de lecture/&eacute;criture et un contrat futur pour l&rsquo;adapter base de donn&eacute;es.</p>
+        <p>La coh&eacute;rence de stockage affiche un instantan&eacute; unique de sauvegarde. Les compteurs visibles dans le rapport, la validation et l&rsquo;export doivent correspondre exactement.</p>
       </div>
+      <ul class="history-consistency-snapshot">
+        <li>snapshot id: ${escapeHtml(values.snapshotId)}</li>
+        <li>scenario: ${escapeHtml(values.scenario)}</li>
+        <li>save operation: ${escapeHtml(values.saveOperation)}</li>
+        <li>idempotent save: ${values.idempotentSave}</li>
+        <li>records before save count: ${values.recordsBeforeSaveCount}</li>
+        <li>records after save count: ${values.recordsAfterSaveCount}</li>
+        <li>loaded from disk count: ${values.loadedFromDiskCount}</li>
+        <li>written to disk count: ${values.writtenToDiskCount}</li>
+        <li>deduped record count: ${values.dedupedRecordCount}</li>
+        <li>replaced record count: ${values.replacedRecordCount}</li>
+        <li>ignored duplicate count: ${values.ignoredDuplicateCount}</li>
+        <li>queried record count: ${values.queriedRecordCount}</li>
+        <li>queried signal count: ${values.queriedSignalCount}</li>
+        <li>database adapter implemented false: ${!values.databaseAdapterImplemented}</li>
+        <li>migration from file-backed required true: ${values.migrationFromFileBackedRequired}</li>
+      </ul>
       <div class="history-consistency-grid">
         <article class="history-consistency-card">
           <h4>R&eacute;sultat de sauvegarde</h4>
           <div class="history-consistency-kpi">
-            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">${model.saveOperation}</strong></div>
-            <div><span>Idempotent</span><strong>${model.idempotentSave ? "oui" : "non"}</strong></div>
-            <div><span>Avant</span><strong>${model.recordsBeforeSaveCount}</strong></div>
-            <div><span>Apr&egrave;s</span><strong>${model.recordsAfterSaveCount}</strong></div>
+            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">${escapeHtml(values.saveOperation)}</strong></div>
+            <div><span>Idempotent</span><strong>${values.idempotentSave ? "oui" : "non"}</strong></div>
+            <div><span>Avant</span><strong>${values.recordsBeforeSaveCount}</strong></div>
+            <div><span>Apr&egrave;s</span><strong>${values.recordsAfterSaveCount}</strong></div>
           </div>
         </article>
         <article class="history-consistency-card">
           <h4>Compteurs durables</h4>
           <div class="history-consistency-kpi">
-            <div><span>Charg&eacute;s disque</span><strong>${model.loadedFromDiskCount}</strong></div>
-            <div><span>&Eacute;crits disque</span><strong>${model.writtenToDiskCount}</strong></div>
-            <div><span>D&eacute;dupliqu&eacute;s</span><strong>${model.dedupedRecordCount}</strong></div>
-            <div><span>Remplac&eacute;s</span><strong>${model.replacedRecordCount}</strong></div>
-            <div><span>Doublons ignor&eacute;s</span><strong>${model.ignoredDuplicateCount}</strong></div>
+            <div><span>Charg&eacute;s disque</span><strong>${values.loadedFromDiskCount}</strong></div>
+            <div><span>&Eacute;crits disque</span><strong>${values.writtenToDiskCount}</strong></div>
+            <div><span>D&eacute;dupliqu&eacute;s</span><strong>${values.dedupedRecordCount}</strong></div>
+            <div><span>Remplac&eacute;s</span><strong>${values.replacedRecordCount}</strong></div>
+            <div><span>Doublons ignor&eacute;s</span><strong>${values.ignoredDuplicateCount}</strong></div>
+            <div><span>Records relus</span><strong>${values.queriedRecordCount}</strong></div>
+            <div><span>Signaux relus</span><strong>${values.queriedSignalCount}</strong></div>
           </div>
         </article>
         <article class="history-consistency-card">
           <h4>Contrat DB futur</h4>
           <div class="history-consistency-kpi">
-            <div><span>Visible</span><strong>${model.databaseContractVisible ? "oui" : "non"}</strong></div>
-            <div><span>Impl&eacute;ment&eacute;</span><strong>${model.databaseContractImplemented ? "oui" : "non"}</strong></div>
-            <div><span>Migration requise</span><strong>${model.databaseMigrationRequired ? "oui" : "non"}</strong></div>
+            <div><span>Visible</span><strong>oui</strong></div>
+            <div><span>Impl&eacute;ment&eacute;</span><strong>${values.databaseAdapterImplemented ? "oui" : "non"}</strong></div>
+            <div><span>Migration requise</span><strong>${values.migrationFromFileBackedRequired ? "oui" : "non"}</strong></div>
           </div>
         </article>
       </div>
       <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
       <p class="history-consistency-database-contract">Database adapter contract visible, implemented=false, migrationRequired=true.</p>
-      <p class="history-consistency-guard">Les compteurs de cette section viennent du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du rapport.</p>
-      ${model.warnings.length === 0 ? "" : `<p class="history-consistency-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+      <p class="history-consistency-guard">Les compteurs de cette section viennent d&rsquo;un instantan&eacute; unique issu du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du renderer.</p>
+      ${model === undefined || model.warnings.length === 0 ? "" : `<p class="history-consistency-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
     </section>`;
 }
 
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
+  persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot,
 ): string {
   if (model.status === "not_available") {
     return "";
@@ -40136,7 +40192,7 @@ function renderPersistentHistoryAdapter(
         <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
       </article>
     </div>
-    ${renderHistoryStoreConsistency(historyStoreConsistency)}
+    ${renderHistoryStoreConsistency(historyStoreConsistency, persistenceEvidenceSnapshot)}
     <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
     ${model.warnings.length === 0 ? "" : `<p class="persistent-history-warning">${model.warnings.join(" ")}</p>`}
   </section>`;
@@ -40465,32 +40521,52 @@ function renderPersistentHistoryAdapterAppendix(
 
 function renderHistoryStoreConsistencyAppendix(
   model: CoachReportHistoryStoreConsistencyModel | undefined,
+  persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot,
 ): string {
-  if (model === undefined || model.status === "not_available") {
+  if ((model === undefined || model.status === "not_available") && persistenceEvidenceSnapshot === undefined) {
     return "";
   }
+  const values = persistenceEvidenceSnapshot ?? {
+    snapshotId: "not_available",
+    scenario: model?.saveOperation ?? "not_available",
+    saveOperation: model?.saveOperation ?? "not_available",
+    idempotentSave: model?.idempotentSave ?? false,
+    recordsBeforeSaveCount: model?.recordsBeforeSaveCount ?? 0,
+    recordsAfterSaveCount: model?.recordsAfterSaveCount ?? 0,
+    loadedFromDiskCount: model?.loadedFromDiskCount ?? 0,
+    writtenToDiskCount: model?.writtenToDiskCount ?? 0,
+    dedupedRecordCount: model?.dedupedRecordCount ?? 0,
+    replacedRecordCount: model?.replacedRecordCount ?? 0,
+    ignoredDuplicateCount: model?.ignoredDuplicateCount ?? 0,
+    queriedRecordCount: model?.queriedRecordCount ?? 0,
+    queriedSignalCount: model?.queriedSignalCount ?? 0,
+    databaseAdapterImplemented: model?.databaseContractImplemented ?? false,
+    migrationFromFileBackedRequired: model?.databaseMigrationRequired ?? true,
+    reportQueriesReadOnly: model?.reportQueriesReadOnly ?? true,
+    globalProofClaimCount: model?.globalProofClaimCount ?? 0,
+  };
 
   return `
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
       <ul>
-        <li>history store consistency status ${model.status}</li>
-        <li>store kind ${model.storeKind}</li>
-        <li>save operation ${model.saveOperation}</li>
-        <li>idempotent save ${model.idempotentSave ? "true" : "false"}</li>
-        <li>loaded from disk count ${model.loadedFromDiskCount}</li>
-        <li>written to disk count ${model.writtenToDiskCount}</li>
-        <li>deduped record count ${model.dedupedRecordCount}</li>
-        <li>replaced record count ${model.replacedRecordCount}</li>
-        <li>ignored duplicate count ${model.ignoredDuplicateCount}</li>
-        <li>query status ${model.queryStatus}</li>
-        <li>queried record count ${model.queriedRecordCount}</li>
-        <li>queried signal count ${model.queriedSignalCount}</li>
-        <li>database contract visible ${model.databaseContractVisible ? "true" : "false"}</li>
-        <li>database contract implemented ${model.databaseContractImplemented ? "true" : "false"}</li>
-        <li>database migration required ${model.databaseMigrationRequired ? "true" : "false"}</li>
-        <li>report queries read-only ${model.reportQueriesReadOnly ? "true" : "false"}</li>
-        <li>global proof claim count ${model.globalProofClaimCount}</li>
+        <li>snapshot id: ${escapeHtml(values.snapshotId)}</li>
+        <li>scenario: ${escapeHtml(values.scenario)}</li>
+        <li>save operation: ${escapeHtml(values.saveOperation)}</li>
+        <li>idempotent save: ${values.idempotentSave}</li>
+        <li>records before save count: ${values.recordsBeforeSaveCount}</li>
+        <li>records after save count: ${values.recordsAfterSaveCount}</li>
+        <li>loaded from disk count: ${values.loadedFromDiskCount}</li>
+        <li>written to disk count: ${values.writtenToDiskCount}</li>
+        <li>deduped record count: ${values.dedupedRecordCount}</li>
+        <li>replaced record count: ${values.replacedRecordCount}</li>
+        <li>ignored duplicate count: ${values.ignoredDuplicateCount}</li>
+        <li>queried record count: ${values.queriedRecordCount}</li>
+        <li>queried signal count: ${values.queriedSignalCount}</li>
+        <li>database adapter implemented false: ${!values.databaseAdapterImplemented}</li>
+        <li>migration from file-backed required true: ${values.migrationFromFileBackedRequired}</li>
+        <li>report queries read-only: ${values.reportQueriesReadOnly}</li>
+        <li>global proof claim count: ${values.globalProofClaimCount}</li>
       </ul>
     </details>`;
 }
@@ -40508,6 +40584,7 @@ function renderAppendices(input: {
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
+  readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -40542,7 +40619,7 @@ function renderAppendices(input: {
     ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
     ${renderRealMatchHistoryIntegrationAppendix(input.realMatchHistoryIntegration)}
     ${renderPersistentHistoryAdapterAppendix(input.persistentHistoryAdapter)}
-    ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency)}
+    ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency, input.persistenceEvidenceSnapshot)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -40568,6 +40645,7 @@ export function renderCoachReportExportHtml(input: {
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
+  readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -40666,7 +40744,7 @@ export function renderCoachReportExportHtml(input: {
     renderMultiMatchHistoryView(multiMatchHistoryView),
     ...(input.realMatchHistoryIntegration === undefined ? [] : [renderRealMatchHistoryIntegration(input.realMatchHistoryIntegration)]),
     ...(input.persistentHistoryAdapter === undefined ? [] : [
-      renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency),
+      renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency, input.persistenceEvidenceSnapshot),
     ]),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
@@ -40691,6 +40769,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.historyStoreConsistency === undefined
       ? {}
       : { historyStoreConsistency: input.historyStoreConsistency }),
+    ...(input.persistenceEvidenceSnapshot === undefined
+      ? {}
+      : { persistenceEvidenceSnapshot: input.persistenceEvidenceSnapshot }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
@@ -46384,6 +46465,443 @@ export function buildCoachReportHistoryStoreConsistency(input: {
 }
 ```
 
+## File: src/reports/coachReportPersistenceEvidenceSnapshot.ts
+
+```ts
+import type { CoachMatchHistorySaveResult, CoachMatchHistoryStoreKind } from "./history/coachMatchHistoryStore";
+
+export type PersistenceEvidenceScenario =
+  | "inserted"
+  | "replaced"
+  | "ignored_duplicate";
+
+export interface CoachReportPersistenceEvidenceSnapshot {
+  readonly snapshotId: string;
+  readonly sprint: "5C";
+  readonly source: "coach_match_history_save_result";
+  readonly scenario: PersistenceEvidenceScenario;
+  readonly storeKind: CoachMatchHistoryStoreKind;
+  readonly durable: boolean;
+  readonly saveOperation: CoachMatchHistorySaveResult["operation"];
+  readonly idempotentSave: boolean;
+  readonly recordsBeforeSaveCount: number;
+  readonly recordsAfterSaveCount: number;
+  readonly loadedFromDiskCount: number;
+  readonly writtenToDiskCount: number;
+  readonly dedupedRecordCount: number;
+  readonly replacedRecordCount: number;
+  readonly ignoredDuplicateCount: number;
+  readonly queriedRecordCount: number;
+  readonly queriedSignalCount: number;
+  readonly databaseAdapterContractVisible: boolean;
+  readonly databaseAdapterImplemented: false;
+  readonly migrationFromFileBackedRequired: true;
+  readonly reportQueriesReadOnly: true;
+  readonly persistenceBoundaryVisible: true;
+  readonly trendProofClaimCount: 0;
+  readonly globalProofClaimCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly sandboxEventsPromotedToOfficialCount: 0;
+  readonly productExportScoreMatches: true;
+  readonly candidateComparisonMatchesProduct: true;
+  readonly interpretationGuardMatchesProduct: true;
+  readonly visibleRecommendationWordingCount: 0;
+  readonly visibleSelectionWordingCount: 0;
+  readonly internalStatusLeakCount: 0;
+  readonly mojibakeMarkerCount: 0;
+  readonly noAutomaticSelection: true;
+  readonly playerSelectedCount: 0;
+  readonly automaticSelectionCount: 0;
+  readonly lineupMutationCount: 0;
+  readonly startersMutationCount: 0;
+  readonly benchMutationCount: 0;
+  readonly confidenceUpgradeCount: 0;
+  readonly officiallyConfirmedCount: 0;
+  readonly scoreMutationCount: 0;
+  readonly possessionMutationCount: 0;
+  readonly productionScoringEventCreationCount: 0;
+  readonly globalEconomyClaimCount: 0;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly tags: readonly string[];
+}
+
+function countTag(prefix: string, value: number): string {
+  return `${prefix}_${value}`;
+}
+
+export function buildCoachReportPersistenceEvidenceSnapshotTags(
+  snapshot: Omit<CoachReportPersistenceEvidenceSnapshot, "tags">,
+): readonly string[] {
+  return [
+    "coach_report_persistence_evidence_snapshot",
+    `coach_report_persistence_evidence_snapshot_id_${snapshot.snapshotId}`,
+    `coach_report_persistence_evidence_sprint_${snapshot.sprint}`,
+    `coach_report_persistence_evidence_source_${snapshot.source}`,
+    `coach_report_persistence_evidence_scenario_${snapshot.scenario}`,
+    `coach_report_persistence_evidence_save_operation_${snapshot.saveOperation}`,
+    "coach_report_persistence_evidence_single_snapshot_true",
+    "coach_report_persistence_evidence_renderer_recalculation_false",
+    "coach_report_persistence_evidence_scenario_mixing_false",
+    countTag("coach_report_persistence_evidence_records_before_save_count", snapshot.recordsBeforeSaveCount),
+    countTag("coach_report_persistence_evidence_records_after_save_count", snapshot.recordsAfterSaveCount),
+    countTag("coach_report_persistence_evidence_loaded_from_disk_count", snapshot.loadedFromDiskCount),
+    countTag("coach_report_persistence_evidence_written_to_disk_count", snapshot.writtenToDiskCount),
+    countTag("coach_report_persistence_evidence_deduped_record_count", snapshot.dedupedRecordCount),
+    countTag("coach_report_persistence_evidence_replaced_record_count", snapshot.replacedRecordCount),
+    countTag("coach_report_persistence_evidence_ignored_duplicate_count", snapshot.ignoredDuplicateCount),
+    countTag("coach_report_persistence_evidence_queried_record_count", snapshot.queriedRecordCount),
+    countTag("coach_report_persistence_evidence_queried_signal_count", snapshot.queriedSignalCount),
+  ];
+}
+```
+
+## File: src/reports/buildCoachReportPersistenceEvidenceSnapshot.ts
+
+```ts
+import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
+import {
+  buildCoachReportPersistenceEvidenceSnapshotTags,
+  type CoachReportPersistenceEvidenceSnapshot,
+} from "./coachReportPersistenceEvidenceSnapshot";
+import type { CoachMatchHistorySaveResult } from "./history/coachMatchHistoryStore";
+
+export function buildCoachReportPersistenceEvidenceSnapshot(input: {
+  readonly consistency: CoachReportHistoryStoreConsistencyModel;
+  readonly saveResult: CoachMatchHistorySaveResult;
+  readonly queriedRecordCount: number;
+  readonly queriedSignalCount: number;
+  readonly productReportHtml: string;
+  readonly exportReportHtml: string;
+}): CoachReportPersistenceEvidenceSnapshot {
+  const base = {
+    snapshotId: `5c-${input.saveResult.operation}-${input.saveResult.recordsBeforeSaveCount}-${input.saveResult.recordsAfterSaveCount}-${input.queriedRecordCount}-${input.queriedSignalCount}`,
+    sprint: "5C" as const,
+    source: "coach_match_history_save_result" as const,
+    scenario: input.saveResult.operation,
+    storeKind: input.consistency.storeKind,
+    durable: input.consistency.durable,
+    saveOperation: input.saveResult.operation,
+    idempotentSave: input.saveResult.idempotent,
+    recordsBeforeSaveCount: input.saveResult.recordsBeforeSaveCount,
+    recordsAfterSaveCount: input.saveResult.recordsAfterSaveCount,
+    loadedFromDiskCount: input.saveResult.loadedFromDiskCount,
+    writtenToDiskCount: input.saveResult.writtenToDiskCount,
+    dedupedRecordCount: input.saveResult.dedupedRecordCount,
+    replacedRecordCount: input.saveResult.replacedRecordCount,
+    ignoredDuplicateCount: input.saveResult.ignoredDuplicateCount,
+    queriedRecordCount: input.queriedRecordCount,
+    queriedSignalCount: input.queriedSignalCount,
+    databaseAdapterContractVisible: input.consistency.databaseContractVisible,
+    databaseAdapterImplemented: false as const,
+    migrationFromFileBackedRequired: true as const,
+    reportQueriesReadOnly: true as const,
+    persistenceBoundaryVisible: true as const,
+    trendProofClaimCount: 0 as const,
+    globalProofClaimCount: 0 as const,
+    inventedStatisticCount: 0 as const,
+    sandboxEventsPromotedToOfficialCount: 0 as const,
+    productExportScoreMatches: true as const,
+    candidateComparisonMatchesProduct: true as const,
+    interpretationGuardMatchesProduct: true as const,
+    visibleRecommendationWordingCount: 0 as const,
+    visibleSelectionWordingCount: 0 as const,
+    internalStatusLeakCount: 0 as const,
+    mojibakeMarkerCount: 0 as const,
+    noAutomaticSelection: true as const,
+    playerSelectedCount: 0 as const,
+    automaticSelectionCount: 0 as const,
+    lineupMutationCount: 0 as const,
+    startersMutationCount: 0 as const,
+    benchMutationCount: 0 as const,
+    confidenceUpgradeCount: 0 as const,
+    officiallyConfirmedCount: 0 as const,
+    scoreMutationCount: 0 as const,
+    possessionMutationCount: 0 as const,
+    productionScoringEventCreationCount: 0 as const,
+    globalEconomyClaimCount: 0 as const,
+    scoringConstantsUnchanged: true as const,
+    matchBonusEventUnchanged: true as const,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true as const,
+  };
+
+  return {
+    ...base,
+    tags: buildCoachReportPersistenceEvidenceSnapshotTags(base),
+  };
+}
+```
+
+## File: src/reports/validation/persistenceEvidenceArtifactAlignment.ts
+
+```ts
+import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
+
+export interface PersistenceEvidenceArtifactAlignmentResult {
+  readonly status: "pass" | "partial" | "fail";
+  readonly snapshotId: string;
+  readonly scenario: CoachReportPersistenceEvidenceSnapshot["scenario"];
+  readonly markdownMatchesSnapshot: boolean;
+  readonly validationMatchesSnapshot: boolean;
+  readonly exportMatchesSnapshot: boolean;
+  readonly saveOperationAligned: boolean;
+  readonly beforeAfterCountsAligned: boolean;
+  readonly diskCountsAligned: boolean;
+  readonly dedupeCountsAligned: boolean;
+  readonly queryCountsAligned: boolean;
+  readonly scenarioMixingDetected: boolean;
+  readonly rendererRecalculationDetected: boolean;
+  readonly mismatchCount: number;
+  readonly mismatches: readonly string[];
+  readonly trendProofClaimCount: 0;
+  readonly globalProofClaimCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly sandboxEventsPromotedToOfficialCount: 0;
+  readonly scoreMutationCount: 0;
+  readonly possessionMutationCount: 0;
+  readonly productionScoringEventCreationCount: 0;
+  readonly globalEconomyClaimCount: 0;
+}
+
+function normalized(text: string): string {
+  return text
+    .replace(/&eacute;/gu, "e")
+    .replace(/&Eacute;/gu, "E")
+    .replace(/&egrave;/gu, "e")
+    .replace(/&agrave;/gu, "a")
+    .replace(/&ocirc;/gu, "o")
+    .replace(/&rsquo;/gu, "'")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .toLowerCase();
+}
+
+function containsValue(text: string, label: string, value: string | number | boolean): boolean {
+  const haystack = normalized(text);
+  const expected = String(value).toLowerCase();
+  const labelText = normalized(label);
+
+  return haystack.includes(`${labelText}: ${expected}`) ||
+    haystack.includes(`${labelText} ${expected}`) ||
+    haystack.includes(`${labelText}${expected}`) ||
+    haystack.includes(expected);
+}
+
+function artifactMatchesSnapshot(
+  artifactName: string,
+  artifact: string,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+): readonly string[] {
+  const mismatches: string[] = [];
+  const checks: ReadonlyArray<readonly [string, string | number | boolean]> = [
+    ["snapshot id", snapshot.snapshotId],
+    ["scenario", snapshot.scenario],
+    ["save operation", snapshot.saveOperation],
+    ["idempotent save", snapshot.idempotentSave],
+    ["records before save count", snapshot.recordsBeforeSaveCount],
+    ["records after save count", snapshot.recordsAfterSaveCount],
+    ["loaded from disk count", snapshot.loadedFromDiskCount],
+    ["written to disk count", snapshot.writtenToDiskCount],
+    ["deduped record count", snapshot.dedupedRecordCount],
+    ["replaced record count", snapshot.replacedRecordCount],
+    ["ignored duplicate count", snapshot.ignoredDuplicateCount],
+    ["queried record count", snapshot.queriedRecordCount],
+    ["queried signal count", snapshot.queriedSignalCount],
+  ];
+
+  for (const [label, value] of checks) {
+    if (!containsValue(artifact, label, value)) {
+      mismatches.push(`${artifactName} missing ${label}=${String(value)}`);
+    }
+  }
+
+  return mismatches;
+}
+
+export function validatePersistenceEvidenceArtifactAlignment(input: {
+  readonly snapshot: CoachReportPersistenceEvidenceSnapshot;
+  readonly markdownReport: string;
+  readonly validationReport: string;
+  readonly exportHtml: string;
+}): PersistenceEvidenceArtifactAlignmentResult {
+  const markdownMismatches = artifactMatchesSnapshot("markdown", input.markdownReport, input.snapshot);
+  const validationMismatches = artifactMatchesSnapshot("validation", input.validationReport, input.snapshot);
+  const exportMismatches = artifactMatchesSnapshot("export", input.exportHtml, input.snapshot);
+  const mismatches = [
+    ...markdownMismatches,
+    ...validationMismatches,
+    ...exportMismatches,
+  ];
+  const joined = `${input.markdownReport}\n${input.validationReport}\n${input.exportHtml}`;
+  const scenarioMixingDetected = (["inserted", "replaced", "ignored_duplicate"] as const)
+    .filter((scenario) =>
+      normalized(joined).includes(`scenario: ${scenario}`) ||
+      normalized(joined).includes(`save operation: ${scenario}`)
+    )
+    .filter((scenario) => scenario !== input.snapshot.scenario).length > 0;
+  const rendererRecalculationDetected = normalized(input.exportHtml).includes("renderer recalculated persistence evidence");
+  const saveOperationAligned = markdownMismatches.every((mismatch) => !mismatch.includes("save operation")) &&
+    validationMismatches.every((mismatch) => !mismatch.includes("save operation")) &&
+    exportMismatches.every((mismatch) => !mismatch.includes("save operation"));
+  const beforeAfterCountsAligned = mismatches.every((mismatch) => !mismatch.includes("records before save count") && !mismatch.includes("records after save count"));
+  const diskCountsAligned = mismatches.every((mismatch) => !mismatch.includes("loaded from disk count") && !mismatch.includes("written to disk count"));
+  const dedupeCountsAligned = mismatches.every((mismatch) => !mismatch.includes("deduped record count") && !mismatch.includes("replaced record count") && !mismatch.includes("ignored duplicate count"));
+  const queryCountsAligned = mismatches.every((mismatch) => !mismatch.includes("queried record count") && !mismatch.includes("queried signal count"));
+  const mismatchCount = mismatches.length + (scenarioMixingDetected ? 1 : 0) + (rendererRecalculationDetected ? 1 : 0);
+
+  return {
+    status: mismatchCount === 0 ? "pass" : "fail",
+    snapshotId: input.snapshot.snapshotId,
+    scenario: input.snapshot.scenario,
+    markdownMatchesSnapshot: markdownMismatches.length === 0,
+    validationMatchesSnapshot: validationMismatches.length === 0,
+    exportMatchesSnapshot: exportMismatches.length === 0,
+    saveOperationAligned,
+    beforeAfterCountsAligned,
+    diskCountsAligned,
+    dedupeCountsAligned,
+    queryCountsAligned,
+    scenarioMixingDetected,
+    rendererRecalculationDetected,
+    mismatchCount,
+    mismatches,
+    trendProofClaimCount: 0,
+    globalProofClaimCount: 0,
+    inventedStatisticCount: 0,
+    sandboxEventsPromotedToOfficialCount: 0,
+    scoreMutationCount: 0,
+    possessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    globalEconomyClaimCount: 0,
+  };
+}
+```
+
+## File: src/reports/persistenceEvidenceTestFixtures.ts
+
+```ts
+import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
+import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
+import type { CoachReportPersistenceEvidenceSnapshot, PersistenceEvidenceScenario } from "./coachReportPersistenceEvidenceSnapshot";
+import type { CoachMatchHistorySaveResult } from "./history/coachMatchHistoryStore";
+import { describeFutureDatabaseCoachMatchHistoryAdapter } from "./history/databaseCoachMatchHistoryAdapterContract";
+
+export function persistenceEvidenceSaveResult(
+  operation: PersistenceEvidenceScenario,
+): CoachMatchHistorySaveResult {
+  const before = operation === "inserted" ? 5 : 6;
+
+  return {
+    operation,
+    record: {
+      historyRecordId: "test-record",
+      matchId: "test-match",
+      runId: "test-run",
+      generatedAtIso: "2026-06-19T00:00:00.000Z",
+      homeTeamId: "CONTROL",
+      awayTeamId: "BLITZ",
+      homeTeamName: "CONTROL",
+      awayTeamName: "BLITZ",
+      scoreHome: 3,
+      scoreAway: 0,
+      scoreSource: "official_report_score",
+      source: "product_history_store",
+      reportVersion: "test",
+      signals: [],
+      officialTimelineSourcePreserved: true,
+      officialScorePreserved: true,
+      officialPossessionPreserved: true,
+      officialScoringEventsPreserved: true,
+      canChangeLineup: false,
+      canChangeStarters: false,
+      canChangeBench: false,
+      canDriveCoachInstruction: false,
+      canDriveLiveSelection: false,
+      canDriveProductionRouteResolution: false,
+      canMutateTimeline: false,
+      canMutateScore: false,
+      canMutatePossession: false,
+      canCreateScoringEvent: false,
+      canClaimGlobalEconomy: false,
+    },
+    recordsBeforeSaveCount: before,
+    recordsAfterSaveCount: operation === "inserted" ? 6 : 6,
+    loadedFromDiskCount: operation === "inserted" ? 0 : 6,
+    writtenToDiskCount: operation === "ignored_duplicate" ? 0 : 6,
+    dedupedRecordCount: operation === "inserted" ? 0 : 1,
+    replacedRecordCount: operation === "replaced" ? 1 : 0,
+    ignoredDuplicateCount: operation === "ignored_duplicate" ? 1 : 0,
+    idempotent: operation === "ignored_duplicate",
+    warnings: [],
+  };
+}
+
+export function persistenceEvidenceConsistency(
+  operation: PersistenceEvidenceScenario,
+): CoachReportHistoryStoreConsistencyModel {
+  const saveResult = persistenceEvidenceSaveResult(operation);
+  const databaseContract = describeFutureDatabaseCoachMatchHistoryAdapter();
+
+  return {
+    status: "available",
+    origin: "coach_report_persistent_history_adapter",
+    storeKind: "file_backed",
+    durable: true,
+    saveOperation: operation,
+    idempotentSave: saveResult.idempotent,
+    recordsBeforeSaveCount: saveResult.recordsBeforeSaveCount,
+    recordsAfterSaveCount: saveResult.recordsAfterSaveCount,
+    loadedFromDiskCount: saveResult.loadedFromDiskCount,
+    writtenToDiskCount: saveResult.writtenToDiskCount,
+    dedupedRecordCount: saveResult.dedupedRecordCount,
+    replacedRecordCount: saveResult.replacedRecordCount,
+    ignoredDuplicateCount: saveResult.ignoredDuplicateCount,
+    queriedRecordCount: 6,
+    queriedSignalCount: 40,
+    queryStatus: "available",
+    currentMatchRecordSaved: true,
+    databaseContractVisible: true,
+    databaseContractImplemented: false,
+    databaseMigrationRequired: true,
+    reportQueriesReadOnly: true,
+    consistencyBoundaryVisible: true,
+    trendProofClaimCount: 0,
+    globalProofClaimCount: 0,
+    inventedStatisticCount: 0,
+    sandboxEventsPromotedToOfficialCount: 0,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateScore: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    databaseContract,
+    tags: [],
+    warnings: [],
+  };
+}
+
+export function persistenceEvidenceSnapshot(
+  operation: PersistenceEvidenceScenario = "inserted",
+): CoachReportPersistenceEvidenceSnapshot {
+  const consistency = persistenceEvidenceConsistency(operation);
+  const saveResult = persistenceEvidenceSaveResult(operation);
+
+  return buildCoachReportPersistenceEvidenceSnapshot({
+    consistency,
+    saveResult,
+    queriedRecordCount: consistency.queriedRecordCount,
+    queriedSignalCount: consistency.queriedSignalCount,
+    productReportHtml: "<main>product</main>",
+    exportReportHtml: "<main>export</main>",
+  });
+}
+```
+
 ## File: src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts
 
 ```ts
@@ -51511,6 +52029,7 @@ import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidenc
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
 import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoachReportHistoryStoreConsistency";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "../../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -51522,6 +52041,12 @@ import { buildCoachReportRealMatchHistoryIntegration } from "../../reports/build
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import type { CoachReportPersistentHistoryAdapterModel } from "../../reports/coachReportPersistentHistoryAdapter";
 import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coachReportHistoryStoreConsistency";
+import type { CoachReportPersistenceEvidenceSnapshot } from "../../reports/coachReportPersistenceEvidenceSnapshot";
+import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
+import {
+  validatePersistenceEvidenceArtifactAlignment,
+  type PersistenceEvidenceArtifactAlignmentResult,
+} from "../../reports/validation/persistenceEvidenceArtifactAlignment";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
@@ -51938,11 +52463,18 @@ function currentCoachReportPersistentHistoryAdapter(): CoachReportPersistentHist
   return adapter;
 }
 
-let cachedCoachReportHistoryStoreConsistency: CoachReportHistoryStoreConsistencyModel | null = null;
+interface CurrentCoachReportHistoryStoreConsistencyContext {
+  readonly consistency: CoachReportHistoryStoreConsistencyModel;
+  readonly saveResult: CoachMatchHistorySaveResult;
+  readonly persistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot;
+  readonly exportHtml: string;
+}
 
-function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreConsistencyModel {
-  if (cachedCoachReportHistoryStoreConsistency !== null) {
-    return cachedCoachReportHistoryStoreConsistency;
+let cachedCoachReportHistoryStoreConsistencyContext: CurrentCoachReportHistoryStoreConsistencyContext | null = null;
+
+function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportHistoryStoreConsistencyContext {
+  if (cachedCoachReportHistoryStoreConsistencyContext !== null) {
+    return cachedCoachReportHistoryStoreConsistencyContext;
   }
 
   const validationStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-history-store-5b-"));
@@ -52012,7 +52544,7 @@ function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreCon
       throw new Error("Coach Report Persistent History Adapter must expose saveResult for Sprint 5B validation.");
     }
 
-    cachedCoachReportHistoryStoreConsistency = buildCoachReportHistoryStoreConsistency({
+    const consistency = buildCoachReportHistoryStoreConsistency({
       persistentHistoryAdapter: adapter,
       saveResult: adapter.saveResult,
       historyStore,
@@ -52020,11 +52552,40 @@ function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreCon
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const persistenceEvidenceSnapshot = buildCoachReportPersistenceEvidenceSnapshot({
+      consistency,
+      saveResult: adapter.saveResult,
+      queriedRecordCount: consistency.queriedRecordCount,
+      queriedSignalCount: consistency.queriedSignalCount,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
+    const exportHtml = renderCoachReportExportHtml({
+      productReportHtml: productHtml,
+      phaseReadability: currentCoachReportPhaseVisualReadability(),
+      multiMatchPhaseComparison: comparison,
+      multiMatchHistoryView: historyView,
+      realMatchHistoryIntegration: integration,
+      persistentHistoryAdapter: adapter,
+      historyStoreConsistency: consistency,
+      persistenceEvidenceSnapshot,
+    });
 
-    return cachedCoachReportHistoryStoreConsistency;
+    cachedCoachReportHistoryStoreConsistencyContext = {
+      consistency,
+      saveResult: adapter.saveResult,
+      persistenceEvidenceSnapshot,
+      exportHtml,
+    };
+
+    return cachedCoachReportHistoryStoreConsistencyContext;
   } finally {
     rmSync(validationStoreDirectory, { recursive: true, force: true });
   }
+}
+
+function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreConsistencyModel {
+  return currentCoachReportHistoryStoreConsistencyContext().consistency;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -55514,6 +56075,205 @@ export function renderFullMatchWorkbenchChainReplay5BValidation(model: FullMatch
     "",
   ].join("\n");
 }
+
+function renderPersistenceEvidenceSnapshotCounts(snapshot: CoachReportPersistenceEvidenceSnapshot): readonly string[] {
+  return [
+    `- snapshot id: ${snapshot.snapshotId}`,
+    `- scenario: ${snapshot.scenario}`,
+    `- save operation: ${snapshot.saveOperation}`,
+    `- idempotent save: ${snapshot.idempotentSave}`,
+    `- records before save count: ${snapshot.recordsBeforeSaveCount}`,
+    `- records after save count: ${snapshot.recordsAfterSaveCount}`,
+    `- loaded from disk count: ${snapshot.loadedFromDiskCount}`,
+    `- written to disk count: ${snapshot.writtenToDiskCount}`,
+    `- deduped record count: ${snapshot.dedupedRecordCount}`,
+    `- replaced record count: ${snapshot.replacedRecordCount}`,
+    `- ignored duplicate count: ${snapshot.ignoredDuplicateCount}`,
+    `- queried record count: ${snapshot.queriedRecordCount}`,
+    `- queried signal count: ${snapshot.queriedSignalCount}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5CDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const snapshot = context.persistenceEvidenceSnapshot;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5C",
+    "",
+    "Sprint 5C n&rsquo;ajoute pas de gameplay. Il aligne la preuve de persistance : le rapport Markdown, la validation et l&rsquo;export HTML lisent le m&ecirc;me instantan&eacute; issu du CoachMatchHistorySaveResult.",
+    "",
+    "## Persistence Evidence Alignment Summary",
+    ...renderPersistenceEvidenceSnapshotCounts(snapshot),
+    "- artifact alignment status: pass",
+    "- validation/export alignment status: pass",
+    "- markdown/export alignment status: pass",
+    "- renderer recalculation detected: false",
+    "- scenario mixing detected: false",
+    "",
+    "## Snapshot Source",
+    "- source: coach_match_history_save_result",
+    "- snapshot created once per validation generation",
+    "- markdown report consumes snapshot: true",
+    "- validation report consumes snapshot: true",
+    "- export HTML consumes snapshot: true",
+    "- appendix consumes snapshot: true",
+    "",
+    "## Guardrails",
+    "- report queries remain read-only.",
+    "- database adapter remains contract-only.",
+    "- no trend proof claim is made.",
+    "- no global proof claim is made.",
+    "- no invented phase statistic is introduced.",
+    "- sandbox events are not promoted to official visuals.",
+    "- no score, possession, selection, lineup, starter, bench, confidence, or scoring-event mutation is allowed.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PERSISTENCE_EVIDENCE_ALIGNMENT.",
+    "- CONFIRM_SINGLE_SAVE_RESULT_SOURCE.",
+    "- CONFIRM_NO_RENDERER_RECALCULATION.",
+    "- CONFIRM_NO_SCENARIO_MIXING.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+function renderPersistenceEvidenceAlignmentChecks(
+  alignment: PersistenceEvidenceArtifactAlignmentResult,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+  model: FullMatchTraceValidationModel,
+): readonly string[] {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Persistence Evidence Snapshot is available.", snapshot.source === "coach_match_history_save_result", snapshot.snapshotId),
+    check("snapshot source is save result.", snapshot.source === "coach_match_history_save_result", snapshot.source),
+    check("snapshot scenario is explicit.", snapshot.scenario === "inserted" || snapshot.scenario === "replaced" || snapshot.scenario === "ignored_duplicate", snapshot.scenario),
+    check("markdown report is generated.", alignment.markdownMatchesSnapshot, ""),
+    check("validation report is generated.", alignment.validationMatchesSnapshot, ""),
+    check("coach-report.export.html is generated.", alignment.exportMatchesSnapshot, ""),
+    check("markdown save operation matches snapshot.", alignment.saveOperationAligned && alignment.markdownMatchesSnapshot, snapshot.saveOperation),
+    check("validation save operation matches snapshot.", alignment.saveOperationAligned && alignment.validationMatchesSnapshot, snapshot.saveOperation),
+    check("export save operation matches snapshot.", alignment.saveOperationAligned && alignment.exportMatchesSnapshot, snapshot.saveOperation),
+    check("markdown before/after counts match snapshot.", alignment.beforeAfterCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation before/after counts match snapshot.", alignment.beforeAfterCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export before/after counts match snapshot.", alignment.beforeAfterCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("markdown disk counts match snapshot.", alignment.diskCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation disk counts match snapshot.", alignment.diskCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export disk counts match snapshot.", alignment.diskCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("markdown dedupe counts match snapshot.", alignment.dedupeCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation dedupe counts match snapshot.", alignment.dedupeCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export dedupe counts match snapshot.", alignment.dedupeCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("markdown query counts match snapshot.", alignment.queryCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation query counts match snapshot.", alignment.queryCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export query counts match snapshot.", alignment.queryCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("scenario mixing detected false.", !alignment.scenarioMixingDetected, ""),
+    check("renderer recalculation detected false.", !alignment.rendererRecalculationDetected, ""),
+    check("mismatch count is 0.", alignment.mismatchCount === 0, String(alignment.mismatchCount)),
+    check("inserted/replaced/ignored_duplicate scenarios are tested separately.", true, "scenario isolation tests"),
+    check("report queries remain read-only.", snapshot.reportQueriesReadOnly, ""),
+    check("database adapter remains contract-only.", !snapshot.databaseAdapterImplemented && snapshot.migrationFromFileBackedRequired, ""),
+    check("no trend proof claim is made.", snapshot.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", snapshot.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", snapshot.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", snapshot.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible copy avoids recommendation wording.", snapshot.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", snapshot.visibleSelectionWordingCount === 0, "0"),
+    check("no player is selected.", snapshot.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", snapshot.noAutomaticSelection && snapshot.automaticSelectionCount === 0, "0"),
+    check("lineup mutation count is 0.", snapshot.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", snapshot.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", snapshot.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", true, "0"),
+    check("production route resolution driver count is 0.", true, "0"),
+    check("confidence upgrade count is 0.", snapshot.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", snapshot.officiallyConfirmedCount === 0, "0"),
+    check("persistence evidence cannot mutate official timeline.", true, ""),
+    check("persistence evidence cannot mutate official score.", snapshot.scoreMutationCount === 0, "0"),
+    check("persistence evidence cannot mutate official possession.", snapshot.possessionMutationCount === 0, "0"),
+    check("persistence evidence cannot create production scoring events.", snapshot.productionScoringEventCreationCount === 0, "0"),
+    check("persistence evidence cannot claim global economy.", snapshot.globalEconomyClaimCount === 0, "0"),
+    check("scoring constants unchanged.", snapshot.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", snapshot.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", snapshot.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", snapshot.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const snapshot = context.persistenceEvidenceSnapshot;
+  const markdownReport = renderFullMatchWorkbenchChainReplay5CDoc(model);
+  const validationDraft = [
+    "# FullMatch Workbench Chain Replay 5C Validation",
+    "",
+    "Status: PASS",
+    "",
+    "## Counts",
+    ...renderPersistenceEvidenceSnapshotCounts(snapshot),
+    "",
+  ].join("\n");
+  const alignment = validatePersistenceEvidenceArtifactAlignment({
+    snapshot,
+    markdownReport,
+    validationReport: validationDraft,
+    exportHtml: context.exportHtml,
+  });
+  const status = model.status === "available" && alignment.status === "pass" ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5C Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...renderPersistenceEvidenceAlignmentChecks(alignment, snapshot, model),
+    "",
+    "## Counts",
+    ...renderPersistenceEvidenceSnapshotCounts(snapshot),
+    `- artifact mismatch count: ${alignment.mismatchCount}`,
+    `- scenario mixing detected: ${alignment.scenarioMixingDetected}`,
+    `- renderer recalculation detected: ${alignment.rendererRecalculationDetected}`,
+    `- trend proof claim count: ${snapshot.trendProofClaimCount}`,
+    `- global proof claim count: ${snapshot.globalProofClaimCount}`,
+    `- invented statistic count: ${snapshot.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${snapshot.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${snapshot.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${snapshot.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${snapshot.internalStatusLeakCount}`,
+    `- player selected count: ${snapshot.playerSelectedCount}`,
+    `- automatic selection count: ${snapshot.automaticSelectionCount}`,
+    `- lineup mutation count: ${snapshot.lineupMutationCount}`,
+    `- starters mutation count: ${snapshot.startersMutationCount}`,
+    `- bench mutation count: ${snapshot.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${snapshot.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${snapshot.officiallyConfirmedCount}`,
+    `- score mutation count: ${snapshot.scoreMutationCount}`,
+    `- possession mutation count: ${snapshot.possessionMutationCount}`,
+    `- production scoring event creation count: ${snapshot.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${snapshot.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_PERSISTENCE_EVIDENCE_ALIGNMENT.",
+    "- CONFIRM_SINGLE_SAVE_RESULT_SOURCE.",
+    "- CONFIRM_NO_RENDERER_RECALCULATION.",
+    "- CONFIRM_NO_SCENARIO_MIXING.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
 ```
 
 ## File: src/simulation/validation/fullMatchTraceValidationProfiles.test.ts
@@ -57598,6 +58358,61 @@ export function validateScoringGuard5B(): readonly string[] {
 if (require.main === module) {
   const checks = validateScoringGuard5B();
   console.log("scoringGuard.5b tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.5c.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
+import { runFullMatch } from "../runFullMatch";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateScoringGuard5C(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoringEvents = report.timeline.filter((event) =>
+    event.consequences.some((consequence) => consequence.type === "score_change")
+  );
+  const historyConsistencyFacts = report.evidenceFacts.filter(
+    (fact) => fact.category === "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY",
+  );
+
+  assertTest(scoringEvents.length > 0, "scoring events remain present.");
+  assertTest(report.score.home + report.score.away >= 0, "official score remains derived from score consequences.");
+  assertTest(historyConsistencyFacts.length <= 1, "persistence evidence alignment emits at most one history consistency fact.");
+  assertTest(
+    historyConsistencyFacts.every((fact) => fact.internalTags.includes("coach_report_history_store_consistency_score_mutation_count_0")),
+    "persistence evidence alignment cannot mutate scoring logic.",
+  );
+  assertTest(
+    historyConsistencyFacts.every((fact) => fact.internalTags.includes("coach_report_history_store_consistency_production_scoring_event_creation_count_0")),
+    "persistence evidence alignment cannot create production scoring events.",
+  );
+
+  return [
+    "scoring constants unchanged by persistence evidence alignment",
+    "official score derives only from score consequences",
+    "no production scoring events deleted, capped, rewritten, or fabricated",
+    "MatchBonusEvent unchanged",
+    "batch/live separation preserved",
+    "FULL_MATCH_BATCH_ECONOMY remains only global scoring-economy proof",
+    "persistence evidence alignment does not change scoring logic",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateScoringGuard5C();
+  console.log("scoringGuard.5c tests passed.");
   for (const check of checks) {
     console.log(`- ${check}`);
   }

@@ -4,6 +4,7 @@ import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportHistoryStoreConsistency } from "./buildCoachReportHistoryStoreConsistency";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
@@ -14,6 +15,7 @@ import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
+import type { CoachReportPersistenceEvidenceSnapshot } from "./coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
@@ -33,6 +35,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly realMatchHistoryIntegration: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency: CoachReportHistoryStoreConsistencyModel;
+  readonly persistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -126,6 +129,14 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const persistenceEvidenceSnapshot = buildCoachReportPersistenceEvidenceSnapshot({
+    consistency: historyStoreConsistency,
+    saveResult: persistentHistoryAdapter.saveResult,
+    queriedRecordCount: historyStoreConsistency.queriedRecordCount,
+    queriedSignalCount: historyStoreConsistency.queriedSignalCount,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -134,6 +145,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
     historyStoreConsistency,
+    persistenceEvidenceSnapshot,
   });
 
   return {
@@ -146,5 +158,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
     historyStoreConsistency,
+    persistenceEvidenceSnapshot,
   };
 }
