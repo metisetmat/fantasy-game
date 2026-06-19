@@ -1,7 +1,9 @@
+import { join } from "node:path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
+import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
@@ -9,11 +11,13 @@ import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseV
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
+import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
 import type { CoachReportPhaseVisualReadabilityModel } from "./coachReportPhaseVisualReadability";
-import { createInMemoryCoachMatchHistoryStore } from "./history/inMemoryCoachMatchHistoryStore";
+import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
+import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 
@@ -25,6 +29,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly comparison: CoachReportMultiMatchPhaseComparisonModel;
   readonly historyView: CoachReportMultiMatchHistoryViewModel;
   readonly realMatchHistoryIntegration: CoachReportRealMatchHistoryIntegrationModel;
+  readonly persistentHistoryAdapter: CoachReportPersistentHistoryAdapterModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -67,14 +72,40 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStore = createFileBackedCoachMatchHistoryStore({
+    filePath: join(process.cwd(), "reports", "test-artifacts", "coach-match-history-context.json"),
+    allowWrite: true,
+  });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
     matchReport: report,
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView: historyView,
-    historyStore: createInMemoryCoachMatchHistoryStore(),
+    historyStore,
     runId: "test-context",
     generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const currentRecord = buildCoachMatchHistoryRecord({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView: historyView,
+    source: "product_history_store",
+    runId: "test-context-product",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const persistentHistoryAdapter = buildCoachReportPersistentHistoryAdapter({
+    realMatchHistoryIntegration,
+    historyStore,
+    currentRecord,
+    query: {
+      teamId: currentRecord.homeTeamId,
+      maxRecords: 12,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    },
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
   });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
@@ -82,6 +113,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     multiMatchPhaseComparison: comparison,
     multiMatchHistoryView: historyView,
     realMatchHistoryIntegration,
+    persistentHistoryAdapter,
   });
 
   return {
@@ -92,5 +124,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     comparison,
     historyView,
     realMatchHistoryIntegration,
+    persistentHistoryAdapter,
   };
 }

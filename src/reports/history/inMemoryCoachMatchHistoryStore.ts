@@ -2,20 +2,12 @@ import type {
   CoachMatchHistoryQuery,
   CoachMatchHistoryQueryResult,
   CoachMatchHistoryRecord,
-  CoachMatchHistorySignal,
 } from "./coachMatchHistory";
 import type { CoachMatchHistoryStore } from "./coachMatchHistoryStore";
-
-function cloneSignal(signal: CoachMatchHistorySignal): CoachMatchHistorySignal {
-  return { ...signal };
-}
-
-function cloneRecord(record: CoachMatchHistoryRecord): CoachMatchHistoryRecord {
-  return {
-    ...record,
-    signals: record.signals.map(cloneSignal),
-  };
-}
+import {
+  cloneCoachMatchHistoryRecord,
+  sortCoachMatchHistoryRecords,
+} from "./coachMatchHistorySerialization";
 
 function matchesTeam(record: CoachMatchHistoryRecord, teamId: string | undefined): boolean {
   if (teamId === undefined) {
@@ -42,12 +34,12 @@ function queryWarnings(records: readonly CoachMatchHistoryRecord[]): readonly st
 export function createInMemoryCoachMatchHistoryStore(
   initialRecords: readonly CoachMatchHistoryRecord[] = [],
 ): CoachMatchHistoryStore {
-  const records = initialRecords.map(cloneRecord);
+  const records = sortCoachMatchHistoryRecords(initialRecords).map(cloneCoachMatchHistoryRecord);
 
   return {
     storeKind: "in_memory",
     save(record: CoachMatchHistoryRecord): CoachMatchHistoryRecord {
-      const next = cloneRecord(record);
+      const next = cloneCoachMatchHistoryRecord(record);
       const existingIndex = records.findIndex((candidate) => candidate.historyRecordId === next.historyRecordId);
 
       if (existingIndex >= 0) {
@@ -56,14 +48,19 @@ export function createInMemoryCoachMatchHistoryStore(
         records.push(next);
       }
 
-      return cloneRecord(next);
+      records.sort((left, right) =>
+        left.generatedAtIso.localeCompare(right.generatedAtIso) ||
+        left.historyRecordId.localeCompare(right.historyRecordId)
+      );
+
+      return cloneCoachMatchHistoryRecord(next);
     },
     query(query: CoachMatchHistoryQuery): CoachMatchHistoryQueryResult {
       const filtered = records
         .filter((record) => query.includeControlledSamples || record.source !== "controlled_sample")
         .filter((record) => query.includeProductHistory || record.source !== "product_history_store")
         .filter((record) => matchesTeam(record, query.teamId))
-        .map(cloneRecord)
+        .map(cloneCoachMatchHistoryRecord)
         .filter((record) => query.phase === undefined || record.signals.some((signal) => signal.phase === query.phase))
         .slice(0, Math.max(0, query.maxRecords));
       const signalCount = filtered.reduce(
@@ -83,8 +80,21 @@ export function createInMemoryCoachMatchHistoryStore(
       };
     },
     listAll(): readonly CoachMatchHistoryRecord[] {
-      return records.map(cloneRecord);
+      return records.map(cloneCoachMatchHistoryRecord);
+    },
+    describe() {
+      return {
+        storeKind: "in_memory",
+        durable: false,
+        readOnlyForReports: true,
+        canDriveCoachInstruction: false,
+        canDriveLiveSelection: false,
+        canDriveProductionRouteResolution: false,
+        canMutateScore: false,
+        canCreateScoringEvent: false,
+        canClaimGlobalEconomy: false,
+        warning: "In-memory history resets between process runs.",
+      };
     },
   };
 }
-

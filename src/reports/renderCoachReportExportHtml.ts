@@ -15,6 +15,7 @@ import type {
   MultiMatchPhaseZoneSignal,
 } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
+import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -22,6 +23,7 @@ import {
 } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
+import { escapeHtml } from "./htmlCoachReport";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -681,6 +683,61 @@ const PREMIUM_EXPORT_CSS = `
       color: var(--report-ink);
     }
 
+    .persistent-history-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .persistent-history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .persistent-history-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .persistent-history-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .persistent-history-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .persistent-history-kpi strong {
+      color: var(--report-ink);
+    }
+
+    .persistent-history-boundary,
+    .persistent-history-guard,
+    .persistent-history-warning {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .persistent-history-store-kind,
+    .persistent-history-readonly {
+      font-weight: 700;
+      color: var(--report-accent);
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -747,6 +804,10 @@ const PREMIUM_EXPORT_CSS = `
       .match-history-grid {
         grid-template-columns: 1fr;
       }
+
+      .persistent-history-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media print {
@@ -782,7 +843,11 @@ const PREMIUM_EXPORT_CSS = `
       .phase-history-row,
       .match-history-card,
       .match-history-guard,
-      .match-history-boundary {
+      .match-history-boundary,
+      .persistent-history-card,
+      .persistent-history-boundary,
+      .persistent-history-guard,
+      .persistent-history-warning {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1378,6 +1443,58 @@ function renderRealMatchHistoryIntegration(
   </section>`;
 }
 
+function renderPersistentHistoryAdapter(
+  model: CoachReportPersistentHistoryAdapterModel,
+): string {
+  if (model.status === "not_available") {
+    return "";
+  }
+
+  return `
+  <section id="persistent-match-history" class="premium-section persistent-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Persistent match history</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Persistance de l&rsquo;historique</h2>
+        <p>${model.recordsAfterSaveCount} enregistrement(s) disponibles apr&egrave;s sauvegarde, ${model.queriedRecordCount} relu(s), ${model.queriedSignalCount} signal(aux) dans la requ&ecirc;te active.</p>
+      </div>
+    </div>
+    <p class="persistent-history-guard">L&rsquo;historique persistant sert &agrave; relire les rapports pass&eacute;s. Il reste une couche d&rsquo;observation : il ne choisit pas les joueurs, ne modifie pas la composition, ne change pas le score et ne cr&eacute;e aucun &eacute;v&eacute;nement de match.</p>
+    <div class="persistent-history-grid">
+      <article class="persistent-history-card">
+        <h3>Boundary persistant</h3>
+        <div class="persistent-history-kpi">
+          <div><span>Type de store</span><strong class="persistent-history-store-kind">${model.storeKind}</strong></div>
+          <div><span>Durable</span><strong>${model.durable ? "oui" : "non"}</strong></div>
+          <div><span>Location visible</span><strong>${model.storageLocationVisible ? "oui" : "non"}</strong></div>
+          <div><span>Lecture report read-only</span><strong class="persistent-history-readonly">${model.reportQueriesReadOnly ? "oui" : "non"}</strong></div>
+        </div>
+        ${model.storageLocation === undefined ? "" : `<p><strong>Stockage local :</strong> <code>${escapeHtml(model.storageLocation)}</code></p>`}
+      </article>
+      <article class="persistent-history-card">
+        <h3>Comptes de persistance</h3>
+        <div class="persistent-history-kpi">
+          <div><span>Avant sauvegarde</span><strong>${model.recordsBeforeSaveCount}</strong></div>
+          <div><span>Apr&egrave;s sauvegarde</span><strong>${model.recordsAfterSaveCount}</strong></div>
+          <div><span>Records relus</span><strong>${model.queriedRecordCount}</strong></div>
+          <div><span>Signaux relus</span><strong>${model.queriedSignalCount}</strong></div>
+          <div><span>Match courant sauv&eacute;</span><strong>${model.currentMatchRecordSaved ? "oui" : "non"}</strong></div>
+        </div>
+      </article>
+      <article class="persistent-history-card">
+        <h3>Ce que la persistance ajoute</h3>
+        <p>Ce que la persistance ajoute : les records d&rsquo;historique peuvent maintenant survivre au-del&agrave; d&rsquo;un store en m&eacute;moire lorsque l&rsquo;adapter file-backed est utilis&eacute;.</p>
+        <h3>Ce qui reste volontairement limit&eacute;</h3>
+        <p>Ce qui reste volontairement limit&eacute; : le rapport lit l&rsquo;historique, mais ne l&rsquo;utilise pas pour appliquer une d&eacute;cision automatique.</p>
+        <h3>Prochaine &eacute;tape produit</h3>
+        <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
+      </article>
+    </div>
+    <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
+    ${model.warnings.length === 0 ? "" : `<p class="persistent-history-warning">${model.warnings.join(" ")}</p>`}
+  </section>`;
+}
+
 function renderProfilesAndPlayers(html: string): string {
   const profilesBody = extractSectionInner(html, "profiles-to-observe");
   const playersBody = extractSectionInner(html, "players-to-study");
@@ -1653,6 +1770,52 @@ function renderRealMatchHistoryIntegrationAppendix(
     </details>`;
 }
 
+function renderPersistentHistoryAdapterAppendix(
+  model: CoachReportPersistentHistoryAdapterModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de persistance de l&rsquo;historique</summary>
+      <ul>
+        <li>persistent history adapter status ${model.status}</li>
+        <li>store kind ${model.storeKind}</li>
+        <li>durable ${model.durable ? "true" : "false"}</li>
+        <li>storage location visible ${model.storageLocationVisible ? "true" : "false"}</li>
+        ${model.storageLocation === undefined ? "" : `<li>storage location ${model.storageLocation}</li>`}
+        <li>records before save count ${model.recordsBeforeSaveCount}</li>
+        <li>records after save count ${model.recordsAfterSaveCount}</li>
+        <li>queried record count ${model.queriedRecordCount}</li>
+        <li>queried signal count ${model.queriedSignalCount}</li>
+        <li>current match record saved ${model.currentMatchRecordSaved ? "true" : "false"}</li>
+        <li>report queries read-only true</li>
+        <li>persistence boundary visible true</li>
+        <li>database adapter not yet required true</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -1664,6 +1827,7 @@ function renderAppendices(input: {
   readonly multiMatchPhaseComparison: CoachReportMultiMatchPhaseComparisonModel;
   readonly multiMatchHistoryView: CoachReportMultiMatchHistoryViewModel;
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
+  readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -1697,6 +1861,7 @@ function renderAppendices(input: {
     ${renderMultiMatchPhaseComparisonAppendix(input.multiMatchPhaseComparison)}
     ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
     ${renderRealMatchHistoryIntegrationAppendix(input.realMatchHistoryIntegration)}
+    ${renderPersistentHistoryAdapterAppendix(input.persistentHistoryAdapter)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -1720,6 +1885,7 @@ export function renderCoachReportExportHtml(input: {
   readonly multiMatchPhaseComparison?: CoachReportMultiMatchPhaseComparisonModel;
   readonly multiMatchHistoryView?: CoachReportMultiMatchHistoryViewModel;
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
+  readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -1817,6 +1983,7 @@ export function renderCoachReportExportHtml(input: {
     renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
     renderMultiMatchHistoryView(multiMatchHistoryView),
     ...(input.realMatchHistoryIntegration === undefined ? [] : [renderRealMatchHistoryIntegration(input.realMatchHistoryIntegration)]),
+    ...(input.persistentHistoryAdapter === undefined ? [] : [renderPersistentHistoryAdapter(input.persistentHistoryAdapter)]),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -1834,6 +2001,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.realMatchHistoryIntegration === undefined
       ? {}
       : { realMatchHistoryIntegration: input.realMatchHistoryIntegration }),
+    ...(input.persistentHistoryAdapter === undefined
+      ? {}
+      : { persistentHistoryAdapter: input.persistentHistoryAdapter }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

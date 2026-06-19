@@ -49,6 +49,7 @@ export type MatchEvidenceScope =
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_PHASE_COMPARISON"
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
   | "WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE"
+  | "WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
@@ -1500,6 +1501,48 @@ export const MATCH_EVIDENCE_SCOPE_REGISTRY: Readonly<Record<MatchEvidenceScope, 
       "which local phase signals deserve re-reading across later matches",
       "where a durable product adapter should replace the in-memory store next",
       "how controlled samples and simulated history should stay separated in future UI work",
+    ],
+    cannotProve: [
+      "global scoring balance",
+      "full-match economy coherence",
+      "production route quality",
+      "normal live selection quality",
+      "that any player should be selected or recommended",
+    ],
+    cannotOverride: [
+      "lineup",
+      "starters",
+      "bench",
+      "live score",
+      "official timeline",
+      "official possession",
+      "official scoring events",
+      "normal live selection",
+      "production route resolution",
+      "full-match batch economy",
+      "scoring constants",
+    ],
+    cannotInclude: [
+      "global proof claims",
+      "invented phase statistics",
+      "sandbox-only events presented as official truth",
+      "automatic selection wording",
+      "officially_confirmed status promotion",
+    ],
+    globalScoringEconomyVerdictAllowed: false,
+  },
+  WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER: {
+    scope: "WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER",
+    canProve: [
+      "a persistent history adapter can save and reload match-history records beyond a single in-memory run",
+      "file-backed persistence can remain read-only from the report point of view",
+      "persistent history remains presentation-only and non-mutating",
+      "product history records remain separated from controlled samples and simulated history",
+    ],
+    canSuggest: [
+      "where a future database adapter should replace the local file-backed boundary",
+      "how a team, season, and competition key could scope durable history later",
+      "which past reports deserve re-reading through the persistent boundary",
     ],
     cannotProve: [
       "global scoring balance",
