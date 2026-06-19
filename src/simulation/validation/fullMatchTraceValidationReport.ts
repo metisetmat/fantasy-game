@@ -1,3 +1,5 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
@@ -431,7 +433,15 @@ function currentCoachReportPersistentHistoryAdapter(): CoachReportPersistentHist
   return adapter;
 }
 
+let cachedCoachReportHistoryStoreConsistency: CoachReportHistoryStoreConsistencyModel | null = null;
+
 function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreConsistencyModel {
+  if (cachedCoachReportHistoryStoreConsistency !== null) {
+    return cachedCoachReportHistoryStoreConsistency;
+  }
+
+  const validationStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-history-store-5b-"));
+
   const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
     routeSelectionMode: "workbench_chain_replay_experimental",
     enableCoachReportMultiMatchPhaseComparison: true,
@@ -455,55 +465,61 @@ function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreCon
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
-  const historyStore = createFileBackedCoachMatchHistoryStore({
-    filePath: join(process.cwd(), "reports", "history", "coach-match-history-validation-5b.json"),
-    allowWrite: true,
-  });
-  const integration = buildCoachReportRealMatchHistoryIntegration({
-    matchReport: report,
-    productReportHtml: productHtml,
-    exportReportHtml: baselineExportHtml,
-    multiMatchHistoryView: historyView,
-    historyStore,
-    runId: "validation-5b-real-history",
-    generatedAtIso: "2026-06-19T00:00:00.000Z",
-  });
-  const currentRecord = buildCoachMatchHistoryRecord({
-    matchReport: report,
-    productReportHtml: productHtml,
-    exportReportHtml: baselineExportHtml,
-    multiMatchHistoryView: historyView,
-    source: "product_history_store",
-    runId: "validation-5b-product-history",
-    generatedAtIso: "2026-06-19T00:00:00.000Z",
-  });
-  const query = {
-    teamId: currentRecord.homeTeamId,
-    maxRecords: 12,
-    includeControlledSamples: true,
-    includeProductHistory: true,
-  };
-  const adapter = buildCoachReportPersistentHistoryAdapter({
-    realMatchHistoryIntegration: integration,
-    historyStore,
-    currentRecord,
-    query,
-    productReportHtml: productHtml,
-    exportReportHtml: baselineExportHtml,
-  });
+  try {
+    const historyStore = createFileBackedCoachMatchHistoryStore({
+      filePath: join(validationStoreDirectory, "coach-match-history-validation-5b.json"),
+      allowWrite: true,
+    });
+    const integration = buildCoachReportRealMatchHistoryIntegration({
+      matchReport: report,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+      multiMatchHistoryView: historyView,
+      historyStore,
+      runId: "validation-5b-real-history",
+      generatedAtIso: "2026-06-19T00:00:00.000Z",
+    });
+    const currentRecord = buildCoachMatchHistoryRecord({
+      matchReport: report,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+      multiMatchHistoryView: historyView,
+      source: "product_history_store",
+      runId: "validation-5b-product-history",
+      generatedAtIso: "2026-06-19T00:00:00.000Z",
+    });
+    const query = {
+      teamId: currentRecord.homeTeamId,
+      maxRecords: 12,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    };
+    const adapter = buildCoachReportPersistentHistoryAdapter({
+      realMatchHistoryIntegration: integration,
+      historyStore,
+      currentRecord,
+      query,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
 
-  if (adapter.saveResult === undefined) {
-    throw new Error("Coach Report Persistent History Adapter must expose saveResult for Sprint 5B validation.");
+    if (adapter.saveResult === undefined) {
+      throw new Error("Coach Report Persistent History Adapter must expose saveResult for Sprint 5B validation.");
+    }
+
+    cachedCoachReportHistoryStoreConsistency = buildCoachReportHistoryStoreConsistency({
+      persistentHistoryAdapter: adapter,
+      saveResult: adapter.saveResult,
+      historyStore,
+      query,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
+
+    return cachedCoachReportHistoryStoreConsistency;
+  } finally {
+    rmSync(validationStoreDirectory, { recursive: true, force: true });
   }
-
-  return buildCoachReportHistoryStoreConsistency({
-    persistentHistoryAdapter: adapter,
-    saveResult: adapter.saveResult,
-    historyStore,
-    query,
-    productReportHtml: productHtml,
-    exportReportHtml: baselineExportHtml,
-  });
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {

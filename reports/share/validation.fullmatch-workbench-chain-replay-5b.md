@@ -6,13 +6,13 @@ Status: PASS
 - PASS: default runFullMatch remains segment_harness.
 - PASS: experimental mode remains opt-in.
 - PASS: History Store Consistency status is available or partial. - available
-- PASS: save operation is explicit. - ignored_duplicate
-- PASS: idempotent save flag is visible. - true
-- PASS: loaded from disk count is visible. - 6
-- PASS: written to disk count is visible. - 0
-- PASS: deduped record count is visible. - 1
+- PASS: save operation is explicit. - inserted
+- PASS: idempotent save flag is visible. - false
+- PASS: loaded from disk count is visible. - 0
+- PASS: written to disk count is visible. - 6
+- PASS: deduped record count is visible. - 0
 - PASS: replaced record count is visible. - 0
-- PASS: ignored duplicate count is visible. - 1
+- PASS: ignored duplicate count is visible. - 0
 - PASS: queried record count is visible. - 6
 - PASS: queried signal count is visible. - 40
 - PASS: database adapter contract is visible.
@@ -39,13 +39,13 @@ Status: PASS
 ## Counts
 - store kind: file_backed
 - durable: true
-- save operation: ignored_duplicate
-- idempotent save: true
-- loaded from disk count: 6
-- written to disk count: 0
-- deduped record count: 1
+- save operation: inserted
+- idempotent save: false
+- loaded from disk count: 0
+- written to disk count: 6
+- deduped record count: 0
 - replaced record count: 0
-- ignored duplicate count: 1
+- ignored duplicate count: 0
 - queried record count: 6
 - queried signal count: 40
 - database contract implemented: false

@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-19T16:55:09.863Z
+Generated timestamp: 2026-06-19T17:45:40.724Z
 Task/sprint name: Sprint 5B - History Store Consistency & Database Adapter Contract
 Final file count: 20
 
@@ -704,35 +704,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/buildCoachReportPersistentHistoryAdapter.ts
- M src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
- M src/reports/coachReportPersistentHistoryAdapter.ts
- M src/reports/fileBackedCoachMatchHistoryStore.test.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/history/coachMatchHistorySerialization.ts
- M src/reports/history/coachMatchHistoryStore.ts
- M src/reports/history/fileBackedCoachMatchHistoryStore.ts
- M src/reports/history/inMemoryCoachMatchHistoryStore.ts
- M src/reports/inMemoryCoachMatchHistoryStore.test.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/diagnostics/sourceOfTruthRegistry.ts
- M src/simulation/runFullMatch.ts
  M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportHistoryStoreConsistency.ts
-?? src/reports/coachMatchHistorySaveResult.test.ts
-?? src/reports/coachReportHistoryStoreConsistency.test.ts
-?? src/reports/coachReportHistoryStoreConsistency.ts
-?? src/reports/coachReportHistoryStoreConsistencyCopy.test.ts
-?? src/reports/coachReportHistoryStoreConsistencyGuard.test.ts
-?? src/reports/coachReportHistoryStoreConsistencyPrintCss.test.ts
-?? src/reports/coachReportHistoryStoreConsistencyRenderer.test.ts
-?? src/reports/coachReportHistoryStoreConsistencySourceGuard.test.ts
-?? src/reports/databaseCoachMatchHistoryAdapterContract.test.ts
-?? src/reports/fileBackedCoachMatchHistoryStoreConsistency.test.ts
-?? src/reports/history/databaseCoachMatchHistoryAdapterContract.ts
-?? src/reports/inMemoryCoachMatchHistoryStoreConsistency.test.ts
-?? src/simulation/fullMatch/scoringGuard.5b.test.ts
+?? src/simulation/validation/fullMatchTraceValidationReport.5b.test.ts
