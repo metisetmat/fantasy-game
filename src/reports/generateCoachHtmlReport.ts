@@ -4,13 +4,15 @@ import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
+import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
-import { createInMemoryCoachMatchHistoryStore } from "./history/inMemoryCoachMatchHistoryStore";
+import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
+import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -60,14 +62,40 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStore = createFileBackedCoachMatchHistoryStore({
+    filePath: join(reportsDirectory, "history", "coach-match-history-store.json"),
+    allowWrite: true,
+  });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
     matchReport: experimentalReport,
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
-    historyStore: createInMemoryCoachMatchHistoryStore(),
+    historyStore,
     runId: "coach-report-latest",
     generatedAtIso: new Date().toISOString(),
+  });
+  const currentPersistentRecord = buildCoachMatchHistoryRecord({
+    matchReport: experimentalReport,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView,
+    source: "product_history_store",
+    runId: "coach-report-product-history",
+    generatedAtIso: new Date().toISOString(),
+  });
+  const persistentHistoryAdapter = buildCoachReportPersistentHistoryAdapter({
+    realMatchHistoryIntegration,
+    historyStore,
+    currentRecord: currentPersistentRecord,
+    query: {
+      teamId: currentPersistentRecord.homeTeamId,
+      maxRecords: 12,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    },
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
   });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
@@ -75,6 +103,7 @@ export function writeLatestCoachReport(): void {
     multiMatchPhaseComparison,
     multiMatchHistoryView,
     realMatchHistoryIntegration,
+    persistentHistoryAdapter,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

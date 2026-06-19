@@ -658,6 +658,61 @@
       color: var(--report-ink);
     }
 
+    .persistent-history-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .persistent-history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .persistent-history-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .persistent-history-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .persistent-history-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .persistent-history-kpi strong {
+      color: var(--report-ink);
+    }
+
+    .persistent-history-boundary,
+    .persistent-history-guard,
+    .persistent-history-warning {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .persistent-history-store-kind,
+    .persistent-history-readonly {
+      font-weight: 700;
+      color: var(--report-accent);
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -724,6 +779,10 @@
       .match-history-grid {
         grid-template-columns: 1fr;
       }
+
+      .persistent-history-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media print {
@@ -759,7 +818,11 @@
       .phase-history-row,
       .match-history-card,
       .match-history-guard,
-      .match-history-boundary {
+      .match-history-boundary,
+      .persistent-history-card,
+      .persistent-history-boundary,
+      .persistent-history-guard,
+      .persistent-history-warning {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1764,7 +1827,7 @@
     <div class="report-section-header">
       <div>
         <h2>Historique produit des matchs</h2>
-        <p>5 enregistrement(s) locaux, 5 relu(s), 32 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
+        <p>6 enregistrement(s) locaux, 6 relu(s), 40 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
       </div>
     </div>
     <p class="match-history-guard">Cet historique pr&eacute;pare le stockage produit des rapports. Dans cette version, il reste local et en lecture seule : il n&rsquo;applique aucune d&eacute;cision, ne modifie pas le score et ne remplace pas l&rsquo;analyse du match courant.</p>
@@ -1772,7 +1835,7 @@
       <article class="match-history-card">
         <h3>Lecture locale</h3>
         <div class="match-history-kpi">
-          <div><span>Type de store</span><strong>in_memory</strong></div>
+          <div><span>Type de store</span><strong>file_backed</strong></div>
           <div><span>Match courant sauv&eacute;</span><strong>oui</strong></div>
           <div><span>Historique visible</span><strong>oui</strong></div>
         </div>
@@ -1782,12 +1845,12 @@
         <div class="match-history-source-list">
           <span class="match-history-source-badge match-history-source-badge--controlled">sample contr&ocirc;l&eacute;: 4</span>
           <span class="match-history-source-badge match-history-source-badge--simulated">match simul&eacute;: 1</span>
-          <span class="match-history-source-badge match-history-source-badge--product">store produit: 0</span>
+          <span class="match-history-source-badge match-history-source-badge--product">store produit: 1</span>
         </div>
         <div class="match-history-kpi">
-          <div><span>Enregistrements stock&eacute;s</span><strong>5</strong></div>
-          <div><span>Enregistrements relus</span><strong>5</strong></div>
-          <div><span>Signaux relus</span><strong>32</strong></div>
+          <div><span>Enregistrements stock&eacute;s</span><strong>6</strong></div>
+          <div><span>Enregistrements relus</span><strong>6</strong></div>
+          <div><span>Signaux relus</span><strong>40</strong></div>
         </div>
       </article>
       <article class="match-history-card">
@@ -1800,6 +1863,49 @@
       </article>
     </div>
     <p class="match-history-boundary">Historique d&rsquo;observation, pas d&eacute;cision automatique. Les signaux stock&eacute;s servent &agrave; relire le contexte, jamais &agrave; s&eacute;lectionner un joueur, changer une composition ou piloter la r&eacute;solution live.</p>
+  </section>
+
+  <section id="persistent-match-history" class="premium-section persistent-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Persistent match history</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Persistance de l&rsquo;historique</h2>
+        <p>6 enregistrement(s) disponibles apr&egrave;s sauvegarde, 6 relu(s), 40 signal(aux) dans la requ&ecirc;te active.</p>
+      </div>
+    </div>
+    <p class="persistent-history-guard">L&rsquo;historique persistant sert &agrave; relire les rapports pass&eacute;s. Il reste une couche d&rsquo;observation : il ne choisit pas les joueurs, ne modifie pas la composition, ne change pas le score et ne cr&eacute;e aucun &eacute;v&eacute;nement de match.</p>
+    <div class="persistent-history-grid">
+      <article class="persistent-history-card">
+        <h3>Boundary persistant</h3>
+        <div class="persistent-history-kpi">
+          <div><span>Type de store</span><strong class="persistent-history-store-kind">file_backed</strong></div>
+          <div><span>Durable</span><strong>oui</strong></div>
+          <div><span>Location visible</span><strong>oui</strong></div>
+          <div><span>Lecture report read-only</span><strong class="persistent-history-readonly">oui</strong></div>
+        </div>
+        <p><strong>Stockage local :</strong> <code>C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</code></p>
+      </article>
+      <article class="persistent-history-card">
+        <h3>Comptes de persistance</h3>
+        <div class="persistent-history-kpi">
+          <div><span>Avant sauvegarde</span><strong>6</strong></div>
+          <div><span>Apr&egrave;s sauvegarde</span><strong>6</strong></div>
+          <div><span>Records relus</span><strong>6</strong></div>
+          <div><span>Signaux relus</span><strong>40</strong></div>
+          <div><span>Match courant sauv&eacute;</span><strong>oui</strong></div>
+        </div>
+      </article>
+      <article class="persistent-history-card">
+        <h3>Ce que la persistance ajoute</h3>
+        <p>Ce que la persistance ajoute : les records d&rsquo;historique peuvent maintenant survivre au-del&agrave; d&rsquo;un store en m&eacute;moire lorsque l&rsquo;adapter file-backed est utilis&eacute;.</p>
+        <h3>Ce qui reste volontairement limit&eacute;</h3>
+        <p>Ce qui reste volontairement limit&eacute; : le rapport lit l&rsquo;historique, mais ne l&rsquo;utilise pas pour appliquer une d&eacute;cision automatique.</p>
+        <h3>Prochaine &eacute;tape produit</h3>
+        <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
+      </article>
+    </div>
+    <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
+    <p class="persistent-history-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
   </section>
 
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
@@ -2607,15 +2713,52 @@
       <summary>D&eacute;tails du stockage d&rsquo;historique des matchs</summary>
       <ul>
         <li>real match history integration status available</li>
-        <li>store kind in_memory</li>
-        <li>stored record count 5</li>
-        <li>queried record count 5</li>
-        <li>queried signal count 32</li>
+        <li>store kind file_backed</li>
+        <li>stored record count 6</li>
+        <li>queried record count 6</li>
+        <li>queried signal count 40</li>
         <li>controlled sample record count 4</li>
         <li>simulated match history record count 1</li>
-        <li>product history record count 0</li>
+        <li>product history record count 1</li>
         <li>current match record saved true</li>
         <li>history summary visible true</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de persistance de l&rsquo;historique</summary>
+      <ul>
+        <li>persistent history adapter status available</li>
+        <li>store kind file_backed</li>
+        <li>durable true</li>
+        <li>storage location visible true</li>
+        <li>storage location C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</li>
+        <li>records before save count 6</li>
+        <li>records after save count 6</li>
+        <li>queried record count 6</li>
+        <li>queried signal count 40</li>
+        <li>current match record saved true</li>
+        <li>report queries read-only true</li>
+        <li>persistence boundary visible true</li>
+        <li>database adapter not yet required true</li>
         <li>trend proof claim count 0</li>
         <li>global proof claim count 0</li>
         <li>invented statistic count 0</li>

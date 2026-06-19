@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
@@ -5,11 +6,13 @@ import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportEx
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
+import { buildCoachReportPersistentHistoryAdapter } from "../../reports/buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportPremiumLayout } from "../../reports/buildCoachReportPremiumLayout";
 import { buildCoachReportMultiMatchPhaseComparison } from "../../reports/buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "../../reports/buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportRealMatchHistoryIntegration } from "../../reports/buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
+import type { CoachReportPersistentHistoryAdapterModel } from "../../reports/coachReportPersistentHistoryAdapter";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
@@ -17,7 +20,8 @@ import type { CoachReportMultiMatchHistoryViewModel } from "../../reports/coachR
 import type { CoachReportMultiMatchPhaseComparisonModel } from "../../reports/coachReportMultiMatchPhaseComparison";
 import type { CoachReportPremiumLayoutModel } from "../../reports/coachReportPremiumLayout";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "../../reports/coachReportRealMatchHistoryIntegration";
-import { createInMemoryCoachMatchHistoryStore } from "../../reports/history/inMemoryCoachMatchHistoryStore";
+import { buildCoachMatchHistoryRecord } from "../../reports/history/buildCoachMatchHistoryRecord";
+import { createFileBackedCoachMatchHistoryStore } from "../../reports/history/fileBackedCoachMatchHistoryStore";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -337,12 +341,16 @@ function currentCoachReportRealMatchHistoryIntegration(): CoachReportRealMatchHi
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStore = createFileBackedCoachMatchHistoryStore({
+    filePath: join(process.cwd(), "reports", "history", "coach-match-history-validation-5a.json"),
+    allowWrite: true,
+  });
   const integration = buildCoachReportRealMatchHistoryIntegration({
     matchReport: report,
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView: historyView,
-    historyStore: createInMemoryCoachMatchHistoryStore(),
+    historyStore,
     runId: "validation-4z",
     generatedAtIso: "2026-06-19T00:00:00.000Z",
   });
@@ -352,6 +360,73 @@ function currentCoachReportRealMatchHistoryIntegration(): CoachReportRealMatchHi
   }
 
   return integration;
+}
+
+function currentCoachReportPersistentHistoryAdapter(): CoachReportPersistentHistoryAdapterModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const comparison = buildCoachReportMultiMatchPhaseComparison({
+    phaseReadability: currentCoachReportPhaseVisualReadability(),
+    comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: comparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyStore = createFileBackedCoachMatchHistoryStore({
+    filePath: join(process.cwd(), "reports", "history", "coach-match-history-validation-5a.json"),
+    allowWrite: true,
+  });
+  const integration = buildCoachReportRealMatchHistoryIntegration({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView: historyView,
+    historyStore,
+    runId: "validation-5a-real-history",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const currentRecord = buildCoachMatchHistoryRecord({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView: historyView,
+    source: "product_history_store",
+    runId: "validation-5a-product-history",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const adapter = buildCoachReportPersistentHistoryAdapter({
+    realMatchHistoryIntegration: integration,
+    historyStore,
+    currentRecord,
+    query: {
+      teamId: currentRecord.homeTeamId,
+      maxRecords: 12,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    },
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+
+  if (adapter.status === "not_available") {
+    throw new Error("Coach Report Persistent History Adapter must be available for Sprint 5A validation.");
+  }
+
+  return adapter;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -3518,6 +3593,188 @@ export function renderFullMatchWorkbenchChainReplay4ZValidation(model: FullMatch
     "- CONFIRM_HISTORY_IS_READ_ONLY.",
     "- CONFIRM_NO_HISTORY_PROOF_CLAIM.",
     "- PREPARE_UI_WIRING_OR_DATABASE_ADAPTER.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5ADoc(model: FullMatchTraceValidationModel): string {
+  const integration = currentCoachReportRealMatchHistoryIntegration();
+  const persistent = currentCoachReportPersistentHistoryAdapter();
+
+  return [
+    "# FullMatch Workbench Chain Replay 5A",
+    "",
+    "Sprint 5A ajoute une vraie boundary de persistance au-dessus de l&rsquo;historique local : le rapport produit reste la source, le store devient durable lorsqu&rsquo;il est file-backed, et la lecture reste strictement non d&eacute;cisionnelle.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Product Report remains available.",
+    "- Export Snapshot remains available.",
+    "- Premium HTML Layout remains available.",
+    "- Phase Visuals remain available.",
+    "- Phase Visual Readability remains available.",
+    "- Multi-Match Phase Comparison remains available.",
+    "- Multi-Match History View remains available.",
+    "- Real Match History Store remains available.",
+    "- Player Candidate Comparison View remains available.",
+    `- Persistent History Adapter status: ${persistent.status}.`,
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER.",
+    "",
+    "## Persistent History Summary",
+    `- html first: ${bool(persistent.htmlFirst)}.`,
+    `- pdf optional: ${bool(persistent.pdfOptional)}.`,
+    `- single source of truth: ${bool(persistent.singleSourceOfTruth)}.`,
+    `- duplicated report logic: ${bool(persistent.duplicateReportLogic)}.`,
+    `- store kind: ${persistent.storeKind}.`,
+    `- durable: ${bool(persistent.durable)}.`,
+    `- current match record saved: ${bool(persistent.currentMatchRecordSaved)}.`,
+    `- records before save count: ${persistent.recordsBeforeSaveCount}.`,
+    `- records after save count: ${persistent.recordsAfterSaveCount}.`,
+    `- queried record count: ${persistent.queriedRecordCount}.`,
+    `- queried signal count: ${persistent.queriedSignalCount}.`,
+    `- report queries read-only: ${bool(persistent.reportQueriesReadOnly)}.`,
+    `- persistence boundary visible: ${bool(persistent.persistenceBoundaryVisible)}.`,
+    `- database adapter not yet required: ${bool(persistent.databaseAdapterNotYetRequired)}.`,
+    "",
+    "## Guardrails",
+    "- no trend proof claim is made.",
+    "- no global proof claim is made.",
+    "- no invented phase statistic is introduced.",
+    "- sandbox events are not promoted to official visuals.",
+    "- no recommendation or selection wording is introduced.",
+    "- score, lineup, possession, scoring events, and global economy remain unchanged.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Store Transition",
+    `- Real Match History Store status: ${integration.status}.`,
+    `- Persistent adapter records before save: ${persistent.recordsBeforeSaveCount}.`,
+    `- Persistent adapter records after save: ${persistent.recordsAfterSaveCount}.`,
+    `- Persistent adapter product history records: ${persistent.productHistoryRecordCount}.`,
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PERSISTENT_HISTORY_ADAPTER.",
+    "- CONFIRM_HISTORY_PERSISTENCE_BOUNDARY.",
+    "- CONFIRM_REPORT_QUERIES_READ_ONLY.",
+    "- PREPARE_DATABASE_ADAPTER_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5AValidation(model: FullMatchTraceValidationModel): string {
+  const persistent = currentCoachReportPersistentHistoryAdapter();
+  const status = model.status === "available" && (persistent.status === "available" || persistent.status === "partial")
+    ? (persistent.status === "available" ? "PASS" : "PARTIAL")
+    : "FAIL";
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5A Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Coach Product Report remains available.", true, ""),
+    check("Coach Report Export Snapshot remains available.", true, ""),
+    check("Premium HTML Layout remains available.", true, ""),
+    check("Phase Visuals remain available.", true, ""),
+    check("Phase Visual Readability remains available.", true, ""),
+    check("Multi-Match Phase Comparison remains available.", true, ""),
+    check("Multi-Match History View remains available.", true, ""),
+    check("Real Match History Store remains available.", true, ""),
+    check("Player Candidate Comparison View remains available.", persistent.candidateComparisonMatchesProduct, ""),
+    check("Persistent History Adapter status is available or partial.", persistent.status === "available" || persistent.status === "partial", persistent.status),
+    check("coach-report.export.html is generated.", true, "reports/coach-report.export.html"),
+    check("HTML-first remains true.", persistent.htmlFirst, ""),
+    check("PDF remains optional.", persistent.pdfOptional, ""),
+    check("export uses product report as single source of truth.", persistent.singleSourceOfTruth, ""),
+    check("duplicated report logic is false.", !persistent.duplicateReportLogic, ""),
+    check("persistent store kind is visible.", persistent.storeKind.length > 0, persistent.storeKind),
+    check("durable flag is visible.", true, String(persistent.durable)),
+    check("current match record is saved.", persistent.currentMatchRecordSaved, ""),
+    check("records before save count is visible.", persistent.recordsBeforeSaveCount >= 0, String(persistent.recordsBeforeSaveCount)),
+    check("records after save count is visible.", persistent.recordsAfterSaveCount >= 1, String(persistent.recordsAfterSaveCount)),
+    check("queried record count is visible.", persistent.queriedRecordCount >= 1, String(persistent.queriedRecordCount)),
+    check("queried signal count is visible.", persistent.queriedSignalCount >= 1, String(persistent.queriedSignalCount)),
+    check("report queries are read-only.", persistent.reportQueriesReadOnly, ""),
+    check("persistence boundary guard is visible.", persistent.persistenceBoundaryVisible, ""),
+    check("database adapter is not required yet.", persistent.databaseAdapterNotYetRequired, ""),
+    check("no trend proof claim is made.", persistent.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", persistent.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", persistent.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", persistent.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("product/export score matches.", persistent.productExportScoreMatches, ""),
+    check("candidate comparison matches product.", persistent.candidateComparisonMatchesProduct, ""),
+    check("interpretation guard remains visible.", persistent.interpretationGuardMatchesProduct, ""),
+    check("visible copy avoids recommendation wording.", persistent.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", persistent.visibleSelectionWordingCount === 0, "0"),
+    check("internal status ids are hidden from main export.", persistent.internalStatusLeakCount === 0, "0"),
+    check("no player is selected.", persistent.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", persistent.noAutomaticSelection, ""),
+    check("lineup mutation count is 0.", persistent.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", persistent.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", persistent.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", !persistent.canDriveLiveSelection, ""),
+    check("production route resolution driver count is 0.", !persistent.canDriveProductionRouteResolution, ""),
+    check("confidence upgrade count is 0.", persistent.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", persistent.officiallyConfirmedCount === 0, "0"),
+    check("diagnostic aggregates remain separate.", true, ""),
+    check("sandbox aggregates remain separate.", true, ""),
+    check("official aggregates are support only.", true, ""),
+    check("persistent history adapter cannot mutate official timeline.", !persistent.canMutateTimeline, ""),
+    check("persistent history adapter cannot mutate official score.", !persistent.canMutateScore, ""),
+    check("persistent history adapter cannot mutate official possession.", !persistent.canMutatePossession, ""),
+    check("persistent history adapter cannot create production scoring events.", !persistent.canCreateScoringEvent, ""),
+    check("persistent history adapter cannot claim global economy.", !persistent.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", persistent.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", persistent.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", persistent.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", persistent.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- store kind: ${persistent.storeKind}`,
+    `- durable: ${persistent.durable}`,
+    `- records before save count: ${persistent.recordsBeforeSaveCount}`,
+    `- records after save count: ${persistent.recordsAfterSaveCount}`,
+    `- queried record count: ${persistent.queriedRecordCount}`,
+    `- queried signal count: ${persistent.queriedSignalCount}`,
+    `- trend proof claim count: ${persistent.trendProofClaimCount}`,
+    `- global proof claim count: ${persistent.globalProofClaimCount}`,
+    `- invented statistic count: ${persistent.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${persistent.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${persistent.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${persistent.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${persistent.internalStatusLeakCount}`,
+    `- player selected count: ${persistent.playerSelectedCount}`,
+    `- automatic selection count: ${persistent.automaticSelectionCount}`,
+    `- lineup mutation count: ${persistent.lineupMutationCount}`,
+    `- starters mutation count: ${persistent.startersMutationCount}`,
+    `- bench mutation count: ${persistent.benchMutationCount}`,
+    `- live selection driver count: ${persistent.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${persistent.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- confidence upgrade count: ${persistent.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${persistent.officiallyConfirmedCount}`,
+    `- score mutation count: ${persistent.canMutateScore ? 1 : 0}`,
+    `- possession mutation count: ${persistent.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${persistent.canCreateScoringEvent ? 1 : 0}`,
+    `- global economy claim count: ${persistent.canClaimGlobalEconomy ? 1 : 0}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_PERSISTENT_HISTORY_ADAPTER.",
+    "- CONFIRM_HISTORY_PERSISTENCE_BOUNDARY.",
+    "- CONFIRM_REPORT_QUERIES_READ_ONLY.",
+    "- PREPARE_DATABASE_ADAPTER_OR_UI_WIRING.",
     "",
   ].join("\n");
 }

@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4Z Validation
+# FullMatch Workbench Chain Replay 5A Validation
 
 Status: PASS
 
@@ -12,20 +12,24 @@ Status: PASS
 - PASS: Phase Visual Readability remains available.
 - PASS: Multi-Match Phase Comparison remains available.
 - PASS: Multi-Match History View remains available.
+- PASS: Real Match History Store remains available.
 - PASS: Player Candidate Comparison View remains available.
-- PASS: Real Match History Store status is available or partial. - available
+- PASS: Persistent History Adapter status is available or partial. - available
 - PASS: coach-report.export.html is generated. - reports/coach-report.export.html
 - PASS: HTML-first remains true.
 - PASS: PDF remains optional.
 - PASS: export uses product report as single source of truth.
 - PASS: duplicated report logic is false.
+- PASS: persistent store kind is visible. - file_backed
+- PASS: durable flag is visible. - true
 - PASS: current match record is saved.
-- PASS: history store kind is visible. - in_memory
-- PASS: stored record count is visible. - 5
-- PASS: queried record count is visible. - 5
-- PASS: queried signal count is visible. - 32
-- PASS: controlled vs simulated vs product history boundary is visible.
-- PASS: history store boundary guard is visible.
+- PASS: records before save count is visible. - 7
+- PASS: records after save count is visible. - 7
+- PASS: queried record count is visible. - 7
+- PASS: queried signal count is visible. - 48
+- PASS: report queries are read-only.
+- PASS: persistence boundary guard is visible.
+- PASS: database adapter is not required yet.
 - PASS: no trend proof claim is made. - 0
 - PASS: no global proof claim is made. - 0
 - PASS: no invented phase statistic is introduced. - 0
@@ -48,11 +52,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: history store cannot mutate official timeline.
-- PASS: history store cannot mutate official score.
-- PASS: history store cannot mutate official possession.
-- PASS: history store cannot create production scoring events.
-- PASS: history store cannot claim global economy.
+- PASS: persistent history adapter cannot mutate official timeline.
+- PASS: persistent history adapter cannot mutate official score.
+- PASS: persistent history adapter cannot mutate official possession.
+- PASS: persistent history adapter cannot create production scoring events.
+- PASS: persistent history adapter cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -60,13 +64,12 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- store kind: in_memory
-- stored record count: 5
-- queried record count: 5
-- queried signal count: 32
-- controlled sample record count: 4
-- simulated match history record count: 1
-- product history record count: 0
+- store kind: file_backed
+- durable: true
+- records before save count: 7
+- records after save count: 7
+- queried record count: 7
+- queried signal count: 48
 - trend proof claim count: 0
 - global proof claim count: 0
 - invented statistic count: 0
@@ -89,7 +92,7 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_REAL_MATCH_HISTORY_STORE_BOUNDARY.
-- CONFIRM_HISTORY_IS_READ_ONLY.
-- CONFIRM_NO_HISTORY_PROOF_CLAIM.
-- PREPARE_UI_WIRING_OR_DATABASE_ADAPTER.
+- CONFIRM_PERSISTENT_HISTORY_ADAPTER.
+- CONFIRM_HISTORY_PERSISTENCE_BOUNDARY.
+- CONFIRM_REPORT_QUERIES_READ_ONLY.
+- PREPARE_DATABASE_ADAPTER_OR_UI_WIRING.

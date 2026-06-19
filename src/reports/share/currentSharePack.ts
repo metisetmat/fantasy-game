@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 4Z - Real Match History Store & Report Integration",
+  name: "Sprint 5A - Persistent History Adapter & Storage Boundary",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-4z.md",
-    "validation.fullmatch-workbench-chain-replay-4z.md",
+    "fullmatch-workbench-chain-replay-5a.md",
+    "validation.fullmatch-workbench-chain-replay-5a.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 4Z share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-4z.md": "summarizes the product-shaped local real-match-history store rollout, read-only boundary, source-of-truth preservation, and unchanged scoring guardrails",
-    "validation.fullmatch-workbench-chain-replay-4z.md": "validates real match history store status, stored and queried record counts, boundary copy, print CSS/page-break protection, non-selection scope, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 4Z share pack",
-    "manifest.md": "compatibility manifest listing the 4Z share pack files",
+    "validation.share-pack.md": "proves the 5A share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-5a.md": "summarizes the persistent history adapter boundary, durable file-backed storage, read-only queries, source-of-truth preservation, and unchanged scoring guardrails",
+    "validation.fullmatch-workbench-chain-replay-5a.md": "validates persistent history adapter status, durable flag, storage counts, boundary copy, print CSS/page-break protection, non-selection scope, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 5A share pack",
+    "manifest.md": "compatibility manifest listing the 5A share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

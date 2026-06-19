@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-19T09:35:19.634Z
-Task/sprint: Sprint 4Z - Real Match History Store & Report Integration
+Generated: 2026-06-19T12:32:36.398Z
+Task/sprint: Sprint 5A - Persistent History Adapter & Storage Boundary
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-4z.md
-- validation.fullmatch-workbench-chain-replay-4z.md
+- fullmatch-workbench-chain-replay-5a.md
+- validation.fullmatch-workbench-chain-replay-5a.md
 - README.md
 
 ## Bundle Files

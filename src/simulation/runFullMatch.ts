@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import type { FatigueReport, MatchEvent, MatchInput, MatchReport, TacticalDiagnosis } from "../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
 import type { MatchReportWarning } from "../contracts/matchReportWarnings";
@@ -200,7 +201,12 @@ import {
 import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "../reports/buildCoachReportMultiMatchHistoryView";
+import { buildCoachReportPersistentHistoryAdapter } from "../reports/buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "../reports/buildCoachReportRealMatchHistoryIntegration";
+import {
+  coachReportPersistentHistoryAdapterEvidenceFact,
+  coachReportPersistentHistoryAdapterLimitations,
+} from "../reports/coachReportPersistentHistoryAdapter";
 import {
   coachReportMultiMatchHistoryViewEvidenceFact,
   coachReportMultiMatchHistoryViewLimitations,
@@ -217,7 +223,8 @@ import {
   coachReportPhaseVisualReadabilityEvidenceFact,
   coachReportPhaseVisualReadabilityLimitations,
 } from "../reports/coachReportPhaseVisualReadability";
-import { createInMemoryCoachMatchHistoryStore } from "../reports/history/inMemoryCoachMatchHistoryStore";
+import { buildCoachMatchHistoryRecord } from "../reports/history/buildCoachMatchHistoryRecord";
+import { createFileBackedCoachMatchHistoryStore } from "../reports/history/fileBackedCoachMatchHistoryStore";
 
 interface FullMatchSegmentConfig {
   readonly label: string;
@@ -3226,6 +3233,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         productReportHtml: coachProductReportHtml,
         exportReportHtml: baselineCoachReportExportHtml,
       });
+  const coachReportPersistentHistoryStore = coachReportMultiMatchHistoryViewModel === null
+    ? null
+    : createFileBackedCoachMatchHistoryStore({
+        filePath: join(process.cwd(), "reports", "history", "coach-match-history-runtime.json"),
+        allowWrite: true,
+      });
   const coachReportRealMatchHistoryIntegrationModel = coachReportMultiMatchHistoryViewModel === null
     ? null
     : buildCoachReportRealMatchHistoryIntegration({
@@ -3233,10 +3246,42 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         productReportHtml: coachProductReportHtml,
         exportReportHtml: baselineCoachReportExportHtml,
         multiMatchHistoryView: coachReportMultiMatchHistoryViewModel,
-        historyStore: createInMemoryCoachMatchHistoryStore(),
+        historyStore: coachReportPersistentHistoryStore ?? createFileBackedCoachMatchHistoryStore({
+          filePath: join(process.cwd(), "reports", "history", "coach-match-history-runtime.json"),
+          allowWrite: true,
+        }),
         runId: `${report.matchId}:${routeSelectionMode}`,
         generatedAtIso: new Date().toISOString(),
       });
+  const coachReportPersistentHistoryCurrentRecord = coachReportMultiMatchHistoryViewModel === null
+    ? null
+    : buildCoachMatchHistoryRecord({
+        matchReport: report,
+        productReportHtml: coachProductReportHtml,
+        exportReportHtml: baselineCoachReportExportHtml,
+        multiMatchHistoryView: coachReportMultiMatchHistoryViewModel,
+        source: "product_history_store",
+        runId: `${report.matchId}:${routeSelectionMode}:product-history`,
+        generatedAtIso: new Date().toISOString(),
+      });
+  const coachReportPersistentHistoryAdapterModel =
+    coachReportPersistentHistoryStore === null ||
+      coachReportRealMatchHistoryIntegrationModel === null ||
+      coachReportPersistentHistoryCurrentRecord === null
+      ? null
+      : buildCoachReportPersistentHistoryAdapter({
+          realMatchHistoryIntegration: coachReportRealMatchHistoryIntegrationModel,
+          historyStore: coachReportPersistentHistoryStore,
+          currentRecord: coachReportPersistentHistoryCurrentRecord,
+          query: {
+            teamId: coachReportPersistentHistoryCurrentRecord.homeTeamId,
+            maxRecords: 12,
+            includeControlledSamples: true,
+            includeProductHistory: true,
+          },
+          productReportHtml: coachProductReportHtml,
+          exportReportHtml: baselineCoachReportExportHtml,
+        });
   const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
@@ -3251,7 +3296,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
                 multiMatchHistoryView: coachReportMultiMatchHistoryViewModel,
                 ...(coachReportRealMatchHistoryIntegrationModel === null
                   ? {}
-                  : { realMatchHistoryIntegration: coachReportRealMatchHistoryIntegrationModel }),
+                  : {
+                    realMatchHistoryIntegration: coachReportRealMatchHistoryIntegrationModel,
+                    ...(coachReportPersistentHistoryAdapterModel === null
+                      ? {}
+                      : { persistentHistoryAdapter: coachReportPersistentHistoryAdapterModel }),
+                  }),
               }),
           }),
       })
@@ -3289,6 +3339,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...(coachReportRealMatchHistoryIntegrationModel === null
           ? []
           : coachReportRealMatchHistoryLimitations(coachReportRealMatchHistoryIntegrationModel)),
+        ...(coachReportPersistentHistoryAdapterModel === null
+          ? []
+          : coachReportPersistentHistoryAdapterLimitations(coachReportPersistentHistoryAdapterModel)),
       ],
     },
   };
@@ -3554,6 +3607,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         matchInput: input,
         model: coachReportRealMatchHistoryIntegrationModel,
       });
+  const coachReportPersistentHistoryAdapterModelFact = coachReportPersistentHistoryAdapterModel === null
+    ? null
+    : coachReportPersistentHistoryAdapterEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachReportPersistentHistoryAdapterModel,
+      });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3620,6 +3680,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportRealMatchHistoryStoreFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportRealMatchHistoryIntegrationModelFact
     : null;
+  const experimentalCoachReportPersistentHistoryAdapterFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportPersistentHistoryAdapterModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3665,6 +3728,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportMultiMatchPhaseComparisonFact === null ? [] : [experimentalCoachReportMultiMatchPhaseComparisonFact]),
     ...(experimentalCoachReportMultiMatchHistoryViewFact === null ? [] : [experimentalCoachReportMultiMatchHistoryViewFact]),
     ...(experimentalCoachReportRealMatchHistoryStoreFact === null ? [] : [experimentalCoachReportRealMatchHistoryStoreFact]),
+    ...(experimentalCoachReportPersistentHistoryAdapterFact === null ? [] : [experimentalCoachReportPersistentHistoryAdapterFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),

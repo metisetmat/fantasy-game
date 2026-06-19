@@ -1,6 +1,6 @@
-# FullMatch Workbench Chain Replay 4Z
+# FullMatch Workbench Chain Replay 5A
 
-Sprint 4Z pr&eacute;pare un vrai stockage produit de l&rsquo;historique de matchs, mais le garde local, en m&eacute;moire et strictement en lecture seule.
+Sprint 5A ajoute une vraie boundary de persistance au-dessus de l&rsquo;historique local : le rapport produit reste la source, le store devient durable lorsqu&rsquo;il est file-backed, et la lecture reste strictement non d&eacute;cisionnelle.
 
 ## Default Mode
 - default runFullMatch remains segment_harness.
@@ -14,26 +14,28 @@ Sprint 4Z pr&eacute;pare un vrai stockage produit de l&rsquo;historique de match
 - Phase Visual Readability remains available.
 - Multi-Match Phase Comparison remains available.
 - Multi-Match History View remains available.
+- Real Match History Store remains available.
 - Player Candidate Comparison View remains available.
-- Real Match History Store status: available.
-- evidence category: WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE.
+- Persistent History Adapter status: available.
+- evidence category: WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER.
 
-## Real Match History Summary
+## Persistent History Summary
 - html first: YES.
 - pdf optional: YES.
 - single source of truth: YES.
 - duplicated report logic: NO.
-- store kind: in_memory.
+- store kind: file_backed.
+- durable: YES.
 - current match record saved: YES.
-- stored record count: 5.
-- queried record count: 5.
-- queried signal count: 32.
-- controlled sample record count: 4.
-- simulated match history record count: 1.
-- product history record count: 0.
+- records before save count: 6.
+- records after save count: 7.
+- queried record count: 7.
+- queried signal count: 48.
+- report queries read-only: YES.
+- persistence boundary visible: YES.
+- database adapter not yet required: YES.
 
 ## Guardrails
-- history remains local and read-only.
 - no trend proof claim is made.
 - no global proof claim is made.
 - no invented phase statistic is introduced.
@@ -42,13 +44,19 @@ Sprint 4Z pr&eacute;pare un vrai stockage produit de l&rsquo;historique de match
 - score, lineup, possession, scoring events, and global economy remain unchanged.
 - FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
 
+## Store Transition
+- Real Match History Store status: available.
+- Persistent adapter records before save: 6.
+- Persistent adapter records after save: 7.
+- Persistent adapter product history records: 1.
+
 ## Test Command
 - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Recommendation
-- CONFIRM_REAL_MATCH_HISTORY_STORE_BOUNDARY.
-- CONFIRM_HISTORY_IS_READ_ONLY.
-- CONFIRM_NO_HISTORY_PROOF_CLAIM.
-- PREPARE_UI_WIRING_OR_DATABASE_ADAPTER.
+- CONFIRM_PERSISTENT_HISTORY_ADAPTER.
+- CONFIRM_HISTORY_PERSISTENCE_BOUNDARY.
+- CONFIRM_REPORT_QUERIES_READ_ONLY.
+- PREPARE_DATABASE_ADAPTER_OR_UI_WIRING.
 
 Trace validation status: PASS.
