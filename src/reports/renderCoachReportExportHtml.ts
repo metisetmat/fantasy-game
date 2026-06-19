@@ -15,6 +15,7 @@ import type {
   MultiMatchPhaseZoneSignal,
 } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
+import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -627,6 +628,94 @@ const PREMIUM_EXPORT_CSS = `
       page-break-inside: avoid;
     }
 
+    .match-history-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .match-history-guard,
+    .match-history-boundary {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      color: var(--report-dark);
+      padding: 12px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .match-history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .match-history-card {
+      border: 1px solid var(--report-line);
+      border-radius: 14px;
+      background: var(--report-paper);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .match-history-card h3 {
+      margin: 0;
+    }
+
+    .match-history-kpi {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+    }
+
+    .match-history-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .match-history-kpi strong {
+      color: var(--report-ink);
+    }
+
+    .match-history-source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .match-history-source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .match-history-source-badge--controlled {
+      background: #f7f3ff;
+      color: #6b4db7;
+      border-color: rgba(107, 77, 183, 0.18);
+    }
+
+    .match-history-source-badge--simulated {
+      background: #e6f6ef;
+      color: #1d6b4f;
+      border-color: rgba(29, 107, 79, 0.18);
+    }
+
+    .match-history-source-badge--product {
+      background: #fff4e7;
+      color: #9a5a14;
+      border-color: rgba(154, 90, 20, 0.18);
+    }
+
     .report-appendix-stack {
       margin-top: 10px;
     }
@@ -654,7 +743,8 @@ const PREMIUM_EXPORT_CSS = `
       .report-phase-layout,
       .report-player-study-grid,
       .phase-stability-grid,
-      .phase-history-grid {
+      .phase-history-grid,
+      .match-history-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -689,7 +779,10 @@ const PREMIUM_EXPORT_CSS = `
       .phase-pitch-legend,
       .phase-legend-item,
       .phase-history-card,
-      .phase-history-row {
+      .phase-history-row,
+      .match-history-card,
+      .match-history-guard,
+      .match-history-boundary {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1233,6 +1326,58 @@ function renderMultiMatchHistoryView(
   </section>`;
 }
 
+function renderRealMatchHistoryIntegration(
+  model: CoachReportRealMatchHistoryIntegrationModel,
+): string {
+  if (model.status === "not_available") {
+    return "";
+  }
+
+  return `
+  <section id="real-match-history-store" class="premium-section match-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
+    <div class="report-section-divider">Product match history</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Historique produit des matchs</h2>
+        <p>${model.storedRecordCount} enregistrement(s) locaux, ${model.queriedRecordCount} relu(s), ${model.queriedSignalCount} signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
+      </div>
+    </div>
+    <p class="match-history-guard">Cet historique pr&eacute;pare le stockage produit des rapports. Dans cette version, il reste local et en lecture seule : il n&rsquo;applique aucune d&eacute;cision, ne modifie pas le score et ne remplace pas l&rsquo;analyse du match courant.</p>
+    <div class="match-history-grid">
+      <article class="match-history-card">
+        <h3>Lecture locale</h3>
+        <div class="match-history-kpi">
+          <div><span>Type de store</span><strong>${model.storeKind}</strong></div>
+          <div><span>Match courant sauv&eacute;</span><strong>${model.currentMatchRecordSaved ? "oui" : "non"}</strong></div>
+          <div><span>Historique visible</span><strong>${model.historySummaryVisible ? "oui" : "non"}</strong></div>
+        </div>
+      </article>
+      <article class="match-history-card">
+        <h3>Sources relues</h3>
+        <div class="match-history-source-list">
+          <span class="match-history-source-badge match-history-source-badge--controlled">sample contr&ocirc;l&eacute;: ${model.controlledSampleRecordCount}</span>
+          <span class="match-history-source-badge match-history-source-badge--simulated">match simul&eacute;: ${model.simulatedMatchHistoryRecordCount}</span>
+          <span class="match-history-source-badge match-history-source-badge--product">store produit: ${model.productHistoryRecordCount}</span>
+        </div>
+        <div class="match-history-kpi">
+          <div><span>Enregistrements stock&eacute;s</span><strong>${model.storedRecordCount}</strong></div>
+          <div><span>Enregistrements relus</span><strong>${model.queriedRecordCount}</strong></div>
+          <div><span>Signaux relus</span><strong>${model.queriedSignalCount}</strong></div>
+        </div>
+      </article>
+      <article class="match-history-card">
+        <h3>Ce que l&rsquo;historique ajoute</h3>
+        <p>Il conserve les signaux de phase issus des rapports pour pouvoir les relire match apr&egrave;s match.</p>
+        <h3>Ce qui reste limit&eacute;</h3>
+        <p>Cette version valide le mod&egrave;le et la lecture, pas encore une base de donn&eacute;es produit compl&egrave;te.</p>
+        <h3>&Agrave; pr&eacute;parer c&ocirc;t&eacute; produit</h3>
+        <p>Brancher ce mod&egrave;le sur un stockage durable par &eacute;quipe, saison et comp&eacute;tition.</p>
+      </article>
+    </div>
+    <p class="match-history-boundary">Historique d&rsquo;observation, pas d&eacute;cision automatique. Les signaux stock&eacute;s servent &agrave; relire le contexte, jamais &agrave; s&eacute;lectionner un joueur, changer une composition ou piloter la r&eacute;solution live.</p>
+  </section>`;
+}
+
 function renderProfilesAndPlayers(html: string): string {
   const profilesBody = extractSectionInner(html, "profiles-to-observe");
   const playersBody = extractSectionInner(html, "players-to-study");
@@ -1465,6 +1610,49 @@ function renderMultiMatchHistoryViewAppendix(
     </details>`;
 }
 
+function renderRealMatchHistoryIntegrationAppendix(
+  model: CoachReportRealMatchHistoryIntegrationModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails du stockage d&rsquo;historique des matchs</summary>
+      <ul>
+        <li>real match history integration status ${model.status}</li>
+        <li>store kind ${model.storeKind}</li>
+        <li>stored record count ${model.storedRecordCount}</li>
+        <li>queried record count ${model.queriedRecordCount}</li>
+        <li>queried signal count ${model.queriedSignalCount}</li>
+        <li>controlled sample record count ${model.controlledSampleRecordCount}</li>
+        <li>simulated match history record count ${model.simulatedMatchHistoryRecordCount}</li>
+        <li>product history record count ${model.productHistoryRecordCount}</li>
+        <li>current match record saved ${model.currentMatchRecordSaved ? "true" : "false"}</li>
+        <li>history summary visible ${model.historySummaryVisible ? "true" : "false"}</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>product/export score match true</li>
+        <li>candidate comparison match true</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>internal status leak count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -1475,6 +1663,7 @@ function renderAppendices(input: {
   readonly legendItemCount: number;
   readonly multiMatchPhaseComparison: CoachReportMultiMatchPhaseComparisonModel;
   readonly multiMatchHistoryView: CoachReportMultiMatchHistoryViewModel;
+  readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -1507,6 +1696,7 @@ function renderAppendices(input: {
     })}
     ${renderMultiMatchPhaseComparisonAppendix(input.multiMatchPhaseComparison)}
     ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
+    ${renderRealMatchHistoryIntegrationAppendix(input.realMatchHistoryIntegration)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -1529,6 +1719,7 @@ export function renderCoachReportExportHtml(input: {
   readonly phaseReadability?: CoachReportPhaseVisualReadabilityModel;
   readonly multiMatchPhaseComparison?: CoachReportMultiMatchPhaseComparisonModel;
   readonly multiMatchHistoryView?: CoachReportMultiMatchHistoryViewModel;
+  readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -1625,6 +1816,7 @@ export function renderCoachReportExportHtml(input: {
     ),
     renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
     renderMultiMatchHistoryView(multiMatchHistoryView),
+    ...(input.realMatchHistoryIntegration === undefined ? [] : [renderRealMatchHistoryIntegration(input.realMatchHistoryIntegration)]),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -1639,6 +1831,9 @@ export function renderCoachReportExportHtml(input: {
     legendItemCount: readabilityPresentation.legendItems.length,
     multiMatchPhaseComparison,
     multiMatchHistoryView,
+    ...(input.realMatchHistoryIntegration === undefined
+      ? {}
+      : { realMatchHistoryIntegration: input.realMatchHistoryIntegration }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

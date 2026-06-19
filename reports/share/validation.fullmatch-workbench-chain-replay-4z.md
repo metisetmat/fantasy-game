@@ -1,4 +1,4 @@
-# FullMatch Workbench Chain Replay 4Y Validation
+# FullMatch Workbench Chain Replay 4Z Validation
 
 Status: PASS
 
@@ -11,18 +11,21 @@ Status: PASS
 - PASS: Phase Visuals remain available.
 - PASS: Phase Visual Readability remains available.
 - PASS: Multi-Match Phase Comparison remains available.
+- PASS: Multi-Match History View remains available.
 - PASS: Player Candidate Comparison View remains available.
-- PASS: Multi-Match History View status is available or partial. - available
+- PASS: Real Match History Store status is available or partial. - available
 - PASS: coach-report.export.html is generated. - reports/coach-report.export.html
 - PASS: HTML-first remains true.
 - PASS: PDF remains optional.
 - PASS: export uses product report as single source of truth.
 - PASS: duplicated report logic is false.
-- PASS: history section is visible.
-- PASS: sample rows are visible. - 32
-- PASS: drilldown cards are visible.
-- PASS: trend labels remain cautious.
-- PASS: local history guard is visible.
+- PASS: current match record is saved.
+- PASS: history store kind is visible. - in_memory
+- PASS: stored record count is visible. - 5
+- PASS: queried record count is visible. - 5
+- PASS: queried signal count is visible. - 32
+- PASS: controlled vs simulated vs product history boundary is visible.
+- PASS: history store boundary guard is visible.
 - PASS: no trend proof claim is made. - 0
 - PASS: no global proof claim is made. - 0
 - PASS: no invented phase statistic is introduced. - 0
@@ -45,11 +48,11 @@ Status: PASS
 - PASS: diagnostic aggregates remain separate.
 - PASS: sandbox aggregates remain separate.
 - PASS: official aggregates are support only.
-- PASS: history layer cannot mutate official timeline.
-- PASS: history layer cannot mutate official score.
-- PASS: history layer cannot mutate official possession.
-- PASS: history layer cannot create production scoring events.
-- PASS: history layer cannot claim global economy.
+- PASS: history store cannot mutate official timeline.
+- PASS: history store cannot mutate official score.
+- PASS: history store cannot mutate official possession.
+- PASS: history store cannot create production scoring events.
+- PASS: history store cannot claim global economy.
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
@@ -57,13 +60,13 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- sample count: 4
-- drilldown count: 8
-- history sample row count: 32
-- local repeated drilldown count: 6
-- local visible-once drilldown count: 2
-- local unstable drilldown count: 0
-- insufficient data drilldown count: 0
+- store kind: in_memory
+- stored record count: 5
+- queried record count: 5
+- queried signal count: 32
+- controlled sample record count: 4
+- simulated match history record count: 1
+- product history record count: 0
 - trend proof claim count: 0
 - global proof claim count: 0
 - invented statistic count: 0
@@ -86,7 +89,7 @@ Status: PASS
 - global economy claim count: 0
 
 ## Recommendation
-- CONFIRM_MULTI_MATCH_HISTORY_VIEW.
-- CONFIRM_TREND_DRILLDOWN_REMAINS_LOCAL.
-- CONFIRM_NO_TREND_PROOF_CLAIM.
-- PREPARE_UI_WIRING_OR_REAL_MATCH_HISTORY_STORE.
+- CONFIRM_REAL_MATCH_HISTORY_STORE_BOUNDARY.
+- CONFIRM_HISTORY_IS_READ_ONLY.
+- CONFIRM_NO_HISTORY_PROOF_CLAIM.
+- PREPARE_UI_WIRING_OR_DATABASE_ADAPTER.
