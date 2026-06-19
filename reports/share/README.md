@@ -1,6 +1,6 @@
-# Sprint 5A Share Pack
+# Sprint 5B Share Pack
 
-Current sprint: Sprint 5A - Persistent History Adapter & Storage Boundary
+Current sprint: Sprint 5B - History Store Consistency & Database Adapter Contract
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-workbench-chain-replay-5a.md
-- validation.fullmatch-workbench-chain-replay-5a.md
+- fullmatch-workbench-chain-replay-5b.md
+- validation.fullmatch-workbench-chain-replay-5b.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,10 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Sprint 5A adds a durable persistence boundary above the local match-history layer. The product report remains the single source of truth, the export stays HTML-first, the store can now be file-backed, and report queries remain strictly read-only and non-decision-driving.
+Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5b.md and validation.fullmatch-workbench-chain-replay-5b.md.
 
-Review order:
-1. Read README.md for upload scope.
-2. Read fullmatch-workbench-chain-replay-5a.md for the persistent-history adapter boundary and storage summary.
-3. Read validation.fullmatch-workbench-chain-replay-5a.md for source-of-truth, copy, print, and non-mutation checks.
-4. Open coach-report.export.html for the coach-facing HTML result.
+Sprint 5B proves save-result consistency for the history store, idempotent duplicate handling, database adapter contract visibility, and unchanged scoring guardrails.
+
+Upload every file in this reports/share directory.

@@ -713,6 +713,67 @@
       color: var(--report-accent);
     }
 
+    .history-consistency-section {
+      display: grid;
+      gap: 14px;
+      border-top: 1px solid var(--report-line);
+      padding-top: 16px;
+    }
+
+    .history-consistency-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .history-consistency-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      background: var(--report-soft);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .history-consistency-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .history-consistency-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .history-consistency-kpi strong,
+    .history-consistency-operation,
+    .history-consistency-boundary,
+    .history-consistency-database-contract,
+    .history-consistency-guard {
+      color: var(--report-dark);
+      font-weight: 700;
+    }
+
+    .history-consistency-boundary,
+    .history-consistency-database-contract,
+    .history-consistency-guard,
+    .history-consistency-warning {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .history-consistency-warning {
+      border-left-color: var(--report-warning);
+      background: #fff8ed;
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -783,6 +844,10 @@
       .persistent-history-grid {
         grid-template-columns: 1fr;
       }
+
+      .history-consistency-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media print {
@@ -822,7 +887,12 @@
       .persistent-history-card,
       .persistent-history-boundary,
       .persistent-history-guard,
-      .persistent-history-warning {
+      .persistent-history-warning,
+      .history-consistency-card,
+      .history-consistency-boundary,
+      .history-consistency-database-contract,
+      .history-consistency-guard,
+      .history-consistency-warning {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1904,8 +1974,48 @@
         <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
       </article>
     </div>
+    
+    <section class="history-consistency-section" aria-label="Coh&eacute;rence du stockage historique">
+      <div>
+        <h3>Coh&eacute;rence du stockage</h3>
+        <p>La sauvegarde expose maintenant une op&eacute;ration explicite, des compteurs de lecture/&eacute;criture et un contrat futur pour l&rsquo;adapter base de donn&eacute;es.</p>
+      </div>
+      <div class="history-consistency-grid">
+        <article class="history-consistency-card">
+          <h4>R&eacute;sultat de sauvegarde</h4>
+          <div class="history-consistency-kpi">
+            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">replaced</strong></div>
+            <div><span>Idempotent</span><strong>non</strong></div>
+            <div><span>Avant</span><strong>6</strong></div>
+            <div><span>Apr&egrave;s</span><strong>6</strong></div>
+          </div>
+        </article>
+        <article class="history-consistency-card">
+          <h4>Compteurs durables</h4>
+          <div class="history-consistency-kpi">
+            <div><span>Charg&eacute;s disque</span><strong>6</strong></div>
+            <div><span>&Eacute;crits disque</span><strong>6</strong></div>
+            <div><span>D&eacute;dupliqu&eacute;s</span><strong>1</strong></div>
+            <div><span>Remplac&eacute;s</span><strong>1</strong></div>
+            <div><span>Doublons ignor&eacute;s</span><strong>0</strong></div>
+          </div>
+        </article>
+        <article class="history-consistency-card">
+          <h4>Contrat DB futur</h4>
+          <div class="history-consistency-kpi">
+            <div><span>Visible</span><strong>oui</strong></div>
+            <div><span>Impl&eacute;ment&eacute;</span><strong>non</strong></div>
+            <div><span>Migration requise</span><strong>oui</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
+      <p class="history-consistency-database-contract">Database adapter contract visible, implemented=false, migrationRequired=true.</p>
+      <p class="history-consistency-guard">Les compteurs de cette section viennent du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du rapport.</p>
+      <p class="history-consistency-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
+    </section>
     <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
-    <p class="persistent-history-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
+    <p class="persistent-history-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
   </section>
 
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
@@ -2777,6 +2887,29 @@
         <li>possession mutation count 0</li>
         <li>production scoring event creation count 0</li>
         <li>global economy claim count 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
+      <ul>
+        <li>history store consistency status available</li>
+        <li>store kind file_backed</li>
+        <li>save operation replaced</li>
+        <li>idempotent save false</li>
+        <li>loaded from disk count 6</li>
+        <li>written to disk count 6</li>
+        <li>deduped record count 1</li>
+        <li>replaced record count 1</li>
+        <li>ignored duplicate count 0</li>
+        <li>query status available</li>
+        <li>queried record count 6</li>
+        <li>queried signal count 40</li>
+        <li>database contract visible true</li>
+        <li>database contract implemented false</li>
+        <li>database migration required true</li>
+        <li>report queries read-only true</li>
+        <li>global proof claim count 0</li>
       </ul>
     </details>
     <details class="appendix">

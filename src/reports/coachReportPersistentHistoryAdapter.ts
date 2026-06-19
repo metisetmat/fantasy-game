@@ -1,5 +1,6 @@
 import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+import type { CoachMatchHistorySaveResult } from "./history/coachMatchHistoryStore";
 
 export type CoachReportPersistentHistoryAdapterStatus =
   | "not_available"
@@ -21,9 +22,16 @@ export interface CoachReportPersistentHistoryAdapterModel {
   readonly storageLocationVisible: boolean;
   readonly storageLocation?: string;
   readonly currentMatchRecordSaved: boolean;
+  readonly saveResult?: CoachMatchHistorySaveResult;
 
   readonly recordsBeforeSaveCount: number;
   readonly recordsAfterSaveCount: number;
+  readonly loadedFromDiskCount: number;
+  readonly writtenToDiskCount: number;
+  readonly dedupedRecordCount: number;
+  readonly replacedRecordCount: number;
+  readonly ignoredDuplicateCount: number;
+  readonly idempotentSave: boolean;
   readonly queriedRecordCount: number;
   readonly queriedSignalCount: number;
 
@@ -95,8 +103,15 @@ export function buildCoachReportPersistentHistoryAdapterTags(
     "coach_report_persistent_history_store_kind_present",
     "coach_report_persistent_history_durable_flag_present",
     "coach_report_persistent_history_current_match_record_saved_true",
+    `coach_report_persistent_history_save_operation_${model.saveResult?.operation ?? "not_available"}`,
+    `coach_report_persistent_history_idempotent_save_${model.idempotentSave}`,
     "coach_report_persistent_history_records_before_save_count_present",
     "coach_report_persistent_history_records_after_save_count_present",
+    "coach_report_persistent_history_loaded_from_disk_count_present",
+    "coach_report_persistent_history_written_to_disk_count_present",
+    "coach_report_persistent_history_deduped_record_count_present",
+    "coach_report_persistent_history_replaced_record_count_present",
+    "coach_report_persistent_history_ignored_duplicate_count_present",
     "coach_report_persistent_history_queried_record_count_present",
     "coach_report_persistent_history_queried_signal_count_present",
     "coach_report_persistent_history_report_queries_read_only_true",
@@ -125,6 +140,11 @@ export function buildCoachReportPersistentHistoryAdapterTags(
     "coach_report_persistent_history_scoring_constants_unchanged",
     countTag("coach_report_persistent_history_records_before_save_count", model.recordsBeforeSaveCount),
     countTag("coach_report_persistent_history_records_after_save_count", model.recordsAfterSaveCount),
+    countTag("coach_report_persistent_history_loaded_from_disk_count", model.loadedFromDiskCount),
+    countTag("coach_report_persistent_history_written_to_disk_count", model.writtenToDiskCount),
+    countTag("coach_report_persistent_history_deduped_record_count", model.dedupedRecordCount),
+    countTag("coach_report_persistent_history_replaced_record_count", model.replacedRecordCount),
+    countTag("coach_report_persistent_history_ignored_duplicate_count", model.ignoredDuplicateCount),
     countTag("coach_report_persistent_history_queried_record_count", model.queriedRecordCount),
     countTag("coach_report_persistent_history_queried_signal_count", model.queriedSignalCount),
   ];

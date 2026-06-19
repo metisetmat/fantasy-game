@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
+import { buildCoachReportHistoryStoreConsistency } from "./buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
@@ -97,6 +98,21 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStoreConsistency = persistentHistoryAdapter.saveResult === undefined
+    ? undefined
+    : buildCoachReportHistoryStoreConsistency({
+        persistentHistoryAdapter,
+        saveResult: persistentHistoryAdapter.saveResult,
+        historyStore,
+        query: {
+          teamId: currentPersistentRecord.homeTeamId,
+          maxRecords: 12,
+          includeControlledSamples: true,
+          includeProductHistory: true,
+        },
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -104,6 +120,7 @@ export function writeLatestCoachReport(): void {
     multiMatchHistoryView,
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
+    ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

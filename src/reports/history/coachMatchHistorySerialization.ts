@@ -21,6 +21,7 @@ function compareRecords(
   right: CoachMatchHistoryRecord,
 ): number {
   return left.generatedAtIso.localeCompare(right.generatedAtIso) ||
+    left.matchId.localeCompare(right.matchId) ||
     left.historyRecordId.localeCompare(right.historyRecordId);
 }
 
@@ -91,6 +92,13 @@ export function serializeCoachMatchHistoryRecords(
   records: readonly CoachMatchHistoryRecord[],
 ): string {
   return `${JSON.stringify(sortCoachMatchHistoryRecords(records), null, 2)}\n`;
+}
+
+export function coachMatchHistoryRecordsHaveSameContent(
+  left: CoachMatchHistoryRecord,
+  right: CoachMatchHistoryRecord,
+): boolean {
+  return serializeCoachMatchHistoryRecords([left]) === serializeCoachMatchHistoryRecords([right]);
 }
 
 export function parseCoachMatchHistoryRecords(

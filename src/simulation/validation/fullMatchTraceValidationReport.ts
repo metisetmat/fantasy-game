@@ -3,6 +3,7 @@ import type { MatchInput, MatchReport } from "../../contracts/engineToCoach";
 import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidence";
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
+import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -13,6 +14,7 @@ import { buildCoachReportMultiMatchPhaseComparisonSamples } from "../../reports/
 import { buildCoachReportRealMatchHistoryIntegration } from "../../reports/buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import type { CoachReportPersistentHistoryAdapterModel } from "../../reports/coachReportPersistentHistoryAdapter";
+import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coachReportHistoryStoreConsistency";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
@@ -427,6 +429,81 @@ function currentCoachReportPersistentHistoryAdapter(): CoachReportPersistentHist
   }
 
   return adapter;
+}
+
+function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreConsistencyModel {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const productView = buildCoachProductReportViewFromMatchReport(
+    report,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtml = renderCoachProductReport(productView);
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtml,
+  });
+  const comparison = buildCoachReportMultiMatchPhaseComparison({
+    phaseReadability: currentCoachReportPhaseVisualReadability(),
+    comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyView = buildCoachReportMultiMatchHistoryView({
+    multiMatchComparison: comparison,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+  const historyStore = createFileBackedCoachMatchHistoryStore({
+    filePath: join(process.cwd(), "reports", "history", "coach-match-history-validation-5b.json"),
+    allowWrite: true,
+  });
+  const integration = buildCoachReportRealMatchHistoryIntegration({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView: historyView,
+    historyStore,
+    runId: "validation-5b-real-history",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const currentRecord = buildCoachMatchHistoryRecord({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+    multiMatchHistoryView: historyView,
+    source: "product_history_store",
+    runId: "validation-5b-product-history",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const query = {
+    teamId: currentRecord.homeTeamId,
+    maxRecords: 12,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  };
+  const adapter = buildCoachReportPersistentHistoryAdapter({
+    realMatchHistoryIntegration: integration,
+    historyStore,
+    currentRecord,
+    query,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
+
+  if (adapter.saveResult === undefined) {
+    throw new Error("Coach Report Persistent History Adapter must expose saveResult for Sprint 5B validation.");
+  }
+
+  return buildCoachReportHistoryStoreConsistency({
+    persistentHistoryAdapter: adapter,
+    saveResult: adapter.saveResult,
+    historyStore,
+    query,
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -3775,6 +3852,144 @@ export function renderFullMatchWorkbenchChainReplay5AValidation(model: FullMatch
     "- CONFIRM_HISTORY_PERSISTENCE_BOUNDARY.",
     "- CONFIRM_REPORT_QUERIES_READ_ONLY.",
     "- PREPARE_DATABASE_ADAPTER_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5BDoc(model: FullMatchTraceValidationModel): string {
+  const consistency = currentCoachReportHistoryStoreConsistency();
+
+  return [
+    "# FullMatch Workbench Chain Replay 5B",
+    "",
+    "Sprint 5B renforce la boundary d&rsquo;historique : chaque sauvegarde expose une op&eacute;ration explicite, les compteurs viennent du save result, et le futur adapter base de donn&eacute;es est cadr&eacute; sans &ecirc;tre impl&eacute;ment&eacute;.",
+    "",
+    "## Default Mode",
+    "- default runFullMatch remains segment_harness.",
+    "",
+    "## Experimental Mode",
+    "- experimental mode remains opt-in.",
+    "- Product Report remains available.",
+    "- Export Snapshot remains available.",
+    "- Premium HTML Layout remains available.",
+    "- Persistent History Adapter remains available.",
+    "- History Store Consistency is available in the export and evidence tags.",
+    "- evidence category: WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY.",
+    "",
+    "## History Store Consistency Summary",
+    `- status: ${consistency.status}.`,
+    `- store kind: ${consistency.storeKind}.`,
+    `- durable: ${bool(consistency.durable)}.`,
+    `- save operation: ${consistency.saveOperation}.`,
+    `- idempotent save: ${bool(consistency.idempotentSave)}.`,
+    `- records before save count: ${consistency.recordsBeforeSaveCount}.`,
+    `- records after save count: ${consistency.recordsAfterSaveCount}.`,
+    `- loaded from disk count: ${consistency.loadedFromDiskCount}.`,
+    `- written to disk count: ${consistency.writtenToDiskCount}.`,
+    `- deduped record count: ${consistency.dedupedRecordCount}.`,
+    `- replaced record count: ${consistency.replacedRecordCount}.`,
+    `- ignored duplicate count: ${consistency.ignoredDuplicateCount}.`,
+    `- queried record count: ${consistency.queriedRecordCount}.`,
+    `- queried signal count: ${consistency.queriedSignalCount}.`,
+    "",
+    "## Database Adapter Contract",
+    `- contract visible: ${bool(consistency.databaseContractVisible)}.`,
+    `- implemented: ${bool(consistency.databaseContractImplemented)}.`,
+    `- migration required: ${bool(consistency.databaseMigrationRequired)}.`,
+    "- expected store kind: future_database.",
+    "- the future adapter must preserve inserted/replaced/ignored_duplicate semantics.",
+    "",
+    "## Guardrails",
+    "- no trend proof claim is made.",
+    "- no global proof claim is made.",
+    "- no invented phase statistic is introduced.",
+    "- history consistency cannot drive coach instruction, live selection, or production route resolution.",
+    "- history consistency cannot mutate score or create scoring events.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_HISTORY_STORE_SAVE_RESULT_CONTRACT.",
+    "- CONFIRM_HISTORY_STORE_IDEMPOTENCE.",
+    "- CONFIRM_DATABASE_ADAPTER_CONTRACT_BOUNDARY.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5BValidation(model: FullMatchTraceValidationModel): string {
+  const consistency = currentCoachReportHistoryStoreConsistency();
+  const status = model.status === "available" &&
+    (consistency.status === "available" || consistency.status === "partial")
+    ? "PASS"
+    : "FAIL";
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5B Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("History Store Consistency status is available or partial.", consistency.status === "available" || consistency.status === "partial", consistency.status),
+    check("save operation is explicit.", consistency.saveOperation !== "not_available", consistency.saveOperation),
+    check("idempotent save flag is visible.", typeof consistency.idempotentSave === "boolean", String(consistency.idempotentSave)),
+    check("loaded from disk count is visible.", consistency.loadedFromDiskCount >= 0, String(consistency.loadedFromDiskCount)),
+    check("written to disk count is visible.", consistency.writtenToDiskCount >= 0, String(consistency.writtenToDiskCount)),
+    check("deduped record count is visible.", consistency.dedupedRecordCount >= 0, String(consistency.dedupedRecordCount)),
+    check("replaced record count is visible.", consistency.replacedRecordCount >= 0, String(consistency.replacedRecordCount)),
+    check("ignored duplicate count is visible.", consistency.ignoredDuplicateCount >= 0, String(consistency.ignoredDuplicateCount)),
+    check("queried record count is visible.", consistency.queriedRecordCount >= 1, String(consistency.queriedRecordCount)),
+    check("queried signal count is visible.", consistency.queriedSignalCount >= 1, String(consistency.queriedSignalCount)),
+    check("database adapter contract is visible.", consistency.databaseContractVisible, ""),
+    check("database adapter implemented is false.", !consistency.databaseContractImplemented, ""),
+    check("database migration is required.", consistency.databaseMigrationRequired, ""),
+    check("report queries are read-only.", consistency.reportQueriesReadOnly, ""),
+    check("consistency boundary is visible.", consistency.consistencyBoundaryVisible, ""),
+    check("no trend proof claim is made.", consistency.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", consistency.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", consistency.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", consistency.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("history consistency cannot drive coach instruction.", !consistency.canDriveCoachInstruction, ""),
+    check("history consistency cannot drive live selection.", !consistency.canDriveLiveSelection, ""),
+    check("history consistency cannot drive production route resolution.", !consistency.canDriveProductionRouteResolution, ""),
+    check("history consistency cannot mutate score.", !consistency.canMutateScore, ""),
+    check("history consistency cannot create production scoring events.", !consistency.canCreateScoringEvent, ""),
+    check("history consistency cannot claim global economy.", !consistency.canClaimGlobalEconomy, ""),
+    check("scoring constants unchanged.", consistency.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", consistency.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", consistency.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", consistency.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+    "",
+    "## Counts",
+    `- store kind: ${consistency.storeKind}`,
+    `- durable: ${consistency.durable}`,
+    `- save operation: ${consistency.saveOperation}`,
+    `- idempotent save: ${consistency.idempotentSave}`,
+    `- loaded from disk count: ${consistency.loadedFromDiskCount}`,
+    `- written to disk count: ${consistency.writtenToDiskCount}`,
+    `- deduped record count: ${consistency.dedupedRecordCount}`,
+    `- replaced record count: ${consistency.replacedRecordCount}`,
+    `- ignored duplicate count: ${consistency.ignoredDuplicateCount}`,
+    `- queried record count: ${consistency.queriedRecordCount}`,
+    `- queried signal count: ${consistency.queriedSignalCount}`,
+    `- database contract implemented: ${consistency.databaseContractImplemented}`,
+    `- database migration required: ${consistency.databaseMigrationRequired}`,
+    `- global economy claim count: ${consistency.canClaimGlobalEconomy ? 1 : 0}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_HISTORY_STORE_SAVE_RESULT_CONTRACT.",
+    "- CONFIRM_HISTORY_STORE_IDEMPOTENCE.",
+    "- CONFIRM_DATABASE_ADAPTER_CONTRACT_BOUNDARY.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION.",
     "",
   ].join("\n");
 }

@@ -15,6 +15,7 @@ import type {
   MultiMatchPhaseZoneSignal,
 } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel, MultiMatchSignalDrilldown } from "./coachReportMultiMatchHistoryView";
+import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
@@ -738,6 +739,67 @@ const PREMIUM_EXPORT_CSS = `
       color: var(--report-accent);
     }
 
+    .history-consistency-section {
+      display: grid;
+      gap: 14px;
+      border-top: 1px solid var(--report-line);
+      padding-top: 16px;
+    }
+
+    .history-consistency-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .history-consistency-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      background: var(--report-soft);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .history-consistency-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .history-consistency-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .history-consistency-kpi strong,
+    .history-consistency-operation,
+    .history-consistency-boundary,
+    .history-consistency-database-contract,
+    .history-consistency-guard {
+      color: var(--report-dark);
+      font-weight: 700;
+    }
+
+    .history-consistency-boundary,
+    .history-consistency-database-contract,
+    .history-consistency-guard,
+    .history-consistency-warning {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .history-consistency-warning {
+      border-left-color: var(--report-warning);
+      background: #fff8ed;
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -808,6 +870,10 @@ const PREMIUM_EXPORT_CSS = `
       .persistent-history-grid {
         grid-template-columns: 1fr;
       }
+
+      .history-consistency-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media print {
@@ -847,7 +913,12 @@ const PREMIUM_EXPORT_CSS = `
       .persistent-history-card,
       .persistent-history-boundary,
       .persistent-history-guard,
-      .persistent-history-warning {
+      .persistent-history-warning,
+      .history-consistency-card,
+      .history-consistency-boundary,
+      .history-consistency-database-contract,
+      .history-consistency-guard,
+      .history-consistency-warning {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1443,8 +1514,58 @@ function renderRealMatchHistoryIntegration(
   </section>`;
 }
 
+function renderHistoryStoreConsistency(
+  model: CoachReportHistoryStoreConsistencyModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="history-consistency-section" aria-label="Coh&eacute;rence du stockage historique">
+      <div>
+        <h3>Coh&eacute;rence du stockage</h3>
+        <p>La sauvegarde expose maintenant une op&eacute;ration explicite, des compteurs de lecture/&eacute;criture et un contrat futur pour l&rsquo;adapter base de donn&eacute;es.</p>
+      </div>
+      <div class="history-consistency-grid">
+        <article class="history-consistency-card">
+          <h4>R&eacute;sultat de sauvegarde</h4>
+          <div class="history-consistency-kpi">
+            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">${model.saveOperation}</strong></div>
+            <div><span>Idempotent</span><strong>${model.idempotentSave ? "oui" : "non"}</strong></div>
+            <div><span>Avant</span><strong>${model.recordsBeforeSaveCount}</strong></div>
+            <div><span>Apr&egrave;s</span><strong>${model.recordsAfterSaveCount}</strong></div>
+          </div>
+        </article>
+        <article class="history-consistency-card">
+          <h4>Compteurs durables</h4>
+          <div class="history-consistency-kpi">
+            <div><span>Charg&eacute;s disque</span><strong>${model.loadedFromDiskCount}</strong></div>
+            <div><span>&Eacute;crits disque</span><strong>${model.writtenToDiskCount}</strong></div>
+            <div><span>D&eacute;dupliqu&eacute;s</span><strong>${model.dedupedRecordCount}</strong></div>
+            <div><span>Remplac&eacute;s</span><strong>${model.replacedRecordCount}</strong></div>
+            <div><span>Doublons ignor&eacute;s</span><strong>${model.ignoredDuplicateCount}</strong></div>
+          </div>
+        </article>
+        <article class="history-consistency-card">
+          <h4>Contrat DB futur</h4>
+          <div class="history-consistency-kpi">
+            <div><span>Visible</span><strong>${model.databaseContractVisible ? "oui" : "non"}</strong></div>
+            <div><span>Impl&eacute;ment&eacute;</span><strong>${model.databaseContractImplemented ? "oui" : "non"}</strong></div>
+            <div><span>Migration requise</span><strong>${model.databaseMigrationRequired ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
+      <p class="history-consistency-database-contract">Database adapter contract visible, implemented=false, migrationRequired=true.</p>
+      <p class="history-consistency-guard">Les compteurs de cette section viennent du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du rapport.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="history-consistency-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
+  historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
 ): string {
   if (model.status === "not_available") {
     return "";
@@ -1490,6 +1611,7 @@ function renderPersistentHistoryAdapter(
         <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
       </article>
     </div>
+    ${renderHistoryStoreConsistency(historyStoreConsistency)}
     <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
     ${model.warnings.length === 0 ? "" : `<p class="persistent-history-warning">${model.warnings.join(" ")}</p>`}
   </section>`;
@@ -1816,6 +1938,38 @@ function renderPersistentHistoryAdapterAppendix(
     </details>`;
 }
 
+function renderHistoryStoreConsistencyAppendix(
+  model: CoachReportHistoryStoreConsistencyModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
+      <ul>
+        <li>history store consistency status ${model.status}</li>
+        <li>store kind ${model.storeKind}</li>
+        <li>save operation ${model.saveOperation}</li>
+        <li>idempotent save ${model.idempotentSave ? "true" : "false"}</li>
+        <li>loaded from disk count ${model.loadedFromDiskCount}</li>
+        <li>written to disk count ${model.writtenToDiskCount}</li>
+        <li>deduped record count ${model.dedupedRecordCount}</li>
+        <li>replaced record count ${model.replacedRecordCount}</li>
+        <li>ignored duplicate count ${model.ignoredDuplicateCount}</li>
+        <li>query status ${model.queryStatus}</li>
+        <li>queried record count ${model.queriedRecordCount}</li>
+        <li>queried signal count ${model.queriedSignalCount}</li>
+        <li>database contract visible ${model.databaseContractVisible ? "true" : "false"}</li>
+        <li>database contract implemented ${model.databaseContractImplemented ? "true" : "false"}</li>
+        <li>database migration required ${model.databaseMigrationRequired ? "true" : "false"}</li>
+        <li>report queries read-only ${model.reportQueriesReadOnly ? "true" : "false"}</li>
+        <li>global proof claim count ${model.globalProofClaimCount}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -1828,6 +1982,7 @@ function renderAppendices(input: {
   readonly multiMatchHistoryView: CoachReportMultiMatchHistoryViewModel;
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
+  readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -1862,6 +2017,7 @@ function renderAppendices(input: {
     ${renderMultiMatchHistoryViewAppendix(input.multiMatchHistoryView)}
     ${renderRealMatchHistoryIntegrationAppendix(input.realMatchHistoryIntegration)}
     ${renderPersistentHistoryAdapterAppendix(input.persistentHistoryAdapter)}
+    ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -1886,6 +2042,7 @@ export function renderCoachReportExportHtml(input: {
   readonly multiMatchHistoryView?: CoachReportMultiMatchHistoryViewModel;
   readonly realMatchHistoryIntegration?: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
+  readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -1983,7 +2140,9 @@ export function renderCoachReportExportHtml(input: {
     renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
     renderMultiMatchHistoryView(multiMatchHistoryView),
     ...(input.realMatchHistoryIntegration === undefined ? [] : [renderRealMatchHistoryIntegration(input.realMatchHistoryIntegration)]),
-    ...(input.persistentHistoryAdapter === undefined ? [] : [renderPersistentHistoryAdapter(input.persistentHistoryAdapter)]),
+    ...(input.persistentHistoryAdapter === undefined ? [] : [
+      renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency),
+    ]),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -2004,6 +2163,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.persistentHistoryAdapter === undefined
       ? {}
       : { persistentHistoryAdapter: input.persistentHistoryAdapter }),
+    ...(input.historyStoreConsistency === undefined
+      ? {}
+      : { historyStoreConsistency: input.historyStoreConsistency }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

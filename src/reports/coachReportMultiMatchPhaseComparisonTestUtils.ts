@@ -3,6 +3,7 @@ import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
+import { buildCoachReportHistoryStoreConsistency } from "./buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
@@ -12,6 +13,7 @@ import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
 import { buildCoachReportPremiumLayout } from "./buildCoachReportPremiumLayout";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
+import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHistoryStoreConsistency";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
@@ -30,6 +32,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly historyView: CoachReportMultiMatchHistoryViewModel;
   readonly realMatchHistoryIntegration: CoachReportRealMatchHistoryIntegrationModel;
   readonly persistentHistoryAdapter: CoachReportPersistentHistoryAdapterModel;
+  readonly historyStoreConsistency: CoachReportHistoryStoreConsistencyModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -107,6 +110,22 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  if (persistentHistoryAdapter.saveResult === undefined) {
+    throw new Error("Persistent history adapter must expose saveResult for test context.");
+  }
+  const historyStoreConsistency = buildCoachReportHistoryStoreConsistency({
+    persistentHistoryAdapter,
+    saveResult: persistentHistoryAdapter.saveResult,
+    historyStore,
+    query: {
+      teamId: currentRecord.homeTeamId,
+      maxRecords: 12,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    },
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -114,6 +133,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     multiMatchHistoryView: historyView,
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
+    historyStoreConsistency,
   });
 
   return {
@@ -125,5 +145,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     historyView,
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
+    historyStoreConsistency,
   };
 }

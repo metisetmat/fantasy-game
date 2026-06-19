@@ -55,6 +55,12 @@ export function buildCoachReportPersistentHistoryAdapter(input: {
       currentMatchRecordSaved: false,
       recordsBeforeSaveCount: input.historyStore.listAll().length,
       recordsAfterSaveCount: input.historyStore.listAll().length,
+      loadedFromDiskCount: 0,
+      writtenToDiskCount: 0,
+      dedupedRecordCount: 0,
+      replacedRecordCount: 0,
+      ignoredDuplicateCount: 0,
+      idempotentSave: false,
       queriedRecordCount: 0,
       queriedSignalCount: 0,
       controlledSampleRecordCount: 0,
@@ -101,8 +107,7 @@ export function buildCoachReportPersistentHistoryAdapter(input: {
   }
 
   try {
-    const recordsBeforeSaveCount = input.historyStore.listAll().length;
-    input.historyStore.save(input.currentRecord);
+    const saveResult = input.historyStore.save(input.currentRecord);
     const allRecords = input.historyStore.listAll();
     const queryResult = input.historyStore.query(input.query);
     const currentMatchRecordSaved = allRecords.some((record) => record.historyRecordId === input.currentRecord.historyRecordId);
@@ -126,8 +131,15 @@ export function buildCoachReportPersistentHistoryAdapter(input: {
       storageLocationVisible: storeDescription.storageLocation !== undefined,
       ...(storeDescription.storageLocation === undefined ? {} : { storageLocation: storeDescription.storageLocation }),
       currentMatchRecordSaved,
-      recordsBeforeSaveCount,
-      recordsAfterSaveCount: allRecords.length,
+      saveResult,
+      recordsBeforeSaveCount: saveResult.recordsBeforeSaveCount,
+      recordsAfterSaveCount: saveResult.recordsAfterSaveCount,
+      loadedFromDiskCount: saveResult.loadedFromDiskCount,
+      writtenToDiskCount: saveResult.writtenToDiskCount,
+      dedupedRecordCount: saveResult.dedupedRecordCount,
+      replacedRecordCount: saveResult.replacedRecordCount,
+      ignoredDuplicateCount: saveResult.ignoredDuplicateCount,
+      idempotentSave: saveResult.idempotent,
       queriedRecordCount: queryResult.recordCount,
       queriedSignalCount: queryResult.signalCount,
       controlledSampleRecordCount: sourceCounts.controlledSampleRecordCount,
@@ -172,6 +184,7 @@ export function buildCoachReportPersistentHistoryAdapter(input: {
       warnings: [
         ...input.realMatchHistoryIntegration.warnings,
         ...queryResult.warnings,
+        ...saveResult.warnings,
         ...(storeDescription.warning === undefined ? [] : [storeDescription.warning]),
       ],
     });
@@ -190,6 +203,12 @@ export function buildCoachReportPersistentHistoryAdapter(input: {
       currentMatchRecordSaved: false,
       recordsBeforeSaveCount: input.historyStore.listAll().length,
       recordsAfterSaveCount: input.historyStore.listAll().length,
+      loadedFromDiskCount: 0,
+      writtenToDiskCount: 0,
+      dedupedRecordCount: 0,
+      replacedRecordCount: 0,
+      ignoredDuplicateCount: 0,
+      idempotentSave: false,
       queriedRecordCount: 0,
       queriedSignalCount: 0,
       controlledSampleRecordCount: 0,

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5A - Persistent History Adapter & Storage Boundary. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5B - History Store Consistency & Database Adapter Contract. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -62,14 +62,16 @@ import {
   renderFullMatchWorkbenchChainReplay4ZValidation,
   renderFullMatchWorkbenchChainReplay5ADoc,
   renderFullMatchWorkbenchChainReplay5AValidation,
+  renderFullMatchWorkbenchChainReplay5BDoc,
+  renderFullMatchWorkbenchChainReplay5BValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5A - Persistent History Adapter & Storage Boundary";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5a.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5a.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5B - History Store Consistency & Database Adapter Contract";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5b.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1777,6 +1779,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5A builder saving the current record through the active store, querying read-only history, and exposing durable boundary counts to the export",
       },
       {
+        source: "src/reports/history/databaseCoachMatchHistoryAdapterContract.ts",
+        required: true,
+        reason: "Sprint 5B future database adapter contract preserving save-result semantics without implementing database writes",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistency.ts",
+        required: true,
+        reason: "Sprint 5B history-store consistency model, tags, evidence fact, and non-mutation guardrails",
+      },
+      {
+        source: "src/reports/buildCoachReportHistoryStoreConsistency.ts",
+        required: true,
+        reason: "Sprint 5B builder deriving consistency counters from CoachMatchHistorySaveResult and exposing the database contract",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -2095,6 +2112,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5a.test.ts",
         required: true,
         reason: "Sprint 5A executable scoring guard proving the persistent history adapter does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5b.test.ts",
+        required: true,
+        reason: "Sprint 5B executable scoring guard proving history-store consistency does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3413,6 +3435,56 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5A executable non-selection and non-mutation guard tests for the persistent history adapter layer",
       },
       {
+        source: "src/reports/coachMatchHistorySaveResult.test.ts",
+        required: true,
+        reason: "Sprint 5B executable save-result semantics tests for insert, replace, and ignored duplicate operations",
+      },
+      {
+        source: "src/reports/fileBackedCoachMatchHistoryStoreConsistency.test.ts",
+        required: true,
+        reason: "Sprint 5B executable file-backed consistency tests for idempotent saves and durable counters",
+      },
+      {
+        source: "src/reports/inMemoryCoachMatchHistoryStoreConsistency.test.ts",
+        required: true,
+        reason: "Sprint 5B executable in-memory consistency tests for matching save-result semantics",
+      },
+      {
+        source: "src/reports/databaseCoachMatchHistoryAdapterContract.test.ts",
+        required: true,
+        reason: "Sprint 5B executable future database adapter contract tests",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistency.test.ts",
+        required: true,
+        reason: "Sprint 5B executable history-store consistency model tests",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5B executable export renderer tests for the history-store consistency subsection and appendix",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencySourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5B executable source guard tests proving counters come from CoachMatchHistorySaveResult",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyCopy.test.ts",
+        required: true,
+        reason: "Sprint 5B executable visible-copy guard tests for consistency wording and non-mutation scope",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyPrintCss.test.ts",
+        required: true,
+        reason: "Sprint 5B executable print CSS tests for history consistency cards and page-break protection",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyGuard.test.ts",
+        required: true,
+        reason: "Sprint 5B executable non-selection and non-mutation guard tests for history-store consistency",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -3608,6 +3680,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5B")) {
+    return renderFullMatchWorkbenchChainReplay5BDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5A")) {
     return renderFullMatchWorkbenchChainReplay5ADoc(fullMatchTraceValidationModel());
   }
@@ -5788,6 +5864,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5B")) {
+    return renderFullMatchWorkbenchChainReplay5BValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5A")) {
     return renderFullMatchWorkbenchChainReplay5AValidation(fullMatchTraceValidationModel());
   }
@@ -7913,6 +7993,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5B")) {
+    return [
+      "# Sprint 5B Share Pack",
+      "",
+      "Current sprint: Sprint 5B - History Store Consistency & Database Adapter Contract",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5b.md",
+      "- validation.fullmatch-workbench-chain-replay-5b.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5b.md and validation.fullmatch-workbench-chain-replay-5b.md.",
+      "",
+      "Sprint 5B proves save-result consistency for the history store, idempotent duplicate handling, database adapter contract visibility, and unchanged scoring guardrails.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5A")) {
     return [
       "# Sprint 5A Share Pack",
@@ -20985,20 +21101,36 @@ export function validateInMemoryCoachMatchHistoryStore(): readonly string[] {
     includeProductHistory: true,
   });
 
-  assertTest(saved.historyRecordId === record.historyRecordId, "store saves records.");
+  assertTest(saved.record.historyRecordId === record.historyRecordId, "store saves records.");
+  assertTest(saved.operation === "inserted", "first save returns inserted operation.");
+  assertTest(saved.record.historyRecordId === record.historyRecordId, "save result includes cloned record.");
+  assertTest(saved.recordsBeforeSaveCount === 0 && saved.recordsAfterSaveCount === 1, "save result exposes before/after counts.");
+  assertTest(saved.loadedFromDiskCount === 0 && saved.writtenToDiskCount === 0, "in-memory save result exposes zero disk counts.");
   assertTest(all.length === 1 && all[0]?.historyRecordId === record.historyRecordId, "store lists all records.");
   assertTest(byTeam.recordCount === 1, "store queries by team.");
   assertTest(byPhase.recordCount === 1, "store queries by phase.");
   assertTest(store.query(byTeam.query).recordCount === byTeam.recordCount, "store remains deterministic.");
   const mutatedCopy = {
-    ...saved,
-    signals: saved.signals.map((signal, index) => index === 0 ? { ...signal, explanation: "changed outside" } : signal),
+    ...saved.record,
+    signals: saved.record.signals.map((signal, index) => index === 0 ? { ...signal, explanation: "changed outside" } : signal),
   };
   assertTest(mutatedCopy.signals[0]?.explanation === "changed outside", "mutated copy changes outside store.");
   assertTest(store.listAll()[0]?.signals[0]?.explanation !== "changed outside", "store does not mutate records during query.");
+  const duplicate = store.save(record);
+  assertTest(duplicate.operation === "ignored_duplicate", "same content duplicate is ignored.");
+  assertTest(duplicate.idempotent, "same content duplicate is idempotent.");
+  const replaced = store.save({
+    ...record,
+    reportVersion: `${record.reportVersion}-updated`,
+  });
+  assertTest(replaced.operation === "replaced", "same id with changed content is replaced.");
+  assertTest(replaced.replacedRecordCount === 1, "replacement count is tracked.");
 
   return [
     "store saves records",
+    "first save returns inserted operation",
+    "same content duplicate is ignored",
+    "same id with changed content is replaced",
     "store queries by team",
     "store queries by phase",
     "store lists all records",
@@ -21420,7 +21552,7 @@ if (require.main === module) {
 ## File: src/reports/fileBackedCoachMatchHistoryStore.test.ts
 
 ```ts
-import { existsSync, mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
@@ -21474,13 +21606,23 @@ export function validateFileBackedCoachMatchHistoryStore(): readonly string[] {
   });
 
   assertTest(existsSync(filePath), "file-backed store creates a file.");
-  assertTest(saved.historyRecordId === record.historyRecordId, "file-backed store saves records.");
+  assertTest(saved.record.historyRecordId === record.historyRecordId, "file-backed store saves records.");
+  assertTest(saved.operation === "inserted", "first file-backed save is inserted.");
+  assertTest(saved.recordsBeforeSaveCount === 0 && saved.recordsAfterSaveCount === 1, "file-backed save exposes before/after counts.");
+  assertTest(saved.writtenToDiskCount === 1, "insert writes deterministic records to disk.");
   assertTest(reloaded.listAll().length === 1, "file-backed store reloads records from disk.");
-  assertTest(duplicate.reportVersion.endsWith("-updated"), "duplicate historyRecordId is replaced deterministically.");
+  assertTest(reloaded.describe().durable, "store description says durable true.");
+  assertTest(duplicate.record.reportVersion.endsWith("-updated"), "duplicate historyRecordId is replaced deterministically.");
+  assertTest(duplicate.operation === "replaced", "changed duplicate returns replaced operation.");
+  assertTest(duplicate.replacedRecordCount === 1, "changed duplicate tracks replacement count.");
+  const ignoredDuplicate = reloaded.save(duplicate.record);
+  assertTest(ignoredDuplicate.operation === "ignored_duplicate", "same content duplicate is ignored.");
+  assertTest(ignoredDuplicate.idempotent, "same content duplicate is idempotent.");
+  assertTest(ignoredDuplicate.loadedFromDiskCount === 1, "reloaded store reports loaded from disk count.");
+  assertTest(ignoredDuplicate.writtenToDiskCount === 0, "ignored duplicate does not rewrite disk.");
   assertTest(byTeam.recordCount === 1, "query by team works after reload.");
   assertTest(byPhase.recordCount === 1, "query by phase works after reload.");
   assertTest(reloaded.describe().readOnlyForReports, "report queries remain read-only.");
-  assertTest(reloaded.describe().durable, "store description says durable true.");
   const firstRecord = reloaded.listAll()[0];
   const outsideMutation = firstRecord === undefined
     ? null
@@ -21491,9 +21633,34 @@ export function validateFileBackedCoachMatchHistoryStore(): readonly string[] {
   assertTest(outsideMutation !== null, "record is available after reload.");
   assertTest(reloaded.listAll()[0]?.signals[0]?.explanation !== "changed outside", "store does not mutate records during query.");
 
+  const malformedPath = join(directory, "malformed-history.json");
+  writeFileSync(malformedPath, "{ broken json", "utf8");
+  const guardedStore = createFileBackedCoachMatchHistoryStore({
+    filePath: malformedPath,
+    allowWrite: true,
+    initialRecords: [record],
+  });
+  const malformedBeforeSave = readFileSync(malformedPath, "utf8");
+  const guardedSave = guardedStore.save({
+    ...record,
+    historyRecordId: `${record.historyRecordId}-guarded`,
+    runId: "guarded-save",
+  });
+  const malformedAfterSave = readFileSync(malformedPath, "utf8");
+  assertTest(malformedAfterSave === malformedBeforeSave, "parse failure keeps existing history file untouched.");
+  assertTest(!guardedStore.describe().durable, "parse failure disables durable writes until the file is repaired.");
+  assertTest(guardedSave.writtenToDiskCount === 0, "parse failure save result reports zero durable writes.");
+  assertTest(
+    guardedStore.describe().warning?.includes("preserved without rewrite") ?? false,
+    "parse failure surfaces a read-only warning instead of silently resetting history.",
+  );
+
   return [
     "file-backed store creates a file",
     "file-backed store saves records",
+    "first file-backed save is inserted",
+    "same content duplicate is ignored",
+    "changed duplicate returns replaced operation",
     "file-backed store reloads records from disk",
     "duplicate historyRecordId is deduped or replaced deterministically",
     "query by team works after reload",
@@ -21501,6 +21668,9 @@ export function validateFileBackedCoachMatchHistoryStore(): readonly string[] {
     "report queries remain read-only",
     "store description says durable true",
     "store does not mutate records during query",
+    "parse failure keeps existing history file untouched",
+    "parse failure disables durable writes until the file is repaired",
+    "parse failure surfaces a read-only warning instead of silently resetting history",
   ];
 }
 
@@ -21571,7 +21741,9 @@ if (require.main === module) {
 ```ts
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
 import { writeLatestCoachReport } from "./generateCoachHtmlReport";
+import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 
 function assertTest(condition: boolean, message: string): asserts condition {
   if (!condition) {
@@ -21592,6 +21764,28 @@ export function validateCoachReportPersistentHistoryRenderer(): readonly string[
   assertTest(html.includes("Prochaine &eacute;tape produit") || html.includes("Prochaine etape produit"), "export must contain Prochaine etape produit.");
   assertTest(html.includes("D&eacute;tails de persistance de l&rsquo;historique") || html.includes("Details de persistance"), "export must contain persistent history appendix.");
 
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const escapedHtml = renderCoachReportExportHtml({
+    productReportHtml: context.productHtml,
+    phaseReadability: context.phaseReadability,
+    multiMatchPhaseComparison: context.comparison,
+    multiMatchHistoryView: context.historyView,
+    realMatchHistoryIntegration: context.realMatchHistoryIntegration,
+    persistentHistoryAdapter: {
+      ...context.persistentHistoryAdapter,
+      storageLocation: `C:\\tmp\\<script>alert("x")</script>.json`,
+      storageLocationVisible: true,
+    },
+  });
+  assertTest(
+    escapedHtml.includes("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;.json"),
+    "persistent history storage location is HTML-escaped.",
+  );
+  assertTest(
+    !escapedHtml.includes("<code>C:\\tmp\\<script>alert(\"x\")</script>.json</code>"),
+    "persistent history storage location does not inject raw HTML.",
+  );
+
   return [
     "reports/coach-report.export.html exists",
     "export contains Persistance de l'historique",
@@ -21600,6 +21794,8 @@ export function validateCoachReportPersistentHistoryRenderer(): readonly string[
     "export contains Ce qui reste volontairement limite",
     "export contains Prochaine etape produit",
     "export contains Details de persistance de l'historique",
+    "persistent history storage location is HTML-escaped",
+    "persistent history storage location does not inject raw HTML",
   ];
 }
 
@@ -21811,6 +22007,437 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/coachMatchHistorySaveResult.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
+import { createInMemoryCoachMatchHistoryStore } from "./history/inMemoryCoachMatchHistoryStore";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachMatchHistorySaveResult(): readonly string[] {
+  const { report, productHtml, exportHtml, historyView } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const record = buildCoachMatchHistoryRecord({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+    multiMatchHistoryView: historyView,
+    source: "product_history_store",
+    runId: "save-result",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const store = createInMemoryCoachMatchHistoryStore();
+  const inserted = store.save(record);
+  const ignored = store.save(record);
+  const replaced = store.save({ ...record, reportVersion: `${record.reportVersion}-changed` });
+
+  assertTest(inserted.operation === "inserted", "insert operation is exposed.");
+  assertTest(ignored.operation === "ignored_duplicate" && ignored.idempotent, "duplicate save is idempotent.");
+  assertTest(replaced.operation === "replaced", "changed record is replaced.");
+  assertTest(replaced.recordsAfterSaveCount === 1, "replacement keeps one active record.");
+  assertTest(inserted.loadedFromDiskCount === 0 && inserted.writtenToDiskCount === 0, "in-memory counters remain zero.");
+
+  return [
+    "insert operation is exposed",
+    "duplicate save is idempotent",
+    "changed record is replaced",
+    "replacement keeps one active record",
+    "in-memory counters remain zero",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachMatchHistorySaveResult();
+  console.log("coachMatchHistorySaveResult tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/fileBackedCoachMatchHistoryStoreConsistency.test.ts
+
+```ts
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
+import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFileBackedCoachMatchHistoryStoreConsistency(): readonly string[] {
+  const { report, productHtml, exportHtml, historyView } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const filePath = join(mkdtempSync(join(tmpdir(), "fantasy-game-history-consistency-")), "history.json");
+  const record = buildCoachMatchHistoryRecord({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+    multiMatchHistoryView: historyView,
+    source: "product_history_store",
+    runId: "file-consistency",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const store = createFileBackedCoachMatchHistoryStore({ filePath, allowWrite: true });
+  const inserted = store.save(record);
+  const duplicateBefore = readFileSync(filePath, "utf8");
+  const duplicate = store.save(record);
+  const duplicateAfter = readFileSync(filePath, "utf8");
+  const replaced = store.save({ ...record, reportVersion: `${record.reportVersion}-replacement` });
+
+  assertTest(inserted.operation === "inserted" && inserted.writtenToDiskCount === 1, "insert writes one record.");
+  assertTest(duplicate.operation === "ignored_duplicate" && duplicate.idempotent, "duplicate is ignored idempotently.");
+  assertTest(duplicateBefore === duplicateAfter, "ignored duplicate does not rewrite serialized content.");
+  assertTest(replaced.operation === "replaced" && replaced.replacedRecordCount === 1, "replacement is tracked.");
+  assertTest(store.listAll().length === 1, "dedupe keeps one current record.");
+
+  return [
+    "insert writes one record",
+    "duplicate is ignored idempotently",
+    "ignored duplicate does not rewrite serialized content",
+    "replacement is tracked",
+    "dedupe keeps one current record",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateFileBackedCoachMatchHistoryStoreConsistency();
+  console.log("fileBackedCoachMatchHistoryStoreConsistency tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/inMemoryCoachMatchHistoryStoreConsistency.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
+import { createInMemoryCoachMatchHistoryStore } from "./history/inMemoryCoachMatchHistoryStore";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateInMemoryCoachMatchHistoryStoreConsistency(): readonly string[] {
+  const { report, productHtml, exportHtml, historyView } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const record = buildCoachMatchHistoryRecord({
+    matchReport: report,
+    productReportHtml: productHtml,
+    exportReportHtml: exportHtml,
+    multiMatchHistoryView: historyView,
+    source: "product_history_store",
+    runId: "memory-consistency",
+    generatedAtIso: "2026-06-19T00:00:00.000Z",
+  });
+  const store = createInMemoryCoachMatchHistoryStore();
+  const inserted = store.save(record);
+  const duplicate = store.save(record);
+  const replaced = store.save({ ...record, reportVersion: `${record.reportVersion}-replacement` });
+
+  assertTest(inserted.operation === "inserted", "insert operation is tracked.");
+  assertTest(duplicate.operation === "ignored_duplicate" && duplicate.idempotent, "duplicate operation is idempotent.");
+  assertTest(replaced.operation === "replaced" && replaced.replacedRecordCount === 1, "replacement operation is tracked.");
+  assertTest(replaced.loadedFromDiskCount === 0 && replaced.writtenToDiskCount === 0, "in-memory consistency keeps disk counters zero.");
+  assertTest(store.listAll().length === 1, "memory store keeps one deduped record.");
+
+  return [
+    "insert operation is tracked",
+    "duplicate operation is idempotent",
+    "replacement operation is tracked",
+    "in-memory consistency keeps disk counters zero",
+    "memory store keeps one deduped record",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateInMemoryCoachMatchHistoryStoreConsistency();
+  console.log("inMemoryCoachMatchHistoryStoreConsistency tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/databaseCoachMatchHistoryAdapterContract.test.ts
+
+```ts
+import { describeFutureDatabaseCoachMatchHistoryAdapter } from "./history/databaseCoachMatchHistoryAdapterContract";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateDatabaseCoachMatchHistoryAdapterContract(): readonly string[] {
+  const contract = describeFutureDatabaseCoachMatchHistoryAdapter();
+
+  assertTest(contract.implemented === false, "database adapter is not implemented yet.");
+  assertTest(contract.migrationRequired, "database migration is required.");
+  assertTest(contract.mustPreserveSaveResultSemantics, "database adapter must preserve save-result semantics.");
+  assertTest(contract.mustSupportIdempotentSave, "database adapter must support idempotent saves.");
+  assertTest(!contract.canMutateScore && !contract.canCreateScoringEvent, "database adapter cannot mutate score or create scoring events.");
+
+  return [
+    "database adapter is not implemented yet",
+    "database migration is required",
+    "database adapter must preserve save-result semantics",
+    "database adapter must support idempotent saves",
+    "database adapter cannot mutate score or create scoring events",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateDatabaseCoachMatchHistoryAdapterContract();
+  console.log("databaseCoachMatchHistoryAdapterContract tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportHistoryStoreConsistency.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportHistoryStoreConsistency(): readonly string[] {
+  const { historyStoreConsistency } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(historyStoreConsistency.status === "available" || historyStoreConsistency.status === "partial", "history store consistency is available or partial.");
+  assertTest(historyStoreConsistency.saveOperation !== "not_available", "save operation is visible.");
+  assertTest(historyStoreConsistency.databaseContractVisible, "database contract is visible.");
+  assertTest(!historyStoreConsistency.databaseContractImplemented, "database contract is not implemented.");
+  assertTest(historyStoreConsistency.databaseMigrationRequired, "database migration requirement is visible.");
+  assertTest(historyStoreConsistency.tags.includes("coach_report_history_store_consistency"), "consistency tags are present.");
+
+  return [
+    "history store consistency is available or partial",
+    "save operation is visible",
+    "database contract is visible",
+    "database contract is not implemented",
+    "database migration requirement is visible",
+    "consistency tags are present",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportHistoryStoreConsistency();
+  console.log("coachReportHistoryStoreConsistency tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportHistoryStoreConsistencyRenderer.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportHistoryStoreConsistencyRenderer(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes("Coh&eacute;rence du stockage"), "export renders history-store consistency section.");
+  assertTest(exportHtml.includes("history-consistency-section"), "export renders consistency CSS hook.");
+  assertTest(exportHtml.includes("Database adapter contract visible"), "export renders database contract note.");
+  assertTest(exportHtml.includes("D&eacute;tails de coh&eacute;rence du stockage historique"), "export renders consistency appendix.");
+
+  return [
+    "export renders history-store consistency section",
+    "export renders consistency CSS hook",
+    "export renders database contract note",
+    "export renders consistency appendix",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportHistoryStoreConsistencyRenderer();
+  console.log("coachReportHistoryStoreConsistencyRenderer tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportHistoryStoreConsistencySourceGuard.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportHistoryStoreConsistencySourceGuard(): readonly string[] {
+  const { historyStoreConsistency, persistentHistoryAdapter } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(persistentHistoryAdapter.saveResult !== undefined, "persistent adapter exposes save result.");
+  assertTest(historyStoreConsistency.recordsBeforeSaveCount === persistentHistoryAdapter.saveResult.recordsBeforeSaveCount, "before count comes from save result.");
+  assertTest(historyStoreConsistency.recordsAfterSaveCount === persistentHistoryAdapter.saveResult.recordsAfterSaveCount, "after count comes from save result.");
+  assertTest(historyStoreConsistency.loadedFromDiskCount === persistentHistoryAdapter.saveResult.loadedFromDiskCount, "loaded count comes from save result.");
+  assertTest(historyStoreConsistency.writtenToDiskCount === persistentHistoryAdapter.saveResult.writtenToDiskCount, "written count comes from save result.");
+
+  return [
+    "persistent adapter exposes save result",
+    "before count comes from save result",
+    "after count comes from save result",
+    "loaded count comes from save result",
+    "written count comes from save result",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportHistoryStoreConsistencySourceGuard();
+  console.log("coachReportHistoryStoreConsistencySourceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportHistoryStoreConsistencyCopy.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportHistoryStoreConsistencyCopy(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes("Coh&eacute;rence du stockage"), "visible copy names storage consistency.");
+  assertTest(exportHtml.includes("aucune mutation du score"), "visible copy says score cannot mutate.");
+  assertTest(exportHtml.includes("implemented=false"), "visible copy marks database adapter unimplemented.");
+  assertTest(!exportHtml.includes("officially_confirmed"), "visible copy does not promote official confirmation.");
+
+  return [
+    "visible copy names storage consistency",
+    "visible copy says score cannot mutate",
+    "visible copy marks database adapter unimplemented",
+    "visible copy does not promote official confirmation",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportHistoryStoreConsistencyCopy();
+  console.log("coachReportHistoryStoreConsistencyCopy tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportHistoryStoreConsistencyPrintCss.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportHistoryStoreConsistencyPrintCss(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes(".history-consistency-section"), "consistency section CSS exists.");
+  assertTest(exportHtml.includes(".history-consistency-grid"), "consistency grid CSS exists.");
+  assertTest(exportHtml.includes(".history-consistency-card"), "consistency card CSS exists.");
+  assertTest(exportHtml.includes("page-break-inside: avoid"), "print CSS avoids splitting consistency cards.");
+
+  return [
+    "consistency section CSS exists",
+    "consistency grid CSS exists",
+    "consistency card CSS exists",
+    "print CSS avoids splitting consistency cards",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportHistoryStoreConsistencyPrintCss();
+  console.log("coachReportHistoryStoreConsistencyPrintCss tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportHistoryStoreConsistencyGuard.test.ts
+
+```ts
+import {
+  coachReportHistoryStoreConsistencyCannotDriveSelection,
+  coachReportHistoryStoreConsistencyCannotMutateOfficialState,
+} from "./coachReportHistoryStoreConsistency";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportHistoryStoreConsistencyGuard(): readonly string[] {
+  const { historyStoreConsistency } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(coachReportHistoryStoreConsistencyCannotDriveSelection(historyStoreConsistency), "history-store consistency cannot drive selection.");
+  assertTest(coachReportHistoryStoreConsistencyCannotMutateOfficialState(historyStoreConsistency), "history-store consistency cannot mutate official state.");
+  assertTest(historyStoreConsistency.trendProofClaimCount === 0, "trend proof claim count is 0.");
+  assertTest(historyStoreConsistency.globalProofClaimCount === 0, "global proof claim count is 0.");
+  assertTest(historyStoreConsistency.fullMatchBatchEconomyRemainsOnlyGlobalProof, "batch economy remains only global proof.");
+
+  return [
+    "history-store consistency cannot drive selection",
+    "history-store consistency cannot mutate official state",
+    "trend proof claim count is 0",
+    "global proof claim count is 0",
+    "batch economy remains only global proof",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportHistoryStoreConsistencyGuard();
+  console.log("coachReportHistoryStoreConsistencyGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -21818,6 +22445,7 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
+import { buildCoachReportHistoryStoreConsistency } from "./buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
@@ -21913,6 +22541,21 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const historyStoreConsistency = persistentHistoryAdapter.saveResult === undefined
+    ? undefined
+    : buildCoachReportHistoryStoreConsistency({
+        persistentHistoryAdapter,
+        saveResult: persistentHistoryAdapter.saveResult,
+        historyStore,
+        query: {
+          teamId: currentPersistentRecord.homeTeamId,
+          maxRecords: 12,
+          includeControlledSamples: true,
+          includeProductHistory: true,
+        },
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -21920,6 +22563,7 @@ export function writeLatestCoachReport(): void {
     multiMatchHistoryView,
     realMatchHistoryIntegration,
     persistentHistoryAdapter,
+    ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
