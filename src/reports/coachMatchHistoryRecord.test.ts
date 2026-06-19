@@ -36,8 +36,8 @@ export function validateCoachMatchHistoryRecord(): readonly string[] {
     matchReport: report,
     productReportHtml: productHtml,
     exportReportHtml: exportHtml.replace(
-      `${report.score.home} - ${report.score.away}`,
-      `${report.score.home} - ${report.score.away + 1}`,
+      /<span class="score">([\s\S]*?)<\/span>/u,
+      `<span class="score">${report.score.home} - ${report.score.away + 1}</span>`,
     ),
     multiMatchHistoryView: historyView,
     source: "simulated_match_history",

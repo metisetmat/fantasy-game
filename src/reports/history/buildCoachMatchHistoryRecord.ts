@@ -55,14 +55,30 @@ function normalizeHtmlForScoreCheck(html: string): string {
     .trim();
 }
 
-function hasOfficialScoreLabel(html: string, scoreHome: number, scoreAway: number): boolean {
-  const normalized = normalizeHtmlForScoreCheck(html);
-  const scorePatterns = [
-    `${scoreHome} - ${scoreAway}`,
-    `${scoreHome}-${scoreAway}`,
-  ];
+function extractDisplayedScoreLabel(html: string): string | null {
+  const scoreMatch = html.match(/<span class="score">([\s\S]*?)<\/span>/u);
 
-  return scorePatterns.some((pattern) => normalized.includes(pattern));
+  if (scoreMatch === null) {
+    return null;
+  }
+
+  const displayedScore = scoreMatch[1];
+
+  if (displayedScore === undefined) {
+    return null;
+  }
+
+  return normalizeHtmlForScoreCheck(displayedScore.replace(/<[^>]+>/gu, ""));
+}
+
+function hasOfficialScoreLabel(html: string, scoreHome: number, scoreAway: number): boolean {
+  const displayedScore = extractDisplayedScoreLabel(html);
+
+  if (displayedScore === null) {
+    return false;
+  }
+
+  return displayedScore === `${scoreHome} - ${scoreAway}` || displayedScore === `${scoreHome}-${scoreAway}`;
 }
 
 export function buildCoachMatchHistoryRecord(input: {
