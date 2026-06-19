@@ -55,14 +55,16 @@ import {
   renderFullMatchWorkbenchChainReplay4ZValidation,
   renderFullMatchWorkbenchChainReplay5ADoc,
   renderFullMatchWorkbenchChainReplay5AValidation,
+  renderFullMatchWorkbenchChainReplay5BDoc,
+  renderFullMatchWorkbenchChainReplay5BValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5A - Persistent History Adapter & Storage Boundary";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5a.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5a.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5B - History Store Consistency & Database Adapter Contract";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5b.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1770,6 +1772,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5A builder saving the current record through the active store, querying read-only history, and exposing durable boundary counts to the export",
       },
       {
+        source: "src/reports/history/databaseCoachMatchHistoryAdapterContract.ts",
+        required: true,
+        reason: "Sprint 5B future database adapter contract preserving save-result semantics without implementing database writes",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistency.ts",
+        required: true,
+        reason: "Sprint 5B history-store consistency model, tags, evidence fact, and non-mutation guardrails",
+      },
+      {
+        source: "src/reports/buildCoachReportHistoryStoreConsistency.ts",
+        required: true,
+        reason: "Sprint 5B builder deriving consistency counters from CoachMatchHistorySaveResult and exposing the database contract",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -2088,6 +2105,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5a.test.ts",
         required: true,
         reason: "Sprint 5A executable scoring guard proving the persistent history adapter does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5b.test.ts",
+        required: true,
+        reason: "Sprint 5B executable scoring guard proving history-store consistency does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3406,6 +3428,56 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5A executable non-selection and non-mutation guard tests for the persistent history adapter layer",
       },
       {
+        source: "src/reports/coachMatchHistorySaveResult.test.ts",
+        required: true,
+        reason: "Sprint 5B executable save-result semantics tests for insert, replace, and ignored duplicate operations",
+      },
+      {
+        source: "src/reports/fileBackedCoachMatchHistoryStoreConsistency.test.ts",
+        required: true,
+        reason: "Sprint 5B executable file-backed consistency tests for idempotent saves and durable counters",
+      },
+      {
+        source: "src/reports/inMemoryCoachMatchHistoryStoreConsistency.test.ts",
+        required: true,
+        reason: "Sprint 5B executable in-memory consistency tests for matching save-result semantics",
+      },
+      {
+        source: "src/reports/databaseCoachMatchHistoryAdapterContract.test.ts",
+        required: true,
+        reason: "Sprint 5B executable future database adapter contract tests",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistency.test.ts",
+        required: true,
+        reason: "Sprint 5B executable history-store consistency model tests",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5B executable export renderer tests for the history-store consistency subsection and appendix",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencySourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5B executable source guard tests proving counters come from CoachMatchHistorySaveResult",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyCopy.test.ts",
+        required: true,
+        reason: "Sprint 5B executable visible-copy guard tests for consistency wording and non-mutation scope",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyPrintCss.test.ts",
+        required: true,
+        reason: "Sprint 5B executable print CSS tests for history consistency cards and page-break protection",
+      },
+      {
+        source: "src/reports/coachReportHistoryStoreConsistencyGuard.test.ts",
+        required: true,
+        reason: "Sprint 5B executable non-selection and non-mutation guard tests for history-store consistency",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -3601,6 +3673,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5B")) {
+    return renderFullMatchWorkbenchChainReplay5BDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5A")) {
     return renderFullMatchWorkbenchChainReplay5ADoc(fullMatchTraceValidationModel());
   }
@@ -5781,6 +5857,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5B")) {
+    return renderFullMatchWorkbenchChainReplay5BValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5A")) {
     return renderFullMatchWorkbenchChainReplay5AValidation(fullMatchTraceValidationModel());
   }
@@ -7906,6 +7986,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5B")) {
+    return [
+      "# Sprint 5B Share Pack",
+      "",
+      "Current sprint: Sprint 5B - History Store Consistency & Database Adapter Contract",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5b.md",
+      "- validation.fullmatch-workbench-chain-replay-5b.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5b.md and validation.fullmatch-workbench-chain-replay-5b.md.",
+      "",
+      "Sprint 5B proves save-result consistency for the history store, idempotent duplicate handling, database adapter contract visibility, and unchanged scoring guardrails.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5A")) {
     return [
       "# Sprint 5A Share Pack",

@@ -103,6 +103,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW":
     case "WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE":
     case "WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER":
+    case "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -230,6 +231,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire l'historique produit local des matchs";
     case "WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER":
       return "Relire la persistance locale de l'historique produit";
+    case "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY":
+      return "Relire la cohérence du stockage historique produit";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

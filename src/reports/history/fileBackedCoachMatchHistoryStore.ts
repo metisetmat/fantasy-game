@@ -11,10 +11,12 @@ import type {
   CoachMatchHistoryRecord,
 } from "./coachMatchHistory";
 import type {
+  CoachMatchHistorySaveResult,
   CoachMatchHistoryStore,
   CoachMatchHistoryStoreDescription,
 } from "./coachMatchHistoryStore";
 import {
+  coachMatchHistoryRecordsHaveSameContent,
   cloneCoachMatchHistoryRecord,
   parseCoachMatchHistoryRecords,
   serializeCoachMatchHistoryRecords,
@@ -23,6 +25,7 @@ import {
 
 interface FileBackedStoreRuntimeState {
   allowWrite: boolean;
+  loadedFromDiskCount: number;
   parseWarning?: string;
 }
 
@@ -83,6 +86,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
   const initialRecords = input.initialRecords ?? [];
   const runtimeState: FileBackedStoreRuntimeState = {
     allowWrite: input.allowWrite,
+    loadedFromDiskCount: 0,
   };
   let records: readonly CoachMatchHistoryRecord[] = sortCoachMatchHistoryRecords(initialRecords);
 
@@ -90,6 +94,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
     try {
       const fromDisk = parseCoachMatchHistoryRecords(readFileSync(input.filePath, "utf8"));
       const merged = new Map<string, CoachMatchHistoryRecord>();
+      runtimeState.loadedFromDiskCount = fromDisk.length;
 
       for (const record of [...fromDisk, ...records]) {
         merged.set(record.historyRecordId, cloneCoachMatchHistoryRecord(record));
@@ -99,6 +104,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
     } catch (error) {
       runtimeState.parseWarning =
         `Persistent history file could not be parsed and is preserved without rewrite: ${error instanceof Error ? error.message : "unknown error"}.`;
+      runtimeState.allowWrite = false;
       records = sortCoachMatchHistoryRecords(initialRecords);
     }
   } else if (runtimeState.allowWrite) {
@@ -107,19 +113,51 @@ export function createFileBackedCoachMatchHistoryStore(input: {
 
   const description = (): CoachMatchHistoryStoreDescription => buildDescription(input.filePath, runtimeState);
 
-  const saveRecord = (record: CoachMatchHistoryRecord): CoachMatchHistoryRecord => {
+  const saveRecord = (record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult => {
     const next = cloneCoachMatchHistoryRecord(record);
-    const merged = new Map<string, CoachMatchHistoryRecord>(
-      records.map((candidate) => [candidate.historyRecordId, cloneCoachMatchHistoryRecord(candidate)]),
-    );
-    merged.set(next.historyRecordId, next);
-    records = sortCoachMatchHistoryRecords([...merged.values()]);
+    const recordsBeforeSaveCount = records.length;
+    const existingIndex = records.findIndex((candidate) => candidate.historyRecordId === next.historyRecordId);
+    let operation: CoachMatchHistorySaveResult["operation"] = "inserted";
+    let replacedRecordCount = 0;
+    let ignoredDuplicateCount = 0;
+    let writtenToDiskCount = 0;
 
-    if (runtimeState.allowWrite && runtimeState.parseWarning === undefined) {
-      writeRecords(input.filePath, records);
+    if (existingIndex >= 0) {
+      const existing = records[existingIndex];
+      if (existing !== undefined && coachMatchHistoryRecordsHaveSameContent(existing, next)) {
+        operation = "ignored_duplicate";
+        ignoredDuplicateCount = 1;
+      } else {
+        const merged = new Map<string, CoachMatchHistoryRecord>(
+          records.map((candidate) => [candidate.historyRecordId, cloneCoachMatchHistoryRecord(candidate)]),
+        );
+        merged.set(next.historyRecordId, next);
+        records = sortCoachMatchHistoryRecords([...merged.values()]);
+        operation = "replaced";
+        replacedRecordCount = 1;
+      }
+    } else {
+      records = sortCoachMatchHistoryRecords([...records, next]);
     }
 
-    return cloneCoachMatchHistoryRecord(next);
+    if (operation !== "ignored_duplicate" && runtimeState.allowWrite && runtimeState.parseWarning === undefined) {
+      writeRecords(input.filePath, records);
+      writtenToDiskCount = records.length;
+    }
+
+    return {
+      operation,
+      record: cloneCoachMatchHistoryRecord(next),
+      recordsBeforeSaveCount,
+      recordsAfterSaveCount: records.length,
+      loadedFromDiskCount: runtimeState.loadedFromDiskCount,
+      writtenToDiskCount,
+      dedupedRecordCount: existingIndex >= 0 ? 1 : 0,
+      replacedRecordCount,
+      ignoredDuplicateCount,
+      idempotent: operation === "ignored_duplicate",
+      warnings: queryWarnings(records, description()),
+    };
   };
 
   const queryRecords = (query: CoachMatchHistoryQuery): CoachMatchHistoryQueryResult => {
@@ -149,7 +187,7 @@ export function createFileBackedCoachMatchHistoryStore(input: {
 
   return {
     storeKind: "file_backed",
-    save(record: CoachMatchHistoryRecord): CoachMatchHistoryRecord {
+    save(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult {
       return saveRecord(record);
     },
     query(query: CoachMatchHistoryQuery): CoachMatchHistoryQueryResult {

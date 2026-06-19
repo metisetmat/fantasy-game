@@ -200,8 +200,13 @@ import {
 import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "../reports/buildCoachReportMultiMatchHistoryView";
+import { buildCoachReportHistoryStoreConsistency } from "../reports/buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportPersistentHistoryAdapter } from "../reports/buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "../reports/buildCoachReportRealMatchHistoryIntegration";
+import {
+  coachReportHistoryStoreConsistencyEvidenceFact,
+  coachReportHistoryStoreConsistencyLimitations,
+} from "../reports/coachReportHistoryStoreConsistency";
 import {
   coachReportPersistentHistoryAdapterEvidenceFact,
   coachReportPersistentHistoryAdapterLimitations,
@@ -3275,6 +3280,25 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           productReportHtml: coachProductReportHtml,
           exportReportHtml: baselineCoachReportExportHtml,
         });
+  const coachReportHistoryStoreConsistencyModel =
+    coachReportPersistentHistoryStore === null ||
+      coachReportPersistentHistoryAdapterModel === null ||
+      coachReportPersistentHistoryAdapterModel.saveResult === undefined ||
+      coachReportPersistentHistoryCurrentRecord === null
+      ? null
+      : buildCoachReportHistoryStoreConsistency({
+          persistentHistoryAdapter: coachReportPersistentHistoryAdapterModel,
+          saveResult: coachReportPersistentHistoryAdapterModel.saveResult,
+          historyStore: coachReportPersistentHistoryStore,
+          query: {
+            teamId: coachReportPersistentHistoryCurrentRecord.homeTeamId,
+            maxRecords: 12,
+            includeControlledSamples: true,
+            includeProductHistory: true,
+          },
+          productReportHtml: coachProductReportHtml,
+          exportReportHtml: baselineCoachReportExportHtml,
+        });
   const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
@@ -3293,7 +3317,12 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
                     realMatchHistoryIntegration: coachReportRealMatchHistoryIntegrationModel,
                     ...(coachReportPersistentHistoryAdapterModel === null
                       ? {}
-                      : { persistentHistoryAdapter: coachReportPersistentHistoryAdapterModel }),
+                      : {
+                        persistentHistoryAdapter: coachReportPersistentHistoryAdapterModel,
+                        ...(coachReportHistoryStoreConsistencyModel === null
+                          ? {}
+                          : { historyStoreConsistency: coachReportHistoryStoreConsistencyModel }),
+                      }),
                   }),
               }),
           }),
@@ -3335,6 +3364,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         ...(coachReportPersistentHistoryAdapterModel === null
           ? []
           : coachReportPersistentHistoryAdapterLimitations(coachReportPersistentHistoryAdapterModel)),
+        ...(coachReportHistoryStoreConsistencyModel === null
+          ? []
+          : coachReportHistoryStoreConsistencyLimitations(coachReportHistoryStoreConsistencyModel)),
       ],
     },
   };
@@ -3607,6 +3639,13 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
         matchInput: input,
         model: coachReportPersistentHistoryAdapterModel,
       });
+  const coachReportHistoryStoreConsistencyModelFact = coachReportHistoryStoreConsistencyModel === null
+    ? null
+    : coachReportHistoryStoreConsistencyEvidenceFact({
+        report,
+        matchInput: input,
+        model: coachReportHistoryStoreConsistencyModel,
+      });
   const experimentalMatchTraceSpineFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? matchTraceSpineModelFact
     : null;
@@ -3676,6 +3715,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   const experimentalCoachReportPersistentHistoryAdapterFact = routeSelectionMode === "workbench_chain_replay_experimental"
     ? coachReportPersistentHistoryAdapterModelFact
     : null;
+  const experimentalCoachReportHistoryStoreConsistencyFact = routeSelectionMode === "workbench_chain_replay_experimental"
+    ? coachReportHistoryStoreConsistencyModelFact
+    : null;
   const chainEvidenceFacts = [
     ...(chainFact === null ? [] : [chainFact]),
     ...(chainContextFact === null ? [] : [chainContextFact]),
@@ -3722,6 +3764,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     ...(experimentalCoachReportMultiMatchHistoryViewFact === null ? [] : [experimentalCoachReportMultiMatchHistoryViewFact]),
     ...(experimentalCoachReportRealMatchHistoryStoreFact === null ? [] : [experimentalCoachReportRealMatchHistoryStoreFact]),
     ...(experimentalCoachReportPersistentHistoryAdapterFact === null ? [] : [experimentalCoachReportPersistentHistoryAdapterFact]),
+    ...(experimentalCoachReportHistoryStoreConsistencyFact === null ? [] : [experimentalCoachReportHistoryStoreConsistencyFact]),
     ...(experimentalMatchTraceSpineFact === null ? [] : [experimentalMatchTraceSpineFact]),
     ...(experimentalMatchTraceAggregatorFact === null ? [] : [experimentalMatchTraceAggregatorFact]),
     ...(experimentalCoachReportTraceV0Fact === null ? [] : [experimentalCoachReportTraceV0Fact]),

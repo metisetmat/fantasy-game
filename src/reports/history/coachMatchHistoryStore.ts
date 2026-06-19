@@ -9,6 +9,25 @@ export type CoachMatchHistoryStoreKind =
   | "file_backed"
   | "future_database";
 
+export type CoachMatchHistorySaveOperation =
+  | "inserted"
+  | "replaced"
+  | "ignored_duplicate";
+
+export interface CoachMatchHistorySaveResult {
+  readonly operation: CoachMatchHistorySaveOperation;
+  readonly record: CoachMatchHistoryRecord;
+  readonly recordsBeforeSaveCount: number;
+  readonly recordsAfterSaveCount: number;
+  readonly loadedFromDiskCount: number;
+  readonly writtenToDiskCount: number;
+  readonly dedupedRecordCount: number;
+  readonly replacedRecordCount: number;
+  readonly ignoredDuplicateCount: number;
+  readonly idempotent: boolean;
+  readonly warnings: readonly string[];
+}
+
 export interface CoachMatchHistoryStoreDescription {
   readonly storeKind: CoachMatchHistoryStoreKind;
   readonly durable: boolean;
@@ -26,7 +45,7 @@ export interface CoachMatchHistoryStoreDescription {
 export interface CoachMatchHistoryStore {
   readonly storeKind: CoachMatchHistoryStoreKind;
 
-  save(record: CoachMatchHistoryRecord): CoachMatchHistoryRecord;
+  save(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult;
 
   query(query: CoachMatchHistoryQuery): CoachMatchHistoryQueryResult;
 

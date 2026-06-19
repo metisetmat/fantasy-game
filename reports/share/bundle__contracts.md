@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 5A - Persistent History Adapter & Storage Boundary. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5B - History Store Consistency & Database Adapter Contract. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -448,6 +448,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_COACH_REPORT_MULTI_MATCH_HISTORY_VIEW"
   | "WORKBENCH_CHAIN_COACH_REPORT_REAL_MATCH_HISTORY_STORE"
   | "WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER"
+  | "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"
