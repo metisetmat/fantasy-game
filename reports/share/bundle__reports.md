@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5D - Database Adapter SPI & Migration Dry Run. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5E - Database Adapter Implementation Spike Without Product Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -70,15 +70,17 @@ import {
   renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot,
   renderFullMatchWorkbenchChainReplay5DDoc,
   renderFullMatchWorkbenchChainReplay5DValidation,
+  renderFullMatchWorkbenchChainReplay5EDoc,
+  renderFullMatchWorkbenchChainReplay5EValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5D - Database Adapter SPI & Migration Dry Run";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5d.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5d.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5E - Database Adapter Implementation Spike Without Product Activation";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5e.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5e.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1864,6 +1866,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5D deterministic mock database dry-run adapter preserving inserted/replaced/ignored_duplicate save-result semantics",
       },
       {
+        source: "src/reports/history/databaseHistoryAdapterFeatureFlag.ts",
+        required: true,
+        reason: "Sprint 5E feature flag contract keeping the experimental database adapter disabled for product activation by default",
+      },
+      {
+        source: "src/reports/history/experimentalDatabaseCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5E deterministic experimental database adapter spike with dry-run save/query semantics and no real database IO",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1882,6 +1894,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportDatabaseMigrationPreparation.ts",
         required: true,
         reason: "Sprint 5D builder connecting persistence evidence snapshot and migration dry run to the export report",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpike.ts",
+        required: true,
+        reason: "Sprint 5E report model, tags, evidence fact, and no-product-activation guardrails for the experimental database adapter spike",
+      },
+      {
+        source: "src/reports/buildCoachReportDatabaseAdapterSpike.ts",
+        required: true,
+        reason: "Sprint 5E builder validating inserted/replaced/ignored_duplicate and query semantics without product database activation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2217,6 +2239,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5d.test.ts",
         required: true,
         reason: "Sprint 5D executable scoring guard proving database migration dry-run preparation does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5e.test.ts",
+        required: true,
+        reason: "Sprint 5E executable scoring guard proving the database adapter spike does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3640,6 +3667,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5D executable mock database adapter tests preserving inserted, replaced, and ignored_duplicate dry-run semantics",
       },
       {
+        source: "src/reports/databaseHistoryAdapterFeatureFlag.test.ts",
+        required: true,
+        reason: "Sprint 5E executable feature flag tests proving database adapter product activation is disabled by default",
+      },
+      {
+        source: "src/reports/experimentalDatabaseCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5E executable experimental database adapter tests for dry-run save/query semantics and no real database IO",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3668,6 +3705,36 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportDatabaseMigrationGuard.test.ts",
         required: true,
         reason: "Sprint 5D executable non-selection and non-mutation guard tests for database migration preparation",
+      },
+      {
+        source: "src/reports/databaseAdapterSpikeFeatureFlagGuard.test.ts",
+        required: true,
+        reason: "Sprint 5E executable feature-flag guard tests proving the spike cannot activate product database usage",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpike.test.ts",
+        required: true,
+        reason: "Sprint 5E executable report-model tests for database adapter spike scenario counts and guardrails",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5E executable renderer tests for the experimental database adapter section and appendix",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeSourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5E executable source guard tests proving the spike consumes persistence evidence and migration preparation",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeCopy.test.ts",
+        required: true,
+        reason: "Sprint 5E executable visible-copy tests proving adapter spike wording stays coach-readable and non-activating",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeGuard.test.ts",
+        required: true,
+        reason: "Sprint 5E executable non-selection and non-mutation guard tests for the experimental database adapter spike",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -3865,6 +3932,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5E")) {
+    return renderFullMatchWorkbenchChainReplay5EDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5D")) {
     return renderFullMatchWorkbenchChainReplay5DDoc(fullMatchTraceValidationModel());
   }
@@ -6061,6 +6131,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5E")) {
+    return renderFullMatchWorkbenchChainReplay5EValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5D")) {
     return renderFullMatchWorkbenchChainReplay5DValidation(fullMatchTraceValidationModel());
   }
@@ -8203,6 +8276,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5E")) {
+    return [
+      "# Sprint 5E Share Pack",
+      "",
+      "Current sprint: Sprint 5E - Database Adapter Implementation Spike Without Product Activation",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5e.md",
+      "- validation.fullmatch-workbench-chain-replay-5e.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5e.md and validation.fullmatch-workbench-chain-replay-5e.md.",
+      "",
+      "Sprint 5E proves the experimental database adapter spike without product database activation or real database IO.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5D")) {
     return [
       "# Sprint 5D Share Pack",
@@ -23276,6 +23385,110 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/databaseHistoryAdapterFeatureFlag.test.ts
+
+```ts
+import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateDatabaseHistoryAdapterFeatureFlag(): readonly string[] {
+  const defaultFlag = resolveDatabaseHistoryAdapterFeatureFlag();
+  const enabledFlag = resolveDatabaseHistoryAdapterFeatureFlag({ enabled: true });
+
+  assertTest(!defaultFlag.enabled, "database adapter feature flag is disabled by default.");
+  assertTest(!defaultFlag.productActivationAllowed, "default flag does not allow product activation.");
+  assertTest(!defaultFlag.reportCanUseAsSourceOfTruth, "default flag does not allow report source-of-truth usage.");
+  assertTest(!defaultFlag.canDriveCoachInstruction, "default flag cannot drive coach instruction.");
+  assertTest(!defaultFlag.canDriveLiveSelection, "default flag cannot drive live selection.");
+  assertTest(!defaultFlag.canDriveProductionRouteResolution, "default flag cannot drive production route resolution.");
+  assertTest(!defaultFlag.canMutateScore, "default flag cannot mutate score.");
+  assertTest(!defaultFlag.canCreateScoringEvent, "default flag cannot create scoring events.");
+  assertTest(!defaultFlag.canClaimGlobalEconomy, "default flag cannot claim global economy.");
+  assertTest(enabledFlag.enabled, "test override can expose enabled flag state.");
+  assertTest(!enabledFlag.productActivationAllowed, "enabled spike flag still does not allow product activation.");
+
+  return [
+    "feature flag disabled by default",
+    "product activation remains false",
+    "report source-of-truth usage remains false",
+    "selection, route, score, scoring-event, and economy drivers remain false",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateDatabaseHistoryAdapterFeatureFlag();
+  console.log("databaseHistoryAdapterFeatureFlag tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/experimentalDatabaseCoachMatchHistoryAdapter.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateExperimentalDatabaseCoachMatchHistoryAdapter(): readonly string[] {
+  const { currentRecord: record } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const adapter = createExperimentalDatabaseCoachMatchHistoryAdapter();
+  const description = adapter.describe();
+  const inserted = adapter.dryRunSave(record);
+  const replaced = adapter.dryRunSave({ ...record, reportVersion: `${record.reportVersion}-replacement` });
+  const ignoredDuplicate = adapter.dryRunSave({ ...record, reportVersion: `${record.reportVersion}-replacement` });
+  const teamQuery = adapter.dryRunQuery({
+    teamId: record.homeTeamId,
+    maxRecords: 5,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+  const phase = record.signals[0]?.phase;
+  const phaseQuery = adapter.dryRunQuery({
+    ...(phase === undefined ? {} : { phase }),
+    maxRecords: 5,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+
+  assertTest(adapter.adapterKind === "experimental_database", "adapter kind is experimental_database.");
+  assertTest(description.status === "implemented", "experimental adapter is implemented.");
+  assertTest(!description.productionReady, "experimental adapter is not production ready.");
+  assertTest(description.realDatabaseReadCount === 0 && description.realDatabaseWriteCount === 0, "no real database IO.");
+  assertTest(inserted.operation === "inserted", "first save inserts.");
+  assertTest(replaced.operation === "replaced", "changed save replaces.");
+  assertTest(ignoredDuplicate.operation === "ignored_duplicate", "same changed save is ignored duplicate.");
+  assertTest(teamQuery.records.some((candidate) => candidate.historyRecordId === record.historyRecordId), "query by team returns record.");
+  assertTest(phase === undefined || phaseQuery.records.some((candidate) => candidate.signals.some((signal) => signal.phase === phase)), "query by phase returns matching signal.");
+
+  return [
+    "experimental adapter implemented but not production ready",
+    "dry-run save preserves inserted, replaced, ignored_duplicate",
+    "dry-run query supports team and phase",
+    "real database IO counts remain 0",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateExperimentalDatabaseCoachMatchHistoryAdapter();
+  console.log("experimentalDatabaseCoachMatchHistoryAdapter tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/coachMatchHistoryMigrationDryRun.test.ts
 
 ```ts
@@ -23576,6 +23789,238 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/databaseAdapterSpikeFeatureFlagGuard.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateDatabaseAdapterSpikeFeatureFlagGuard(): readonly string[] {
+  const { databaseAdapterSpike } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(!databaseAdapterSpike.defaultFeatureFlagEnabled, "default feature flag remains disabled.");
+  assertTest(!databaseAdapterSpike.productActivationAllowed, "product activation is not allowed.");
+  assertTest(!databaseAdapterSpike.reportCanUseAsSourceOfTruth, "database cannot become report source of truth.");
+  assertTest(databaseAdapterSpike.activeProductHistorySource === "file_backed", "active product history source remains file_backed.");
+  assertTest(!databaseAdapterSpike.databaseUsedAsProductTruth, "database is not used as product truth.");
+
+  return [
+    "default feature flag disabled",
+    "product activation disallowed",
+    "report source-of-truth usage disallowed",
+    "active product source remains file_backed",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateDatabaseAdapterSpikeFeatureFlagGuard();
+  console.log("databaseAdapterSpikeFeatureFlagGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseAdapterSpike.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseAdapterSpike(): readonly string[] {
+  const { databaseAdapterSpike } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(databaseAdapterSpike.status === "available", "database adapter spike model is available.");
+  assertTest(databaseAdapterSpike.adapterKind === "experimental_database", "adapter kind is experimental_database.");
+  assertTest(databaseAdapterSpike.adapterImplemented, "adapter implemented is true.");
+  assertTest(!databaseAdapterSpike.adapterProductionReady, "adapter production ready is false.");
+  assertTest(databaseAdapterSpike.dryRunOnly, "spike is dry-run only.");
+  assertTest(databaseAdapterSpike.realDatabaseReadCount === 0 && databaseAdapterSpike.realDatabaseWriteCount === 0, "no real database IO.");
+  assertTest(databaseAdapterSpike.insertedScenarioPass, "inserted scenario passes.");
+  assertTest(databaseAdapterSpike.replacedScenarioPass, "replaced scenario passes.");
+  assertTest(databaseAdapterSpike.ignoredDuplicateScenarioPass, "ignored duplicate scenario passes.");
+  assertTest(databaseAdapterSpike.queryByTeamPass, "query by team passes.");
+  assertTest(databaseAdapterSpike.queryByPhasePass, "query by phase passes.");
+  assertTest(databaseAdapterSpike.deterministicOrderingPass, "deterministic ordering passes.");
+
+  return [
+    "database adapter spike available",
+    "experimental adapter implemented but not production ready",
+    "dry-run save/query scenarios pass",
+    "real database IO counts remain 0",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseAdapterSpike();
+  console.log("coachReportDatabaseAdapterSpike tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseAdapterSpikeRenderer.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseAdapterSpikeRenderer(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes("Adapter database exp&eacute;rimental"), "export contains experimental database adapter section.");
+  assertTest(exportHtml.includes("Ce que le spike valide"), "export contains what the spike validates.");
+  assertTest(exportHtml.includes("Ce qui reste d&eacute;sactiv&eacute;"), "export contains what remains disabled.");
+  assertTest(exportHtml.includes("Prochaine &eacute;tape produit"), "export contains next product step.");
+  assertTest(exportHtml.includes("D&eacute;tails adapter database exp&eacute;rimental"), "export contains experimental database adapter appendix.");
+
+  return [
+    "export contains experimental database adapter section",
+    "export contains spike validation, disabled-state, next-step, and appendix sections",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseAdapterSpikeRenderer();
+  console.log("coachReportDatabaseAdapterSpikeRenderer tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseAdapterSpikeSourceGuard.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseAdapterSpikeSourceGuard(): readonly string[] {
+  const { databaseAdapterSpike, databaseMigrationPreparation, persistenceEvidenceSnapshot } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(databaseAdapterSpike.sourceRecordCount > 0, "spike consumes persisted source records.");
+  assertTest(databaseAdapterSpike.warnings.some((warning) => warning.includes(persistenceEvidenceSnapshot.snapshotId)), "spike warning references persistence snapshot.");
+  assertTest(databaseAdapterSpike.warnings.some((warning) => warning.includes("file_backed")), "spike warning preserves file_backed source boundary.");
+  assertTest(databaseAdapterSpike.sourceRecordCount === databaseMigrationPreparation.sourceRecordCount, "spike and migration preparation use the same source record count.");
+
+  return [
+    "spike consumes source records",
+    "spike references persistence evidence snapshot",
+    "spike preserves file_backed source boundary",
+    "spike aligns source record count with migration preparation",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseAdapterSpikeSourceGuard();
+  console.log("coachReportDatabaseAdapterSpikeSourceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseAdapterSpikeCopy.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseAdapterSpikeCopy(): readonly string[] {
+  const { databaseAdapterSpike, exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(databaseAdapterSpike.visibleRecommendationWordingCount === 0, "visible recommendation wording count is 0.");
+  assertTest(databaseAdapterSpike.visibleSelectionWordingCount === 0, "visible selection wording count is 0.");
+  assertTest(databaseAdapterSpike.internalStatusLeakCount === 0, "internal status leak count is 0.");
+  assertTest(databaseAdapterSpike.mojibakeMarkerCount === 0, "mojibake marker count is 0.");
+  assertTest(exportHtml.includes("Active product history source") && exportHtml.includes("file_backed"), "export states product report remains file-backed.");
+  assertTest(exportHtml.includes("aucune base r&eacute;elle n&rsquo;est lue ou &eacute;crite"), "export states no real database IO.");
+
+  return [
+    "visible recommendation and selection wording counts are 0",
+    "internal status and mojibake counts are 0",
+    "export copy states file-backed product boundary and no real database IO",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseAdapterSpikeCopy();
+  console.log("coachReportDatabaseAdapterSpikeCopy tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseAdapterSpikeGuard.test.ts
+
+```ts
+import {
+  coachReportDatabaseAdapterSpikeCannotDriveSelection,
+  coachReportDatabaseAdapterSpikeCannotMutateOfficialState,
+} from "./coachReportDatabaseAdapterSpike";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseAdapterSpikeGuard(): readonly string[] {
+  const { databaseAdapterSpike } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(coachReportDatabaseAdapterSpikeCannotDriveSelection(databaseAdapterSpike), "database adapter spike cannot drive selection.");
+  assertTest(coachReportDatabaseAdapterSpikeCannotMutateOfficialState(databaseAdapterSpike), "database adapter spike cannot mutate official state.");
+  assertTest(databaseAdapterSpike.lineupMutationCount === 0, "lineup mutation count is 0.");
+  assertTest(databaseAdapterSpike.startersMutationCount === 0, "starters mutation count is 0.");
+  assertTest(databaseAdapterSpike.benchMutationCount === 0, "bench mutation count is 0.");
+  assertTest(databaseAdapterSpike.scoreMutationCount === 0, "score mutation count is 0.");
+  assertTest(databaseAdapterSpike.possessionMutationCount === 0, "possession mutation count is 0.");
+  assertTest(databaseAdapterSpike.productionScoringEventCreationCount === 0, "production scoring event creation count is 0.");
+
+  return [
+    "database adapter spike cannot drive selection",
+    "database adapter spike cannot mutate official state",
+    "lineup, score, possession, and scoring-event mutation counts are 0",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseAdapterSpikeGuard();
+  console.log("coachReportDatabaseAdapterSpikeGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -23589,6 +24034,7 @@ import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMul
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
+import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -23599,6 +24045,8 @@ import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRe
 import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
 import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatchHistoryMigrationDryRun";
 import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
+import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
+import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -23720,6 +24168,21 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const databaseFeatureFlag = resolveDatabaseHistoryAdapterFeatureFlag();
+  const experimentalDatabaseAdapter = createExperimentalDatabaseCoachMatchHistoryAdapter({
+    featureFlag: databaseFeatureFlag,
+  });
+  const databaseAdapterSpike = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined
+    ? undefined
+    : buildCoachReportDatabaseAdapterSpike({
+        persistenceEvidenceSnapshot,
+        migrationPreparation: databaseMigrationPreparation,
+        sourceRecords: historyStore.listAll(),
+        experimentalAdapter: experimentalDatabaseAdapter,
+        featureFlag: databaseFeatureFlag,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -23730,6 +24193,7 @@ export function writeLatestCoachReport(): void {
     ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
     ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
+    ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

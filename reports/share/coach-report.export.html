@@ -836,6 +836,66 @@
       background: #fff8ed;
     }
 
+    .database-adapter-spike-section {
+      display: grid;
+      gap: 14px;
+      border-top: 1px solid var(--report-line);
+      padding-top: 16px;
+    }
+
+    .database-adapter-spike-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .database-adapter-spike-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      background: var(--report-soft);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .database-adapter-spike-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .database-adapter-spike-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .database-adapter-spike-kpi strong,
+    .database-adapter-spike-boundary,
+    .database-adapter-spike-guard,
+    .database-adapter-spike-feature-flag {
+      color: var(--report-dark);
+      font-weight: 700;
+    }
+
+    .database-adapter-spike-boundary,
+    .database-adapter-spike-guard,
+    .database-adapter-spike-warning,
+    .database-adapter-spike-feature-flag {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .database-adapter-spike-warning {
+      border-left-color: var(--report-warning);
+      background: #fff8ed;
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -2156,6 +2216,63 @@
       <p class="database-migration-warning">Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active.</p>
     </section>
 
+    <section class="database-adapter-spike-section" aria-label="Adapter database exp&eacute;rimental">
+      <div>
+        <h3>Adapter database exp&eacute;rimental</h3>
+        <p>Cet adapter database est exp&eacute;rimental. Il valide une forme technique future, mais le rapport ne l&rsquo;utilise pas comme source de v&eacute;rit&eacute; produit et aucune base r&eacute;elle n&rsquo;est lue ou &eacute;crite.</p>
+      </div>
+      <p class="database-adapter-spike-feature-flag">Feature flag disabled; default enabled false; product activation allowed false.</p>
+      <div class="database-adapter-spike-grid">
+        <article class="database-adapter-spike-card">
+          <h4>Adapter</h4>
+          <div class="database-adapter-spike-kpi">
+            <div><span>Adapter kind</span><strong>experimental_database</strong></div>
+            <div><span>Adapter implemented</span><strong>true</strong></div>
+            <div><span>Production ready</span><strong>false</strong></div>
+            <div><span>Feature flag enabled</span><strong>false</strong></div>
+            <div><span>Product activation allowed</span><strong>false</strong></div>
+            <div><span>Report can use as source of truth</span><strong>false</strong></div>
+            <div><span>Real DB write count</span><strong>0</strong></div>
+            <div><span>Real DB read count</span><strong>0</strong></div>
+          </div>
+        </article>
+        <article class="database-adapter-spike-card">
+          <h4>Source active</h4>
+          <div class="database-adapter-spike-kpi">
+            <div><span>Active product history source</span><strong>file_backed</strong></div>
+            <div><span>Database used as product truth</span><strong>false</strong></div>
+            <div><span>Dry run only</span><strong>true</strong></div>
+            <div><span>Source record count</span><strong>6</strong></div>
+            <div><span>Experimental adapter record count</span><strong>1</strong></div>
+            <div><span>Dry run save count</span><strong>3</strong></div>
+            <div><span>Dry run query count</span><strong>2</strong></div>
+          </div>
+        </article>
+        <article class="database-adapter-spike-card">
+          <h4>Sc&eacute;narios valid&eacute;s</h4>
+          <div class="database-adapter-spike-kpi">
+            <div><span>Inserted scenario pass</span><strong>true</strong></div>
+            <div><span>Replaced scenario pass</span><strong>true</strong></div>
+            <div><span>Ignored duplicate scenario pass</span><strong>true</strong></div>
+            <div><span>Query by team pass</span><strong>true</strong></div>
+            <div><span>Query by phase pass</span><strong>true</strong></div>
+            <div><span>Deterministic ordering pass</span><strong>true</strong></div>
+          </div>
+        </article>
+        <article class="database-adapter-spike-card">
+          <h4>Ce que le spike valide</h4>
+          <p>Ce que le spike valide : l&rsquo;adapter exp&eacute;rimental reproduit les sc&eacute;narios inserted, replaced et ignored_duplicate sans d&eacute;pendance &agrave; une base r&eacute;elle.</p>
+          <h4>Ce qui reste d&eacute;sactiv&eacute;</h4>
+          <p>Ce qui reste d&eacute;sactiv&eacute; : la DB ne devient pas la source de v&eacute;rit&eacute; du rapport et ne pilote aucune d&eacute;cision coach.</p>
+          <h4>Prochaine &eacute;tape produit</h4>
+          <p>Prochaine &eacute;tape produit : choisir une vraie technologie de stockage puis brancher l&rsquo;adapter derri&egrave;re la m&ecirc;me boundary.</p>
+        </article>
+      </div>
+      <p class="database-adapter-spike-boundary">Boundary 5E : file_backed reste la source produit active ; l&rsquo;adapter experimental_database reste un spike technique non appliqu&eacute;.</p>
+      <p class="database-adapter-spike-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
+      <p class="database-adapter-spike-warning">Experimental database adapter exists behind a disabled-by-default feature flag. Product history source remains file_backed; database adapter is not product truth. Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active. Persistence snapshot consumed: 5c-replaced-6-6-6-40.</p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -3090,6 +3207,49 @@
         <li>possession mutation count: 0</li>
         <li>production scoring event creation count: 0</li>
         <li>global economy claim count: 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails adapter database exp&eacute;rimental</summary>
+      <ul>
+        <li>spike status: available</li>
+        <li>adapter kind: experimental_database</li>
+        <li>adapter implemented true</li>
+        <li>adapter production ready false</li>
+        <li>feature flag enabled: false</li>
+        <li>default feature flag enabled false</li>
+        <li>product activation allowed false</li>
+        <li>report can use as source of truth false</li>
+        <li>real DB write count: 0</li>
+        <li>real DB read count: 0</li>
+        <li>dry run only true</li>
+        <li>active product history source file_backed</li>
+        <li>database used as product truth false</li>
+        <li>save-result semantics preserved true</li>
+        <li>inserted scenario pass true</li>
+        <li>replaced scenario pass true</li>
+        <li>ignored duplicate scenario pass true</li>
+        <li>query by team pass true</li>
+        <li>query by phase pass true</li>
+        <li>deterministic ordering pass true</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>starters mutation count 0</li>
+        <li>bench mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
       </ul>
     </details>
     <details class="appendix">

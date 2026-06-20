@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 5D - Database Adapter SPI & Migration Dry Run. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5E - Database Adapter Implementation Spike Without Product Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -450,6 +450,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_COACH_REPORT_PERSISTENT_HISTORY_ADAPTER"
   | "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY"
   | "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_MIGRATION_PREPARATION"
+  | "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"

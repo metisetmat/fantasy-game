@@ -63,15 +63,17 @@ import {
   renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot,
   renderFullMatchWorkbenchChainReplay5DDoc,
   renderFullMatchWorkbenchChainReplay5DValidation,
+  renderFullMatchWorkbenchChainReplay5EDoc,
+  renderFullMatchWorkbenchChainReplay5EValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5D - Database Adapter SPI & Migration Dry Run";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5d.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5d.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5E - Database Adapter Implementation Spike Without Product Activation";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5e.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5e.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1857,6 +1859,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5D deterministic mock database dry-run adapter preserving inserted/replaced/ignored_duplicate save-result semantics",
       },
       {
+        source: "src/reports/history/databaseHistoryAdapterFeatureFlag.ts",
+        required: true,
+        reason: "Sprint 5E feature flag contract keeping the experimental database adapter disabled for product activation by default",
+      },
+      {
+        source: "src/reports/history/experimentalDatabaseCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5E deterministic experimental database adapter spike with dry-run save/query semantics and no real database IO",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1875,6 +1887,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportDatabaseMigrationPreparation.ts",
         required: true,
         reason: "Sprint 5D builder connecting persistence evidence snapshot and migration dry run to the export report",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpike.ts",
+        required: true,
+        reason: "Sprint 5E report model, tags, evidence fact, and no-product-activation guardrails for the experimental database adapter spike",
+      },
+      {
+        source: "src/reports/buildCoachReportDatabaseAdapterSpike.ts",
+        required: true,
+        reason: "Sprint 5E builder validating inserted/replaced/ignored_duplicate and query semantics without product database activation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2210,6 +2232,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5d.test.ts",
         required: true,
         reason: "Sprint 5D executable scoring guard proving database migration dry-run preparation does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5e.test.ts",
+        required: true,
+        reason: "Sprint 5E executable scoring guard proving the database adapter spike does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3633,6 +3660,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5D executable mock database adapter tests preserving inserted, replaced, and ignored_duplicate dry-run semantics",
       },
       {
+        source: "src/reports/databaseHistoryAdapterFeatureFlag.test.ts",
+        required: true,
+        reason: "Sprint 5E executable feature flag tests proving database adapter product activation is disabled by default",
+      },
+      {
+        source: "src/reports/experimentalDatabaseCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5E executable experimental database adapter tests for dry-run save/query semantics and no real database IO",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3661,6 +3698,36 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportDatabaseMigrationGuard.test.ts",
         required: true,
         reason: "Sprint 5D executable non-selection and non-mutation guard tests for database migration preparation",
+      },
+      {
+        source: "src/reports/databaseAdapterSpikeFeatureFlagGuard.test.ts",
+        required: true,
+        reason: "Sprint 5E executable feature-flag guard tests proving the spike cannot activate product database usage",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpike.test.ts",
+        required: true,
+        reason: "Sprint 5E executable report-model tests for database adapter spike scenario counts and guardrails",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5E executable renderer tests for the experimental database adapter section and appendix",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeSourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5E executable source guard tests proving the spike consumes persistence evidence and migration preparation",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeCopy.test.ts",
+        required: true,
+        reason: "Sprint 5E executable visible-copy tests proving adapter spike wording stays coach-readable and non-activating",
+      },
+      {
+        source: "src/reports/coachReportDatabaseAdapterSpikeGuard.test.ts",
+        required: true,
+        reason: "Sprint 5E executable non-selection and non-mutation guard tests for the experimental database adapter spike",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -3858,6 +3925,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5E")) {
+    return renderFullMatchWorkbenchChainReplay5EDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5D")) {
     return renderFullMatchWorkbenchChainReplay5DDoc(fullMatchTraceValidationModel());
   }
@@ -6054,6 +6124,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5E")) {
+    return renderFullMatchWorkbenchChainReplay5EValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5D")) {
     return renderFullMatchWorkbenchChainReplay5DValidation(fullMatchTraceValidationModel());
   }
@@ -8196,6 +8269,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5E")) {
+    return [
+      "# Sprint 5E Share Pack",
+      "",
+      "Current sprint: Sprint 5E - Database Adapter Implementation Spike Without Product Activation",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5e.md",
+      "- validation.fullmatch-workbench-chain-replay-5e.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5e.md and validation.fullmatch-workbench-chain-replay-5e.md.",
+      "",
+      "Sprint 5E proves the experimental database adapter spike without product database activation or real database IO.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5D")) {
     return [
       "# Sprint 5D Share Pack",
