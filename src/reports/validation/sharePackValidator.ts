@@ -80,6 +80,27 @@ function containsAny(value: string, fragments: readonly string[]): boolean {
   return fragments.some((fragment) => value.includes(fragment));
 }
 
+function regexEscape(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+function extractLabelledValue(artifact: string, label: string): string | null {
+  const match = new RegExp(`${regexEscape(label)}:\\s*([^<\\r\\n]+)`, "u").exec(artifact);
+  const value = match?.[1];
+  return value === undefined ? null : value.trim();
+}
+
+function labelledValuesAligned(label: string, artifacts: readonly string[]): boolean {
+  const values = artifacts.map((artifact) => extractLabelledValue(artifact, label));
+  return values.every((value) => value !== null) && new Set(values).size === 1;
+}
+
+function labelledAlignmentDetail(label: string, artifacts: readonly string[]): string {
+  return artifacts
+    .map((artifact, index) => `artifact${index + 1}=${extractLabelledValue(artifact, label) ?? "missing"}`)
+    .join(", ");
+}
+
 function countAny(value: string, fragments: readonly string[]): number {
   return fragments.reduce((total, fragment) => total + (value.includes(fragment) ? 1 : 0), 0);
 }
@@ -278,6 +299,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay5AValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5a.md"));
   const fullMatchWorkbenchChainReplay5B = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5b.md"));
   const fullMatchWorkbenchChainReplay5BValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5b.md"));
+  const fullMatchWorkbenchChainReplay5C = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5c.md"));
+  const fullMatchWorkbenchChainReplay5CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5c.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2727,6 +2750,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-5a.md",
     ...sprint5AForbiddenLeftovers,
   ];
+  const sprint5CExpectedFiles = sprint5BExpectedFiles.map((file) =>
+    file === "fullmatch-workbench-chain-replay-5b.md"
+      ? "fullmatch-workbench-chain-replay-5c.md"
+      : file === "validation.fullmatch-workbench-chain-replay-5b.md"
+        ? "validation.fullmatch-workbench-chain-replay-5c.md"
+        : file
+  );
+  const sprint5CForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-5b.md",
+    "validation.fullmatch-workbench-chain-replay-5b.md",
+    ...sprint5BForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3401,6 +3436,58 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("50-match economy remains global reference", fullMatchWorkbenchChainReplay5B.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay5BValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay5BValidation.includes("CONFIRM_HISTORY_STORE_SAVE_RESULT_CONTRACT") && fullMatchWorkbenchChainReplay5BValidation.includes("PREPARE_DATABASE_ADAPTER_IMPLEMENTATION"), "5B recommendations visible"),
+  ];
+  const sprint5CAlignmentArtifacts = [
+    fullMatchWorkbenchChainReplay5C,
+    fullMatchWorkbenchChainReplay5CValidation,
+    coachExportHtml,
+  ];
+  const sprint5CChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("manifest exists", manifest.length > 0, manifestPath),
+    check("README exists", readme.length > 0, readmePath),
+    check("detailed manifest exists", detailedManifest.length > 0, detailedManifestPath),
+    check("validation.share-pack.md copied", sourceExists("validation.share-pack.md") && requiredCopied("validation.share-pack.md"), "validation.share-pack.md"),
+    check("all expected files are copied", sprint5CExpectedFiles.every((file) => requiredCopied(file)), sprint5CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint5CExpectedFiles.every((file) => manifest.includes(file)), sprint5CExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("no stale files remain in reports/share", staleFiles.length === 0, staleFiles.join(", ") || "none"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 5C", activeConfig.sprintName === "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint5CExpectedFiles.every((file) => requiredCopied(file)), sprint5CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint5CForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint5CForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 5C oriented", readme.includes("# Sprint 5C Share Pack") && readme.includes("fullmatch-workbench-chain-replay-5c.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("5C report included", fullMatchWorkbenchChainReplay5C.includes("# FullMatch Workbench Chain Replay 5C") && fullMatchWorkbenchChainReplay5C.includes("Persistence Evidence Alignment Summary"), "5C doc included"),
+    check("5C validation is PASS", fullMatchWorkbenchChainReplay5CValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay5CValidation.includes("markdown save operation matches snapshot"), "5C validation current"),
+    check("product report HTML copied", coachProductHtml.includes("Rapport coach") && coachProductHtml.includes("Joueurs"), "product HTML visible"),
+    check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
+    check("persistence snapshot section is present", coachExportHtml.includes("Coh&eacute;rence du stockage") && coachExportHtml.includes("history-consistency-snapshot"), "snapshot section visible"),
+    check("single snapshot guard is visible", coachExportHtml.includes("instantan&eacute; unique de sauvegarde") && coachExportHtml.includes("rapport, la validation et l&rsquo;export doivent correspondre exactement"), "single snapshot guard visible"),
+    check("export save operation matches 5C report", labelledValuesAligned("save operation", sprint5CAlignmentArtifacts), labelledAlignmentDetail("save operation", sprint5CAlignmentArtifacts)),
+    check("export before/after counters match 5C report", labelledValuesAligned("records before save count", sprint5CAlignmentArtifacts) && labelledValuesAligned("records after save count", sprint5CAlignmentArtifacts), `${labelledAlignmentDetail("records before save count", sprint5CAlignmentArtifacts)}; ${labelledAlignmentDetail("records after save count", sprint5CAlignmentArtifacts)}`),
+    check("export disk counters match 5C report", labelledValuesAligned("loaded from disk count", sprint5CAlignmentArtifacts) && labelledValuesAligned("written to disk count", sprint5CAlignmentArtifacts), `${labelledAlignmentDetail("loaded from disk count", sprint5CAlignmentArtifacts)}; ${labelledAlignmentDetail("written to disk count", sprint5CAlignmentArtifacts)}`),
+    check("export query counters match 5C report", labelledValuesAligned("queried record count", sprint5CAlignmentArtifacts) && labelledValuesAligned("queried signal count", sprint5CAlignmentArtifacts), `${labelledAlignmentDetail("queried record count", sprint5CAlignmentArtifacts)}; ${labelledAlignmentDetail("queried signal count", sprint5CAlignmentArtifacts)}`),
+    check("artifact mismatch count is 0", fullMatchWorkbenchChainReplay5CValidation.includes("- artifact mismatch count: 0"), "mismatch 0"),
+    check("scenario mixing false", fullMatchWorkbenchChainReplay5CValidation.includes("- scenario mixing detected: false"), "scenario mixing false"),
+    check("renderer recalculation false", fullMatchWorkbenchChainReplay5CValidation.includes("- renderer recalculation detected: false"), "renderer recalculation false"),
+    check("bundle includes persistence evidence source files", bundleReports.includes("src/reports/coachReportPersistenceEvidenceSnapshot.ts") && bundleReports.includes("src/reports/buildCoachReportPersistenceEvidenceSnapshot.ts") && bundleReports.includes("src/reports/validation/persistenceEvidenceArtifactAlignment.ts"), "5C source bundled"),
+    check("bundle includes persistence evidence tests", bundleReports.includes("persistenceEvidenceSnapshot.test.ts") && bundleReports.includes("persistenceEvidenceArtifactAlignment.test.ts") && bundleReports.includes("persistenceEvidenceGuard.test.ts"), "5C tests bundled"),
+    check("simulation bundle includes scoring guard 5C", bundleSimulation.includes("scoringGuard.5c.test.ts"), "5C scoring guard bundled"),
+    check("main export hides internal status names", !containsAny(coachExportMainHtml, ["officially_confirmed", "trace_supported", "sandbox_only"]), "internal statuses hidden"),
+    check("main export avoids recommendation wording", !containsAny(coachExportMainHtml, ["meilleur choix", "composition recommand", "selection automatique", "preuve globale", "certitude"]), "recommendation wording count 0"),
+    check("main export avoids selection wording", !containsAny(coachExportMainHtml, ["a selectionner", "player selected"]), "selection wording count 0"),
+    check("visible French copy is clean", !containsAny(coachExportHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay5CValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay5CValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay5CValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay5C.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay5CValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay5CValidation.includes("CONFIRM_PERSISTENCE_EVIDENCE_ALIGNMENT") && fullMatchWorkbenchChainReplay5CValidation.includes("CONFIRM_NO_SCENARIO_MIXING"), "5C recommendations visible"),
   ];
   const sprint4YChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -6611,6 +6698,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency")
+      ? sprint5CChecks
     : activeConfig.sprintName.includes("Sprint 5B - History Store Consistency & Database Adapter Contract")
       ? sprint5BChecks
     : activeConfig.sprintName.includes("Sprint 5A - Persistent History Adapter & Storage Boundary")

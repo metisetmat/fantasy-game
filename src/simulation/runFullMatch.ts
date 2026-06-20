@@ -201,6 +201,7 @@ import { buildCoachReportPhaseVisualReadability } from "../reports/buildCoachRep
 import { buildCoachReportMultiMatchPhaseComparison } from "../reports/buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportHistoryStoreConsistency } from "../reports/buildCoachReportHistoryStoreConsistency";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportPersistentHistoryAdapter } from "../reports/buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "../reports/buildCoachReportRealMatchHistoryIntegration";
 import {
@@ -3299,6 +3300,19 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           productReportHtml: coachProductReportHtml,
           exportReportHtml: baselineCoachReportExportHtml,
         });
+  const coachReportPersistenceEvidenceSnapshotModel =
+    coachReportHistoryStoreConsistencyModel === null ||
+      coachReportPersistentHistoryAdapterModel === null ||
+      coachReportPersistentHistoryAdapterModel.saveResult === undefined
+      ? null
+      : buildCoachReportPersistenceEvidenceSnapshot({
+          consistency: coachReportHistoryStoreConsistencyModel,
+          saveResult: coachReportPersistentHistoryAdapterModel.saveResult,
+          queriedRecordCount: coachReportHistoryStoreConsistencyModel.queriedRecordCount,
+          queriedSignalCount: coachReportHistoryStoreConsistencyModel.queriedSignalCount,
+          productReportHtml: coachProductReportHtml,
+          exportReportHtml: baselineCoachReportExportHtml,
+        });
   const coachReportExportHtml = coachReportExportSnapshotModel.exportHtmlGenerated
     ? renderCoachReportExportHtml({
         productReportHtml: coachProductReportHtml,
@@ -3322,6 +3336,9 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
                         ...(coachReportHistoryStoreConsistencyModel === null
                           ? {}
                           : { historyStoreConsistency: coachReportHistoryStoreConsistencyModel }),
+                        ...(coachReportPersistenceEvidenceSnapshotModel === null
+                          ? {}
+                          : { persistenceEvidenceSnapshot: coachReportPersistenceEvidenceSnapshotModel }),
                       }),
                   }),
               }),

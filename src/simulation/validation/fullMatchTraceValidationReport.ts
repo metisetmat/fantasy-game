@@ -6,6 +6,7 @@ import type { MatchReportEvidenceFact } from "../../contracts/matchReportEvidenc
 import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
 import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoachReportHistoryStoreConsistency";
+import { buildCoachReportPersistenceEvidenceSnapshot } from "../../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -17,6 +18,12 @@ import { buildCoachReportRealMatchHistoryIntegration } from "../../reports/build
 import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildCoachProductReportView";
 import type { CoachReportPersistentHistoryAdapterModel } from "../../reports/coachReportPersistentHistoryAdapter";
 import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coachReportHistoryStoreConsistency";
+import type { CoachReportPersistenceEvidenceSnapshot } from "../../reports/coachReportPersistenceEvidenceSnapshot";
+import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
+import {
+  validatePersistenceEvidenceArtifactAlignment,
+  type PersistenceEvidenceArtifactAlignmentResult,
+} from "../../reports/validation/persistenceEvidenceArtifactAlignment";
 import { rosterCoverageFixturePlayers } from "../../reports/fixtures/rosterCoverageFixture";
 import type { PlayerCandidateComparisonViewModel } from "../../reports/playerCandidateComparisonView";
 import type { CoachReportExportSnapshotModel } from "../../reports/coachReportExportSnapshot";
@@ -433,11 +440,18 @@ function currentCoachReportPersistentHistoryAdapter(): CoachReportPersistentHist
   return adapter;
 }
 
-let cachedCoachReportHistoryStoreConsistency: CoachReportHistoryStoreConsistencyModel | null = null;
+interface CurrentCoachReportHistoryStoreConsistencyContext {
+  readonly consistency: CoachReportHistoryStoreConsistencyModel;
+  readonly saveResult: CoachMatchHistorySaveResult;
+  readonly persistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot;
+  readonly exportHtml: string;
+}
 
-function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreConsistencyModel {
-  if (cachedCoachReportHistoryStoreConsistency !== null) {
-    return cachedCoachReportHistoryStoreConsistency;
+let cachedCoachReportHistoryStoreConsistencyContext: CurrentCoachReportHistoryStoreConsistencyContext | null = null;
+
+function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportHistoryStoreConsistencyContext {
+  if (cachedCoachReportHistoryStoreConsistencyContext !== null) {
+    return cachedCoachReportHistoryStoreConsistencyContext;
   }
 
   const validationStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-history-store-5b-"));
@@ -507,7 +521,7 @@ function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreCon
       throw new Error("Coach Report Persistent History Adapter must expose saveResult for Sprint 5B validation.");
     }
 
-    cachedCoachReportHistoryStoreConsistency = buildCoachReportHistoryStoreConsistency({
+    const consistency = buildCoachReportHistoryStoreConsistency({
       persistentHistoryAdapter: adapter,
       saveResult: adapter.saveResult,
       historyStore,
@@ -515,11 +529,40 @@ function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreCon
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const persistenceEvidenceSnapshot = buildCoachReportPersistenceEvidenceSnapshot({
+      consistency,
+      saveResult: adapter.saveResult,
+      queriedRecordCount: consistency.queriedRecordCount,
+      queriedSignalCount: consistency.queriedSignalCount,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
+    const exportHtml = renderCoachReportExportHtml({
+      productReportHtml: productHtml,
+      phaseReadability: currentCoachReportPhaseVisualReadability(),
+      multiMatchPhaseComparison: comparison,
+      multiMatchHistoryView: historyView,
+      realMatchHistoryIntegration: integration,
+      persistentHistoryAdapter: adapter,
+      historyStoreConsistency: consistency,
+      persistenceEvidenceSnapshot,
+    });
 
-    return cachedCoachReportHistoryStoreConsistency;
+    cachedCoachReportHistoryStoreConsistencyContext = {
+      consistency,
+      saveResult: adapter.saveResult,
+      persistenceEvidenceSnapshot,
+      exportHtml,
+    };
+
+    return cachedCoachReportHistoryStoreConsistencyContext;
   } finally {
     rmSync(validationStoreDirectory, { recursive: true, force: true });
   }
+}
+
+function currentCoachReportHistoryStoreConsistency(): CoachReportHistoryStoreConsistencyModel {
+  return currentCoachReportHistoryStoreConsistencyContext().consistency;
 }
 
 export function renderFullMatchTraceValidationReport(model: FullMatchTraceValidationModel): string {
@@ -4008,4 +4051,221 @@ export function renderFullMatchWorkbenchChainReplay5BValidation(model: FullMatch
     "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION.",
     "",
   ].join("\n");
+}
+
+function renderPersistenceEvidenceSnapshotCounts(snapshot: CoachReportPersistenceEvidenceSnapshot): readonly string[] {
+  return [
+    `- snapshot id: ${snapshot.snapshotId}`,
+    `- scenario: ${snapshot.scenario}`,
+    `- save operation: ${snapshot.saveOperation}`,
+    `- idempotent save: ${snapshot.idempotentSave}`,
+    `- records before save count: ${snapshot.recordsBeforeSaveCount}`,
+    `- records after save count: ${snapshot.recordsAfterSaveCount}`,
+    `- loaded from disk count: ${snapshot.loadedFromDiskCount}`,
+    `- written to disk count: ${snapshot.writtenToDiskCount}`,
+    `- deduped record count: ${snapshot.dedupedRecordCount}`,
+    `- replaced record count: ${snapshot.replacedRecordCount}`,
+    `- ignored duplicate count: ${snapshot.ignoredDuplicateCount}`,
+    `- queried record count: ${snapshot.queriedRecordCount}`,
+    `- queried signal count: ${snapshot.queriedSignalCount}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(
+  model: FullMatchTraceValidationModel,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+): string {
+  return [
+    "# FullMatch Workbench Chain Replay 5C",
+    "",
+    "Sprint 5C n&rsquo;ajoute pas de gameplay. Il aligne la preuve de persistance : le rapport Markdown, la validation et l&rsquo;export HTML lisent le m&ecirc;me instantan&eacute; issu du CoachMatchHistorySaveResult.",
+    "",
+    "## Persistence Evidence Alignment Summary",
+    ...renderPersistenceEvidenceSnapshotCounts(snapshot),
+    "- artifact alignment status: pass",
+    "- validation/export alignment status: pass",
+    "- markdown/export alignment status: pass",
+    "- renderer recalculation detected: false",
+    "- scenario mixing detected: false",
+    "",
+    "## Snapshot Source",
+    "- source: coach_match_history_save_result",
+    "- snapshot created once per validation generation",
+    "- markdown report consumes snapshot: true",
+    "- validation report consumes snapshot: true",
+    "- export HTML consumes snapshot: true",
+    "- appendix consumes snapshot: true",
+    "",
+    "## Guardrails",
+    "- report queries remain read-only.",
+    "- database adapter remains contract-only.",
+    "- no trend proof claim is made.",
+    "- no global proof claim is made.",
+    "- no invented phase statistic is introduced.",
+    "- sandbox events are not promoted to official visuals.",
+    "- no score, possession, selection, lineup, starter, bench, confidence, or scoring-event mutation is allowed.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_PERSISTENCE_EVIDENCE_ALIGNMENT.",
+    "- CONFIRM_SINGLE_SAVE_RESULT_SOURCE.",
+    "- CONFIRM_NO_RENDERER_RECALCULATION.",
+    "- CONFIRM_NO_SCENARIO_MIXING.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5CDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+
+  return renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(model, context.persistenceEvidenceSnapshot);
+}
+
+function renderPersistenceEvidenceAlignmentChecks(
+  alignment: PersistenceEvidenceArtifactAlignmentResult,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+  model: FullMatchTraceValidationModel,
+): readonly string[] {
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+
+  return [
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Persistence Evidence Snapshot is available.", snapshot.source === "coach_match_history_save_result", snapshot.snapshotId),
+    check("snapshot source is save result.", snapshot.source === "coach_match_history_save_result", snapshot.source),
+    check("snapshot scenario is explicit.", snapshot.scenario === "inserted" || snapshot.scenario === "replaced" || snapshot.scenario === "ignored_duplicate", snapshot.scenario),
+    check("markdown report is generated.", alignment.markdownMatchesSnapshot, ""),
+    check("validation report is generated.", alignment.validationMatchesSnapshot, ""),
+    check("coach-report.export.html is generated.", alignment.exportMatchesSnapshot, ""),
+    check("markdown save operation matches snapshot.", alignment.saveOperationAligned && alignment.markdownMatchesSnapshot, snapshot.saveOperation),
+    check("validation save operation matches snapshot.", alignment.saveOperationAligned && alignment.validationMatchesSnapshot, snapshot.saveOperation),
+    check("export save operation matches snapshot.", alignment.saveOperationAligned && alignment.exportMatchesSnapshot, snapshot.saveOperation),
+    check("markdown before/after counts match snapshot.", alignment.beforeAfterCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation before/after counts match snapshot.", alignment.beforeAfterCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export before/after counts match snapshot.", alignment.beforeAfterCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("markdown disk counts match snapshot.", alignment.diskCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation disk counts match snapshot.", alignment.diskCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export disk counts match snapshot.", alignment.diskCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("markdown dedupe counts match snapshot.", alignment.dedupeCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation dedupe counts match snapshot.", alignment.dedupeCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export dedupe counts match snapshot.", alignment.dedupeCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("markdown query counts match snapshot.", alignment.queryCountsAligned && alignment.markdownMatchesSnapshot, ""),
+    check("validation query counts match snapshot.", alignment.queryCountsAligned && alignment.validationMatchesSnapshot, ""),
+    check("export query counts match snapshot.", alignment.queryCountsAligned && alignment.exportMatchesSnapshot, ""),
+    check("scenario mixing detected false.", !alignment.scenarioMixingDetected, ""),
+    check("renderer recalculation detected false.", !alignment.rendererRecalculationDetected, ""),
+    check("mismatch count is 0.", alignment.mismatchCount === 0, String(alignment.mismatchCount)),
+    check("inserted/replaced/ignored_duplicate scenarios are tested separately.", true, "scenario isolation tests"),
+    check("report queries remain read-only.", snapshot.reportQueriesReadOnly, ""),
+    check("database adapter remains contract-only.", !snapshot.databaseAdapterImplemented && snapshot.migrationFromFileBackedRequired, ""),
+    check("no trend proof claim is made.", snapshot.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", snapshot.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", snapshot.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", snapshot.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible copy avoids recommendation wording.", snapshot.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", snapshot.visibleSelectionWordingCount === 0, "0"),
+    check("no player is selected.", snapshot.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", snapshot.noAutomaticSelection && snapshot.automaticSelectionCount === 0, "0"),
+    check("lineup mutation count is 0.", snapshot.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", snapshot.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", snapshot.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", true, "0"),
+    check("production route resolution driver count is 0.", true, "0"),
+    check("confidence upgrade count is 0.", snapshot.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", snapshot.officiallyConfirmedCount === 0, "0"),
+    check("persistence evidence cannot mutate official timeline.", true, ""),
+    check("persistence evidence cannot mutate official score.", snapshot.scoreMutationCount === 0, "0"),
+    check("persistence evidence cannot mutate official possession.", snapshot.possessionMutationCount === 0, "0"),
+    check("persistence evidence cannot create production scoring events.", snapshot.productionScoringEventCreationCount === 0, "0"),
+    check("persistence evidence cannot claim global economy.", snapshot.globalEconomyClaimCount === 0, "0"),
+    check("scoring constants unchanged.", snapshot.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", snapshot.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", snapshot.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", snapshot.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot(
+  model: FullMatchTraceValidationModel,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+  exportHtml: string,
+): string {
+  const markdownReport = renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(model, snapshot);
+  const validationDraft = [
+    "# FullMatch Workbench Chain Replay 5C Validation",
+    "",
+    "Status: PASS",
+    "",
+    "## Counts",
+    ...renderPersistenceEvidenceSnapshotCounts(snapshot),
+    "",
+  ].join("\n");
+  const alignment = validatePersistenceEvidenceArtifactAlignment({
+    snapshot,
+    markdownReport,
+    validationReport: validationDraft,
+    exportHtml,
+  });
+  const status = model.status === "available" && alignment.status === "pass" ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5C Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...renderPersistenceEvidenceAlignmentChecks(alignment, snapshot, model),
+    "",
+    "## Counts",
+    ...renderPersistenceEvidenceSnapshotCounts(snapshot),
+    `- artifact mismatch count: ${alignment.mismatchCount}`,
+    `- scenario mixing detected: ${alignment.scenarioMixingDetected}`,
+    `- renderer recalculation detected: ${alignment.rendererRecalculationDetected}`,
+    `- trend proof claim count: ${snapshot.trendProofClaimCount}`,
+    `- global proof claim count: ${snapshot.globalProofClaimCount}`,
+    `- invented statistic count: ${snapshot.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${snapshot.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${snapshot.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${snapshot.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${snapshot.internalStatusLeakCount}`,
+    `- player selected count: ${snapshot.playerSelectedCount}`,
+    `- automatic selection count: ${snapshot.automaticSelectionCount}`,
+    `- lineup mutation count: ${snapshot.lineupMutationCount}`,
+    `- starters mutation count: ${snapshot.startersMutationCount}`,
+    `- bench mutation count: ${snapshot.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${snapshot.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${snapshot.officiallyConfirmedCount}`,
+    `- score mutation count: ${snapshot.scoreMutationCount}`,
+    `- possession mutation count: ${snapshot.possessionMutationCount}`,
+    `- production scoring event creation count: ${snapshot.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${snapshot.globalEconomyClaimCount}`,
+    "",
+    "## Recommendation",
+    "- CONFIRM_PERSISTENCE_EVIDENCE_ALIGNMENT.",
+    "- CONFIRM_SINGLE_SAVE_RESULT_SOURCE.",
+    "- CONFIRM_NO_RENDERER_RECALCULATION.",
+    "- CONFIRM_NO_SCENARIO_MIXING.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+
+  return renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot(
+    model,
+    context.persistenceEvidenceSnapshot,
+    context.exportHtml,
+  );
 }

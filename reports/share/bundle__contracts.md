@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 5B - History Store Consistency & Database Adapter Contract. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
