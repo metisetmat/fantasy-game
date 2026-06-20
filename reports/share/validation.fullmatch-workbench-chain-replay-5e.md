@@ -62,8 +62,8 @@ Status: PASS
 - active product history source: file_backed
 - database used as product truth: false
 - source record count: 6
-- experimental adapter record count: 1
-- dry run save count: 3
+- experimental adapter record count: 6
+- dry run save count: 8
 - dry run query count: 2
 - inserted scenario pass: true
 - replaced scenario pass: true

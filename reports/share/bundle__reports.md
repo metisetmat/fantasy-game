@@ -23923,12 +23923,14 @@ export function validateCoachReportDatabaseAdapterSpikeSourceGuard(): readonly s
   assertTest(databaseAdapterSpike.warnings.some((warning) => warning.includes(persistenceEvidenceSnapshot.snapshotId)), "spike warning references persistence snapshot.");
   assertTest(databaseAdapterSpike.warnings.some((warning) => warning.includes("file_backed")), "spike warning preserves file_backed source boundary.");
   assertTest(databaseAdapterSpike.sourceRecordCount === databaseMigrationPreparation.sourceRecordCount, "spike and migration preparation use the same source record count.");
+  assertTest(databaseAdapterSpike.experimentalAdapterRecordCount === databaseAdapterSpike.sourceRecordCount, "experimental adapter loads every source record.");
 
   return [
     "spike consumes source records",
     "spike references persistence evidence snapshot",
     "spike preserves file_backed source boundary",
     "spike aligns source record count with migration preparation",
+    "experimental adapter loads every source record",
   ];
 }
 

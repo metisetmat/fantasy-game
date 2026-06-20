@@ -69,6 +69,11 @@ export function buildCoachReportDatabaseAdapterSpike(input: {
     replacedScenarioPass = replaceResult.operation === "replaced";
     ignoredDuplicateScenarioPass = duplicateResult.operation === "ignored_duplicate";
 
+    for (const record of input.sourceRecords.slice(1)) {
+      input.experimentalAdapter.dryRunSave(record);
+      dryRunSaveCount += 1;
+    }
+
     const teamQuery = input.experimentalAdapter.dryRunQuery({
       teamId: firstRecord.homeTeamId,
       maxRecords: 10,
