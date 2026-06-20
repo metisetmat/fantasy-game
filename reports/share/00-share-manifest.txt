@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-20T12:39:49.113Z
+Generated timestamp: 2026-06-20T12:53:19.243Z
 Task/sprint name: Sprint 5D - Database Adapter SPI & Migration Dry Run
 Final file count: 20
 
@@ -733,27 +733,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/matchReportEvidence.ts
- M src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportDatabaseMigrationPreparation.ts
-?? src/reports/coachMatchHistoryMigrationDryRun.test.ts
-?? src/reports/coachReportDatabaseMigrationCopy.test.ts
-?? src/reports/coachReportDatabaseMigrationGuard.test.ts
-?? src/reports/coachReportDatabaseMigrationPreparation.test.ts
-?? src/reports/coachReportDatabaseMigrationPreparation.ts
-?? src/reports/coachReportDatabaseMigrationRenderer.test.ts
-?? src/reports/coachReportDatabaseMigrationSourceGuard.test.ts
-?? src/reports/databaseCoachMatchHistoryAdapterSpi.test.ts
-?? src/reports/history/buildCoachMatchHistoryMigrationDryRun.ts
-?? src/reports/history/coachMatchHistoryMigrationDryRun.ts
-?? src/reports/history/databaseCoachMatchHistoryAdapterSpi.ts
-?? src/reports/history/mockDatabaseCoachMatchHistoryAdapter.ts
-?? src/reports/mockDatabaseCoachMatchHistoryAdapter.test.ts
-?? src/simulation/fullMatch/scoringGuard.5d.test.ts
+ M src/reports/coachMatchHistoryMigrationDryRun.test.ts
+ M src/reports/history/buildCoachMatchHistoryMigrationDryRun.ts
+ M src/reports/history/coachMatchHistorySerialization.ts

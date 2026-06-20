@@ -1,7 +1,35 @@
 import type {
   CoachMatchHistoryRecord,
   CoachMatchHistorySignal,
+  CoachMatchHistorySignalPhase,
+  CoachMatchHistorySignalStability,
+  CoachMatchHistorySource,
 } from "./coachMatchHistory";
+
+const validSignalPhases: readonly CoachMatchHistorySignalPhase[] = [
+  "with_ball",
+  "without_ball",
+  "goalkeeper",
+];
+
+const validSignalStabilities: readonly CoachMatchHistorySignalStability[] = [
+  "local_repeated",
+  "local_visible_once",
+  "local_unstable",
+  "insufficient_data",
+  "not_evaluated",
+];
+
+const validHistorySources: readonly CoachMatchHistorySource[] = [
+  "current_product_report",
+  "controlled_sample",
+  "simulated_match_history",
+  "product_history_store",
+];
+
+function isOneOf<T extends string>(value: unknown, allowed: readonly T[]): value is T {
+  return typeof value === "string" && allowed.includes(value as T);
+}
 
 function cloneSignal(signal: CoachMatchHistorySignal): CoachMatchHistorySignal {
   return { ...signal };
@@ -43,10 +71,10 @@ function isSignal(value: unknown): value is CoachMatchHistorySignal {
   }
 
   return typeof value.signalId === "string" &&
-    typeof value.phase === "string" &&
+    isOneOf(value.phase, validSignalPhases) &&
     typeof value.label === "string" &&
-    typeof value.stability === "string" &&
-    typeof value.source === "string" &&
+    isOneOf(value.stability, validSignalStabilities) &&
+    isOneOf(value.source, validHistorySources) &&
     typeof value.explanation === "string" &&
     (value.zone === undefined || typeof value.zone === "string") &&
     (value.value === undefined || typeof value.value === "number");
@@ -67,8 +95,8 @@ function isRecord(value: unknown): value is CoachMatchHistoryRecord {
     typeof value.awayTeamName === "string" &&
     typeof value.scoreHome === "number" &&
     typeof value.scoreAway === "number" &&
-    typeof value.scoreSource === "string" &&
-    typeof value.source === "string" &&
+    (value.scoreSource === "official_report_score" || value.scoreSource === "live_scoring_events_sample" || value.scoreSource === "unknown") &&
+    isOneOf(value.source, validHistorySources) &&
     typeof value.reportVersion === "string" &&
     value.signals.every(isSignal) &&
     value.officialTimelineSourcePreserved === true &&

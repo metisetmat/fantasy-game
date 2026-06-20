@@ -2,7 +2,7 @@ import type { CoachMatchHistoryRecord } from "./coachMatchHistory";
 import type { DatabaseCoachMatchHistoryAdapterSpi } from "./databaseCoachMatchHistoryAdapterSpi";
 import {
   cloneCoachMatchHistoryRecord,
-  serializeCoachMatchHistoryRecords,
+  parseCoachMatchHistoryRecords,
 } from "./coachMatchHistorySerialization";
 import type {
   CoachMatchHistoryMigrationDryRunModel,
@@ -15,22 +15,8 @@ function targetAdapterKind(adapter: DatabaseCoachMatchHistoryAdapterSpi): "mock_
 }
 
 function isValidHistoryRecord(record: CoachMatchHistoryRecord): boolean {
-  if (
-    typeof record.historyRecordId !== "string" ||
-    typeof record.matchId !== "string" ||
-    typeof record.runId !== "string" ||
-    typeof record.generatedAtIso !== "string" ||
-    typeof record.homeTeamId !== "string" ||
-    typeof record.awayTeamId !== "string" ||
-    typeof record.scoreHome !== "number" ||
-    typeof record.scoreAway !== "number" ||
-    !Array.isArray(record.signals)
-  ) {
-    return false;
-  }
-
   try {
-    serializeCoachMatchHistoryRecords([record]);
+    parseCoachMatchHistoryRecords(JSON.stringify([record]));
     return true;
   } catch {
     return false;
