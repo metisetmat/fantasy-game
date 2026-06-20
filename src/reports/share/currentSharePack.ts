@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency",
+  name: "Sprint 5D - Database Adapter SPI & Migration Dry Run",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-5c.md",
-    "validation.fullmatch-workbench-chain-replay-5c.md",
+    "fullmatch-workbench-chain-replay-5d.md",
+    "validation.fullmatch-workbench-chain-replay-5d.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,14 +39,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 5C share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-5c.md": "summarizes the single persistence evidence snapshot shared by markdown, validation, export HTML, appendix, and share-pack validation",
-    "validation.fullmatch-workbench-chain-replay-5c.md": "validates persistence evidence alignment, counter consistency, scenario isolation, no renderer-side recomputation, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 5C share pack",
-    "manifest.md": "compatibility manifest listing the 5C share pack files",
+    "validation.share-pack.md": "proves the 5D share pack is current, complete, and below 20 files",
+    "fullmatch-workbench-chain-replay-5d.md": "summarizes database adapter SPI preparation, mock database dry-run semantics, and no-real-database guardrails",
+    "validation.fullmatch-workbench-chain-replay-5d.md": "validates the database adapter SPI, migration dry run, export HTML section, evidence category, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 5D share pack",
+    "manifest.md": "compatibility manifest listing the 5D share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",
-    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, and Player Candidate Comparison View models/builders/renderers/tests, Selection Preview coach copy model/builder/tests, Selection Preview Profile View model/builder/tests, trace-backing renderer tests, score source labels, Coach Report V1 visualization, information hierarchy and legacy cleanup models/builders/tests, timeline review, sandbox decision panel, sandbox evidence calibration, batch confidence calibration, coach test plan, selection preview, match trace spine, match trace aggregator, Coach Report V0 from trace aggregates, French trace labels, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
+    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, Player Candidate Comparison View, persistent history evidence, database adapter SPI and migration dry-run preparation, Selection Preview coach copy/model/tests, trace-backed rendering, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
   },
 };

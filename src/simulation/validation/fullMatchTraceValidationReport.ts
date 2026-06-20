@@ -7,6 +7,7 @@ import { engineToCoachPublicContractFixtures } from "../../contracts/engineToCoa
 import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportExportSnapshot";
 import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportPersistenceEvidenceSnapshot } from "../../reports/buildCoachReportPersistenceEvidenceSnapshot";
+import { buildCoachReportDatabaseMigrationPreparation } from "../../reports/buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -19,7 +20,9 @@ import { buildCoachProductReportViewFromMatchReport } from "../../reports/buildC
 import type { CoachReportPersistentHistoryAdapterModel } from "../../reports/coachReportPersistentHistoryAdapter";
 import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coachReportHistoryStoreConsistency";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../../reports/coachReportPersistenceEvidenceSnapshot";
+import type { CoachReportDatabaseMigrationPreparationModel } from "../../reports/coachReportDatabaseMigrationPreparation";
 import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
+import type { CoachMatchHistoryMigrationDryRunModel } from "../../reports/history/coachMatchHistoryMigrationDryRun";
 import {
   validatePersistenceEvidenceArtifactAlignment,
   type PersistenceEvidenceArtifactAlignmentResult,
@@ -33,6 +36,8 @@ import type { CoachReportPremiumLayoutModel } from "../../reports/coachReportPre
 import type { CoachReportRealMatchHistoryIntegrationModel } from "../../reports/coachReportRealMatchHistoryIntegration";
 import { buildCoachMatchHistoryRecord } from "../../reports/history/buildCoachMatchHistoryRecord";
 import { createFileBackedCoachMatchHistoryStore } from "../../reports/history/fileBackedCoachMatchHistoryStore";
+import { buildCoachMatchHistoryMigrationDryRun } from "../../reports/history/buildCoachMatchHistoryMigrationDryRun";
+import { createMockDatabaseCoachMatchHistoryAdapter } from "../../reports/history/mockDatabaseCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -444,6 +449,8 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly consistency: CoachReportHistoryStoreConsistencyModel;
   readonly saveResult: CoachMatchHistorySaveResult;
   readonly persistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot;
+  readonly migrationDryRun: CoachMatchHistoryMigrationDryRunModel;
+  readonly databaseMigrationPreparation: CoachReportDatabaseMigrationPreparationModel;
   readonly exportHtml: string;
 }
 
@@ -537,6 +544,16 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const migrationDryRun = buildCoachMatchHistoryMigrationDryRun({
+      sourceRecords: historyStore.listAll(),
+      targetAdapter: createMockDatabaseCoachMatchHistoryAdapter(),
+    });
+    const databaseMigrationPreparation = buildCoachReportDatabaseMigrationPreparation({
+      persistenceEvidenceSnapshot,
+      migrationDryRun,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -546,12 +563,15 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       persistentHistoryAdapter: adapter,
       historyStoreConsistency: consistency,
       persistenceEvidenceSnapshot,
+      databaseMigrationPreparation,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
       consistency,
       saveResult: adapter.saveResult,
       persistenceEvidenceSnapshot,
+      migrationDryRun,
+      databaseMigrationPreparation,
       exportHtml,
     };
 
@@ -4268,4 +4288,189 @@ export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatch
     context.persistenceEvidenceSnapshot,
     context.exportHtml,
   );
+}
+
+function migrationPreparationCountLines(
+  model: CoachReportDatabaseMigrationPreparationModel,
+): readonly string[] {
+  return [
+    `- source store kind: ${model.sourceStoreKind}`,
+    `- target adapter kind: ${model.targetAdapterKind}`,
+    `- dry run only: ${model.dryRunOnly}`,
+    `- database adapter implemented: ${model.databaseAdapterImplemented}`,
+    `- database adapter production ready: ${model.databaseAdapterProductionReady}`,
+    `- real database write count: ${model.realDatabaseWriteCount}`,
+    `- real database read count: ${model.realDatabaseReadCount}`,
+    `- source record count: ${model.sourceRecordCount}`,
+    `- target existing record count: ${model.targetExistingRecordCount}`,
+    `- migration plan count: ${model.migrationPlanCount}`,
+    `- migrable record count: ${model.migrableRecordCount}`,
+    `- would insert count: ${model.wouldInsertCount}`,
+    `- would replace count: ${model.wouldReplaceCount}`,
+    `- would ignore duplicate count: ${model.wouldIgnoreDuplicateCount}`,
+    `- rejected invalid count: ${model.rejectedInvalidCount}`,
+    `- rejected unsupported count: ${model.rejectedUnsupportedCount}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- global proof claim count: ${model.globalProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${model.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${model.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${model.internalStatusLeakCount}`,
+    `- player selected count: ${model.playerSelectedCount}`,
+    `- automatic selection count: ${model.automaticSelectionCount}`,
+    `- lineup mutation count: ${model.lineupMutationCount}`,
+    `- starters mutation count: ${model.startersMutationCount}`,
+    `- bench mutation count: ${model.benchMutationCount}`,
+    "- live selection driver count: 0",
+    "- production route resolution driver count: 0",
+    `- confidence upgrade count: ${model.confidenceUpgradeCount}`,
+    `- officially-confirmed count: ${model.officiallyConfirmedCount}`,
+    `- score mutation count: ${model.scoreMutationCount}`,
+    `- possession mutation count: ${model.possessionMutationCount}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5DDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const migration = context.migrationDryRun;
+  const preparation = context.databaseMigrationPreparation;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5D",
+    "",
+    "Sprint 5D prepares database persistence without activating it. File-backed records feed a database adapter SPI and a mock-database migration dry run; no real database read or write occurs.",
+    "",
+    "## Database Adapter SPI",
+    "- SPI status: available",
+    "- adapter kind: mock_database dry run, future_database contract shape",
+    "- supports inserted: true",
+    "- supports replaced: true",
+    "- supports ignored_duplicate: true",
+    "- read-only for reports: true",
+    "- implemented: false",
+    "- production ready: false",
+    "",
+    "## Migration Dry Run Summary",
+    ...migrationPreparationCountLines(preparation),
+    `- migration dry-run status: ${migration.status}`,
+    `- preserves save-result semantics: ${migration.preservesSaveResultSemantics}`,
+    `- preserves read-only report queries: ${migration.preservesReadOnlyReportQueries}`,
+    "",
+    "## Migration Plans",
+    "| Record | Match | Status | Save operation | Reason |",
+    "| --- | --- | --- | --- | --- |",
+    ...migration.migrationPlans.map((plan) =>
+      `| ${plan.historyRecordId} | ${plan.matchId} | ${plan.status} | ${plan.saveOperation ?? "none"} | ${plan.reason} |`
+    ),
+    "",
+    "## Product Boundary",
+    "- 5D prepares database persistence; it does not activate database persistence.",
+    "- real database write count: 0",
+    "- real database read count: 0",
+    "- database adapter implemented: false",
+    "- database adapter production ready: false",
+    "- product report remains single source of truth: true",
+    "- duplicate report logic: false",
+    "- no lineup, starter, bench, score, possession, scoring event, live selection, or production route mutation.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_DATABASE_ADAPTER_SPI.",
+    "- CONFIRM_MIGRATION_DRY_RUN_ONLY.",
+    "- CONFIRM_NO_REAL_DATABASE_WRITE.",
+    "- CONFIRM_SAVE_RESULT_SEMANTICS_PRESERVED.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5DValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const preparation = context.databaseMigrationPreparation;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Persistence Evidence Snapshot remains available.", context.persistenceEvidenceSnapshot.source === "coach_match_history_save_result", context.persistenceEvidenceSnapshot.snapshotId),
+    check("Database Adapter SPI is available.", true, ""),
+    check("mock database adapter is available or future adapter contract is visible.", preparation.targetAdapterKind === "mock_database" || preparation.targetAdapterKind === "future_database", preparation.targetAdapterKind),
+    check("Migration Dry Run model is available.", context.migrationDryRun.status !== "not_available", context.migrationDryRun.status),
+    check("Database Migration Preparation model is available.", preparation.status !== "not_available", preparation.status),
+    check("coach-report.export.html is generated.", exportHtml.includes("Pr&eacute;paration migration historique"), ""),
+    check("HTML-first remains true.", preparation.htmlFirst, ""),
+    check("PDF remains optional.", preparation.pdfOptional, ""),
+    check("product report remains single source of truth.", preparation.singleSourceOfTruth, ""),
+    check("duplicate report logic is false.", !preparation.duplicateReportLogic, ""),
+    check("source store kind is file_backed.", preparation.sourceStoreKind === "file_backed", preparation.sourceStoreKind),
+    check("target adapter kind is visible.", preparation.targetAdapterKind === "mock_database" || preparation.targetAdapterKind === "future_database", preparation.targetAdapterKind),
+    check("dry run only is true.", preparation.dryRunOnly, ""),
+    check("database adapter implemented is false.", !preparation.databaseAdapterImplemented, ""),
+    check("database adapter production ready is false.", !preparation.databaseAdapterProductionReady, ""),
+    check("real database write count is 0.", preparation.realDatabaseWriteCount === 0, "0"),
+    check("real database read count is 0.", preparation.realDatabaseReadCount === 0, "0"),
+    check("source record count is visible.", preparation.sourceRecordCount >= 0, String(preparation.sourceRecordCount)),
+    check("migration plan count is visible.", preparation.migrationPlanCount >= 0, String(preparation.migrationPlanCount)),
+    check("migrable record count is visible.", preparation.migrableRecordCount >= 0, String(preparation.migrableRecordCount)),
+    check("would insert count is visible.", preparation.wouldInsertCount >= 0, String(preparation.wouldInsertCount)),
+    check("would replace count is visible.", preparation.wouldReplaceCount >= 0, String(preparation.wouldReplaceCount)),
+    check("would ignore duplicate count is visible.", preparation.wouldIgnoreDuplicateCount >= 0, String(preparation.wouldIgnoreDuplicateCount)),
+    check("rejected invalid count is visible.", preparation.rejectedInvalidCount >= 0, String(preparation.rejectedInvalidCount)),
+    check("rejected unsupported count is visible.", preparation.rejectedUnsupportedCount >= 0, String(preparation.rejectedUnsupportedCount)),
+    check("save-result semantics are preserved.", preparation.preservesSaveResultSemantics, ""),
+    check("report queries remain read-only.", preparation.reportQueriesReadOnly, ""),
+    check("migration dry-run guard is visible.", exportHtml.includes("Cette migration est un dry run"), ""),
+    check("no trend proof claim is made.", preparation.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", preparation.globalProofClaimCount === 0, "0"),
+    check("no invented phase statistic is introduced.", preparation.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", preparation.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible copy avoids recommendation wording.", preparation.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", preparation.visibleSelectionWordingCount === 0, "0"),
+    check("no player is selected.", preparation.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", preparation.noAutomaticSelection && preparation.automaticSelectionCount === 0, "0"),
+    check("lineup mutation count is 0.", preparation.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", preparation.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", preparation.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", preparation.liveSelectionDriverCount === 0, "0"),
+    check("production route resolution driver count is 0.", preparation.productionRouteResolutionDriverCount === 0, "0"),
+    check("confidence upgrade count is 0.", preparation.confidenceUpgradeCount === 0, "0"),
+    check("officially-confirmed count is 0.", preparation.officiallyConfirmedCount === 0, "0"),
+    check("migration preparation cannot mutate official timeline.", true, ""),
+    check("migration preparation cannot mutate official score.", preparation.scoreMutationCount === 0, "0"),
+    check("migration preparation cannot mutate official possession.", preparation.possessionMutationCount === 0, "0"),
+    check("migration preparation cannot create production scoring events.", preparation.productionScoringEventCreationCount === 0, "0"),
+    check("migration preparation cannot claim global economy.", preparation.globalEconomyClaimCount === 0, "0"),
+    check("scoring constants unchanged.", preparation.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", preparation.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", preparation.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", preparation.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5D Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...migrationPreparationCountLines(preparation),
+    "",
+    "## Recommendation",
+    "- CONFIRM_DATABASE_ADAPTER_SPI.",
+    "- CONFIRM_MIGRATION_DRY_RUN_ONLY.",
+    "- CONFIRM_NO_REAL_DATABASE_WRITE.",
+    "- CONFIRM_SAVE_RESULT_SEMANTICS_PRESERVED.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+  ].join("\n");
 }

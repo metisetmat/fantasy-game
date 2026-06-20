@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5D - Database Adapter SPI & Migration Dry Run. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -68,15 +68,17 @@ import {
   renderFullMatchWorkbenchChainReplay5CDocFromSnapshot,
   renderFullMatchWorkbenchChainReplay5CValidation,
   renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot,
+  renderFullMatchWorkbenchChainReplay5DDoc,
+  renderFullMatchWorkbenchChainReplay5DValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5c.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5c.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5D - Database Adapter SPI & Migration Dry Run";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5d.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1852,6 +1854,36 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5C reusable persistence evidence fixtures for scenario and artifact alignment tests",
       },
       {
+        source: "src/reports/history/databaseCoachMatchHistoryAdapterSpi.ts",
+        required: true,
+        reason: "Sprint 5D database adapter SPI defining dry-run save/query semantics without activating production database persistence",
+      },
+      {
+        source: "src/reports/history/mockDatabaseCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5D deterministic mock database dry-run adapter preserving inserted/replaced/ignored_duplicate save-result semantics",
+      },
+      {
+        source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
+        required: true,
+        reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
+      },
+      {
+        source: "src/reports/history/buildCoachMatchHistoryMigrationDryRun.ts",
+        required: true,
+        reason: "Sprint 5D builder planning file-backed to database-adapter migration without real database reads or writes",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationPreparation.ts",
+        required: true,
+        reason: "Sprint 5D report model, tags, evidence fact, and non-mutation guardrails for database migration preparation",
+      },
+      {
+        source: "src/reports/buildCoachReportDatabaseMigrationPreparation.ts",
+        required: true,
+        reason: "Sprint 5D builder connecting persistence evidence snapshot and migration dry run to the export report",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -2180,6 +2212,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5c.test.ts",
         required: true,
         reason: "Sprint 5C executable scoring guard proving persistence evidence alignment does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5d.test.ts",
+        required: true,
+        reason: "Sprint 5D executable scoring guard proving database migration dry-run preparation does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3593,6 +3630,46 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5C executable non-selection and non-mutation guard tests for persistence evidence",
       },
       {
+        source: "src/reports/databaseCoachMatchHistoryAdapterSpi.test.ts",
+        required: true,
+        reason: "Sprint 5D executable database adapter SPI tests for dry-run status, adapter metadata, and non-production readiness",
+      },
+      {
+        source: "src/reports/mockDatabaseCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5D executable mock database adapter tests preserving inserted, replaced, and ignored_duplicate dry-run semantics",
+      },
+      {
+        source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
+        required: true,
+        reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationPreparation.test.ts",
+        required: true,
+        reason: "Sprint 5D executable report-model tests for database migration preparation counts and guardrails",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5D executable export renderer tests for the database migration preparation section and appendix",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationSourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5D executable source guard tests proving migration preparation consumes the dry-run model",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationCopy.test.ts",
+        required: true,
+        reason: "Sprint 5D executable visible-copy tests proving migration wording stays coach-readable and dry-run scoped",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationGuard.test.ts",
+        required: true,
+        reason: "Sprint 5D executable non-selection and non-mutation guard tests for database migration preparation",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -3788,6 +3865,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5D")) {
+    return renderFullMatchWorkbenchChainReplay5DDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5C")) {
     const snapshot = latestPersistenceEvidenceSnapshot();
 
@@ -5980,6 +6061,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5D")) {
+    return renderFullMatchWorkbenchChainReplay5DValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5C")) {
     const snapshot = latestPersistenceEvidenceSnapshot();
     const exportHtml = latestCoachReportExportHtml();
@@ -8118,6 +8203,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5D")) {
+    return [
+      "# Sprint 5D Share Pack",
+      "",
+      "Current sprint: Sprint 5D - Database Adapter SPI & Migration Dry Run",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5d.md",
+      "- validation.fullmatch-workbench-chain-replay-5d.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5d.md and validation.fullmatch-workbench-chain-replay-5d.md.",
+      "",
+      "Sprint 5D proves the database adapter SPI and migration dry run without activating database persistence or writing to a real database.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5C")) {
     return [
       "# Sprint 5C Share Pack",
@@ -23039,6 +23160,422 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/databaseCoachMatchHistoryAdapterSpi.test.ts
+
+```ts
+import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateDatabaseCoachMatchHistoryAdapterSpi(): readonly string[] {
+  const adapter = createMockDatabaseCoachMatchHistoryAdapter();
+  const description = adapter.describe();
+
+  assertTest(adapter.adapterKind === "mock_database", "SPI exposes adapter kind.");
+  assertTest(description.supportsInserted, "SPI supports inserted.");
+  assertTest(description.supportsReplaced, "SPI supports replaced.");
+  assertTest(description.supportsIgnoredDuplicate, "SPI supports ignored_duplicate.");
+  assertTest(description.readOnlyForReports, "readOnlyForReports is true.");
+  assertTest(!description.implemented, "implemented can remain false.");
+  assertTest(!description.productionReady, "productionReady can remain false.");
+  assertTest(!description.canDriveCoachInstruction, "cannot drive coach instruction.");
+  assertTest(!description.canDriveLiveSelection, "cannot drive live selection.");
+  assertTest(!description.canMutateScore, "cannot mutate score.");
+  assertTest(!description.canCreateScoringEvent, "cannot create scoring events.");
+  assertTest(!description.canClaimGlobalEconomy, "cannot claim global economy.");
+
+  return [
+    "SPI exists",
+    "description exposes adapter kind",
+    "supports inserted, replaced, and ignored_duplicate",
+    "readOnlyForReports is true",
+    "implemented and productionReady can remain false",
+    "cannot drive coach instruction, live selection, score, scoring events, or global economy",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateDatabaseCoachMatchHistoryAdapterSpi();
+  console.log("databaseCoachMatchHistoryAdapterSpi tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/mockDatabaseCoachMatchHistoryAdapter.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
+import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateMockDatabaseCoachMatchHistoryAdapter(): readonly string[] {
+  const { persistentHistoryAdapter } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const record = persistentHistoryAdapter.saveResult?.record;
+  if (record === undefined) {
+    throw new Error("test context must expose a saved history record.");
+  }
+
+  const adapter = createMockDatabaseCoachMatchHistoryAdapter();
+  const inserted = adapter.dryRunSave(record);
+  const duplicate = adapter.dryRunSave(record);
+  const changed = { ...record, reportVersion: `${record.reportVersion}-changed` };
+  const replaced = adapter.dryRunSave(changed);
+  const secondAdapter = createMockDatabaseCoachMatchHistoryAdapter();
+  const secondInserted = secondAdapter.dryRunSave(record);
+  const fileBacked = createFileBackedCoachMatchHistoryStore({
+    filePath: "reports/test-artifacts/mock-db-file-backed-comparison.json",
+    allowWrite: false,
+  });
+  const fileBackedInserted = fileBacked.save(record);
+  const query = adapter.dryRunQuery({
+    teamId: record.homeTeamId,
+    maxRecords: 5,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+
+  assertTest(inserted.operation === "inserted", "dryRunSave returns inserted for new record.");
+  assertTest(replaced.operation === "replaced", "dryRunSave returns replaced for same id different content.");
+  assertTest(duplicate.operation === "ignored_duplicate", "dryRunSave returns ignored_duplicate for same id same content.");
+  assertTest(inserted.writtenToDiskCount === 0 && replaced.writtenToDiskCount === 0, "dry-run save does not write to real DB.");
+  assertTest(query.recordCount >= 1 && query.warnings.some((warning) => warning.includes("dry-run")), "dry-run query does not read from real DB.");
+  assertTest(JSON.stringify(adapter.listDryRunRecords()) === JSON.stringify(adapter.listDryRunRecords()), "listDryRunRecords is deterministic.");
+  assertTest(inserted.operation === secondInserted.operation, "mock adapter is deterministic.");
+  assertTest(fileBackedInserted.operation === inserted.operation, "save-result semantics match file-backed store operation names.");
+
+  return [
+    "mock adapter is deterministic",
+    "dryRunSave returns inserted for new record",
+    "dryRunSave returns replaced for changed same id",
+    "dryRunSave returns ignored_duplicate for identical same id",
+    "dry-run save does not write to real DB",
+    "dry-run query does not read from real DB",
+    "listDryRunRecords is deterministic",
+    "save-result semantics match file-backed store",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateMockDatabaseCoachMatchHistoryAdapter();
+  console.log("mockDatabaseCoachMatchHistoryAdapter tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachMatchHistoryMigrationDryRun.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatchHistoryMigrationDryRun";
+import type { CoachMatchHistoryRecord } from "./history/coachMatchHistory";
+import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachMatchHistoryMigrationDryRun(): readonly string[] {
+  const { persistentHistoryAdapter } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const record = persistentHistoryAdapter.saveResult?.record;
+  if (record === undefined) {
+    throw new Error("test context must expose a saved history record.");
+  }
+  const invalidRecord = { ...record, historyRecordId: 42 } as unknown as CoachMatchHistoryRecord;
+  const invalidScoreSourceRecord = {
+    ...record,
+    historyRecordId: `${record.historyRecordId}-bad-score-source`,
+    scoreSource: "stale_demo_score",
+  } as unknown as CoachMatchHistoryRecord;
+  const invalidSignalRecord = {
+    ...record,
+    historyRecordId: `${record.historyRecordId}-bad-signal`,
+    signals: record.signals.map((signal, index) =>
+      index === 0 ? { ...signal, stability: "too_confident" } : signal
+    ),
+  } as unknown as CoachMatchHistoryRecord;
+  const unsupportedRecord: CoachMatchHistoryRecord = { ...record, historyRecordId: `${record.historyRecordId}-controlled`, source: "controlled_sample" };
+  const dryRun = buildCoachMatchHistoryMigrationDryRun({
+    sourceRecords: [record, record, invalidRecord, invalidScoreSourceRecord, invalidSignalRecord, unsupportedRecord],
+    targetAdapter: createMockDatabaseCoachMatchHistoryAdapter(),
+  });
+
+  assertTest(dryRun.status === "available", "migration dry-run model exists.");
+  assertTest(dryRun.dryRunOnly, "dryRunOnly is true.");
+  assertTest(dryRun.realDatabaseWriteCount === 0, "realDatabaseWriteCount is 0.");
+  assertTest(dryRun.realDatabaseReadCount === 0, "realDatabaseReadCount is 0.");
+  assertTest(dryRun.sourceRecordCount === 6, "source record count is present.");
+  assertTest(dryRun.migrationPlanCount === 6, "migration plan count is present.");
+  assertTest(dryRun.migrableRecordCount === 2, "migrable count is present.");
+  assertTest(dryRun.wouldInsertCount === 1, "insert count is present.");
+  assertTest(dryRun.wouldIgnoreDuplicateCount === 1, "ignored duplicate count is present.");
+  assertTest(dryRun.rejectedInvalidCount === 3, "rejected invalid records are handled safely.");
+  assertTest(dryRun.rejectedUnsupportedCount === 1, "rejected unsupported records are handled safely.");
+  assertTest(dryRun.preservesSaveResultSemantics, "save-result semantics are preserved.");
+
+  return [
+    "migration dry-run model exists",
+    "dryRunOnly is true",
+    "realDatabaseWriteCount and realDatabaseReadCount are 0",
+    "source, plan, migrable, insert, ignored, invalid, and unsupported counts are present",
+    "save-result semantics are preserved",
+    "rejected invalid and unsupported records are handled safely",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachMatchHistoryMigrationDryRun();
+  console.log("coachMatchHistoryMigrationDryRun tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseMigrationPreparation.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseMigrationPreparation(): readonly string[] {
+  const { databaseMigrationPreparation } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(databaseMigrationPreparation.status === "available" || databaseMigrationPreparation.status === "partial", "report model exists.");
+  assertTest(databaseMigrationPreparation.sourceStoreKind === "file_backed", "source store kind is file_backed.");
+  assertTest(databaseMigrationPreparation.targetAdapterKind === "mock_database" || databaseMigrationPreparation.targetAdapterKind === "future_database", "target adapter kind is visible.");
+  assertTest(databaseMigrationPreparation.dryRunOnly, "dry run only true.");
+  assertTest(!databaseMigrationPreparation.databaseAdapterImplemented, "database adapter implemented false.");
+  assertTest(!databaseMigrationPreparation.databaseAdapterProductionReady, "database adapter production ready false.");
+  assertTest(databaseMigrationPreparation.realDatabaseWriteCount === 0, "real DB write count 0.");
+  assertTest(databaseMigrationPreparation.realDatabaseReadCount === 0, "real DB read count 0.");
+  assertTest(databaseMigrationPreparation.trendProofClaimCount === 0, "trend proof claim count 0.");
+  assertTest(databaseMigrationPreparation.globalProofClaimCount === 0, "global proof claim count 0.");
+  assertTest(databaseMigrationPreparation.inventedStatisticCount === 0, "invented statistic count 0.");
+  assertTest(databaseMigrationPreparation.sandboxEventsPromotedToOfficialCount === 0, "sandbox promoted to official count 0.");
+
+  return [
+    "report model exists",
+    "source store kind is file_backed",
+    "target adapter kind is visible",
+    "dry run only true",
+    "database adapter implemented and production ready false",
+    "real DB read and write counts are 0",
+    "proof and invented-statistic counts are 0",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseMigrationPreparation();
+  console.log("coachReportDatabaseMigrationPreparation tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseMigrationRenderer.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseMigrationRenderer(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes("Pr&eacute;paration migration historique"), "coach-report.export.html contains preparation migration historique.");
+  assertTest(exportHtml.includes("Cette migration est un dry run"), "export contains migration dry-run guard.");
+  assertTest(exportHtml.includes("Ce que la migration pr&eacute;pare"), "export contains Ce que la migration prepare.");
+  assertTest(exportHtml.includes("Ce qui reste volontairement limit&eacute;"), "export contains Ce qui reste volontairement limite.");
+  assertTest(exportHtml.includes("Prochaine &eacute;tape produit"), "export contains Prochaine etape produit.");
+  assertTest(exportHtml.includes("D&eacute;tails de pr&eacute;paration migration database"), "export contains database migration appendix.");
+
+  return [
+    "coach-report.export.html contains Preparation migration historique",
+    "export contains migration dry-run guard",
+    "export contains Ce que la migration prepare",
+    "export contains Ce qui reste volontairement limite",
+    "export contains Prochaine etape produit",
+    "export contains Details de preparation migration database",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseMigrationRenderer();
+  console.log("coachReportDatabaseMigrationRenderer tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseMigrationSourceGuard.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseMigrationSourceGuard(): readonly string[] {
+  const { databaseMigrationPreparation } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(databaseMigrationPreparation.sourceStoreKind === "file_backed", "migration consumes file-backed records.");
+  assertTest(databaseMigrationPreparation.targetAdapterKind === "mock_database", "migration consumes database SPI mock only.");
+  assertTest(databaseMigrationPreparation.singleSourceOfTruth, "migration does not create a second source of truth.");
+  assertTest(databaseMigrationPreparation.realDatabaseWriteCount === 0, "migration does not write to real DB.");
+  assertTest(databaseMigrationPreparation.realDatabaseReadCount === 0, "migration does not read from real DB.");
+  assertTest(databaseMigrationPreparation.sandboxEventsPromotedToOfficialCount === 0, "sandbox-only events are not promoted to official.");
+  assertTest(databaseMigrationPreparation.inventedStatisticCount === 0, "invented statistic count is 0.");
+  assertTest(databaseMigrationPreparation.scoreMutationCount === 0, "product/export score matches.");
+  assertTest(databaseMigrationPreparation.visibleSelectionWordingCount === 0, "candidate comparison remains non-selection.");
+
+  return [
+    "migration consumes file-backed records and database SPI only",
+    "migration does not create a second source of truth",
+    "migration does not write to or read from real DB",
+    "sandbox-only events are not promoted",
+    "invented statistic count is 0",
+    "product/export score and candidate comparison guardrails remain intact",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseMigrationSourceGuard();
+  console.log("coachReportDatabaseMigrationSourceGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseMigrationCopy.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+const FORBIDDEN_COPY: readonly string[] = [
+  "preuve statistique",
+  "preuve globale",
+  "certitude",
+  "dÃ©montrÃ©",
+  "validÃ© dÃ©finitivement",
+  "officiellement confirmÃ©",
+  "joueur recommandÃ©",
+  "Ã  sÃ©lectionner",
+  "titulaire conseillÃ©",
+  "remplacement conseillÃ©",
+  "composition recommandÃ©e",
+  "sÃ©lection automatique",
+  "officially_confirmed",
+  "trace_supported",
+  "sandbox_only",
+];
+
+function visibleDatabaseMigrationCopy(exportHtml: string): string {
+  const start = exportHtml.indexOf("Pr&eacute;paration migration historique");
+  const end = exportHtml.indexOf("D&eacute;tails de pr&eacute;paration migration database");
+  return start === -1 ? "" : exportHtml.slice(start, end === -1 ? undefined : end);
+}
+
+export function validateCoachReportDatabaseMigrationCopy(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const visibleCopy = visibleDatabaseMigrationCopy(exportHtml).toLowerCase();
+
+  for (const forbidden of FORBIDDEN_COPY) {
+    assertTest(!visibleCopy.includes(forbidden.toLowerCase()), `visible copy does not contain ${forbidden}.`);
+  }
+
+  return FORBIDDEN_COPY.map((fragment) => `visible copy does not contain ${fragment}`);
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseMigrationCopy();
+  console.log("coachReportDatabaseMigrationCopy tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDatabaseMigrationGuard.test.ts
+
+```ts
+import {
+  coachReportDatabaseMigrationPreparationCannotDriveSelection,
+  coachReportDatabaseMigrationPreparationCannotMutateOfficialState,
+} from "./coachReportDatabaseMigrationPreparation";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDatabaseMigrationGuard(): readonly string[] {
+  const { databaseMigrationPreparation } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(coachReportDatabaseMigrationPreparationCannotDriveSelection(databaseMigrationPreparation), "migration preparation cannot change lineup/starters/bench or select players.");
+  assertTest(coachReportDatabaseMigrationPreparationCannotMutateOfficialState(databaseMigrationPreparation), "migration preparation cannot mutate official state.");
+  assertTest(databaseMigrationPreparation.liveSelectionDriverCount === 0, "cannot drive live selection.");
+  assertTest(databaseMigrationPreparation.productionRouteResolutionDriverCount === 0, "cannot drive production route resolution.");
+  assertTest(databaseMigrationPreparation.confidenceUpgradeCount === 0, "cannot upgrade confidence.");
+  assertTest(databaseMigrationPreparation.globalEconomyClaimCount === 0, "cannot claim global economy.");
+
+  return [
+    "migration preparation cannot change lineup, starters, or bench",
+    "cannot drive coach instruction, live selection, or production route resolution",
+    "cannot mutate official timeline, score, possession, or scoring events",
+    "cannot claim global economy",
+    "cannot upgrade confidence",
+    "cannot select a player",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDatabaseMigrationGuard();
+  console.log("coachReportDatabaseMigrationGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -23051,6 +23588,7 @@ import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMa
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
+import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -23059,6 +23597,8 @@ import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportR
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
 import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
 import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
+import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatchHistoryMigrationDryRun";
+import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -23168,6 +23708,18 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const migrationDryRun = buildCoachMatchHistoryMigrationDryRun({
+    sourceRecords: historyStore.listAll(),
+    targetAdapter: createMockDatabaseCoachMatchHistoryAdapter(),
+  });
+  const databaseMigrationPreparation = persistenceEvidenceSnapshot === undefined
+    ? undefined
+    : buildCoachReportDatabaseMigrationPreparation({
+        persistenceEvidenceSnapshot,
+        migrationDryRun,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -23177,6 +23729,7 @@ export function writeLatestCoachReport(): void {
     persistentHistoryAdapter,
     ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
+    ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

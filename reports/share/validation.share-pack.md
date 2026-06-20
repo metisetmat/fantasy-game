@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency
+- current sprint: Sprint 5D - Database Adapter SPI & Migration Dry Run
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -27,29 +27,28 @@ Status: PASS
 - PASS: source reports were not deleted - 0
 - PASS: manifest exposes MINIMAL_REVIEW - mode visible
 - PASS: manifest says upload every file in reports/share - upload instruction visible
-- PASS: current sprint is Sprint 5C - Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency
+- PASS: current sprint is Sprint 5D - Sprint 5D - Database Adapter SPI & Migration Dry Run
 - PASS: share pack mode is MINIMAL_REVIEW - MINIMAL_REVIEW
 - PASS: share pack under 20 files - 20
 - PASS: expected share file count is 20 - 20
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 5C oriented - README current
-- PASS: 5C report included - 5C doc included
-- PASS: 5C validation is PASS - 5C validation current
+- PASS: README is Sprint 5D oriented - README current
+- PASS: 5D report included - 5D doc included
+- PASS: 5D validation is PASS - 5D validation current
 - PASS: product report HTML copied - product HTML visible
 - PASS: export report HTML copied - export HTML visible
-- PASS: persistence snapshot section is present - snapshot section visible
-- PASS: single snapshot guard is visible - single snapshot guard visible
-- PASS: export save operation matches 5C report - artifact1=replaced, artifact2=replaced, artifact3=replaced
-- PASS: export before/after counters match 5C report - artifact1=6, artifact2=6, artifact3=6; artifact1=6, artifact2=6, artifact3=6
-- PASS: export disk counters match 5C report - artifact1=6, artifact2=6, artifact3=6; artifact1=6, artifact2=6, artifact3=6
-- PASS: export query counters match 5C report - artifact1=6, artifact2=6, artifact3=6; artifact1=40, artifact2=40, artifact3=40
-- PASS: artifact mismatch count is 0 - mismatch 0
-- PASS: scenario mixing false - scenario mixing false
-- PASS: renderer recalculation false - renderer recalculation false
-- PASS: bundle includes persistence evidence source files - 5C source bundled
-- PASS: bundle includes persistence evidence tests - 5C tests bundled
-- PASS: simulation bundle includes scoring guard 5C - 5C scoring guard bundled
+- PASS: database migration preparation section is present - database migration section visible
+- PASS: migration dry-run guard is visible - dry-run guard visible
+- PASS: database migration appendix is present - database migration appendix visible
+- PASS: no real database write or read occurs - real DB counters 0
+- PASS: adapter remains mock and not production ready - mock adapter only
+- PASS: save-result semantics preserved - save-result semantics visible
+- PASS: report queries remain read-only - read-only query guard visible
+- PASS: bundle includes database migration source files - 5D source bundled
+- PASS: bundle includes database migration tests - 5D tests bundled
+- PASS: simulation bundle includes scoring guard 5D - 5D scoring guard bundled
+- PASS: database migration evidence category bundled - 5D evidence category bundled
 - PASS: main export hides internal status names - internal statuses hidden
 - PASS: main export avoids recommendation wording - recommendation wording count 0
 - PASS: main export avoids selection wording - selection wording count 0
@@ -59,7 +58,7 @@ Status: PASS
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: 50-match economy remains global reference - 50-match reference visible
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendations visible - 5C recommendations visible
+- PASS: recommendations visible - 5D recommendations visible
 
 ## Files
 
@@ -73,7 +72,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-workbench-chain-replay-5c.md
+- fullmatch-workbench-chain-replay-5d.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -81,5 +80,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-5c.md
+- validation.fullmatch-workbench-chain-replay-5d.md
 - validation.share-pack.md

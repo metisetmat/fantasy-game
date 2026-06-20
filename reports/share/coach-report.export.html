@@ -774,6 +774,68 @@
       background: #fff8ed;
     }
 
+    .database-migration-section {
+      display: grid;
+      gap: 14px;
+      border-top: 1px solid var(--report-line);
+      padding-top: 16px;
+    }
+
+    .database-migration-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .database-migration-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      background: var(--report-soft);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .database-migration-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .database-migration-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .database-migration-kpi strong,
+    .database-migration-boundary,
+    .database-migration-plan,
+    .database-migration-guard,
+    .database-migration-dry-run {
+      color: var(--report-dark);
+      font-weight: 700;
+    }
+
+    .database-migration-boundary,
+    .database-migration-plan,
+    .database-migration-guard,
+    .database-migration-warning,
+    .database-migration-dry-run {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .database-migration-warning {
+      border-left-color: var(--report-warning);
+      background: #fff8ed;
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -848,6 +910,10 @@
       .history-consistency-grid {
         grid-template-columns: 1fr;
       }
+
+      .database-migration-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media print {
@@ -892,7 +958,13 @@
       .history-consistency-boundary,
       .history-consistency-database-contract,
       .history-consistency-guard,
-      .history-consistency-warning {
+      .history-consistency-warning,
+      .database-migration-card,
+      .database-migration-boundary,
+      .database-migration-plan,
+      .database-migration-guard,
+      .database-migration-warning,
+      .database-migration-dry-run {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -2037,6 +2109,53 @@
     <p class="persistent-history-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
   </section>
 
+    <section class="database-migration-section" aria-label="Pr&eacute;paration migration historique">
+      <div>
+        <h3>Pr&eacute;paration migration historique</h3>
+        <p>La migration database est pr&eacute;par&eacute;e comme un dry run de lecture : elle d&eacute;crit ce qui serait ins&eacute;r&eacute;, remplac&eacute;, ignor&eacute; ou rejet&eacute;, sans activer de stockage database.</p>
+      </div>
+      <p class="database-migration-dry-run">Cette migration est un dry run. Elle pr&eacute;pare le passage vers un futur stockage database sans &eacute;crire dans une base r&eacute;elle, sans changer le rapport courant et sans cr&eacute;er une nouvelle source de v&eacute;rit&eacute;.</p>
+      <div class="database-migration-grid">
+        <article class="database-migration-card">
+          <h4>Boundary database</h4>
+          <div class="database-migration-kpi">
+            <div><span>Source store kind</span><strong>file_backed</strong></div>
+            <div><span>Target adapter kind</span><strong>mock_database</strong></div>
+            <div><span>Dry run only</span><strong>true</strong></div>
+            <div><span>Adapter impl&eacute;ment&eacute;</span><strong>false</strong></div>
+            <div><span>Production ready</span><strong>false</strong></div>
+            <div><span>Real DB write count</span><strong>0</strong></div>
+            <div><span>Real DB read count</span><strong>0</strong></div>
+          </div>
+        </article>
+        <article class="database-migration-card">
+          <h4>Plan de migration</h4>
+          <div class="database-migration-kpi">
+            <div><span>Source record count</span><strong>6</strong></div>
+            <div><span>Migration plan count</span><strong>6</strong></div>
+            <div><span>Migrable record count</span><strong>2</strong></div>
+            <div><span>Would insert count</span><strong>2</strong></div>
+            <div><span>Would replace count</span><strong>0</strong></div>
+            <div><span>Would ignore duplicate count</span><strong>0</strong></div>
+            <div><span>Rejected invalid count</span><strong>0</strong></div>
+            <div><span>Rejected unsupported count</span><strong>4</strong></div>
+          </div>
+        </article>
+        <article class="database-migration-card">
+          <h4>Ce que la migration pr&eacute;pare</h4>
+          <p>Ce que la migration pr&eacute;pare : les records file-backed peuvent &ecirc;tre analys&eacute;s avec le m&ecirc;me contrat de sauvegarde qu&rsquo;un futur adapter database.</p>
+          <h4>Ce qui reste volontairement limit&eacute;</h4>
+          <p>Ce qui reste volontairement limit&eacute; : aucune base r&eacute;elle n&rsquo;est utilis&eacute;e ; le dry run ne fait qu&rsquo;expliquer ce qui serait ins&eacute;r&eacute;, remplac&eacute; ou ignor&eacute;.</p>
+          <h4>Prochaine &eacute;tape produit</h4>
+          <p>Prochaine &eacute;tape produit : choisir un stockage durable produit et brancher l&rsquo;adapter sans changer les garanties read-only du rapport.</p>
+        </article>
+      </div>
+      <p class="database-migration-boundary">Migration de pr&eacute;paration uniquement : aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
+      <p class="database-migration-plan">Save-result semantics preserved: true. Report queries read-only: true.</p>
+      <p class="database-migration-guard">Database adapter implemented false, production ready false, real database read/write counts 0.</p>
+      <p class="database-migration-warning">Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active.</p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -2929,6 +3048,48 @@
         <li>migration from file-backed required true: true</li>
         <li>report queries read-only: true</li>
         <li>global proof claim count: 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de pr&eacute;paration migration database</summary>
+      <ul>
+        <li>migration preparation status: available</li>
+        <li>source store kind: file_backed</li>
+        <li>target adapter kind: mock_database</li>
+        <li>dry run only: true</li>
+        <li>database adapter implemented: false</li>
+        <li>database adapter production ready: false</li>
+        <li>source record count: 6</li>
+        <li>target existing record count: 0</li>
+        <li>migration plan count: 6</li>
+        <li>migrable record count: 2</li>
+        <li>would insert count: 2</li>
+        <li>would replace count: 0</li>
+        <li>would ignore duplicate count: 0</li>
+        <li>rejected invalid count: 0</li>
+        <li>rejected unsupported count: 4</li>
+        <li>real DB write count: 0</li>
+        <li>real DB read count: 0</li>
+        <li>save result semantics preserved: true</li>
+        <li>report queries read-only: true</li>
+        <li>trend proof claim count: 0</li>
+        <li>global proof claim count: 0</li>
+        <li>invented statistic count: 0</li>
+        <li>sandbox events promoted to official count: 0</li>
+        <li>visible recommendation wording count: 0</li>
+        <li>visible selection wording count: 0</li>
+        <li>player selected count: 0</li>
+        <li>automatic selection count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>score mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>global economy claim count: 0</li>
       </ul>
     </details>
     <details class="appendix">
