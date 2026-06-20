@@ -5,15 +5,15 @@ Status: PASS
 ## Checks
 - PASS: default runFullMatch remains segment_harness.
 - PASS: experimental mode remains opt-in.
-- PASS: Persistence Evidence Snapshot is available. - 5c-inserted-5-6-6-40
+- PASS: Persistence Evidence Snapshot is available. - 5c-replaced-6-6-6-40
 - PASS: snapshot source is save result. - coach_match_history_save_result
-- PASS: snapshot scenario is explicit. - inserted
+- PASS: snapshot scenario is explicit. - replaced
 - PASS: markdown report is generated.
 - PASS: validation report is generated.
 - PASS: coach-report.export.html is generated.
-- PASS: markdown save operation matches snapshot. - inserted
-- PASS: validation save operation matches snapshot. - inserted
-- PASS: export save operation matches snapshot. - inserted
+- PASS: markdown save operation matches snapshot. - replaced
+- PASS: validation save operation matches snapshot. - replaced
+- PASS: export save operation matches snapshot. - replaced
 - PASS: markdown before/after counts match snapshot.
 - PASS: validation before/after counts match snapshot.
 - PASS: export before/after counts match snapshot.
@@ -59,16 +59,16 @@ Status: PASS
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
-- snapshot id: 5c-inserted-5-6-6-40
-- scenario: inserted
-- save operation: inserted
+- snapshot id: 5c-replaced-6-6-6-40
+- scenario: replaced
+- save operation: replaced
 - idempotent save: false
-- records before save count: 5
+- records before save count: 6
 - records after save count: 6
-- loaded from disk count: 0
+- loaded from disk count: 6
 - written to disk count: 6
-- deduped record count: 0
-- replaced record count: 0
+- deduped record count: 1
+- replaced record count: 1
 - ignored duplicate count: 0
 - queried record count: 6
 - queried signal count: 40

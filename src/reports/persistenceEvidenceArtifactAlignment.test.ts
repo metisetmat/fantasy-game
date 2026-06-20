@@ -47,10 +47,21 @@ export function validatePersistenceEvidenceArtifactAlignmentTest(): readonly str
   assertTest(!result.rendererRecalculationDetected, "renderer recalculation must be false.");
   assertTest(result.mismatchCount === 0, "mismatch count must be 0.");
 
+  const missingLabelResult = validatePersistenceEvidenceArtifactAlignment({
+    snapshot,
+    markdownReport: artifact(snapshot).replace(`records before save count: ${snapshot.recordsBeforeSaveCount}`, `unrelated value: ${snapshot.recordsBeforeSaveCount}`),
+    validationReport: artifact(snapshot),
+    exportHtml: artifact(snapshot),
+  });
+
+  assertTest(missingLabelResult.status === "fail", "artifact alignment must fail when a labelled counter is missing.");
+  assertTest(missingLabelResult.mismatchCount > 0, "missing labelled counter must increment mismatch count.");
+
   return [
     "markdown, validation, and export match snapshot",
     "all counter groups align",
     "scenario mixing and renderer recalculation are false",
+    "missing labelled counters fail even when the value appears elsewhere",
   ];
 }
 

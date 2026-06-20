@@ -43,11 +43,11 @@ function containsValue(text: string, label: string, value: string | number | boo
   const haystack = normalized(text);
   const expected = String(value).toLowerCase();
   const labelText = normalized(label);
+  const escapedLabel = labelText.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const escapedValue = expected.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const labelledValue = new RegExp(`${escapedLabel}\\s*:?\\s*${escapedValue}(\\b|\\s|\\.|,|;|$)`, "u");
 
-  return haystack.includes(`${labelText}: ${expected}`) ||
-    haystack.includes(`${labelText} ${expected}`) ||
-    haystack.includes(`${labelText}${expected}`) ||
-    haystack.includes(expected);
+  return labelledValue.test(haystack);
 }
 
 function artifactMatchesSnapshot(

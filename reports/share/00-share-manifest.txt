@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-19T18:45:49.316Z
+Generated timestamp: 2026-06-20T11:38:37.410Z
 Task/sprint name: Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency
 Final file count: 20
 
@@ -719,23 +719,8 @@ Test/build commands run:
 
 Git status summary:
  M reports/validation.share-pack.md
- M src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
  M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
+ M src/reports/persistenceEvidenceArtifactAlignment.test.ts
+ M src/reports/validation/persistenceEvidenceArtifactAlignment.ts
  M src/reports/validation/sharePackValidator.ts
- M src/simulation/runFullMatch.ts
  M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportPersistenceEvidenceSnapshot.ts
-?? src/reports/coachReportPersistenceEvidenceSnapshot.ts
-?? src/reports/persistenceEvidenceArtifactAlignment.test.ts
-?? src/reports/persistenceEvidenceCopy.test.ts
-?? src/reports/persistenceEvidenceGuard.test.ts
-?? src/reports/persistenceEvidenceMarkdownAlignment.test.ts
-?? src/reports/persistenceEvidenceNoRendererSideEffects.test.ts
-?? src/reports/persistenceEvidenceRendererAlignment.test.ts
-?? src/reports/persistenceEvidenceScenarioIsolation.test.ts
-?? src/reports/persistenceEvidenceSnapshot.test.ts
-?? src/reports/persistenceEvidenceTestFixtures.ts
-?? src/reports/persistenceEvidenceValidationAlignment.test.ts
-?? src/reports/validation/persistenceEvidenceArtifactAlignment.ts
-?? src/simulation/fullMatch/scoringGuard.5c.test.ts

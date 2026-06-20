@@ -1,5 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs";
-import { tmpdir } from "os";
+import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
@@ -65,9 +64,8 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
-  const historyStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-coach-report-5c-"));
   const historyStore = createFileBackedCoachMatchHistoryStore({
-    filePath: join(historyStoreDirectory, "coach-match-history-store.json"),
+    filePath: join(reportsDirectory, "history", "coach-match-history-store.json"),
     allowWrite: true,
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
@@ -168,6 +166,13 @@ export function writeLatestCoachReport(): void {
     exportHtml,
     "utf8",
   );
+  if (persistenceEvidenceSnapshot !== undefined) {
+    writeFileSync(
+      join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
+      `${JSON.stringify(persistenceEvidenceSnapshot, null, 2)}\n`,
+      "utf8",
+    );
+  }
 
   console.log("Generated reports/match-report.latest.json");
   console.log("Generated reports/coach-report.latest.html");
@@ -175,7 +180,9 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.experimental.html");
   console.log("Generated reports/coach-report.product.html");
   console.log("Generated reports/coach-report.export.html");
-  rmSync(historyStoreDirectory, { recursive: true, force: true });
+  if (persistenceEvidenceSnapshot !== undefined) {
+    console.log("Generated reports/persistence-evidence-snapshot.latest.json");
+  }
 }
 
 if (require.main === module) {

@@ -80,6 +80,27 @@ function containsAny(value: string, fragments: readonly string[]): boolean {
   return fragments.some((fragment) => value.includes(fragment));
 }
 
+function regexEscape(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+function extractLabelledValue(artifact: string, label: string): string | null {
+  const match = new RegExp(`${regexEscape(label)}:\\s*([^<\\r\\n]+)`, "u").exec(artifact);
+  const value = match?.[1];
+  return value === undefined ? null : value.trim();
+}
+
+function labelledValuesAligned(label: string, artifacts: readonly string[]): boolean {
+  const values = artifacts.map((artifact) => extractLabelledValue(artifact, label));
+  return values.every((value) => value !== null) && new Set(values).size === 1;
+}
+
+function labelledAlignmentDetail(label: string, artifacts: readonly string[]): string {
+  return artifacts
+    .map((artifact, index) => `artifact${index + 1}=${extractLabelledValue(artifact, label) ?? "missing"}`)
+    .join(", ");
+}
+
 function countAny(value: string, fragments: readonly string[]): number {
   return fragments.reduce((total, fragment) => total + (value.includes(fragment) ? 1 : 0), 0);
 }
@@ -3416,6 +3437,11 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay5BValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
     check("recommendations visible", fullMatchWorkbenchChainReplay5BValidation.includes("CONFIRM_HISTORY_STORE_SAVE_RESULT_CONTRACT") && fullMatchWorkbenchChainReplay5BValidation.includes("PREPARE_DATABASE_ADAPTER_IMPLEMENTATION"), "5B recommendations visible"),
   ];
+  const sprint5CAlignmentArtifacts = [
+    fullMatchWorkbenchChainReplay5C,
+    fullMatchWorkbenchChainReplay5CValidation,
+    coachExportHtml,
+  ];
   const sprint5CChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
     check("manifest exists", manifest.length > 0, manifestPath),
@@ -3442,10 +3468,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
     check("persistence snapshot section is present", coachExportHtml.includes("Coh&eacute;rence du stockage") && coachExportHtml.includes("history-consistency-snapshot"), "snapshot section visible"),
     check("single snapshot guard is visible", coachExportHtml.includes("instantan&eacute; unique de sauvegarde") && coachExportHtml.includes("rapport, la validation et l&rsquo;export doivent correspondre exactement"), "single snapshot guard visible"),
-    check("export save operation matches 5C report", fullMatchWorkbenchChainReplay5C.includes("- save operation: inserted") && fullMatchWorkbenchChainReplay5CValidation.includes("- save operation: inserted") && coachExportHtml.includes("save operation: inserted"), "save operation aligned"),
-    check("export before/after counters match 5C report", fullMatchWorkbenchChainReplay5C.includes("- records before save count: 5") && fullMatchWorkbenchChainReplay5CValidation.includes("- records before save count: 5") && coachExportHtml.includes("records before save count: 5"), "before count aligned"),
-    check("export disk counters match 5C report", fullMatchWorkbenchChainReplay5C.includes("- written to disk count: 6") && fullMatchWorkbenchChainReplay5CValidation.includes("- written to disk count: 6") && coachExportHtml.includes("written to disk count: 6"), "disk count aligned"),
-    check("export query counters match 5C report", fullMatchWorkbenchChainReplay5C.includes("- queried signal count: 40") && fullMatchWorkbenchChainReplay5CValidation.includes("- queried signal count: 40") && coachExportHtml.includes("queried signal count: 40"), "query count aligned"),
+    check("export save operation matches 5C report", labelledValuesAligned("save operation", sprint5CAlignmentArtifacts), labelledAlignmentDetail("save operation", sprint5CAlignmentArtifacts)),
+    check("export before/after counters match 5C report", labelledValuesAligned("records before save count", sprint5CAlignmentArtifacts) && labelledValuesAligned("records after save count", sprint5CAlignmentArtifacts), `${labelledAlignmentDetail("records before save count", sprint5CAlignmentArtifacts)}; ${labelledAlignmentDetail("records after save count", sprint5CAlignmentArtifacts)}`),
+    check("export disk counters match 5C report", labelledValuesAligned("loaded from disk count", sprint5CAlignmentArtifacts) && labelledValuesAligned("written to disk count", sprint5CAlignmentArtifacts), `${labelledAlignmentDetail("loaded from disk count", sprint5CAlignmentArtifacts)}; ${labelledAlignmentDetail("written to disk count", sprint5CAlignmentArtifacts)}`),
+    check("export query counters match 5C report", labelledValuesAligned("queried record count", sprint5CAlignmentArtifacts) && labelledValuesAligned("queried signal count", sprint5CAlignmentArtifacts), `${labelledAlignmentDetail("queried record count", sprint5CAlignmentArtifacts)}; ${labelledAlignmentDetail("queried signal count", sprint5CAlignmentArtifacts)}`),
     check("artifact mismatch count is 0", fullMatchWorkbenchChainReplay5CValidation.includes("- artifact mismatch count: 0"), "mismatch 0"),
     check("scenario mixing false", fullMatchWorkbenchChainReplay5CValidation.includes("- scenario mixing detected: false"), "scenario mixing false"),
     check("renderer recalculation false", fullMatchWorkbenchChainReplay5CValidation.includes("- renderer recalculation detected: false"), "renderer recalculation false"),

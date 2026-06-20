@@ -40,10 +40,10 @@ Status: PASS
 - PASS: export report HTML copied - export HTML visible
 - PASS: persistence snapshot section is present - snapshot section visible
 - PASS: single snapshot guard is visible - single snapshot guard visible
-- PASS: export save operation matches 5C report - save operation aligned
-- PASS: export before/after counters match 5C report - before count aligned
-- PASS: export disk counters match 5C report - disk count aligned
-- PASS: export query counters match 5C report - query count aligned
+- PASS: export save operation matches 5C report - artifact1=replaced, artifact2=replaced, artifact3=replaced
+- PASS: export before/after counters match 5C report - artifact1=6, artifact2=6, artifact3=6; artifact1=6, artifact2=6, artifact3=6
+- PASS: export disk counters match 5C report - artifact1=6, artifact2=6, artifact3=6; artifact1=6, artifact2=6, artifact3=6
+- PASS: export query counters match 5C report - artifact1=6, artifact2=6, artifact3=6; artifact1=40, artifact2=40, artifact3=40
 - PASS: artifact mismatch count is 0 - mismatch 0
 - PASS: scenario mixing false - scenario mixing false
 - PASS: renderer recalculation false - renderer recalculation false

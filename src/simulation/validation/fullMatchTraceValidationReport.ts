@@ -4071,10 +4071,10 @@ function renderPersistenceEvidenceSnapshotCounts(snapshot: CoachReportPersistenc
   ];
 }
 
-export function renderFullMatchWorkbenchChainReplay5CDoc(model: FullMatchTraceValidationModel): string {
-  const context = currentCoachReportHistoryStoreConsistencyContext();
-  const snapshot = context.persistenceEvidenceSnapshot;
-
+export function renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(
+  model: FullMatchTraceValidationModel,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+): string {
   return [
     "# FullMatch Workbench Chain Replay 5C",
     "",
@@ -4119,6 +4119,12 @@ export function renderFullMatchWorkbenchChainReplay5CDoc(model: FullMatchTraceVa
     `Trace validation status: ${statusLabel(model)}.`,
     "",
   ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5CDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+
+  return renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(model, context.persistenceEvidenceSnapshot);
 }
 
 function renderPersistenceEvidenceAlignmentChecks(
@@ -4187,10 +4193,12 @@ function renderPersistenceEvidenceAlignmentChecks(
   ];
 }
 
-export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatchTraceValidationModel): string {
-  const context = currentCoachReportHistoryStoreConsistencyContext();
-  const snapshot = context.persistenceEvidenceSnapshot;
-  const markdownReport = renderFullMatchWorkbenchChainReplay5CDoc(model);
+export function renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot(
+  model: FullMatchTraceValidationModel,
+  snapshot: CoachReportPersistenceEvidenceSnapshot,
+  exportHtml: string,
+): string {
+  const markdownReport = renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(model, snapshot);
   const validationDraft = [
     "# FullMatch Workbench Chain Replay 5C Validation",
     "",
@@ -4204,7 +4212,7 @@ export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatch
     snapshot,
     markdownReport,
     validationReport: validationDraft,
-    exportHtml: context.exportHtml,
+    exportHtml,
   });
   const status = model.status === "available" && alignment.status === "pass" ? "PASS" : "FAIL";
 
@@ -4250,4 +4258,14 @@ export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatch
     "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
     "",
   ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5CValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+
+  return renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot(
+    model,
+    context.persistenceEvidenceSnapshot,
+    context.exportHtml,
+  );
 }

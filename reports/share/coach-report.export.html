@@ -1897,7 +1897,7 @@
     <div class="report-section-header">
       <div>
         <h2>Historique produit des matchs</h2>
-        <p>5 enregistrement(s) locaux, 5 relu(s), 32 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
+        <p>6 enregistrement(s) locaux, 6 relu(s), 40 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
       </div>
     </div>
     <p class="match-history-guard">Cet historique pr&eacute;pare le stockage produit des rapports. Dans cette version, il reste local et en lecture seule : il n&rsquo;applique aucune d&eacute;cision, ne modifie pas le score et ne remplace pas l&rsquo;analyse du match courant.</p>
@@ -1915,12 +1915,12 @@
         <div class="match-history-source-list">
           <span class="match-history-source-badge match-history-source-badge--controlled">sample contr&ocirc;l&eacute;: 4</span>
           <span class="match-history-source-badge match-history-source-badge--simulated">match simul&eacute;: 1</span>
-          <span class="match-history-source-badge match-history-source-badge--product">store produit: 0</span>
+          <span class="match-history-source-badge match-history-source-badge--product">store produit: 1</span>
         </div>
         <div class="match-history-kpi">
-          <div><span>Enregistrements stock&eacute;s</span><strong>5</strong></div>
-          <div><span>Enregistrements relus</span><strong>5</strong></div>
-          <div><span>Signaux relus</span><strong>32</strong></div>
+          <div><span>Enregistrements stock&eacute;s</span><strong>6</strong></div>
+          <div><span>Enregistrements relus</span><strong>6</strong></div>
+          <div><span>Signaux relus</span><strong>40</strong></div>
         </div>
       </article>
       <article class="match-history-card">
@@ -1953,12 +1953,12 @@
           <div><span>Location visible</span><strong>oui</strong></div>
           <div><span>Lecture report read-only</span><strong class="persistent-history-readonly">oui</strong></div>
         </div>
-        <p><strong>Stockage local :</strong> <code>C:\Users\mbess\AppData\Local\Temp\fantasy-game-coach-report-5c-4kE3ni\coach-match-history-store.json</code></p>
+        <p><strong>Stockage local :</strong> <code>C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</code></p>
       </article>
       <article class="persistent-history-card">
         <h3>Comptes de persistance</h3>
         <div class="persistent-history-kpi">
-          <div><span>Avant sauvegarde</span><strong>5</strong></div>
+          <div><span>Avant sauvegarde</span><strong>6</strong></div>
           <div><span>Apr&egrave;s sauvegarde</span><strong>6</strong></div>
           <div><span>Records relus</span><strong>6</strong></div>
           <div><span>Signaux relus</span><strong>40</strong></div>
@@ -1981,16 +1981,16 @@
         <p>La coh&eacute;rence de stockage affiche un instantan&eacute; unique de sauvegarde. Les compteurs visibles dans le rapport, la validation et l&rsquo;export doivent correspondre exactement.</p>
       </div>
       <ul class="history-consistency-snapshot">
-        <li>snapshot id: 5c-inserted-5-6-6-40</li>
-        <li>scenario: inserted</li>
-        <li>save operation: inserted</li>
+        <li>snapshot id: 5c-replaced-6-6-6-40</li>
+        <li>scenario: replaced</li>
+        <li>save operation: replaced</li>
         <li>idempotent save: false</li>
-        <li>records before save count: 5</li>
+        <li>records before save count: 6</li>
         <li>records after save count: 6</li>
-        <li>loaded from disk count: 0</li>
+        <li>loaded from disk count: 6</li>
         <li>written to disk count: 6</li>
-        <li>deduped record count: 0</li>
-        <li>replaced record count: 0</li>
+        <li>deduped record count: 1</li>
+        <li>replaced record count: 1</li>
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
         <li>queried signal count: 40</li>
@@ -2001,19 +2001,19 @@
         <article class="history-consistency-card">
           <h4>R&eacute;sultat de sauvegarde</h4>
           <div class="history-consistency-kpi">
-            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">inserted</strong></div>
+            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">replaced</strong></div>
             <div><span>Idempotent</span><strong>non</strong></div>
-            <div><span>Avant</span><strong>5</strong></div>
+            <div><span>Avant</span><strong>6</strong></div>
             <div><span>Apr&egrave;s</span><strong>6</strong></div>
           </div>
         </article>
         <article class="history-consistency-card">
           <h4>Compteurs durables</h4>
           <div class="history-consistency-kpi">
-            <div><span>Charg&eacute;s disque</span><strong>0</strong></div>
+            <div><span>Charg&eacute;s disque</span><strong>6</strong></div>
             <div><span>&Eacute;crits disque</span><strong>6</strong></div>
-            <div><span>D&eacute;dupliqu&eacute;s</span><strong>0</strong></div>
-            <div><span>Remplac&eacute;s</span><strong>0</strong></div>
+            <div><span>D&eacute;dupliqu&eacute;s</span><strong>1</strong></div>
+            <div><span>Remplac&eacute;s</span><strong>1</strong></div>
             <div><span>Doublons ignor&eacute;s</span><strong>0</strong></div>
             <div><span>Records relus</span><strong>6</strong></div>
             <div><span>Signaux relus</span><strong>40</strong></div>
@@ -2843,12 +2843,12 @@
       <ul>
         <li>real match history integration status available</li>
         <li>store kind file_backed</li>
-        <li>stored record count 5</li>
-        <li>queried record count 5</li>
-        <li>queried signal count 32</li>
+        <li>stored record count 6</li>
+        <li>queried record count 6</li>
+        <li>queried signal count 40</li>
         <li>controlled sample record count 4</li>
         <li>simulated match history record count 1</li>
-        <li>product history record count 0</li>
+        <li>product history record count 1</li>
         <li>current match record saved true</li>
         <li>history summary visible true</li>
         <li>trend proof claim count 0</li>
@@ -2879,8 +2879,8 @@
         <li>store kind file_backed</li>
         <li>durable true</li>
         <li>storage location visible true</li>
-        <li>storage location C:\Users\mbess\AppData\Local\Temp\fantasy-game-coach-report-5c-4kE3ni\coach-match-history-store.json</li>
-        <li>records before save count 5</li>
+        <li>storage location C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</li>
+        <li>records before save count 6</li>
         <li>records after save count 6</li>
         <li>queried record count 6</li>
         <li>queried signal count 40</li>
@@ -2912,16 +2912,16 @@
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
       <ul>
-        <li>snapshot id: 5c-inserted-5-6-6-40</li>
-        <li>scenario: inserted</li>
-        <li>save operation: inserted</li>
+        <li>snapshot id: 5c-replaced-6-6-6-40</li>
+        <li>scenario: replaced</li>
+        <li>save operation: replaced</li>
         <li>idempotent save: false</li>
-        <li>records before save count: 5</li>
+        <li>records before save count: 6</li>
         <li>records after save count: 6</li>
-        <li>loaded from disk count: 0</li>
+        <li>loaded from disk count: 6</li>
         <li>written to disk count: 6</li>
-        <li>deduped record count: 0</li>
-        <li>replaced record count: 0</li>
+        <li>deduped record count: 1</li>
+        <li>replaced record count: 1</li>
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
         <li>queried signal count: 40</li>

@@ -3,16 +3,16 @@
 Sprint 5C n&rsquo;ajoute pas de gameplay. Il aligne la preuve de persistance : le rapport Markdown, la validation et l&rsquo;export HTML lisent le m&ecirc;me instantan&eacute; issu du CoachMatchHistorySaveResult.
 
 ## Persistence Evidence Alignment Summary
-- snapshot id: 5c-inserted-5-6-6-40
-- scenario: inserted
-- save operation: inserted
+- snapshot id: 5c-replaced-6-6-6-40
+- scenario: replaced
+- save operation: replaced
 - idempotent save: false
-- records before save count: 5
+- records before save count: 6
 - records after save count: 6
-- loaded from disk count: 0
+- loaded from disk count: 6
 - written to disk count: 6
-- deduped record count: 0
-- replaced record count: 0
+- deduped record count: 1
+- replaced record count: 1
 - ignored duplicate count: 0
 - queried record count: 6
 - queried signal count: 40

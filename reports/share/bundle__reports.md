@@ -65,11 +65,14 @@ import {
   renderFullMatchWorkbenchChainReplay5BDoc,
   renderFullMatchWorkbenchChainReplay5BValidation,
   renderFullMatchWorkbenchChainReplay5CDoc,
+  renderFullMatchWorkbenchChainReplay5CDocFromSnapshot,
   renderFullMatchWorkbenchChainReplay5CValidation,
+  renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
+import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5c.md";
@@ -77,6 +80,8 @@ const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
+let cachedPersistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot | null | undefined;
+let cachedCoachReportExportHtml: string | null | undefined;
 
 function fullMatchTraceValidationModel(): FullMatchTraceValidationModel {
   if (cachedFullMatchTraceValidationModel === null) {
@@ -84,6 +89,37 @@ function fullMatchTraceValidationModel(): FullMatchTraceValidationModel {
   }
 
   return cachedFullMatchTraceValidationModel;
+}
+
+function latestPersistenceEvidenceSnapshot(): CoachReportPersistenceEvidenceSnapshot | null {
+  if (cachedPersistenceEvidenceSnapshot !== undefined) {
+    return cachedPersistenceEvidenceSnapshot;
+  }
+
+  const snapshotPath = join(process.cwd(), "reports", "persistence-evidence-snapshot.latest.json");
+  if (!existsSync(snapshotPath)) {
+    cachedPersistenceEvidenceSnapshot = null;
+    return cachedPersistenceEvidenceSnapshot;
+  }
+
+  try {
+    cachedPersistenceEvidenceSnapshot = JSON.parse(readFileSync(snapshotPath, "utf8")) as CoachReportPersistenceEvidenceSnapshot;
+  } catch {
+    cachedPersistenceEvidenceSnapshot = null;
+  }
+
+  return cachedPersistenceEvidenceSnapshot;
+}
+
+function latestCoachReportExportHtml(): string | null {
+  if (cachedCoachReportExportHtml !== undefined) {
+    return cachedCoachReportExportHtml;
+  }
+
+  const exportPath = join(process.cwd(), "reports", "coach-report.export.html");
+  cachedCoachReportExportHtml = existsSync(exportPath) ? readFileSync(exportPath, "utf8") : null;
+
+  return cachedCoachReportExportHtml;
 }
 
 interface SharePackSource {
@@ -3753,7 +3789,11 @@ function generateBundles(
 
 function fullMatchWorkbenchChainReplayDoc(): string {
   if (TASK_NAME.includes("Sprint 5C")) {
-    return renderFullMatchWorkbenchChainReplay5CDoc(fullMatchTraceValidationModel());
+    const snapshot = latestPersistenceEvidenceSnapshot();
+
+    return snapshot === null
+      ? renderFullMatchWorkbenchChainReplay5CDoc(fullMatchTraceValidationModel())
+      : renderFullMatchWorkbenchChainReplay5CDocFromSnapshot(fullMatchTraceValidationModel(), snapshot);
   }
 
   if (TASK_NAME.includes("Sprint 5B")) {
@@ -5941,7 +5981,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
   if (TASK_NAME.includes("Sprint 5C")) {
-    return renderFullMatchWorkbenchChainReplay5CValidation(fullMatchTraceValidationModel());
+    const snapshot = latestPersistenceEvidenceSnapshot();
+    const exportHtml = latestCoachReportExportHtml();
+
+    return snapshot === null || exportHtml === null
+      ? renderFullMatchWorkbenchChainReplay5CValidation(fullMatchTraceValidationModel())
+      : renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot(fullMatchTraceValidationModel(), snapshot, exportHtml);
   }
 
   if (TASK_NAME.includes("Sprint 5B")) {
@@ -22830,10 +22875,21 @@ export function validatePersistenceEvidenceArtifactAlignmentTest(): readonly str
   assertTest(!result.rendererRecalculationDetected, "renderer recalculation must be false.");
   assertTest(result.mismatchCount === 0, "mismatch count must be 0.");
 
+  const missingLabelResult = validatePersistenceEvidenceArtifactAlignment({
+    snapshot,
+    markdownReport: artifact(snapshot).replace(`records before save count: ${snapshot.recordsBeforeSaveCount}`, `unrelated value: ${snapshot.recordsBeforeSaveCount}`),
+    validationReport: artifact(snapshot),
+    exportHtml: artifact(snapshot),
+  });
+
+  assertTest(missingLabelResult.status === "fail", "artifact alignment must fail when a labelled counter is missing.");
+  assertTest(missingLabelResult.mismatchCount > 0, "missing labelled counter must increment mismatch count.");
+
   return [
     "markdown, validation, and export match snapshot",
     "all counter groups align",
     "scenario mixing and renderer recalculation are false",
+    "missing labelled counters fail even when the value appears elsewhere",
   ];
 }
 
@@ -22986,8 +23042,7 @@ if (require.main === module) {
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs";
-import { tmpdir } from "os";
+import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { buildCoachReportExportSnapshot } from "./buildCoachReportExportSnapshot";
@@ -23053,9 +23108,8 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
-  const historyStoreDirectory = mkdtempSync(join(tmpdir(), "fantasy-game-coach-report-5c-"));
   const historyStore = createFileBackedCoachMatchHistoryStore({
-    filePath: join(historyStoreDirectory, "coach-match-history-store.json"),
+    filePath: join(reportsDirectory, "history", "coach-match-history-store.json"),
     allowWrite: true,
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
@@ -23156,6 +23210,13 @@ export function writeLatestCoachReport(): void {
     exportHtml,
     "utf8",
   );
+  if (persistenceEvidenceSnapshot !== undefined) {
+    writeFileSync(
+      join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
+      `${JSON.stringify(persistenceEvidenceSnapshot, null, 2)}\n`,
+      "utf8",
+    );
+  }
 
   console.log("Generated reports/match-report.latest.json");
   console.log("Generated reports/coach-report.latest.html");
@@ -23163,7 +23224,9 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.experimental.html");
   console.log("Generated reports/coach-report.product.html");
   console.log("Generated reports/coach-report.export.html");
-  rmSync(historyStoreDirectory, { recursive: true, force: true });
+  if (persistenceEvidenceSnapshot !== undefined) {
+    console.log("Generated reports/persistence-evidence-snapshot.latest.json");
+  }
 }
 
 if (require.main === module) {
