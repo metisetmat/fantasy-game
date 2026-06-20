@@ -7,6 +7,7 @@ import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMa
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
+import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -15,6 +16,8 @@ import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportR
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
 import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRecord";
 import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
+import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatchHistoryMigrationDryRun";
+import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -124,6 +127,18 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const migrationDryRun = buildCoachMatchHistoryMigrationDryRun({
+    sourceRecords: historyStore.listAll(),
+    targetAdapter: createMockDatabaseCoachMatchHistoryAdapter(),
+  });
+  const databaseMigrationPreparation = persistenceEvidenceSnapshot === undefined
+    ? undefined
+    : buildCoachReportDatabaseMigrationPreparation({
+        persistenceEvidenceSnapshot,
+        migrationDryRun,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -133,6 +148,7 @@ export function writeLatestCoachReport(): void {
     persistentHistoryAdapter,
     ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
+    ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

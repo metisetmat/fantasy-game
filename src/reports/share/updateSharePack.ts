@@ -61,15 +61,17 @@ import {
   renderFullMatchWorkbenchChainReplay5CDocFromSnapshot,
   renderFullMatchWorkbenchChainReplay5CValidation,
   renderFullMatchWorkbenchChainReplay5CValidationFromSnapshot,
+  renderFullMatchWorkbenchChainReplay5DDoc,
+  renderFullMatchWorkbenchChainReplay5DValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5c.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5c.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5D - Database Adapter SPI & Migration Dry Run";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5d.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1845,6 +1847,36 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5C reusable persistence evidence fixtures for scenario and artifact alignment tests",
       },
       {
+        source: "src/reports/history/databaseCoachMatchHistoryAdapterSpi.ts",
+        required: true,
+        reason: "Sprint 5D database adapter SPI defining dry-run save/query semantics without activating production database persistence",
+      },
+      {
+        source: "src/reports/history/mockDatabaseCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5D deterministic mock database dry-run adapter preserving inserted/replaced/ignored_duplicate save-result semantics",
+      },
+      {
+        source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
+        required: true,
+        reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
+      },
+      {
+        source: "src/reports/history/buildCoachMatchHistoryMigrationDryRun.ts",
+        required: true,
+        reason: "Sprint 5D builder planning file-backed to database-adapter migration without real database reads or writes",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationPreparation.ts",
+        required: true,
+        reason: "Sprint 5D report model, tags, evidence fact, and non-mutation guardrails for database migration preparation",
+      },
+      {
+        source: "src/reports/buildCoachReportDatabaseMigrationPreparation.ts",
+        required: true,
+        reason: "Sprint 5D builder connecting persistence evidence snapshot and migration dry run to the export report",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -2173,6 +2205,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5c.test.ts",
         required: true,
         reason: "Sprint 5C executable scoring guard proving persistence evidence alignment does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5d.test.ts",
+        required: true,
+        reason: "Sprint 5D executable scoring guard proving database migration dry-run preparation does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3586,6 +3623,46 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5C executable non-selection and non-mutation guard tests for persistence evidence",
       },
       {
+        source: "src/reports/databaseCoachMatchHistoryAdapterSpi.test.ts",
+        required: true,
+        reason: "Sprint 5D executable database adapter SPI tests for dry-run status, adapter metadata, and non-production readiness",
+      },
+      {
+        source: "src/reports/mockDatabaseCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5D executable mock database adapter tests preserving inserted, replaced, and ignored_duplicate dry-run semantics",
+      },
+      {
+        source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
+        required: true,
+        reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationPreparation.test.ts",
+        required: true,
+        reason: "Sprint 5D executable report-model tests for database migration preparation counts and guardrails",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5D executable export renderer tests for the database migration preparation section and appendix",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationSourceGuard.test.ts",
+        required: true,
+        reason: "Sprint 5D executable source guard tests proving migration preparation consumes the dry-run model",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationCopy.test.ts",
+        required: true,
+        reason: "Sprint 5D executable visible-copy tests proving migration wording stays coach-readable and dry-run scoped",
+      },
+      {
+        source: "src/reports/coachReportDatabaseMigrationGuard.test.ts",
+        required: true,
+        reason: "Sprint 5D executable non-selection and non-mutation guard tests for database migration preparation",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -3781,6 +3858,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5D")) {
+    return renderFullMatchWorkbenchChainReplay5DDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5C")) {
     const snapshot = latestPersistenceEvidenceSnapshot();
 
@@ -5973,6 +6054,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5D")) {
+    return renderFullMatchWorkbenchChainReplay5DValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 5C")) {
     const snapshot = latestPersistenceEvidenceSnapshot();
     const exportHtml = latestCoachReportExportHtml();
@@ -8111,6 +8196,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5D")) {
+    return [
+      "# Sprint 5D Share Pack",
+      "",
+      "Current sprint: Sprint 5D - Database Adapter SPI & Migration Dry Run",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5d.md",
+      "- validation.fullmatch-workbench-chain-replay-5d.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5d.md and validation.fullmatch-workbench-chain-replay-5d.md.",
+      "",
+      "Sprint 5D proves the database adapter SPI and migration dry run without activating database persistence or writing to a real database.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5C")) {
     return [
       "# Sprint 5C Share Pack",

@@ -19,6 +19,7 @@ import type { CoachReportHistoryStoreConsistencyModel } from "./coachReportHisto
 import type { CoachReportPersistenceEvidenceSnapshot } from "./coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
+import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReportDatabaseMigrationPreparation";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -801,6 +802,68 @@ const PREMIUM_EXPORT_CSS = `
       background: #fff8ed;
     }
 
+    .database-migration-section {
+      display: grid;
+      gap: 14px;
+      border-top: 1px solid var(--report-line);
+      padding-top: 16px;
+    }
+
+    .database-migration-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .database-migration-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      background: var(--report-soft);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .database-migration-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .database-migration-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .database-migration-kpi strong,
+    .database-migration-boundary,
+    .database-migration-plan,
+    .database-migration-guard,
+    .database-migration-dry-run {
+      color: var(--report-dark);
+      font-weight: 700;
+    }
+
+    .database-migration-boundary,
+    .database-migration-plan,
+    .database-migration-guard,
+    .database-migration-warning,
+    .database-migration-dry-run {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .database-migration-warning {
+      border-left-color: var(--report-warning);
+      background: #fff8ed;
+    }
+
     .match-history-source-list {
       display: flex;
       flex-wrap: wrap;
@@ -875,6 +938,10 @@ const PREMIUM_EXPORT_CSS = `
       .history-consistency-grid {
         grid-template-columns: 1fr;
       }
+
+      .database-migration-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media print {
@@ -919,7 +986,13 @@ const PREMIUM_EXPORT_CSS = `
       .history-consistency-boundary,
       .history-consistency-database-contract,
       .history-consistency-guard,
-      .history-consistency-warning {
+      .history-consistency-warning,
+      .database-migration-card,
+      .database-migration-boundary,
+      .database-migration-plan,
+      .database-migration-guard,
+      .database-migration-warning,
+      .database-migration-dry-run {
         break-inside: avoid;
         page-break-inside: avoid;
         box-shadow: none;
@@ -1601,6 +1674,62 @@ function renderHistoryStoreConsistency(
     </section>`;
 }
 
+function renderDatabaseMigrationPreparation(
+  model: CoachReportDatabaseMigrationPreparationModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="database-migration-section" aria-label="Pr&eacute;paration migration historique">
+      <div>
+        <h3>Pr&eacute;paration migration historique</h3>
+        <p>La migration database est pr&eacute;par&eacute;e comme un dry run de lecture : elle d&eacute;crit ce qui serait ins&eacute;r&eacute;, remplac&eacute;, ignor&eacute; ou rejet&eacute;, sans activer de stockage database.</p>
+      </div>
+      <p class="database-migration-dry-run">Cette migration est un dry run. Elle pr&eacute;pare le passage vers un futur stockage database sans &eacute;crire dans une base r&eacute;elle, sans changer le rapport courant et sans cr&eacute;er une nouvelle source de v&eacute;rit&eacute;.</p>
+      <div class="database-migration-grid">
+        <article class="database-migration-card">
+          <h4>Boundary database</h4>
+          <div class="database-migration-kpi">
+            <div><span>Source store kind</span><strong>${model.sourceStoreKind}</strong></div>
+            <div><span>Target adapter kind</span><strong>${model.targetAdapterKind}</strong></div>
+            <div><span>Dry run only</span><strong>${model.dryRunOnly ? "true" : "false"}</strong></div>
+            <div><span>Adapter impl&eacute;ment&eacute;</span><strong>${model.databaseAdapterImplemented ? "true" : "false"}</strong></div>
+            <div><span>Production ready</span><strong>${model.databaseAdapterProductionReady ? "true" : "false"}</strong></div>
+            <div><span>Real DB write count</span><strong>${model.realDatabaseWriteCount}</strong></div>
+            <div><span>Real DB read count</span><strong>${model.realDatabaseReadCount}</strong></div>
+          </div>
+        </article>
+        <article class="database-migration-card">
+          <h4>Plan de migration</h4>
+          <div class="database-migration-kpi">
+            <div><span>Source record count</span><strong>${model.sourceRecordCount}</strong></div>
+            <div><span>Migration plan count</span><strong>${model.migrationPlanCount}</strong></div>
+            <div><span>Migrable record count</span><strong>${model.migrableRecordCount}</strong></div>
+            <div><span>Would insert count</span><strong>${model.wouldInsertCount}</strong></div>
+            <div><span>Would replace count</span><strong>${model.wouldReplaceCount}</strong></div>
+            <div><span>Would ignore duplicate count</span><strong>${model.wouldIgnoreDuplicateCount}</strong></div>
+            <div><span>Rejected invalid count</span><strong>${model.rejectedInvalidCount}</strong></div>
+            <div><span>Rejected unsupported count</span><strong>${model.rejectedUnsupportedCount}</strong></div>
+          </div>
+        </article>
+        <article class="database-migration-card">
+          <h4>Ce que la migration pr&eacute;pare</h4>
+          <p>Ce que la migration pr&eacute;pare : les records file-backed peuvent &ecirc;tre analys&eacute;s avec le m&ecirc;me contrat de sauvegarde qu&rsquo;un futur adapter database.</p>
+          <h4>Ce qui reste volontairement limit&eacute;</h4>
+          <p>Ce qui reste volontairement limit&eacute; : aucune base r&eacute;elle n&rsquo;est utilis&eacute;e ; le dry run ne fait qu&rsquo;expliquer ce qui serait ins&eacute;r&eacute;, remplac&eacute; ou ignor&eacute;.</p>
+          <h4>Prochaine &eacute;tape produit</h4>
+          <p>Prochaine &eacute;tape produit : choisir un stockage durable produit et brancher l&rsquo;adapter sans changer les garanties read-only du rapport.</p>
+        </article>
+      </div>
+      <p class="database-migration-boundary">Migration de pr&eacute;paration uniquement : aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
+      <p class="database-migration-plan">Save-result semantics preserved: ${model.preservesSaveResultSemantics}. Report queries read-only: ${model.reportQueriesReadOnly}.</p>
+      <p class="database-migration-guard">Database adapter implemented false, production ready false, real database read/write counts 0.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="database-migration-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -2029,6 +2158,57 @@ function renderHistoryStoreConsistencyAppendix(
     </details>`;
 }
 
+function renderDatabaseMigrationPreparationAppendix(
+  model: CoachReportDatabaseMigrationPreparationModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails de pr&eacute;paration migration database</summary>
+      <ul>
+        <li>migration preparation status: ${model.status}</li>
+        <li>source store kind: ${model.sourceStoreKind}</li>
+        <li>target adapter kind: ${model.targetAdapterKind}</li>
+        <li>dry run only: ${model.dryRunOnly}</li>
+        <li>database adapter implemented: ${model.databaseAdapterImplemented}</li>
+        <li>database adapter production ready: ${model.databaseAdapterProductionReady}</li>
+        <li>source record count: ${model.sourceRecordCount}</li>
+        <li>target existing record count: ${model.targetExistingRecordCount}</li>
+        <li>migration plan count: ${model.migrationPlanCount}</li>
+        <li>migrable record count: ${model.migrableRecordCount}</li>
+        <li>would insert count: ${model.wouldInsertCount}</li>
+        <li>would replace count: ${model.wouldReplaceCount}</li>
+        <li>would ignore duplicate count: ${model.wouldIgnoreDuplicateCount}</li>
+        <li>rejected invalid count: ${model.rejectedInvalidCount}</li>
+        <li>rejected unsupported count: ${model.rejectedUnsupportedCount}</li>
+        <li>real DB write count: ${model.realDatabaseWriteCount}</li>
+        <li>real DB read count: ${model.realDatabaseReadCount}</li>
+        <li>save result semantics preserved: ${model.preservesSaveResultSemantics}</li>
+        <li>report queries read-only: ${model.reportQueriesReadOnly}</li>
+        <li>trend proof claim count: ${model.trendProofClaimCount}</li>
+        <li>global proof claim count: ${model.globalProofClaimCount}</li>
+        <li>invented statistic count: ${model.inventedStatisticCount}</li>
+        <li>sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}</li>
+        <li>visible recommendation wording count: ${model.visibleRecommendationWordingCount}</li>
+        <li>visible selection wording count: ${model.visibleSelectionWordingCount}</li>
+        <li>player selected count: ${model.playerSelectedCount}</li>
+        <li>automatic selection count: ${model.automaticSelectionCount}</li>
+        <li>lineup mutation count: ${model.lineupMutationCount}</li>
+        <li>starters mutation count: ${model.startersMutationCount}</li>
+        <li>bench mutation count: ${model.benchMutationCount}</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>score mutation count: ${model.scoreMutationCount}</li>
+        <li>possession mutation count: ${model.possessionMutationCount}</li>
+        <li>production scoring event creation count: ${model.productionScoringEventCreationCount}</li>
+        <li>global economy claim count: ${model.globalEconomyClaimCount}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -2043,6 +2223,7 @@ function renderAppendices(input: {
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
   readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
+  readonly databaseMigrationPreparation?: CoachReportDatabaseMigrationPreparationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -2078,6 +2259,7 @@ function renderAppendices(input: {
     ${renderRealMatchHistoryIntegrationAppendix(input.realMatchHistoryIntegration)}
     ${renderPersistentHistoryAdapterAppendix(input.persistentHistoryAdapter)}
     ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency, input.persistenceEvidenceSnapshot)}
+    ${renderDatabaseMigrationPreparationAppendix(input.databaseMigrationPreparation)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -2104,6 +2286,7 @@ export function renderCoachReportExportHtml(input: {
   readonly persistentHistoryAdapter?: CoachReportPersistentHistoryAdapterModel;
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
   readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
+  readonly databaseMigrationPreparation?: CoachReportDatabaseMigrationPreparationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -2204,6 +2387,7 @@ export function renderCoachReportExportHtml(input: {
     ...(input.persistentHistoryAdapter === undefined ? [] : [
       renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency, input.persistenceEvidenceSnapshot),
     ]),
+    renderDatabaseMigrationPreparation(input.databaseMigrationPreparation),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -2230,6 +2414,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.persistenceEvidenceSnapshot === undefined
       ? {}
       : { persistenceEvidenceSnapshot: input.persistenceEvidenceSnapshot }),
+    ...(input.databaseMigrationPreparation === undefined
+      ? {}
+      : { databaseMigrationPreparation: input.databaseMigrationPreparation }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
