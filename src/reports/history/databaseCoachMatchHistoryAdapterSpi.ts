@@ -14,6 +14,7 @@ export type DatabaseCoachMatchHistoryAdapterStatus =
 export type DatabaseCoachMatchHistoryAdapterKind =
   | "future_database"
   | "mock_database"
+  | "experimental_database"
   | "production_database";
 
 export interface DatabaseCoachMatchHistoryAdapterDescription {
@@ -31,6 +32,11 @@ export interface DatabaseCoachMatchHistoryAdapterDescription {
   readonly supportsQueryByCompetition: boolean;
   readonly implemented: boolean;
   readonly productionReady: boolean;
+  readonly featureFlagEnabled: boolean;
+  readonly productActivationAllowed: boolean;
+  readonly reportCanUseAsSourceOfTruth: boolean;
+  readonly realDatabaseReadCount: 0;
+  readonly realDatabaseWriteCount: 0;
   readonly canDriveCoachInstruction: false;
   readonly canDriveLiveSelection: false;
   readonly canDriveProductionRouteResolution: false;

@@ -20,6 +20,7 @@ import type { CoachReportPersistenceEvidenceSnapshot } from "./coachReportPersis
 import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPersistentHistoryAdapter";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReportDatabaseMigrationPreparation";
+import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabaseAdapterSpike";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -860,6 +861,66 @@ const PREMIUM_EXPORT_CSS = `
     }
 
     .database-migration-warning {
+      border-left-color: var(--report-warning);
+      background: #fff8ed;
+    }
+
+    .database-adapter-spike-section {
+      display: grid;
+      gap: 14px;
+      border-top: 1px solid var(--report-line);
+      padding-top: 16px;
+    }
+
+    .database-adapter-spike-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .database-adapter-spike-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      background: var(--report-soft);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .database-adapter-spike-kpi {
+      display: grid;
+      gap: 6px;
+    }
+
+    .database-adapter-spike-kpi div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--report-muted);
+    }
+
+    .database-adapter-spike-kpi strong,
+    .database-adapter-spike-boundary,
+    .database-adapter-spike-guard,
+    .database-adapter-spike-feature-flag {
+      color: var(--report-dark);
+      font-weight: 700;
+    }
+
+    .database-adapter-spike-boundary,
+    .database-adapter-spike-guard,
+    .database-adapter-spike-warning,
+    .database-adapter-spike-feature-flag {
+      border-left: 3px solid var(--report-accent);
+      background: var(--report-accent-soft);
+      padding: 10px 12px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .database-adapter-spike-warning {
       border-left-color: var(--report-warning);
       background: #fff8ed;
     }
@@ -1730,6 +1791,72 @@ function renderDatabaseMigrationPreparation(
     </section>`;
 }
 
+function renderDatabaseAdapterSpike(
+  model: CoachReportDatabaseAdapterSpikeModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="database-adapter-spike-section" aria-label="Adapter database exp&eacute;rimental">
+      <div>
+        <h3>Adapter database exp&eacute;rimental</h3>
+        <p>Cet adapter database est exp&eacute;rimental. Il valide une forme technique future, mais le rapport ne l&rsquo;utilise pas comme source de v&eacute;rit&eacute; produit et aucune base r&eacute;elle n&rsquo;est lue ou &eacute;crite.</p>
+      </div>
+      <p class="database-adapter-spike-feature-flag">Feature flag ${escapeHtml(model.featureFlagEnabled ? "enabled" : "disabled")}; default enabled false; product activation allowed false.</p>
+      <div class="database-adapter-spike-grid">
+        <article class="database-adapter-spike-card">
+          <h4>Adapter</h4>
+          <div class="database-adapter-spike-kpi">
+            <div><span>Adapter kind</span><strong>${model.adapterKind}</strong></div>
+            <div><span>Adapter implemented</span><strong>${model.adapterImplemented ? "true" : "false"}</strong></div>
+            <div><span>Production ready</span><strong>${model.adapterProductionReady ? "true" : "false"}</strong></div>
+            <div><span>Feature flag enabled</span><strong>${model.featureFlagEnabled ? "true" : "false"}</strong></div>
+            <div><span>Product activation allowed</span><strong>${model.productActivationAllowed ? "true" : "false"}</strong></div>
+            <div><span>Report can use as source of truth</span><strong>${model.reportCanUseAsSourceOfTruth ? "true" : "false"}</strong></div>
+            <div><span>Real DB write count</span><strong>${model.realDatabaseWriteCount}</strong></div>
+            <div><span>Real DB read count</span><strong>${model.realDatabaseReadCount}</strong></div>
+          </div>
+        </article>
+        <article class="database-adapter-spike-card">
+          <h4>Source active</h4>
+          <div class="database-adapter-spike-kpi">
+            <div><span>Active product history source</span><strong>${model.activeProductHistorySource}</strong></div>
+            <div><span>Database used as product truth</span><strong>${model.databaseUsedAsProductTruth ? "true" : "false"}</strong></div>
+            <div><span>Dry run only</span><strong>${model.dryRunOnly ? "true" : "false"}</strong></div>
+            <div><span>Source record count</span><strong>${model.sourceRecordCount}</strong></div>
+            <div><span>Experimental adapter record count</span><strong>${model.experimentalAdapterRecordCount}</strong></div>
+            <div><span>Dry run save count</span><strong>${model.dryRunSaveCount}</strong></div>
+            <div><span>Dry run query count</span><strong>${model.dryRunQueryCount}</strong></div>
+          </div>
+        </article>
+        <article class="database-adapter-spike-card">
+          <h4>Sc&eacute;narios valid&eacute;s</h4>
+          <div class="database-adapter-spike-kpi">
+            <div><span>Inserted scenario pass</span><strong>${model.insertedScenarioPass ? "true" : "false"}</strong></div>
+            <div><span>Replaced scenario pass</span><strong>${model.replacedScenarioPass ? "true" : "false"}</strong></div>
+            <div><span>Ignored duplicate scenario pass</span><strong>${model.ignoredDuplicateScenarioPass ? "true" : "false"}</strong></div>
+            <div><span>Query by team pass</span><strong>${model.queryByTeamPass ? "true" : "false"}</strong></div>
+            <div><span>Query by phase pass</span><strong>${model.queryByPhasePass ? "true" : "false"}</strong></div>
+            <div><span>Deterministic ordering pass</span><strong>${model.deterministicOrderingPass ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+        <article class="database-adapter-spike-card">
+          <h4>Ce que le spike valide</h4>
+          <p>Ce que le spike valide : l&rsquo;adapter exp&eacute;rimental reproduit les sc&eacute;narios inserted, replaced et ignored_duplicate sans d&eacute;pendance &agrave; une base r&eacute;elle.</p>
+          <h4>Ce qui reste d&eacute;sactiv&eacute;</h4>
+          <p>Ce qui reste d&eacute;sactiv&eacute; : la DB ne devient pas la source de v&eacute;rit&eacute; du rapport et ne pilote aucune d&eacute;cision coach.</p>
+          <h4>Prochaine &eacute;tape produit</h4>
+          <p>Prochaine &eacute;tape produit : choisir une vraie technologie de stockage puis brancher l&rsquo;adapter derri&egrave;re la m&ecirc;me boundary.</p>
+        </article>
+      </div>
+      <p class="database-adapter-spike-boundary">Boundary 5E : file_backed reste la source produit active ; l&rsquo;adapter experimental_database reste un spike technique non appliqu&eacute;.</p>
+      <p class="database-adapter-spike-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="database-adapter-spike-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -2209,6 +2336,58 @@ function renderDatabaseMigrationPreparationAppendix(
     </details>`;
 }
 
+function renderDatabaseAdapterSpikeAppendix(
+  model: CoachReportDatabaseAdapterSpikeModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails adapter database exp&eacute;rimental</summary>
+      <ul>
+        <li>spike status: ${model.status}</li>
+        <li>adapter kind: ${model.adapterKind}</li>
+        <li>adapter implemented true</li>
+        <li>adapter production ready false</li>
+        <li>feature flag enabled: ${model.featureFlagEnabled}</li>
+        <li>default feature flag enabled false</li>
+        <li>product activation allowed false</li>
+        <li>report can use as source of truth false</li>
+        <li>real DB write count: ${model.realDatabaseWriteCount}</li>
+        <li>real DB read count: ${model.realDatabaseReadCount}</li>
+        <li>dry run only true</li>
+        <li>active product history source ${model.activeProductHistorySource}</li>
+        <li>database used as product truth ${model.databaseUsedAsProductTruth}</li>
+        <li>save-result semantics preserved ${model.saveResultSemanticsPreserved}</li>
+        <li>inserted scenario pass ${model.insertedScenarioPass}</li>
+        <li>replaced scenario pass ${model.replacedScenarioPass}</li>
+        <li>ignored duplicate scenario pass ${model.ignoredDuplicateScenarioPass}</li>
+        <li>query by team pass ${model.queryByTeamPass}</li>
+        <li>query by phase pass ${model.queryByPhasePass}</li>
+        <li>deterministic ordering pass ${model.deterministicOrderingPass}</li>
+        <li>trend proof claim count 0</li>
+        <li>global proof claim count 0</li>
+        <li>invented statistic count 0</li>
+        <li>sandbox events promoted to official count 0</li>
+        <li>visible recommendation wording count 0</li>
+        <li>visible selection wording count 0</li>
+        <li>player selected count 0</li>
+        <li>automatic selection count 0</li>
+        <li>lineup mutation count 0</li>
+        <li>starters mutation count 0</li>
+        <li>bench mutation count 0</li>
+        <li>live selection driver count 0</li>
+        <li>production route resolution driver count 0</li>
+        <li>score mutation count 0</li>
+        <li>possession mutation count 0</li>
+        <li>production scoring event creation count 0</li>
+        <li>global economy claim count 0</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -2224,6 +2403,7 @@ function renderAppendices(input: {
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
   readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
   readonly databaseMigrationPreparation?: CoachReportDatabaseMigrationPreparationModel;
+  readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -2260,6 +2440,7 @@ function renderAppendices(input: {
     ${renderPersistentHistoryAdapterAppendix(input.persistentHistoryAdapter)}
     ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency, input.persistenceEvidenceSnapshot)}
     ${renderDatabaseMigrationPreparationAppendix(input.databaseMigrationPreparation)}
+    ${renderDatabaseAdapterSpikeAppendix(input.databaseAdapterSpike)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -2287,6 +2468,7 @@ export function renderCoachReportExportHtml(input: {
   readonly historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel;
   readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
   readonly databaseMigrationPreparation?: CoachReportDatabaseMigrationPreparationModel;
+  readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -2388,6 +2570,7 @@ export function renderCoachReportExportHtml(input: {
       renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency, input.persistenceEvidenceSnapshot),
     ]),
     renderDatabaseMigrationPreparation(input.databaseMigrationPreparation),
+    renderDatabaseAdapterSpike(input.databaseAdapterSpike),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -2417,6 +2600,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.databaseMigrationPreparation === undefined
       ? {}
       : { databaseMigrationPreparation: input.databaseMigrationPreparation }),
+    ...(input.databaseAdapterSpike === undefined
+      ? {}
+      : { databaseAdapterSpike: input.databaseAdapterSpike }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

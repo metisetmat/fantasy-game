@@ -8,6 +8,7 @@ import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMul
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
+import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -18,6 +19,8 @@ import { buildCoachMatchHistoryRecord } from "./history/buildCoachMatchHistoryRe
 import { createFileBackedCoachMatchHistoryStore } from "./history/fileBackedCoachMatchHistoryStore";
 import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatchHistoryMigrationDryRun";
 import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
+import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
+import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -139,6 +142,21 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const databaseFeatureFlag = resolveDatabaseHistoryAdapterFeatureFlag();
+  const experimentalDatabaseAdapter = createExperimentalDatabaseCoachMatchHistoryAdapter({
+    featureFlag: databaseFeatureFlag,
+  });
+  const databaseAdapterSpike = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined
+    ? undefined
+    : buildCoachReportDatabaseAdapterSpike({
+        persistenceEvidenceSnapshot,
+        migrationPreparation: databaseMigrationPreparation,
+        sourceRecords: historyStore.listAll(),
+        experimentalAdapter: experimentalDatabaseAdapter,
+        featureFlag: databaseFeatureFlag,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -149,6 +167,7 @@ export function writeLatestCoachReport(): void {
     ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
     ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
+    ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

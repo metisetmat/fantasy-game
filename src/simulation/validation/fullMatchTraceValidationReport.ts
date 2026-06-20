@@ -8,6 +8,7 @@ import { buildCoachReportExportSnapshot } from "../../reports/buildCoachReportEx
 import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoachReportHistoryStoreConsistency";
 import { buildCoachReportPersistenceEvidenceSnapshot } from "../../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "../../reports/buildCoachReportDatabaseMigrationPreparation";
+import { buildCoachReportDatabaseAdapterSpike } from "../../reports/buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -21,6 +22,7 @@ import type { CoachReportPersistentHistoryAdapterModel } from "../../reports/coa
 import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coachReportHistoryStoreConsistency";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../../reports/coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportDatabaseMigrationPreparationModel } from "../../reports/coachReportDatabaseMigrationPreparation";
+import type { CoachReportDatabaseAdapterSpikeModel } from "../../reports/coachReportDatabaseAdapterSpike";
 import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
 import type { CoachMatchHistoryMigrationDryRunModel } from "../../reports/history/coachMatchHistoryMigrationDryRun";
 import {
@@ -38,6 +40,8 @@ import { buildCoachMatchHistoryRecord } from "../../reports/history/buildCoachMa
 import { createFileBackedCoachMatchHistoryStore } from "../../reports/history/fileBackedCoachMatchHistoryStore";
 import { buildCoachMatchHistoryMigrationDryRun } from "../../reports/history/buildCoachMatchHistoryMigrationDryRun";
 import { createMockDatabaseCoachMatchHistoryAdapter } from "../../reports/history/mockDatabaseCoachMatchHistoryAdapter";
+import { resolveDatabaseHistoryAdapterFeatureFlag } from "../../reports/history/databaseHistoryAdapterFeatureFlag";
+import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "../../reports/history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -451,6 +455,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly persistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot;
   readonly migrationDryRun: CoachMatchHistoryMigrationDryRunModel;
   readonly databaseMigrationPreparation: CoachReportDatabaseMigrationPreparationModel;
+  readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
   readonly exportHtml: string;
 }
 
@@ -554,6 +559,18 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const databaseFeatureFlag = resolveDatabaseHistoryAdapterFeatureFlag();
+    const databaseAdapterSpike = buildCoachReportDatabaseAdapterSpike({
+      persistenceEvidenceSnapshot,
+      migrationPreparation: databaseMigrationPreparation,
+      sourceRecords: historyStore.listAll(),
+      experimentalAdapter: createExperimentalDatabaseCoachMatchHistoryAdapter({
+        featureFlag: databaseFeatureFlag,
+      }),
+      featureFlag: databaseFeatureFlag,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -564,6 +581,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       historyStoreConsistency: consistency,
       persistenceEvidenceSnapshot,
       databaseMigrationPreparation,
+      databaseAdapterSpike,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -572,6 +590,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       persistenceEvidenceSnapshot,
       migrationDryRun,
       databaseMigrationPreparation,
+      databaseAdapterSpike,
       exportHtml,
     };
 
@@ -4470,6 +4489,172 @@ export function renderFullMatchWorkbenchChainReplay5DValidation(model: FullMatch
     "- CONFIRM_MIGRATION_DRY_RUN_ONLY.",
     "- CONFIRM_NO_REAL_DATABASE_WRITE.",
     "- CONFIRM_SAVE_RESULT_SEMANTICS_PRESERVED.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+function databaseAdapterSpikeCountLines(
+  model: CoachReportDatabaseAdapterSpikeModel,
+): readonly string[] {
+  return [
+    `- adapter kind: ${model.adapterKind}`,
+    `- adapter implemented: ${model.adapterImplemented}`,
+    `- adapter production ready: ${model.adapterProductionReady}`,
+    `- feature flag enabled: ${model.featureFlagEnabled}`,
+    `- default feature flag enabled: ${model.defaultFeatureFlagEnabled}`,
+    `- product activation allowed: ${model.productActivationAllowed}`,
+    `- report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}`,
+    `- real database write count: ${model.realDatabaseWriteCount}`,
+    `- real database read count: ${model.realDatabaseReadCount}`,
+    `- dry run only: ${model.dryRunOnly}`,
+    `- active product history source: ${model.activeProductHistorySource}`,
+    `- database used as product truth: ${model.databaseUsedAsProductTruth}`,
+    `- source record count: ${model.sourceRecordCount}`,
+    `- experimental adapter record count: ${model.experimentalAdapterRecordCount}`,
+    `- dry run save count: ${model.dryRunSaveCount}`,
+    `- dry run query count: ${model.dryRunQueryCount}`,
+    `- inserted scenario pass: ${model.insertedScenarioPass}`,
+    `- replaced scenario pass: ${model.replacedScenarioPass}`,
+    `- ignored duplicate scenario pass: ${model.ignoredDuplicateScenarioPass}`,
+    `- query by team pass: ${model.queryByTeamPass}`,
+    `- query by phase pass: ${model.queryByPhasePass}`,
+    `- deterministic ordering pass: ${model.deterministicOrderingPass}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- global proof claim count: ${model.globalProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${model.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${model.visibleSelectionWordingCount}`,
+    `- internal status leak count: ${model.internalStatusLeakCount}`,
+    `- player selected count: ${model.playerSelectedCount}`,
+    `- automatic selection count: ${model.automaticSelectionCount}`,
+    `- lineup mutation count: ${model.lineupMutationCount}`,
+    `- starters mutation count: ${model.startersMutationCount}`,
+    `- bench mutation count: ${model.benchMutationCount}`,
+    `- live selection driver count: ${model.liveSelectionDriverCount}`,
+    `- production route resolution driver count: ${model.productionRouteResolutionDriverCount}`,
+    `- score mutation count: ${model.scoreMutationCount}`,
+    `- possession mutation count: ${model.possessionMutationCount}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5EDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const spike = context.databaseAdapterSpike;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5E",
+    "",
+    "Sprint 5E implements an experimental database adapter spike without product activation. The adapter exercises deterministic dry-run save/query semantics, while the product report and history source remain file_backed.",
+    "",
+    "## Experimental Database Adapter",
+    "- adapter kind: experimental_database",
+    "- adapter implemented: true",
+    "- adapter production ready: false",
+    `- feature flag enabled: ${spike.featureFlagEnabled}`,
+    "- default feature flag enabled: false",
+    "- product activation allowed: false",
+    "- report can use as source of truth: false",
+    "- real database write count: 0",
+    "- real database read count: 0",
+    "- dry run only: true",
+    "- active product history source: file_backed",
+    "- database used as product truth: false",
+    "",
+    "## Spike Scenarios",
+    ...databaseAdapterSpikeCountLines(spike),
+    "",
+    "## Product Boundary",
+    "- 5E implements the adapter spike; it does not activate database persistence.",
+    "- The adapter cannot drive coach instruction, live selection, production route resolution, score, possession, or scoring events.",
+    "- Product history remains file_backed.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_EXPERIMENTAL_DATABASE_ADAPTER_SPIKE.",
+    "- CONFIRM_FEATURE_FLAG_DISABLED_BY_DEFAULT.",
+    "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
+    "- CONFIRM_DRY_RUN_SAVE_QUERY_SEMANTICS.",
+    "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5EValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const spike = context.databaseAdapterSpike;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("default runFullMatch remains segment_harness.", true, ""),
+    check("experimental mode remains opt-in.", true, ""),
+    check("Database Adapter Spike model is available.", spike.status !== "not_available", spike.status),
+    check("adapter kind is experimental_database.", spike.adapterKind === "experimental_database", spike.adapterKind),
+    check("adapter implemented is true.", spike.adapterImplemented, ""),
+    check("adapter production ready is false.", !spike.adapterProductionReady, ""),
+    check("feature flag is present and disabled by default.", !spike.defaultFeatureFlagEnabled, ""),
+    check("product activation is not allowed.", !spike.productActivationAllowed, ""),
+    check("report cannot use database as source of truth.", !spike.reportCanUseAsSourceOfTruth, ""),
+    check("real database write count is 0.", spike.realDatabaseWriteCount === 0, "0"),
+    check("real database read count is 0.", spike.realDatabaseReadCount === 0, "0"),
+    check("dry-run only is true.", spike.dryRunOnly, ""),
+    check("active product history source remains file_backed.", spike.activeProductHistorySource === "file_backed", spike.activeProductHistorySource),
+    check("database is not used as product truth.", !spike.databaseUsedAsProductTruth, ""),
+    check("inserted save scenario passes.", spike.insertedScenarioPass, ""),
+    check("replaced save scenario passes.", spike.replacedScenarioPass, ""),
+    check("ignored duplicate save scenario passes.", spike.ignoredDuplicateScenarioPass, ""),
+    check("query by team passes.", spike.queryByTeamPass, ""),
+    check("query by phase passes.", spike.queryByPhasePass, ""),
+    check("deterministic ordering passes.", spike.deterministicOrderingPass, ""),
+    check("coach-report.export.html includes experimental database adapter section.", exportHtml.includes("Adapter database exp&eacute;rimental"), ""),
+    check("export includes database spike appendix.", exportHtml.includes("D&eacute;tails adapter database exp&eacute;rimental"), ""),
+    check("no trend proof claim is made.", spike.trendProofClaimCount === 0, "0"),
+    check("no global proof claim is made.", spike.globalProofClaimCount === 0, "0"),
+    check("no invented statistic is introduced.", spike.inventedStatisticCount === 0, "0"),
+    check("sandbox events are not promoted to official visuals.", spike.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible copy avoids recommendation wording.", spike.visibleRecommendationWordingCount === 0, "0"),
+    check("visible copy avoids selection wording.", spike.visibleSelectionWordingCount === 0, "0"),
+    check("no player is selected.", spike.playerSelectedCount === 0, "0"),
+    check("no automatic selection is true.", spike.noAutomaticSelection && spike.automaticSelectionCount === 0, "0"),
+    check("lineup mutation count is 0.", spike.lineupMutationCount === 0, "0"),
+    check("starters mutation count is 0.", spike.startersMutationCount === 0, "0"),
+    check("bench mutation count is 0.", spike.benchMutationCount === 0, "0"),
+    check("live selection driver count is 0.", spike.liveSelectionDriverCount === 0, "0"),
+    check("production route resolution driver count is 0.", spike.productionRouteResolutionDriverCount === 0, "0"),
+    check("database adapter cannot mutate official score.", spike.scoreMutationCount === 0, "0"),
+    check("database adapter cannot mutate official possession.", spike.possessionMutationCount === 0, "0"),
+    check("database adapter cannot create production scoring events.", spike.productionScoringEventCreationCount === 0, "0"),
+    check("database adapter cannot claim global economy.", spike.globalEconomyClaimCount === 0, "0"),
+    check("scoring constants unchanged.", spike.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", spike.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", spike.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", spike.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5E Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...databaseAdapterSpikeCountLines(spike),
+    "",
+    "## Recommendation",
+    "- CONFIRM_EXPERIMENTAL_DATABASE_ADAPTER_SPIKE.",
+    "- CONFIRM_FEATURE_FLAG_DISABLED_BY_DEFAULT.",
+    "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
+    "- CONFIRM_DRY_RUN_SAVE_QUERY_SEMANTICS.",
     "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
     "",
   ].join("\n");

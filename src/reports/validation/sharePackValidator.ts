@@ -303,6 +303,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay5CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5c.md"));
   const fullMatchWorkbenchChainReplay5D = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5d.md"));
   const fullMatchWorkbenchChainReplay5DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5d.md"));
+  const fullMatchWorkbenchChainReplay5E = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5e.md"));
+  const fullMatchWorkbenchChainReplay5EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5e.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2776,6 +2778,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-5c.md",
     ...sprint5CForbiddenLeftovers,
   ];
+  const sprint5EExpectedFiles = sprint5DExpectedFiles.map((file) =>
+    file === "fullmatch-workbench-chain-replay-5d.md"
+      ? "fullmatch-workbench-chain-replay-5e.md"
+      : file === "validation.fullmatch-workbench-chain-replay-5d.md"
+        ? "validation.fullmatch-workbench-chain-replay-5e.md"
+        : file
+  );
+  const sprint5EForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-5d.md",
+    "validation.fullmatch-workbench-chain-replay-5d.md",
+    ...sprint5DForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3455,6 +3469,54 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint5EChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("manifest exists", manifest.length > 0, manifestPath),
+    check("README exists", readme.length > 0, readmePath),
+    check("detailed manifest exists", detailedManifest.length > 0, detailedManifestPath),
+    check("validation.share-pack.md copied", sourceExists("validation.share-pack.md") && requiredCopied("validation.share-pack.md"), "validation.share-pack.md"),
+    check("all expected files are copied", sprint5EExpectedFiles.every((file) => requiredCopied(file)), sprint5EExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint5EExpectedFiles.every((file) => manifest.includes(file)), sprint5EExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("no stale files remain in reports/share", staleFiles.length === 0, staleFiles.join(", ") || "none"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 5E", activeConfig.sprintName === "Sprint 5E - Database Adapter Implementation Spike Without Product Activation", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint5EExpectedFiles.every((file) => requiredCopied(file)), sprint5EExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint5EForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint5EForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 5E oriented", readme.includes("# Sprint 5E Share Pack") && readme.includes("fullmatch-workbench-chain-replay-5e.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("5E report included", fullMatchWorkbenchChainReplay5E.includes("# FullMatch Workbench Chain Replay 5E") && fullMatchWorkbenchChainReplay5E.includes("Experimental Database Adapter") && fullMatchWorkbenchChainReplay5E.includes("Spike Scenarios"), "5E doc included"),
+    check("5E validation is PASS", fullMatchWorkbenchChainReplay5EValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay5EValidation.includes("Database Adapter Spike model is available") && fullMatchWorkbenchChainReplay5EValidation.includes("adapter kind is experimental_database"), "5E validation current"),
+    check("product report HTML copied", coachProductHtml.includes("Rapport coach") && coachProductHtml.includes("Joueurs"), "product HTML visible"),
+    check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
+    check("experimental database adapter section is present", coachExportHtml.includes("Adapter database exp&eacute;rimental") && coachExportHtml.includes("database-adapter-spike-section"), "database adapter spike section visible"),
+    check("experimental database spike guard is visible", coachExportHtml.includes("aucune base r&eacute;elle n&rsquo;est lue ou &eacute;crite") && fullMatchWorkbenchChainReplay5EValidation.includes("real database write count is 0"), "no-real-DB guard visible"),
+    check("experimental database adapter appendix is present", coachExportHtml.includes("D&eacute;tails adapter database exp&eacute;rimental") && coachExportHtml.includes("active product history source file_backed"), "database adapter spike appendix visible"),
+    check("real database read and write counts are 0", fullMatchWorkbenchChainReplay5EValidation.includes("real database write count is 0") && fullMatchWorkbenchChainReplay5EValidation.includes("real database read count is 0") && coachExportHtml.includes("real DB read count: 0"), "real DB counters 0"),
+    check("adapter implemented but not production ready", fullMatchWorkbenchChainReplay5E.includes("adapter implemented: true") && fullMatchWorkbenchChainReplay5E.includes("adapter production ready: false"), "experimental adapter only"),
+    check("feature flag disabled by default", fullMatchWorkbenchChainReplay5EValidation.includes("feature flag is present and disabled by default") && fullMatchWorkbenchChainReplay5E.includes("default feature flag enabled: false"), "feature flag guard visible"),
+    check("product database activation remains disabled", fullMatchWorkbenchChainReplay5E.includes("product activation allowed: false") && fullMatchWorkbenchChainReplay5E.includes("database used as product truth: false"), "product DB activation disabled"),
+    check("save-result scenarios pass", fullMatchWorkbenchChainReplay5EValidation.includes("inserted save scenario passes") && fullMatchWorkbenchChainReplay5EValidation.includes("replaced save scenario passes") && fullMatchWorkbenchChainReplay5EValidation.includes("ignored duplicate save scenario passes"), "save-result scenarios visible"),
+    check("report queries remain dry-run", fullMatchWorkbenchChainReplay5EValidation.includes("query by team passes") && fullMatchWorkbenchChainReplay5EValidation.includes("query by phase passes"), "dry-run query guard visible"),
+    check("bundle includes database adapter spike source files", bundleReports.includes("src/reports/history/databaseHistoryAdapterFeatureFlag.ts") && bundleReports.includes("src/reports/history/experimentalDatabaseCoachMatchHistoryAdapter.ts") && bundleReports.includes("src/reports/coachReportDatabaseAdapterSpike.ts") && bundleReports.includes("src/reports/buildCoachReportDatabaseAdapterSpike.ts"), "5E source bundled"),
+    check("bundle includes database adapter spike tests", bundleReports.includes("databaseHistoryAdapterFeatureFlag.test.ts") && bundleReports.includes("experimentalDatabaseCoachMatchHistoryAdapter.test.ts") && bundleReports.includes("coachReportDatabaseAdapterSpikeRenderer.test.ts") && bundleReports.includes("coachReportDatabaseAdapterSpikeGuard.test.ts"), "5E tests bundled"),
+    check("simulation bundle includes scoring guard 5E", bundleSimulation.includes("scoringGuard.5e.test.ts"), "5E scoring guard bundled"),
+    check("database adapter spike evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE") && bundleSimulation.includes("WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE"), "5E evidence category bundled"),
+    check("main export hides internal status names", !containsAny(coachExportMainHtml, ["officially_confirmed", "trace_supported", "sandbox_only"]), "internal statuses hidden"),
+    check("main export avoids recommendation wording", !containsAny(coachExportMainHtml, ["meilleur choix", "composition recommand", "selection automatique", "preuve globale", "certitude"]), "recommendation wording count 0"),
+    check("main export avoids selection wording", !containsAny(coachExportMainHtml, ["a selectionner", "player selected"]), "selection wording count 0"),
+    check("visible French copy is clean", !containsAny(coachExportHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay5EValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay5EValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay5EValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay5E.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay5EValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay5EValidation.includes("CONFIRM_EXPERIMENTAL_DATABASE_ADAPTER_SPIKE") && fullMatchWorkbenchChainReplay5EValidation.includes("CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION") && fullMatchWorkbenchChainReplay5EValidation.includes("PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING"), "5E recommendations visible"),
   ];
   const sprint5DChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -6758,6 +6820,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 5E - Database Adapter Implementation Spike Without Product Activation")
+      ? sprint5EChecks
     : activeConfig.sprintName.includes("Sprint 5D - Database Adapter SPI & Migration Dry Run")
       ? sprint5DChecks
     : activeConfig.sprintName.includes("Sprint 5C - Persistence Evidence Alignment & Report Counter Consistency")
