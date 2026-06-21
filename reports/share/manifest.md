@@ -1,6 +1,6 @@
 # Share Pack
 
-Generated: 2026-06-21T19:58:20.763Z
+Generated: 2026-06-21T20:11:43.007Z
 Task/sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 Mode: MINIMAL_REVIEW
 Final file count: 20

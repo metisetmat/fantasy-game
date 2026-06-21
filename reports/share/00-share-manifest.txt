@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-21T19:58:20.763Z
+Generated timestamp: 2026-06-21T20:11:43.007Z
 Task/sprint name: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 Final file count: 20
 
@@ -785,7 +785,20 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/reports/scoringFamilyAttributionAudit.test.ts
- M src/reports/scoringFamilyAttributionAudit.ts
- M src/systems/scoring/scoringFamilyAttribution.test.ts
- M src/systems/scoring/scoringFamilyAttribution.ts
+M  reports/validation.share-pack.md
+M  src/contracts/engineToCoach.ts
+A  src/contracts/scoringFamily.ts
+M  src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
+M  src/reports/fullMatchScoreEconomyCalibration.ts
+M  src/reports/generateCoachHtmlReport.ts
+M  src/reports/renderCoachReportExportHtml.ts
+A  src/reports/scoringFamilyAttributionAudit.test.ts
+A  src/reports/scoringFamilyAttributionAudit.ts
+A  src/reports/scoringFamilyAttributionRenderer.test.ts
+M  src/reports/validation/sharePackValidator.ts
+M  src/simulation/adapters/matchReportBuilder.ts
+M  src/simulation/validation/fullMatchTraceValidationReport.ts
+M  src/systems/scoring/index.ts
+A  src/systems/scoring/scoringFamilyAttribution.test.ts
+A  src/systems/scoring/scoringFamilyAttribution.ts
+A  src/systems/scoring/scoringFamilyAttributionWarnings.ts
