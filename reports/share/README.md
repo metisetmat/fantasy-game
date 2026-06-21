@@ -1,6 +1,6 @@
-# Sprint 5E Share Pack
+# Sprint 5F Share Pack
 
-Current sprint: Sprint 5E - Database Adapter Implementation Spike Without Product Activation
+Current sprint: Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-workbench-chain-replay-5e.md
-- validation.fullmatch-workbench-chain-replay-5e.md
+- fullmatch-workbench-chain-replay-5f.md
+- validation.fullmatch-workbench-chain-replay-5f.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5e.md and validation.fullmatch-workbench-chain-replay-5e.md.
+Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5f.md and validation.fullmatch-workbench-chain-replay-5f.md.
 
-Sprint 5E proves the experimental database adapter spike without product database activation or real database IO.
+Sprint 5F selects sqlite_local as the durable storage target and prepares disabled real-adapter wiring without product database activation.
 
 Upload every file in this reports/share directory.

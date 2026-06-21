@@ -9,6 +9,7 @@ import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPers
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
+import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -21,6 +22,7 @@ import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatch
 import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
 import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
+import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -157,6 +159,20 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const durableStorageDecision = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined || databaseAdapterSpike === undefined
+    ? undefined
+    : buildCoachReportDurableStorageDecision({
+        persistenceEvidenceSnapshot,
+        migrationPreparation: databaseMigrationPreparation,
+        databaseAdapterSpike,
+        sourceRecords: historyStore.listAll(),
+        durableAdapter: createSqliteLocalCoachMatchHistoryAdapter({
+          featureFlag: databaseFeatureFlag,
+        }),
+        featureFlag: databaseFeatureFlag,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -168,6 +184,7 @@ export function writeLatestCoachReport(): void {
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
     ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
     ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
+    ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

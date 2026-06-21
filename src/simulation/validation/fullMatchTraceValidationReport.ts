@@ -9,6 +9,7 @@ import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoac
 import { buildCoachReportPersistenceEvidenceSnapshot } from "../../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "../../reports/buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportDatabaseAdapterSpike } from "../../reports/buildCoachReportDatabaseAdapterSpike";
+import { buildCoachReportDurableStorageDecision } from "../../reports/buildCoachReportDurableStorageDecision";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -23,6 +24,7 @@ import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coac
 import type { CoachReportPersistenceEvidenceSnapshot } from "../../reports/coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportDatabaseMigrationPreparationModel } from "../../reports/coachReportDatabaseMigrationPreparation";
 import type { CoachReportDatabaseAdapterSpikeModel } from "../../reports/coachReportDatabaseAdapterSpike";
+import type { CoachReportDurableStorageDecisionModel } from "../../reports/coachReportDurableStorageDecision";
 import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
 import type { CoachMatchHistoryMigrationDryRunModel } from "../../reports/history/coachMatchHistoryMigrationDryRun";
 import {
@@ -42,6 +44,7 @@ import { buildCoachMatchHistoryMigrationDryRun } from "../../reports/history/bui
 import { createMockDatabaseCoachMatchHistoryAdapter } from "../../reports/history/mockDatabaseCoachMatchHistoryAdapter";
 import { resolveDatabaseHistoryAdapterFeatureFlag } from "../../reports/history/databaseHistoryAdapterFeatureFlag";
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "../../reports/history/experimentalDatabaseCoachMatchHistoryAdapter";
+import { createSqliteLocalCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -456,6 +459,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly migrationDryRun: CoachMatchHistoryMigrationDryRunModel;
   readonly databaseMigrationPreparation: CoachReportDatabaseMigrationPreparationModel;
   readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
+  readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
   readonly exportHtml: string;
 }
 
@@ -571,6 +575,18 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const durableStorageDecision = buildCoachReportDurableStorageDecision({
+      persistenceEvidenceSnapshot,
+      migrationPreparation: databaseMigrationPreparation,
+      databaseAdapterSpike,
+      sourceRecords: historyStore.listAll(),
+      durableAdapter: createSqliteLocalCoachMatchHistoryAdapter({
+        featureFlag: databaseFeatureFlag,
+      }),
+      featureFlag: databaseFeatureFlag,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -582,6 +598,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       persistenceEvidenceSnapshot,
       databaseMigrationPreparation,
       databaseAdapterSpike,
+      durableStorageDecision,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -591,6 +608,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       migrationDryRun,
       databaseMigrationPreparation,
       databaseAdapterSpike,
+      durableStorageDecision,
       exportHtml,
     };
 
@@ -4656,6 +4674,169 @@ export function renderFullMatchWorkbenchChainReplay5EValidation(model: FullMatch
     "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
     "- CONFIRM_DRY_RUN_SAVE_QUERY_SEMANTICS.",
     "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+function durableStorageDecisionCountLines(
+  model: CoachReportDurableStorageDecisionModel,
+): readonly string[] {
+  return [
+    `- storage target selected: ${model.selectedStorageTarget}`,
+    `- schema version: ${model.schemaVersion}`,
+    `- decision made: ${model.decisionMade}`,
+    `- real adapter wiring prepared: ${model.realAdapterWiringPrepared}`,
+    `- adapter kind: ${model.adapterKind}`,
+    `- adapter implemented: ${model.adapterImplemented}`,
+    `- adapter production ready: ${model.adapterProductionReady}`,
+    `- feature flag enabled: ${model.featureFlagEnabled}`,
+    `- default feature flag enabled: ${model.defaultFeatureFlagEnabled}`,
+    `- product activation allowed: ${model.productActivationAllowed}`,
+    `- active product history source: ${model.activeProductHistorySource}`,
+    `- database used as product truth: ${model.databaseUsedAsProductTruth}`,
+    `- report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}`,
+    `- real DB write count: ${model.realDatabaseWriteCount}`,
+    `- real DB read count: ${model.realDatabaseReadCount}`,
+    `- dry run only: ${model.dryRunOnly}`,
+    `- inserted scenario pass: ${model.insertedScenarioPass}`,
+    `- replaced scenario pass: ${model.replacedScenarioPass}`,
+    `- ignored duplicate scenario pass: ${model.ignoredDuplicateScenarioPass}`,
+    `- query by team pass: ${model.queryByTeamPass}`,
+    `- query by phase pass: ${model.queryByPhasePass}`,
+    `- deterministic ordering pass: ${model.deterministicOrderingPass}`,
+    `- source record count: ${model.sourceRecordCount}`,
+    `- durable adapter record count: ${model.durableAdapterRecordCount}`,
+    `- dry run save count: ${model.dryRunSaveCount}`,
+    `- dry run query count: ${model.dryRunQueryCount}`,
+    `- score mutation count: ${model.canMutateScore ? 1 : 0}`,
+    `- timeline mutation count: ${model.canMutateTimeline ? 1 : 0}`,
+    `- possession mutation count: ${model.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${model.canCreateProductionScoringEvents ? 1 : 0}`,
+    `- lineup mutation count: ${model.canMutateLineup ? 1 : 0}`,
+    `- starters mutation count: ${model.canMutateStarters ? 1 : 0}`,
+    `- bench mutation count: ${model.canMutateBench ? 1 : 0}`,
+    `- live selection driver count: ${model.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${model.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- global economy claim count: ${model.canClaimGlobalEconomy ? 1 : 0}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const decision = context.durableStorageDecision;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5F",
+    "",
+    "Sprint 5F makes the durable storage decision explicit and prepares disabled real-adapter wiring. Product history remains file_backed; no real database read/write occurs.",
+    "",
+    "## Durable Storage Decision",
+    ...durableStorageDecisionCountLines(decision),
+    "",
+    "## Schema Decision",
+    "- schema version: coach_match_history_v1",
+    "- fields covered: recordId, matchId, teamId, opponentTeamId, generatedAt, source, score, phase signals, evidence snapshot id, createdAt, updatedAt, idempotency key",
+    "- MatchReport contract modified: false",
+    "- MatchBonusEvent modified: false",
+    "- scoring constants modified: false",
+    "- scoring events created by schema: false",
+    "",
+    "## Product Boundary",
+    "- durable storage target selected: sqlite_local",
+    "- real adapter wiring prepared: true",
+    "- real database IO enabled: false",
+    "- production activation allowed: false",
+    "- product history source remains file_backed.",
+    "- database used as product truth: false",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_DURABLE_STORAGE_DECISION_SQLITE_LOCAL.",
+    "- CONFIRM_SCHEMA_VERSION_COACH_MATCH_HISTORY_V1.",
+    "- CONFIRM_DISABLED_REAL_ADAPTER_WIRING.",
+    "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
+    "- PREPARE_CONTROLLED_LOCAL_TEST_READ_ONLY_DB_MODE.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5FValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const decision = context.durableStorageDecision;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("Durable Storage Decision model is available.", decision.status === "available", decision.status),
+    check("storage target selected is sqlite_local.", decision.selectedStorageTarget === "sqlite_local", decision.selectedStorageTarget),
+    check("schema version is coach_match_history_v1.", decision.schemaVersion === "coach_match_history_v1", decision.schemaVersion),
+    check("schema covers required fields.", decision.schemaCoversRequiredFields, String(decision.schemaFieldCount)),
+    check("real adapter wiring prepared.", decision.realAdapterWiringPrepared, ""),
+    check("adapter implemented is true.", decision.adapterImplemented, ""),
+    check("adapter production ready is false.", !decision.adapterProductionReady, ""),
+    check("feature flag enabled is false.", !decision.featureFlagEnabled, ""),
+    check("default feature flag enabled is false.", !decision.defaultFeatureFlagEnabled, ""),
+    check("product activation allowed is false.", !decision.productActivationAllowed, ""),
+    check("active product history source is file_backed.", decision.activeProductHistorySource === "file_backed", decision.activeProductHistorySource),
+    check("database used as product truth is false.", !decision.databaseUsedAsProductTruth, ""),
+    check("report can use as source of truth is false.", !decision.reportCanUseAsSourceOfTruth, ""),
+    check("real DB write count is 0.", decision.realDatabaseWriteCount === 0, "0"),
+    check("real DB read count is 0.", decision.realDatabaseReadCount === 0, "0"),
+    check("dry run only is true.", decision.dryRunOnly, ""),
+    check("inserted scenario passes.", decision.insertedScenarioPass, ""),
+    check("replaced scenario passes.", decision.replacedScenarioPass, ""),
+    check("ignored duplicate scenario passes.", decision.ignoredDuplicateScenarioPass, ""),
+    check("query by team passes.", decision.queryByTeamPass, ""),
+    check("query by phase passes.", decision.queryByPhasePass, ""),
+    check("deterministic ordering passes.", decision.deterministicOrderingPass, ""),
+    check("durable adapter loads every source record.", decision.durableAdapterRecordCount === decision.sourceRecordCount, `${decision.durableAdapterRecordCount}/${decision.sourceRecordCount}`),
+    check("score mutation count is 0.", !decision.canMutateScore, "0"),
+    check("timeline mutation count is 0.", !decision.canMutateTimeline, "0"),
+    check("possession mutation count is 0.", !decision.canMutatePossession, "0"),
+    check("production scoring event creation count is 0.", !decision.canCreateProductionScoringEvents, "0"),
+    check("lineup mutation count is 0.", !decision.canMutateLineup, "0"),
+    check("starters mutation count is 0.", !decision.canMutateStarters, "0"),
+    check("bench mutation count is 0.", !decision.canMutateBench, "0"),
+    check("live selection driver count is 0.", !decision.canDriveLiveSelection, "0"),
+    check("production route resolution driver count is 0.", !decision.canDriveProductionRouteResolution, "0"),
+    check("global economy claim count is 0.", !decision.canClaimGlobalEconomy, "0"),
+    check("trend proof claim count is 0.", decision.trendProofClaimCount === 0, "0"),
+    check("invented statistic count is 0.", decision.inventedStatisticCount === 0, "0"),
+    check("sandbox events promoted to official count is 0.", decision.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible recommendation wording count is 0.", decision.visibleRecommendationWordingCount === 0, "0"),
+    check("visible selection wording count is 0.", decision.visibleSelectionWordingCount === 0, "0"),
+    check("scoring constants unchanged.", decision.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", decision.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", decision.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", decision.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("export contains durable storage decision section.", exportHtml.includes("D&eacute;cision stockage durable"), ""),
+    check("legacy migration wording is clarified.", decision.legacyMigrationWordingClarified && exportHtml.includes("previous migration SPI"), ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5F Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...durableStorageDecisionCountLines(decision),
+    "",
+    "## Recommendation",
+    "- CONFIRM_DURABLE_STORAGE_DECISION_SQLITE_LOCAL.",
+    "- CONFIRM_SCHEMA_VERSION_COACH_MATCH_HISTORY_V1.",
+    "- CONFIRM_DISABLED_REAL_ADAPTER_WIRING.",
+    "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
+    "- PREPARE_CONTROLLED_LOCAL_TEST_READ_ONLY_DB_MODE.",
     "",
   ].join("\n");
 }

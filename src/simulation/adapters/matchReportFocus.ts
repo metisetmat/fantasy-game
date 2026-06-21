@@ -106,6 +106,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY":
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_MIGRATION_PREPARATION":
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE":
+    case "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -239,6 +240,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la preparation migration database historique";
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE":
       return "Relire le spike adapter database experimental";
+    case "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION":
+      return "Relire la decision de stockage durable";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

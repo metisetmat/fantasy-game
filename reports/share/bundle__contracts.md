@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 5E - Database Adapter Implementation Spike Without Product Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -451,6 +451,7 @@ export type MatchReportEvidenceCategory =
   | "WORKBENCH_CHAIN_COACH_REPORT_HISTORY_STORE_CONSISTENCY"
   | "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_MIGRATION_PREPARATION"
   | "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE"
+  | "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION"
   | "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE"
   | "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR"
   | "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES"

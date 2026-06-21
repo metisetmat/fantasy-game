@@ -305,6 +305,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay5DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5d.md"));
   const fullMatchWorkbenchChainReplay5E = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5e.md"));
   const fullMatchWorkbenchChainReplay5EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5e.md"));
+  const fullMatchWorkbenchChainReplay5F = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5f.md"));
+  const fullMatchWorkbenchChainReplay5FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5f.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2790,6 +2792,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-5d.md",
     ...sprint5DForbiddenLeftovers,
   ];
+  const sprint5FExpectedFiles = sprint5EExpectedFiles.map((file) =>
+    file === "fullmatch-workbench-chain-replay-5e.md"
+      ? "fullmatch-workbench-chain-replay-5f.md"
+      : file === "validation.fullmatch-workbench-chain-replay-5e.md"
+        ? "validation.fullmatch-workbench-chain-replay-5f.md"
+        : file
+  );
+  const sprint5FForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-5e.md",
+    "validation.fullmatch-workbench-chain-replay-5e.md",
+    ...sprint5EForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3469,6 +3483,55 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint5FChecks: readonly SharePackCheck[] = [
+    check("reports/share exists", existsSync(shareDirectory), shareDirectory),
+    check("manifest exists", manifest.length > 0, manifestPath),
+    check("README exists", readme.length > 0, readmePath),
+    check("detailed manifest exists", detailedManifest.length > 0, detailedManifestPath),
+    check("validation.share-pack.md copied", sourceExists("validation.share-pack.md") && requiredCopied("validation.share-pack.md"), "validation.share-pack.md"),
+    check("all expected files are copied", sprint5FExpectedFiles.every((file) => requiredCopied(file)), sprint5FExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint5FExpectedFiles.every((file) => manifest.includes(file)), sprint5FExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("no stale files remain in reports/share", staleFiles.length === 0, staleFiles.join(", ") || "none"),
+    check("excluded-by-default files are not in reports/share", excludedInShare.length === 0, excludedInShare.join(", ") || "none"),
+    check("source reports were not deleted", missingExcludedSources.length === 0, missingExcludedSources.join(", ") || "0"),
+    check("manifest exposes MINIMAL_REVIEW", manifest.includes("MINIMAL_REVIEW"), "mode visible"),
+    check("manifest says upload every file in reports/share", manifest.includes("Upload every file in this reports/share directory."), "upload instruction visible"),
+    check("current sprint is Sprint 5F", activeConfig.sprintName === "Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring", activeConfig.sprintName),
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share pack under 20 files", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("expected share file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("missing expected files are none", sprint5FExpectedFiles.every((file) => requiredCopied(file)), sprint5FExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint5FForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint5FForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 5F oriented", readme.includes("# Sprint 5F Share Pack") && readme.includes("fullmatch-workbench-chain-replay-5f.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("5F report included", fullMatchWorkbenchChainReplay5F.includes("# FullMatch Workbench Chain Replay 5F") && fullMatchWorkbenchChainReplay5F.includes("Durable Storage Decision") && fullMatchWorkbenchChainReplay5F.includes("Schema Decision"), "5F doc included"),
+    check("5F validation is PASS", fullMatchWorkbenchChainReplay5FValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay5FValidation.includes("storage target selected is sqlite_local") && fullMatchWorkbenchChainReplay5FValidation.includes("schema version is coach_match_history_v1"), "5F validation current"),
+    check("product report HTML copied", coachProductHtml.includes("Rapport coach") && coachProductHtml.includes("Joueurs"), "product HTML visible"),
+    check("export report HTML copied", coachExportHtml.includes("Rapport coach") && coachExportHtml.includes("data-export-snapshot=\"coach_product_report\""), "export HTML visible"),
+    check("durable storage decision section is present", coachExportHtml.includes("D&eacute;cision stockage durable") && coachExportHtml.includes("durable-storage-decision-section"), "durable storage section visible"),
+    check("durable storage appendix is present", coachExportHtml.includes("D&eacute;tails d&eacute;cision stockage durable") && coachExportHtml.includes("schema version: coach_match_history_v1"), "durable storage appendix visible"),
+    check("legacy migration wording clarified", coachExportHtml.includes("previous migration SPI") && !coachExportHtml.includes("Database adapter implemented false, production ready false"), "legacy wording clarified"),
+    check("sqlite local target visible", fullMatchWorkbenchChainReplay5F.includes("storage target selected: sqlite_local") && coachExportHtml.includes("sqlite_local"), "sqlite_local visible"),
+    check("schema version visible", fullMatchWorkbenchChainReplay5F.includes("schema version: coach_match_history_v1") && coachExportHtml.includes("coach_match_history_v1"), "schema visible"),
+    check("real adapter wiring prepared", fullMatchWorkbenchChainReplay5FValidation.includes("real adapter wiring prepared") && coachExportHtml.includes("Real adapter wiring prepared"), "real adapter wiring visible"),
+    check("product database activation remains disabled", fullMatchWorkbenchChainReplay5F.includes("production activation allowed: false") && fullMatchWorkbenchChainReplay5F.includes("database used as product truth: false"), "product DB activation disabled"),
+    check("real database read and write counts are 0", fullMatchWorkbenchChainReplay5FValidation.includes("real DB write count is 0") && fullMatchWorkbenchChainReplay5FValidation.includes("real DB read count is 0") && coachExportHtml.includes("Real DB read count"), "real DB counters 0"),
+    check("save-result scenarios pass", fullMatchWorkbenchChainReplay5FValidation.includes("inserted scenario passes") && fullMatchWorkbenchChainReplay5FValidation.includes("replaced scenario passes") && fullMatchWorkbenchChainReplay5FValidation.includes("ignored duplicate scenario passes"), "save-result scenarios visible"),
+    check("report queries remain dry-run", fullMatchWorkbenchChainReplay5FValidation.includes("query by team passes") && fullMatchWorkbenchChainReplay5FValidation.includes("query by phase passes"), "dry-run query guard visible"),
+    check("bundle includes durable storage source files", bundleReports.includes("src/reports/history/coachMatchHistoryDurableSchema.ts") && bundleReports.includes("src/reports/history/sqliteLocalCoachMatchHistoryAdapter.ts") && bundleReports.includes("src/reports/coachReportDurableStorageDecision.ts") && bundleReports.includes("src/reports/buildCoachReportDurableStorageDecision.ts"), "5F source bundled"),
+    check("bundle includes durable storage tests", bundleReports.includes("coachMatchHistoryDurableSchema.test.ts") && bundleReports.includes("sqliteLocalCoachMatchHistoryAdapter.test.ts") && bundleReports.includes("coachReportDurableStorageDecisionRenderer.test.ts") && bundleReports.includes("coachReportDurableStorageDecisionGuard.test.ts"), "5F tests bundled"),
+    check("simulation bundle includes scoring guard 5F", bundleSimulation.includes("scoringGuard.5f.test.ts"), "5F scoring guard bundled"),
+    check("durable storage evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION") && bundleSimulation.includes("WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION"), "5F evidence category bundled"),
+    check("main export hides internal status names", !containsAny(coachExportMainHtml, ["officially_confirmed", "trace_supported", "sandbox_only"]), "internal statuses hidden"),
+    check("main export avoids recommendation wording", !containsAny(coachExportMainHtml, ["meilleur choix", "composition recommand", "selection automatique", "preuve globale", "certitude"]), "recommendation wording count 0"),
+    check("main export avoids selection wording", !containsAny(coachExportMainHtml, ["a selectionner", "player selected"]), "selection wording count 0"),
+    check("visible French copy is clean", !containsAny(coachExportHtml, coachHtmlMojibakeMarkers), "mojibake count 0"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay5FValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay5FValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay5FValidation.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay5F.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay5FValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay5FValidation.includes("CONFIRM_DURABLE_STORAGE_DECISION_SQLITE_LOCAL") && fullMatchWorkbenchChainReplay5FValidation.includes("CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION") && fullMatchWorkbenchChainReplay5FValidation.includes("PREPARE_CONTROLLED_LOCAL_TEST_READ_ONLY_DB_MODE"), "5F recommendations visible"),
   ];
   const sprint5EChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
@@ -6820,6 +6883,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring")
+      ? sprint5FChecks
     : activeConfig.sprintName.includes("Sprint 5E - Database Adapter Implementation Spike Without Product Activation")
       ? sprint5EChecks
     : activeConfig.sprintName.includes("Sprint 5D - Database Adapter SPI & Migration Dry Run")

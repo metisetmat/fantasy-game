@@ -65,15 +65,17 @@ import {
   renderFullMatchWorkbenchChainReplay5DValidation,
   renderFullMatchWorkbenchChainReplay5EDoc,
   renderFullMatchWorkbenchChainReplay5EValidation,
+  renderFullMatchWorkbenchChainReplay5FDoc,
+  renderFullMatchWorkbenchChainReplay5FValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5E - Database Adapter Implementation Spike Without Product Activation";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5e.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5e.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5f.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1869,6 +1871,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5E deterministic experimental database adapter spike with dry-run save/query semantics and no real database IO",
       },
       {
+        source: "src/reports/history/coachMatchHistoryDurableSchema.ts",
+        required: true,
+        reason: "Sprint 5F versioned coach_match_history_v1 durable schema decision for sqlite_local preparation",
+      },
+      {
+        source: "src/reports/history/sqliteLocalCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5F disabled sqlite_local adapter wiring preserving dry-run save/query semantics without real database IO",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1897,6 +1909,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportDatabaseAdapterSpike.ts",
         required: true,
         reason: "Sprint 5E builder validating inserted/replaced/ignored_duplicate and query semantics without product database activation",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecision.ts",
+        required: true,
+        reason: "Sprint 5F report model, tags, evidence fact, and no-product-activation guardrails for durable storage decision",
+      },
+      {
+        source: "src/reports/buildCoachReportDurableStorageDecision.ts",
+        required: true,
+        reason: "Sprint 5F builder selecting sqlite_local and validating disabled real-adapter wiring without product activation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2237,6 +2259,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5e.test.ts",
         required: true,
         reason: "Sprint 5E executable scoring guard proving the database adapter spike does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5f.test.ts",
+        required: true,
+        reason: "Sprint 5F executable scoring guard proving durable storage decision and disabled adapter wiring do not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3670,6 +3697,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5E executable experimental database adapter tests for dry-run save/query semantics and no real database IO",
       },
       {
+        source: "src/reports/coachMatchHistoryDurableSchema.test.ts",
+        required: true,
+        reason: "Sprint 5F executable durable schema tests proving coach_match_history_v1 covers required fields without changing MatchReport or scoring contracts",
+      },
+      {
+        source: "src/reports/sqliteLocalCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5F executable sqlite_local disabled-adapter tests for dry-run save/query semantics and no real database IO",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3728,6 +3765,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportDatabaseAdapterSpikeGuard.test.ts",
         required: true,
         reason: "Sprint 5E executable non-selection and non-mutation guard tests for the experimental database adapter spike",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecision.test.ts",
+        required: true,
+        reason: "Sprint 5F executable report-model tests for durable storage decision counts and guardrails",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecisionRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5F executable renderer tests for durable storage decision section and appendix",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecisionGuard.test.ts",
+        required: true,
+        reason: "Sprint 5F executable non-selection and non-mutation guard tests for durable storage decision",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecisionCopy.test.ts",
+        required: true,
+        reason: "Sprint 5F executable visible-copy tests proving durable storage wording stays cautious and non-activating",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -3925,6 +3982,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5F")) {
+    return renderFullMatchWorkbenchChainReplay5FDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5E")) {
     return renderFullMatchWorkbenchChainReplay5EDoc(fullMatchTraceValidationModel());
   }
@@ -6124,6 +6184,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5F")) {
+    return renderFullMatchWorkbenchChainReplay5FValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5E")) {
     return renderFullMatchWorkbenchChainReplay5EValidation(fullMatchTraceValidationModel());
   }
@@ -8269,6 +8332,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5F")) {
+    return [
+      "# Sprint 5F Share Pack",
+      "",
+      "Current sprint: Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5f.md",
+      "- validation.fullmatch-workbench-chain-replay-5f.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5f.md and validation.fullmatch-workbench-chain-replay-5f.md.",
+      "",
+      "Sprint 5F selects sqlite_local as the durable storage target and prepares disabled real-adapter wiring without product database activation.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5E")) {
     return [
       "# Sprint 5E Share Pack",

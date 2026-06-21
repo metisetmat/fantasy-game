@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5E - Database Adapter Implementation Spike Without Product Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -72,15 +72,17 @@ import {
   renderFullMatchWorkbenchChainReplay5DValidation,
   renderFullMatchWorkbenchChainReplay5EDoc,
   renderFullMatchWorkbenchChainReplay5EValidation,
+  renderFullMatchWorkbenchChainReplay5FDoc,
+  renderFullMatchWorkbenchChainReplay5FValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5E - Database Adapter Implementation Spike Without Product Activation";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5e.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5e.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5f.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1876,6 +1878,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5E deterministic experimental database adapter spike with dry-run save/query semantics and no real database IO",
       },
       {
+        source: "src/reports/history/coachMatchHistoryDurableSchema.ts",
+        required: true,
+        reason: "Sprint 5F versioned coach_match_history_v1 durable schema decision for sqlite_local preparation",
+      },
+      {
+        source: "src/reports/history/sqliteLocalCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5F disabled sqlite_local adapter wiring preserving dry-run save/query semantics without real database IO",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1904,6 +1916,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportDatabaseAdapterSpike.ts",
         required: true,
         reason: "Sprint 5E builder validating inserted/replaced/ignored_duplicate and query semantics without product database activation",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecision.ts",
+        required: true,
+        reason: "Sprint 5F report model, tags, evidence fact, and no-product-activation guardrails for durable storage decision",
+      },
+      {
+        source: "src/reports/buildCoachReportDurableStorageDecision.ts",
+        required: true,
+        reason: "Sprint 5F builder selecting sqlite_local and validating disabled real-adapter wiring without product activation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2244,6 +2266,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5e.test.ts",
         required: true,
         reason: "Sprint 5E executable scoring guard proving the database adapter spike does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5f.test.ts",
+        required: true,
+        reason: "Sprint 5F executable scoring guard proving durable storage decision and disabled adapter wiring do not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3677,6 +3704,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5E executable experimental database adapter tests for dry-run save/query semantics and no real database IO",
       },
       {
+        source: "src/reports/coachMatchHistoryDurableSchema.test.ts",
+        required: true,
+        reason: "Sprint 5F executable durable schema tests proving coach_match_history_v1 covers required fields without changing MatchReport or scoring contracts",
+      },
+      {
+        source: "src/reports/sqliteLocalCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5F executable sqlite_local disabled-adapter tests for dry-run save/query semantics and no real database IO",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3735,6 +3772,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportDatabaseAdapterSpikeGuard.test.ts",
         required: true,
         reason: "Sprint 5E executable non-selection and non-mutation guard tests for the experimental database adapter spike",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecision.test.ts",
+        required: true,
+        reason: "Sprint 5F executable report-model tests for durable storage decision counts and guardrails",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecisionRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5F executable renderer tests for durable storage decision section and appendix",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecisionGuard.test.ts",
+        required: true,
+        reason: "Sprint 5F executable non-selection and non-mutation guard tests for durable storage decision",
+      },
+      {
+        source: "src/reports/coachReportDurableStorageDecisionCopy.test.ts",
+        required: true,
+        reason: "Sprint 5F executable visible-copy tests proving durable storage wording stays cautious and non-activating",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -3932,6 +3989,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5F")) {
+    return renderFullMatchWorkbenchChainReplay5FDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5E")) {
     return renderFullMatchWorkbenchChainReplay5EDoc(fullMatchTraceValidationModel());
   }
@@ -6131,6 +6191,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5F")) {
+    return renderFullMatchWorkbenchChainReplay5FValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5E")) {
     return renderFullMatchWorkbenchChainReplay5EValidation(fullMatchTraceValidationModel());
   }
@@ -8276,6 +8339,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5F")) {
+    return [
+      "# Sprint 5F Share Pack",
+      "",
+      "Current sprint: Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5f.md",
+      "- validation.fullmatch-workbench-chain-replay-5f.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5f.md and validation.fullmatch-workbench-chain-replay-5f.md.",
+      "",
+      "Sprint 5F selects sqlite_local as the durable storage target and prepares disabled real-adapter wiring without product database activation.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5E")) {
     return [
       "# Sprint 5E Share Pack",
@@ -22657,13 +22756,15 @@ export function validateCoachReportHistoryStoreConsistencyRenderer(): readonly s
 
   assertTest(exportHtml.includes("Coh&eacute;rence du stockage"), "export renders history-store consistency section.");
   assertTest(exportHtml.includes("history-consistency-section"), "export renders consistency CSS hook.");
-  assertTest(exportHtml.includes("Database adapter contract visible"), "export renders database contract note.");
+  assertTest(exportHtml.includes("Migration SPI adapter contract visible"), "export renders migration SPI contract note.");
+  assertTest(exportHtml.includes("previous migration SPI, not to the experimental or durable storage adapter"), "export clarifies legacy adapter wording.");
   assertTest(exportHtml.includes("D&eacute;tails de coh&eacute;rence du stockage historique"), "export renders consistency appendix.");
 
   return [
     "export renders history-store consistency section",
     "export renders consistency CSS hook",
-    "export renders database contract note",
+    "export renders migration SPI contract note",
+    "export clarifies legacy adapter wording",
     "export renders consistency appendix",
   ];
 }
@@ -23489,6 +23590,112 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/coachMatchHistoryDurableSchema.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import {
+  coachMatchHistoryDurableSchemaContract,
+  coachMatchHistoryRecordMatchesDurableSchema,
+} from "./history/coachMatchHistoryDurableSchema";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachMatchHistoryDurableSchema(): readonly string[] {
+  const { currentRecord } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(coachMatchHistoryDurableSchemaContract.schemaVersion === "coach_match_history_v1", "schema version is coach_match_history_v1.");
+  assertTest(coachMatchHistoryDurableSchemaContract.selectedStorageTarget === "sqlite_local", "storage target is sqlite_local.");
+  assertTest(coachMatchHistoryDurableSchemaContract.fields.some((field) => field.name === "idempotencyKey"), "idempotency key exists.");
+  assertTest(coachMatchHistoryDurableSchemaContract.fields.some((field) => field.name === "phaseSignals"), "phase signals field exists.");
+  assertTest(!coachMatchHistoryDurableSchemaContract.canModifyMatchReportContract, "schema cannot modify MatchReport contract.");
+  assertTest(!coachMatchHistoryDurableSchemaContract.canModifyMatchBonusEvent, "schema cannot modify MatchBonusEvent.");
+  assertTest(!coachMatchHistoryDurableSchemaContract.canModifyScoringConstants, "schema cannot modify scoring constants.");
+  assertTest(!coachMatchHistoryDurableSchemaContract.canCreateScoringEvents, "schema cannot create scoring events.");
+  assertTest(coachMatchHistoryRecordMatchesDurableSchema(currentRecord), "current record matches durable schema.");
+
+  return [
+    "schema version coach_match_history_v1",
+    "target sqlite_local",
+    "idempotency and phase-signal fields exist",
+    "schema cannot modify MatchReport, MatchBonusEvent, scoring constants, or scoring events",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachMatchHistoryDurableSchema();
+  console.log("coachMatchHistoryDurableSchema tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/sqliteLocalCoachMatchHistoryAdapter.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSqliteLocalCoachMatchHistoryAdapter(): readonly string[] {
+  const { currentRecord } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const adapter = createSqliteLocalCoachMatchHistoryAdapter();
+  const description = adapter.describe();
+  const inserted = adapter.dryRunSave(currentRecord);
+  const replacement = adapter.dryRunSave({ ...currentRecord, reportVersion: `${currentRecord.reportVersion}-sqlite-test` });
+  const duplicate = adapter.dryRunSave({ ...currentRecord, reportVersion: `${currentRecord.reportVersion}-sqlite-test` });
+  const teamQuery = adapter.dryRunQuery({
+    teamId: currentRecord.homeTeamId,
+    maxRecords: 5,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+  const phase = currentRecord.signals[0]?.phase;
+  const phaseQuery = adapter.dryRunQuery({
+    ...(phase === undefined ? {} : { phase }),
+    maxRecords: 5,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+
+  assertTest(description.adapterKind === "sqlite_local_disabled", "adapter kind is sqlite_local_disabled.");
+  assertTest(description.implemented, "adapter wiring is implemented.");
+  assertTest(!description.productionReady, "adapter is not production ready.");
+  assertTest(!description.productActivationAllowed, "product activation is not allowed.");
+  assertTest(description.realDatabaseReadCount === 0 && description.realDatabaseWriteCount === 0, "real database IO is 0.");
+  assertTest(inserted.operation === "inserted", "inserted scenario passes.");
+  assertTest(replacement.operation === "replaced", "replaced scenario passes.");
+  assertTest(duplicate.operation === "ignored_duplicate", "ignored duplicate scenario passes.");
+  assertTest(teamQuery.records.length > 0, "query by team passes.");
+  assertTest(phase === undefined || phaseQuery.records.some((record) => record.signals.some((signal) => signal.phase === phase)), "query by phase passes.");
+
+  return [
+    "sqlite local disabled adapter is implemented but not production ready",
+    "real database IO remains 0",
+    "inserted, replaced, ignored_duplicate pass",
+    "query by team and phase pass",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateSqliteLocalCoachMatchHistoryAdapter();
+  console.log("sqliteLocalCoachMatchHistoryAdapter tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/coachMatchHistoryMigrationDryRun.test.ts
 
 ```ts
@@ -24023,6 +24230,168 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/coachReportDurableStorageDecision.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDurableStorageDecision(): readonly string[] {
+  const { durableStorageDecision } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(durableStorageDecision.status === "available", "durable storage decision is available.");
+  assertTest(durableStorageDecision.selectedStorageTarget === "sqlite_local", "storage target is sqlite_local.");
+  assertTest(durableStorageDecision.schemaVersion === "coach_match_history_v1", "schema version is coach_match_history_v1.");
+  assertTest(durableStorageDecision.realAdapterWiringPrepared, "real adapter wiring prepared.");
+  assertTest(durableStorageDecision.adapterKind === "sqlite_local_disabled", "adapter kind is sqlite_local_disabled.");
+  assertTest(durableStorageDecision.adapterImplemented, "adapter implemented true.");
+  assertTest(!durableStorageDecision.adapterProductionReady, "adapter production ready false.");
+  assertTest(!durableStorageDecision.productActivationAllowed, "product activation allowed false.");
+  assertTest(durableStorageDecision.activeProductHistorySource === "file_backed", "active source remains file_backed.");
+  assertTest(!durableStorageDecision.databaseUsedAsProductTruth, "database used as product truth false.");
+  assertTest(durableStorageDecision.realDatabaseReadCount === 0 && durableStorageDecision.realDatabaseWriteCount === 0, "real database IO 0.");
+  assertTest(durableStorageDecision.insertedScenarioPass && durableStorageDecision.replacedScenarioPass && durableStorageDecision.ignoredDuplicateScenarioPass, "save scenarios pass.");
+  assertTest(durableStorageDecision.queryByTeamPass && durableStorageDecision.queryByPhasePass && durableStorageDecision.deterministicOrderingPass, "query/order scenarios pass.");
+
+  return [
+    "durable storage decision available",
+    "sqlite_local and coach_match_history_v1 selected",
+    "sqlite_local_disabled adapter prepared",
+    "product activation false and file_backed remains active",
+    "save/query/order scenarios pass",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDurableStorageDecision();
+  console.log("coachReportDurableStorageDecision tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDurableStorageDecisionRenderer.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDurableStorageDecisionRenderer(): readonly string[] {
+  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(exportHtml.includes("D&eacute;cision stockage durable"), "export contains durable storage decision section.");
+  assertTest(exportHtml.includes("Storage target selected") && exportHtml.includes("sqlite_local"), "export contains sqlite_local target.");
+  assertTest(exportHtml.includes("Schema version") && exportHtml.includes("coach_match_history_v1"), "export contains schema version.");
+  assertTest(exportHtml.includes("Real adapter wiring prepared"), "export contains adapter wiring prepared.");
+  assertTest(exportHtml.includes("D&eacute;tails d&eacute;cision stockage durable"), "export contains durable storage appendix.");
+  assertTest(exportHtml.includes("previous migration SPI"), "export clarifies legacy migration SPI wording.");
+
+  return [
+    "export contains durable storage section",
+    "export contains sqlite_local and schema version",
+    "export contains appendix and legacy wording clarification",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDurableStorageDecisionRenderer();
+  console.log("coachReportDurableStorageDecisionRenderer tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDurableStorageDecisionGuard.test.ts
+
+```ts
+import {
+  coachReportDurableStorageDecisionCannotDriveSelection,
+  coachReportDurableStorageDecisionCannotMutateOfficialState,
+} from "./coachReportDurableStorageDecision";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDurableStorageDecisionGuard(): readonly string[] {
+  const { durableStorageDecision } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(coachReportDurableStorageDecisionCannotDriveSelection(durableStorageDecision), "durable storage cannot drive selection.");
+  assertTest(coachReportDurableStorageDecisionCannotMutateOfficialState(durableStorageDecision), "durable storage cannot mutate official state.");
+  assertTest(durableStorageDecision.trendProofClaimCount === 0, "trend proof claim count is 0.");
+  assertTest(durableStorageDecision.globalProofClaimCount === 0, "global proof claim count is 0.");
+  assertTest(durableStorageDecision.inventedStatisticCount === 0, "invented statistic count is 0.");
+  assertTest(durableStorageDecision.sandboxEventsPromotedToOfficialCount === 0, "sandbox promoted count is 0.");
+
+  return [
+    "durable storage cannot drive selection",
+    "durable storage cannot mutate official state",
+    "proof, invented-statistic, and sandbox-promotion counts are 0",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDurableStorageDecisionGuard();
+  console.log("coachReportDurableStorageDecisionGuard tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
+## File: src/reports/coachReportDurableStorageDecisionCopy.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportDurableStorageDecisionCopy(): readonly string[] {
+  const { durableStorageDecision, exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+
+  assertTest(durableStorageDecision.visibleRecommendationWordingCount === 0, "visible recommendation wording count is 0.");
+  assertTest(durableStorageDecision.visibleSelectionWordingCount === 0, "visible selection wording count is 0.");
+  assertTest(durableStorageDecision.internalStatusLeakCount === 0, "internal status leak count is 0.");
+  assertTest(durableStorageDecision.mojibakeMarkerCount === 0, "mojibake marker count is 0.");
+  assertTest(exportHtml.includes("file_backed reste la source active"), "export states file_backed remains active.");
+  assertTest(exportHtml.includes("compteurs DB r&eacute;els restent &agrave; 0"), "export states real DB counters remain 0.");
+  assertTest(!exportHtml.includes("DB active"), "export does not say DB active.");
+
+  return [
+    "visible wording counters are 0",
+    "export states file_backed active and DB counters 0",
+    "export does not say DB active",
+  ];
+}
+
+if (require.main === module) {
+  const checks = validateCoachReportDurableStorageDecisionCopy();
+  console.log("coachReportDurableStorageDecisionCopy tests passed.");
+  for (const check of checks) {
+    console.log(`- ${check}`);
+  }
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -24037,6 +24406,7 @@ import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPers
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
+import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -24049,6 +24419,7 @@ import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatch
 import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
 import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
+import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -24185,6 +24556,20 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const durableStorageDecision = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined || databaseAdapterSpike === undefined
+    ? undefined
+    : buildCoachReportDurableStorageDecision({
+        persistenceEvidenceSnapshot,
+        migrationPreparation: databaseMigrationPreparation,
+        databaseAdapterSpike,
+        sourceRecords: historyStore.listAll(),
+        durableAdapter: createSqliteLocalCoachMatchHistoryAdapter({
+          featureFlag: databaseFeatureFlag,
+        }),
+        featureFlag: databaseFeatureFlag,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -24196,6 +24581,7 @@ export function writeLatestCoachReport(): void {
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
     ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
     ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
+    ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
