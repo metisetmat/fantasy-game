@@ -23,6 +23,7 @@ import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReport
 import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabaseAdapterSpike";
 import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
+import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -1989,6 +1990,72 @@ function renderControlledLocalReadOnlyDbMode(
     </section>`;
 }
 
+function renderRealSQLiteReadOnlyIOSmokeTest(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Smoke test SQLite read-only">
+      <div>
+        <h3>Smoke test SQLite read-only</h3>
+        <p>Smoke test contr&ocirc;l&eacute; : une fixture SQLite locale non-prod est lue en read-only. Elle n&rsquo;est pas active par d&eacute;faut, non utilis&eacute;e comme v&eacute;rit&eacute; produit, et la source produit active reste inchang&eacute;e.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Lecture SQLite r&eacute;elle</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Mode</span><strong>${model.modeName}</strong></div>
+            <div><span>Storage target</span><strong>${model.storageTarget}</strong></div>
+            <div><span>Schema</span><strong>${model.schemaVersion}</strong></div>
+            <div><span>Vraie lecture SQLite contr&ocirc;l&eacute;e</span><strong>${model.realSQLiteIoEnabled ? "oui" : "non"}</strong></div>
+            <div><span>Read-only</span><strong>${model.readOnlyMode ? "true" : "false"}</strong></div>
+            <div><span>Write mode allowed</span><strong>${model.writeModeAllowed ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Actif par d&eacute;faut</span><strong>${model.defaultFeatureFlagEnabled ? "oui" : "non"}</strong></div>
+            <div><span>Feature flag enabled</span><strong>${model.featureFlagEnabled ? "true" : "false"}</strong></div>
+            <div><span>Activation produit</span><strong>${model.productActivationAllowed ? "oui" : "non"}</strong></div>
+            <div><span>Source produit active</span><strong>${model.activeProductHistorySource}</strong></div>
+            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>${model.databaseUsedAsProductTruth ? "oui" : "non"}</strong></div>
+            <div><span>Rapport source officielle</span><strong>${model.reportCanUseAsSourceOfTruth ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Compteurs IO</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Lecture DB r&eacute;elle mode d&eacute;faut</span><strong>${model.defaultRealDatabaseReadCount}</strong></div>
+            <div><span>Lecture DB r&eacute;elle mode contr&ocirc;l&eacute;</span><strong>${model.controlledRealDatabaseReadCount}</strong></div>
+            <div><span>&Eacute;criture DB</span><strong>${model.realDatabaseWriteCount}</strong></div>
+            <div><span>Write rejected</span><strong>${model.writeRejectedPass ? "true" : "false"}</strong></div>
+            <div><span>Fixture record count</span><strong>${model.fixtureRecordCount}</strong></div>
+            <div><span>Adapter record count</span><strong>${model.readOnlyAdapterRecordCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Contrats v&eacute;rifi&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Query by team</span><strong>${model.queryByTeamPass ? "true" : "false"}</strong></div>
+            <div><span>Query by phase</span><strong>${model.queryByPhasePass ? "true" : "false"}</strong></div>
+            <div><span>Deterministic ordering</span><strong>${model.deterministicOrderingPass ? "true" : "false"}</strong></div>
+            <div><span>Schema compatibility</span><strong>${model.schemaCompatibilityPass ? "true" : "false"}</strong></div>
+            <div><span>Dry-run fallback</span><strong>${model.dryRunFallbackAvailable ? "true" : "false"}</strong></div>
+            <div><span>Driver choice</span><strong>${model.sqliteDriverChoice}</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5H : smoke test contr&ocirc;l&eacute;, read-only, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, source produit active inchang&eacute;e et aucune &eacute;criture.</p>
+      <p class="durable-storage-decision-guard">Aucune mutation du match officiel : score, timeline, possession, scoring events, s&eacute;lection, composition, titulaires, banc et routes production restent intacts.</p>
+      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : ${escapeHtml(model.nextStep)}, uniquement en non-prod et pas encore activ&eacute;e.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="durable-storage-decision-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -2622,6 +2689,66 @@ function renderControlledLocalReadOnlyDbModeAppendix(
     </details>`;
 }
 
+function renderRealSQLiteReadOnlyIOSmokeTestAppendix(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails smoke test SQLite read-only</summary>
+      <ul>
+        <li>real SQLite read-only IO smoke test status: ${model.status}</li>
+        <li>mode name: ${model.modeName}</li>
+        <li>storage target: ${model.storageTarget}</li>
+        <li>schema version: ${model.schemaVersion}</li>
+        <li>real SQLite IO enabled: ${model.realSQLiteIoEnabled}</li>
+        <li>read-only mode: ${model.readOnlyMode}</li>
+        <li>write mode allowed: ${model.writeModeAllowed}</li>
+        <li>write rejected pass: ${model.writeRejectedPass}</li>
+        <li>adapter implemented: ${model.adapterImplemented}</li>
+        <li>adapter production ready: ${model.adapterProductionReady}</li>
+        <li>feature flag enabled: ${model.featureFlagEnabled}</li>
+        <li>default feature flag enabled: ${model.defaultFeatureFlagEnabled}</li>
+        <li>product activation allowed: ${model.productActivationAllowed}</li>
+        <li>active product history source: ${model.activeProductHistorySource}</li>
+        <li>database used as product truth: ${model.databaseUsedAsProductTruth}</li>
+        <li>report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}</li>
+        <li>default real DB read count: ${model.defaultRealDatabaseReadCount}</li>
+        <li>controlled real DB read count: ${model.controlledRealDatabaseReadCount}</li>
+        <li>real DB write count: ${model.realDatabaseWriteCount}</li>
+        <li>fixture path: ${escapeHtml(model.fixturePath)}</li>
+        <li>fixture record count: ${model.fixtureRecordCount}</li>
+        <li>read-only adapter record count: ${model.readOnlyAdapterRecordCount}</li>
+        <li>query by team pass: ${model.queryByTeamPass}</li>
+        <li>query by phase pass: ${model.queryByPhasePass}</li>
+        <li>deterministic ordering pass: ${model.deterministicOrderingPass}</li>
+        <li>schema compatibility pass: ${model.schemaCompatibilityPass}</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+        <li>trend proof claim count: ${model.trendProofClaimCount}</li>
+        <li>invented statistic count: ${model.inventedStatisticCount}</li>
+        <li>sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}</li>
+        <li>visible recommendation wording count: ${model.visibleRecommendationWordingCount}</li>
+        <li>visible selection wording count: ${model.visibleSelectionWordingCount}</li>
+        <li>scoring constants unchanged: ${model.scoringConstantsUnchanged}</li>
+        <li>MatchBonusEvent unchanged: ${model.matchBonusEventUnchanged}</li>
+        <li>batch/live separation preserved: ${model.batchLiveSeparationPreserved}</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -2640,6 +2767,7 @@ function renderAppendices(input: {
   readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -2679,6 +2807,7 @@ function renderAppendices(input: {
     ${renderDatabaseAdapterSpikeAppendix(input.databaseAdapterSpike)}
     ${renderDurableStorageDecisionAppendix(input.durableStorageDecision)}
     ${renderControlledLocalReadOnlyDbModeAppendix(input.controlledLocalReadOnlyDbMode)}
+    ${renderRealSQLiteReadOnlyIOSmokeTestAppendix(input.realSQLiteReadOnlyIOSmokeTest)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -2709,6 +2838,7 @@ export function renderCoachReportExportHtml(input: {
   readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -2813,6 +2943,7 @@ export function renderCoachReportExportHtml(input: {
     renderDatabaseAdapterSpike(input.databaseAdapterSpike),
     renderDurableStorageDecision(input.durableStorageDecision),
     renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
+    renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -2851,6 +2982,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.controlledLocalReadOnlyDbMode === undefined
       ? {}
       : { controlledLocalReadOnlyDbMode: input.controlledLocalReadOnlyDbMode }),
+    ...(input.realSQLiteReadOnlyIOSmokeTest === undefined
+      ? {}
+      : { realSQLiteReadOnlyIOSmokeTest: input.realSQLiteReadOnlyIOSmokeTest }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

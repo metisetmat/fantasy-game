@@ -9,6 +9,7 @@ import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReport
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
+import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
@@ -24,6 +25,7 @@ import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReport
 import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabaseAdapterSpike";
 import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
+import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
@@ -37,6 +39,7 @@ import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHist
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
 import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
+import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 
@@ -56,6 +59,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -201,6 +205,15 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const realSQLiteReadOnlyIOSmokeTest = buildCoachReportRealSQLiteReadOnlyIOSmokeTest({
+    controlledLocalReadOnlyDbMode,
+    sqliteAdapter: createSqliteRealReadOnlyCoachMatchHistoryAdapter({
+      fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
+      explicitControlledMode: true,
+    }),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -214,6 +227,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     databaseAdapterSpike,
     durableStorageDecision,
     controlledLocalReadOnlyDbMode,
+    realSQLiteReadOnlyIOSmokeTest,
   });
 
   return {
@@ -232,5 +246,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     databaseAdapterSpike,
     durableStorageDecision,
     controlledLocalReadOnlyDbMode,
+    realSQLiteReadOnlyIOSmokeTest,
   };
 }

@@ -108,6 +108,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE":
     case "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION":
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -245,6 +246,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la decision de stockage durable";
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
       return "Relire la lecture SQLite locale controlee";
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
+      return "Relire le smoke test SQLite read-only";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5G - Controlled Local Read-Only DB Mode. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5H - Real SQLite Read-Only IO Smoke Test. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -76,15 +76,17 @@ import {
   renderFullMatchWorkbenchChainReplay5FValidation,
   renderFullMatchWorkbenchChainReplay5GDoc,
   renderFullMatchWorkbenchChainReplay5GValidation,
+  renderFullMatchWorkbenchChainReplay5HDoc,
+  renderFullMatchWorkbenchChainReplay5HValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5G - Controlled Local Read-Only DB Mode";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5g.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5g.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5H - Real SQLite Read-Only IO Smoke Test";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5h.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5h.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1895,6 +1897,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5G controlled local read-only SQLite adapter contract with query support, write rejection, and no real database IO",
       },
       {
+        source: "src/reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5H real local SQLite read-only fixture adapter with controlled file IO, schema validation, query support, and write rejection",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1943,6 +1950,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportControlledLocalReadOnlyDbMode.ts",
         required: true,
         reason: "Sprint 5G builder validating read-only team/phase queries, schema compatibility, deterministic ordering, and write rejection",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.ts",
+        required: true,
+        reason: "Sprint 5H report model, tags, evidence fact, and guardrails for real SQLite read-only IO smoke testing",
+      },
+      {
+        source: "src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts",
+        required: true,
+        reason: "Sprint 5H builder validating real SQLite controlled reads, non-product truth, schema compatibility, deterministic ordering, and write rejection",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2293,6 +2310,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5g.test.ts",
         required: true,
         reason: "Sprint 5G executable scoring guard proving controlled local read-only DB mode does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5h.test.ts",
+        required: true,
+        reason: "Sprint 5H executable scoring guard proving real SQLite read-only IO smoke test does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3741,6 +3763,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5G executable read-only adapter tests for explicit controlled query mode, schema compatibility, and write rejection",
       },
       {
+        source: "src/reports/sqliteRealReadOnlyCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5H executable real SQLite read-only fixture adapter tests for controlled file IO, schema compatibility, query support, and write rejection",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3839,6 +3866,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportControlledLocalReadOnlyDbModeCopy.test.ts",
         required: true,
         reason: "Sprint 5G executable visible-copy tests proving SQLite local wording stays controlled, local, read-only, and non-activating",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.test.ts",
+        required: true,
+        reason: "Sprint 5H executable model tests proving real SQLite read-only IO is controlled, disabled by default, non-product truth, and write-free",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5H executable renderer tests for the SQLite read-only smoke test export section and appendix",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestGuard.test.ts",
+        required: true,
+        reason: "Sprint 5H executable guard tests proving real SQLite read-only smoke test cannot drive selection or mutate official state",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestCopy.test.ts",
+        required: true,
+        reason: "Sprint 5H executable visible-copy tests proving SQLite smoke test wording stays non-prod, read-only, non-activating, and non-prescriptive",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -4036,6 +4083,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5H")) {
+    return renderFullMatchWorkbenchChainReplay5HDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5G")) {
     return renderFullMatchWorkbenchChainReplay5GDoc(fullMatchTraceValidationModel());
   }
@@ -6241,6 +6291,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5H")) {
+    return renderFullMatchWorkbenchChainReplay5HValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5G")) {
     return renderFullMatchWorkbenchChainReplay5GValidation(fullMatchTraceValidationModel());
   }
@@ -8392,6 +8445,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5H")) {
+    return [
+      "# Sprint 5H Share Pack",
+      "",
+      "Current sprint: Sprint 5H - Real SQLite Read-Only IO Smoke Test",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5h.md",
+      "- validation.fullmatch-workbench-chain-replay-5h.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5h.md and validation.fullmatch-workbench-chain-replay-5h.md.",
+      "",
+      "Sprint 5H proves a real local SQLite read-only IO smoke test against a non-prod coach_match_history_v1 fixture. The product source remains file_backed, SQLite local is not product truth, default real DB reads stay at 0, controlled reads are counted only in the explicit smoke test, and writes remain rejected.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5G")) {
     return [
       "# Sprint 5G Share Pack",
@@ -23859,6 +23948,92 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/sqliteRealReadOnlyCoachMatchHistoryAdapter.test.ts
+
+```ts
+import { join } from "node:path";
+import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateSqliteRealReadOnlyCoachMatchHistoryAdapter(): readonly string[] {
+  const adapter = createSqliteRealReadOnlyCoachMatchHistoryAdapter({
+    fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
+    explicitControlledMode: true,
+  });
+  const records = adapter.listReadOnlyRecords();
+  const firstRecord = records[0];
+  const descriptionBefore = adapter.describe();
+
+  assertTest(descriptionBefore.modeName === "real_sqlite_readonly_io_smoke_test", "mode name must be real_sqlite_readonly_io_smoke_test.");
+  assertTest(descriptionBefore.adapterKind === "sqlite_local_readonly_real_smoke_test", "adapter kind must be sqlite_local_readonly_real_smoke_test.");
+  assertTest(descriptionBefore.schemaVersion === "coach_match_history_v1", "schema version must be coach_match_history_v1.");
+  assertTest(descriptionBefore.defaultRealDatabaseReadCount === 0, "default real DB read count must remain 0.");
+  assertTest(descriptionBefore.controlledRealDatabaseReadCount > 0, "controlled real DB read count must be > 0 after fixture load.");
+  assertTest(descriptionBefore.realDatabaseWriteCount === 0, "real DB write count must remain 0.");
+  assertTest(descriptionBefore.readOnlyMode, "adapter must be read-only.");
+  assertTest(!descriptionBefore.writeModeAllowed, "write mode must be disabled.");
+  assertTest(!descriptionBefore.featureFlagEnabled, "feature flag must be disabled.");
+  assertTest(!descriptionBefore.defaultFeatureFlagEnabled, "default feature flag must be disabled.");
+  assertTest(!descriptionBefore.productActivationAllowed, "product activation must be disallowed.");
+  assertTest(!descriptionBefore.databaseUsedAsProductTruth, "database must not be product truth.");
+  assertTest(!descriptionBefore.reportCanUseAsSourceOfTruth, "report must not use DB as official source.");
+  assertTest(descriptionBefore.fixtureRecordCount >= 6, "fixture must contain at least 6 records.");
+  assertTest(records.length === descriptionBefore.fixtureRecordCount, "read-only records must match fixture count.");
+  assertTest(descriptionBefore.missingRequiredColumnCount === 0, "required fixture columns must be present.");
+  assertTest(descriptionBefore.schemaIncompatibleRecordCount === 0, "fixture records must match durable schema.");
+  assertTest(firstRecord !== undefined, "fixture must expose at least one record.");
+
+  if (firstRecord === undefined) {
+    throw new Error("fixture must expose at least one record.");
+  }
+
+  const teamQuery = adapter.readOnlyQuery({
+    teamId: firstRecord.homeTeamId,
+    maxRecords: 10,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+  const phase = firstRecord.signals[0]?.phase;
+  const phaseQuery = adapter.readOnlyQuery({
+    ...(phase === undefined ? {} : { phase }),
+    maxRecords: 10,
+    includeControlledSamples: true,
+    includeProductHistory: true,
+  });
+  const rejectedWrite = adapter.rejectWrite(firstRecord);
+  const descriptionAfter = adapter.describe();
+
+  assertTest(teamQuery.records.some((record) => record.historyRecordId === firstRecord.historyRecordId), "query by team must return the first fixture record.");
+  assertTest(phase === undefined || phaseQuery.records.some((record) => record.signals.some((signal) => signal.phase === phase)), "query by phase must return matching records.");
+  assertTest(rejectedWrite.recordsAfterSaveCount === rejectedWrite.recordsBeforeSaveCount, "write rejection must not change record count.");
+  assertTest(rejectedWrite.writtenToDiskCount === 0, "write rejection must not write to disk.");
+  assertTest(descriptionAfter.realDatabaseWriteCount === 0, "real DB write count must stay 0 after rejected write.");
+  assertTest(descriptionAfter.writeRejectedCount === 1, "write rejection count must be tracked.");
+  assertTest(descriptionAfter.controlledRealDatabaseReadCount > descriptionBefore.controlledRealDatabaseReadCount, "controlled reads must be counted.");
+
+  return [
+    "real SQLite read-only adapter is implemented",
+    "fixture read uses real local SQLite file IO",
+    "default product DB reads remain 0",
+    "controlled real DB read count is greater than 0",
+    "writes are rejected without disk writes",
+    "query by team and phase pass",
+  ];
+}
+
+const checks = validateSqliteRealReadOnlyCoachMatchHistoryAdapter();
+
+console.log("sqliteRealReadOnlyCoachMatchHistoryAdapter tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
 ## File: src/reports/coachMatchHistoryMigrationDryRun.test.ts
 
 ```ts
@@ -24753,6 +24928,215 @@ if (require.main === module) {
 }
 ```
 
+## File: src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportRealSQLiteReadOnlyIOSmokeTest(): readonly string[] {
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const model = context.realSQLiteReadOnlyIOSmokeTest;
+
+  assertTest(model.status === "available", "real SQLite read-only IO smoke test must be available.");
+  assertTest(model.modeName === "real_sqlite_readonly_io_smoke_test", "mode name must be real_sqlite_readonly_io_smoke_test.");
+  assertTest(model.storageTarget === "sqlite_local", "storage target must be sqlite_local.");
+  assertTest(model.schemaVersion === "coach_match_history_v1", "schema version must be coach_match_history_v1.");
+  assertTest(model.realSQLiteIoEnabled, "real SQLite IO must be enabled in controlled smoke test mode.");
+  assertTest(model.readOnlyMode, "read-only mode must be true.");
+  assertTest(!model.writeModeAllowed, "write mode must be false.");
+  assertTest(model.writeRejectedPass, "write rejection must pass.");
+  assertTest(model.adapterImplemented, "adapter must be implemented.");
+  assertTest(!model.adapterProductionReady, "adapter must not be production ready.");
+  assertTest(!model.featureFlagEnabled, "feature flag must be disabled.");
+  assertTest(!model.defaultFeatureFlagEnabled, "default feature flag must be disabled.");
+  assertTest(!model.productActivationAllowed, "product activation must be false.");
+  assertTest(model.activeProductHistorySource === "file_backed", "active product history source must remain file_backed.");
+  assertTest(!model.databaseUsedAsProductTruth, "database must not become product truth.");
+  assertTest(!model.reportCanUseAsSourceOfTruth, "report must not use SQLite as source of truth.");
+  assertTest(model.defaultRealDatabaseReadCount === 0, "default real DB read count must remain 0.");
+  assertTest(model.controlledRealDatabaseReadCount > 0, "controlled real DB read count must be > 0.");
+  assertTest(model.realDatabaseWriteCount === 0, "real DB write count must remain 0.");
+  assertTest(model.fixtureRecordCount >= 6, "fixture record count must be >= 6.");
+  assertTest(model.readOnlyAdapterRecordCount === model.fixtureRecordCount, "adapter record count must equal fixture count.");
+  assertTest(model.queryByTeamPass, "query by team must pass.");
+  assertTest(model.queryByPhasePass, "query by phase must pass.");
+  assertTest(model.deterministicOrderingPass, "deterministic ordering must pass.");
+  assertTest(model.schemaCompatibilityPass, "schema compatibility must pass.");
+  assertTest(model.scoringConstantsUnchanged, "scoring constants must remain unchanged.");
+  assertTest(model.matchBonusEventUnchanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(model.batchLiveSeparationPreserved, "batch/live separation must remain preserved.");
+  assertTest(model.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY must remain only global proof.");
+
+  return [
+    "real SQLite read-only IO smoke test available",
+    "controlled read count is > 0 and default read count is 0",
+    "SQLite remains non-product truth",
+    "file_backed remains active product source",
+    "write rejection and schema/query checks pass",
+  ];
+}
+
+const checks = validateCoachReportRealSQLiteReadOnlyIOSmokeTest();
+
+console.log("coachReportRealSQLiteReadOnlyIOSmokeTest tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
+## File: src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestRenderer.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportRealSQLiteReadOnlyIOSmokeTestRenderer(): readonly string[] {
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const exportHtml = context.exportHtml;
+
+  assertTest(exportHtml.includes("Smoke test SQLite read-only"), "export must contain the 5H smoke test section.");
+  assertTest(exportHtml.includes("real_sqlite_readonly_io_smoke_test"), "export must show the 5H mode name.");
+  assertTest(exportHtml.includes("sqlite_local"), "export must show sqlite_local target.");
+  assertTest(exportHtml.includes("coach_match_history_v1"), "export must show coach_match_history_v1 schema.");
+  assertTest(exportHtml.includes("Vraie lecture SQLite contr&ocirc;l&eacute;e"), "export must state real controlled SQLite read.");
+  assertTest(exportHtml.includes("Lecture DB r&eacute;elle mode d&eacute;faut"), "export must show default real DB read count.");
+  assertTest(exportHtml.includes("Lecture DB r&eacute;elle mode contr&ocirc;l&eacute;"), "export must show controlled real DB read count.");
+  assertTest(exportHtml.includes("&Eacute;criture DB"), "export must show DB write count.");
+  assertTest(exportHtml.includes("Write rejected"), "export must show write rejection.");
+  assertTest(exportHtml.includes("Query by team"), "export must show query by team.");
+  assertTest(exportHtml.includes("Query by phase"), "export must show query by phase.");
+  assertTest(exportHtml.includes("Details smoke test SQLite read-only") || exportHtml.includes("D&eacute;tails smoke test SQLite read-only"), "export must contain smoke test appendix.");
+
+  return [
+    "export contains real SQLite read-only smoke test section",
+    "export contains mode, target, schema, real read, and write rejection",
+    "export contains read-only smoke test appendix",
+  ];
+}
+
+const checks = validateCoachReportRealSQLiteReadOnlyIOSmokeTestRenderer();
+
+console.log("coachReportRealSQLiteReadOnlyIOSmokeTestRenderer tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
+## File: src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestGuard.test.ts
+
+```ts
+import {
+  coachReportRealSQLiteReadOnlyIOSmokeTestCannotDriveSelection,
+  coachReportRealSQLiteReadOnlyIOSmokeTestCannotMutateOfficialState,
+} from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateCoachReportRealSQLiteReadOnlyIOSmokeTestGuard(): readonly string[] {
+  const model = buildCoachReportMultiMatchPhaseComparisonTestContext().realSQLiteReadOnlyIOSmokeTest;
+
+  assertTest(coachReportRealSQLiteReadOnlyIOSmokeTestCannotDriveSelection(model), "smoke test cannot drive selection.");
+  assertTest(coachReportRealSQLiteReadOnlyIOSmokeTestCannotMutateOfficialState(model), "smoke test cannot mutate official match state.");
+  assertTest(!model.canDriveCoachInstruction, "coach instruction driver must be false.");
+  assertTest(!model.canDriveLiveSelection, "live selection driver must be false.");
+  assertTest(!model.canDriveProductionRouteResolution, "production route driver must be false.");
+  assertTest(!model.canMutateScore, "score mutation must be false.");
+  assertTest(!model.canMutateTimeline, "timeline mutation must be false.");
+  assertTest(!model.canMutatePossession, "possession mutation must be false.");
+  assertTest(!model.canCreateProductionScoringEvents, "production scoring event creation must be false.");
+  assertTest(!model.canMutateLineup, "lineup mutation must be false.");
+  assertTest(!model.canMutateStarters, "starters mutation must be false.");
+  assertTest(!model.canMutateBench, "bench mutation must be false.");
+  assertTest(!model.canClaimGlobalEconomy, "global economy claim must be false.");
+  assertTest(model.trendProofClaimCount === 0, "trend proof claim count must be 0.");
+  assertTest(model.inventedStatisticCount === 0, "invented statistic count must be 0.");
+  assertTest(model.sandboxEventsPromotedToOfficialCount === 0, "sandbox promotion count must be 0.");
+
+  return [
+    "real SQLite smoke test cannot drive selection",
+    "real SQLite smoke test cannot mutate official state",
+    "trend proof, invented statistic, and sandbox promotion counts are 0",
+  ];
+}
+
+const checks = validateCoachReportRealSQLiteReadOnlyIOSmokeTestGuard();
+
+console.log("coachReportRealSQLiteReadOnlyIOSmokeTestGuard tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
+## File: src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestCopy.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/giu, " ")
+    .replace(/<style[\s\S]*?<\/style>/giu, " ")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .toLowerCase();
+}
+
+export function validateCoachReportRealSQLiteReadOnlyIOSmokeTestCopy(): readonly string[] {
+  const visible = stripHtml(buildCoachReportMultiMatchPhaseComparisonTestContext().exportHtml);
+
+  assertTest(visible.includes("smoke test sqlite read-only"), "visible copy must name the smoke test.");
+  assertTest(visible.includes("smoke test contr&ocirc;l&eacute;"), "visible copy must say controlled smoke test.");
+  assertTest(visible.includes("read-only"), "visible copy must say read-only.");
+  assertTest(visible.includes("non actif par d&eacute;faut"), "visible copy must say non-default.");
+  assertTest(visible.includes("non utilis&eacute; comme v&eacute;rit&eacute; produit"), "visible copy must say not product truth.");
+  assertTest(visible.includes("source produit active reste inchang"), "visible copy must say product source unchanged.");
+  assertTest(visible.includes("aucune &eacute;criture"), "visible copy must say no writes.");
+  assertTest(visible.includes("aucune mutation du match officiel"), "visible copy must say no official match mutation.");
+  assertTest(!visible.includes("sqlite est source de v"), "visible copy must not claim SQLite is source of truth.");
+  assertTest(!visible.includes("le produit utilise sqlite"), "visible copy must not claim product uses SQLite.");
+  assertTest(!visible.includes("tendance prouv"), "visible copy must not claim proved trend.");
+  assertTest(!visible.includes("preuve globale"), "visible copy must not claim global proof.");
+  assertTest(!visible.includes("recommandation automatique"), "visible copy must not include automatic recommendation wording.");
+  assertTest(!visible.includes("s&eacute;lection automatique"), "visible copy must not include automatic selection wording.");
+
+  return [
+    "visible copy states controlled read-only non-prod smoke test",
+    "visible copy states non-default, no-write, and no official mutation boundary",
+    "visible copy avoids SQLite product-truth and automatic-selection claims",
+  ];
+}
+
+const checks = validateCoachReportRealSQLiteReadOnlyIOSmokeTestCopy();
+
+console.log("coachReportRealSQLiteReadOnlyIOSmokeTestCopy tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -24769,6 +25153,7 @@ import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReport
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
+import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -24783,6 +25168,7 @@ import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHist
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
 import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
+import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -24945,6 +25331,17 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const realSQLiteReadOnlyIOSmokeTest = controlledLocalReadOnlyDbMode === undefined
+    ? undefined
+    : buildCoachReportRealSQLiteReadOnlyIOSmokeTest({
+        controlledLocalReadOnlyDbMode,
+        sqliteAdapter: createSqliteRealReadOnlyCoachMatchHistoryAdapter({
+          fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
+          explicitControlledMode: true,
+        }),
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -24958,6 +25355,7 @@ export function writeLatestCoachReport(): void {
     ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
     ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
     ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
+    ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

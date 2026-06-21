@@ -11,6 +11,7 @@ import { buildCoachReportDatabaseMigrationPreparation } from "../../reports/buil
 import { buildCoachReportDatabaseAdapterSpike } from "../../reports/buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportDurableStorageDecision } from "../../reports/buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "../../reports/buildCoachReportControlledLocalReadOnlyDbMode";
+import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "../../reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -27,6 +28,7 @@ import type { CoachReportDatabaseMigrationPreparationModel } from "../../reports
 import type { CoachReportDatabaseAdapterSpikeModel } from "../../reports/coachReportDatabaseAdapterSpike";
 import type { CoachReportDurableStorageDecisionModel } from "../../reports/coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "../../reports/coachReportControlledLocalReadOnlyDbMode";
+import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "../../reports/coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
 import type { CoachMatchHistoryMigrationDryRunModel } from "../../reports/history/coachMatchHistoryMigrationDryRun";
 import {
@@ -48,6 +50,7 @@ import { resolveDatabaseHistoryAdapterFeatureFlag } from "../../reports/history/
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "../../reports/history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { createSqliteLocalCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalCoachMatchHistoryAdapter";
 import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
+import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "../../reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -464,6 +467,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly exportHtml: string;
 }
 
@@ -601,6 +605,15 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const realSQLiteReadOnlyIOSmokeTest = buildCoachReportRealSQLiteReadOnlyIOSmokeTest({
+      controlledLocalReadOnlyDbMode,
+      sqliteAdapter: createSqliteRealReadOnlyCoachMatchHistoryAdapter({
+        fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
+        explicitControlledMode: true,
+      }),
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -614,6 +627,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       databaseAdapterSpike,
       durableStorageDecision,
       controlledLocalReadOnlyDbMode,
+      realSQLiteReadOnlyIOSmokeTest,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -625,6 +639,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       databaseAdapterSpike,
       durableStorageDecision,
       controlledLocalReadOnlyDbMode,
+      realSQLiteReadOnlyIOSmokeTest,
       exportHtml,
     };
 
@@ -4894,6 +4909,180 @@ export function renderFullMatchWorkbenchChainReplay5GValidation(model: FullMatch
     "- CONFIRM_CONTROLLED_LOCAL_READONLY_DB_MODE.",
     "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
     "- CONFIRM_NO_DB_WRITES.",
+    "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
+    "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+  ].join("\n");
+}
+
+function realSQLiteReadOnlyIOSmokeTestCountLines(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel,
+): readonly string[] {
+  return [
+    `- real SQLite read-only IO smoke test available: ${model.status === "available"}`,
+    `- mode name: ${model.modeName}`,
+    `- storage target selected: ${model.storageTarget}`,
+    `- schema version: ${model.schemaVersion}`,
+    `- real SQLite IO enabled: ${model.realSQLiteIoEnabled}`,
+    `- read-only mode: ${model.readOnlyMode}`,
+    `- write mode allowed: ${model.writeModeAllowed}`,
+    `- write rejected pass: ${model.writeRejectedPass}`,
+    `- adapter implemented: ${model.adapterImplemented}`,
+    `- adapter production ready: ${model.adapterProductionReady}`,
+    `- feature flag enabled: ${model.featureFlagEnabled}`,
+    `- default feature flag enabled: ${model.defaultFeatureFlagEnabled}`,
+    `- product activation allowed: ${model.productActivationAllowed}`,
+    `- active product history source: ${model.activeProductHistorySource}`,
+    `- database used as product truth: ${model.databaseUsedAsProductTruth}`,
+    `- report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}`,
+    `- default real DB read count: ${model.defaultRealDatabaseReadCount}`,
+    `- controlled real DB read count: ${model.controlledRealDatabaseReadCount}`,
+    `- real DB write count: ${model.realDatabaseWriteCount}`,
+    `- fixture path: ${model.fixturePath}`,
+    `- fixture record count: ${model.fixtureRecordCount}`,
+    `- read-only adapter record count: ${model.readOnlyAdapterRecordCount}`,
+    `- query by team pass: ${model.queryByTeamPass}`,
+    `- query by phase pass: ${model.queryByPhasePass}`,
+    `- deterministic ordering pass: ${model.deterministicOrderingPass}`,
+    `- schema compatibility pass: ${model.schemaCompatibilityPass}`,
+    `- score mutation count: ${model.canMutateScore ? 1 : 0}`,
+    `- timeline mutation count: ${model.canMutateTimeline ? 1 : 0}`,
+    `- possession mutation count: ${model.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${model.canCreateProductionScoringEvents ? 1 : 0}`,
+    `- lineup mutation count: ${model.canMutateLineup ? 1 : 0}`,
+    `- starters mutation count: ${model.canMutateStarters ? 1 : 0}`,
+    `- bench mutation count: ${model.canMutateBench ? 1 : 0}`,
+    `- live selection driver count: ${model.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${model.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- global economy claim count: ${model.canClaimGlobalEconomy ? 1 : 0}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${model.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${model.visibleSelectionWordingCount}`,
+    `- scoring constants unchanged: ${model.scoringConstantsUnchanged}`,
+    `- MatchBonusEvent unchanged: ${model.matchBonusEventUnchanged}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5HDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const smokeTest = context.realSQLiteReadOnlyIOSmokeTest;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5H",
+    "",
+    "Sprint 5H closes the persistence spike with a real local SQLite read-only IO smoke test. The fixture is non-prod, explicitly requested, and cannot become product truth.",
+    "",
+    "## SQLite Driver Choice",
+    "- choice: minimal_readonly_sqlite_file_reader",
+    "- reason: the project has no existing SQLite dependency; the smoke test proves real local `.sqlite` file IO without adding a fragile install-time native dependency.",
+    "- scope: fixture-only read path for `coach_match_history_v1`; no write SQL path exists.",
+    "",
+    "## Real SQLite Read-Only IO Smoke Test",
+    ...realSQLiteReadOnlyIOSmokeTestCountLines(smokeTest),
+    "",
+    "## Product Boundary",
+    "- normal product mode remains file_backed.",
+    "- SQLite local read-only smoke test is not active by default.",
+    "- product activation allowed: false",
+    "- database used as product truth: false",
+    "- report can use as source of truth: false",
+    "- default real database read count: 0",
+    "- controlled real database read count is greater than 0 only inside this explicit smoke test.",
+    "- real database write count: 0",
+    "- no score, timeline, possession, scoring-event, selection, lineup, or production-route mutation is allowed.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_REAL_SQLITE_READONLY_IO_SMOKE_TEST.",
+    "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
+    "- CONFIRM_NO_SQLITE_WRITES.",
+    "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
+    "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5HValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const smokeTest = context.realSQLiteReadOnlyIOSmokeTest;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("real SQLite read-only IO smoke test exists.", smokeTest.status === "available", smokeTest.status),
+    check("mode must be explicitly requested.", smokeTest.explicitControlledModeOnly, smokeTest.modeName),
+    check("storage target selected is sqlite_local.", smokeTest.storageTarget === "sqlite_local", smokeTest.storageTarget),
+    check("schema version is coach_match_history_v1.", smokeTest.schemaVersion === "coach_match_history_v1", smokeTest.schemaVersion),
+    check("real SQLite IO enabled is true.", smokeTest.realSQLiteIoEnabled, ""),
+    check("read-only mode is true.", smokeTest.readOnlyMode, ""),
+    check("write mode allowed is false.", !smokeTest.writeModeAllowed, ""),
+    check("write rejected pass is true.", smokeTest.writeRejectedPass, ""),
+    check("adapter implemented is true.", smokeTest.adapterImplemented, ""),
+    check("adapter production ready is false.", !smokeTest.adapterProductionReady, ""),
+    check("feature flag enabled is false.", !smokeTest.featureFlagEnabled, ""),
+    check("default feature flag enabled is false.", !smokeTest.defaultFeatureFlagEnabled, ""),
+    check("product activation allowed is false.", !smokeTest.productActivationAllowed, ""),
+    check("active product history source is file_backed.", smokeTest.activeProductHistorySource === "file_backed", smokeTest.activeProductHistorySource),
+    check("database used as product truth is false.", !smokeTest.databaseUsedAsProductTruth, ""),
+    check("report can use as source of truth is false.", !smokeTest.reportCanUseAsSourceOfTruth, ""),
+    check("default real DB read count is 0.", smokeTest.defaultRealDatabaseReadCount === 0, "0"),
+    check("controlled real DB read count is greater than 0.", smokeTest.controlledRealDatabaseReadCount > 0, String(smokeTest.controlledRealDatabaseReadCount)),
+    check("real DB write count is 0.", smokeTest.realDatabaseWriteCount === 0, "0"),
+    check("fixture record count is at least 6.", smokeTest.fixtureRecordCount >= 6, String(smokeTest.fixtureRecordCount)),
+    check("read-only adapter record count equals fixture record count.", smokeTest.readOnlyAdapterRecordCount === smokeTest.fixtureRecordCount, `${smokeTest.readOnlyAdapterRecordCount}/${smokeTest.fixtureRecordCount}`),
+    check("query by team passes.", smokeTest.queryByTeamPass, ""),
+    check("query by phase passes.", smokeTest.queryByPhasePass, ""),
+    check("deterministic ordering passes.", smokeTest.deterministicOrderingPass, ""),
+    check("schema compatibility passes.", smokeTest.schemaCompatibilityPass, ""),
+    check("score mutation count is 0.", !smokeTest.canMutateScore, "0"),
+    check("timeline mutation count is 0.", !smokeTest.canMutateTimeline, "0"),
+    check("possession mutation count is 0.", !smokeTest.canMutatePossession, "0"),
+    check("production scoring event creation count is 0.", !smokeTest.canCreateProductionScoringEvents, "0"),
+    check("lineup mutation count is 0.", !smokeTest.canMutateLineup, "0"),
+    check("starters mutation count is 0.", !smokeTest.canMutateStarters, "0"),
+    check("bench mutation count is 0.", !smokeTest.canMutateBench, "0"),
+    check("live selection driver count is 0.", !smokeTest.canDriveLiveSelection, "0"),
+    check("production route resolution driver count is 0.", !smokeTest.canDriveProductionRouteResolution, "0"),
+    check("global economy claim count is 0.", !smokeTest.canClaimGlobalEconomy, "0"),
+    check("trend proof claim count is 0.", smokeTest.trendProofClaimCount === 0, "0"),
+    check("invented statistic count is 0.", smokeTest.inventedStatisticCount === 0, "0"),
+    check("sandbox events promoted to official count is 0.", smokeTest.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible recommendation wording count is 0.", smokeTest.visibleRecommendationWordingCount === 0, "0"),
+    check("visible selection wording count is 0.", smokeTest.visibleSelectionWordingCount === 0, "0"),
+    check("scoring constants unchanged.", smokeTest.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", smokeTest.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", smokeTest.batchLiveSeparationPreserved, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global economy proof.", smokeTest.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("export contains SQLite read-only smoke test section.", exportHtml.includes("Smoke test SQLite read-only"), ""),
+    check("export states source produit active inchang", exportHtml.includes("source produit active reste inchang") || exportHtml.includes("source produit active inchang"), ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5H Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...realSQLiteReadOnlyIOSmokeTestCountLines(smokeTest),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_REAL_SQLITE_READONLY_IO_SMOKE_TEST.",
+    "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
+    "- CONFIRM_NO_SQLITE_WRITES.",
     "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
     "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
     "",
