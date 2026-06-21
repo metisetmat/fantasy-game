@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 5H - Real SQLite Read-Only IO Smoke Test",
+  name: "Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-5h.md",
-    "validation.fullmatch-workbench-chain-replay-5h.md",
+    "fullmatch-scoring-family-attribution-6b.md",
+    "validation.fullmatch-scoring-family-attribution-6b.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 5H share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-5h.md": "summarizes the real SQLite read-only IO smoke test, non-prod fixture, sqlite_local target, coach_match_history_v1 schema, write rejection, and no-product-activation guardrails",
-    "validation.fullmatch-workbench-chain-replay-5h.md": "validates real SQLite read-only controlled IO, query by team/phase, deterministic ordering, schema compatibility, write rejection, export HTML section, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 5H share pack",
-    "manifest.md": "compatibility manifest listing the 5H share pack files",
+    "validation.share-pack.md": "proves the 6B share pack is current, complete, and below 20 files",
+    "fullmatch-scoring-family-attribution-6b.md": "audits official score_change events by scoring family, reduces legacy UNKNOWN attribution, and preserves no-cap/no-rewrite/no-deletion guardrails",
+    "validation.fullmatch-scoring-family-attribution-6b.md": "validates scoring family attribution coverage, explicit UNKNOWN handling, unchanged scoring constants, official-event score source, and single-run limitation for Sprint 6B",
+    "README.md": "compact reviewer orientation for the 6B share pack",
+    "manifest.md": "compatibility manifest listing the 6B share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

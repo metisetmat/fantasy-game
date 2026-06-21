@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-21T12:33:41.689Z
-Task/sprint: Sprint 5H - Real SQLite Read-Only IO Smoke Test
+Generated: 2026-06-21T19:58:20.763Z
+Task/sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-5h.md
-- validation.fullmatch-workbench-chain-replay-5h.md
+- fullmatch-scoring-family-attribution-6b.md
+- validation.fullmatch-scoring-family-attribution-6b.md
 - README.md
 
 ## Bundle Files

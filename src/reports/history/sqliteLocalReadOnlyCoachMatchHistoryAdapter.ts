@@ -5,7 +5,6 @@ import type {
 } from "./coachMatchHistory";
 import type { CoachMatchHistorySaveResult } from "./coachMatchHistoryStore";
 import {
-  coachMatchHistoryRecordsHaveSameContent,
   cloneCoachMatchHistoryRecord,
   sortCoachMatchHistoryRecords,
 } from "./coachMatchHistorySerialization";
@@ -163,21 +162,18 @@ export function createSqliteLocalReadOnlyCoachMatchHistoryAdapter(input: {
     },
     rejectWrite(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult {
       writeRejectedCount += 1;
-      const existing = records.find((candidate) => candidate.historyRecordId === record.historyRecordId);
 
       return {
-        operation: existing !== undefined && coachMatchHistoryRecordsHaveSameContent(existing, record)
-          ? "ignored_duplicate"
-          : "ignored_duplicate",
+        operation: "rejected_write",
         record: cloneCoachMatchHistoryRecord(record),
         recordsBeforeSaveCount: records.length,
         recordsAfterSaveCount: records.length,
         loadedFromDiskCount: 0,
         writtenToDiskCount: 0,
-        dedupedRecordCount: existing === undefined ? 0 : 1,
+        dedupedRecordCount: 0,
         replacedRecordCount: 0,
-        ignoredDuplicateCount: 1,
-        idempotent: true,
+        ignoredDuplicateCount: 0,
+        idempotent: false,
         warnings: [
           "Write rejected: controlled_local_readonly_db is read-only in Sprint 5G.",
         ],

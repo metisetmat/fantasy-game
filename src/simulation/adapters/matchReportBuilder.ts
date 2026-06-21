@@ -52,6 +52,10 @@ import type { ReboundSecondChanceModel } from "../fullMatch/reboundSecondChanceS
 import type { MultiActionContinuationModel } from "../fullMatch/multiActionContinuationSandbox";
 import type { SandboxSequenceReplayModel } from "../fullMatch/sandboxSequenceReplay";
 import type { ControlledSegmentSandboxTimelineModel } from "../fullMatch/controlledSegmentSandboxTimeline";
+import {
+  classifyScoringEventFamily,
+  scoringFamilyTags,
+} from "../../systems/scoring/scoringFamilyAttribution";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -1389,6 +1393,44 @@ function scoringEventToMatchEvent(input: {
   });
   const teamState = input.segment.segmentState === undefined ? undefined : teamStateForId(input.segment.segmentState, teamId);
   const timelineTick = input.segment.tickOffset + input.event.sequenceNumber;
+  const scoreChangeDescription = `${input.event.teamName} scored ${input.event.points} points via ${input.event.scoringType}.`;
+  const baseTags = [
+    "run_match_adapter",
+    "mini_match_scoring_event",
+    "scoring_event",
+    `scoring_type_${input.event.scoringType}`,
+    ...input.influence.tags,
+    ...goalkeeperProfileTags(input.matchInput),
+    ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
+    ...segmentInfluenceTags(input.segment.segmentInfluence),
+    ...chainSegmentContextTags(input.segment.chainSegmentContext),
+    ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
+    ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
+    ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
+    ...segmentRouteInputTags(input.segment.segmentRouteInput),
+    ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
+    ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
+    ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
+    ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
+    ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+    ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
+    ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
+    ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
+    ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
+    ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
+    ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+    ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
+    ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
+    ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
+    ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
+  ];
+  const scoringAttribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: baseTags,
+    tacticalMoveType: input.event.scoringType,
+    consequencePointValue: input.event.points,
+    consequenceDescriptions: [scoreChangeDescription],
+  });
 
   return {
     eventId: `${input.matchInput.matchId}-${input.segment.eventIdPrefix}-score-${input.index + 1}`,
@@ -1426,39 +1468,21 @@ function scoringEventToMatchEvent(input: {
     consequences: [
       {
         type: "score_change",
-        description: `${input.event.teamName} scored ${input.event.points} points via ${input.event.scoringType}.`,
+        description: scoreChangeDescription,
         value: input.event.points,
       },
     ],
+    scoringFamily: scoringAttribution.family,
+    scoringAction: scoringAttribution.scoringAction,
+    scoringPointValue: input.event.points,
+    scoringAttributionConfidence: scoringAttribution.confidence,
+    scoringAttributionReason: scoringAttribution.attributionReason,
+    scoringAttributionSourceFields: scoringAttribution.sourceFieldsUsed,
+    scoringAttributionMissingFields: scoringAttribution.missingFields,
+    scoringAttributionWarningCodes: scoringAttribution.warningCodes,
     tags: [
-      "run_match_adapter",
-      "mini_match_scoring_event",
-      "scoring_event",
-      `scoring_type_${input.event.scoringType}`,
-      ...input.influence.tags,
-      ...goalkeeperProfileTags(input.matchInput),
-      ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
-      ...segmentInfluenceTags(input.segment.segmentInfluence),
-      ...chainSegmentContextTags(input.segment.chainSegmentContext),
-      ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
-      ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
-      ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
-      ...segmentRouteInputTags(input.segment.segmentRouteInput),
-      ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
-      ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
-      ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
-      ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
-      ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
-      ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
-      ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
-      ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
-      ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
-      ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
-      ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
-      ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
-      ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
-      ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
-      ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
+      ...baseTags,
+      ...scoringFamilyTags(scoringAttribution),
     ],
     narrativeWeight: 70,
   };

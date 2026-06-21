@@ -3,7 +3,8 @@ import type { CoachMatchHistorySaveResult, CoachMatchHistoryStoreKind } from "./
 export type PersistenceEvidenceScenario =
   | "inserted"
   | "replaced"
-  | "ignored_duplicate";
+  | "ignored_duplicate"
+  | "rejected_write";
 
 export interface CoachReportPersistenceEvidenceSnapshot {
   readonly snapshotId: string;

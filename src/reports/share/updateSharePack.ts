@@ -71,15 +71,19 @@ import {
   renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay5HDoc,
   renderFullMatchWorkbenchChainReplay5HValidation,
+  renderFullMatchScoringFamilyAttribution6BDoc,
+  renderFullMatchScoringFamilyAttribution6BValidation,
+  renderFullMatchScoreEconomyCalibration6ADoc,
+  renderFullMatchScoreEconomyCalibration6AValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5H - Real SQLite Read-Only IO Smoke Test";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5h.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5h.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-scoring-family-attribution-6b.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-scoring-family-attribution-6b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -282,6 +286,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/contracts/matchReportWarnings.ts",
         required: true,
         reason: "Sprint 2P canonical MatchReport warning contract",
+      },
+      {
+        source: "src/contracts/scoringFamily.ts",
+        required: true,
+        reason: "Sprint 6B official scoring family attribution contract and warning-code surface",
       },
       {
         source: "src/contracts/engineToCoach.test.ts",
@@ -1953,6 +1962,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts",
         required: true,
         reason: "Sprint 5H builder validating real SQLite controlled reads, non-product truth, schema compatibility, deterministic ordering, and write rejection",
+      },
+      {
+        source: "src/reports/fullMatchScoreEconomyCalibration.ts",
+        required: true,
+        reason: "Sprint 6A full-match score economy calibration model for single-run root-cause diagnosis, controlled projection, and no-mutation guardrails",
+      },
+      {
+        source: "src/systems/scoring/scoringFamilyAttribution.ts",
+        required: true,
+        reason: "Sprint 6B classifier mapping official score_change events to scoring families with explicit UNKNOWN warnings",
+      },
+      {
+        source: "src/systems/scoring/scoringFamilyAttributionWarnings.ts",
+        required: true,
+        reason: "Sprint 6B scoring attribution warning-code registry for explicit taxonomy cleanup diagnostics",
+      },
+      {
+        source: "src/reports/scoringFamilyAttributionAudit.ts",
+        required: true,
+        reason: "Sprint 6B scoring family attribution audit model with coverage, legacy UNKNOWN comparison, family points, and no-mutation guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -3881,6 +3910,31 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5H executable visible-copy tests proving SQLite smoke test wording stays non-prod, read-only, non-activating, and non-prescriptive",
       },
       {
+        source: "src/reports/fullMatchScoreEconomyCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6A executable model tests proving score economy calibration keeps constants, events, batch/live separation, and persistence boundaries intact",
+      },
+      {
+        source: "src/reports/fullMatchScoreEconomyCalibrationRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6A executable renderer tests proving coach export copy is local, controlled, no-cap, no-rewrite, and not a global proof",
+      },
+      {
+        source: "src/systems/scoring/scoringFamilyAttribution.test.ts",
+        required: true,
+        reason: "Sprint 6B executable classifier tests proving legacy scoring_type tags map to official families and UNKNOWN remains explicit",
+      },
+      {
+        source: "src/reports/scoringFamilyAttributionAudit.test.ts",
+        required: true,
+        reason: "Sprint 6B executable audit tests proving coverage, legacy UNKNOWN reduction, point attribution, and no-mutation guardrails",
+      },
+      {
+        source: "src/reports/scoringFamilyAttributionRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6B executable renderer tests proving the coach export includes Origine des points and avoids manual score-correction wording",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -4076,6 +4130,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6B")) {
+    return renderFullMatchScoringFamilyAttribution6BDoc(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return renderFullMatchScoreEconomyCalibration6ADoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5H")) {
     return renderFullMatchWorkbenchChainReplay5HDoc(fullMatchTraceValidationModel());
   }
@@ -6284,6 +6344,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6B")) {
+    return renderFullMatchScoringFamilyAttribution6BValidation(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return renderFullMatchScoreEconomyCalibration6AValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5H")) {
     return renderFullMatchWorkbenchChainReplay5HValidation(fullMatchTraceValidationModel());
   }
@@ -8438,6 +8504,78 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6B")) {
+    return [
+      "# Sprint 6B Share Pack",
+      "",
+      "Current sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-scoring-family-attribution-6b.md",
+      "- validation.fullmatch-scoring-family-attribution-6b.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-scoring-family-attribution-6b.md and validation.fullmatch-scoring-family-attribution-6b.md.",
+      "",
+      "Sprint 6B classifies official score_change events into scoring families, reduces legacy UNKNOWN attribution, adds Origine des points to the coach export, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return [
+      "# Sprint 6A Share Pack",
+      "",
+      "Current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-score-economy-calibration-6a.md",
+      "- validation.fullmatch-score-economy-calibration-6a.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-score-economy-calibration-6a.md and validation.fullmatch-score-economy-calibration-6a.md.",
+      "",
+      "Sprint 6A diagnoses a single full-match score-economy outlier, adds a controlled projection and before/after comparison, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5H")) {
     return [
       "# Sprint 5H Share Pack",
