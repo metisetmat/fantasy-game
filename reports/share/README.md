@@ -1,6 +1,6 @@
-# Sprint 5G Share Pack
+# Sprint 5H Share Pack
 
-Current sprint: Sprint 5G - Controlled Local Read-Only DB Mode
+Current sprint: Sprint 5H - Real SQLite Read-Only IO Smoke Test
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-workbench-chain-replay-5g.md
-- validation.fullmatch-workbench-chain-replay-5g.md
+- fullmatch-workbench-chain-replay-5h.md
+- validation.fullmatch-workbench-chain-replay-5h.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5g.md and validation.fullmatch-workbench-chain-replay-5g.md.
+Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5h.md and validation.fullmatch-workbench-chain-replay-5h.md.
 
-Sprint 5G proves controlled local read-only DB mode for test/dev only. The product source remains file_backed, SQLite local is not product truth, and real DB read/write counts stay at 0 in default report mode.
+Sprint 5H proves a real local SQLite read-only IO smoke test against a non-prod coach_match_history_v1 fixture. The product source remains file_backed, SQLite local is not product truth, default real DB reads stay at 0, controlled reads are counted only in the explicit smoke test, and writes remain rejected.
 
 Upload every file in this reports/share directory.

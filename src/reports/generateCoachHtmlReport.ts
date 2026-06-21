@@ -11,6 +11,7 @@ import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReport
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
+import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -25,6 +26,7 @@ import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHist
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
 import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
+import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -187,6 +189,17 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const realSQLiteReadOnlyIOSmokeTest = controlledLocalReadOnlyDbMode === undefined
+    ? undefined
+    : buildCoachReportRealSQLiteReadOnlyIOSmokeTest({
+        controlledLocalReadOnlyDbMode,
+        sqliteAdapter: createSqliteRealReadOnlyCoachMatchHistoryAdapter({
+          fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
+          explicitControlledMode: true,
+        }),
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -200,6 +213,7 @@ export function writeLatestCoachReport(): void {
     ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
     ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
     ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
+    ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

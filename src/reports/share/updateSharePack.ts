@@ -69,15 +69,17 @@ import {
   renderFullMatchWorkbenchChainReplay5FValidation,
   renderFullMatchWorkbenchChainReplay5GDoc,
   renderFullMatchWorkbenchChainReplay5GValidation,
+  renderFullMatchWorkbenchChainReplay5HDoc,
+  renderFullMatchWorkbenchChainReplay5HValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5G - Controlled Local Read-Only DB Mode";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5g.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5g.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5H - Real SQLite Read-Only IO Smoke Test";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5h.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5h.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1888,6 +1890,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5G controlled local read-only SQLite adapter contract with query support, write rejection, and no real database IO",
       },
       {
+        source: "src/reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5H real local SQLite read-only fixture adapter with controlled file IO, schema validation, query support, and write rejection",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1936,6 +1943,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportControlledLocalReadOnlyDbMode.ts",
         required: true,
         reason: "Sprint 5G builder validating read-only team/phase queries, schema compatibility, deterministic ordering, and write rejection",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.ts",
+        required: true,
+        reason: "Sprint 5H report model, tags, evidence fact, and guardrails for real SQLite read-only IO smoke testing",
+      },
+      {
+        source: "src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts",
+        required: true,
+        reason: "Sprint 5H builder validating real SQLite controlled reads, non-product truth, schema compatibility, deterministic ordering, and write rejection",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2286,6 +2303,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5g.test.ts",
         required: true,
         reason: "Sprint 5G executable scoring guard proving controlled local read-only DB mode does not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5h.test.ts",
+        required: true,
+        reason: "Sprint 5H executable scoring guard proving real SQLite read-only IO smoke test does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3734,6 +3756,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5G executable read-only adapter tests for explicit controlled query mode, schema compatibility, and write rejection",
       },
       {
+        source: "src/reports/sqliteRealReadOnlyCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5H executable real SQLite read-only fixture adapter tests for controlled file IO, schema compatibility, query support, and write rejection",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3832,6 +3859,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportControlledLocalReadOnlyDbModeCopy.test.ts",
         required: true,
         reason: "Sprint 5G executable visible-copy tests proving SQLite local wording stays controlled, local, read-only, and non-activating",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.test.ts",
+        required: true,
+        reason: "Sprint 5H executable model tests proving real SQLite read-only IO is controlled, disabled by default, non-product truth, and write-free",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5H executable renderer tests for the SQLite read-only smoke test export section and appendix",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestGuard.test.ts",
+        required: true,
+        reason: "Sprint 5H executable guard tests proving real SQLite read-only smoke test cannot drive selection or mutate official state",
+      },
+      {
+        source: "src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestCopy.test.ts",
+        required: true,
+        reason: "Sprint 5H executable visible-copy tests proving SQLite smoke test wording stays non-prod, read-only, non-activating, and non-prescriptive",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -4029,6 +4076,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5H")) {
+    return renderFullMatchWorkbenchChainReplay5HDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5G")) {
     return renderFullMatchWorkbenchChainReplay5GDoc(fullMatchTraceValidationModel());
   }
@@ -6234,6 +6284,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5H")) {
+    return renderFullMatchWorkbenchChainReplay5HValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5G")) {
     return renderFullMatchWorkbenchChainReplay5GValidation(fullMatchTraceValidationModel());
   }
@@ -8385,6 +8438,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5H")) {
+    return [
+      "# Sprint 5H Share Pack",
+      "",
+      "Current sprint: Sprint 5H - Real SQLite Read-Only IO Smoke Test",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5h.md",
+      "- validation.fullmatch-workbench-chain-replay-5h.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5h.md and validation.fullmatch-workbench-chain-replay-5h.md.",
+      "",
+      "Sprint 5H proves a real local SQLite read-only IO smoke test against a non-prod coach_match_history_v1 fixture. The product source remains file_backed, SQLite local is not product truth, default real DB reads stay at 0, controlled reads are counted only in the explicit smoke test, and writes remain rejected.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5G")) {
     return [
       "# Sprint 5G Share Pack",

@@ -2385,6 +2385,63 @@
       <p class="durable-storage-decision-warning">controlled_local_readonly_db is available only as an explicit test/dev mode. Product history source remains file_backed; SQLite local is not product truth. No real SQLite IO occurs in Sprint 5G; true SQLite read wiring is deferred to a later non-prod trial. Sprint 5F durable decision carried forward: sqlite_local/coach_match_history_v1.</p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Smoke test SQLite read-only">
+      <div>
+        <h3>Smoke test SQLite read-only</h3>
+        <p>Smoke test contr&ocirc;l&eacute; : une fixture SQLite locale non-prod est lue en read-only. Elle n&rsquo;est pas active par d&eacute;faut, non utilis&eacute;e comme v&eacute;rit&eacute; produit, et la source produit active reste inchang&eacute;e.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Lecture SQLite r&eacute;elle</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Mode</span><strong>real_sqlite_readonly_io_smoke_test</strong></div>
+            <div><span>Storage target</span><strong>sqlite_local</strong></div>
+            <div><span>Schema</span><strong>coach_match_history_v1</strong></div>
+            <div><span>Vraie lecture SQLite contr&ocirc;l&eacute;e</span><strong>oui</strong></div>
+            <div><span>Read-only</span><strong>true</strong></div>
+            <div><span>Write mode allowed</span><strong>false</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Actif par d&eacute;faut</span><strong>non</strong></div>
+            <div><span>Feature flag enabled</span><strong>false</strong></div>
+            <div><span>Activation produit</span><strong>non</strong></div>
+            <div><span>Source produit active</span><strong>file_backed</strong></div>
+            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>non</strong></div>
+            <div><span>Rapport source officielle</span><strong>non</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Compteurs IO</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Lecture DB r&eacute;elle mode d&eacute;faut</span><strong>0</strong></div>
+            <div><span>Lecture DB r&eacute;elle mode contr&ocirc;l&eacute;</span><strong>3</strong></div>
+            <div><span>&Eacute;criture DB</span><strong>0</strong></div>
+            <div><span>Write rejected</span><strong>true</strong></div>
+            <div><span>Fixture record count</span><strong>6</strong></div>
+            <div><span>Adapter record count</span><strong>6</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Contrats v&eacute;rifi&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Query by team</span><strong>true</strong></div>
+            <div><span>Query by phase</span><strong>true</strong></div>
+            <div><span>Deterministic ordering</span><strong>true</strong></div>
+            <div><span>Schema compatibility</span><strong>true</strong></div>
+            <div><span>Dry-run fallback</span><strong>true</strong></div>
+            <div><span>Driver choice</span><strong>minimal_readonly_sqlite_file_reader</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5H : smoke test contr&ocirc;l&eacute;, read-only, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, source produit active inchang&eacute;e et aucune &eacute;criture.</p>
+      <p class="durable-storage-decision-guard">Aucune mutation du match officiel : score, timeline, possession, scoring events, s&eacute;lection, composition, titulaires, banc et routes production restent intacts.</p>
+      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : Product History Source Switch Trial in non-prod only, uniquement en non-prod et pas encore activ&eacute;e.</p>
+      <p class="durable-storage-decision-warning">real_sqlite_readonly_io_smoke_test is an explicit non-prod smoke test only. The SQLite fixture is read with real local file IO, but file_backed remains the active product history source. SQLite local is not product truth and cannot drive selection, score, timeline, possession, lineup, or route resolution. Sprint 5G controlled mode carried forward: controlled_local_readonly_db/coach_match_history_v1.</p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -3446,6 +3503,57 @@
         <li>trend proof claim count: 0</li>
         <li>invented statistic count: 0</li>
         <li>sandbox events promoted to official count: 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails smoke test SQLite read-only</summary>
+      <ul>
+        <li>real SQLite read-only IO smoke test status: available</li>
+        <li>mode name: real_sqlite_readonly_io_smoke_test</li>
+        <li>storage target: sqlite_local</li>
+        <li>schema version: coach_match_history_v1</li>
+        <li>real SQLite IO enabled: true</li>
+        <li>read-only mode: true</li>
+        <li>write mode allowed: false</li>
+        <li>write rejected pass: true</li>
+        <li>adapter implemented: true</li>
+        <li>adapter production ready: false</li>
+        <li>feature flag enabled: false</li>
+        <li>default feature flag enabled: false</li>
+        <li>product activation allowed: false</li>
+        <li>active product history source: file_backed</li>
+        <li>database used as product truth: false</li>
+        <li>report can use as source of truth: false</li>
+        <li>default real DB read count: 0</li>
+        <li>controlled real DB read count: 3</li>
+        <li>real DB write count: 0</li>
+        <li>fixture path: C:\Users\mbess\Documents\fantasy-game-engine\test-fixtures\sqlite\coach-match-history-v1.sqlite</li>
+        <li>fixture record count: 6</li>
+        <li>read-only adapter record count: 6</li>
+        <li>query by team pass: true</li>
+        <li>query by phase pass: true</li>
+        <li>deterministic ordering pass: true</li>
+        <li>schema compatibility pass: true</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+        <li>trend proof claim count: 0</li>
+        <li>invented statistic count: 0</li>
+        <li>sandbox events promoted to official count: 0</li>
+        <li>visible recommendation wording count: 0</li>
+        <li>visible selection wording count: 0</li>
+        <li>scoring constants unchanged: true</li>
+        <li>MatchBonusEvent unchanged: true</li>
+        <li>batch/live separation preserved: true</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: true</li>
       </ul>
     </details>
     <details class="appendix">

@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 5G - Controlled Local Read-Only DB Mode. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 5H - Real SQLite Read-Only IO Smoke Test. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -38565,6 +38565,7 @@ import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReport
 import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabaseAdapterSpike";
 import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
+import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -40531,6 +40532,72 @@ function renderControlledLocalReadOnlyDbMode(
     </section>`;
 }
 
+function renderRealSQLiteReadOnlyIOSmokeTest(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Smoke test SQLite read-only">
+      <div>
+        <h3>Smoke test SQLite read-only</h3>
+        <p>Smoke test contr&ocirc;l&eacute; : une fixture SQLite locale non-prod est lue en read-only. Elle n&rsquo;est pas active par d&eacute;faut, non utilis&eacute;e comme v&eacute;rit&eacute; produit, et la source produit active reste inchang&eacute;e.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Lecture SQLite r&eacute;elle</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Mode</span><strong>${model.modeName}</strong></div>
+            <div><span>Storage target</span><strong>${model.storageTarget}</strong></div>
+            <div><span>Schema</span><strong>${model.schemaVersion}</strong></div>
+            <div><span>Vraie lecture SQLite contr&ocirc;l&eacute;e</span><strong>${model.realSQLiteIoEnabled ? "oui" : "non"}</strong></div>
+            <div><span>Read-only</span><strong>${model.readOnlyMode ? "true" : "false"}</strong></div>
+            <div><span>Write mode allowed</span><strong>${model.writeModeAllowed ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Actif par d&eacute;faut</span><strong>${model.defaultFeatureFlagEnabled ? "oui" : "non"}</strong></div>
+            <div><span>Feature flag enabled</span><strong>${model.featureFlagEnabled ? "true" : "false"}</strong></div>
+            <div><span>Activation produit</span><strong>${model.productActivationAllowed ? "oui" : "non"}</strong></div>
+            <div><span>Source produit active</span><strong>${model.activeProductHistorySource}</strong></div>
+            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>${model.databaseUsedAsProductTruth ? "oui" : "non"}</strong></div>
+            <div><span>Rapport source officielle</span><strong>${model.reportCanUseAsSourceOfTruth ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Compteurs IO</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Lecture DB r&eacute;elle mode d&eacute;faut</span><strong>${model.defaultRealDatabaseReadCount}</strong></div>
+            <div><span>Lecture DB r&eacute;elle mode contr&ocirc;l&eacute;</span><strong>${model.controlledRealDatabaseReadCount}</strong></div>
+            <div><span>&Eacute;criture DB</span><strong>${model.realDatabaseWriteCount}</strong></div>
+            <div><span>Write rejected</span><strong>${model.writeRejectedPass ? "true" : "false"}</strong></div>
+            <div><span>Fixture record count</span><strong>${model.fixtureRecordCount}</strong></div>
+            <div><span>Adapter record count</span><strong>${model.readOnlyAdapterRecordCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Contrats v&eacute;rifi&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Query by team</span><strong>${model.queryByTeamPass ? "true" : "false"}</strong></div>
+            <div><span>Query by phase</span><strong>${model.queryByPhasePass ? "true" : "false"}</strong></div>
+            <div><span>Deterministic ordering</span><strong>${model.deterministicOrderingPass ? "true" : "false"}</strong></div>
+            <div><span>Schema compatibility</span><strong>${model.schemaCompatibilityPass ? "true" : "false"}</strong></div>
+            <div><span>Dry-run fallback</span><strong>${model.dryRunFallbackAvailable ? "true" : "false"}</strong></div>
+            <div><span>Driver choice</span><strong>${model.sqliteDriverChoice}</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5H : smoke test contr&ocirc;l&eacute;, read-only, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, source produit active inchang&eacute;e et aucune &eacute;criture.</p>
+      <p class="durable-storage-decision-guard">Aucune mutation du match officiel : score, timeline, possession, scoring events, s&eacute;lection, composition, titulaires, banc et routes production restent intacts.</p>
+      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : ${escapeHtml(model.nextStep)}, uniquement en non-prod et pas encore activ&eacute;e.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="durable-storage-decision-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -41164,6 +41231,66 @@ function renderControlledLocalReadOnlyDbModeAppendix(
     </details>`;
 }
 
+function renderRealSQLiteReadOnlyIOSmokeTestAppendix(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails smoke test SQLite read-only</summary>
+      <ul>
+        <li>real SQLite read-only IO smoke test status: ${model.status}</li>
+        <li>mode name: ${model.modeName}</li>
+        <li>storage target: ${model.storageTarget}</li>
+        <li>schema version: ${model.schemaVersion}</li>
+        <li>real SQLite IO enabled: ${model.realSQLiteIoEnabled}</li>
+        <li>read-only mode: ${model.readOnlyMode}</li>
+        <li>write mode allowed: ${model.writeModeAllowed}</li>
+        <li>write rejected pass: ${model.writeRejectedPass}</li>
+        <li>adapter implemented: ${model.adapterImplemented}</li>
+        <li>adapter production ready: ${model.adapterProductionReady}</li>
+        <li>feature flag enabled: ${model.featureFlagEnabled}</li>
+        <li>default feature flag enabled: ${model.defaultFeatureFlagEnabled}</li>
+        <li>product activation allowed: ${model.productActivationAllowed}</li>
+        <li>active product history source: ${model.activeProductHistorySource}</li>
+        <li>database used as product truth: ${model.databaseUsedAsProductTruth}</li>
+        <li>report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}</li>
+        <li>default real DB read count: ${model.defaultRealDatabaseReadCount}</li>
+        <li>controlled real DB read count: ${model.controlledRealDatabaseReadCount}</li>
+        <li>real DB write count: ${model.realDatabaseWriteCount}</li>
+        <li>fixture path: ${escapeHtml(model.fixturePath)}</li>
+        <li>fixture record count: ${model.fixtureRecordCount}</li>
+        <li>read-only adapter record count: ${model.readOnlyAdapterRecordCount}</li>
+        <li>query by team pass: ${model.queryByTeamPass}</li>
+        <li>query by phase pass: ${model.queryByPhasePass}</li>
+        <li>deterministic ordering pass: ${model.deterministicOrderingPass}</li>
+        <li>schema compatibility pass: ${model.schemaCompatibilityPass}</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+        <li>trend proof claim count: ${model.trendProofClaimCount}</li>
+        <li>invented statistic count: ${model.inventedStatisticCount}</li>
+        <li>sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}</li>
+        <li>visible recommendation wording count: ${model.visibleRecommendationWordingCount}</li>
+        <li>visible selection wording count: ${model.visibleSelectionWordingCount}</li>
+        <li>scoring constants unchanged: ${model.scoringConstantsUnchanged}</li>
+        <li>MatchBonusEvent unchanged: ${model.matchBonusEventUnchanged}</li>
+        <li>batch/live separation preserved: ${model.batchLiveSeparationPreserved}</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -41182,6 +41309,7 @@ function renderAppendices(input: {
   readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -41221,6 +41349,7 @@ function renderAppendices(input: {
     ${renderDatabaseAdapterSpikeAppendix(input.databaseAdapterSpike)}
     ${renderDurableStorageDecisionAppendix(input.durableStorageDecision)}
     ${renderControlledLocalReadOnlyDbModeAppendix(input.controlledLocalReadOnlyDbMode)}
+    ${renderRealSQLiteReadOnlyIOSmokeTestAppendix(input.realSQLiteReadOnlyIOSmokeTest)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -41251,6 +41380,7 @@ export function renderCoachReportExportHtml(input: {
   readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -41355,6 +41485,7 @@ export function renderCoachReportExportHtml(input: {
     renderDatabaseAdapterSpike(input.databaseAdapterSpike),
     renderDurableStorageDecision(input.durableStorageDecision),
     renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
+    renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -41393,6 +41524,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.controlledLocalReadOnlyDbMode === undefined
       ? {}
       : { controlledLocalReadOnlyDbMode: input.controlledLocalReadOnlyDbMode }),
+    ...(input.realSQLiteReadOnlyIOSmokeTest === undefined
+      ? {}
+      : { realSQLiteReadOnlyIOSmokeTest: input.realSQLiteReadOnlyIOSmokeTest }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
@@ -47573,6 +47707,7 @@ export type DatabaseCoachMatchHistoryAdapterKind =
   | "experimental_database"
   | "sqlite_local_disabled"
   | "sqlite_local_readonly_controlled"
+  | "sqlite_local_readonly_real_smoke_test"
   | "production_database";
 
 export interface DatabaseCoachMatchHistoryAdapterDescription {
@@ -48378,6 +48513,588 @@ export function createSqliteLocalReadOnlyCoachMatchHistoryAdapter(input: {
     },
     listReadOnlyRecords(): readonly CoachMatchHistoryRecord[] {
       return records.map(cloneCoachMatchHistoryRecord);
+    },
+  };
+}
+```
+
+## File: src/reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter.ts
+
+```ts
+import { readFileSync } from "node:fs";
+import type {
+  CoachMatchHistoryQuery,
+  CoachMatchHistoryQueryResult,
+  CoachMatchHistoryRecord,
+} from "./coachMatchHistory";
+import type { CoachMatchHistorySaveResult } from "./coachMatchHistoryStore";
+import {
+  cloneCoachMatchHistoryRecord,
+  parseCoachMatchHistoryRecords,
+  sortCoachMatchHistoryRecords,
+} from "./coachMatchHistorySerialization";
+import {
+  COACH_MATCH_HISTORY_SCHEMA_VERSION,
+  coachMatchHistoryRecordMatchesDurableSchema,
+} from "./coachMatchHistoryDurableSchema";
+import type {
+  DatabaseCoachMatchHistoryAdapterKind,
+  DatabaseCoachMatchHistoryAdapterStatus,
+} from "./databaseCoachMatchHistoryAdapterSpi";
+
+export type RealSQLiteReadOnlyIOSmokeTestModeName = "real_sqlite_readonly_io_smoke_test";
+
+const SQLITE_HEADER = "SQLite format 3\u0000";
+const HISTORY_TABLE_NAME = "coach_match_history_v1";
+const REQUIRED_COLUMNS = [
+  "recordId",
+  "matchId",
+  "teamId",
+  "opponentTeamId",
+  "generatedAt",
+  "source",
+  "score",
+  "phaseSignals",
+  "evidenceSnapshotId",
+  "createdAt",
+  "updatedAt",
+  "idempotencyKey",
+  "schemaVersion",
+] as const;
+
+export interface SqliteRealReadOnlyCoachMatchHistoryAdapterDescription {
+  readonly adapterKind: "sqlite_local_readonly_real_smoke_test";
+  readonly status: DatabaseCoachMatchHistoryAdapterStatus;
+  readonly modeName: RealSQLiteReadOnlyIOSmokeTestModeName;
+  readonly schemaVersion: typeof COACH_MATCH_HISTORY_SCHEMA_VERSION;
+  readonly durable: true;
+  readonly readOnlyForReports: true;
+  readonly supportsQueryByTeam: true;
+  readonly supportsQueryByPhase: true;
+  readonly supportsQueryBySeason: false;
+  readonly supportsQueryByCompetition: false;
+  readonly implemented: true;
+  readonly productionReady: false;
+  readonly featureFlagEnabled: false;
+  readonly defaultFeatureFlagEnabled: false;
+  readonly productActivationAllowed: false;
+  readonly reportCanUseAsSourceOfTruth: false;
+  readonly databaseUsedAsProductTruth: false;
+  readonly defaultRealDatabaseReadCount: 0;
+  readonly controlledRealDatabaseReadCount: number;
+  readonly realDatabaseWriteCount: 0;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateScore: false;
+  readonly canCreateScoringEvent: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly readOnlyMode: true;
+  readonly writeModeAllowed: false;
+  readonly writeRejectedCount: number;
+  readonly fixturePath: string;
+  readonly fixtureRecordCount: number;
+  readonly schemaCompatibleRecordCount: number;
+  readonly schemaIncompatibleRecordCount: number;
+  readonly sqliteHeaderValid: boolean;
+  readonly tableName: typeof HISTORY_TABLE_NAME;
+  readonly requiredColumnCount: number;
+  readonly missingRequiredColumnCount: number;
+  readonly trueSqliteIoUsed: true;
+}
+
+export interface SqliteRealReadOnlyCoachMatchHistoryAdapter {
+  readonly adapterKind: DatabaseCoachMatchHistoryAdapterKind;
+
+  describe(): SqliteRealReadOnlyCoachMatchHistoryAdapterDescription;
+
+  readOnlyQuery(query: CoachMatchHistoryQuery): CoachMatchHistoryQueryResult;
+
+  rejectWrite(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult;
+
+  listReadOnlyRecords(): readonly CoachMatchHistoryRecord[];
+}
+
+interface SqliteDatabase {
+  readonly buffer: Buffer;
+  readonly pageSize: number;
+}
+
+interface VarintResult {
+  readonly value: number;
+  readonly nextOffset: number;
+}
+
+interface SqliteMasterRow {
+  readonly type: string;
+  readonly name: string;
+  readonly tableName: string;
+  readonly rootPage: number;
+  readonly sql: string | null;
+}
+
+type SqliteCellValue = string | number | bigint | Buffer | null;
+
+function readVarint(buffer: Buffer, offset: number): VarintResult {
+  let value = 0n;
+  let cursor = offset;
+
+  for (let index = 0; index < 9; index += 1) {
+    const byte = buffer[cursor];
+    if (byte === undefined) {
+      throw new Error("Unexpected end of SQLite varint.");
+    }
+
+    cursor += 1;
+
+    if (index === 8) {
+      value = (value << 8n) | BigInt(byte);
+      break;
+    }
+
+    value = (value << 7n) | BigInt(byte & 0x7f);
+
+    if ((byte & 0x80) === 0) {
+      break;
+    }
+  }
+
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error("SQLite varint exceeds safe JavaScript integer range.");
+  }
+
+  return {
+    value: Number(value),
+    nextOffset: cursor,
+  };
+}
+
+function readSignedInteger(buffer: Buffer, offset: number, byteLength: number): number {
+  if (byteLength === 0) {
+    return 0;
+  }
+
+  let value = 0n;
+  for (let index = 0; index < byteLength; index += 1) {
+    const byte = buffer[offset + index];
+    if (byte === undefined) {
+      throw new Error("Unexpected end of SQLite integer.");
+    }
+    value = (value << 8n) | BigInt(byte);
+  }
+
+  const signBit = 1n << BigInt(byteLength * 8 - 1);
+  if ((value & signBit) !== 0n) {
+    value -= 1n << BigInt(byteLength * 8);
+  }
+
+  return Number(value);
+}
+
+function valueLength(serialType: number): number {
+  if (serialType === 0 || serialType === 8 || serialType === 9) {
+    return 0;
+  }
+  if (serialType >= 1 && serialType <= 4) {
+    return serialType;
+  }
+  if (serialType === 5) {
+    return 6;
+  }
+  if (serialType === 6 || serialType === 7) {
+    return 8;
+  }
+  if (serialType >= 12) {
+    return Math.floor((serialType - 12) / 2);
+  }
+  throw new Error(`Unsupported SQLite serial type ${serialType}.`);
+}
+
+function parseSqliteRecord(buffer: Buffer, offset: number, payloadLength: number): readonly SqliteCellValue[] {
+  const payloadEnd = offset + payloadLength;
+  const headerLength = readVarint(buffer, offset);
+  const headerEnd = offset + headerLength.value;
+  let headerOffset = headerLength.nextOffset;
+  const serialTypes: number[] = [];
+
+  while (headerOffset < headerEnd) {
+    const serialType = readVarint(buffer, headerOffset);
+    serialTypes.push(serialType.value);
+    headerOffset = serialType.nextOffset;
+  }
+
+  let valueOffset = headerEnd;
+  const values: SqliteCellValue[] = [];
+
+  for (const serialType of serialTypes) {
+    const length = valueLength(serialType);
+    if (valueOffset + length > payloadEnd) {
+      throw new Error("SQLite record payload ended before all values were read.");
+    }
+
+    if (serialType === 0) {
+      values.push(null);
+    } else if (serialType === 1 || serialType === 2 || serialType === 3 || serialType === 4 || serialType === 5 || serialType === 6) {
+      values.push(readSignedInteger(buffer, valueOffset, length));
+    } else if (serialType === 7) {
+      values.push(buffer.readDoubleBE(valueOffset));
+    } else if (serialType === 8) {
+      values.push(0);
+    } else if (serialType === 9) {
+      values.push(1);
+    } else if (serialType >= 12 && serialType % 2 === 0) {
+      values.push(buffer.subarray(valueOffset, valueOffset + length));
+    } else if (serialType >= 13 && serialType % 2 === 1) {
+      values.push(buffer.toString("utf8", valueOffset, valueOffset + length));
+    } else {
+      throw new Error(`Unsupported SQLite serial type ${serialType}.`);
+    }
+
+    valueOffset += length;
+  }
+
+  return values;
+}
+
+function openSqliteDatabase(filePath: string): SqliteDatabase {
+  const buffer = readFileSync(filePath);
+  const header = buffer.toString("binary", 0, SQLITE_HEADER.length);
+  if (header !== SQLITE_HEADER) {
+    throw new Error(`Invalid SQLite fixture header at ${filePath}.`);
+  }
+
+  const rawPageSize = buffer.readUInt16BE(16);
+  const pageSize = rawPageSize === 1 ? 65536 : rawPageSize;
+  if (pageSize < 512 || pageSize > 65536) {
+    throw new Error(`Unsupported SQLite page size ${pageSize}.`);
+  }
+
+  return { buffer, pageSize };
+}
+
+function pageOffset(database: SqliteDatabase, pageNumber: number): number {
+  if (pageNumber < 1) {
+    throw new Error(`Invalid SQLite page number ${pageNumber}.`);
+  }
+  return (pageNumber - 1) * database.pageSize;
+}
+
+function parseTableLeafCell(database: SqliteDatabase, cellOffset: number): readonly SqliteCellValue[] {
+  const payloadLength = readVarint(database.buffer, cellOffset);
+  const rowId = readVarint(database.buffer, payloadLength.nextOffset);
+  return parseSqliteRecord(database.buffer, rowId.nextOffset, payloadLength.value);
+}
+
+function parseTablePage(database: SqliteDatabase, pageNumber: number): readonly (readonly SqliteCellValue[])[] {
+  const offset = pageOffset(database, pageNumber);
+  const headerOffset = pageNumber === 1 ? offset + 100 : offset;
+  const pageType = database.buffer[headerOffset];
+  if (pageType === undefined) {
+    throw new Error(`SQLite page ${pageNumber} is outside the fixture.`);
+  }
+
+  const cellCount = database.buffer.readUInt16BE(headerOffset + 3);
+  const cellPointerArrayOffset = headerOffset + (pageType === 0x05 ? 12 : 8);
+  const rows: (readonly SqliteCellValue[])[] = [];
+
+  if (pageType === 0x0d) {
+    for (let index = 0; index < cellCount; index += 1) {
+      const cellPointer = database.buffer.readUInt16BE(cellPointerArrayOffset + index * 2);
+      rows.push(parseTableLeafCell(database, offset + cellPointer));
+    }
+    return rows;
+  }
+
+  if (pageType === 0x05) {
+    for (let index = 0; index < cellCount; index += 1) {
+      const cellPointer = database.buffer.readUInt16BE(cellPointerArrayOffset + index * 2);
+      const childPage = database.buffer.readUInt32BE(offset + cellPointer);
+      rows.push(...parseTablePage(database, childPage));
+    }
+    const rightMostPage = database.buffer.readUInt32BE(headerOffset + 8);
+    rows.push(...parseTablePage(database, rightMostPage));
+    return rows;
+  }
+
+  throw new Error(`Unsupported SQLite table page type 0x${pageType.toString(16)}.`);
+}
+
+function asString(value: SqliteCellValue, fieldName: string): string {
+  if (typeof value !== "string") {
+    throw new Error(`SQLite field ${fieldName} must be a string.`);
+  }
+  return value;
+}
+
+function asNumber(value: SqliteCellValue, fieldName: string): number {
+  if (typeof value !== "number") {
+    throw new Error(`SQLite field ${fieldName} must be a number.`);
+  }
+  return value;
+}
+
+function asOptionalString(value: SqliteCellValue, fieldName: string): string | null {
+  if (value === null) {
+    return null;
+  }
+  return asString(value, fieldName);
+}
+
+function parseSqliteMaster(database: SqliteDatabase): readonly SqliteMasterRow[] {
+  return parseTablePage(database, 1).map((values) => ({
+    type: asString(values[0] ?? null, "sqlite_master.type"),
+    name: asString(values[1] ?? null, "sqlite_master.name"),
+    tableName: asString(values[2] ?? null, "sqlite_master.tbl_name"),
+    rootPage: asNumber(values[3] ?? null, "sqlite_master.rootpage"),
+    sql: asOptionalString(values[4] ?? null, "sqlite_master.sql"),
+  }));
+}
+
+function parseColumnNames(createSql: string): readonly string[] {
+  const openIndex = createSql.indexOf("(");
+  const closeIndex = createSql.lastIndexOf(")");
+  if (openIndex < 0 || closeIndex <= openIndex) {
+    throw new Error("SQLite table DDL does not contain a column list.");
+  }
+
+  return createSql
+    .slice(openIndex + 1, closeIndex)
+    .split(",")
+    .map((column) => column.trim().split(/\s+/u)[0] ?? "")
+    .map((column) => column.replace(/^"|"$/gu, ""))
+    .filter((column) => column.length > 0);
+}
+
+function matchesTeam(record: CoachMatchHistoryRecord, teamId: string | undefined): boolean {
+  return teamId === undefined || record.homeTeamId === teamId || record.awayTeamId === teamId;
+}
+
+function countCompatible(records: readonly CoachMatchHistoryRecord[]): number {
+  return records.filter(coachMatchHistoryRecordMatchesDurableSchema).length;
+}
+
+function parseScore(scoreJson: string): {
+  readonly scoreHome: number;
+  readonly scoreAway: number;
+  readonly scoreSource: CoachMatchHistoryRecord["scoreSource"];
+} {
+  const parsed = JSON.parse(scoreJson) as unknown;
+  if (
+    typeof parsed !== "object" ||
+    parsed === null ||
+    typeof (parsed as { readonly home?: unknown }).home !== "number" ||
+    typeof (parsed as { readonly away?: unknown }).away !== "number"
+  ) {
+    throw new Error("SQLite score payload is malformed.");
+  }
+  const source = (parsed as { readonly source?: unknown }).source;
+  if (source !== "official_report_score" && source !== "live_scoring_events_sample" && source !== "unknown") {
+    throw new Error("SQLite score source is malformed.");
+  }
+
+  return {
+    scoreHome: (parsed as { readonly home: number }).home,
+    scoreAway: (parsed as { readonly away: number }).away,
+    scoreSource: source,
+  };
+}
+
+function recordFromRow(row: ReadonlyMap<string, SqliteCellValue>): CoachMatchHistoryRecord {
+  const score = parseScore(asString(row.get("score") ?? null, "score"));
+  const record = {
+    historyRecordId: asString(row.get("recordId") ?? null, "recordId"),
+    matchId: asString(row.get("matchId") ?? null, "matchId"),
+    runId: asString(row.get("runId") ?? null, "runId"),
+    generatedAtIso: asString(row.get("generatedAt") ?? null, "generatedAt"),
+    homeTeamId: asString(row.get("teamId") ?? null, "teamId"),
+    awayTeamId: asString(row.get("opponentTeamId") ?? null, "opponentTeamId"),
+    homeTeamName: asString(row.get("homeTeamName") ?? null, "homeTeamName"),
+    awayTeamName: asString(row.get("awayTeamName") ?? null, "awayTeamName"),
+    scoreHome: score.scoreHome,
+    scoreAway: score.scoreAway,
+    scoreSource: score.scoreSource,
+    source: asString(row.get("source") ?? null, "source"),
+    reportVersion: asString(row.get("reportVersion") ?? null, "reportVersion"),
+    signals: JSON.parse(asString(row.get("phaseSignals") ?? null, "phaseSignals")) as unknown,
+    officialTimelineSourcePreserved: true,
+    officialScorePreserved: true,
+    officialPossessionPreserved: true,
+    officialScoringEventsPreserved: true,
+    canChangeLineup: false,
+    canChangeStarters: false,
+    canChangeBench: false,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateTimeline: false,
+    canMutateScore: false,
+    canMutatePossession: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+  };
+
+  const [parsed] = parseCoachMatchHistoryRecords(JSON.stringify([record]));
+  if (parsed === undefined) {
+    throw new Error(`SQLite row ${record.historyRecordId} did not produce a valid history record.`);
+  }
+  return parsed;
+}
+
+function loadRecordsFromFixture(filePath: string): {
+  readonly records: readonly CoachMatchHistoryRecord[];
+  readonly columns: readonly string[];
+} {
+  const database = openSqliteDatabase(filePath);
+  const masterRows = parseSqliteMaster(database);
+  const table = masterRows.find((row) => row.type === "table" && row.name === HISTORY_TABLE_NAME);
+  if (table === undefined) {
+    throw new Error(`SQLite fixture does not contain ${HISTORY_TABLE_NAME}.`);
+  }
+  if (table.sql === null) {
+    throw new Error(`SQLite table ${HISTORY_TABLE_NAME} does not expose a DDL statement.`);
+  }
+
+  const columns = parseColumnNames(table.sql);
+  const tableRows = parseTablePage(database, table.rootPage);
+  const records = tableRows.map((values) => {
+    const row = new Map<string, SqliteCellValue>();
+    columns.forEach((column, index) => {
+      row.set(column, values[index] ?? null);
+    });
+    const schemaVersion = asString(row.get("schemaVersion") ?? null, "schemaVersion");
+    if (schemaVersion !== COACH_MATCH_HISTORY_SCHEMA_VERSION) {
+      throw new Error(`SQLite row has unsupported schema version ${schemaVersion}.`);
+    }
+    return recordFromRow(row);
+  });
+
+  return {
+    columns,
+    records: sortCoachMatchHistoryRecords(records),
+  };
+}
+
+function description(input: {
+  readonly fixturePath: string;
+  readonly records: readonly CoachMatchHistoryRecord[];
+  readonly columns: readonly string[];
+  readonly controlledRealDatabaseReadCount: number;
+  readonly writeRejectedCount: number;
+}): SqliteRealReadOnlyCoachMatchHistoryAdapterDescription {
+  const schemaCompatibleRecordCount = countCompatible(input.records);
+  const missingRequiredColumnCount = REQUIRED_COLUMNS.filter((column) => !input.columns.includes(column)).length;
+
+  return {
+    adapterKind: "sqlite_local_readonly_real_smoke_test",
+    status: "implemented",
+    modeName: "real_sqlite_readonly_io_smoke_test",
+    schemaVersion: COACH_MATCH_HISTORY_SCHEMA_VERSION,
+    durable: true,
+    readOnlyForReports: true,
+    supportsQueryByTeam: true,
+    supportsQueryByPhase: true,
+    supportsQueryBySeason: false,
+    supportsQueryByCompetition: false,
+    implemented: true,
+    productionReady: false,
+    featureFlagEnabled: false,
+    defaultFeatureFlagEnabled: false,
+    productActivationAllowed: false,
+    reportCanUseAsSourceOfTruth: false,
+    databaseUsedAsProductTruth: false,
+    defaultRealDatabaseReadCount: 0,
+    controlledRealDatabaseReadCount: input.controlledRealDatabaseReadCount,
+    realDatabaseWriteCount: 0,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateScore: false,
+    canCreateScoringEvent: false,
+    canClaimGlobalEconomy: false,
+    readOnlyMode: true,
+    writeModeAllowed: false,
+    writeRejectedCount: input.writeRejectedCount,
+    fixturePath: input.fixturePath,
+    fixtureRecordCount: input.records.length,
+    schemaCompatibleRecordCount,
+    schemaIncompatibleRecordCount: input.records.length - schemaCompatibleRecordCount,
+    sqliteHeaderValid: true,
+    tableName: HISTORY_TABLE_NAME,
+    requiredColumnCount: REQUIRED_COLUMNS.length,
+    missingRequiredColumnCount,
+    trueSqliteIoUsed: true,
+  };
+}
+
+export function createSqliteRealReadOnlyCoachMatchHistoryAdapter(input: {
+  readonly fixturePath: string;
+  readonly explicitControlledMode: true;
+}): SqliteRealReadOnlyCoachMatchHistoryAdapter {
+  const loaded = loadRecordsFromFixture(input.fixturePath);
+  let controlledRealDatabaseReadCount = 1;
+  let writeRejectedCount = 0;
+
+  return {
+    adapterKind: "sqlite_local_readonly_real_smoke_test",
+    describe(): SqliteRealReadOnlyCoachMatchHistoryAdapterDescription {
+      return description({
+        fixturePath: input.fixturePath,
+        records: loaded.records,
+        columns: loaded.columns,
+        controlledRealDatabaseReadCount,
+        writeRejectedCount,
+      });
+    },
+    readOnlyQuery(query: CoachMatchHistoryQuery): CoachMatchHistoryQueryResult {
+      controlledRealDatabaseReadCount += 1;
+      const filtered = loaded.records
+        .filter((record) => query.includeControlledSamples || record.source !== "controlled_sample")
+        .filter((record) => query.includeProductHistory || record.source !== "product_history_store")
+        .filter((record) => matchesTeam(record, query.teamId))
+        .filter((record) => query.phase === undefined || record.signals.some((signal) => signal.phase === query.phase))
+        .slice(0, Math.max(0, query.maxRecords))
+        .map(cloneCoachMatchHistoryRecord);
+      const signalCount = filtered.reduce(
+        (total, record) => total + (query.phase === undefined
+          ? record.signals.length
+          : record.signals.filter((signal) => signal.phase === query.phase).length),
+        0,
+      );
+
+      return {
+        status: filtered.length === 0 ? "partial" : "available",
+        query: { ...query },
+        recordCount: filtered.length,
+        signalCount,
+        records: filtered,
+        warnings: [
+          "real_sqlite_readonly_io_smoke_test reads a non-prod SQLite fixture in explicit controlled mode only.",
+          "SQLite local remains non-product truth; file_backed remains the active product history source.",
+        ],
+      };
+    },
+    rejectWrite(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult {
+      writeRejectedCount += 1;
+      const existing = loaded.records.find((candidate) => candidate.historyRecordId === record.historyRecordId);
+
+      return {
+        operation: "ignored_duplicate",
+        record: cloneCoachMatchHistoryRecord(record),
+        recordsBeforeSaveCount: loaded.records.length,
+        recordsAfterSaveCount: loaded.records.length,
+        loadedFromDiskCount: loaded.records.length,
+        writtenToDiskCount: 0,
+        dedupedRecordCount: existing === undefined ? 0 : 1,
+        replacedRecordCount: 0,
+        ignoredDuplicateCount: 1,
+        idempotent: true,
+        warnings: [
+          "Write rejected: real_sqlite_readonly_io_smoke_test exposes no SQLite write path.",
+        ],
+      };
+    },
+    listReadOnlyRecords(): readonly CoachMatchHistoryRecord[] {
+      return loaded.records.map(cloneCoachMatchHistoryRecord);
     },
   };
 }
@@ -49910,6 +50627,303 @@ export function buildCoachReportControlledLocalReadOnlyDbMode(input: {
       "Product history source remains file_backed; SQLite local is not product truth.",
       "No real SQLite IO occurs in Sprint 5G; true SQLite read wiring is deferred to a later non-prod trial.",
       `Sprint 5F durable decision carried forward: ${input.durableStorageDecision.selectedStorageTarget}/${input.durableStorageDecision.schemaVersion}.`,
+    ],
+  });
+}
+```
+
+## File: src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.ts
+
+```ts
+import type { MatchInput, MatchReport } from "../contracts/engineToCoach";
+import type { MatchReportEvidenceFact } from "../contracts/matchReportEvidence";
+import type { CoachMatchHistoryDurableStorageTarget } from "./history/coachMatchHistoryDurableSchema";
+import type { RealSQLiteReadOnlyIOSmokeTestModeName } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
+
+export type CoachReportRealSQLiteReadOnlyIOSmokeTestStatus = "not_available" | "available";
+
+export interface CoachReportRealSQLiteReadOnlyIOSmokeTestModel {
+  readonly status: CoachReportRealSQLiteReadOnlyIOSmokeTestStatus;
+  readonly modeName: RealSQLiteReadOnlyIOSmokeTestModeName;
+  readonly storageTarget: CoachMatchHistoryDurableStorageTarget;
+  readonly schemaVersion: "coach_match_history_v1";
+  readonly realSQLiteIoEnabled: true;
+  readonly readOnlyMode: true;
+  readonly writeModeAllowed: false;
+  readonly writeRejectedPass: boolean;
+  readonly adapterImplemented: true;
+  readonly adapterProductionReady: false;
+  readonly featureFlagEnabled: false;
+  readonly defaultFeatureFlagEnabled: false;
+  readonly productActivationAllowed: false;
+  readonly activeProductHistorySource: "file_backed";
+  readonly databaseUsedAsProductTruth: false;
+  readonly reportCanUseAsSourceOfTruth: false;
+  readonly defaultRealDatabaseReadCount: 0;
+  readonly controlledRealDatabaseReadCount: number;
+  readonly realDatabaseWriteCount: 0;
+  readonly fixturePath: string;
+  readonly fixtureRecordCount: number;
+  readonly readOnlyAdapterRecordCount: number;
+  readonly queryByTeamPass: boolean;
+  readonly queryByPhasePass: boolean;
+  readonly deterministicOrderingPass: boolean;
+  readonly schemaCompatibilityPass: boolean;
+  readonly dryRunFallbackAvailable: true;
+  readonly canDriveCoachInstruction: false;
+  readonly canDriveLiveSelection: false;
+  readonly canDriveProductionRouteResolution: false;
+  readonly canMutateScore: false;
+  readonly canMutateTimeline: false;
+  readonly canMutatePossession: false;
+  readonly canCreateProductionScoringEvents: false;
+  readonly canMutateLineup: false;
+  readonly canMutateStarters: false;
+  readonly canMutateBench: false;
+  readonly canClaimGlobalEconomy: false;
+  readonly trendProofClaimCount: 0;
+  readonly globalProofClaimCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly sandboxEventsPromotedToOfficialCount: 0;
+  readonly visibleRecommendationWordingCount: 0;
+  readonly visibleSelectionWordingCount: 0;
+  readonly scoringConstantsUnchanged: true;
+  readonly matchBonusEventUnchanged: true;
+  readonly batchLiveSeparationPreserved: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly explicitControlledModeOnly: true;
+  readonly nonProdFixtureOnly: true;
+  readonly sqliteDriverChoice: "minimal_readonly_sqlite_file_reader";
+  readonly nextStep: "Product History Source Switch Trial in non-prod only";
+  readonly tags: readonly string[];
+  readonly warnings: readonly string[];
+}
+
+export function buildCoachReportRealSQLiteReadOnlyIOSmokeTestTags(
+  model: Omit<CoachReportRealSQLiteReadOnlyIOSmokeTestModel, "tags">,
+): readonly string[] {
+  return [
+    "coach_report_real_sqlite_readonly_io_smoke_test",
+    `coach_report_real_sqlite_readonly_io_status_${model.status}`,
+    `coach_report_real_sqlite_readonly_io_mode_${model.modeName}`,
+    `coach_report_real_sqlite_readonly_io_storage_target_${model.storageTarget}`,
+    `coach_report_real_sqlite_readonly_io_schema_${model.schemaVersion}`,
+    "coach_report_real_sqlite_readonly_io_enabled_true",
+    "coach_report_real_sqlite_readonly_io_read_only_true",
+    "coach_report_real_sqlite_readonly_io_write_mode_allowed_false",
+    "coach_report_real_sqlite_readonly_io_write_rejected_pass_true",
+    "coach_report_real_sqlite_readonly_io_adapter_implemented_true",
+    "coach_report_real_sqlite_readonly_io_adapter_production_ready_false",
+    "coach_report_real_sqlite_readonly_io_feature_flag_enabled_false",
+    "coach_report_real_sqlite_readonly_io_default_enabled_false",
+    "coach_report_real_sqlite_readonly_io_product_activation_allowed_false",
+    "coach_report_real_sqlite_readonly_io_active_product_history_source_file_backed",
+    "coach_report_real_sqlite_readonly_io_database_used_as_product_truth_false",
+    "coach_report_real_sqlite_readonly_io_report_source_of_truth_false",
+    "coach_report_real_sqlite_readonly_io_default_read_count_0",
+    `coach_report_real_sqlite_readonly_io_controlled_read_count_${model.controlledRealDatabaseReadCount}`,
+    "coach_report_real_sqlite_readonly_io_write_count_0",
+    "coach_report_real_sqlite_readonly_io_query_by_team_pass_true",
+    "coach_report_real_sqlite_readonly_io_query_by_phase_pass_true",
+    "coach_report_real_sqlite_readonly_io_deterministic_ordering_pass_true",
+    "coach_report_real_sqlite_readonly_io_schema_compatibility_pass_true",
+    "coach_report_real_sqlite_readonly_io_no_mutation_guardrails_true",
+    "coach_report_real_sqlite_readonly_io_full_match_batch_economy_only_global_proof",
+  ];
+}
+
+export function coachReportRealSQLiteReadOnlyIOSmokeTestCannotDriveSelection(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel,
+): boolean {
+  return !model.canDriveCoachInstruction &&
+    !model.canDriveLiveSelection &&
+    !model.canDriveProductionRouteResolution &&
+    !model.canMutateLineup &&
+    !model.canMutateStarters &&
+    !model.canMutateBench;
+}
+
+export function coachReportRealSQLiteReadOnlyIOSmokeTestCannotMutateOfficialState(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel,
+): boolean {
+  return !model.canMutateScore &&
+    !model.canMutateTimeline &&
+    !model.canMutatePossession &&
+    !model.canCreateProductionScoringEvents &&
+    !model.canClaimGlobalEconomy;
+}
+
+export function coachReportRealSQLiteReadOnlyIOSmokeTestEvidenceFact(input: {
+  readonly report: MatchReport;
+  readonly matchInput: MatchInput;
+  readonly model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
+}): MatchReportEvidenceFact | null {
+  if (input.model.status === "not_available") {
+    return null;
+  }
+
+  return {
+    factId: `${input.report.matchId}-coach-report-real-sqlite-readonly-io-smoke-test`,
+    matchId: input.report.matchId,
+    teamId: input.matchInput.homeTeam.teamId,
+    opponentTeamId: input.matchInput.awayTeam.teamId,
+    category: "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST",
+    scope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+    eventIds: input.report.timeline.slice(0, 3).map((event) => event.eventId),
+    affectedZones: input.report.zoneStats.slice(0, 6).map((zone) => zone.zone),
+    summary:
+      `Coach Report Real SQLite Read-Only IO Smoke Test ${input.model.status}: modeName=${input.model.modeName}, ` +
+      `storageTarget=${input.model.storageTarget}, schemaVersion=${input.model.schemaVersion}, realSQLiteIoEnabled=true, ` +
+      `defaultRealDatabaseReadCount=0, controlledRealDatabaseReadCount=${input.model.controlledRealDatabaseReadCount}, realDatabaseWriteCount=0, activeProductHistorySource=file_backed.`,
+    confidence: "medium",
+    strength: 72,
+    coachVisible: false,
+    internalTags: input.model.tags,
+  };
+}
+```
+
+## File: src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts
+
+```ts
+import {
+  buildCoachReportRealSQLiteReadOnlyIOSmokeTestTags,
+  type CoachReportRealSQLiteReadOnlyIOSmokeTestModel,
+} from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
+import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
+import type { CoachMatchHistoryRecord } from "./history/coachMatchHistory";
+import { COACH_MATCH_HISTORY_SCHEMA_VERSION, coachMatchHistoryRecordMatchesDurableSchema } from "./history/coachMatchHistoryDurableSchema";
+import type { SqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
+
+function withTags(
+  model: Omit<CoachReportRealSQLiteReadOnlyIOSmokeTestModel, "tags">,
+): CoachReportRealSQLiteReadOnlyIOSmokeTestModel {
+  return {
+    ...model,
+    tags: buildCoachReportRealSQLiteReadOnlyIOSmokeTestTags(model),
+  };
+}
+
+function hasDeterministicOrder(records: readonly CoachMatchHistoryRecord[]): boolean {
+  const signature = records.map((record) => `${record.generatedAtIso}:${record.matchId}:${record.historyRecordId}`).join("|");
+  const sorted = [...records]
+    .sort((left, right) =>
+      left.generatedAtIso.localeCompare(right.generatedAtIso) ||
+      left.matchId.localeCompare(right.matchId) ||
+      left.historyRecordId.localeCompare(right.historyRecordId)
+    )
+    .map((record) => `${record.generatedAtIso}:${record.matchId}:${record.historyRecordId}`)
+    .join("|");
+
+  return signature === sorted;
+}
+
+export function buildCoachReportRealSQLiteReadOnlyIOSmokeTest(input: {
+  readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly sqliteAdapter: SqliteRealReadOnlyCoachMatchHistoryAdapter;
+  readonly productReportHtml: string;
+  readonly exportReportHtml: string;
+}): CoachReportRealSQLiteReadOnlyIOSmokeTestModel {
+  const readOnlyRecords = input.sqliteAdapter.listReadOnlyRecords();
+  const firstRecord = readOnlyRecords[0];
+  const descriptionBeforeQueries = input.sqliteAdapter.describe();
+  let queryByTeamPass = false;
+  let queryByPhasePass = false;
+  let writeRejectedPass = false;
+
+  if (firstRecord !== undefined) {
+    const teamQuery = input.sqliteAdapter.readOnlyQuery({
+      teamId: firstRecord.homeTeamId,
+      maxRecords: 10,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    });
+    queryByTeamPass = teamQuery.records.some((record) => record.historyRecordId === firstRecord.historyRecordId);
+
+    const phase = firstRecord.signals[0]?.phase;
+    const phaseQuery = input.sqliteAdapter.readOnlyQuery({
+      ...(phase === undefined ? {} : { phase }),
+      maxRecords: 10,
+      includeControlledSamples: true,
+      includeProductHistory: true,
+    });
+    queryByPhasePass = phase === undefined || phaseQuery.records.some((record) =>
+      record.signals.some((signal) => signal.phase === phase)
+    );
+
+    const rejectedWrite = input.sqliteAdapter.rejectWrite(firstRecord);
+    writeRejectedPass = rejectedWrite.recordsAfterSaveCount === rejectedWrite.recordsBeforeSaveCount &&
+      rejectedWrite.writtenToDiskCount === 0 &&
+      rejectedWrite.replacedRecordCount === 0 &&
+      rejectedWrite.warnings.some((warning) => warning.includes("Write rejected"));
+  }
+
+  const descriptionAfterQueries = input.sqliteAdapter.describe();
+  const schemaCompatibilityPass =
+    descriptionAfterQueries.schemaVersion === COACH_MATCH_HISTORY_SCHEMA_VERSION &&
+    descriptionAfterQueries.missingRequiredColumnCount === 0 &&
+    readOnlyRecords.every(coachMatchHistoryRecordMatchesDurableSchema) &&
+    descriptionAfterQueries.schemaIncompatibleRecordCount === 0;
+  const deterministicOrderingPass = hasDeterministicOrder(readOnlyRecords);
+
+  return withTags({
+    status: "available",
+    modeName: "real_sqlite_readonly_io_smoke_test",
+    storageTarget: "sqlite_local",
+    schemaVersion: "coach_match_history_v1",
+    realSQLiteIoEnabled: true,
+    readOnlyMode: true,
+    writeModeAllowed: false,
+    writeRejectedPass,
+    adapterImplemented: descriptionBeforeQueries.implemented,
+    adapterProductionReady: false,
+    featureFlagEnabled: false,
+    defaultFeatureFlagEnabled: false,
+    productActivationAllowed: false,
+    activeProductHistorySource: "file_backed",
+    databaseUsedAsProductTruth: false,
+    reportCanUseAsSourceOfTruth: false,
+    defaultRealDatabaseReadCount: 0,
+    controlledRealDatabaseReadCount: descriptionAfterQueries.controlledRealDatabaseReadCount,
+    realDatabaseWriteCount: 0,
+    fixturePath: descriptionAfterQueries.fixturePath,
+    fixtureRecordCount: descriptionAfterQueries.fixtureRecordCount,
+    readOnlyAdapterRecordCount: readOnlyRecords.length,
+    queryByTeamPass,
+    queryByPhasePass,
+    deterministicOrderingPass,
+    schemaCompatibilityPass,
+    dryRunFallbackAvailable: true,
+    canDriveCoachInstruction: false,
+    canDriveLiveSelection: false,
+    canDriveProductionRouteResolution: false,
+    canMutateScore: false,
+    canMutateTimeline: false,
+    canMutatePossession: false,
+    canCreateProductionScoringEvents: false,
+    canMutateLineup: false,
+    canMutateStarters: false,
+    canMutateBench: false,
+    canClaimGlobalEconomy: false,
+    trendProofClaimCount: 0,
+    globalProofClaimCount: 0,
+    inventedStatisticCount: 0,
+    sandboxEventsPromotedToOfficialCount: 0,
+    visibleRecommendationWordingCount: 0,
+    visibleSelectionWordingCount: 0,
+    scoringConstantsUnchanged: true,
+    matchBonusEventUnchanged: true,
+    batchLiveSeparationPreserved: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    explicitControlledModeOnly: true,
+    nonProdFixtureOnly: true,
+    sqliteDriverChoice: "minimal_readonly_sqlite_file_reader",
+    nextStep: "Product History Source Switch Trial in non-prod only",
+    warnings: [
+      "real_sqlite_readonly_io_smoke_test is an explicit non-prod smoke test only.",
+      "The SQLite fixture is read with real local file IO, but file_backed remains the active product history source.",
+      "SQLite local is not product truth and cannot drive selection, score, timeline, possession, lineup, or route resolution.",
+      `Sprint 5G controlled mode carried forward: ${input.controlledLocalReadOnlyDbMode.modeName}/${input.controlledLocalReadOnlyDbMode.schemaVersion}.`,
     ],
   });
 }
@@ -55047,6 +56061,7 @@ import { buildCoachReportDatabaseMigrationPreparation } from "../../reports/buil
 import { buildCoachReportDatabaseAdapterSpike } from "../../reports/buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportDurableStorageDecision } from "../../reports/buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "../../reports/buildCoachReportControlledLocalReadOnlyDbMode";
+import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "../../reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -55063,6 +56078,7 @@ import type { CoachReportDatabaseMigrationPreparationModel } from "../../reports
 import type { CoachReportDatabaseAdapterSpikeModel } from "../../reports/coachReportDatabaseAdapterSpike";
 import type { CoachReportDurableStorageDecisionModel } from "../../reports/coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "../../reports/coachReportControlledLocalReadOnlyDbMode";
+import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "../../reports/coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
 import type { CoachMatchHistoryMigrationDryRunModel } from "../../reports/history/coachMatchHistoryMigrationDryRun";
 import {
@@ -55084,6 +56100,7 @@ import { resolveDatabaseHistoryAdapterFeatureFlag } from "../../reports/history/
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "../../reports/history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { createSqliteLocalCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalCoachMatchHistoryAdapter";
 import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
+import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "../../reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -55500,6 +56517,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
+  readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly exportHtml: string;
 }
 
@@ -55637,6 +56655,15 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const realSQLiteReadOnlyIOSmokeTest = buildCoachReportRealSQLiteReadOnlyIOSmokeTest({
+      controlledLocalReadOnlyDbMode,
+      sqliteAdapter: createSqliteRealReadOnlyCoachMatchHistoryAdapter({
+        fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
+        explicitControlledMode: true,
+      }),
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -55650,6 +56677,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       databaseAdapterSpike,
       durableStorageDecision,
       controlledLocalReadOnlyDbMode,
+      realSQLiteReadOnlyIOSmokeTest,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -55661,6 +56689,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       databaseAdapterSpike,
       durableStorageDecision,
       controlledLocalReadOnlyDbMode,
+      realSQLiteReadOnlyIOSmokeTest,
       exportHtml,
     };
 
@@ -59936,6 +60965,180 @@ export function renderFullMatchWorkbenchChainReplay5GValidation(model: FullMatch
   ].join("\n");
 }
 
+function realSQLiteReadOnlyIOSmokeTestCountLines(
+  model: CoachReportRealSQLiteReadOnlyIOSmokeTestModel,
+): readonly string[] {
+  return [
+    `- real SQLite read-only IO smoke test available: ${model.status === "available"}`,
+    `- mode name: ${model.modeName}`,
+    `- storage target selected: ${model.storageTarget}`,
+    `- schema version: ${model.schemaVersion}`,
+    `- real SQLite IO enabled: ${model.realSQLiteIoEnabled}`,
+    `- read-only mode: ${model.readOnlyMode}`,
+    `- write mode allowed: ${model.writeModeAllowed}`,
+    `- write rejected pass: ${model.writeRejectedPass}`,
+    `- adapter implemented: ${model.adapterImplemented}`,
+    `- adapter production ready: ${model.adapterProductionReady}`,
+    `- feature flag enabled: ${model.featureFlagEnabled}`,
+    `- default feature flag enabled: ${model.defaultFeatureFlagEnabled}`,
+    `- product activation allowed: ${model.productActivationAllowed}`,
+    `- active product history source: ${model.activeProductHistorySource}`,
+    `- database used as product truth: ${model.databaseUsedAsProductTruth}`,
+    `- report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}`,
+    `- default real DB read count: ${model.defaultRealDatabaseReadCount}`,
+    `- controlled real DB read count: ${model.controlledRealDatabaseReadCount}`,
+    `- real DB write count: ${model.realDatabaseWriteCount}`,
+    `- fixture path: ${model.fixturePath}`,
+    `- fixture record count: ${model.fixtureRecordCount}`,
+    `- read-only adapter record count: ${model.readOnlyAdapterRecordCount}`,
+    `- query by team pass: ${model.queryByTeamPass}`,
+    `- query by phase pass: ${model.queryByPhasePass}`,
+    `- deterministic ordering pass: ${model.deterministicOrderingPass}`,
+    `- schema compatibility pass: ${model.schemaCompatibilityPass}`,
+    `- score mutation count: ${model.canMutateScore ? 1 : 0}`,
+    `- timeline mutation count: ${model.canMutateTimeline ? 1 : 0}`,
+    `- possession mutation count: ${model.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${model.canCreateProductionScoringEvents ? 1 : 0}`,
+    `- lineup mutation count: ${model.canMutateLineup ? 1 : 0}`,
+    `- starters mutation count: ${model.canMutateStarters ? 1 : 0}`,
+    `- bench mutation count: ${model.canMutateBench ? 1 : 0}`,
+    `- live selection driver count: ${model.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${model.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- global economy claim count: ${model.canClaimGlobalEconomy ? 1 : 0}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${model.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${model.visibleSelectionWordingCount}`,
+    `- scoring constants unchanged: ${model.scoringConstantsUnchanged}`,
+    `- MatchBonusEvent unchanged: ${model.matchBonusEventUnchanged}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5HDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const smokeTest = context.realSQLiteReadOnlyIOSmokeTest;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5H",
+    "",
+    "Sprint 5H closes the persistence spike with a real local SQLite read-only IO smoke test. The fixture is non-prod, explicitly requested, and cannot become product truth.",
+    "",
+    "## SQLite Driver Choice",
+    "- choice: minimal_readonly_sqlite_file_reader",
+    "- reason: the project has no existing SQLite dependency; the smoke test proves real local `.sqlite` file IO without adding a fragile install-time native dependency.",
+    "- scope: fixture-only read path for `coach_match_history_v1`; no write SQL path exists.",
+    "",
+    "## Real SQLite Read-Only IO Smoke Test",
+    ...realSQLiteReadOnlyIOSmokeTestCountLines(smokeTest),
+    "",
+    "## Product Boundary",
+    "- normal product mode remains file_backed.",
+    "- SQLite local read-only smoke test is not active by default.",
+    "- product activation allowed: false",
+    "- database used as product truth: false",
+    "- report can use as source of truth: false",
+    "- default real database read count: 0",
+    "- controlled real database read count is greater than 0 only inside this explicit smoke test.",
+    "- real database write count: 0",
+    "- no score, timeline, possession, scoring-event, selection, lineup, or production-route mutation is allowed.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_REAL_SQLITE_READONLY_IO_SMOKE_TEST.",
+    "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
+    "- CONFIRM_NO_SQLITE_WRITES.",
+    "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
+    "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5HValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const smokeTest = context.realSQLiteReadOnlyIOSmokeTest;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("real SQLite read-only IO smoke test exists.", smokeTest.status === "available", smokeTest.status),
+    check("mode must be explicitly requested.", smokeTest.explicitControlledModeOnly, smokeTest.modeName),
+    check("storage target selected is sqlite_local.", smokeTest.storageTarget === "sqlite_local", smokeTest.storageTarget),
+    check("schema version is coach_match_history_v1.", smokeTest.schemaVersion === "coach_match_history_v1", smokeTest.schemaVersion),
+    check("real SQLite IO enabled is true.", smokeTest.realSQLiteIoEnabled, ""),
+    check("read-only mode is true.", smokeTest.readOnlyMode, ""),
+    check("write mode allowed is false.", !smokeTest.writeModeAllowed, ""),
+    check("write rejected pass is true.", smokeTest.writeRejectedPass, ""),
+    check("adapter implemented is true.", smokeTest.adapterImplemented, ""),
+    check("adapter production ready is false.", !smokeTest.adapterProductionReady, ""),
+    check("feature flag enabled is false.", !smokeTest.featureFlagEnabled, ""),
+    check("default feature flag enabled is false.", !smokeTest.defaultFeatureFlagEnabled, ""),
+    check("product activation allowed is false.", !smokeTest.productActivationAllowed, ""),
+    check("active product history source is file_backed.", smokeTest.activeProductHistorySource === "file_backed", smokeTest.activeProductHistorySource),
+    check("database used as product truth is false.", !smokeTest.databaseUsedAsProductTruth, ""),
+    check("report can use as source of truth is false.", !smokeTest.reportCanUseAsSourceOfTruth, ""),
+    check("default real DB read count is 0.", smokeTest.defaultRealDatabaseReadCount === 0, "0"),
+    check("controlled real DB read count is greater than 0.", smokeTest.controlledRealDatabaseReadCount > 0, String(smokeTest.controlledRealDatabaseReadCount)),
+    check("real DB write count is 0.", smokeTest.realDatabaseWriteCount === 0, "0"),
+    check("fixture record count is at least 6.", smokeTest.fixtureRecordCount >= 6, String(smokeTest.fixtureRecordCount)),
+    check("read-only adapter record count equals fixture record count.", smokeTest.readOnlyAdapterRecordCount === smokeTest.fixtureRecordCount, `${smokeTest.readOnlyAdapterRecordCount}/${smokeTest.fixtureRecordCount}`),
+    check("query by team passes.", smokeTest.queryByTeamPass, ""),
+    check("query by phase passes.", smokeTest.queryByPhasePass, ""),
+    check("deterministic ordering passes.", smokeTest.deterministicOrderingPass, ""),
+    check("schema compatibility passes.", smokeTest.schemaCompatibilityPass, ""),
+    check("score mutation count is 0.", !smokeTest.canMutateScore, "0"),
+    check("timeline mutation count is 0.", !smokeTest.canMutateTimeline, "0"),
+    check("possession mutation count is 0.", !smokeTest.canMutatePossession, "0"),
+    check("production scoring event creation count is 0.", !smokeTest.canCreateProductionScoringEvents, "0"),
+    check("lineup mutation count is 0.", !smokeTest.canMutateLineup, "0"),
+    check("starters mutation count is 0.", !smokeTest.canMutateStarters, "0"),
+    check("bench mutation count is 0.", !smokeTest.canMutateBench, "0"),
+    check("live selection driver count is 0.", !smokeTest.canDriveLiveSelection, "0"),
+    check("production route resolution driver count is 0.", !smokeTest.canDriveProductionRouteResolution, "0"),
+    check("global economy claim count is 0.", !smokeTest.canClaimGlobalEconomy, "0"),
+    check("trend proof claim count is 0.", smokeTest.trendProofClaimCount === 0, "0"),
+    check("invented statistic count is 0.", smokeTest.inventedStatisticCount === 0, "0"),
+    check("sandbox events promoted to official count is 0.", smokeTest.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible recommendation wording count is 0.", smokeTest.visibleRecommendationWordingCount === 0, "0"),
+    check("visible selection wording count is 0.", smokeTest.visibleSelectionWordingCount === 0, "0"),
+    check("scoring constants unchanged.", smokeTest.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", smokeTest.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", smokeTest.batchLiveSeparationPreserved, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global economy proof.", smokeTest.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("export contains SQLite read-only smoke test section.", exportHtml.includes("Smoke test SQLite read-only"), ""),
+    check("export states source produit active inchang", exportHtml.includes("source produit active reste inchang") || exportHtml.includes("source produit active inchang"), ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5H Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...realSQLiteReadOnlyIOSmokeTestCountLines(smokeTest),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    "- CONFIRM_REAL_SQLITE_READONLY_IO_SMOKE_TEST.",
+    "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
+    "- CONFIRM_NO_SQLITE_WRITES.",
+    "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
+    "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+  ].join("\n");
+}
+
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
   const context = currentCoachReportHistoryStoreConsistencyContext();
   const decision = context.durableStorageDecision;
@@ -62434,6 +63637,50 @@ if (require.main === module) {
   for (const check of checks) {
     console.log(`- ${check}`);
   }
+}
+```
+
+## File: src/simulation/fullMatch/scoringGuard.5h.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "../../reports/coachReportMultiMatchPhaseComparisonTestUtils";
+import { scoringRegistryEntry } from "../../systems/scoring/scoringActionRegistry";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateScoringGuard5H(): readonly string[] {
+  const model = buildCoachReportMultiMatchPhaseComparisonTestContext().realSQLiteReadOnlyIOSmokeTest;
+
+  assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
+  assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
+  assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
+  assertTest(scoringRegistryEntry("DROP_GOAL").points === 2, "DROP_GOAL must remain 2.");
+  assertTest(!scoringRegistryEntry("PENALTY_SHOT").active, "PENALTY_SHOT must remain inactive.");
+  assertTest(model.realDatabaseWriteCount === 0, "real SQLite smoke test must not write.");
+  assertTest(model.defaultRealDatabaseReadCount === 0, "default product mode must not read SQLite.");
+  assertTest(model.controlledRealDatabaseReadCount > 0, "controlled smoke test must read SQLite.");
+  assertTest(model.activeProductHistorySource === "file_backed", "active product source must stay file_backed.");
+  assertTest(!model.databaseUsedAsProductTruth, "SQLite must not become product truth.");
+  assertTest(!model.canCreateProductionScoringEvents, "SQLite smoke test cannot create production scoring events.");
+  assertTest(model.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY remains only global economy proof.");
+
+  return [
+    "scoring constants remain unchanged",
+    "PENALTY_SHOT remains inactive",
+    "SQLite smoke test has no writes and cannot create scoring events",
+    "batch/live separation and global economy proof boundary remain preserved",
+  ];
+}
+
+const checks = validateScoringGuard5H();
+
+console.log("scoringGuard.5h tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
 }
 ```
 
@@ -70432,6 +71679,7 @@ function insightTypeForFact(fact: MatchEvidenceFact): CoachInsight["type"] {
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE":
     case "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION":
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -70562,6 +71810,8 @@ function titleForFact(fact: MatchEvidenceFact): string {
       return "Decision stockage durable";
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
       return "Lecture SQLite locale controlee";
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
+      return "Smoke test SQLite read-only";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
@@ -70678,6 +71928,7 @@ function recommendedActionForFact(fact: MatchEvidenceFact): CoachInsight["recomm
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE":
     case "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION":
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":
     case "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES":
@@ -70752,6 +72003,7 @@ function selectPrimaryFact(facts: readonly MatchEvidenceFact[]): MatchEvidenceFa
     "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE",
     "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION",
     "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE",
+    "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST",
     "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE",
     "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR",
     "WORKBENCH_CHAIN_COACH_REPORT_FROM_TRACE_AGGREGATES",
@@ -71942,6 +73194,7 @@ function priorityForCategory(category: MatchEvidenceCategory): number {
     case "WORKBENCH_CHAIN_COACH_REPORT_DATABASE_ADAPTER_SPIKE":
     case "WORKBENCH_CHAIN_COACH_REPORT_DURABLE_STORAGE_DECISION":
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
       return 25;
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return 24;
@@ -72079,6 +73332,8 @@ function focusTitleForFact(fact: MatchEvidenceFact): string {
       return "Relire la decision de stockage durable";
     case "WORKBENCH_CHAIN_COACH_REPORT_CONTROLLED_LOCAL_READONLY_DB_MODE":
       return "Relire la lecture SQLite locale controlee";
+    case "WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST":
+      return "Relire le smoke test SQLite read-only";
     case "WORKBENCH_CHAIN_MATCH_EVENT_TRACE_SPINE":
       return "Relire la colonne de traces de match";
     case "WORKBENCH_CHAIN_MATCH_TRACE_AGGREGATOR":

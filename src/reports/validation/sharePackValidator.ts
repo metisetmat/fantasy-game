@@ -309,6 +309,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchWorkbenchChainReplay5FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5f.md"));
   const fullMatchWorkbenchChainReplay5G = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5g.md"));
   const fullMatchWorkbenchChainReplay5GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5g.md"));
+  const fullMatchWorkbenchChainReplay5H = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-5h.md"));
+  const fullMatchWorkbenchChainReplay5HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-5h.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2818,6 +2820,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-workbench-chain-replay-5f.md",
     ...sprint5FForbiddenLeftovers,
   ];
+  const sprint5HExpectedFiles = sprint5GExpectedFiles.map((file) =>
+    file === "fullmatch-workbench-chain-replay-5g.md"
+      ? "fullmatch-workbench-chain-replay-5h.md"
+      : file === "validation.fullmatch-workbench-chain-replay-5g.md"
+        ? "validation.fullmatch-workbench-chain-replay-5h.md"
+        : file
+  );
+  const sprint5HForbiddenLeftovers = [
+    "fullmatch-workbench-chain-replay-5g.md",
+    "validation.fullmatch-workbench-chain-replay-5g.md",
+    ...sprint5GForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3498,6 +3512,57 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
   ];
+  const sprint5HChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint5HExpectedFiles.every((file) => requiredCopied(file)), sprint5HExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint5HExpectedFiles.every((file) => manifest.includes(file)), sprint5HExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("package.json copied", requiredCopied("package.json"), ""),
+    check("tsconfig.json copied", requiredCopied("tsconfig.json"), ""),
+    check("coach-report.export.html copied", requiredCopied("coach-report.export.html"), ""),
+    check("validation.share-pack.md copied", requiredCopied("validation.share-pack.md"), ""),
+    check("README.md copied", requiredCopied("README.md"), ""),
+    check("manifest.md copied", requiredCopied("manifest.md"), ""),
+    check("current sprint is Sprint 5H", activeConfig.sprintName === "Sprint 5H - Real SQLite Read-Only IO Smoke Test", activeConfig.sprintName),
+    check("missing expected files are none", sprint5HExpectedFiles.every((file) => requiredCopied(file)), sprint5HExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint5HForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint5HForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 5H oriented", readme.includes("# Sprint 5H Share Pack") && readme.includes("fullmatch-workbench-chain-replay-5h.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("5H report included", fullMatchWorkbenchChainReplay5H.includes("# FullMatch Workbench Chain Replay 5H") && fullMatchWorkbenchChainReplay5H.includes("Real SQLite Read-Only IO Smoke Test") && fullMatchWorkbenchChainReplay5H.includes("Product Boundary"), "5H doc included"),
+    check("5H validation is PASS", fullMatchWorkbenchChainReplay5HValidation.includes("Status: PASS") && fullMatchWorkbenchChainReplay5HValidation.includes("real SQLite read-only IO smoke test exists") && fullMatchWorkbenchChainReplay5HValidation.includes("schema version is coach_match_history_v1"), "5H validation current"),
+    check("sqlite local target visible", fullMatchWorkbenchChainReplay5H.includes("storage target selected: sqlite_local") && coachExportHtml.includes("sqlite_local"), "sqlite_local visible"),
+    check("schema version visible", fullMatchWorkbenchChainReplay5H.includes("schema version: coach_match_history_v1") && coachExportHtml.includes("coach_match_history_v1"), "schema visible"),
+    check("real SQLite IO enabled true", fullMatchWorkbenchChainReplay5HValidation.includes("real SQLite IO enabled is true") && coachExportHtml.includes("Vraie lecture SQLite contr"), "real SQLite IO visible"),
+    check("read-only mode true", fullMatchWorkbenchChainReplay5HValidation.includes("read-only mode is true") && coachExportHtml.includes("Read-only"), "read-only visible"),
+    check("write mode disabled", fullMatchWorkbenchChainReplay5HValidation.includes("write mode allowed is false") && fullMatchWorkbenchChainReplay5HValidation.includes("write rejected pass is true"), "write rejection visible"),
+    check("product database activation remains disabled", fullMatchWorkbenchChainReplay5H.includes("product activation allowed: false") && fullMatchWorkbenchChainReplay5H.includes("database used as product truth: false"), "product DB activation disabled"),
+    check("file_backed remains active product source", fullMatchWorkbenchChainReplay5H.includes("active product history source: file_backed") && coachExportHtml.includes("file_backed"), "file_backed visible"),
+    check("default real database read count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("default real DB read count is 0") && coachExportHtml.includes("Lecture DB r&eacute;elle mode d&eacute;faut"), "default real DB read 0"),
+    check("controlled real database read count is greater than 0", fullMatchWorkbenchChainReplay5HValidation.includes("controlled real DB read count is greater than 0") && fullMatchWorkbenchChainReplay5H.includes("controlled real DB read count:"), "controlled real reads visible"),
+    check("real database write count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("real DB write count is 0") && coachExportHtml.includes("&Eacute;criture DB"), "real DB write 0"),
+    check("fixture record count is visible", fullMatchWorkbenchChainReplay5HValidation.includes("fixture record count is at least 6") && fullMatchWorkbenchChainReplay5H.includes("fixture record count:"), "fixture count visible"),
+    check("query by team and phase pass", fullMatchWorkbenchChainReplay5HValidation.includes("query by team passes") && fullMatchWorkbenchChainReplay5HValidation.includes("query by phase passes"), "read-only queries visible"),
+    check("deterministic ordering and schema compatibility pass", fullMatchWorkbenchChainReplay5HValidation.includes("deterministic ordering passes") && fullMatchWorkbenchChainReplay5HValidation.includes("schema compatibility passes"), "schema/order visible"),
+    check("bundle includes real SQLite read-only source files", bundleReports.includes("src/reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter.ts") && bundleReports.includes("src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.ts") && bundleReports.includes("src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts"), "5H source bundled"),
+    check("bundle includes real SQLite read-only tests", bundleReports.includes("sqliteRealReadOnlyCoachMatchHistoryAdapter.test.ts") && bundleReports.includes("coachReportRealSQLiteReadOnlyIOSmokeTestRenderer.test.ts") && bundleReports.includes("coachReportRealSQLiteReadOnlyIOSmokeTestGuard.test.ts"), "5H tests bundled"),
+    check("simulation bundle includes scoring guard 5H", bundleSimulation.includes("scoringGuard.5h.test.ts"), "5H scoring guard bundled"),
+    check("real SQLite read-only evidence category bundled", bundleContracts.includes("WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST") && bundleSimulation.includes("WORKBENCH_CHAIN_COACH_REPORT_REAL_SQLITE_READONLY_IO_SMOKE_TEST"), "5H evidence category bundled"),
+    check("score mutation count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("score mutation count is 0"), "score mutation 0"),
+    check("timeline mutation count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("timeline mutation count is 0"), "timeline mutation 0"),
+    check("possession mutation count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("possession mutation count is 0"), "possession mutation 0"),
+    check("production scoring event creation count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("production scoring event creation count is 0"), "scoring event creation 0"),
+    check("lineup/starters/bench mutation counts are 0", fullMatchWorkbenchChainReplay5HValidation.includes("lineup mutation count is 0") && fullMatchWorkbenchChainReplay5HValidation.includes("starters mutation count is 0") && fullMatchWorkbenchChainReplay5HValidation.includes("bench mutation count is 0"), "lineup guard 0"),
+    check("live selection and production route driver counts are 0", fullMatchWorkbenchChainReplay5HValidation.includes("live selection driver count is 0") && fullMatchWorkbenchChainReplay5HValidation.includes("production route resolution driver count is 0"), "selection/route drivers 0"),
+    check("trend proof and invented statistic counts are 0", fullMatchWorkbenchChainReplay5HValidation.includes("trend proof claim count is 0") && fullMatchWorkbenchChainReplay5HValidation.includes("invented statistic count is 0"), "proof/invented counts 0"),
+    check("sandbox events promoted count is 0", fullMatchWorkbenchChainReplay5HValidation.includes("sandbox events promoted to official count is 0"), "sandbox promotion 0"),
+    check("no scoring constants changed", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchWorkbenchChainReplay5HValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("no MatchBonusEvent mutation", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchWorkbenchChainReplay5HValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchWorkbenchChainReplay5HValidation.includes("FULL_MATCH_BATCH_ECONOMY remains only global economy proof"), "batch/live PASS"),
+    check("50-match economy remains global reference", fullMatchWorkbenchChainReplay5H.includes("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchWorkbenchChainReplay5HValidation.includes("explicit exhaustive test command is available"), "test:all visible"),
+    check("recommendations visible", fullMatchWorkbenchChainReplay5HValidation.includes("CONFIRM_REAL_SQLITE_READONLY_IO_SMOKE_TEST") && fullMatchWorkbenchChainReplay5HValidation.includes("CONFIRM_NO_SQLITE_WRITES") && fullMatchWorkbenchChainReplay5HValidation.includes("PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY"), "5H recommendations visible"),
+  ];
+
   const sprint5GChecks: readonly SharePackCheck[] = [
     check("reports/share exists", existsSync(shareDirectory), shareDirectory),
     check("manifest exists", manifest.length > 0, manifestPath),
@@ -6955,6 +7020,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 5H - Real SQLite Read-Only IO Smoke Test")
+      ? sprint5HChecks
     : activeConfig.sprintName.includes("Sprint 5G - Controlled Local Read-Only DB Mode")
       ? sprint5GChecks
     : activeConfig.sprintName.includes("Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring")
