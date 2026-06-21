@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 5H - Real SQLite Read-Only IO Smoke Test. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6A - Full-Match Score Economy Calibration Reset. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -78,15 +78,17 @@ import {
   renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay5HDoc,
   renderFullMatchWorkbenchChainReplay5HValidation,
+  renderFullMatchScoreEconomyCalibration6ADoc,
+  renderFullMatchScoreEconomyCalibration6AValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5H - Real SQLite Read-Only IO Smoke Test";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5h.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5h.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6A - Full-Match Score Economy Calibration Reset";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-score-economy-calibration-6a.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-score-economy-calibration-6a.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1960,6 +1962,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts",
         required: true,
         reason: "Sprint 5H builder validating real SQLite controlled reads, non-product truth, schema compatibility, deterministic ordering, and write rejection",
+      },
+      {
+        source: "src/reports/fullMatchScoreEconomyCalibration.ts",
+        required: true,
+        reason: "Sprint 6A full-match score economy calibration model for single-run root-cause diagnosis, controlled projection, and no-mutation guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -3888,6 +3895,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5H executable visible-copy tests proving SQLite smoke test wording stays non-prod, read-only, non-activating, and non-prescriptive",
       },
       {
+        source: "src/reports/fullMatchScoreEconomyCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6A executable model tests proving score economy calibration keeps constants, events, batch/live separation, and persistence boundaries intact",
+      },
+      {
+        source: "src/reports/fullMatchScoreEconomyCalibrationRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6A executable renderer tests proving coach export copy is local, controlled, no-cap, no-rewrite, and not a global proof",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -4083,6 +4100,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return renderFullMatchScoreEconomyCalibration6ADoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5H")) {
     return renderFullMatchWorkbenchChainReplay5HDoc(fullMatchTraceValidationModel());
   }
@@ -6291,6 +6311,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return renderFullMatchScoreEconomyCalibration6AValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5H")) {
     return renderFullMatchWorkbenchChainReplay5HValidation(fullMatchTraceValidationModel());
   }
@@ -8445,6 +8468,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return [
+      "# Sprint 6A Share Pack",
+      "",
+      "Current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-score-economy-calibration-6a.md",
+      "- validation.fullmatch-score-economy-calibration-6a.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-score-economy-calibration-6a.md and validation.fullmatch-score-economy-calibration-6a.md.",
+      "",
+      "Sprint 6A diagnoses a single full-match score-economy outlier, adds a controlled projection and before/after comparison, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5H")) {
     return [
       "# Sprint 5H Share Pack",
@@ -25145,6 +25204,130 @@ for (const check of checks) {
 }
 ```
 
+## File: src/reports/fullMatchScoreEconomyCalibration.test.ts
+
+```ts
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+export function validateFullMatchScoreEconomyCalibration(): readonly string[] {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const model = buildFullMatchScoreEconomyCalibrationModel(report);
+  const beforeTotal = report.score.home + report.score.away;
+  const afterTotal = model.officialScoreAfterCalibration
+    .split(" - ")
+    .map((value) => Number.parseInt(value, 10))
+    .reduce((total, value) => total + (Number.isFinite(value) ? value : 0), 0);
+
+  assertTest(model.status === "available", "score economy calibration model must be available.");
+  assertTest(model.scope === "FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN", "scope must be single-run score economy.");
+  assertTest(model.calibrationVersion === "SCORE_ECONOMY_6A", "calibration version must be SCORE_ECONOMY_6A.");
+  assertTest(model.rootCause.primaryCause !== "INSUFFICIENT_EVIDENCE", "root-cause classification must be available.");
+  assertTest(model.rootCause.limitations.some((limitation) => limitation.includes("Single-run")), "single-run limitation must be explicit.");
+  assertTest(model.comparison.scoringEventsBefore >= model.comparison.scoringEventsAfter, "after comparison must not increase scoring events.");
+  assertTest(afterTotal <= beforeTotal, "projected calibration score must be no more extreme than before.");
+  assertTest(!model.scoringConstantsChanged, "scoring constants must remain unchanged.");
+  assertTest(!model.scoreCapApplied, "score cap must not be applied.");
+  assertTest(!model.postHocScoreRewriteApplied, "post-hoc score rewrite must not be applied.");
+  assertTest(!model.scoringEventsDeleted, "official scoring events must not be deleted.");
+  assertTest(!model.scoringEventsRewritten, "official scoring events must not be rewritten.");
+  assertTest(!model.forcedOpponentScoreApplied, "opponent score must not be forced.");
+  assertTest(model.officialTimelineMutationCount === 0, "official timeline mutation count must be 0.");
+  assertTest(model.officialPossessionMutationCount === 0, "official possession mutation count must be 0.");
+  assertTest(model.productionScoringEventCreationCount === 0, "production scoring event creation count must be 0.");
+  assertTest(model.batchLiveSeparationPreserved, "batch/live separation must be preserved.");
+  assertTest(!model.matchBonusEventChanged, "MatchBonusEvent must remain unchanged.");
+  assertTest(!model.persistenceUsedForCalibration, "persistence must not be used for calibration.");
+  assertTest(!model.sqliteUsedAsScoreEconomySource, "SQLite must not be used as score economy source.");
+  assertTest(model.fullMatchBatchEconomyRemainsOnlyGlobalProof, "FULL_MATCH_BATCH_ECONOMY remains only global proof.");
+  assertTest(model.inventedStatisticCount === 0, "invented statistic count must be 0.");
+  assertTest(model.trendProofClaimCount === 0, "trend proof claim count must be 0.");
+  assertTest(model.globalEconomyClaimCount === 0, "global economy claim count must be 0.");
+
+  return [
+    "full-match score economy calibration model is available",
+    "root-cause classification and before/after comparison are available",
+    "projected calibration is less extreme without score cap or post-hoc rewrite",
+    "scoring constants, MatchBonusEvent, batch/live separation, and global proof boundary remain intact",
+    "persistence and SQLite are not used for gameplay calibration",
+  ];
+}
+
+const checks = validateFullMatchScoreEconomyCalibration();
+
+console.log("fullMatchScoreEconomyCalibration tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
+## File: src/reports/fullMatchScoreEconomyCalibrationRenderer.test.ts
+
+```ts
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+function assertTest(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+function visibleText(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/giu, " ")
+    .replace(/<style[\s\S]*?<\/style>/giu, " ")
+    .replace(/<[^>]+>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .toLowerCase();
+}
+
+export function validateFullMatchScoreEconomyCalibrationRenderer(): readonly string[] {
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const html = context.exportHtml;
+  const sectionHtml = html.slice(
+    html.indexOf("Calibration &eacute;conomie du score"),
+    html.indexOf("Profils a observer") > 0 ? html.indexOf("Profils a observer") : html.length,
+  );
+  const text = visibleText(sectionHtml);
+
+  assertTest(html.includes("Calibration &eacute;conomie du score"), "export must contain score economy calibration section.");
+  assertTest(html.includes("Score full-match avant calibration"), "export must show score before calibration.");
+  assertTest(html.includes("Projection apr&egrave;s calibration"), "export must show projected score after calibration.");
+  assertTest(text.includes("signal single-run"), "visible copy must frame the signal as single-run.");
+  assertTest(text.includes("constantes inchang"), "visible copy must say scoring constants are unchanged.");
+  assertTest(text.includes("aucun cap de score"), "visible copy must say no score cap.");
+  assertTest(text.includes("score reste issu des"), "visible copy must say score comes from official events.");
+  assertTest(!text.includes("preuve globale"), "visible copy must not claim global proof.");
+  assertTest(!text.includes("tendance prouv"), "visible copy must not claim proved trend.");
+  assertTest(!text.includes("score corrig"), "visible copy must not claim corrected score.");
+  assertTest(!text.includes("score ajust"), "visible copy must not claim manually adjusted score.");
+  assertTest(!text.includes("recommandation automatique de s"), "visible copy must not contain automatic selection recommendation.");
+
+  return [
+    "export contains full-match score economy calibration section",
+    "visible copy states single-run, unchanged constants, no score cap, and official-event score source",
+    "visible copy avoids global proof, proved trend, manual correction, and automatic selection wording",
+  ];
+}
+
+const checks = validateFullMatchScoreEconomyCalibrationRenderer();
+
+console.log("fullMatchScoreEconomyCalibrationRenderer tests passed.");
+for (const check of checks) {
+  console.log(`- ${check}`);
+}
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -25162,6 +25345,7 @@ import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabase
 import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
+import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -25350,6 +25534,7 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -25364,6 +25549,7 @@ export function writeLatestCoachReport(): void {
     ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
     ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
     ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
+    fullMatchScoreEconomyCalibration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

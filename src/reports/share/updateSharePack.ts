@@ -71,15 +71,17 @@ import {
   renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay5HDoc,
   renderFullMatchWorkbenchChainReplay5HValidation,
+  renderFullMatchScoreEconomyCalibration6ADoc,
+  renderFullMatchScoreEconomyCalibration6AValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5H - Real SQLite Read-Only IO Smoke Test";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5h.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5h.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6A - Full-Match Score Economy Calibration Reset";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-score-economy-calibration-6a.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-score-economy-calibration-6a.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1953,6 +1955,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts",
         required: true,
         reason: "Sprint 5H builder validating real SQLite controlled reads, non-product truth, schema compatibility, deterministic ordering, and write rejection",
+      },
+      {
+        source: "src/reports/fullMatchScoreEconomyCalibration.ts",
+        required: true,
+        reason: "Sprint 6A full-match score economy calibration model for single-run root-cause diagnosis, controlled projection, and no-mutation guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -3881,6 +3888,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5H executable visible-copy tests proving SQLite smoke test wording stays non-prod, read-only, non-activating, and non-prescriptive",
       },
       {
+        source: "src/reports/fullMatchScoreEconomyCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6A executable model tests proving score economy calibration keeps constants, events, batch/live separation, and persistence boundaries intact",
+      },
+      {
+        source: "src/reports/fullMatchScoreEconomyCalibrationRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6A executable renderer tests proving coach export copy is local, controlled, no-cap, no-rewrite, and not a global proof",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -4076,6 +4093,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return renderFullMatchScoreEconomyCalibration6ADoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5H")) {
     return renderFullMatchWorkbenchChainReplay5HDoc(fullMatchTraceValidationModel());
   }
@@ -6284,6 +6304,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return renderFullMatchScoreEconomyCalibration6AValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5H")) {
     return renderFullMatchWorkbenchChainReplay5HValidation(fullMatchTraceValidationModel());
   }
@@ -8438,6 +8461,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6A")) {
+    return [
+      "# Sprint 6A Share Pack",
+      "",
+      "Current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-score-economy-calibration-6a.md",
+      "- validation.fullmatch-score-economy-calibration-6a.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-score-economy-calibration-6a.md and validation.fullmatch-score-economy-calibration-6a.md.",
+      "",
+      "Sprint 6A diagnoses a single full-match score-economy outlier, adds a controlled projection and before/after comparison, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5H")) {
     return [
       "# Sprint 5H Share Pack",

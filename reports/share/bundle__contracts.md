@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 5H - Real SQLite Read-Only IO Smoke Test. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6A - Full-Match Score Economy Calibration Reset. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

@@ -1,6 +1,6 @@
-# Sprint 5H Share Pack
+# Sprint 6A Share Pack
 
-Current sprint: Sprint 5H - Real SQLite Read-Only IO Smoke Test
+Current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-workbench-chain-replay-5h.md
-- validation.fullmatch-workbench-chain-replay-5h.md
+- fullmatch-score-economy-calibration-6a.md
+- validation.fullmatch-score-economy-calibration-6a.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5h.md and validation.fullmatch-workbench-chain-replay-5h.md.
+Start with validation.share-pack.md, then fullmatch-score-economy-calibration-6a.md and validation.fullmatch-score-economy-calibration-6a.md.
 
-Sprint 5H proves a real local SQLite read-only IO smoke test against a non-prod coach_match_history_v1 fixture. The product source remains file_backed, SQLite local is not product truth, default real DB reads stay at 0, controlled reads are counted only in the explicit smoke test, and writes remain rejected.
+Sprint 6A diagnoses a single full-match score-economy outlier, adds a controlled projection and before/after comparison, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.
 
 Upload every file in this reports/share directory.

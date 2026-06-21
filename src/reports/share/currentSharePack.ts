@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 5H - Real SQLite Read-Only IO Smoke Test",
+  name: "Sprint 6A - Full-Match Score Economy Calibration Reset",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-workbench-chain-replay-5h.md",
-    "validation.fullmatch-workbench-chain-replay-5h.md",
+    "fullmatch-score-economy-calibration-6a.md",
+    "validation.fullmatch-score-economy-calibration-6a.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 5H share pack is current, complete, and below 20 files",
-    "fullmatch-workbench-chain-replay-5h.md": "summarizes the real SQLite read-only IO smoke test, non-prod fixture, sqlite_local target, coach_match_history_v1 schema, write rejection, and no-product-activation guardrails",
-    "validation.fullmatch-workbench-chain-replay-5h.md": "validates real SQLite read-only controlled IO, query by team/phase, deterministic ordering, schema compatibility, write rejection, export HTML section, and unchanged scoring guardrails",
-    "README.md": "compact reviewer orientation for the 5H share pack",
-    "manifest.md": "compatibility manifest listing the 5H share pack files",
+    "validation.share-pack.md": "proves the 6A share pack is current, complete, and below 20 files",
+    "fullmatch-score-economy-calibration-6a.md": "summarizes the single-run full-match score economy root-cause diagnosis, controlled calibration projection, before/after comparison, and no-cap/no-rewrite/no-deletion guardrails",
+    "validation.fullmatch-score-economy-calibration-6a.md": "validates unchanged scoring constants, official-event score source, no score cap, no post-hoc rewrite, no event deletion, batch/live separation, and single-run limitation for Sprint 6A",
+    "README.md": "compact reviewer orientation for the 6A share pack",
+    "manifest.md": "compatibility manifest listing the 6A share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

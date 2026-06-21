@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 5H - Real SQLite Read-Only IO Smoke Test
+- current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -26,43 +26,35 @@ Status: PASS
 - PASS: validation.share-pack.md copied - 
 - PASS: README.md copied - 
 - PASS: manifest.md copied - 
-- PASS: current sprint is Sprint 5H - Sprint 5H - Real SQLite Read-Only IO Smoke Test
+- PASS: current sprint is Sprint 6A - Sprint 6A - Full-Match Score Economy Calibration Reset
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 5H oriented - README current
-- PASS: 5H report included - 5H doc included
-- PASS: 5H validation is PASS - 5H validation current
-- PASS: sqlite local target visible - sqlite_local visible
-- PASS: schema version visible - schema visible
-- PASS: real SQLite IO enabled true - real SQLite IO visible
-- PASS: read-only mode true - read-only visible
-- PASS: write mode disabled - write rejection visible
-- PASS: product database activation remains disabled - product DB activation disabled
-- PASS: file_backed remains active product source - file_backed visible
-- PASS: default real database read count is 0 - default real DB read 0
-- PASS: controlled real database read count is greater than 0 - controlled real reads visible
-- PASS: real database write count is 0 - real DB write 0
-- PASS: fixture record count is visible - fixture count visible
-- PASS: query by team and phase pass - read-only queries visible
-- PASS: deterministic ordering and schema compatibility pass - schema/order visible
-- PASS: bundle includes real SQLite read-only source files - 5H source bundled
-- PASS: bundle includes real SQLite read-only tests - 5H tests bundled
-- PASS: simulation bundle includes scoring guard 5H - 5H scoring guard bundled
-- PASS: real SQLite read-only evidence category bundled - 5H evidence category bundled
-- PASS: score mutation count is 0 - score mutation 0
-- PASS: timeline mutation count is 0 - timeline mutation 0
-- PASS: possession mutation count is 0 - possession mutation 0
-- PASS: production scoring event creation count is 0 - scoring event creation 0
-- PASS: lineup/starters/bench mutation counts are 0 - lineup guard 0
-- PASS: live selection and production route driver counts are 0 - selection/route drivers 0
-- PASS: trend proof and invented statistic counts are 0 - proof/invented counts 0
-- PASS: sandbox events promoted count is 0 - sandbox promotion 0
-- PASS: no scoring constants changed - scoring constants visible
-- PASS: no MatchBonusEvent mutation - MatchBonusEvent separated
+- PASS: README is Sprint 6A oriented - README current
+- PASS: 6A report included - 6A doc included
+- PASS: 6A validation is PASS - 6A validation current
+- PASS: official score before and after are visible - score before/after visible
+- PASS: scoring event before/after counts are visible - event counts visible
+- PASS: root-cause diagnosis is visible - root cause visible
+- PASS: family before/after counts are visible - family counts visible
+- PASS: route mix and success rates are visible - route evidence visible
+- PASS: goalkeeper and fatigue impact are visible - keeper/fatigue visible
+- PASS: single-run and batch limitation are visible - single-run limitation visible
+- PASS: coach export contains calibration section - export calibration visible
+- PASS: scoring constants unchanged - scoring constants visible
+- PASS: score cap is not applied - score cap false
+- PASS: post-hoc score rewrite is not applied - rewrite false
+- PASS: scoring events are not deleted or rewritten - event mutation false
+- PASS: forced opponent score is not applied - forced score false
+- PASS: mutation counts are 0 - mutation counts 0
 - PASS: batch/live separation preserved - batch/live PASS
+- PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
+- PASS: persistence and SQLite are not calibration sources - persistence/SQLite false
+- PASS: no invented global or trend claims - claim counts 0
 - PASS: 50-match economy remains global reference - 50-match reference visible
+- PASS: bundle includes 6A source files - 6A source bundled
+- PASS: bundle includes 6A executable tests - 6A tests bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendations visible - 5H recommendations visible
+- PASS: recommendation visible - 6A recommendation visible
 
 ## Files
 
@@ -76,7 +68,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-workbench-chain-replay-5h.md
+- fullmatch-score-economy-calibration-6a.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -84,5 +76,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-workbench-chain-replay-5h.md
+- validation.fullmatch-score-economy-calibration-6a.md
 - validation.share-pack.md

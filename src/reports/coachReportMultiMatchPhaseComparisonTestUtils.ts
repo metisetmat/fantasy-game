@@ -10,6 +10,7 @@ import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabase
 import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
+import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
@@ -26,6 +27,7 @@ import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabase
 import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
+import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
@@ -60,6 +62,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
+  readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -214,6 +217,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(report);
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -228,6 +232,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     durableStorageDecision,
     controlledLocalReadOnlyDbMode,
     realSQLiteReadOnlyIOSmokeTest,
+    fullMatchScoreEconomyCalibration,
   });
 
   return {
@@ -247,5 +252,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     durableStorageDecision,
     controlledLocalReadOnlyDbMode,
     realSQLiteReadOnlyIOSmokeTest,
+    fullMatchScoreEconomyCalibration,
   };
 }

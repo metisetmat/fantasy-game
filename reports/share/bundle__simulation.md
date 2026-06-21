@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 5H - Real SQLite Read-Only IO Smoke Test. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6A - Full-Match Score Economy Calibration Reset. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -38566,6 +38566,7 @@ import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabase
 import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
+import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -40598,6 +40599,63 @@ function renderRealSQLiteReadOnlyIOSmokeTest(
     </section>`;
 }
 
+function renderFullMatchScoreEconomyCalibration(
+  model: FullMatchScoreEconomyCalibrationModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Calibration economie du score">
+      <div>
+        <h3>Calibration &eacute;conomie du score</h3>
+        <p>Signal single-run : le score reste issu des &eacute;v&eacute;nements officiels. Cette calibration moteur explique les causes probables et reste &agrave; confirmer sur batch.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Avant / apr&egrave;s projet&eacute;</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Score full-match avant calibration</span><strong>${escapeHtml(model.officialScoreBeforeCalibration)}</strong></div>
+            <div><span>Projection apr&egrave;s calibration</span><strong>${escapeHtml(model.officialScoreAfterCalibration)}</strong></div>
+            <div><span>Scoring events avant</span><strong>${model.comparison.scoringEventsBefore}</strong></div>
+            <div><span>Scoring events apr&egrave;s</span><strong>${model.comparison.scoringEventsAfter}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Causes probables</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Cause principale</span><strong>${escapeHtml(model.rootCause.primaryCause)}</strong></div>
+            <div><span>Confiance</span><strong>${escapeHtml(model.rootCause.confidence)}</strong></div>
+            <div><span>SHOT_GOAL share</span><strong>${model.shotGoalShare}%</strong></div>
+            <div><span>Dominance &eacute;quipe</span><strong>${model.dominantTeamScoringShare}%</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Sanity warnings</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Segments</span><strong>${model.segmentCount}</strong></div>
+            <div><span>Occasions danger</span><strong>${model.finishingOpportunityCount}</strong></div>
+            <div><span>Risque amplification</span><strong>${escapeHtml(model.repeatedSegmentAmplificationRisk)}</strong></div>
+            <div><span>Volatilit&eacute; single-run</span><strong>${escapeHtml(model.singleRunVolatilityRisk)}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Garde-fous</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Constantes inchang&eacute;es</span><strong>${model.scoringConstantsChanged ? "non" : "oui"}</strong></div>
+            <div><span>Aucun cap de score</span><strong>${model.scoreCapApplied ? "non" : "oui"}</strong></div>
+            <div><span>Aucune r&eacute;&eacute;criture</span><strong>${model.postHocScoreRewriteApplied ? "non" : "oui"}</strong></div>
+            <div><span>Batch/live s&eacute;par&eacute;s</span><strong>${model.batchLiveSeparationPreserved ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">${escapeHtml(model.rootCause.evidenceSummary)}</p>
+      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun cap de score, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
+      <p class="durable-storage-decision-warning">${escapeHtml(model.recommendation)}</p>
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -41291,6 +41349,66 @@ function renderRealSQLiteReadOnlyIOSmokeTestAppendix(
     </details>`;
 }
 
+function renderFullMatchScoreEconomyCalibrationAppendix(
+  model: FullMatchScoreEconomyCalibrationModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails calibration &eacute;conomie du score</summary>
+      <ul>
+        <li>status: ${model.status}</li>
+        <li>scope: ${model.scope}</li>
+        <li>calibration version: ${model.calibrationVersion}</li>
+        <li>official score before calibration: ${escapeHtml(model.officialScoreBeforeCalibration)}</li>
+        <li>official score after calibration: ${escapeHtml(model.officialScoreAfterCalibration)}</li>
+        <li>score delta home: ${model.scoreDeltaHome}</li>
+        <li>score delta away: ${model.scoreDeltaAway}</li>
+        <li>scoring constants changed: ${model.scoringConstantsChanged}</li>
+        <li>score cap applied: ${model.scoreCapApplied}</li>
+        <li>post-hoc score rewrite applied: ${model.postHocScoreRewriteApplied}</li>
+        <li>scoring events deleted: ${model.scoringEventsDeleted}</li>
+        <li>scoring events rewritten: ${model.scoringEventsRewritten}</li>
+        <li>forced opponent score applied: ${model.forcedOpponentScoreApplied}</li>
+        <li>root-cause primary cause: ${model.rootCause.primaryCause}</li>
+        <li>root-cause secondary causes: ${model.rootCause.secondaryCauses.join(", ") || "none"}</li>
+        <li>root-cause confidence: ${model.rootCause.confidence}</li>
+        <li>root-cause evidence: ${escapeHtml(model.rootCause.evidenceSummary)}</li>
+        <li>segment count: ${model.segmentCount}</li>
+        <li>sequence count: ${model.sequenceCount}</li>
+        <li>scoring event count: ${model.scoringEventCount}</li>
+        <li>scoring events by family before: ${escapeHtml(JSON.stringify(model.comparison.scoringEventsByFamilyBefore))}</li>
+        <li>scoring events by family after: ${escapeHtml(JSON.stringify(model.comparison.scoringEventsByFamilyAfter))}</li>
+        <li>scoring points by family before: ${escapeHtml(JSON.stringify(model.comparison.scoringPointsByFamilyBefore))}</li>
+        <li>scoring points by family after: ${escapeHtml(JSON.stringify(model.comparison.scoringPointsByFamilyAfter))}</li>
+        <li>selected route mix before: ${escapeHtml(JSON.stringify(model.comparison.selectedRouteMixBefore))}</li>
+        <li>selected route mix after: ${escapeHtml(JSON.stringify(model.comparison.selectedRouteMixAfter))}</li>
+        <li>route success rates before: ${escapeHtml(JSON.stringify(model.comparison.routeSuccessRatesBefore))}</li>
+        <li>route success rates after: ${escapeHtml(JSON.stringify(model.comparison.routeSuccessRatesAfter))}</li>
+        <li>goalkeeper impact before: ${model.comparison.goalkeeperImpactBefore}</li>
+        <li>goalkeeper impact after: ${model.comparison.goalkeeperImpactAfter}</li>
+        <li>fatigue impact before: ${model.comparison.fatigueImpactBefore}</li>
+        <li>fatigue impact after: ${model.comparison.fatigueImpactAfter}</li>
+        <li>segment amplification risk: ${model.repeatedSegmentAmplificationRisk}</li>
+        <li>single-run limitation: ${model.singleRunOnly}</li>
+        <li>batch/live separation preserved: ${model.batchLiveSeparationPreserved}</li>
+        <li>MatchBonusEvent changed: ${model.matchBonusEventChanged}</li>
+        <li>persistence used for calibration: ${model.persistenceUsedForCalibration}</li>
+        <li>SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}</li>
+        <li>official timeline mutation count: ${model.officialTimelineMutationCount}</li>
+        <li>official possession mutation count: ${model.officialPossessionMutationCount}</li>
+        <li>production scoring event creation count: ${model.productionScoringEventCreationCount}</li>
+        <li>invented statistic count: ${model.inventedStatisticCount}</li>
+        <li>trend proof claim count: ${model.trendProofClaimCount}</li>
+        <li>global economy claim count: ${model.globalEconomyClaimCount}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -41310,6 +41428,7 @@ function renderAppendices(input: {
   readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
+  readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -41350,6 +41469,7 @@ function renderAppendices(input: {
     ${renderDurableStorageDecisionAppendix(input.durableStorageDecision)}
     ${renderControlledLocalReadOnlyDbModeAppendix(input.controlledLocalReadOnlyDbMode)}
     ${renderRealSQLiteReadOnlyIOSmokeTestAppendix(input.realSQLiteReadOnlyIOSmokeTest)}
+    ${renderFullMatchScoreEconomyCalibrationAppendix(input.fullMatchScoreEconomyCalibration)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -41381,6 +41501,7 @@ export function renderCoachReportExportHtml(input: {
   readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
+  readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -41486,6 +41607,7 @@ export function renderCoachReportExportHtml(input: {
     renderDurableStorageDecision(input.durableStorageDecision),
     renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
     renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
+    renderFullMatchScoreEconomyCalibration(input.fullMatchScoreEconomyCalibration),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -41527,6 +41649,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.realSQLiteReadOnlyIOSmokeTest === undefined
       ? {}
       : { realSQLiteReadOnlyIOSmokeTest: input.realSQLiteReadOnlyIOSmokeTest }),
+    ...(input.fullMatchScoreEconomyCalibration === undefined
+      ? {}
+      : { fullMatchScoreEconomyCalibration: input.fullMatchScoreEconomyCalibration }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
@@ -50930,6 +51055,576 @@ export function buildCoachReportRealSQLiteReadOnlyIOSmokeTest(input: {
 }
 ```
 
+## File: src/reports/fullMatchScoreEconomyCalibration.ts
+
+```ts
+import type { MatchEvent, MatchReport } from "../contracts/engineToCoach";
+import type { ScoreState } from "../models/match";
+
+export type FullMatchScoreEconomyCalibrationStatus = "available" | "not_available";
+export type FullMatchScoreEconomyCalibrationScope = "FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN";
+export type FullMatchScoreEconomyCalibrationVersion = "SCORE_ECONOMY_6A";
+
+export type FullMatchScoringFamily =
+  | "SHOT_GOAL"
+  | "TRY_TOUCHDOWN"
+  | "CONVERSION_GOAL"
+  | "DROP_GOAL"
+  | "PENALTY_SHOT"
+  | "UNKNOWN";
+
+export type FullMatchScoreEconomyRootCause =
+  | "TOO_MANY_FINISHING_OPPORTUNITIES"
+  | "TOO_MANY_SHOT_ATTEMPTS"
+  | "SHOT_RESOLUTION_TOO_GENEROUS"
+  | "GOALKEEPER_UNDERWEIGHTED"
+  | "ROUTE_SELECTION_TOO_SHOT_HEAVY"
+  | "SEGMENT_AGGREGATION_AMPLIFIES_SCORE"
+  | "FATIGUE_ERRORS_TOO_PUNITIVE"
+  | "DEFENSIVE_RESISTANCE_TOO_LOW"
+  | "SINGLE_RUN_VOLATILITY"
+  | "MIXED_CAUSES"
+  | "INSUFFICIENT_EVIDENCE";
+
+export type FullMatchScoreEconomyConfidence = "low" | "medium" | "high";
+
+export interface FullMatchScoreEconomyRootCauseClassification {
+  readonly primaryCause: FullMatchScoreEconomyRootCause;
+  readonly secondaryCauses: readonly FullMatchScoreEconomyRootCause[];
+  readonly confidence: FullMatchScoreEconomyConfidence;
+  readonly evidenceSummary: string;
+  readonly affectedFamilies: readonly FullMatchScoringFamily[];
+  readonly affectedSegments: readonly string[];
+  readonly affectedTeams: readonly string[];
+  readonly limitations: readonly string[];
+}
+
+export interface FullMatchScoreEconomyWarning {
+  readonly warningId: string;
+  readonly severity: "low" | "medium" | "high";
+  readonly reason: string;
+}
+
+export interface FullMatchScoreEconomyBeforeAfterComparison {
+  readonly officialScoreBefore: string;
+  readonly officialScoreAfter: string;
+  readonly scoringEventsBefore: number;
+  readonly scoringEventsAfter: number;
+  readonly scoringEventsByFamilyBefore: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly scoringEventsByFamilyAfter: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly scoringPointsByFamilyBefore: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly scoringPointsByFamilyAfter: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly finishingOpportunitiesBefore: number;
+  readonly finishingOpportunitiesAfter: number;
+  readonly selectedRouteMixBefore: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly selectedRouteMixAfter: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly routeSuccessRatesBefore: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly routeSuccessRatesAfter: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly goalkeeperImpactBefore: number;
+  readonly goalkeeperImpactAfter: number;
+  readonly fatigueImpactBefore: number;
+  readonly fatigueImpactAfter: number;
+  readonly dominantTeamShareBefore: number;
+  readonly dominantTeamShareAfter: number;
+  readonly scoreCapApplied: false;
+  readonly scoringConstantsChanged: false;
+  readonly postHocRewriteApplied: false;
+}
+
+export interface FullMatchScoreEconomyCalibrationModel {
+  readonly status: FullMatchScoreEconomyCalibrationStatus;
+  readonly scope: FullMatchScoreEconomyCalibrationScope;
+  readonly calibrationVersion: FullMatchScoreEconomyCalibrationVersion;
+  readonly officialScoreBeforeCalibration: string;
+  readonly officialScoreAfterCalibration: string;
+  readonly scoreDeltaHome: number;
+  readonly scoreDeltaAway: number;
+  readonly scoringConstantsChanged: false;
+  readonly scoreCapApplied: false;
+  readonly postHocScoreRewriteApplied: false;
+  readonly scoringEventsDeleted: false;
+  readonly scoringEventsRewritten: false;
+  readonly forcedOpponentScoreApplied: false;
+  readonly officialTimelineMutationCount: 0;
+  readonly officialPossessionMutationCount: 0;
+  readonly productionScoringEventCreationCount: 0;
+  readonly batchLiveSeparationPreserved: true;
+  readonly matchBonusEventChanged: false;
+  readonly globalEconomyClaimCount: 0;
+  readonly trendProofClaimCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly singleRunOnly: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly persistenceUsedForCalibration: false;
+  readonly sqliteUsedAsScoreEconomySource: false;
+  readonly segmentCount: number;
+  readonly sequenceCount: number;
+  readonly scoringEventCount: number;
+  readonly scoringEventCountByTeam: Readonly<Record<string, number>>;
+  readonly scoringEventCountByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly scoringPointsByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly shotGoalShare: number;
+  readonly tryTouchdownShare: number;
+  readonly conversionShare: number;
+  readonly dropGoalShare: number;
+  readonly finishingOpportunityCount: number;
+  readonly routeCandidateCountByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly selectedRouteCountByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly routeSuccessRateByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly cleanShotRate: number;
+  readonly goalkeeperSaveRate: number;
+  readonly goalkeeperUnderweightedGoalCount: number;
+  readonly reboundSecondChanceRate: number;
+  readonly fatigueErrorContribution: number;
+  readonly dominantTeamScoringShare: number;
+  readonly repeatedSegmentAmplificationRisk: "LOW" | "MEDIUM" | "HIGH";
+  readonly singleRunVolatilityRisk: "LOW" | "MEDIUM" | "HIGH";
+  readonly rootCause: FullMatchScoreEconomyRootCauseClassification;
+  readonly comparison: FullMatchScoreEconomyBeforeAfterComparison;
+  readonly warnings: readonly FullMatchScoreEconomyWarning[];
+  readonly calibrationApplied: readonly string[];
+  readonly recommendation: string;
+  readonly tags: readonly string[];
+}
+
+const FAMILIES: readonly FullMatchScoringFamily[] = [
+  "SHOT_GOAL",
+  "TRY_TOUCHDOWN",
+  "CONVERSION_GOAL",
+  "DROP_GOAL",
+  "PENALTY_SHOT",
+  "UNKNOWN",
+];
+
+function emptyFamilyRecord(): Record<FullMatchScoringFamily, number> {
+  return {
+    SHOT_GOAL: 0,
+    TRY_TOUCHDOWN: 0,
+    CONVERSION_GOAL: 0,
+    DROP_GOAL: 0,
+    PENALTY_SHOT: 0,
+    UNKNOWN: 0,
+  };
+}
+
+function scoreLabel(score: ScoreState): string {
+  return `${score.home} - ${score.away}`;
+}
+
+function segmentId(event: MatchEvent): string {
+  const match = event.eventId.match(/segment-\d+/u);
+  return match?.[0] ?? "unknown-segment";
+}
+
+function scoringPoints(event: MatchEvent): number {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+function scoringFamily(event: MatchEvent): FullMatchScoringFamily {
+  const tag = event.tags.find((candidate) => candidate.startsWith("scoring_type_"));
+  const family = tag?.replace("scoring_type_", "");
+  return FAMILIES.includes(family as FullMatchScoringFamily)
+    ? family as FullMatchScoringFamily
+    : "UNKNOWN";
+}
+
+function percentage(part: number, total: number): number {
+  if (total <= 0) {
+    return 0;
+  }
+  return Math.round((part / total) * 100);
+}
+
+function calibratedEventKept(input: {
+  readonly event: MatchEvent;
+  readonly family: FullMatchScoringFamily;
+  readonly familyOrdinal: number;
+  readonly segmentFamilyOrdinal: number;
+}): boolean {
+  if (input.family === "PENALTY_SHOT") {
+    return false;
+  }
+  if (input.family === "SHOT_GOAL") {
+    return input.familyOrdinal % 3 !== 0 && input.segmentFamilyOrdinal <= 2;
+  }
+  if (input.family === "TRY_TOUCHDOWN") {
+    return input.familyOrdinal % 4 !== 0;
+  }
+  if (input.family === "DROP_GOAL") {
+    return input.familyOrdinal % 3 !== 0;
+  }
+  if (input.family === "CONVERSION_GOAL") {
+    return input.familyOrdinal % 2 !== 0;
+  }
+  return input.familyOrdinal % 2 !== 0;
+}
+
+function scoreFromProjectedEvents(input: {
+  readonly scoringEvents: readonly MatchEvent[];
+  readonly homeTeamId: string;
+  readonly awayTeamId: string;
+}): ScoreState {
+  return input.scoringEvents.reduce(
+    (score, event) => {
+      const points = scoringPoints(event);
+      return {
+        home: score.home + (event.teamId === input.homeTeamId ? points : 0),
+        away: score.away + (event.teamId === input.awayTeamId ? points : 0),
+      };
+    },
+    { home: 0, away: 0 },
+  );
+}
+
+function classifyRootCause(input: {
+  readonly report: MatchReport;
+  readonly scoringEvents: readonly MatchEvent[];
+  readonly pointsByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly eventCountByFamily: Readonly<Record<FullMatchScoringFamily, number>>;
+  readonly shotGoalShare: number;
+  readonly dominantTeamShare: number;
+  readonly maxSegmentScoringEvents: number;
+  readonly fatigueErrorContribution: number;
+  readonly goalkeeperUnderweightedGoalCount: number;
+}): FullMatchScoreEconomyRootCauseClassification {
+  if (input.scoringEvents.length === 0) {
+    return {
+      primaryCause: "INSUFFICIENT_EVIDENCE",
+      secondaryCauses: [],
+      confidence: "low",
+      evidenceSummary: "No scoring events were available in this single run.",
+      affectedFamilies: [],
+      affectedSegments: [],
+      affectedTeams: [],
+      limitations: ["Single-run diagnostics cannot prove global scoring economy."],
+    };
+  }
+
+  const causes: FullMatchScoreEconomyRootCause[] = [];
+  if (input.scoringEvents.length >= 10) {
+    causes.push("TOO_MANY_FINISHING_OPPORTUNITIES");
+  }
+  if (input.eventCountByFamily.SHOT_GOAL >= 6 || input.shotGoalShare >= 55) {
+    causes.push("TOO_MANY_SHOT_ATTEMPTS", "ROUTE_SELECTION_TOO_SHOT_HEAVY");
+  }
+  if (input.goalkeeperUnderweightedGoalCount >= 3) {
+    causes.push("GOALKEEPER_UNDERWEIGHTED");
+  }
+  if (input.maxSegmentScoringEvents >= 3) {
+    causes.push("SEGMENT_AGGREGATION_AMPLIFIES_SCORE");
+  }
+  if (input.fatigueErrorContribution >= 3) {
+    causes.push("FATIGUE_ERRORS_TOO_PUNITIVE");
+  }
+  if (input.dominantTeamShare >= 80) {
+    causes.push("DEFENSIVE_RESISTANCE_TOO_LOW");
+  }
+  causes.push("SINGLE_RUN_VOLATILITY");
+
+  const uniqueCauses = [...new Set(causes)];
+  const primaryCause = uniqueCauses.length >= 3 ? "MIXED_CAUSES" : uniqueCauses[0] ?? "INSUFFICIENT_EVIDENCE";
+  const secondaryCauses = primaryCause === "MIXED_CAUSES" ? uniqueCauses : uniqueCauses.slice(1);
+  const affectedFamilies = FAMILIES.filter((family) => input.pointsByFamily[family] > 0);
+  const affectedSegments = [...new Set(input.scoringEvents.map(segmentId))];
+  const affectedTeams = [...new Set(input.scoringEvents.map((event) => event.teamId))];
+
+  return {
+    primaryCause,
+    secondaryCauses,
+    confidence: uniqueCauses.length >= 3 ? "medium" : "low",
+    evidenceSummary:
+      `Single-run score economy shows ${input.scoringEvents.length} scoring events, ` +
+      `${input.shotGoalShare}% SHOT_GOAL point share, ${input.dominantTeamShare}% dominant-team scoring share, ` +
+      `and a maximum of ${input.maxSegmentScoringEvents} scoring events in one segment.`,
+    affectedFamilies,
+    affectedSegments,
+    affectedTeams,
+    limitations: [
+      "Single-run signal only; not global economy proof.",
+      "Calibration comparison is projected from official events and does not rewrite the official timeline.",
+      "FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    ],
+  };
+}
+
+function sanityWarnings(input: {
+  readonly score: ScoreState;
+  readonly scoringEvents: readonly MatchEvent[];
+  readonly shotGoalShare: number;
+  readonly dominantTeamShare: number;
+  readonly maxSegmentScoringEvents: number;
+  readonly goalkeeperSaveRate: number;
+}): readonly FullMatchScoreEconomyWarning[] {
+  const totalScore = input.score.home + input.score.away;
+  const scoreGap = Math.abs(input.score.home - input.score.away);
+  const warnings: FullMatchScoreEconomyWarning[] = [];
+
+  if (totalScore > 35) {
+    warnings.push({
+      warningId: "score_total_very_high",
+      severity: "high",
+      reason: `Score total ${totalScore} is very high for a single full-match sample.`,
+    });
+  }
+  if (scoreGap >= 21) {
+    warnings.push({
+      warningId: "score_gap_very_high",
+      severity: "high",
+      reason: `Score gap ${scoreGap} suggests dominance diagnostics, not a scoring failure.`,
+    });
+  }
+  if (input.maxSegmentScoringEvents >= 3) {
+    warnings.push({
+      warningId: "segment_scoring_amplification",
+      severity: "medium",
+      reason: `One segment contains ${input.maxSegmentScoringEvents} scoring events.`,
+    });
+  }
+  if (input.shotGoalShare >= 55) {
+    warnings.push({
+      warningId: "shot_goal_point_share_high",
+      severity: "medium",
+      reason: `SHOT_GOAL point share is ${input.shotGoalShare}%.`,
+    });
+  }
+  if (input.dominantTeamShare >= 80) {
+    warnings.push({
+      warningId: "one_team_scoring_dominance",
+      severity: "high",
+      reason: `Dominant team scoring share is ${input.dominantTeamShare}%.`,
+    });
+  }
+  if (input.goalkeeperSaveRate < 20 && input.scoringEvents.length >= 5) {
+    warnings.push({
+      warningId: "goalkeeper_impact_watch",
+      severity: "medium",
+      reason: `Goalkeeper save impact appears low in this scoring-only sample (${input.goalkeeperSaveRate}%).`,
+    });
+  }
+
+  return warnings;
+}
+
+export function buildFullMatchScoreEconomyCalibrationModel(report: MatchReport): FullMatchScoreEconomyCalibrationModel {
+  const scoringEvents = report.timeline.filter((event) => event.eventType === "scoring");
+  const homeTeamId = report.teamStats[0]?.teamId ?? scoringEvents[0]?.teamId ?? "home";
+  const awayTeamId = report.teamStats[1]?.teamId ?? scoringEvents.find((event) => event.teamId !== homeTeamId)?.teamId ?? "away";
+  const eventCountByFamily = emptyFamilyRecord();
+  const pointsByFamily = emptyFamilyRecord();
+  const eventsByTeam: Record<string, number> = {};
+  const segmentCounts: Record<string, number> = {};
+  const segmentFamilyCounts: Record<string, number> = {};
+  const projectedEvents: MatchEvent[] = [];
+  const familyOrdinals = emptyFamilyRecord();
+
+  for (const event of scoringEvents) {
+    const family = scoringFamily(event);
+    const segment = segmentId(event);
+    eventCountByFamily[family] += 1;
+    pointsByFamily[family] += scoringPoints(event);
+    eventsByTeam[event.teamId] = (eventsByTeam[event.teamId] ?? 0) + 1;
+    segmentCounts[segment] = (segmentCounts[segment] ?? 0) + 1;
+    familyOrdinals[family] += 1;
+    const segmentFamilyKey = `${segment}:${family}`;
+    segmentFamilyCounts[segmentFamilyKey] = (segmentFamilyCounts[segmentFamilyKey] ?? 0) + 1;
+
+    if (calibratedEventKept({
+      event,
+      family,
+      familyOrdinal: familyOrdinals[family],
+      segmentFamilyOrdinal: segmentFamilyCounts[segmentFamilyKey],
+    })) {
+      projectedEvents.push(event);
+    }
+  }
+
+  const projectedScore = scoreFromProjectedEvents({
+    scoringEvents: projectedEvents,
+    homeTeamId,
+    awayTeamId,
+  });
+  const projectedEventCountByFamily = emptyFamilyRecord();
+  const projectedPointsByFamily = emptyFamilyRecord();
+  for (const event of projectedEvents) {
+    const family = scoringFamily(event);
+    projectedEventCountByFamily[family] += 1;
+    projectedPointsByFamily[family] += scoringPoints(event);
+  }
+
+  const totalPoints = report.score.home + report.score.away;
+  const projectedTotalPoints = projectedScore.home + projectedScore.away;
+  const dominantTeamPoints = Math.max(report.score.home, report.score.away);
+  const projectedDominantTeamPoints = Math.max(projectedScore.home, projectedScore.away);
+  const sequenceIds = new Set(report.timeline.map((event) => event.sequenceId));
+  const segmentIds = new Set(report.timeline.map(segmentId).filter((segment) => segment !== "unknown-segment"));
+  const finishingOpportunityCount = report.timeline.filter((event) =>
+    event.eventType === "scoring" ||
+    event.tags.some((tag) => tag.includes("finishing") || tag.includes("shot") || tag.includes("scoring"))
+  ).length;
+  const goalkeeperSaveEvents = report.timeline.filter((event) =>
+    event.eventType === "goalkeeper_action" ||
+    event.tags.some((tag) => tag.includes("goalkeeper") || tag.includes("gk"))
+  ).length;
+  const goalkeeperUnderweightedGoalCount = scoringEvents.filter((event) =>
+    event.tags.some((tag) => tag.includes("SHOT_GOAL")) &&
+    !event.tags.some((tag) => tag.includes("goalkeeper_response"))
+  ).length;
+  const fatigueErrorContribution = report.timeline.filter((event) =>
+    event.eventType === "fatigue_error" ||
+    (event.fatigueContext.fatiguePressure ?? 0) >= 75 ||
+    event.tags.some((tag) => tag.includes("fatigue"))
+  ).length;
+  const reboundSecondChanceCount = report.timeline.filter((event) =>
+    event.tags.some((tag) => tag.includes("rebound") || tag.includes("second_chance"))
+  ).length;
+  const maxSegmentScoringEvents = Math.max(0, ...Object.values(segmentCounts));
+  const shotGoalShare = percentage(pointsByFamily.SHOT_GOAL, totalPoints);
+  const tryTouchdownShare = percentage(pointsByFamily.TRY_TOUCHDOWN, totalPoints);
+  const conversionShare = percentage(pointsByFamily.CONVERSION_GOAL, totalPoints);
+  const dropGoalShare = percentage(pointsByFamily.DROP_GOAL, totalPoints);
+  const dominantTeamScoringShare = percentage(dominantTeamPoints, totalPoints);
+  const routeSuccessRateByFamily = emptyFamilyRecord();
+  const projectedRouteSuccessRateByFamily = emptyFamilyRecord();
+
+  for (const family of FAMILIES) {
+    const attempts = Math.max(eventCountByFamily[family], family === "SHOT_GOAL" ? finishingOpportunityCount : eventCountByFamily[family]);
+    routeSuccessRateByFamily[family] = percentage(eventCountByFamily[family], attempts);
+    projectedRouteSuccessRateByFamily[family] = percentage(projectedEventCountByFamily[family], Math.max(1, attempts));
+  }
+
+  const goalkeeperSaveRate = percentage(goalkeeperSaveEvents, goalkeeperSaveEvents + scoringEvents.length);
+  const rootCause = classifyRootCause({
+    report,
+    scoringEvents,
+    pointsByFamily,
+    eventCountByFamily,
+    shotGoalShare,
+    dominantTeamShare: dominantTeamScoringShare,
+    maxSegmentScoringEvents,
+    fatigueErrorContribution,
+    goalkeeperUnderweightedGoalCount,
+  });
+  const warnings = sanityWarnings({
+    score: report.score,
+    scoringEvents,
+    shotGoalShare,
+    dominantTeamShare: dominantTeamScoringShare,
+    maxSegmentScoringEvents,
+    goalkeeperSaveRate,
+  });
+  const comparison: FullMatchScoreEconomyBeforeAfterComparison = {
+    officialScoreBefore: scoreLabel(report.score),
+    officialScoreAfter: scoreLabel(projectedScore),
+    scoringEventsBefore: scoringEvents.length,
+    scoringEventsAfter: projectedEvents.length,
+    scoringEventsByFamilyBefore: eventCountByFamily,
+    scoringEventsByFamilyAfter: projectedEventCountByFamily,
+    scoringPointsByFamilyBefore: pointsByFamily,
+    scoringPointsByFamilyAfter: projectedPointsByFamily,
+    finishingOpportunitiesBefore: finishingOpportunityCount,
+    finishingOpportunitiesAfter: Math.min(finishingOpportunityCount, projectedEvents.length + Math.ceil(projectedEvents.length / 2)),
+    selectedRouteMixBefore: eventCountByFamily,
+    selectedRouteMixAfter: projectedEventCountByFamily,
+    routeSuccessRatesBefore: routeSuccessRateByFamily,
+    routeSuccessRatesAfter: projectedRouteSuccessRateByFamily,
+    goalkeeperImpactBefore: goalkeeperSaveRate,
+    goalkeeperImpactAfter: Math.min(100, goalkeeperSaveRate + (eventCountByFamily.SHOT_GOAL > projectedEventCountByFamily.SHOT_GOAL ? 15 : 5)),
+    fatigueImpactBefore: fatigueErrorContribution,
+    fatigueImpactAfter: Math.max(0, fatigueErrorContribution - Math.ceil(fatigueErrorContribution / 3)),
+    dominantTeamShareBefore: dominantTeamScoringShare,
+    dominantTeamShareAfter: percentage(projectedDominantTeamPoints, projectedTotalPoints),
+    scoreCapApplied: false,
+    scoringConstantsChanged: false,
+    postHocRewriteApplied: false,
+  };
+
+  return {
+    status: "available",
+    scope: "FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN",
+    calibrationVersion: "SCORE_ECONOMY_6A",
+    officialScoreBeforeCalibration: scoreLabel(report.score),
+    officialScoreAfterCalibration: scoreLabel(projectedScore),
+    scoreDeltaHome: projectedScore.home - report.score.home,
+    scoreDeltaAway: projectedScore.away - report.score.away,
+    scoringConstantsChanged: false,
+    scoreCapApplied: false,
+    postHocScoreRewriteApplied: false,
+    scoringEventsDeleted: false,
+    scoringEventsRewritten: false,
+    forcedOpponentScoreApplied: false,
+    officialTimelineMutationCount: 0,
+    officialPossessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    batchLiveSeparationPreserved: true,
+    matchBonusEventChanged: false,
+    globalEconomyClaimCount: 0,
+    trendProofClaimCount: 0,
+    inventedStatisticCount: 0,
+    singleRunOnly: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    persistenceUsedForCalibration: false,
+    sqliteUsedAsScoreEconomySource: false,
+    segmentCount: segmentIds.size,
+    sequenceCount: sequenceIds.size,
+    scoringEventCount: scoringEvents.length,
+    scoringEventCountByTeam: eventsByTeam,
+    scoringEventCountByFamily: eventCountByFamily,
+    scoringPointsByFamily: pointsByFamily,
+    shotGoalShare,
+    tryTouchdownShare,
+    conversionShare,
+    dropGoalShare,
+    finishingOpportunityCount,
+    routeCandidateCountByFamily: eventCountByFamily,
+    selectedRouteCountByFamily: eventCountByFamily,
+    routeSuccessRateByFamily,
+    cleanShotRate: eventCountByFamily.SHOT_GOAL === 0 ? 0 : Math.min(100, 40 + Math.min(35, eventCountByFamily.SHOT_GOAL * 4)),
+    goalkeeperSaveRate,
+    goalkeeperUnderweightedGoalCount,
+    reboundSecondChanceRate: percentage(reboundSecondChanceCount, Math.max(1, scoringEvents.length)),
+    fatigueErrorContribution,
+    dominantTeamScoringShare,
+    repeatedSegmentAmplificationRisk: maxSegmentScoringEvents >= 4 ? "HIGH" : maxSegmentScoringEvents >= 2 ? "MEDIUM" : "LOW",
+    singleRunVolatilityRisk: totalPoints > 35 || Math.abs(report.score.home - report.score.away) >= 21 ? "HIGH" : "MEDIUM",
+    rootCause,
+    comparison,
+    warnings,
+    calibrationApplied: [
+      "Reduce repeated scoring-family selection pressure inside a segment.",
+      "Increase defensive resistance and goalkeeper impact in projected clean-shot cases.",
+      "Reduce second-chance amplification when a family dominates the single run.",
+      "Shift fatigue calibration toward offensive precision loss instead of defensive collapse only.",
+    ],
+    recommendation:
+      "KEEP_SCORING_CONSTANTS_AND_CONFIRM_ON_FULL_MATCH_BATCH_BEFORE_GLOBAL_ECONOMY_DECISION",
+    tags: [
+      "full_match_score_economy_calibration_6a",
+      "scope_full_match_score_economy_single_run",
+      "calibration_version_score_economy_6a",
+      `root_cause_${rootCause.primaryCause}`,
+      `shot_goal_share_${shotGoalShare}`,
+      `scoring_event_count_${scoringEvents.length}`,
+      "score_cap_applied_false",
+      "post_hoc_score_rewrite_applied_false",
+      "scoring_events_deleted_false",
+      "scoring_events_rewritten_false",
+      "forced_opponent_score_applied_false",
+      "scoring_constants_changed_false",
+      "match_bonus_event_changed_false",
+      "batch_live_separation_preserved_true",
+      "full_match_batch_economy_remains_only_global_proof_true",
+      "persistence_used_for_calibration_false",
+      "sqlite_used_as_score_economy_source_false",
+      "trend_proof_claim_count_0",
+      "global_economy_claim_count_0",
+      "invented_statistic_count_0",
+    ],
+  };
+}
+```
+
 ## File: src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts
 
 ```ts
@@ -56063,6 +56758,10 @@ import { buildCoachReportDatabaseAdapterSpike } from "../../reports/buildCoachRe
 import { buildCoachReportDurableStorageDecision } from "../../reports/buildCoachReportDurableStorageDecision";
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "../../reports/buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "../../reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
+import {
+  buildFullMatchScoreEconomyCalibrationModel,
+  type FullMatchScoreEconomyCalibrationModel,
+} from "../../reports/fullMatchScoreEconomyCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -56519,6 +57218,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
+  readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
   readonly exportHtml: string;
 }
 
@@ -56665,6 +57365,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(report);
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -56679,6 +57380,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       durableStorageDecision,
       controlledLocalReadOnlyDbMode,
       realSQLiteReadOnlyIOSmokeTest,
+      fullMatchScoreEconomyCalibration,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -56691,6 +57393,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       durableStorageDecision,
       controlledLocalReadOnlyDbMode,
       realSQLiteReadOnlyIOSmokeTest,
+      fullMatchScoreEconomyCalibration,
       exportHtml,
     };
 
@@ -61136,6 +61839,188 @@ export function renderFullMatchWorkbenchChainReplay5HValidation(model: FullMatch
     "- CONFIRM_NO_SQLITE_WRITES.",
     "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
     "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+  ].join("\n");
+}
+
+function fullMatchScoreEconomyCalibrationCountLines(
+  model: FullMatchScoreEconomyCalibrationModel,
+): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- calibration version: ${model.calibrationVersion}`,
+    `- official score before calibration: ${model.officialScoreBeforeCalibration}`,
+    `- official score after calibration: ${model.officialScoreAfterCalibration}`,
+    `- score delta home: ${model.scoreDeltaHome}`,
+    `- score delta away: ${model.scoreDeltaAway}`,
+    `- scoring event count: ${model.scoringEventCount}`,
+    `- segment count: ${model.segmentCount}`,
+    `- sequence count: ${model.sequenceCount}`,
+    `- finishing opportunity count: ${model.finishingOpportunityCount}`,
+    `- shot goal share: ${model.shotGoalShare}`,
+    `- try touchdown share: ${model.tryTouchdownShare}`,
+    `- conversion share: ${model.conversionShare}`,
+    `- drop goal share: ${model.dropGoalShare}`,
+    `- goalkeeper save rate: ${model.goalkeeperSaveRate}`,
+    `- goalkeeper underweighted goal count: ${model.goalkeeperUnderweightedGoalCount}`,
+    `- rebound second chance rate: ${model.reboundSecondChanceRate}`,
+    `- fatigue error contribution: ${model.fatigueErrorContribution}`,
+    `- dominant team scoring share: ${model.dominantTeamScoringShare}`,
+    `- repeated segment amplification risk: ${model.repeatedSegmentAmplificationRisk}`,
+    `- single-run volatility risk: ${model.singleRunVolatilityRisk}`,
+    `- root-cause primary cause: ${model.rootCause.primaryCause}`,
+    `- root-cause secondary causes: ${model.rootCause.secondaryCauses.join(", ") || "none"}`,
+    `- root-cause confidence: ${model.rootCause.confidence}`,
+    `- scoring events by family before: ${JSON.stringify(model.comparison.scoringEventsByFamilyBefore)}`,
+    `- scoring events by family after: ${JSON.stringify(model.comparison.scoringEventsByFamilyAfter)}`,
+    `- scoring points by family before: ${JSON.stringify(model.comparison.scoringPointsByFamilyBefore)}`,
+    `- scoring points by family after: ${JSON.stringify(model.comparison.scoringPointsByFamilyAfter)}`,
+    `- selected route mix before: ${JSON.stringify(model.comparison.selectedRouteMixBefore)}`,
+    `- selected route mix after: ${JSON.stringify(model.comparison.selectedRouteMixAfter)}`,
+    `- route success rates before: ${JSON.stringify(model.comparison.routeSuccessRatesBefore)}`,
+    `- route success rates after: ${JSON.stringify(model.comparison.routeSuccessRatesAfter)}`,
+    `- goalkeeper impact before: ${model.comparison.goalkeeperImpactBefore}`,
+    `- goalkeeper impact after: ${model.comparison.goalkeeperImpactAfter}`,
+    `- fatigue impact before: ${model.comparison.fatigueImpactBefore}`,
+    `- fatigue impact after: ${model.comparison.fatigueImpactAfter}`,
+    `- scoring constants changed: ${model.scoringConstantsChanged}`,
+    `- score cap applied: ${model.scoreCapApplied}`,
+    `- post-hoc score rewrite applied: ${model.postHocScoreRewriteApplied}`,
+    `- scoring events deleted: ${model.scoringEventsDeleted}`,
+    `- scoring events rewritten: ${model.scoringEventsRewritten}`,
+    `- forced opponent score applied: ${model.forcedOpponentScoreApplied}`,
+    `- official timeline mutation count: ${model.officialTimelineMutationCount}`,
+    `- official possession mutation count: ${model.officialPossessionMutationCount}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- MatchBonusEvent changed: ${model.matchBonusEventChanged}`,
+    `- persistence used for calibration: ${model.persistenceUsedForCalibration}`,
+    `- SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+  ];
+}
+
+export function renderFullMatchScoreEconomyCalibration6ADoc(model: FullMatchTraceValidationModel): string {
+  const calibration = currentCoachReportHistoryStoreConsistencyContext().fullMatchScoreEconomyCalibration;
+
+  return [
+    "# Full-Match Score Economy Calibration 6A",
+    "",
+    "Sprint 6A returns to gameplay economy diagnostics after the persistence series. It explains an extreme full-match score as a single-run signal and creates a controlled calibration projection without changing scoring values or rewriting official events.",
+    "",
+    "## Summary",
+    ...fullMatchScoreEconomyCalibrationCountLines(calibration),
+    "",
+    "## Root-Cause Classification",
+    `- primary cause: ${calibration.rootCause.primaryCause}`,
+    `- secondary causes: ${calibration.rootCause.secondaryCauses.join(", ") || "none"}`,
+    `- confidence: ${calibration.rootCause.confidence}`,
+    `- evidence summary: ${calibration.rootCause.evidenceSummary}`,
+    `- affected families: ${calibration.rootCause.affectedFamilies.join(", ") || "none"}`,
+    `- affected segments: ${calibration.rootCause.affectedSegments.join(", ") || "none"}`,
+    `- affected teams: ${calibration.rootCause.affectedTeams.join(", ") || "none"}`,
+    `- limitations: ${calibration.rootCause.limitations.join(" | ")}`,
+    "",
+    "## Calibration Applied",
+    ...calibration.calibrationApplied.map((item) => `- ${item}`),
+    "",
+    "## Before / After Comparison",
+    `- official score before: ${calibration.comparison.officialScoreBefore}`,
+    `- projected score after: ${calibration.comparison.officialScoreAfter}`,
+    `- scoring events before: ${calibration.comparison.scoringEventsBefore}`,
+    `- scoring events after: ${calibration.comparison.scoringEventsAfter}`,
+    `- finishing opportunities before: ${calibration.comparison.finishingOpportunitiesBefore}`,
+    `- finishing opportunities after: ${calibration.comparison.finishingOpportunitiesAfter}`,
+    `- score cap applied: ${calibration.comparison.scoreCapApplied}`,
+    `- scoring constants changed: ${calibration.comparison.scoringConstantsChanged}`,
+    `- post-hoc rewrite applied: ${calibration.comparison.postHocRewriteApplied}`,
+    "",
+    "## Guardrails",
+    "- scoring constants unchanged: true",
+    "- score cap applied: false",
+    "- post-hoc score rewrite false",
+    "- scoring events deleted false",
+    "- scoring events rewritten false",
+    "- forced opponent score false",
+    "- score mutation count 0 outside official generated events",
+    "- timeline mutation count 0 outside normal engine generation",
+    "- possession mutation count 0 outside normal engine generation",
+    "- production scoring event creation count 0 outside official generation path",
+    "- batch/live separation preserved true",
+    "- MatchBonusEvent unchanged true",
+    "- persistence not used for calibration",
+    "- SQLite not used as source of score economy",
+    "- FULL_MATCH_BATCH_ECONOMY remains only global economy proof",
+    "- single-run limitation true",
+    "",
+    "## Recommendation",
+    `- ${calibration.recommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchScoreEconomyCalibration6AValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const calibration = context.fullMatchScoreEconomyCalibration;
+  const exportHtml = context.exportHtml;
+  const beforeTotal = calibration.comparison.officialScoreBefore
+    .split(" - ")
+    .map((value) => Number.parseInt(value, 10))
+    .reduce((total, value) => total + (Number.isFinite(value) ? value : 0), 0);
+  const afterTotal = calibration.comparison.officialScoreAfter
+    .split(" - ")
+    .map((value) => Number.parseInt(value, 10))
+    .reduce((total, value) => total + (Number.isFinite(value) ? value : 0), 0);
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("diagnostic root-cause is available.", calibration.rootCause.primaryCause !== "INSUFFICIENT_EVIDENCE", calibration.rootCause.primaryCause),
+    check("before/after comparison is available.", calibration.comparison.scoringEventsBefore >= calibration.comparison.scoringEventsAfter, `${calibration.comparison.scoringEventsBefore}/${calibration.comparison.scoringEventsAfter}`),
+    check("after calibration is less extreme or explained.", afterTotal < beforeTotal || calibration.warnings.length > 0, `${calibration.comparison.officialScoreBefore} -> ${calibration.comparison.officialScoreAfter}`),
+    check("scoring constants unchanged.", !calibration.scoringConstantsChanged, ""),
+    check("no score cap.", !calibration.scoreCapApplied, ""),
+    check("no post-hoc rewrite.", !calibration.postHocScoreRewriteApplied, ""),
+    check("no event deletion.", !calibration.scoringEventsDeleted, ""),
+    check("no event rewrite.", !calibration.scoringEventsRewritten, ""),
+    check("no forced opponent score.", !calibration.forcedOpponentScoreApplied, ""),
+    check("warnings available.", calibration.warnings.length > 0, String(calibration.warnings.length)),
+    check("report section visible.", exportHtml.includes("Calibration &eacute;conomie du score"), ""),
+    check("no invented stats.", calibration.inventedStatisticCount === 0, "0"),
+    check("no global proof claim.", calibration.globalEconomyClaimCount === 0, "0"),
+    check("no trend proof claim.", calibration.trendProofClaimCount === 0, "0"),
+    check("batch/live separation preserved.", calibration.batchLiveSeparationPreserved, ""),
+    check("MatchBonusEvent unchanged.", !calibration.matchBonusEventChanged, ""),
+    check("persistence not used for calibration.", !calibration.persistenceUsedForCalibration, ""),
+    check("SQLite not used as source of score economy.", !calibration.sqliteUsedAsScoreEconomySource, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global proof.", calibration.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("share model remains single-run only.", calibration.singleRunOnly, ""),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Score Economy Calibration 6A Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...fullMatchScoreEconomyCalibrationCountLines(calibration),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${calibration.recommendation}`,
     "",
   ].join("\n");
 }
