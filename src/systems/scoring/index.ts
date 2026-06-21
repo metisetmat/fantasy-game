@@ -37,6 +37,8 @@ export * from "./shotOriginHeatmap";
 export * from "./scoreFromTryTouchdownOutcomes";
 export * from "./scoringRules";
 export * from "./scoringActionRegistry";
+export * from "./scoringFamilyAttribution";
+export * from "./scoringFamilyAttributionWarnings";
 export * from "./scoringEventAggregator";
 export * from "./scoringEventStream";
 export * from "./scoringEventTypes";

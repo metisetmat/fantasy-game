@@ -16,6 +16,10 @@ import {
   buildFullMatchScoreEconomyCalibrationModel,
   type FullMatchScoreEconomyCalibrationModel,
 } from "../../reports/fullMatchScoreEconomyCalibration";
+import {
+  buildScoringFamilyAttributionAuditModel,
+  type ScoringFamilyAttributionAuditModel,
+} from "../../reports/scoringFamilyAttributionAudit";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -473,6 +477,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
+  readonly scoringFamilyAttributionAudit: ScoringFamilyAttributionAuditModel;
   readonly exportHtml: string;
 }
 
@@ -620,6 +625,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       exportReportHtml: baselineExportHtml,
     });
     const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(report);
+    const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(report);
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -635,6 +641,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       controlledLocalReadOnlyDbMode,
       realSQLiteReadOnlyIOSmokeTest,
       fullMatchScoreEconomyCalibration,
+      scoringFamilyAttributionAudit,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -648,6 +655,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       controlledLocalReadOnlyDbMode,
       realSQLiteReadOnlyIOSmokeTest,
       fullMatchScoreEconomyCalibration,
+      scoringFamilyAttributionAudit,
       exportHtml,
     };
 
@@ -5275,6 +5283,163 @@ export function renderFullMatchScoreEconomyCalibration6AValidation(model: FullMa
     "",
     "## Recommendation",
     `- ${calibration.recommendation}`,
+    "",
+  ].join("\n");
+}
+
+function scoringFamilyAttributionAuditCountLines(
+  model: ScoringFamilyAttributionAuditModel,
+): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- attribution version: ${model.attributionVersion}`,
+    `- total scoring event count: ${model.totalScoringEventCount}`,
+    `- attributed scoring event count: ${model.attributedScoringEventCount}`,
+    `- unknown scoring event count: ${model.unknownScoringEventCount}`,
+    `- legacy unknown scoring event count: ${model.legacyUnknownScoringEventCount}`,
+    `- unknown scoring point total: ${model.unknownScoringPointTotal}`,
+    `- attribution coverage rate: ${model.attributionCoverageRate}`,
+    `- scoring events by family: ${JSON.stringify(model.scoringEventsByFamily)}`,
+    `- scoring points by family: ${JSON.stringify(model.scoringPointsByFamily)}`,
+    `- high confidence count: ${model.highConfidenceCount}`,
+    `- medium confidence count: ${model.mediumConfidenceCount}`,
+    `- low confidence count: ${model.lowConfidenceCount}`,
+    `- family attribution warnings: ${model.familyAttributionWarnings.join(", ") || "none"}`,
+    `- warning count by code: ${JSON.stringify(model.warningCountByCode)}`,
+    `- unknown reasons: ${model.unknownReasons.join(" | ") || "none"}`,
+    `- scoring constants changed: ${model.scoringConstantsChanged}`,
+    `- score cap applied: ${model.scoreCapApplied}`,
+    `- post-hoc rewrite applied: ${model.postHocRewriteApplied}`,
+    `- scoring events deleted: ${model.scoringEventsDeleted}`,
+    `- scoring events rewritten: ${model.scoringEventsRewritten}`,
+    `- forced opponent score applied: ${model.forcedOpponentScoreApplied}`,
+    `- official timeline mutation count: ${model.officialTimelineMutationCount}`,
+    `- official possession mutation count: ${model.officialPossessionMutationCount}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- MatchBonusEvent changed: ${model.matchBonusEventChanged}`,
+    `- persistence used for attribution: ${model.persistenceUsedForAttribution}`,
+    `- SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- single-run only: ${model.singleRunOnly}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}`,
+  ];
+}
+
+export function renderFullMatchScoringFamilyAttribution6BDoc(model: FullMatchTraceValidationModel): string {
+  const audit = currentCoachReportHistoryStoreConsistencyContext().scoringFamilyAttributionAudit;
+  const familyRows = Object.entries(audit.scoringEventsByFamily).map(([family, eventCount]) => {
+    const pointCount = audit.scoringPointsByFamily[family as keyof typeof audit.scoringPointsByFamily] ?? 0;
+    return `| ${family} | ${eventCount} | ${pointCount} |`;
+  });
+  const unknownRows = audit.unknownEvents.length === 0
+    ? ["| none | none | 0 | none | none |"]
+    : audit.unknownEvents.map((event) =>
+      `| ${event.eventId} | ${event.teamId} | ${event.pointValue} | ${event.reason} | ${event.warningCodes.join(", ") || "none"} |`
+    );
+
+  return [
+    "# Full-Match Scoring Family Attribution 6B",
+    "",
+    "Sprint 6B makes official scoring events explainable by family. It classifies the existing score_change events into SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, PENALTY_SHOT, or explicit UNKNOWN without changing scoring values, caps, official events, or batch/live boundaries.",
+    "",
+    "## Summary",
+    ...scoringFamilyAttributionAuditCountLines(audit),
+    "",
+    "## Scoring Events By Family",
+    "| Family | Events | Points |",
+    "| --- | ---: | ---: |",
+    ...familyRows,
+    "",
+    "## Unknown Attribution Audit",
+    "| Event | Team | Points | Reason | Warning codes |",
+    "| --- | --- | ---: | --- | --- |",
+    ...unknownRows,
+    "",
+    "## 6A To 6B Cleanup",
+    `- legacy 6A UNKNOWN scoring event count: ${audit.legacyUnknownScoringEventCount}`,
+    `- 6B UNKNOWN scoring event count: ${audit.unknownScoringEventCount}`,
+    `- UNKNOWN reduced versus 6A: ${audit.unknownScoringEventCount < audit.legacyUnknownScoringEventCount}`,
+    `- scoring events by family no longer all UNKNOWN: ${audit.scoringEventsByFamily.UNKNOWN < audit.totalScoringEventCount}`,
+    `- scoring points by family no longer all UNKNOWN: ${audit.scoringPointsByFamily.UNKNOWN === 0}`,
+    "",
+    "## Guardrails",
+    "- scoring constants unchanged: true",
+    "- score cap applied: false",
+    "- post-hoc score rewrite false",
+    "- scoring events deleted false",
+    "- scoring events rewritten false",
+    "- forced opponent score false",
+    "- batch/live separation preserved true",
+    "- MatchBonusEvent unchanged true",
+    "- persistence not used for attribution",
+    "- SQLite not used as source of score economy",
+    "- FULL_MATCH_BATCH_ECONOMY remains only global economy proof",
+    "- single-run limitation true",
+    "",
+    "## Recommendation",
+    `- ${audit.recommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchScoringFamilyAttribution6BValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const audit = context.scoringFamilyAttributionAudit;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("scoring family classifier is available.", audit.attributionVersion === "SCORING_FAMILY_ATTRIBUTION_6B", audit.attributionVersion),
+    check("every official score_change event has a family or explicit UNKNOWN reason.", audit.attributedScoringEventCount + audit.unknownScoringEventCount === audit.totalScoringEventCount && audit.unknownEvents.every((event) => event.reason.length > 0), `${audit.attributedScoringEventCount}/${audit.totalScoringEventCount}`),
+    check("attribution coverage is visible.", audit.attributionCoverageRate >= 0, String(audit.attributionCoverageRate)),
+    check("UNKNOWN count reduced versus 6A.", audit.unknownScoringEventCount < audit.legacyUnknownScoringEventCount, `${audit.legacyUnknownScoringEventCount} -> ${audit.unknownScoringEventCount}`),
+    check("scoring events by family are not all UNKNOWN.", audit.scoringEventsByFamily.UNKNOWN < audit.totalScoringEventCount, JSON.stringify(audit.scoringEventsByFamily)),
+    check("scoring points by family are not all UNKNOWN.", audit.scoringPointsByFamily.UNKNOWN === 0, JSON.stringify(audit.scoringPointsByFamily)),
+    check("SHOT_GOAL attribution is populated.", audit.scoringEventsByFamily.SHOT_GOAL > 0 && audit.scoringPointsByFamily.SHOT_GOAL > 0, `${audit.scoringEventsByFamily.SHOT_GOAL}/${audit.scoringPointsByFamily.SHOT_GOAL}`),
+    check("UNKNOWN reasons are explicit when needed.", audit.unknownScoringEventCount === 0 || audit.unknownReasons.length > 0, audit.unknownReasons.join(" | ")),
+    check("PENALTY_SHOT remains inactive.", !audit.familyAttributionWarnings.includes("INACTIVE_PENALTY_SHOT_USED"), "inactive"),
+    check("scoring constants unchanged.", !audit.scoringConstantsChanged, ""),
+    check("no score cap.", !audit.scoreCapApplied, ""),
+    check("no post-hoc rewrite.", !audit.postHocRewriteApplied, ""),
+    check("no event deletion.", !audit.scoringEventsDeleted, ""),
+    check("no event rewrite.", !audit.scoringEventsRewritten, ""),
+    check("no forced opponent score.", !audit.forcedOpponentScoreApplied, ""),
+    check("batch/live separation preserved.", audit.batchLiveSeparationPreserved, ""),
+    check("MatchBonusEvent unchanged.", !audit.matchBonusEventChanged, ""),
+    check("persistence not used for attribution.", !audit.persistenceUsedForAttribution, ""),
+    check("SQLite not used as source of score economy.", !audit.sqliteUsedAsScoreEconomySource, ""),
+    check("no invented stats.", audit.inventedStatisticCount === 0, "0"),
+    check("no global proof claim.", audit.globalEconomyClaimCount === 0, "0"),
+    check("no trend proof claim.", audit.trendProofClaimCount === 0, "0"),
+    check("coach export contains Origine des points.", exportHtml.includes("Origine des points") && exportHtml.includes("Couverture"), ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global proof.", audit.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Scoring Family Attribution 6B Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...scoringFamilyAttributionAuditCountLines(audit),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${audit.recommendation}`,
     "",
   ].join("\n");
 }

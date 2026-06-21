@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6A - Full-Match Score Economy Calibration Reset. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -78,6 +78,8 @@ import {
   renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay5HDoc,
   renderFullMatchWorkbenchChainReplay5HValidation,
+  renderFullMatchScoringFamilyAttribution6BDoc,
+  renderFullMatchScoringFamilyAttribution6BValidation,
   renderFullMatchScoreEconomyCalibration6ADoc,
   renderFullMatchScoreEconomyCalibration6AValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
@@ -86,9 +88,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6A - Full-Match Score Economy Calibration Reset";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-score-economy-calibration-6a.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-score-economy-calibration-6a.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-scoring-family-attribution-6b.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-scoring-family-attribution-6b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -291,6 +293,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/contracts/matchReportWarnings.ts",
         required: true,
         reason: "Sprint 2P canonical MatchReport warning contract",
+      },
+      {
+        source: "src/contracts/scoringFamily.ts",
+        required: true,
+        reason: "Sprint 6B official scoring family attribution contract and warning-code surface",
       },
       {
         source: "src/contracts/engineToCoach.test.ts",
@@ -1967,6 +1974,21 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchScoreEconomyCalibration.ts",
         required: true,
         reason: "Sprint 6A full-match score economy calibration model for single-run root-cause diagnosis, controlled projection, and no-mutation guardrails",
+      },
+      {
+        source: "src/systems/scoring/scoringFamilyAttribution.ts",
+        required: true,
+        reason: "Sprint 6B classifier mapping official score_change events to scoring families with explicit UNKNOWN warnings",
+      },
+      {
+        source: "src/systems/scoring/scoringFamilyAttributionWarnings.ts",
+        required: true,
+        reason: "Sprint 6B scoring attribution warning-code registry for explicit taxonomy cleanup diagnostics",
+      },
+      {
+        source: "src/reports/scoringFamilyAttributionAudit.ts",
+        required: true,
+        reason: "Sprint 6B scoring family attribution audit model with coverage, legacy UNKNOWN comparison, family points, and no-mutation guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -3905,6 +3927,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6A executable renderer tests proving coach export copy is local, controlled, no-cap, no-rewrite, and not a global proof",
       },
       {
+        source: "src/systems/scoring/scoringFamilyAttribution.test.ts",
+        required: true,
+        reason: "Sprint 6B executable classifier tests proving legacy scoring_type tags map to official families and UNKNOWN remains explicit",
+      },
+      {
+        source: "src/reports/scoringFamilyAttributionAudit.test.ts",
+        required: true,
+        reason: "Sprint 6B executable audit tests proving coverage, legacy UNKNOWN reduction, point attribution, and no-mutation guardrails",
+      },
+      {
+        source: "src/reports/scoringFamilyAttributionRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6B executable renderer tests proving the coach export includes Origine des points and avoids manual score-correction wording",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -4100,6 +4137,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6B")) {
+    return renderFullMatchScoringFamilyAttribution6BDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6A")) {
     return renderFullMatchScoreEconomyCalibration6ADoc(fullMatchTraceValidationModel());
   }
@@ -6311,6 +6351,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6B")) {
+    return renderFullMatchScoringFamilyAttribution6BValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6A")) {
     return renderFullMatchScoreEconomyCalibration6AValidation(fullMatchTraceValidationModel());
   }
@@ -8468,6 +8511,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6B")) {
+    return [
+      "# Sprint 6B Share Pack",
+      "",
+      "Current sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-scoring-family-attribution-6b.md",
+      "- validation.fullmatch-scoring-family-attribution-6b.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-scoring-family-attribution-6b.md and validation.fullmatch-scoring-family-attribution-6b.md.",
+      "",
+      "Sprint 6B classifies official score_change events into scoring families, reduces legacy UNKNOWN attribution, adds Origine des points to the coach export, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6A")) {
     return [
       "# Sprint 6A Share Pack",
@@ -25332,6 +25411,196 @@ for (const check of checks) {
 }
 ```
 
+## File: src/systems/scoring/scoringFamilyAttribution.test.ts
+
+```ts
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import {
+  classifyScoringEventFamily,
+  scoringFamilyTags,
+} from "./scoringFamilyAttribution";
+
+test("maps legacy goal scoring_type tags to SHOT_GOAL", () => {
+  const attribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: ["scoring_type_goal"],
+    tacticalMoveType: "goal",
+    consequencePointValue: 3,
+  });
+
+  assert.equal(attribution.family, "SHOT_GOAL");
+  assert.equal(attribution.scoringAction, "SHOT_GOAL");
+  assert.equal(attribution.confidence, "high");
+  assert.ok(attribution.sourceFieldsUsed.includes("tags.scoring_type"));
+  assert.ok(scoringFamilyTags(attribution).includes("scoring_family_SHOT_GOAL"));
+});
+
+test("maps try, conversion, and drop families from explicit tags", () => {
+  assert.equal(classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: ["scoring_type_try"],
+    consequencePointValue: 5,
+  }).family, "TRY_TOUCHDOWN");
+  assert.equal(classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: ["scoring_type_conversion"],
+    consequencePointValue: 2,
+  }).family, "CONVERSION_GOAL");
+  assert.equal(classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: ["scoring_type_drop"],
+    consequencePointValue: 2,
+  }).family, "DROP_GOAL");
+});
+
+test("keeps UNKNOWN explicit when no taxonomy evidence exists", () => {
+  const attribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: [],
+  });
+
+  assert.equal(attribution.family, "UNKNOWN");
+  assert.equal(
+    attribution.unknownReason,
+    "Official score_change event lacks enough scoring action, route, tag, or point-value evidence for a safe family attribution.",
+  );
+  assert.ok(attribution.warningCodes.includes("UNKNOWN_SCORING_FAMILY"));
+  assert.ok(attribution.warningCodes.includes("MISSING_SCORE_CHANGE_POINT_VALUE"));
+});
+
+test("does not classify bare 2-point score changes as conversions", () => {
+  const attribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: [],
+    consequencePointValue: 2,
+  });
+
+  assert.equal(attribution.family, "UNKNOWN");
+  assert.ok(attribution.warningCodes.includes("AMBIGUOUS_SCORING_FAMILY"));
+  assert.ok(attribution.warningCodes.includes("UNKNOWN_SCORING_FAMILY"));
+  assert.equal(attribution.sourceFieldsUsed.includes("score_change.value"), false);
+});
+
+test("flags inactive penalty shot if it appears", () => {
+  const attribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: ["scoring_type_penalty"],
+    consequencePointValue: 3,
+  });
+
+  assert.equal(attribution.family, "PENALTY_SHOT");
+  assert.ok(attribution.warningCodes.includes("INACTIVE_PENALTY_SHOT_USED"));
+});
+```
+
+## File: src/reports/scoringFamilyAttributionAudit.test.ts
+
+```ts
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
+
+test("builds a PASS scoring family attribution audit for the full-match fixture", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const audit = buildScoringFamilyAttributionAuditModel(report);
+
+  assert.equal(audit.status, "PASS");
+  assert.equal(audit.totalScoringEventCount > 0, true);
+  assert.equal(audit.unknownScoringEventCount, 0);
+  assert.equal(audit.unknownScoringPointTotal, 0);
+  assert.equal(audit.attributionCoverageRate, 100);
+  assert.equal(audit.legacyUnknownScoringEventCount > audit.unknownScoringEventCount, true);
+  assert.equal(audit.scoringEventsByFamily.UNKNOWN, 0);
+  assert.equal(audit.scoringPointsByFamily.UNKNOWN, 0);
+  assert.equal(audit.scoringEventsByFamily.SHOT_GOAL > 0, true);
+  assert.equal(audit.scoringPointsByFamily.SHOT_GOAL > 0, true);
+});
+
+test("keeps Sprint 6B attribution as a report-only audit without score mutation", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const audit = buildScoringFamilyAttributionAuditModel(report);
+
+  assert.equal(audit.scoringConstantsChanged, false);
+  assert.equal(audit.scoreCapApplied, false);
+  assert.equal(audit.postHocRewriteApplied, false);
+  assert.equal(audit.scoringEventsDeleted, false);
+  assert.equal(audit.scoringEventsRewritten, false);
+  assert.equal(audit.forcedOpponentScoreApplied, false);
+  assert.equal(audit.batchLiveSeparationPreserved, true);
+  assert.equal(audit.matchBonusEventChanged, false);
+  assert.equal(audit.persistenceUsedForAttribution, false);
+  assert.equal(audit.sqliteUsedAsScoreEconomySource, false);
+  assert.equal(audit.fullMatchBatchEconomyRemainsOnlyGlobalProof, true);
+});
+
+test("downgrades attributed audits with classifier warnings to WARNING", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoringIndex = report.timeline.findIndex((event) =>
+    event.consequences.some((consequence) => consequence.type === "score_change")
+  );
+
+  assert.equal(scoringIndex >= 0, true);
+
+  const timeline = [...report.timeline];
+  const scoringEvent = timeline[scoringIndex];
+  if (scoringEvent === undefined) {
+    throw new Error("Expected a scoring event in the full-match fixture.");
+  }
+
+  timeline[scoringIndex] = {
+    ...scoringEvent,
+    scoringFamily: "PENALTY_SHOT",
+    scoringAction: "PENALTY_SHOT",
+    scoringAttributionWarningCodes: ["INACTIVE_PENALTY_SHOT_USED"],
+    tags: [
+      ...scoringEvent.tags.filter((tag) => !tag.startsWith("scoring_type_") && !tag.startsWith("scoring_family_") && !tag.startsWith("scoring_action_")),
+      "scoring_type_penalty",
+      "scoring_family_PENALTY_SHOT",
+      "scoring_action_PENALTY_SHOT",
+    ],
+  };
+
+  const audit = buildScoringFamilyAttributionAuditModel({
+    ...report,
+    timeline,
+  });
+
+  assert.equal(audit.status, "WARNING");
+  assert.equal(audit.unknownScoringEventCount, 0);
+  assert.ok(audit.familyAttributionWarnings.includes("INACTIVE_PENALTY_SHOT_USED"));
+});
+```
+
+## File: src/reports/scoringFamilyAttributionRenderer.test.ts
+
+```ts
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+test("renders the scoring-family attribution section in the coach export", () => {
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const html = context.exportHtml;
+
+  assert.match(html, /Origine des points/);
+  assert.match(html, /Famille de score/);
+  assert.match(html, /Couverture/);
+  assert.match(html, /SHOT_GOAL/);
+  assert.doesNotMatch(html, /score ajuste manuellement/);
+  assert.equal(context.scoringFamilyAttributionAudit.status, "PASS");
+  assert.equal(context.scoringFamilyAttributionAudit.unknownScoringEventCount, 0);
+});
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -25350,6 +25619,7 @@ import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurabl
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
+import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -25539,6 +25809,7 @@ export function writeLatestCoachReport(): void {
         exportReportHtml: baselineExportHtml,
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
+  const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -25554,6 +25825,7 @@ export function writeLatestCoachReport(): void {
     ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
     ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
     fullMatchScoreEconomyCalibration,
+    scoringFamilyAttributionAudit,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

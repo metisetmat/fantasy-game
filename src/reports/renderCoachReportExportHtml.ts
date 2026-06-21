@@ -25,6 +25,7 @@ import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurabl
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
+import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -2114,6 +2115,69 @@ function renderFullMatchScoreEconomyCalibration(
     </section>`;
 }
 
+function renderScoringFamilyAttributionAudit(
+  model: ScoringFamilyAttributionAuditModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const familyRows = Object.entries(model.scoringEventsByFamily)
+    .map(([family, count]) => {
+      const points = model.scoringPointsByFamily[family as keyof typeof model.scoringPointsByFamily] ?? 0;
+      return `<tr><td>${escapeHtml(family)}</td><td>${count}</td><td>${points}</td></tr>`;
+    })
+    .join("");
+  const tracedPointTotal = Object.values(model.scoringPointsByFamily).reduce((total, points) => total + points, 0);
+  const unknownCopy = model.unknownScoringEventCount === 0
+    ? "Aucun evenement de score officiel ne reste sans famille."
+    : `${model.unknownScoringEventCount} evenement(s) restent UNKNOWN avec raison explicite : ${escapeHtml(model.unknownReasons.join(" | "))}.`;
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Origine des points">
+      <div>
+        <h3>Origine des points</h3>
+        <p>Lecture single-run : les points restent issus des evenements officiels score_change. Cette section attribue chaque score a une famille pour rendre la calibration lisible, sans modifier le score.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Score officiel</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Points traces</span><strong>${tracedPointTotal}</strong></div>
+            <div><span>Evenements officiels</span><strong>${model.totalScoringEventCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Couverture</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Attribution</span><strong>${model.attributionCoverageRate}%</strong></div>
+            <div><span>Attribues</span><strong>${model.attributedScoringEventCount}/${model.totalScoringEventCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>UNKNOWN</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Apres 6B</span><strong>${model.unknownScoringEventCount}</strong></div>
+            <div><span>Legacy 6A</span><strong>${model.legacyUnknownScoringEventCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Confiance</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Haute</span><strong>${model.highConfidenceCount}</strong></div>
+            <div><span>Moyenne / basse</span><strong>${model.mediumConfidenceCount} / ${model.lowConfidenceCount}</strong></div>
+          </div>
+        </article>
+      </div>
+      <table class="premium-table">
+        <thead><tr><th>Famille de score</th><th>Evenements</th><th>Points</th></tr></thead>
+        <tbody>${familyRows}</tbody>
+      </table>
+      <p class="durable-storage-decision-guard">${unknownCopy}</p>
+      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -2867,6 +2931,52 @@ function renderFullMatchScoreEconomyCalibrationAppendix(
     </details>`;
 }
 
+function renderScoringFamilyAttributionAuditAppendix(
+  model: ScoringFamilyAttributionAuditModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails attribution familles de score</summary>
+      <ul>
+        <li>status: ${model.status}</li>
+        <li>scope: ${model.scope}</li>
+        <li>attribution version: ${model.attributionVersion}</li>
+        <li>total scoring event count: ${model.totalScoringEventCount}</li>
+        <li>attributed scoring event count: ${model.attributedScoringEventCount}</li>
+        <li>unknown scoring event count: ${model.unknownScoringEventCount}</li>
+        <li>legacy unknown scoring event count: ${model.legacyUnknownScoringEventCount}</li>
+        <li>unknown scoring point total: ${model.unknownScoringPointTotal}</li>
+        <li>attribution coverage rate: ${model.attributionCoverageRate}</li>
+        <li>scoring events by family: ${escapeHtml(JSON.stringify(model.scoringEventsByFamily))}</li>
+        <li>scoring points by family: ${escapeHtml(JSON.stringify(model.scoringPointsByFamily))}</li>
+        <li>unknown reasons: ${escapeHtml(model.unknownReasons.join(" | ") || "none")}</li>
+        <li>high confidence count: ${model.highConfidenceCount}</li>
+        <li>medium confidence count: ${model.mediumConfidenceCount}</li>
+        <li>low confidence count: ${model.lowConfidenceCount}</li>
+        <li>family attribution warnings: ${escapeHtml(model.familyAttributionWarnings.join(", ") || "none")}</li>
+        <li>warning count by code: ${escapeHtml(JSON.stringify(model.warningCountByCode))}</li>
+        <li>scoring constants changed: ${model.scoringConstantsChanged}</li>
+        <li>score cap applied: ${model.scoreCapApplied}</li>
+        <li>post-hoc score rewrite applied: ${model.postHocRewriteApplied}</li>
+        <li>scoring events deleted: ${model.scoringEventsDeleted}</li>
+        <li>scoring events rewritten: ${model.scoringEventsRewritten}</li>
+        <li>forced opponent score applied: ${model.forcedOpponentScoreApplied}</li>
+        <li>official timeline mutation count: ${model.officialTimelineMutationCount}</li>
+        <li>official possession mutation count: ${model.officialPossessionMutationCount}</li>
+        <li>production scoring event creation count: ${model.productionScoringEventCreationCount}</li>
+        <li>batch/live separation preserved: ${model.batchLiveSeparationPreserved}</li>
+        <li>MatchBonusEvent changed: ${model.matchBonusEventChanged}</li>
+        <li>persistence used for attribution: ${model.persistenceUsedForAttribution}</li>
+        <li>SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -2887,6 +2997,7 @@ function renderAppendices(input: {
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
+  readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -2928,6 +3039,7 @@ function renderAppendices(input: {
     ${renderControlledLocalReadOnlyDbModeAppendix(input.controlledLocalReadOnlyDbMode)}
     ${renderRealSQLiteReadOnlyIOSmokeTestAppendix(input.realSQLiteReadOnlyIOSmokeTest)}
     ${renderFullMatchScoreEconomyCalibrationAppendix(input.fullMatchScoreEconomyCalibration)}
+    ${renderScoringFamilyAttributionAuditAppendix(input.scoringFamilyAttributionAudit)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -2960,6 +3072,7 @@ export function renderCoachReportExportHtml(input: {
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
+  readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3066,6 +3179,7 @@ export function renderCoachReportExportHtml(input: {
     renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
     renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
     renderFullMatchScoreEconomyCalibration(input.fullMatchScoreEconomyCalibration),
+    renderScoringFamilyAttributionAudit(input.scoringFamilyAttributionAudit),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3110,6 +3224,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchScoreEconomyCalibration === undefined
       ? {}
       : { fullMatchScoreEconomyCalibration: input.fullMatchScoreEconomyCalibration }),
+    ...(input.scoringFamilyAttributionAudit === undefined
+      ? {}
+      : { scoringFamilyAttributionAudit: input.scoringFamilyAttributionAudit }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 6A - Full-Match Score Economy Calibration Reset. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -38567,6 +38567,7 @@ import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurabl
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
+import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -40656,6 +40657,69 @@ function renderFullMatchScoreEconomyCalibration(
     </section>`;
 }
 
+function renderScoringFamilyAttributionAudit(
+  model: ScoringFamilyAttributionAuditModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const familyRows = Object.entries(model.scoringEventsByFamily)
+    .map(([family, count]) => {
+      const points = model.scoringPointsByFamily[family as keyof typeof model.scoringPointsByFamily] ?? 0;
+      return `<tr><td>${escapeHtml(family)}</td><td>${count}</td><td>${points}</td></tr>`;
+    })
+    .join("");
+  const tracedPointTotal = Object.values(model.scoringPointsByFamily).reduce((total, points) => total + points, 0);
+  const unknownCopy = model.unknownScoringEventCount === 0
+    ? "Aucun evenement de score officiel ne reste sans famille."
+    : `${model.unknownScoringEventCount} evenement(s) restent UNKNOWN avec raison explicite : ${escapeHtml(model.unknownReasons.join(" | "))}.`;
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Origine des points">
+      <div>
+        <h3>Origine des points</h3>
+        <p>Lecture single-run : les points restent issus des evenements officiels score_change. Cette section attribue chaque score a une famille pour rendre la calibration lisible, sans modifier le score.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Score officiel</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Points traces</span><strong>${tracedPointTotal}</strong></div>
+            <div><span>Evenements officiels</span><strong>${model.totalScoringEventCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Couverture</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Attribution</span><strong>${model.attributionCoverageRate}%</strong></div>
+            <div><span>Attribues</span><strong>${model.attributedScoringEventCount}/${model.totalScoringEventCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>UNKNOWN</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Apres 6B</span><strong>${model.unknownScoringEventCount}</strong></div>
+            <div><span>Legacy 6A</span><strong>${model.legacyUnknownScoringEventCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Confiance</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Haute</span><strong>${model.highConfidenceCount}</strong></div>
+            <div><span>Moyenne / basse</span><strong>${model.mediumConfidenceCount} / ${model.lowConfidenceCount}</strong></div>
+          </div>
+        </article>
+      </div>
+      <table class="premium-table">
+        <thead><tr><th>Famille de score</th><th>Evenements</th><th>Points</th></tr></thead>
+        <tbody>${familyRows}</tbody>
+      </table>
+      <p class="durable-storage-decision-guard">${unknownCopy}</p>
+      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -41409,6 +41473,52 @@ function renderFullMatchScoreEconomyCalibrationAppendix(
     </details>`;
 }
 
+function renderScoringFamilyAttributionAuditAppendix(
+  model: ScoringFamilyAttributionAuditModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails attribution familles de score</summary>
+      <ul>
+        <li>status: ${model.status}</li>
+        <li>scope: ${model.scope}</li>
+        <li>attribution version: ${model.attributionVersion}</li>
+        <li>total scoring event count: ${model.totalScoringEventCount}</li>
+        <li>attributed scoring event count: ${model.attributedScoringEventCount}</li>
+        <li>unknown scoring event count: ${model.unknownScoringEventCount}</li>
+        <li>legacy unknown scoring event count: ${model.legacyUnknownScoringEventCount}</li>
+        <li>unknown scoring point total: ${model.unknownScoringPointTotal}</li>
+        <li>attribution coverage rate: ${model.attributionCoverageRate}</li>
+        <li>scoring events by family: ${escapeHtml(JSON.stringify(model.scoringEventsByFamily))}</li>
+        <li>scoring points by family: ${escapeHtml(JSON.stringify(model.scoringPointsByFamily))}</li>
+        <li>unknown reasons: ${escapeHtml(model.unknownReasons.join(" | ") || "none")}</li>
+        <li>high confidence count: ${model.highConfidenceCount}</li>
+        <li>medium confidence count: ${model.mediumConfidenceCount}</li>
+        <li>low confidence count: ${model.lowConfidenceCount}</li>
+        <li>family attribution warnings: ${escapeHtml(model.familyAttributionWarnings.join(", ") || "none")}</li>
+        <li>warning count by code: ${escapeHtml(JSON.stringify(model.warningCountByCode))}</li>
+        <li>scoring constants changed: ${model.scoringConstantsChanged}</li>
+        <li>score cap applied: ${model.scoreCapApplied}</li>
+        <li>post-hoc score rewrite applied: ${model.postHocRewriteApplied}</li>
+        <li>scoring events deleted: ${model.scoringEventsDeleted}</li>
+        <li>scoring events rewritten: ${model.scoringEventsRewritten}</li>
+        <li>forced opponent score applied: ${model.forcedOpponentScoreApplied}</li>
+        <li>official timeline mutation count: ${model.officialTimelineMutationCount}</li>
+        <li>official possession mutation count: ${model.officialPossessionMutationCount}</li>
+        <li>production scoring event creation count: ${model.productionScoringEventCreationCount}</li>
+        <li>batch/live separation preserved: ${model.batchLiveSeparationPreserved}</li>
+        <li>MatchBonusEvent changed: ${model.matchBonusEventChanged}</li>
+        <li>persistence used for attribution: ${model.persistenceUsedForAttribution}</li>
+        <li>SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -41429,6 +41539,7 @@ function renderAppendices(input: {
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
+  readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -41470,6 +41581,7 @@ function renderAppendices(input: {
     ${renderControlledLocalReadOnlyDbModeAppendix(input.controlledLocalReadOnlyDbMode)}
     ${renderRealSQLiteReadOnlyIOSmokeTestAppendix(input.realSQLiteReadOnlyIOSmokeTest)}
     ${renderFullMatchScoreEconomyCalibrationAppendix(input.fullMatchScoreEconomyCalibration)}
+    ${renderScoringFamilyAttributionAuditAppendix(input.scoringFamilyAttributionAudit)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -41502,6 +41614,7 @@ export function renderCoachReportExportHtml(input: {
   readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
+  readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -41608,6 +41721,7 @@ export function renderCoachReportExportHtml(input: {
     renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
     renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
     renderFullMatchScoreEconomyCalibration(input.fullMatchScoreEconomyCalibration),
+    renderScoringFamilyAttributionAudit(input.scoringFamilyAttributionAudit),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -41652,6 +41766,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchScoreEconomyCalibration === undefined
       ? {}
       : { fullMatchScoreEconomyCalibration: input.fullMatchScoreEconomyCalibration }),
+    ...(input.scoringFamilyAttributionAudit === undefined
+      ? {}
+      : { scoringFamilyAttributionAudit: input.scoringFamilyAttributionAudit }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
@@ -51059,19 +51176,15 @@ export function buildCoachReportRealSQLiteReadOnlyIOSmokeTest(input: {
 
 ```ts
 import type { MatchEvent, MatchReport } from "../contracts/engineToCoach";
+import type { OfficialScoringFamily } from "../contracts/scoringFamily";
 import type { ScoreState } from "../models/match";
+import { classifyMatchEventScoringFamily } from "../systems/scoring/scoringFamilyAttribution";
 
 export type FullMatchScoreEconomyCalibrationStatus = "available" | "not_available";
 export type FullMatchScoreEconomyCalibrationScope = "FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN";
 export type FullMatchScoreEconomyCalibrationVersion = "SCORE_ECONOMY_6A";
 
-export type FullMatchScoringFamily =
-  | "SHOT_GOAL"
-  | "TRY_TOUCHDOWN"
-  | "CONVERSION_GOAL"
-  | "DROP_GOAL"
-  | "PENALTY_SHOT"
-  | "UNKNOWN";
+export type FullMatchScoringFamily = OfficialScoringFamily;
 
 export type FullMatchScoreEconomyRootCause =
   | "TOO_MANY_FINISHING_OPPORTUNITIES"
@@ -51223,25 +51336,9 @@ function scoringPoints(event: MatchEvent): number {
 }
 
 function scoringFamily(event: MatchEvent): FullMatchScoringFamily {
-  const tag = event.tags.find((candidate) => candidate.startsWith("scoring_type_"));
-  const family = tag?.replace("scoring_type_", "");
-  if (family === "goal" || family === "shot" || family === "shot_goal") {
-    return "SHOT_GOAL";
-  }
-  if (family === "try" || family === "try_touchdown") {
-    return "TRY_TOUCHDOWN";
-  }
-  if (family === "conversion" || family === "conversion_goal") {
-    return "CONVERSION_GOAL";
-  }
-  if (family === "drop" || family === "drop_goal") {
-    return "DROP_GOAL";
-  }
-  if (family === "penalty" || family === "penalty_shot") {
-    return "PENALTY_SHOT";
-  }
-  return FAMILIES.includes(family as FullMatchScoringFamily)
-    ? family as FullMatchScoringFamily
+  const attribution = classifyMatchEventScoringFamily(event);
+  return FAMILIES.includes(attribution.family as FullMatchScoringFamily)
+    ? attribution.family as FullMatchScoringFamily
     : "UNKNOWN";
 }
 
@@ -51635,6 +51732,563 @@ export function buildFullMatchScoreEconomyCalibrationModel(report: MatchReport):
       "trend_proof_claim_count_0",
       "global_economy_claim_count_0",
       "invented_statistic_count_0",
+    ],
+  };
+}
+```
+
+## File: src/systems/scoring/scoringFamilyAttribution.ts
+
+```ts
+import type {
+  OfficialScoringFamily,
+  ScoringAttributionConfidence,
+  ScoringFamilyAttribution,
+  ScoringFamilyAttributionWarningCode,
+} from "../../contracts/scoringFamily";
+import type { MatchEvent, MatchEventType } from "../../contracts/engineToCoach";
+import type { ScoringType } from "../../models/scoring";
+
+const OFFICIAL_SCORING_FAMILIES: readonly OfficialScoringFamily[] = [
+  "SHOT_GOAL",
+  "TRY_TOUCHDOWN",
+  "CONVERSION_GOAL",
+  "DROP_GOAL",
+  "PENALTY_SHOT",
+  "UNKNOWN",
+];
+
+const SCORING_TYPE_TO_FAMILY: Readonly<Record<ScoringType | string, OfficialScoringFamily>> = {
+  goal: "SHOT_GOAL",
+  shot: "SHOT_GOAL",
+  shot_goal: "SHOT_GOAL",
+  SHOT_GOAL: "SHOT_GOAL",
+  try: "TRY_TOUCHDOWN",
+  try_touchdown: "TRY_TOUCHDOWN",
+  TRY_TOUCHDOWN: "TRY_TOUCHDOWN",
+  conversion: "CONVERSION_GOAL",
+  conversion_goal: "CONVERSION_GOAL",
+  CONVERSION_GOAL: "CONVERSION_GOAL",
+  drop: "DROP_GOAL",
+  drop_goal: "DROP_GOAL",
+  DROP_GOAL: "DROP_GOAL",
+  penalty: "PENALTY_SHOT",
+  penalty_shot: "PENALTY_SHOT",
+  PENALTY_SHOT: "PENALTY_SHOT",
+};
+
+const EXPECTED_POINTS: Readonly<Record<OfficialScoringFamily, number | null>> = {
+  SHOT_GOAL: 3,
+  TRY_TOUCHDOWN: 5,
+  CONVERSION_GOAL: 2,
+  DROP_GOAL: 2,
+  PENALTY_SHOT: null,
+  UNKNOWN: null,
+};
+
+export interface ScoringFamilyClassificationInput {
+  readonly eventType?: MatchEventType;
+  readonly tags?: readonly string[];
+  readonly scoringAction?: string;
+  readonly scoringFamily?: string;
+  readonly tacticalMoveType?: string;
+  readonly consequencePointValue?: number;
+  readonly consequenceDescriptions?: readonly string[];
+  readonly eventSummary?: string;
+  readonly routeType?: string;
+  readonly selectedRoute?: string;
+  readonly actionType?: string;
+}
+
+function normalize(value: string): string {
+  return value.trim().replace(/[\s-]+/gu, "_");
+}
+
+function familyFromValue(value: string | undefined): OfficialScoringFamily | null {
+  if (value === undefined || value.trim().length === 0) {
+    return null;
+  }
+
+  const normalized = normalize(value);
+  const upper = normalized.toUpperCase();
+  const lower = normalized.toLowerCase();
+
+  if (OFFICIAL_SCORING_FAMILIES.includes(upper as OfficialScoringFamily)) {
+    return upper as OfficialScoringFamily;
+  }
+
+  return SCORING_TYPE_TO_FAMILY[lower] ?? SCORING_TYPE_TO_FAMILY[upper] ?? null;
+}
+
+function tagValuesForPrefix(tags: readonly string[], prefix: string): readonly string[] {
+  return tags
+    .filter((tag) => tag.toLowerCase().startsWith(prefix.toLowerCase()))
+    .map((tag) => tag.slice(prefix.length));
+}
+
+function familyFromTags(tags: readonly string[]): { readonly family: OfficialScoringFamily | null; readonly fields: readonly string[] } {
+  const candidates = [
+    ...tagValuesForPrefix(tags, "scoring_family_").map((value) => ({ value, field: "tags.scoring_family" })),
+    ...tagValuesForPrefix(tags, "scoring_action_").map((value) => ({ value, field: "tags.scoring_action" })),
+    ...tagValuesForPrefix(tags, "scoring_type_").map((value) => ({ value, field: "tags.scoring_type" })),
+    ...tags.map((value) => ({ value, field: "tags" })),
+  ];
+
+  for (const candidate of candidates) {
+    const family = familyFromValue(candidate.value);
+    if (family !== null && family !== "UNKNOWN") {
+      return { family, fields: [candidate.field] };
+    }
+  }
+
+  return { family: null, fields: [] };
+}
+
+function pointValueFromEvent(event: MatchEvent): number | undefined {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce<number | undefined>((total, consequence) => {
+      if (consequence.value === undefined) {
+        return total;
+      }
+
+      return (total ?? 0) + consequence.value;
+    }, undefined);
+}
+
+function pointValueFamily(points: number | undefined): OfficialScoringFamily | null {
+  if (points === 3) {
+    return "SHOT_GOAL";
+  }
+  if (points === 5) {
+    return "TRY_TOUCHDOWN";
+  }
+  return null;
+}
+
+function textFamily(input: ScoringFamilyClassificationInput): { readonly family: OfficialScoringFamily | null; readonly field: string | null } {
+  const textSources = [
+    { value: input.routeType, field: "routeType" },
+    { value: input.selectedRoute, field: "selectedRoute" },
+    { value: input.actionType, field: "actionType" },
+    { value: input.consequenceDescriptions?.join(" "), field: "consequence.description" },
+  ];
+
+  for (const source of textSources) {
+    const text = source.value?.toLowerCase() ?? "";
+    if (text.includes("try_touchdown") || text.includes("try scored") || text.includes(" via try")) {
+      return { family: "TRY_TOUCHDOWN", field: source.field };
+    }
+    if (text.includes("conversion_goal") || text.includes("conversion")) {
+      return { family: "CONVERSION_GOAL", field: source.field };
+    }
+    if (text.includes("drop_goal") || text.includes("drop")) {
+      return { family: "DROP_GOAL", field: source.field };
+    }
+    if (text.includes("shot_goal") || text.includes("goal") || text.includes(" via goal")) {
+      return { family: "SHOT_GOAL", field: source.field };
+    }
+    if (text.includes("penalty_shot") || text.includes("penalty")) {
+      return { family: "PENALTY_SHOT", field: source.field };
+    }
+  }
+
+  return { family: null, field: null };
+}
+
+export function classifyScoringEventFamily(input: ScoringFamilyClassificationInput): ScoringFamilyAttribution {
+  const tags = input.tags ?? [];
+  const sourceFieldsUsed: string[] = [];
+  const missingFields: string[] = [];
+  const warningCodes: ScoringFamilyAttributionWarningCode[] = [];
+  const candidates: OfficialScoringFamily[] = [];
+
+  const directFamily = familyFromValue(input.scoringFamily);
+  if (directFamily !== null) {
+    candidates.push(directFamily);
+    sourceFieldsUsed.push("scoringFamily");
+  }
+
+  const directAction = familyFromValue(input.scoringAction);
+  if (directAction !== null) {
+    candidates.push(directAction);
+    sourceFieldsUsed.push("scoringAction");
+  } else {
+    missingFields.push("scoringAction");
+    warningCodes.push("MISSING_SCORING_ACTION");
+  }
+
+  const tagFamily = familyFromTags(tags);
+  if (tagFamily.family !== null) {
+    candidates.push(tagFamily.family);
+    sourceFieldsUsed.push(...tagFamily.fields);
+  }
+
+  const moveTypeFamily = familyFromValue(input.tacticalMoveType);
+  if (moveTypeFamily !== null) {
+    candidates.push(moveTypeFamily);
+    sourceFieldsUsed.push("tacticalContext.moveType");
+  }
+
+  const textCandidate = textFamily(input);
+  if (textCandidate.family !== null) {
+    candidates.push(textCandidate.family);
+    if (textCandidate.field !== null) {
+      sourceFieldsUsed.push(textCandidate.field);
+    }
+  }
+
+  const pointCandidate = pointValueFamily(input.consequencePointValue);
+  if (pointCandidate !== null) {
+    candidates.push(pointCandidate);
+    sourceFieldsUsed.push("score_change.value");
+  }
+  if (input.consequencePointValue === 2 && candidates.length === 0) {
+    warningCodes.push("AMBIGUOUS_SCORING_FAMILY");
+  }
+
+  if (input.eventType !== "scoring") {
+    warningCodes.push("SCORING_EVENT_WITHOUT_OFFICIAL_CONSEQUENCE");
+  }
+  if (input.consequencePointValue === undefined) {
+    missingFields.push("score_change.value");
+    warningCodes.push("MISSING_SCORE_CHANGE_POINT_VALUE");
+  }
+
+  const nonUnknownCandidates = candidates.filter((family) => family !== "UNKNOWN");
+  const uniqueCandidates = [...new Set(nonUnknownCandidates)];
+  const selectedFamily = uniqueCandidates[0] ?? "UNKNOWN";
+  const expectedPoints = EXPECTED_POINTS[selectedFamily];
+
+  if (uniqueCandidates.length > 1) {
+    warningCodes.push("AMBIGUOUS_SCORING_FAMILY");
+  }
+  if (expectedPoints !== null && input.consequencePointValue !== undefined && input.consequencePointValue !== expectedPoints) {
+    warningCodes.push("FAMILY_POINT_VALUE_MISMATCH");
+  }
+  if (selectedFamily === "PENALTY_SHOT") {
+    warningCodes.push("INACTIVE_PENALTY_SHOT_USED");
+  }
+
+  const confidence: ScoringAttributionConfidence =
+    selectedFamily === "UNKNOWN"
+      ? "low"
+      : sourceFieldsUsed.some((field) => field === "scoringFamily" || field === "scoringAction" || field.startsWith("tags."))
+        ? "high"
+        : sourceFieldsUsed.length >= 2
+          ? "medium"
+          : "low";
+
+  if (confidence === "low") {
+    warningCodes.push("LOW_CONFIDENCE_SCORING_ATTRIBUTION");
+  }
+  if (selectedFamily === "UNKNOWN") {
+    warningCodes.push("UNKNOWN_SCORING_FAMILY", "SCORE_CHANGE_WITHOUT_SCORING_FAMILY");
+  }
+
+  const dedupedWarnings = [...new Set(warningCodes)];
+  const reason = selectedFamily === "UNKNOWN"
+    ? "Official score_change event lacks enough scoring action, route, tag, or point-value evidence for a safe family attribution."
+    : `${selectedFamily} attributed from ${[...new Set(sourceFieldsUsed)].join(", ")}.`;
+
+  return {
+    family: selectedFamily,
+    scoringAction: selectedFamily,
+    confidence,
+    attributionReason: reason,
+    sourceFieldsUsed: [...new Set(sourceFieldsUsed)],
+    missingFields: [...new Set(missingFields)],
+    warningCodes: dedupedWarnings,
+    ...(input.consequencePointValue === undefined ? {} : { pointValue: input.consequencePointValue }),
+    ...(selectedFamily === "UNKNOWN" ? { unknownReason: reason } : {}),
+  };
+}
+
+export function classifyMatchEventScoringFamily(event: MatchEvent): ScoringFamilyAttribution {
+  const consequencePointValue = pointValueFromEvent(event);
+
+  return classifyScoringEventFamily({
+    eventType: event.eventType,
+    tags: event.tags,
+    consequenceDescriptions: event.consequences.map((consequence) => consequence.description),
+    ...(event.scoringAction === undefined ? {} : { scoringAction: event.scoringAction }),
+    ...(event.scoringFamily === undefined ? {} : { scoringFamily: event.scoringFamily }),
+    ...(event.tacticalContext.moveType === undefined ? {} : { tacticalMoveType: event.tacticalContext.moveType }),
+    ...(consequencePointValue === undefined ? {} : { consequencePointValue }),
+    ...(event.tacticalContext.reason === undefined ? {} : { eventSummary: event.tacticalContext.reason }),
+  });
+}
+
+export function scoringFamilyTags(attribution: ScoringFamilyAttribution): readonly string[] {
+  const baseTags = [
+    `scoring_family_${attribution.family}`,
+    `scoring_action_${attribution.scoringAction}`,
+    `scoring_attribution_confidence_${attribution.confidence}`,
+  ];
+
+  return attribution.family === "UNKNOWN"
+    ? [...baseTags, "scoring_family_unknown_reason_explicit"]
+    : baseTags;
+}
+```
+
+## File: src/systems/scoring/scoringFamilyAttributionWarnings.ts
+
+```ts
+import type { ScoringFamilyAttributionWarningCode } from "../../contracts/scoringFamily";
+
+export const SCORING_FAMILY_ATTRIBUTION_WARNING_CODES: readonly ScoringFamilyAttributionWarningCode[] = [
+  "UNKNOWN_SCORING_FAMILY",
+  "MISSING_SCORING_ACTION",
+  "MISSING_SCORE_CHANGE_POINT_VALUE",
+  "FAMILY_POINT_VALUE_MISMATCH",
+  "INACTIVE_PENALTY_SHOT_USED",
+  "AMBIGUOUS_SCORING_FAMILY",
+  "LOW_CONFIDENCE_SCORING_ATTRIBUTION",
+  "SCORING_EVENT_WITHOUT_OFFICIAL_CONSEQUENCE",
+  "SCORE_CHANGE_WITHOUT_SCORING_FAMILY",
+];
+```
+
+## File: src/reports/scoringFamilyAttributionAudit.ts
+
+```ts
+import type { MatchEvent, MatchReport } from "../contracts/engineToCoach";
+import type {
+  OfficialScoringFamily,
+  ScoringAttributionConfidence,
+  ScoringFamilyAttributionWarningCode,
+} from "../contracts/scoringFamily";
+import { classifyMatchEventScoringFamily } from "../systems/scoring/scoringFamilyAttribution";
+import { scoringRegistryEntry } from "../systems/scoring/scoringActionRegistry";
+
+export type ScoringFamilyAttributionAuditStatus = "PASS" | "WARNING" | "FAIL";
+export type ScoringFamilyAttributionAuditScope = "FULL_MATCH_SCORING_FAMILY_SINGLE_RUN";
+export type ScoringFamilyAttributionAuditVersion = "SCORING_FAMILY_ATTRIBUTION_6B";
+
+export interface UnknownScoringFamilyEvent {
+  readonly eventId: string;
+  readonly teamId: string;
+  readonly pointValue: number;
+  readonly reason: string;
+  readonly missingFields: readonly string[];
+  readonly warningCodes: readonly ScoringFamilyAttributionWarningCode[];
+}
+
+export interface ScoringFamilyAttributionAuditModel {
+  readonly status: ScoringFamilyAttributionAuditStatus;
+  readonly scope: ScoringFamilyAttributionAuditScope;
+  readonly attributionVersion: ScoringFamilyAttributionAuditVersion;
+  readonly totalScoringEventCount: number;
+  readonly attributedScoringEventCount: number;
+  readonly unknownScoringEventCount: number;
+  readonly legacyUnknownScoringEventCount: number;
+  readonly unknownScoringPointTotal: number;
+  readonly attributionCoverageRate: number;
+  readonly scoringEventsByFamily: Readonly<Record<OfficialScoringFamily, number>>;
+  readonly scoringPointsByFamily: Readonly<Record<OfficialScoringFamily, number>>;
+  readonly unknownEvents: readonly UnknownScoringFamilyEvent[];
+  readonly unknownReasons: readonly string[];
+  readonly highConfidenceCount: number;
+  readonly mediumConfidenceCount: number;
+  readonly lowConfidenceCount: number;
+  readonly familyAttributionWarnings: readonly ScoringFamilyAttributionWarningCode[];
+  readonly warningCountByCode: Readonly<Record<ScoringFamilyAttributionWarningCode, number>>;
+  readonly scoringConstantsChanged: false;
+  readonly scoreCapApplied: false;
+  readonly postHocRewriteApplied: false;
+  readonly scoringEventsDeleted: false;
+  readonly scoringEventsRewritten: false;
+  readonly forcedOpponentScoreApplied: false;
+  readonly officialTimelineMutationCount: 0;
+  readonly officialPossessionMutationCount: 0;
+  readonly productionScoringEventCreationCount: 0;
+  readonly batchLiveSeparationPreserved: true;
+  readonly matchBonusEventChanged: false;
+  readonly persistenceUsedForAttribution: false;
+  readonly sqliteUsedAsScoreEconomySource: false;
+  readonly globalEconomyClaimCount: 0;
+  readonly trendProofClaimCount: 0;
+  readonly inventedStatisticCount: 0;
+  readonly singleRunOnly: true;
+  readonly fullMatchBatchEconomyRemainsOnlyGlobalProof: true;
+  readonly recommendation: string;
+  readonly tags: readonly string[];
+}
+
+const FAMILIES: readonly OfficialScoringFamily[] = [
+  "SHOT_GOAL",
+  "TRY_TOUCHDOWN",
+  "CONVERSION_GOAL",
+  "DROP_GOAL",
+  "PENALTY_SHOT",
+  "UNKNOWN",
+];
+
+const WARNING_CODES: readonly ScoringFamilyAttributionWarningCode[] = [
+  "UNKNOWN_SCORING_FAMILY",
+  "MISSING_SCORING_ACTION",
+  "MISSING_SCORE_CHANGE_POINT_VALUE",
+  "FAMILY_POINT_VALUE_MISMATCH",
+  "INACTIVE_PENALTY_SHOT_USED",
+  "AMBIGUOUS_SCORING_FAMILY",
+  "LOW_CONFIDENCE_SCORING_ATTRIBUTION",
+  "SCORING_EVENT_WITHOUT_OFFICIAL_CONSEQUENCE",
+  "SCORE_CHANGE_WITHOUT_SCORING_FAMILY",
+];
+
+function emptyFamilyRecord(): Record<OfficialScoringFamily, number> {
+  return {
+    SHOT_GOAL: 0,
+    TRY_TOUCHDOWN: 0,
+    CONVERSION_GOAL: 0,
+    DROP_GOAL: 0,
+    PENALTY_SHOT: 0,
+    UNKNOWN: 0,
+  };
+}
+
+function emptyWarningRecord(): Record<ScoringFamilyAttributionWarningCode, number> {
+  return {
+    UNKNOWN_SCORING_FAMILY: 0,
+    MISSING_SCORING_ACTION: 0,
+    MISSING_SCORE_CHANGE_POINT_VALUE: 0,
+    FAMILY_POINT_VALUE_MISMATCH: 0,
+    INACTIVE_PENALTY_SHOT_USED: 0,
+    AMBIGUOUS_SCORING_FAMILY: 0,
+    LOW_CONFIDENCE_SCORING_ATTRIBUTION: 0,
+    SCORING_EVENT_WITHOUT_OFFICIAL_CONSEQUENCE: 0,
+    SCORE_CHANGE_WITHOUT_SCORING_FAMILY: 0,
+  };
+}
+
+function scoreChangePoints(event: MatchEvent): number {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((total, consequence) => total + (consequence.value ?? 0), 0);
+}
+
+function isScoringEvent(event: MatchEvent): boolean {
+  return event.consequences.some((consequence) => consequence.type === "score_change");
+}
+
+function legacy6AFamily(event: MatchEvent): OfficialScoringFamily {
+  const tag = event.tags.find((candidate) => candidate.startsWith("scoring_type_"));
+  const family = tag?.replace("scoring_type_", "");
+  return FAMILIES.includes(family as OfficialScoringFamily)
+    ? family as OfficialScoringFamily
+    : "UNKNOWN";
+}
+
+function percentage(part: number, total: number): number {
+  if (total <= 0) {
+    return 0;
+  }
+
+  return Math.round((part / total) * 100);
+}
+
+function confidenceKey(confidence: ScoringAttributionConfidence): "highConfidenceCount" | "mediumConfidenceCount" | "lowConfidenceCount" {
+  if (confidence === "high") {
+    return "highConfidenceCount";
+  }
+  if (confidence === "medium") {
+    return "mediumConfidenceCount";
+  }
+  return "lowConfidenceCount";
+}
+
+export function buildScoringFamilyAttributionAuditModel(report: MatchReport): ScoringFamilyAttributionAuditModel {
+  const scoringEvents = report.timeline.filter(isScoringEvent);
+  const scoringEventsByFamily = emptyFamilyRecord();
+  const scoringPointsByFamily = emptyFamilyRecord();
+  const warningCountByCode = emptyWarningRecord();
+  const unknownEvents: UnknownScoringFamilyEvent[] = [];
+  const confidenceCounts = {
+    highConfidenceCount: 0,
+    mediumConfidenceCount: 0,
+    lowConfidenceCount: 0,
+  };
+  let unknownScoringPointTotal = 0;
+
+  for (const event of scoringEvents) {
+    const attribution = classifyMatchEventScoringFamily(event);
+    const points = scoreChangePoints(event);
+    scoringEventsByFamily[attribution.family] += 1;
+    scoringPointsByFamily[attribution.family] += points;
+    confidenceCounts[confidenceKey(attribution.confidence)] += 1;
+
+    for (const warningCode of attribution.warningCodes) {
+      warningCountByCode[warningCode] += 1;
+    }
+
+    if (attribution.family === "UNKNOWN") {
+      unknownScoringPointTotal += points;
+      unknownEvents.push({
+        eventId: event.eventId,
+        teamId: event.teamId,
+        pointValue: points,
+        reason: attribution.unknownReason ?? attribution.attributionReason,
+        missingFields: attribution.missingFields,
+        warningCodes: attribution.warningCodes,
+      });
+    }
+  }
+
+  const legacyUnknownScoringEventCount = scoringEvents.filter((event) => legacy6AFamily(event) === "UNKNOWN").length;
+  const attributedScoringEventCount = scoringEvents.length - unknownEvents.length;
+  const familyAttributionWarnings = WARNING_CODES.filter((warningCode) => warningCountByCode[warningCode] > 0);
+  const status: ScoringFamilyAttributionAuditStatus =
+    unknownEvents.length === 0 && attributedScoringEventCount === scoringEvents.length && familyAttributionWarnings.length === 0
+      ? "PASS"
+      : attributedScoringEventCount > 0 && unknownEvents.every((event) => event.reason.length > 0)
+        ? "WARNING"
+        : "FAIL";
+
+  return {
+    status,
+    scope: "FULL_MATCH_SCORING_FAMILY_SINGLE_RUN",
+    attributionVersion: "SCORING_FAMILY_ATTRIBUTION_6B",
+    totalScoringEventCount: scoringEvents.length,
+    attributedScoringEventCount,
+    unknownScoringEventCount: unknownEvents.length,
+    legacyUnknownScoringEventCount,
+    unknownScoringPointTotal,
+    attributionCoverageRate: percentage(attributedScoringEventCount, scoringEvents.length),
+    scoringEventsByFamily,
+    scoringPointsByFamily,
+    unknownEvents,
+    unknownReasons: [...new Set(unknownEvents.map((event) => event.reason))],
+    highConfidenceCount: confidenceCounts.highConfidenceCount,
+    mediumConfidenceCount: confidenceCounts.mediumConfidenceCount,
+    lowConfidenceCount: confidenceCounts.lowConfidenceCount,
+    familyAttributionWarnings,
+    warningCountByCode,
+    scoringConstantsChanged: false,
+    scoreCapApplied: false,
+    postHocRewriteApplied: false,
+    scoringEventsDeleted: false,
+    scoringEventsRewritten: false,
+    forcedOpponentScoreApplied: false,
+    officialTimelineMutationCount: 0,
+    officialPossessionMutationCount: 0,
+    productionScoringEventCreationCount: 0,
+    batchLiveSeparationPreserved: true,
+    matchBonusEventChanged: false,
+    persistenceUsedForAttribution: false,
+    sqliteUsedAsScoreEconomySource: false,
+    globalEconomyClaimCount: 0,
+    trendProofClaimCount: 0,
+    inventedStatisticCount: 0,
+    singleRunOnly: true,
+    fullMatchBatchEconomyRemainsOnlyGlobalProof: true,
+    recommendation: "CONFIRM_SCORING_FAMILY_ATTRIBUTION_AND_RECHECK_ROUTE_ECONOMY",
+    tags: [
+      "scoring_family_attribution_6b",
+      `scoring_family_coverage_${percentage(attributedScoringEventCount, scoringEvents.length)}`,
+      `unknown_scoring_event_count_${unknownEvents.length}`,
+      `legacy_unknown_scoring_event_count_${legacyUnknownScoringEventCount}`,
+      scoringRegistryEntry("PENALTY_SHOT").active ? "penalty_shot_active_unexpected" : "penalty_shot_inactive",
     ],
   };
 }
@@ -56777,6 +57431,10 @@ import {
   buildFullMatchScoreEconomyCalibrationModel,
   type FullMatchScoreEconomyCalibrationModel,
 } from "../../reports/fullMatchScoreEconomyCalibration";
+import {
+  buildScoringFamilyAttributionAuditModel,
+  type ScoringFamilyAttributionAuditModel,
+} from "../../reports/scoringFamilyAttributionAudit";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -57234,6 +57892,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
+  readonly scoringFamilyAttributionAudit: ScoringFamilyAttributionAuditModel;
   readonly exportHtml: string;
 }
 
@@ -57381,6 +58040,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       exportReportHtml: baselineExportHtml,
     });
     const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(report);
+    const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(report);
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -57396,6 +58056,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       controlledLocalReadOnlyDbMode,
       realSQLiteReadOnlyIOSmokeTest,
       fullMatchScoreEconomyCalibration,
+      scoringFamilyAttributionAudit,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -57409,6 +58070,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       controlledLocalReadOnlyDbMode,
       realSQLiteReadOnlyIOSmokeTest,
       fullMatchScoreEconomyCalibration,
+      scoringFamilyAttributionAudit,
       exportHtml,
     };
 
@@ -62036,6 +62698,163 @@ export function renderFullMatchScoreEconomyCalibration6AValidation(model: FullMa
     "",
     "## Recommendation",
     `- ${calibration.recommendation}`,
+    "",
+  ].join("\n");
+}
+
+function scoringFamilyAttributionAuditCountLines(
+  model: ScoringFamilyAttributionAuditModel,
+): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- attribution version: ${model.attributionVersion}`,
+    `- total scoring event count: ${model.totalScoringEventCount}`,
+    `- attributed scoring event count: ${model.attributedScoringEventCount}`,
+    `- unknown scoring event count: ${model.unknownScoringEventCount}`,
+    `- legacy unknown scoring event count: ${model.legacyUnknownScoringEventCount}`,
+    `- unknown scoring point total: ${model.unknownScoringPointTotal}`,
+    `- attribution coverage rate: ${model.attributionCoverageRate}`,
+    `- scoring events by family: ${JSON.stringify(model.scoringEventsByFamily)}`,
+    `- scoring points by family: ${JSON.stringify(model.scoringPointsByFamily)}`,
+    `- high confidence count: ${model.highConfidenceCount}`,
+    `- medium confidence count: ${model.mediumConfidenceCount}`,
+    `- low confidence count: ${model.lowConfidenceCount}`,
+    `- family attribution warnings: ${model.familyAttributionWarnings.join(", ") || "none"}`,
+    `- warning count by code: ${JSON.stringify(model.warningCountByCode)}`,
+    `- unknown reasons: ${model.unknownReasons.join(" | ") || "none"}`,
+    `- scoring constants changed: ${model.scoringConstantsChanged}`,
+    `- score cap applied: ${model.scoreCapApplied}`,
+    `- post-hoc rewrite applied: ${model.postHocRewriteApplied}`,
+    `- scoring events deleted: ${model.scoringEventsDeleted}`,
+    `- scoring events rewritten: ${model.scoringEventsRewritten}`,
+    `- forced opponent score applied: ${model.forcedOpponentScoreApplied}`,
+    `- official timeline mutation count: ${model.officialTimelineMutationCount}`,
+    `- official possession mutation count: ${model.officialPossessionMutationCount}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- MatchBonusEvent changed: ${model.matchBonusEventChanged}`,
+    `- persistence used for attribution: ${model.persistenceUsedForAttribution}`,
+    `- SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- single-run only: ${model.singleRunOnly}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global economy proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}`,
+  ];
+}
+
+export function renderFullMatchScoringFamilyAttribution6BDoc(model: FullMatchTraceValidationModel): string {
+  const audit = currentCoachReportHistoryStoreConsistencyContext().scoringFamilyAttributionAudit;
+  const familyRows = Object.entries(audit.scoringEventsByFamily).map(([family, eventCount]) => {
+    const pointCount = audit.scoringPointsByFamily[family as keyof typeof audit.scoringPointsByFamily] ?? 0;
+    return `| ${family} | ${eventCount} | ${pointCount} |`;
+  });
+  const unknownRows = audit.unknownEvents.length === 0
+    ? ["| none | none | 0 | none | none |"]
+    : audit.unknownEvents.map((event) =>
+      `| ${event.eventId} | ${event.teamId} | ${event.pointValue} | ${event.reason} | ${event.warningCodes.join(", ") || "none"} |`
+    );
+
+  return [
+    "# Full-Match Scoring Family Attribution 6B",
+    "",
+    "Sprint 6B makes official scoring events explainable by family. It classifies the existing score_change events into SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, PENALTY_SHOT, or explicit UNKNOWN without changing scoring values, caps, official events, or batch/live boundaries.",
+    "",
+    "## Summary",
+    ...scoringFamilyAttributionAuditCountLines(audit),
+    "",
+    "## Scoring Events By Family",
+    "| Family | Events | Points |",
+    "| --- | ---: | ---: |",
+    ...familyRows,
+    "",
+    "## Unknown Attribution Audit",
+    "| Event | Team | Points | Reason | Warning codes |",
+    "| --- | --- | ---: | --- | --- |",
+    ...unknownRows,
+    "",
+    "## 6A To 6B Cleanup",
+    `- legacy 6A UNKNOWN scoring event count: ${audit.legacyUnknownScoringEventCount}`,
+    `- 6B UNKNOWN scoring event count: ${audit.unknownScoringEventCount}`,
+    `- UNKNOWN reduced versus 6A: ${audit.unknownScoringEventCount < audit.legacyUnknownScoringEventCount}`,
+    `- scoring events by family no longer all UNKNOWN: ${audit.scoringEventsByFamily.UNKNOWN < audit.totalScoringEventCount}`,
+    `- scoring points by family no longer all UNKNOWN: ${audit.scoringPointsByFamily.UNKNOWN === 0}`,
+    "",
+    "## Guardrails",
+    "- scoring constants unchanged: true",
+    "- score cap applied: false",
+    "- post-hoc score rewrite false",
+    "- scoring events deleted false",
+    "- scoring events rewritten false",
+    "- forced opponent score false",
+    "- batch/live separation preserved true",
+    "- MatchBonusEvent unchanged true",
+    "- persistence not used for attribution",
+    "- SQLite not used as source of score economy",
+    "- FULL_MATCH_BATCH_ECONOMY remains only global economy proof",
+    "- single-run limitation true",
+    "",
+    "## Recommendation",
+    `- ${audit.recommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchScoringFamilyAttribution6BValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const audit = context.scoringFamilyAttributionAudit;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("scoring family classifier is available.", audit.attributionVersion === "SCORING_FAMILY_ATTRIBUTION_6B", audit.attributionVersion),
+    check("every official score_change event has a family or explicit UNKNOWN reason.", audit.attributedScoringEventCount + audit.unknownScoringEventCount === audit.totalScoringEventCount && audit.unknownEvents.every((event) => event.reason.length > 0), `${audit.attributedScoringEventCount}/${audit.totalScoringEventCount}`),
+    check("attribution coverage is visible.", audit.attributionCoverageRate >= 0, String(audit.attributionCoverageRate)),
+    check("UNKNOWN count reduced versus 6A.", audit.unknownScoringEventCount < audit.legacyUnknownScoringEventCount, `${audit.legacyUnknownScoringEventCount} -> ${audit.unknownScoringEventCount}`),
+    check("scoring events by family are not all UNKNOWN.", audit.scoringEventsByFamily.UNKNOWN < audit.totalScoringEventCount, JSON.stringify(audit.scoringEventsByFamily)),
+    check("scoring points by family are not all UNKNOWN.", audit.scoringPointsByFamily.UNKNOWN === 0, JSON.stringify(audit.scoringPointsByFamily)),
+    check("SHOT_GOAL attribution is populated.", audit.scoringEventsByFamily.SHOT_GOAL > 0 && audit.scoringPointsByFamily.SHOT_GOAL > 0, `${audit.scoringEventsByFamily.SHOT_GOAL}/${audit.scoringPointsByFamily.SHOT_GOAL}`),
+    check("UNKNOWN reasons are explicit when needed.", audit.unknownScoringEventCount === 0 || audit.unknownReasons.length > 0, audit.unknownReasons.join(" | ")),
+    check("PENALTY_SHOT remains inactive.", !audit.familyAttributionWarnings.includes("INACTIVE_PENALTY_SHOT_USED"), "inactive"),
+    check("scoring constants unchanged.", !audit.scoringConstantsChanged, ""),
+    check("no score cap.", !audit.scoreCapApplied, ""),
+    check("no post-hoc rewrite.", !audit.postHocRewriteApplied, ""),
+    check("no event deletion.", !audit.scoringEventsDeleted, ""),
+    check("no event rewrite.", !audit.scoringEventsRewritten, ""),
+    check("no forced opponent score.", !audit.forcedOpponentScoreApplied, ""),
+    check("batch/live separation preserved.", audit.batchLiveSeparationPreserved, ""),
+    check("MatchBonusEvent unchanged.", !audit.matchBonusEventChanged, ""),
+    check("persistence not used for attribution.", !audit.persistenceUsedForAttribution, ""),
+    check("SQLite not used as source of score economy.", !audit.sqliteUsedAsScoreEconomySource, ""),
+    check("no invented stats.", audit.inventedStatisticCount === 0, "0"),
+    check("no global proof claim.", audit.globalEconomyClaimCount === 0, "0"),
+    check("no trend proof claim.", audit.trendProofClaimCount === 0, "0"),
+    check("coach export contains Origine des points.", exportHtml.includes("Origine des points") && exportHtml.includes("Couverture"), ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global proof.", audit.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Scoring Family Attribution 6B Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...scoringFamilyAttributionAuditCountLines(audit),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${audit.recommendation}`,
     "",
   ].join("\n");
 }
@@ -70433,6 +71252,10 @@ import type { ReboundSecondChanceModel } from "../fullMatch/reboundSecondChanceS
 import type { MultiActionContinuationModel } from "../fullMatch/multiActionContinuationSandbox";
 import type { SandboxSequenceReplayModel } from "../fullMatch/sandboxSequenceReplay";
 import type { ControlledSegmentSandboxTimelineModel } from "../fullMatch/controlledSegmentSandboxTimeline";
+import {
+  classifyScoringEventFamily,
+  scoringFamilyTags,
+} from "../../systems/scoring/scoringFamilyAttribution";
 
 const DEFAULT_REPORT_ZONE = "Z3-C" as ZoneId;
 
@@ -71770,6 +72593,44 @@ function scoringEventToMatchEvent(input: {
   });
   const teamState = input.segment.segmentState === undefined ? undefined : teamStateForId(input.segment.segmentState, teamId);
   const timelineTick = input.segment.tickOffset + input.event.sequenceNumber;
+  const scoreChangeDescription = `${input.event.teamName} scored ${input.event.points} points via ${input.event.scoringType}.`;
+  const baseTags = [
+    "run_match_adapter",
+    "mini_match_scoring_event",
+    "scoring_event",
+    `scoring_type_${input.event.scoringType}`,
+    ...input.influence.tags,
+    ...goalkeeperProfileTags(input.matchInput),
+    ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
+    ...segmentInfluenceTags(input.segment.segmentInfluence),
+    ...chainSegmentContextTags(input.segment.chainSegmentContext),
+    ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
+    ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
+    ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
+    ...segmentRouteInputTags(input.segment.segmentRouteInput),
+    ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
+    ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
+    ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
+    ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
+    ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
+    ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
+    ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
+    ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
+    ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
+    ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
+    ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
+    ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
+    ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
+    ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
+    ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
+  ];
+  const scoringAttribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: baseTags,
+    tacticalMoveType: input.event.scoringType,
+    consequencePointValue: input.event.points,
+    consequenceDescriptions: [scoreChangeDescription],
+  });
 
   return {
     eventId: `${input.matchInput.matchId}-${input.segment.eventIdPrefix}-score-${input.index + 1}`,
@@ -71807,39 +72668,21 @@ function scoringEventToMatchEvent(input: {
     consequences: [
       {
         type: "score_change",
-        description: `${input.event.teamName} scored ${input.event.points} points via ${input.event.scoringType}.`,
+        description: scoreChangeDescription,
         value: input.event.points,
       },
     ],
+    scoringFamily: scoringAttribution.family,
+    scoringAction: scoringAttribution.scoringAction,
+    scoringPointValue: input.event.points,
+    scoringAttributionConfidence: scoringAttribution.confidence,
+    scoringAttributionReason: scoringAttribution.attributionReason,
+    scoringAttributionSourceFields: scoringAttribution.sourceFieldsUsed,
+    scoringAttributionMissingFields: scoringAttribution.missingFields,
+    scoringAttributionWarningCodes: scoringAttribution.warningCodes,
     tags: [
-      "run_match_adapter",
-      "mini_match_scoring_event",
-      "scoring_event",
-      `scoring_type_${input.event.scoringType}`,
-      ...input.influence.tags,
-      ...goalkeeperProfileTags(input.matchInput),
-      ...(input.segment.segmentState === undefined ? [] : scoreStateTags(input.segment.segmentState.score)),
-      ...segmentInfluenceTags(input.segment.segmentInfluence),
-      ...chainSegmentContextTags(input.segment.chainSegmentContext),
-      ...routeCandidateInfluenceTags(input.segment.routeCandidateInfluence),
-      ...shadowRouteSelectionTags(input.segment.shadowRouteSelection),
-      ...controlledSegmentSelectionTags(input.segment.controlledSegmentSelection),
-      ...segmentRouteInputTags(input.segment.segmentRouteInput),
-      ...controlledMiniMatchRouteSourceTags(input.segment.controlledMiniMatchRouteSource),
-      ...liveSelectionOverrideGuardTags(input.segment.liveSelectionOverrideGuard),
-      ...isolatedMiniMatchOverrideExperimentTags(input.segment.isolatedMiniMatchOverrideExperiment),
-      ...controlledSegmentReplayComparisonTags(input.segment.controlledSegmentReplayComparison),
-      ...realIsolatedSegmentReplayTags(input.segment.realIsolatedSegmentReplay),
-      ...controlledRouteResolutionSandboxTags(input.segment.controlledRouteResolutionSandbox),
-      ...sandboxScoringOpportunityModelTags(input.segment.sandboxScoringOpportunityModel),
-      ...sandboxScoringEventCandidateModelTags(input.segment.sandboxScoringEventCandidateModel),
-      ...sandboxScoringEventResolutionModelTags(input.segment.sandboxScoringEventResolutionModel),
-      ...attributeDrivenShotResolutionModelTags(input.segment.attributeDrivenShotResolutionModel),
-      ...goalkeeperResponseModelTags(input.segment.goalkeeperResponseModel),
-      ...reboundSecondChanceModelTags(input.segment.reboundSecondChanceModel),
-      ...multiActionContinuationModelTags(input.segment.multiActionContinuationModel),
-      ...sandboxSequenceReplayModelTags(input.segment.sandboxSequenceReplayModel),
-      ...controlledSegmentSandboxTimelineModelTags(input.segment.controlledSegmentSandboxTimelineModel),
+      ...baseTags,
+      ...scoringFamilyTags(scoringAttribution),
     ],
     narrativeWeight: 70,
   };

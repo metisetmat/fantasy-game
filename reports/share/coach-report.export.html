@@ -2490,6 +2490,49 @@
       <p class="durable-storage-decision-warning">KEEP_SCORING_CONSTANTS_AND_CONFIRM_ON_FULL_MATCH_BATCH_BEFORE_GLOBAL_ECONOMY_DECISION</p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Origine des points">
+      <div>
+        <h3>Origine des points</h3>
+        <p>Lecture single-run : les points restent issus des evenements officiels score_change. Cette section attribue chaque score a une famille pour rendre la calibration lisible, sans modifier le score.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Score officiel</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Points traces</span><strong>45</strong></div>
+            <div><span>Evenements officiels</span><strong>15</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Couverture</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Attribution</span><strong>100%</strong></div>
+            <div><span>Attribues</span><strong>15/15</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>UNKNOWN</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Apres 6B</span><strong>0</strong></div>
+            <div><span>Legacy 6A</span><strong>15</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Confiance</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Haute</span><strong>15</strong></div>
+            <div><span>Moyenne / basse</span><strong>0 / 0</strong></div>
+          </div>
+        </article>
+      </div>
+      <table class="premium-table">
+        <thead><tr><th>Famille de score</th><th>Evenements</th><th>Points</th></tr></thead>
+        <tbody><tr><td>SHOT_GOAL</td><td>15</td><td>45</td></tr><tr><td>TRY_TOUCHDOWN</td><td>0</td><td>0</td></tr><tr><td>CONVERSION_GOAL</td><td>0</td><td>0</td></tr><tr><td>DROP_GOAL</td><td>0</td><td>0</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0</td></tr></tbody>
+      </table>
+      <p class="durable-storage-decision-guard">Aucun evenement de score officiel ne reste sans famille.</p>
+      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -3622,7 +3665,7 @@
         <li>scoring events rewritten: false</li>
         <li>forced opponent score applied: false</li>
         <li>root-cause primary cause: MIXED_CAUSES</li>
-        <li>root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY</li>
+        <li>root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, GOALKEEPER_UNDERWEIGHTED, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY</li>
         <li>root-cause confidence: medium</li>
         <li>root-cause evidence: Single-run score economy shows 15 scoring events, 100% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 2 scoring events in one segment.</li>
         <li>segment count: 8</li>
@@ -3653,6 +3696,43 @@
         <li>invented statistic count: 0</li>
         <li>trend proof claim count: 0</li>
         <li>global economy claim count: 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails attribution familles de score</summary>
+      <ul>
+        <li>status: PASS</li>
+        <li>scope: FULL_MATCH_SCORING_FAMILY_SINGLE_RUN</li>
+        <li>attribution version: SCORING_FAMILY_ATTRIBUTION_6B</li>
+        <li>total scoring event count: 15</li>
+        <li>attributed scoring event count: 15</li>
+        <li>unknown scoring event count: 0</li>
+        <li>legacy unknown scoring event count: 15</li>
+        <li>unknown scoring point total: 0</li>
+        <li>attribution coverage rate: 100</li>
+        <li>scoring events by family: {&quot;SHOT_GOAL&quot;:15,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family: {&quot;SHOT_GOAL&quot;:45,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>unknown reasons: none</li>
+        <li>high confidence count: 15</li>
+        <li>medium confidence count: 0</li>
+        <li>low confidence count: 0</li>
+        <li>family attribution warnings: none</li>
+        <li>warning count by code: {&quot;UNKNOWN_SCORING_FAMILY&quot;:0,&quot;MISSING_SCORING_ACTION&quot;:0,&quot;MISSING_SCORE_CHANGE_POINT_VALUE&quot;:0,&quot;FAMILY_POINT_VALUE_MISMATCH&quot;:0,&quot;INACTIVE_PENALTY_SHOT_USED&quot;:0,&quot;AMBIGUOUS_SCORING_FAMILY&quot;:0,&quot;LOW_CONFIDENCE_SCORING_ATTRIBUTION&quot;:0,&quot;SCORING_EVENT_WITHOUT_OFFICIAL_CONSEQUENCE&quot;:0,&quot;SCORE_CHANGE_WITHOUT_SCORING_FAMILY&quot;:0}</li>
+        <li>scoring constants changed: false</li>
+        <li>score cap applied: false</li>
+        <li>post-hoc score rewrite applied: false</li>
+        <li>scoring events deleted: false</li>
+        <li>scoring events rewritten: false</li>
+        <li>forced opponent score applied: false</li>
+        <li>official timeline mutation count: 0</li>
+        <li>official possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>batch/live separation preserved: true</li>
+        <li>MatchBonusEvent changed: false</li>
+        <li>persistence used for attribution: false</li>
+        <li>SQLite used as score economy source: false</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: true</li>
       </ul>
     </details>
     <details class="appendix">

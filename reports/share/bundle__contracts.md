@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6A - Full-Match Score Economy Calibration Reset. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -13,6 +13,11 @@ import type { PlayerAttributes, PlayerRole } from "../models/player";
 import type { TeamIdentity } from "../models/team";
 import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "./matchReportEvidence";
 import type { MatchReportWarning } from "./matchReportWarnings";
+import type {
+  OfficialScoringFamily,
+  ScoringAttributionConfidence,
+  ScoringFamilyAttributionWarningCode,
+} from "./scoringFamily";
 
 export type MatchTimestamp = {
   readonly tick: TacticalTick;
@@ -193,6 +198,14 @@ export interface MatchEvent {
   readonly fatigueContext: FatigueContextSnapshot;
   readonly outcome: EventOutcome;
   readonly consequences: readonly EventConsequence[];
+  readonly scoringFamily?: OfficialScoringFamily;
+  readonly scoringAction?: OfficialScoringFamily;
+  readonly scoringPointValue?: number;
+  readonly scoringAttributionConfidence?: ScoringAttributionConfidence;
+  readonly scoringAttributionReason?: string;
+  readonly scoringAttributionSourceFields?: readonly string[];
+  readonly scoringAttributionMissingFields?: readonly string[];
+  readonly scoringAttributionWarningCodes?: readonly ScoringFamilyAttributionWarningCode[];
   readonly tags: readonly EventTag[];
   readonly narrativeWeight: Rating;
 }
@@ -514,6 +527,43 @@ export type MatchReportWarning = {
   readonly eventIds: readonly string[];
   readonly mayInvalidateGlobalScoringEconomy: false;
 };
+```
+
+## File: src/contracts/scoringFamily.ts
+
+```ts
+export type OfficialScoringFamily =
+  | "SHOT_GOAL"
+  | "TRY_TOUCHDOWN"
+  | "CONVERSION_GOAL"
+  | "DROP_GOAL"
+  | "PENALTY_SHOT"
+  | "UNKNOWN";
+
+export type ScoringAttributionConfidence = "high" | "medium" | "low";
+
+export type ScoringFamilyAttributionWarningCode =
+  | "UNKNOWN_SCORING_FAMILY"
+  | "MISSING_SCORING_ACTION"
+  | "MISSING_SCORE_CHANGE_POINT_VALUE"
+  | "FAMILY_POINT_VALUE_MISMATCH"
+  | "INACTIVE_PENALTY_SHOT_USED"
+  | "AMBIGUOUS_SCORING_FAMILY"
+  | "LOW_CONFIDENCE_SCORING_ATTRIBUTION"
+  | "SCORING_EVENT_WITHOUT_OFFICIAL_CONSEQUENCE"
+  | "SCORE_CHANGE_WITHOUT_SCORING_FAMILY";
+
+export interface ScoringFamilyAttribution {
+  readonly family: OfficialScoringFamily;
+  readonly scoringAction: OfficialScoringFamily;
+  readonly confidence: ScoringAttributionConfidence;
+  readonly attributionReason: string;
+  readonly sourceFieldsUsed: readonly string[];
+  readonly missingFields: readonly string[];
+  readonly warningCodes: readonly ScoringFamilyAttributionWarningCode[];
+  readonly pointValue?: number;
+  readonly unknownReason?: string;
+}
 ```
 
 ## File: src/contracts/engineToCoach.test.ts

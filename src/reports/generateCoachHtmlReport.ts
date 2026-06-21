@@ -13,6 +13,7 @@ import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurabl
 import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
+import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -202,6 +203,7 @@ export function writeLatestCoachReport(): void {
         exportReportHtml: baselineExportHtml,
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
+  const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -217,6 +219,7 @@ export function writeLatestCoachReport(): void {
     ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
     ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
     fullMatchScoreEconomyCalibration,
+    scoringFamilyAttributionAudit,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
