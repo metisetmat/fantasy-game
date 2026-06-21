@@ -2126,7 +2126,7 @@
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
         <li>queried signal count: 40</li>
-        <li>database adapter implemented false: true</li>
+        <li>migration SPI adapter implemented false: true</li>
         <li>migration from file-backed required true: true</li>
       </ul>
       <div class="history-consistency-grid">
@@ -2161,7 +2161,7 @@
         </article>
       </div>
       <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
-      <p class="history-consistency-database-contract">Database adapter contract visible, implemented=false, migrationRequired=true.</p>
+      <p class="history-consistency-database-contract">Migration SPI adapter contract visible, implemented=false, migrationRequired=true. This refers to the previous migration SPI, not to the experimental or durable storage adapter.</p>
       <p class="history-consistency-guard">Les compteurs de cette section viennent d&rsquo;un instantan&eacute; unique issu du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du renderer.</p>
       <p class="history-consistency-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
     </section>
@@ -2212,7 +2212,7 @@
       </div>
       <p class="database-migration-boundary">Migration de pr&eacute;paration uniquement : aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
       <p class="database-migration-plan">Save-result semantics preserved: true. Report queries read-only: true.</p>
-      <p class="database-migration-guard">Database adapter implemented false, production ready false, real database read/write counts 0.</p>
+      <p class="database-migration-guard">Migration SPI adapter implemented false, production ready false, real database read/write counts 0. This refers to the previous migration SPI, not to the experimental or durable storage adapter.</p>
       <p class="database-migration-warning">Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active.</p>
     </section>
 
@@ -2271,6 +2271,118 @@
       <p class="database-adapter-spike-boundary">Boundary 5E : file_backed reste la source produit active ; l&rsquo;adapter experimental_database reste un spike technique non appliqu&eacute;.</p>
       <p class="database-adapter-spike-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
       <p class="database-adapter-spike-warning">Experimental database adapter exists behind a disabled-by-default feature flag. Product history source remains file_backed; database adapter is not product truth. Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active. Persistence snapshot consumed: 5c-replaced-6-6-6-40.</p>
+    </section>
+
+    <section class="durable-storage-decision-section" aria-label="D&eacute;cision stockage durable">
+      <div>
+        <h3>D&eacute;cision stockage durable</h3>
+        <p>Le stockage durable cible est choisi pour la prochaine &eacute;tape de d&eacute;veloppement/test, sans activation produit. Le rapport continue de lire l&rsquo;historique actif en file_backed.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Cible durable</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Storage target selected</span><strong>sqlite_local</strong></div>
+            <div><span>Schema version</span><strong>coach_match_history_v1</strong></div>
+            <div><span>Decision made</span><strong>true</strong></div>
+            <div><span>Real adapter wiring prepared</span><strong>true</strong></div>
+            <div><span>Adapter kind</span><strong>sqlite_local_disabled</strong></div>
+            <div><span>Adapter implemented</span><strong>true</strong></div>
+            <div><span>Adapter production ready</span><strong>false</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Feature flag enabled</span><strong>false</strong></div>
+            <div><span>Default feature flag enabled</span><strong>false</strong></div>
+            <div><span>Product activation allowed</span><strong>false</strong></div>
+            <div><span>Active product history source</span><strong>file_backed</strong></div>
+            <div><span>Database used as product truth</span><strong>false</strong></div>
+            <div><span>Report can use as source of truth</span><strong>false</strong></div>
+            <div><span>Real DB write count</span><strong>0</strong></div>
+            <div><span>Real DB read count</span><strong>0</strong></div>
+            <div><span>Dry run only</span><strong>true</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Sc&eacute;narios pr&eacute;par&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Inserted scenario pass</span><strong>true</strong></div>
+            <div><span>Replaced scenario pass</span><strong>true</strong></div>
+            <div><span>Ignored duplicate scenario pass</span><strong>true</strong></div>
+            <div><span>Query by team pass</span><strong>true</strong></div>
+            <div><span>Query by phase pass</span><strong>true</strong></div>
+            <div><span>Deterministic ordering pass</span><strong>true</strong></div>
+            <div><span>Durable adapter record count</span><strong>6</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Prochaine &eacute;tape produit</h4>
+          <p>Activer une lecture contr&ocirc;l&eacute;e en environnement test/local, pas en produit. La lecture produit courante reste file_backed jusqu&rsquo;&agrave; validation explicite ult&eacute;rieure.</p>
+          <p>SQLite local is selected for the next durable development/test target because it is simple, inspectable, and can stay isolated behind disabled product activation.</p>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5F : sqlite_local est une cible de pr&eacute;paration ; file_backed reste la source active, la base n&rsquo;est pas utilis&eacute;e comme v&eacute;rit&eacute; produit et les compteurs DB r&eacute;els restent &agrave; 0.</p>
+      <p class="durable-storage-decision-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
+      <p class="durable-storage-decision-warning">Durable storage target selected for preparation only: sqlite_local. SQLite local adapter wiring is disabled/no-IO in Sprint 5F. Product history source remains file_backed; database adapter is not product truth. Persistence snapshot consumed: 5c-replaced-6-6-6-40. Migration preparation status carried forward: available. Database adapter spike status carried forward: available.</p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Lecture SQLite locale contr&ocirc;l&eacute;e">
+      <div>
+        <h3>Lecture SQLite locale contr&ocirc;l&eacute;e</h3>
+        <p>Ce mode sert uniquement &agrave; relire localement des records compatibles en environnement test/dev. Il n&rsquo;est pas actif par d&eacute;faut et la source produit active reste inchang&eacute;e.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Mode contr&ocirc;l&eacute;</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Mode</span><strong>controlled_local_readonly_db</strong></div>
+            <div><span>Stockage cible</span><strong>sqlite_local</strong></div>
+            <div><span>Sch&eacute;ma</span><strong>coach_match_history_v1</strong></div>
+            <div><span>Read-only mode</span><strong>true</strong></div>
+            <div><span>Write mode allowed</span><strong>false</strong></div>
+            <div><span>Write rejected pass</span><strong>true</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Actif par d&eacute;faut</span><strong>non</strong></div>
+            <div><span>Feature flag enabled</span><strong>false</strong></div>
+            <div><span>Activation produit</span><strong>non</strong></div>
+            <div><span>Source produit active</span><strong>file_backed</strong></div>
+            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>non</strong></div>
+            <div><span>Rapport source officielle</span><strong>non</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Lecture locale</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Lectures DB r&eacute;elles mode d&eacute;faut</span><strong>0</strong></div>
+            <div><span>&Eacute;critures DB r&eacute;elles</span><strong>0</strong></div>
+            <div><span>Controlled read attempts</span><strong>2</strong></div>
+            <div><span>Source record count</span><strong>6</strong></div>
+            <div><span>Read-only record count</span><strong>6</strong></div>
+            <div><span>Read-only query count</span><strong>2</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Contrats v&eacute;rifi&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Query by team pass</span><strong>true</strong></div>
+            <div><span>Query by phase pass</span><strong>true</strong></div>
+            <div><span>Deterministic ordering pass</span><strong>true</strong></div>
+            <div><span>Schema compatibility pass</span><strong>true</strong></div>
+            <div><span>Dry-run fallback</span><strong>true</strong></div>
+            <div><span>True SQLite IO deferred</span><strong>true</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5G : mode contr&ocirc;l&eacute;, lecture locale, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, aucune &eacute;criture et source produit active inchang&eacute;e.</p>
+      <p class="durable-storage-decision-guard">Aucune modification du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection, de la composition ou des d&eacute;cisions coach.</p>
+      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : Product History Source Switch Trial in non-prod only.</p>
+      <p class="durable-storage-decision-warning">controlled_local_readonly_db is available only as an explicit test/dev mode. Product history source remains file_backed; SQLite local is not product truth. No real SQLite IO occurs in Sprint 5G; true SQLite read wiring is deferred to a later non-prod trial. Sprint 5F durable decision carried forward: sqlite_local/coach_match_history_v1.</p>
     </section>
 
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
@@ -3161,7 +3273,7 @@
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
         <li>queried signal count: 40</li>
-        <li>database adapter implemented false: true</li>
+        <li>migration SPI adapter implemented false: true</li>
         <li>migration from file-backed required true: true</li>
         <li>report queries read-only: true</li>
         <li>global proof claim count: 0</li>
@@ -3175,7 +3287,7 @@
         <li>source store kind: file_backed</li>
         <li>target adapter kind: mock_database</li>
         <li>dry run only: true</li>
-        <li>database adapter implemented: false</li>
+        <li>migration SPI adapter implemented: false</li>
         <li>database adapter production ready: false</li>
         <li>source record count: 6</li>
         <li>target existing record count: 0</li>
@@ -3250,6 +3362,90 @@
         <li>possession mutation count 0</li>
         <li>production scoring event creation count 0</li>
         <li>global economy claim count 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails d&eacute;cision stockage durable</summary>
+      <ul>
+        <li>durable storage status: available</li>
+        <li>selected storage target: sqlite_local</li>
+        <li>decision made: true</li>
+        <li>schema version: coach_match_history_v1</li>
+        <li>schema field count: 12</li>
+        <li>schema covers required fields: true</li>
+        <li>real adapter wiring prepared: true</li>
+        <li>adapter kind: sqlite_local_disabled</li>
+        <li>adapter implemented: true</li>
+        <li>adapter production ready: false</li>
+        <li>feature flag enabled: false</li>
+        <li>default feature flag enabled: false</li>
+        <li>product activation allowed: false</li>
+        <li>active product history source: file_backed</li>
+        <li>database used as product truth: false</li>
+        <li>report can use as source of truth: false</li>
+        <li>real DB write count: 0</li>
+        <li>real DB read count: 0</li>
+        <li>dry run only: true</li>
+        <li>inserted scenario pass: true</li>
+        <li>replaced scenario pass: true</li>
+        <li>ignored duplicate scenario pass: true</li>
+        <li>query by team pass: true</li>
+        <li>query by phase pass: true</li>
+        <li>deterministic ordering pass: true</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+      </ul>
+    </details>
+    
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails lecture SQLite locale contr&ocirc;l&eacute;e</summary>
+      <ul>
+        <li>controlled local read-only DB mode status: available</li>
+        <li>mode name: controlled_local_readonly_db</li>
+        <li>storage target: sqlite_local</li>
+        <li>schema version: coach_match_history_v1</li>
+        <li>read-only mode: true</li>
+        <li>write mode allowed: false</li>
+        <li>write rejected pass: true</li>
+        <li>product activation allowed: false</li>
+        <li>default enabled: false</li>
+        <li>feature flag enabled: false</li>
+        <li>active product history source: file_backed</li>
+        <li>database used as product truth: false</li>
+        <li>report can use as source of truth: false</li>
+        <li>real DB read count: 0</li>
+        <li>real DB write count: 0</li>
+        <li>controlled read attempt count: 2</li>
+        <li>dry-run fallback available: true</li>
+        <li>source record count: 6</li>
+        <li>read-only record count: 6</li>
+        <li>read-only query count: 2</li>
+        <li>query by team pass: true</li>
+        <li>query by phase pass: true</li>
+        <li>deterministic ordering pass: true</li>
+        <li>schema compatibility pass: true</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+        <li>trend proof claim count: 0</li>
+        <li>invented statistic count: 0</li>
+        <li>sandbox events promoted to official count: 0</li>
       </ul>
     </details>
     <details class="appendix">

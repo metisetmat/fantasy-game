@@ -9,6 +9,8 @@ import { buildCoachReportHistoryStoreConsistency } from "../../reports/buildCoac
 import { buildCoachReportPersistenceEvidenceSnapshot } from "../../reports/buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "../../reports/buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportDatabaseAdapterSpike } from "../../reports/buildCoachReportDatabaseAdapterSpike";
+import { buildCoachReportDurableStorageDecision } from "../../reports/buildCoachReportDurableStorageDecision";
+import { buildCoachReportControlledLocalReadOnlyDbMode } from "../../reports/buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -23,6 +25,8 @@ import type { CoachReportHistoryStoreConsistencyModel } from "../../reports/coac
 import type { CoachReportPersistenceEvidenceSnapshot } from "../../reports/coachReportPersistenceEvidenceSnapshot";
 import type { CoachReportDatabaseMigrationPreparationModel } from "../../reports/coachReportDatabaseMigrationPreparation";
 import type { CoachReportDatabaseAdapterSpikeModel } from "../../reports/coachReportDatabaseAdapterSpike";
+import type { CoachReportDurableStorageDecisionModel } from "../../reports/coachReportDurableStorageDecision";
+import type { CoachReportControlledLocalReadOnlyDbModeModel } from "../../reports/coachReportControlledLocalReadOnlyDbMode";
 import type { CoachMatchHistorySaveResult } from "../../reports/history/coachMatchHistoryStore";
 import type { CoachMatchHistoryMigrationDryRunModel } from "../../reports/history/coachMatchHistoryMigrationDryRun";
 import {
@@ -42,6 +46,8 @@ import { buildCoachMatchHistoryMigrationDryRun } from "../../reports/history/bui
 import { createMockDatabaseCoachMatchHistoryAdapter } from "../../reports/history/mockDatabaseCoachMatchHistoryAdapter";
 import { resolveDatabaseHistoryAdapterFeatureFlag } from "../../reports/history/databaseHistoryAdapterFeatureFlag";
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "../../reports/history/experimentalDatabaseCoachMatchHistoryAdapter";
+import { createSqliteLocalCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalCoachMatchHistoryAdapter";
+import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "../../reports/history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "../../reports/renderCoachProductReport";
 import { renderCoachReportExportHtml } from "../../reports/renderCoachReportExportHtml";
 import { runFullMatch } from "../runFullMatch";
@@ -456,6 +462,8 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly migrationDryRun: CoachMatchHistoryMigrationDryRunModel;
   readonly databaseMigrationPreparation: CoachReportDatabaseMigrationPreparationModel;
   readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
+  readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
+  readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
   readonly exportHtml: string;
 }
 
@@ -571,6 +579,28 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       productReportHtml: productHtml,
       exportReportHtml: baselineExportHtml,
     });
+    const durableStorageDecision = buildCoachReportDurableStorageDecision({
+      persistenceEvidenceSnapshot,
+      migrationPreparation: databaseMigrationPreparation,
+      databaseAdapterSpike,
+      sourceRecords: historyStore.listAll(),
+      durableAdapter: createSqliteLocalCoachMatchHistoryAdapter({
+        featureFlag: databaseFeatureFlag,
+      }),
+      featureFlag: databaseFeatureFlag,
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
+    const controlledLocalReadOnlyDbMode = buildCoachReportControlledLocalReadOnlyDbMode({
+      durableStorageDecision,
+      sourceRecords: historyStore.listAll(),
+      readOnlyAdapter: createSqliteLocalReadOnlyCoachMatchHistoryAdapter({
+        initialRecords: historyStore.listAll(),
+        featureFlagEnabled: false,
+      }),
+      productReportHtml: productHtml,
+      exportReportHtml: baselineExportHtml,
+    });
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -582,6 +612,8 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       persistenceEvidenceSnapshot,
       databaseMigrationPreparation,
       databaseAdapterSpike,
+      durableStorageDecision,
+      controlledLocalReadOnlyDbMode,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -591,6 +623,8 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       migrationDryRun,
       databaseMigrationPreparation,
       databaseAdapterSpike,
+      durableStorageDecision,
+      controlledLocalReadOnlyDbMode,
       exportHtml,
     };
 
@@ -4656,6 +4690,329 @@ export function renderFullMatchWorkbenchChainReplay5EValidation(model: FullMatch
     "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
     "- CONFIRM_DRY_RUN_SAVE_QUERY_SEMANTICS.",
     "- PREPARE_DATABASE_ADAPTER_IMPLEMENTATION_OR_UI_WIRING.",
+    "",
+  ].join("\n");
+}
+
+function durableStorageDecisionCountLines(
+  model: CoachReportDurableStorageDecisionModel,
+): readonly string[] {
+  return [
+    `- storage target selected: ${model.selectedStorageTarget}`,
+    `- schema version: ${model.schemaVersion}`,
+    `- decision made: ${model.decisionMade}`,
+    `- real adapter wiring prepared: ${model.realAdapterWiringPrepared}`,
+    `- adapter kind: ${model.adapterKind}`,
+    `- adapter implemented: ${model.adapterImplemented}`,
+    `- adapter production ready: ${model.adapterProductionReady}`,
+    `- feature flag enabled: ${model.featureFlagEnabled}`,
+    `- default feature flag enabled: ${model.defaultFeatureFlagEnabled}`,
+    `- product activation allowed: ${model.productActivationAllowed}`,
+    `- active product history source: ${model.activeProductHistorySource}`,
+    `- database used as product truth: ${model.databaseUsedAsProductTruth}`,
+    `- report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}`,
+    `- real DB write count: ${model.realDatabaseWriteCount}`,
+    `- real DB read count: ${model.realDatabaseReadCount}`,
+    `- dry run only: ${model.dryRunOnly}`,
+    `- inserted scenario pass: ${model.insertedScenarioPass}`,
+    `- replaced scenario pass: ${model.replacedScenarioPass}`,
+    `- ignored duplicate scenario pass: ${model.ignoredDuplicateScenarioPass}`,
+    `- query by team pass: ${model.queryByTeamPass}`,
+    `- query by phase pass: ${model.queryByPhasePass}`,
+    `- deterministic ordering pass: ${model.deterministicOrderingPass}`,
+    `- source record count: ${model.sourceRecordCount}`,
+    `- durable adapter record count: ${model.durableAdapterRecordCount}`,
+    `- dry run save count: ${model.dryRunSaveCount}`,
+    `- dry run query count: ${model.dryRunQueryCount}`,
+    `- score mutation count: ${model.canMutateScore ? 1 : 0}`,
+    `- timeline mutation count: ${model.canMutateTimeline ? 1 : 0}`,
+    `- possession mutation count: ${model.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${model.canCreateProductionScoringEvents ? 1 : 0}`,
+    `- lineup mutation count: ${model.canMutateLineup ? 1 : 0}`,
+    `- starters mutation count: ${model.canMutateStarters ? 1 : 0}`,
+    `- bench mutation count: ${model.canMutateBench ? 1 : 0}`,
+    `- live selection driver count: ${model.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${model.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- global economy claim count: ${model.canClaimGlobalEconomy ? 1 : 0}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+  ];
+}
+
+function controlledLocalReadOnlyDbModeCountLines(
+  model: CoachReportControlledLocalReadOnlyDbModeModel,
+): readonly string[] {
+  return [
+    `- controlled local read-only DB mode available: ${model.status === "available"}`,
+    `- mode name: ${model.modeName}`,
+    `- storage target selected: ${model.storageTarget}`,
+    `- schema version: ${model.schemaVersion}`,
+    `- read-only mode: ${model.readOnlyMode}`,
+    `- write mode allowed: ${model.writeModeAllowed}`,
+    `- adapter implemented: ${model.adapterImplemented}`,
+    `- adapter production ready: ${model.adapterProductionReady}`,
+    `- feature flag enabled: ${model.featureFlagEnabled}`,
+    `- default feature flag enabled: ${model.defaultEnabled}`,
+    `- product activation allowed: ${model.productActivationAllowed}`,
+    `- active product history source: ${model.activeProductHistorySource}`,
+    `- database used as product truth: ${model.databaseUsedAsProductTruth}`,
+    `- report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}`,
+    `- real DB write count: ${model.realDatabaseWriteCount}`,
+    `- default real DB read count: ${model.realDatabaseReadCount}`,
+    `- controlled read attempt count: ${model.controlledReadAttemptCount}`,
+    `- dry-run fallback available: ${model.dryRunFallbackAvailable}`,
+    `- source record count: ${model.sourceRecordCount}`,
+    `- read-only adapter record count: ${model.readOnlyRecordCount}`,
+    `- read-only query count: ${model.readOnlyQueryCount}`,
+    `- query by team pass: ${model.readOnlyQueryByTeamPass}`,
+    `- query by phase pass: ${model.readOnlyQueryByPhasePass}`,
+    `- deterministic ordering pass: ${model.deterministicOrderingPass}`,
+    `- schema compatibility pass: ${model.schemaCompatibilityPass}`,
+    `- write rejected pass: ${model.writeRejectedPass}`,
+    `- score mutation count: ${model.canMutateScore ? 1 : 0}`,
+    `- timeline mutation count: ${model.canMutateTimeline ? 1 : 0}`,
+    `- possession mutation count: ${model.canMutatePossession ? 1 : 0}`,
+    `- production scoring event creation count: ${model.canCreateProductionScoringEvents ? 1 : 0}`,
+    `- lineup mutation count: ${model.canMutateLineup ? 1 : 0}`,
+    `- starters mutation count: ${model.canMutateStarters ? 1 : 0}`,
+    `- bench mutation count: ${model.canMutateBench ? 1 : 0}`,
+    `- live selection driver count: ${model.canDriveLiveSelection ? 1 : 0}`,
+    `- production route resolution driver count: ${model.canDriveProductionRouteResolution ? 1 : 0}`,
+    `- global economy claim count: ${model.canClaimGlobalEconomy ? 1 : 0}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}`,
+    `- visible recommendation wording count: ${model.visibleRecommendationWordingCount}`,
+    `- visible selection wording count: ${model.visibleSelectionWordingCount}`,
+  ];
+}
+
+export function renderFullMatchWorkbenchChainReplay5GDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const readOnlyMode = context.controlledLocalReadOnlyDbMode;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5G",
+    "",
+    "Sprint 5G introduces controlled local read-only DB mode for test/dev only. Product history remains file_backed; SQLite local does not become product truth and no database writes are allowed.",
+    "",
+    "## Controlled Local Read-Only DB Mode",
+    ...controlledLocalReadOnlyDbModeCountLines(readOnlyMode),
+    "",
+    "## Product Boundary",
+    "- normal product mode remains file_backed.",
+    "- SQLite local read-only mode is not active by default.",
+    "- product activation allowed: false",
+    "- write mode allowed: false",
+    "- real database write count: 0",
+    "- default real database read count: 0",
+    "- controlled reads use a structured local contract; true SQLite IO is deferred.",
+    "- no score, timeline, possession, scoring-event, selection, lineup, or coach-decision mutation is allowed.",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_CONTROLLED_LOCAL_READONLY_DB_MODE.",
+    "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
+    "- CONFIRM_NO_DB_WRITES.",
+    "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
+    "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5GValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const readOnlyMode = context.controlledLocalReadOnlyDbMode;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("controlled local read-only DB mode exists.", readOnlyMode.status === "available", readOnlyMode.status),
+    check("mode must be explicitly requested.", readOnlyMode.explicitControlledModeOnly, readOnlyMode.modeName),
+    check("storage target selected is sqlite_local.", readOnlyMode.storageTarget === "sqlite_local", readOnlyMode.storageTarget),
+    check("schema version is coach_match_history_v1.", readOnlyMode.schemaVersion === "coach_match_history_v1", readOnlyMode.schemaVersion),
+    check("read-only mode is true.", readOnlyMode.readOnlyMode, ""),
+    check("write mode allowed is false.", !readOnlyMode.writeModeAllowed, ""),
+    check("adapter implemented is true.", readOnlyMode.adapterImplemented, ""),
+    check("adapter production ready is false.", !readOnlyMode.adapterProductionReady, ""),
+    check("feature flag enabled is false.", !readOnlyMode.featureFlagEnabled, ""),
+    check("default feature flag enabled is false.", !readOnlyMode.defaultEnabled, ""),
+    check("product activation allowed is false.", !readOnlyMode.productActivationAllowed, ""),
+    check("active product history source is file_backed.", readOnlyMode.activeProductHistorySource === "file_backed", readOnlyMode.activeProductHistorySource),
+    check("database used as product truth is false.", !readOnlyMode.databaseUsedAsProductTruth, ""),
+    check("report can use as source of truth is false.", !readOnlyMode.reportCanUseAsSourceOfTruth, ""),
+    check("real DB write count is 0.", readOnlyMode.realDatabaseWriteCount === 0, "0"),
+    check("default real DB read count is 0.", readOnlyMode.realDatabaseReadCount === 0, "0"),
+    check("controlled read attempts are visible.", readOnlyMode.controlledReadAttemptCount > 0, String(readOnlyMode.controlledReadAttemptCount)),
+    check("source record count is visible.", readOnlyMode.sourceRecordCount > 0, String(readOnlyMode.sourceRecordCount)),
+    check("read-only adapter record count matches source.", readOnlyMode.readOnlyRecordCount === readOnlyMode.sourceRecordCount, `${readOnlyMode.readOnlyRecordCount}/${readOnlyMode.sourceRecordCount}`),
+    check("query by team passes.", readOnlyMode.readOnlyQueryByTeamPass, ""),
+    check("query by phase passes.", readOnlyMode.readOnlyQueryByPhasePass, ""),
+    check("deterministic ordering passes.", readOnlyMode.deterministicOrderingPass, ""),
+    check("schema compatibility passes.", readOnlyMode.schemaCompatibilityPass, ""),
+    check("write rejected passes.", readOnlyMode.writeRejectedPass, ""),
+    check("score mutation count is 0.", !readOnlyMode.canMutateScore, "0"),
+    check("timeline mutation count is 0.", !readOnlyMode.canMutateTimeline, "0"),
+    check("possession mutation count is 0.", !readOnlyMode.canMutatePossession, "0"),
+    check("production scoring event creation count is 0.", !readOnlyMode.canCreateProductionScoringEvents, "0"),
+    check("lineup mutation count is 0.", !readOnlyMode.canMutateLineup, "0"),
+    check("starters mutation count is 0.", !readOnlyMode.canMutateStarters, "0"),
+    check("bench mutation count is 0.", !readOnlyMode.canMutateBench, "0"),
+    check("live selection driver count is 0.", !readOnlyMode.canDriveLiveSelection, "0"),
+    check("production route resolution driver count is 0.", !readOnlyMode.canDriveProductionRouteResolution, "0"),
+    check("global economy claim count is 0.", !readOnlyMode.canClaimGlobalEconomy, "0"),
+    check("trend proof claim count is 0.", readOnlyMode.trendProofClaimCount === 0, "0"),
+    check("invented statistic count is 0.", readOnlyMode.inventedStatisticCount === 0, "0"),
+    check("sandbox events promoted to official count is 0.", readOnlyMode.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible recommendation wording count is 0.", readOnlyMode.visibleRecommendationWordingCount === 0, "0"),
+    check("visible selection wording count is 0.", readOnlyMode.visibleSelectionWordingCount === 0, "0"),
+    check("scoring constants unchanged.", readOnlyMode.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", readOnlyMode.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", readOnlyMode.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global economy proof.", readOnlyMode.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("export contains controlled local read-only DB section.", exportHtml.includes("Lecture SQLite locale contr&ocirc;l&eacute;e"), ""),
+    check("export states file_backed remains active.", exportHtml.includes("source produit active reste inchang"), ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5G Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...controlledLocalReadOnlyDbModeCountLines(readOnlyMode),
+    "",
+    "## Recommendation",
+    "- CONFIRM_CONTROLLED_LOCAL_READONLY_DB_MODE.",
+    "- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.",
+    "- CONFIRM_NO_DB_WRITES.",
+    "- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.",
+    "- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.",
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const decision = context.durableStorageDecision;
+
+  return [
+    "# FullMatch Workbench Chain Replay 5F",
+    "",
+    "Sprint 5F makes the durable storage decision explicit and prepares disabled real-adapter wiring. Product history remains file_backed; no real database read/write occurs.",
+    "",
+    "## Durable Storage Decision",
+    ...durableStorageDecisionCountLines(decision),
+    "",
+    "## Schema Decision",
+    "- schema version: coach_match_history_v1",
+    "- fields covered: recordId, matchId, teamId, opponentTeamId, generatedAt, source, score, phase signals, evidence snapshot id, createdAt, updatedAt, idempotency key",
+    "- MatchReport contract modified: false",
+    "- MatchBonusEvent modified: false",
+    "- scoring constants modified: false",
+    "- scoring events created by schema: false",
+    "",
+    "## Product Boundary",
+    "- durable storage target selected: sqlite_local",
+    "- real adapter wiring prepared: true",
+    "- real database IO enabled: false",
+    "- production activation allowed: false",
+    "- product history source remains file_backed.",
+    "- database used as product truth: false",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.",
+    "",
+    "## Recommendation",
+    "- CONFIRM_DURABLE_STORAGE_DECISION_SQLITE_LOCAL.",
+    "- CONFIRM_SCHEMA_VERSION_COACH_MATCH_HISTORY_V1.",
+    "- CONFIRM_DISABLED_REAL_ADAPTER_WIRING.",
+    "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
+    "- PREPARE_CONTROLLED_LOCAL_TEST_READ_ONLY_DB_MODE.",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchWorkbenchChainReplay5FValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const decision = context.durableStorageDecision;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("Durable Storage Decision model is available.", decision.status === "available", decision.status),
+    check("storage target selected is sqlite_local.", decision.selectedStorageTarget === "sqlite_local", decision.selectedStorageTarget),
+    check("schema version is coach_match_history_v1.", decision.schemaVersion === "coach_match_history_v1", decision.schemaVersion),
+    check("schema covers required fields.", decision.schemaCoversRequiredFields, String(decision.schemaFieldCount)),
+    check("real adapter wiring prepared.", decision.realAdapterWiringPrepared, ""),
+    check("adapter implemented is true.", decision.adapterImplemented, ""),
+    check("adapter production ready is false.", !decision.adapterProductionReady, ""),
+    check("feature flag enabled is false.", !decision.featureFlagEnabled, ""),
+    check("default feature flag enabled is false.", !decision.defaultFeatureFlagEnabled, ""),
+    check("product activation allowed is false.", !decision.productActivationAllowed, ""),
+    check("active product history source is file_backed.", decision.activeProductHistorySource === "file_backed", decision.activeProductHistorySource),
+    check("database used as product truth is false.", !decision.databaseUsedAsProductTruth, ""),
+    check("report can use as source of truth is false.", !decision.reportCanUseAsSourceOfTruth, ""),
+    check("real DB write count is 0.", decision.realDatabaseWriteCount === 0, "0"),
+    check("real DB read count is 0.", decision.realDatabaseReadCount === 0, "0"),
+    check("dry run only is true.", decision.dryRunOnly, ""),
+    check("inserted scenario passes.", decision.insertedScenarioPass, ""),
+    check("replaced scenario passes.", decision.replacedScenarioPass, ""),
+    check("ignored duplicate scenario passes.", decision.ignoredDuplicateScenarioPass, ""),
+    check("query by team passes.", decision.queryByTeamPass, ""),
+    check("query by phase passes.", decision.queryByPhasePass, ""),
+    check("deterministic ordering passes.", decision.deterministicOrderingPass, ""),
+    check("durable adapter loads every source record.", decision.durableAdapterRecordCount === decision.sourceRecordCount, `${decision.durableAdapterRecordCount}/${decision.sourceRecordCount}`),
+    check("score mutation count is 0.", !decision.canMutateScore, "0"),
+    check("timeline mutation count is 0.", !decision.canMutateTimeline, "0"),
+    check("possession mutation count is 0.", !decision.canMutatePossession, "0"),
+    check("production scoring event creation count is 0.", !decision.canCreateProductionScoringEvents, "0"),
+    check("lineup mutation count is 0.", !decision.canMutateLineup, "0"),
+    check("starters mutation count is 0.", !decision.canMutateStarters, "0"),
+    check("bench mutation count is 0.", !decision.canMutateBench, "0"),
+    check("live selection driver count is 0.", !decision.canDriveLiveSelection, "0"),
+    check("production route resolution driver count is 0.", !decision.canDriveProductionRouteResolution, "0"),
+    check("global economy claim count is 0.", !decision.canClaimGlobalEconomy, "0"),
+    check("trend proof claim count is 0.", decision.trendProofClaimCount === 0, "0"),
+    check("invented statistic count is 0.", decision.inventedStatisticCount === 0, "0"),
+    check("sandbox events promoted to official count is 0.", decision.sandboxEventsPromotedToOfficialCount === 0, "0"),
+    check("visible recommendation wording count is 0.", decision.visibleRecommendationWordingCount === 0, "0"),
+    check("visible selection wording count is 0.", decision.visibleSelectionWordingCount === 0, "0"),
+    check("scoring constants unchanged.", decision.scoringConstantsUnchanged, ""),
+    check("MatchBonusEvent unchanged.", decision.matchBonusEventUnchanged, ""),
+    check("batch/live separation preserved.", decision.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.", decision.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("export contains durable storage decision section.", exportHtml.includes("D&eacute;cision stockage durable"), ""),
+    check("legacy migration wording is clarified.", decision.legacyMigrationWordingClarified && exportHtml.includes("previous migration SPI"), ""),
+    check("explicit exhaustive test command is available.", model.status === "available", "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# FullMatch Workbench Chain Replay 5F Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...durableStorageDecisionCountLines(decision),
+    "",
+    "## Recommendation",
+    "- CONFIRM_DURABLE_STORAGE_DECISION_SQLITE_LOCAL.",
+    "- CONFIRM_SCHEMA_VERSION_COACH_MATCH_HISTORY_V1.",
+    "- CONFIRM_DISABLED_REAL_ADAPTER_WIRING.",
+    "- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.",
+    "- PREPARE_CONTROLLED_LOCAL_TEST_READ_ONLY_DB_MODE.",
     "",
   ].join("\n");
 }

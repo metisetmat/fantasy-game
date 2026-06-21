@@ -15,6 +15,8 @@ export type DatabaseCoachMatchHistoryAdapterKind =
   | "future_database"
   | "mock_database"
   | "experimental_database"
+  | "sqlite_local_disabled"
+  | "sqlite_local_readonly_controlled"
   | "production_database";
 
 export interface DatabaseCoachMatchHistoryAdapterDescription {

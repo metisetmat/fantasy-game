@@ -21,6 +21,8 @@ import type { CoachReportPersistentHistoryAdapterModel } from "./coachReportPers
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReportDatabaseMigrationPreparation";
 import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabaseAdapterSpike";
+import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
+import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
   deriveCoachReportPhaseVisualReadabilityPresentation,
@@ -1694,7 +1696,7 @@ function renderHistoryStoreConsistency(
         <li>ignored duplicate count: ${values.ignoredDuplicateCount}</li>
         <li>queried record count: ${values.queriedRecordCount}</li>
         <li>queried signal count: ${values.queriedSignalCount}</li>
-        <li>database adapter implemented false: ${!values.databaseAdapterImplemented}</li>
+        <li>migration SPI adapter implemented false: ${!values.databaseAdapterImplemented}</li>
         <li>migration from file-backed required true: ${values.migrationFromFileBackedRequired}</li>
       </ul>
       <div class="history-consistency-grid">
@@ -1729,7 +1731,7 @@ function renderHistoryStoreConsistency(
         </article>
       </div>
       <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
-      <p class="history-consistency-database-contract">Database adapter contract visible, implemented=false, migrationRequired=true.</p>
+      <p class="history-consistency-database-contract">Migration SPI adapter contract visible, implemented=false, migrationRequired=true. This refers to the previous migration SPI, not to the experimental or durable storage adapter.</p>
       <p class="history-consistency-guard">Les compteurs de cette section viennent d&rsquo;un instantan&eacute; unique issu du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du renderer.</p>
       ${model === undefined || model.warnings.length === 0 ? "" : `<p class="history-consistency-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
     </section>`;
@@ -1786,7 +1788,7 @@ function renderDatabaseMigrationPreparation(
       </div>
       <p class="database-migration-boundary">Migration de pr&eacute;paration uniquement : aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
       <p class="database-migration-plan">Save-result semantics preserved: ${model.preservesSaveResultSemantics}. Report queries read-only: ${model.reportQueriesReadOnly}.</p>
-      <p class="database-migration-guard">Database adapter implemented false, production ready false, real database read/write counts 0.</p>
+      <p class="database-migration-guard">Migration SPI adapter implemented false, production ready false, real database read/write counts 0. This refers to the previous migration SPI, not to the experimental or durable storage adapter.</p>
       ${model.warnings.length === 0 ? "" : `<p class="database-migration-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
     </section>`;
 }
@@ -1854,6 +1856,136 @@ function renderDatabaseAdapterSpike(
       <p class="database-adapter-spike-boundary">Boundary 5E : file_backed reste la source produit active ; l&rsquo;adapter experimental_database reste un spike technique non appliqu&eacute;.</p>
       <p class="database-adapter-spike-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
       ${model.warnings.length === 0 ? "" : `<p class="database-adapter-spike-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
+function renderDurableStorageDecision(
+  model: CoachReportDurableStorageDecisionModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="durable-storage-decision-section" aria-label="D&eacute;cision stockage durable">
+      <div>
+        <h3>D&eacute;cision stockage durable</h3>
+        <p>Le stockage durable cible est choisi pour la prochaine &eacute;tape de d&eacute;veloppement/test, sans activation produit. Le rapport continue de lire l&rsquo;historique actif en file_backed.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Cible durable</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Storage target selected</span><strong>${model.selectedStorageTarget}</strong></div>
+            <div><span>Schema version</span><strong>${model.schemaVersion}</strong></div>
+            <div><span>Decision made</span><strong>${model.decisionMade ? "true" : "false"}</strong></div>
+            <div><span>Real adapter wiring prepared</span><strong>${model.realAdapterWiringPrepared ? "true" : "false"}</strong></div>
+            <div><span>Adapter kind</span><strong>${model.adapterKind}</strong></div>
+            <div><span>Adapter implemented</span><strong>${model.adapterImplemented ? "true" : "false"}</strong></div>
+            <div><span>Adapter production ready</span><strong>${model.adapterProductionReady ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Feature flag enabled</span><strong>${model.featureFlagEnabled ? "true" : "false"}</strong></div>
+            <div><span>Default feature flag enabled</span><strong>${model.defaultFeatureFlagEnabled ? "true" : "false"}</strong></div>
+            <div><span>Product activation allowed</span><strong>${model.productActivationAllowed ? "true" : "false"}</strong></div>
+            <div><span>Active product history source</span><strong>${model.activeProductHistorySource}</strong></div>
+            <div><span>Database used as product truth</span><strong>${model.databaseUsedAsProductTruth ? "true" : "false"}</strong></div>
+            <div><span>Report can use as source of truth</span><strong>${model.reportCanUseAsSourceOfTruth ? "true" : "false"}</strong></div>
+            <div><span>Real DB write count</span><strong>${model.realDatabaseWriteCount}</strong></div>
+            <div><span>Real DB read count</span><strong>${model.realDatabaseReadCount}</strong></div>
+            <div><span>Dry run only</span><strong>${model.dryRunOnly ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Sc&eacute;narios pr&eacute;par&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Inserted scenario pass</span><strong>${model.insertedScenarioPass ? "true" : "false"}</strong></div>
+            <div><span>Replaced scenario pass</span><strong>${model.replacedScenarioPass ? "true" : "false"}</strong></div>
+            <div><span>Ignored duplicate scenario pass</span><strong>${model.ignoredDuplicateScenarioPass ? "true" : "false"}</strong></div>
+            <div><span>Query by team pass</span><strong>${model.queryByTeamPass ? "true" : "false"}</strong></div>
+            <div><span>Query by phase pass</span><strong>${model.queryByPhasePass ? "true" : "false"}</strong></div>
+            <div><span>Deterministic ordering pass</span><strong>${model.deterministicOrderingPass ? "true" : "false"}</strong></div>
+            <div><span>Durable adapter record count</span><strong>${model.durableAdapterRecordCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Prochaine &eacute;tape produit</h4>
+          <p>Activer une lecture contr&ocirc;l&eacute;e en environnement test/local, pas en produit. La lecture produit courante reste file_backed jusqu&rsquo;&agrave; validation explicite ult&eacute;rieure.</p>
+          <p>${escapeHtml(model.reason)}</p>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5F : sqlite_local est une cible de pr&eacute;paration ; file_backed reste la source active, la base n&rsquo;est pas utilis&eacute;e comme v&eacute;rit&eacute; produit et les compteurs DB r&eacute;els restent &agrave; 0.</p>
+      <p class="durable-storage-decision-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="durable-storage-decision-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
+    </section>`;
+}
+
+function renderControlledLocalReadOnlyDbMode(
+  model: CoachReportControlledLocalReadOnlyDbModeModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Lecture SQLite locale contr&ocirc;l&eacute;e">
+      <div>
+        <h3>Lecture SQLite locale contr&ocirc;l&eacute;e</h3>
+        <p>Ce mode sert uniquement &agrave; relire localement des records compatibles en environnement test/dev. Il n&rsquo;est pas actif par d&eacute;faut et la source produit active reste inchang&eacute;e.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Mode contr&ocirc;l&eacute;</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Mode</span><strong>${model.modeName}</strong></div>
+            <div><span>Stockage cible</span><strong>${model.storageTarget}</strong></div>
+            <div><span>Sch&eacute;ma</span><strong>${model.schemaVersion}</strong></div>
+            <div><span>Read-only mode</span><strong>${model.readOnlyMode ? "true" : "false"}</strong></div>
+            <div><span>Write mode allowed</span><strong>${model.writeModeAllowed ? "true" : "false"}</strong></div>
+            <div><span>Write rejected pass</span><strong>${model.writeRejectedPass ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Boundary produit</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Actif par d&eacute;faut</span><strong>${model.defaultEnabled ? "oui" : "non"}</strong></div>
+            <div><span>Feature flag enabled</span><strong>${model.featureFlagEnabled ? "true" : "false"}</strong></div>
+            <div><span>Activation produit</span><strong>${model.productActivationAllowed ? "oui" : "non"}</strong></div>
+            <div><span>Source produit active</span><strong>${model.activeProductHistorySource}</strong></div>
+            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>${model.databaseUsedAsProductTruth ? "oui" : "non"}</strong></div>
+            <div><span>Rapport source officielle</span><strong>${model.reportCanUseAsSourceOfTruth ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Lecture locale</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Lectures DB r&eacute;elles mode d&eacute;faut</span><strong>${model.realDatabaseReadCount}</strong></div>
+            <div><span>&Eacute;critures DB r&eacute;elles</span><strong>${model.realDatabaseWriteCount}</strong></div>
+            <div><span>Controlled read attempts</span><strong>${model.controlledReadAttemptCount}</strong></div>
+            <div><span>Source record count</span><strong>${model.sourceRecordCount}</strong></div>
+            <div><span>Read-only record count</span><strong>${model.readOnlyRecordCount}</strong></div>
+            <div><span>Read-only query count</span><strong>${model.readOnlyQueryCount}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Contrats v&eacute;rifi&eacute;s</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Query by team pass</span><strong>${model.readOnlyQueryByTeamPass ? "true" : "false"}</strong></div>
+            <div><span>Query by phase pass</span><strong>${model.readOnlyQueryByPhasePass ? "true" : "false"}</strong></div>
+            <div><span>Deterministic ordering pass</span><strong>${model.deterministicOrderingPass ? "true" : "false"}</strong></div>
+            <div><span>Schema compatibility pass</span><strong>${model.schemaCompatibilityPass ? "true" : "false"}</strong></div>
+            <div><span>Dry-run fallback</span><strong>${model.dryRunFallbackAvailable ? "true" : "false"}</strong></div>
+            <div><span>True SQLite IO deferred</span><strong>${model.trueSqliteIoDeferred ? "true" : "false"}</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">Boundary 5G : mode contr&ocirc;l&eacute;, lecture locale, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, aucune &eacute;criture et source produit active inchang&eacute;e.</p>
+      <p class="durable-storage-decision-guard">Aucune modification du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection, de la composition ou des d&eacute;cisions coach.</p>
+      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : ${escapeHtml(model.nextStep)}.</p>
+      ${model.warnings.length === 0 ? "" : `<p class="durable-storage-decision-warning">${model.warnings.map(escapeHtml).join(" ")}</p>`}
     </section>`;
 }
 
@@ -2277,7 +2409,7 @@ function renderHistoryStoreConsistencyAppendix(
         <li>ignored duplicate count: ${values.ignoredDuplicateCount}</li>
         <li>queried record count: ${values.queriedRecordCount}</li>
         <li>queried signal count: ${values.queriedSignalCount}</li>
-        <li>database adapter implemented false: ${!values.databaseAdapterImplemented}</li>
+        <li>migration SPI adapter implemented false: ${!values.databaseAdapterImplemented}</li>
         <li>migration from file-backed required true: ${values.migrationFromFileBackedRequired}</li>
         <li>report queries read-only: ${values.reportQueriesReadOnly}</li>
         <li>global proof claim count: ${values.globalProofClaimCount}</li>
@@ -2300,7 +2432,7 @@ function renderDatabaseMigrationPreparationAppendix(
         <li>source store kind: ${model.sourceStoreKind}</li>
         <li>target adapter kind: ${model.targetAdapterKind}</li>
         <li>dry run only: ${model.dryRunOnly}</li>
-        <li>database adapter implemented: ${model.databaseAdapterImplemented}</li>
+        <li>migration SPI adapter implemented: ${model.databaseAdapterImplemented}</li>
         <li>database adapter production ready: ${model.databaseAdapterProductionReady}</li>
         <li>source record count: ${model.sourceRecordCount}</li>
         <li>target existing record count: ${model.targetExistingRecordCount}</li>
@@ -2388,6 +2520,108 @@ function renderDatabaseAdapterSpikeAppendix(
     </details>`;
 }
 
+function renderDurableStorageDecisionAppendix(
+  model: CoachReportDurableStorageDecisionModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails d&eacute;cision stockage durable</summary>
+      <ul>
+        <li>durable storage status: ${model.status}</li>
+        <li>selected storage target: ${model.selectedStorageTarget}</li>
+        <li>decision made: ${model.decisionMade}</li>
+        <li>schema version: ${model.schemaVersion}</li>
+        <li>schema field count: ${model.schemaFieldCount}</li>
+        <li>schema covers required fields: ${model.schemaCoversRequiredFields}</li>
+        <li>real adapter wiring prepared: ${model.realAdapterWiringPrepared}</li>
+        <li>adapter kind: ${model.adapterKind}</li>
+        <li>adapter implemented: ${model.adapterImplemented}</li>
+        <li>adapter production ready: ${model.adapterProductionReady}</li>
+        <li>feature flag enabled: ${model.featureFlagEnabled}</li>
+        <li>default feature flag enabled: ${model.defaultFeatureFlagEnabled}</li>
+        <li>product activation allowed: ${model.productActivationAllowed}</li>
+        <li>active product history source: ${model.activeProductHistorySource}</li>
+        <li>database used as product truth: ${model.databaseUsedAsProductTruth}</li>
+        <li>report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}</li>
+        <li>real DB write count: ${model.realDatabaseWriteCount}</li>
+        <li>real DB read count: ${model.realDatabaseReadCount}</li>
+        <li>dry run only: ${model.dryRunOnly}</li>
+        <li>inserted scenario pass: ${model.insertedScenarioPass}</li>
+        <li>replaced scenario pass: ${model.replacedScenarioPass}</li>
+        <li>ignored duplicate scenario pass: ${model.ignoredDuplicateScenarioPass}</li>
+        <li>query by team pass: ${model.queryByTeamPass}</li>
+        <li>query by phase pass: ${model.queryByPhasePass}</li>
+        <li>deterministic ordering pass: ${model.deterministicOrderingPass}</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+      </ul>
+    </details>`;
+}
+
+function renderControlledLocalReadOnlyDbModeAppendix(
+  model: CoachReportControlledLocalReadOnlyDbModeModel | undefined,
+): string {
+  if (model === undefined || model.status === "not_available") {
+    return "";
+  }
+
+  return `
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails lecture SQLite locale contr&ocirc;l&eacute;e</summary>
+      <ul>
+        <li>controlled local read-only DB mode status: ${model.status}</li>
+        <li>mode name: ${model.modeName}</li>
+        <li>storage target: ${model.storageTarget}</li>
+        <li>schema version: ${model.schemaVersion}</li>
+        <li>read-only mode: ${model.readOnlyMode}</li>
+        <li>write mode allowed: ${model.writeModeAllowed}</li>
+        <li>write rejected pass: ${model.writeRejectedPass}</li>
+        <li>product activation allowed: ${model.productActivationAllowed}</li>
+        <li>default enabled: ${model.defaultEnabled}</li>
+        <li>feature flag enabled: ${model.featureFlagEnabled}</li>
+        <li>active product history source: ${model.activeProductHistorySource}</li>
+        <li>database used as product truth: ${model.databaseUsedAsProductTruth}</li>
+        <li>report can use as source of truth: ${model.reportCanUseAsSourceOfTruth}</li>
+        <li>real DB read count: ${model.realDatabaseReadCount}</li>
+        <li>real DB write count: ${model.realDatabaseWriteCount}</li>
+        <li>controlled read attempt count: ${model.controlledReadAttemptCount}</li>
+        <li>dry-run fallback available: ${model.dryRunFallbackAvailable}</li>
+        <li>source record count: ${model.sourceRecordCount}</li>
+        <li>read-only record count: ${model.readOnlyRecordCount}</li>
+        <li>read-only query count: ${model.readOnlyQueryCount}</li>
+        <li>query by team pass: ${model.readOnlyQueryByTeamPass}</li>
+        <li>query by phase pass: ${model.readOnlyQueryByPhasePass}</li>
+        <li>deterministic ordering pass: ${model.deterministicOrderingPass}</li>
+        <li>schema compatibility pass: ${model.schemaCompatibilityPass}</li>
+        <li>score mutation count: 0</li>
+        <li>timeline mutation count: 0</li>
+        <li>possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>lineup mutation count: 0</li>
+        <li>starters mutation count: 0</li>
+        <li>bench mutation count: 0</li>
+        <li>live selection driver count: 0</li>
+        <li>production route resolution driver count: 0</li>
+        <li>global economy claim count: 0</li>
+        <li>trend proof claim count: ${model.trendProofClaimCount}</li>
+        <li>invented statistic count: ${model.inventedStatisticCount}</li>
+        <li>sandbox events promoted to official count: ${model.sandboxEventsPromotedToOfficialCount}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -2404,6 +2638,8 @@ function renderAppendices(input: {
   readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
   readonly databaseMigrationPreparation?: CoachReportDatabaseMigrationPreparationModel;
   readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
+  readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
+  readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -2441,6 +2677,8 @@ function renderAppendices(input: {
     ${renderHistoryStoreConsistencyAppendix(input.historyStoreConsistency, input.persistenceEvidenceSnapshot)}
     ${renderDatabaseMigrationPreparationAppendix(input.databaseMigrationPreparation)}
     ${renderDatabaseAdapterSpikeAppendix(input.databaseAdapterSpike)}
+    ${renderDurableStorageDecisionAppendix(input.durableStorageDecision)}
+    ${renderControlledLocalReadOnlyDbModeAppendix(input.controlledLocalReadOnlyDbMode)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -2469,6 +2707,8 @@ export function renderCoachReportExportHtml(input: {
   readonly persistenceEvidenceSnapshot?: CoachReportPersistenceEvidenceSnapshot;
   readonly databaseMigrationPreparation?: CoachReportDatabaseMigrationPreparationModel;
   readonly databaseAdapterSpike?: CoachReportDatabaseAdapterSpikeModel;
+  readonly durableStorageDecision?: CoachReportDurableStorageDecisionModel;
+  readonly controlledLocalReadOnlyDbMode?: CoachReportControlledLocalReadOnlyDbModeModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -2571,6 +2811,8 @@ export function renderCoachReportExportHtml(input: {
     ]),
     renderDatabaseMigrationPreparation(input.databaseMigrationPreparation),
     renderDatabaseAdapterSpike(input.databaseAdapterSpike),
+    renderDurableStorageDecision(input.durableStorageDecision),
+    renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -2603,6 +2845,12 @@ export function renderCoachReportExportHtml(input: {
     ...(input.databaseAdapterSpike === undefined
       ? {}
       : { databaseAdapterSpike: input.databaseAdapterSpike }),
+    ...(input.durableStorageDecision === undefined
+      ? {}
+      : { durableStorageDecision: input.durableStorageDecision }),
+    ...(input.controlledLocalReadOnlyDbMode === undefined
+      ? {}
+      : { controlledLocalReadOnlyDbMode: input.controlledLocalReadOnlyDbMode }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

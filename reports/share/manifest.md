@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-20T16:35:42.198Z
-Task/sprint: Sprint 5E - Database Adapter Implementation Spike Without Product Activation
+Generated: 2026-06-21T10:53:28.227Z
+Task/sprint: Sprint 5G - Controlled Local Read-Only DB Mode
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-workbench-chain-replay-5e.md
-- validation.fullmatch-workbench-chain-replay-5e.md
+- fullmatch-workbench-chain-replay-5g.md
+- validation.fullmatch-workbench-chain-replay-5g.md
 - README.md
 
 ## Bundle Files

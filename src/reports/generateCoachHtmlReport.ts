@@ -9,6 +9,8 @@ import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPers
 import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportPersistenceEvidenceSnapshot";
 import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
+import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
+import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -21,6 +23,8 @@ import { buildCoachMatchHistoryMigrationDryRun } from "./history/buildCoachMatch
 import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDatabaseCoachMatchHistoryAdapter";
 import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
+import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
+import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
@@ -157,6 +161,32 @@ export function writeLatestCoachReport(): void {
         productReportHtml: productHtml,
         exportReportHtml: baselineExportHtml,
       });
+  const durableStorageDecision = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined || databaseAdapterSpike === undefined
+    ? undefined
+    : buildCoachReportDurableStorageDecision({
+        persistenceEvidenceSnapshot,
+        migrationPreparation: databaseMigrationPreparation,
+        databaseAdapterSpike,
+        sourceRecords: historyStore.listAll(),
+        durableAdapter: createSqliteLocalCoachMatchHistoryAdapter({
+          featureFlag: databaseFeatureFlag,
+        }),
+        featureFlag: databaseFeatureFlag,
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
+  const controlledLocalReadOnlyDbMode = durableStorageDecision === undefined
+    ? undefined
+    : buildCoachReportControlledLocalReadOnlyDbMode({
+        durableStorageDecision,
+        sourceRecords: historyStore.listAll(),
+        readOnlyAdapter: createSqliteLocalReadOnlyCoachMatchHistoryAdapter({
+          initialRecords: historyStore.listAll(),
+          featureFlagEnabled: false,
+        }),
+        productReportHtml: productHtml,
+        exportReportHtml: baselineExportHtml,
+      });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -168,6 +198,8 @@ export function writeLatestCoachReport(): void {
     ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
     ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
     ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
+    ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
+    ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

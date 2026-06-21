@@ -1,0 +1,101 @@
+# FullMatch Workbench Chain Replay 5G Validation
+
+Status: PASS
+
+## Checks
+- PASS: controlled local read-only DB mode exists. - available
+- PASS: mode must be explicitly requested. - controlled_local_readonly_db
+- PASS: storage target selected is sqlite_local. - sqlite_local
+- PASS: schema version is coach_match_history_v1. - coach_match_history_v1
+- PASS: read-only mode is true.
+- PASS: write mode allowed is false.
+- PASS: adapter implemented is true.
+- PASS: adapter production ready is false.
+- PASS: feature flag enabled is false.
+- PASS: default feature flag enabled is false.
+- PASS: product activation allowed is false.
+- PASS: active product history source is file_backed. - file_backed
+- PASS: database used as product truth is false.
+- PASS: report can use as source of truth is false.
+- PASS: real DB write count is 0. - 0
+- PASS: default real DB read count is 0. - 0
+- PASS: controlled read attempts are visible. - 2
+- PASS: source record count is visible. - 6
+- PASS: read-only adapter record count matches source. - 6/6
+- PASS: query by team passes.
+- PASS: query by phase passes.
+- PASS: deterministic ordering passes.
+- PASS: schema compatibility passes.
+- PASS: write rejected passes.
+- PASS: score mutation count is 0. - 0
+- PASS: timeline mutation count is 0. - 0
+- PASS: possession mutation count is 0. - 0
+- PASS: production scoring event creation count is 0. - 0
+- PASS: lineup mutation count is 0. - 0
+- PASS: starters mutation count is 0. - 0
+- PASS: bench mutation count is 0. - 0
+- PASS: live selection driver count is 0. - 0
+- PASS: production route resolution driver count is 0. - 0
+- PASS: global economy claim count is 0. - 0
+- PASS: trend proof claim count is 0. - 0
+- PASS: invented statistic count is 0. - 0
+- PASS: sandbox events promoted to official count is 0. - 0
+- PASS: visible recommendation wording count is 0. - 0
+- PASS: visible selection wording count is 0. - 0
+- PASS: scoring constants unchanged.
+- PASS: MatchBonusEvent unchanged.
+- PASS: batch/live separation preserved.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains only global economy proof.
+- PASS: export contains controlled local read-only DB section.
+- PASS: export states file_backed remains active.
+- PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
+
+## Counts
+- controlled local read-only DB mode available: true
+- mode name: controlled_local_readonly_db
+- storage target selected: sqlite_local
+- schema version: coach_match_history_v1
+- read-only mode: true
+- write mode allowed: false
+- adapter implemented: true
+- adapter production ready: false
+- feature flag enabled: false
+- default feature flag enabled: false
+- product activation allowed: false
+- active product history source: file_backed
+- database used as product truth: false
+- report can use as source of truth: false
+- real DB write count: 0
+- default real DB read count: 0
+- controlled read attempt count: 2
+- dry-run fallback available: true
+- source record count: 6
+- read-only adapter record count: 6
+- read-only query count: 2
+- query by team pass: true
+- query by phase pass: true
+- deterministic ordering pass: true
+- schema compatibility pass: true
+- write rejected pass: true
+- score mutation count: 0
+- timeline mutation count: 0
+- possession mutation count: 0
+- production scoring event creation count: 0
+- lineup mutation count: 0
+- starters mutation count: 0
+- bench mutation count: 0
+- live selection driver count: 0
+- production route resolution driver count: 0
+- global economy claim count: 0
+- trend proof claim count: 0
+- invented statistic count: 0
+- sandbox events promoted to official count: 0
+- visible recommendation wording count: 0
+- visible selection wording count: 0
+
+## Recommendation
+- CONFIRM_CONTROLLED_LOCAL_READONLY_DB_MODE.
+- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.
+- CONFIRM_NO_DB_WRITES.
+- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.
+- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.
