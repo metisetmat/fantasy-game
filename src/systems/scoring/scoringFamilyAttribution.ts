@@ -121,15 +121,11 @@ function pointValueFamily(points: number | undefined): OfficialScoringFamily | n
   if (points === 5) {
     return "TRY_TOUCHDOWN";
   }
-  if (points === 2) {
-    return "CONVERSION_GOAL";
-  }
   return null;
 }
 
 function textFamily(input: ScoringFamilyClassificationInput): { readonly family: OfficialScoringFamily | null; readonly field: string | null } {
   const textSources = [
-    { value: input.eventSummary, field: "eventSummary" },
     { value: input.routeType, field: "routeType" },
     { value: input.selectedRoute, field: "selectedRoute" },
     { value: input.actionType, field: "actionType" },
@@ -204,6 +200,9 @@ export function classifyScoringEventFamily(input: ScoringFamilyClassificationInp
   if (pointCandidate !== null) {
     candidates.push(pointCandidate);
     sourceFieldsUsed.push("score_change.value");
+  }
+  if (input.consequencePointValue === 2 && candidates.length === 0) {
+    warningCodes.push("AMBIGUOUS_SCORING_FAMILY");
   }
 
   if (input.eventType !== "scoring") {

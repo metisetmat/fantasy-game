@@ -25465,6 +25465,19 @@ test("keeps UNKNOWN explicit when no taxonomy evidence exists", () => {
   assert.ok(attribution.warningCodes.includes("MISSING_SCORE_CHANGE_POINT_VALUE"));
 });
 
+test("does not classify bare 2-point score changes as conversions", () => {
+  const attribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: [],
+    consequencePointValue: 2,
+  });
+
+  assert.equal(attribution.family, "UNKNOWN");
+  assert.ok(attribution.warningCodes.includes("AMBIGUOUS_SCORING_FAMILY"));
+  assert.ok(attribution.warningCodes.includes("UNKNOWN_SCORING_FAMILY"));
+  assert.equal(attribution.sourceFieldsUsed.includes("score_change.value"), false);
+});
+
 test("flags inactive penalty shot if it appears", () => {
   const attribution = classifyScoringEventFamily({
     eventType: "scoring",
@@ -25521,6 +25534,45 @@ test("keeps Sprint 6B attribution as a report-only audit without score mutation"
   assert.equal(audit.persistenceUsedForAttribution, false);
   assert.equal(audit.sqliteUsedAsScoreEconomySource, false);
   assert.equal(audit.fullMatchBatchEconomyRemainsOnlyGlobalProof, true);
+});
+
+test("downgrades attributed audits with classifier warnings to WARNING", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoringIndex = report.timeline.findIndex((event) =>
+    event.consequences.some((consequence) => consequence.type === "score_change")
+  );
+
+  assert.equal(scoringIndex >= 0, true);
+
+  const timeline = [...report.timeline];
+  const scoringEvent = timeline[scoringIndex];
+  if (scoringEvent === undefined) {
+    throw new Error("Expected a scoring event in the full-match fixture.");
+  }
+
+  timeline[scoringIndex] = {
+    ...scoringEvent,
+    scoringFamily: "PENALTY_SHOT",
+    scoringAction: "PENALTY_SHOT",
+    scoringAttributionWarningCodes: ["INACTIVE_PENALTY_SHOT_USED"],
+    tags: [
+      ...scoringEvent.tags.filter((tag) => !tag.startsWith("scoring_type_") && !tag.startsWith("scoring_family_") && !tag.startsWith("scoring_action_")),
+      "scoring_type_penalty",
+      "scoring_family_PENALTY_SHOT",
+      "scoring_action_PENALTY_SHOT",
+    ],
+  };
+
+  const audit = buildScoringFamilyAttributionAuditModel({
+    ...report,
+    timeline,
+  });
+
+  assert.equal(audit.status, "WARNING");
+  assert.equal(audit.unknownScoringEventCount, 0);
+  assert.ok(audit.familyAttributionWarnings.includes("INACTIVE_PENALTY_SHOT_USED"));
 });
 ```
 

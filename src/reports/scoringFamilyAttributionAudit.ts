@@ -184,7 +184,7 @@ export function buildScoringFamilyAttributionAuditModel(report: MatchReport): Sc
   const attributedScoringEventCount = scoringEvents.length - unknownEvents.length;
   const familyAttributionWarnings = WARNING_CODES.filter((warningCode) => warningCountByCode[warningCode] > 0);
   const status: ScoringFamilyAttributionAuditStatus =
-    unknownEvents.length === 0 && attributedScoringEventCount === scoringEvents.length
+    unknownEvents.length === 0 && attributedScoringEventCount === scoringEvents.length && familyAttributionWarnings.length === 0
       ? "PASS"
       : attributedScoringEventCount > 0 && unknownEvents.every((event) => event.reason.length > 0)
         ? "WARNING"

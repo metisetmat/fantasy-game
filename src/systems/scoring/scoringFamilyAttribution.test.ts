@@ -53,6 +53,19 @@ test("keeps UNKNOWN explicit when no taxonomy evidence exists", () => {
   assert.ok(attribution.warningCodes.includes("MISSING_SCORE_CHANGE_POINT_VALUE"));
 });
 
+test("does not classify bare 2-point score changes as conversions", () => {
+  const attribution = classifyScoringEventFamily({
+    eventType: "scoring",
+    tags: [],
+    consequencePointValue: 2,
+  });
+
+  assert.equal(attribution.family, "UNKNOWN");
+  assert.ok(attribution.warningCodes.includes("AMBIGUOUS_SCORING_FAMILY"));
+  assert.ok(attribution.warningCodes.includes("UNKNOWN_SCORING_FAMILY"));
+  assert.equal(attribution.sourceFieldsUsed.includes("score_change.value"), false);
+});
+
 test("flags inactive penalty shot if it appears", () => {
   const attribution = classifyScoringEventFamily({
     eventType: "scoring",

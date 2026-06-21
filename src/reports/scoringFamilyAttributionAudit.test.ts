@@ -40,3 +40,42 @@ test("keeps Sprint 6B attribution as a report-only audit without score mutation"
   assert.equal(audit.sqliteUsedAsScoreEconomySource, false);
   assert.equal(audit.fullMatchBatchEconomyRemainsOnlyGlobalProof, true);
 });
+
+test("downgrades attributed audits with classifier warnings to WARNING", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const scoringIndex = report.timeline.findIndex((event) =>
+    event.consequences.some((consequence) => consequence.type === "score_change")
+  );
+
+  assert.equal(scoringIndex >= 0, true);
+
+  const timeline = [...report.timeline];
+  const scoringEvent = timeline[scoringIndex];
+  if (scoringEvent === undefined) {
+    throw new Error("Expected a scoring event in the full-match fixture.");
+  }
+
+  timeline[scoringIndex] = {
+    ...scoringEvent,
+    scoringFamily: "PENALTY_SHOT",
+    scoringAction: "PENALTY_SHOT",
+    scoringAttributionWarningCodes: ["INACTIVE_PENALTY_SHOT_USED"],
+    tags: [
+      ...scoringEvent.tags.filter((tag) => !tag.startsWith("scoring_type_") && !tag.startsWith("scoring_family_") && !tag.startsWith("scoring_action_")),
+      "scoring_type_penalty",
+      "scoring_family_PENALTY_SHOT",
+      "scoring_action_PENALTY_SHOT",
+    ],
+  };
+
+  const audit = buildScoringFamilyAttributionAuditModel({
+    ...report,
+    timeline,
+  });
+
+  assert.equal(audit.status, "WARNING");
+  assert.equal(audit.unknownScoringEventCount, 0);
+  assert.ok(audit.familyAttributionWarnings.includes("INACTIVE_PENALTY_SHOT_USED"));
+});
