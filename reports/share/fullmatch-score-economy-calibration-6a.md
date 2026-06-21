@@ -7,14 +7,14 @@ Sprint 6A returns to gameplay economy diagnostics after the persistence series. 
 - scope: FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN
 - calibration version: SCORE_ECONOMY_6A
 - official score before calibration: 45 - 0
-- official score after calibration: 24 - 0
-- score delta home: -21
+- official score after calibration: 30 - 0
+- score delta home: -15
 - score delta away: 0
 - scoring event count: 15
 - segment count: 8
 - sequence count: 48
 - finishing opportunity count: 63
-- shot goal share: 0
+- shot goal share: 100
 - try touchdown share: 0
 - conversion share: 0
 - drop goal share: 0
@@ -26,18 +26,18 @@ Sprint 6A returns to gameplay economy diagnostics after the persistence series. 
 - repeated segment amplification risk: MEDIUM
 - single-run volatility risk: HIGH
 - root-cause primary cause: MIXED_CAUSES
-- root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY
+- root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY
 - root-cause confidence: medium
-- scoring events by family before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":15}
-- scoring events by family after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":8}
-- scoring points by family before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":45}
-- scoring points by family after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":24}
-- selected route mix before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":15}
-- selected route mix after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":8}
-- route success rates before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":100}
-- route success rates after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":53}
+- scoring events by family before: {"SHOT_GOAL":15,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- scoring events by family after: {"SHOT_GOAL":10,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- scoring points by family before: {"SHOT_GOAL":45,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- scoring points by family after: {"SHOT_GOAL":30,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- selected route mix before: {"SHOT_GOAL":15,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- selected route mix after: {"SHOT_GOAL":10,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- route success rates before: {"SHOT_GOAL":24,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- route success rates after: {"SHOT_GOAL":16,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
 - goalkeeper impact before: 38
-- goalkeeper impact after: 43
+- goalkeeper impact after: 53
 - fatigue impact before: 63
 - fatigue impact after: 42
 - scoring constants changed: false
@@ -60,10 +60,10 @@ Sprint 6A returns to gameplay economy diagnostics after the persistence series. 
 
 ## Root-Cause Classification
 - primary cause: MIXED_CAUSES
-- secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY
+- secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY
 - confidence: medium
-- evidence summary: Single-run score economy shows 15 scoring events, 0% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 2 scoring events in one segment.
-- affected families: UNKNOWN
+- evidence summary: Single-run score economy shows 15 scoring events, 100% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 2 scoring events in one segment.
+- affected families: SHOT_GOAL
 - affected segments: segment-1, segment-2, segment-3, segment-4, segment-5, segment-6, segment-7, segment-8
 - affected teams: control
 - limitations: Single-run signal only; not global economy proof. | Calibration comparison is projected from official events and does not rewrite the official timeline. | FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
@@ -76,11 +76,11 @@ Sprint 6A returns to gameplay economy diagnostics after the persistence series. 
 
 ## Before / After Comparison
 - official score before: 45 - 0
-- projected score after: 24 - 0
+- projected score after: 30 - 0
 - scoring events before: 15
-- scoring events after: 8
+- scoring events after: 10
 - finishing opportunities before: 63
-- finishing opportunities after: 12
+- finishing opportunities after: 15
 - score cap applied: false
 - scoring constants changed: false
 - post-hoc rewrite applied: false

@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-21T18:02:12.285Z
+Generated timestamp: 2026-06-21T19:48:52.598Z
 Task/sprint name: Sprint 6A - Full-Match Score Economy Calibration Reset
 Final file count: 20
 
@@ -778,12 +778,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchScoreEconomyCalibration.test.ts
-?? src/reports/fullMatchScoreEconomyCalibration.ts
-?? src/reports/fullMatchScoreEconomyCalibrationRenderer.test.ts
+ M src/reports/fullMatchScoreEconomyCalibration.test.ts
+ M src/reports/fullMatchScoreEconomyCalibration.ts

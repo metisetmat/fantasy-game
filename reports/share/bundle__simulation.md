@@ -51225,6 +51225,21 @@ function scoringPoints(event: MatchEvent): number {
 function scoringFamily(event: MatchEvent): FullMatchScoringFamily {
   const tag = event.tags.find((candidate) => candidate.startsWith("scoring_type_"));
   const family = tag?.replace("scoring_type_", "");
+  if (family === "goal" || family === "shot" || family === "shot_goal") {
+    return "SHOT_GOAL";
+  }
+  if (family === "try" || family === "try_touchdown") {
+    return "TRY_TOUCHDOWN";
+  }
+  if (family === "conversion" || family === "conversion_goal") {
+    return "CONVERSION_GOAL";
+  }
+  if (family === "drop" || family === "drop_goal") {
+    return "DROP_GOAL";
+  }
+  if (family === "penalty" || family === "penalty_shot") {
+    return "PENALTY_SHOT";
+  }
   return FAMILIES.includes(family as FullMatchScoringFamily)
     ? family as FullMatchScoringFamily
     : "UNKNOWN";

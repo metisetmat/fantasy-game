@@ -1,6 +1,6 @@
 # Share Pack
 
-Generated: 2026-06-21T18:02:12.285Z
+Generated: 2026-06-21T19:48:52.598Z
 Task/sprint: Sprint 6A - Full-Match Score Economy Calibration Reset
 Mode: MINIMAL_REVIEW
 Final file count: 20

@@ -4,15 +4,15 @@ Status: PASS
 
 ## Checks
 - PASS: diagnostic root-cause is available. - MIXED_CAUSES
-- PASS: before/after comparison is available. - 15/8
-- PASS: after calibration is less extreme or explained. - 45 - 0 -> 24 - 0
+- PASS: before/after comparison is available. - 15/10
+- PASS: after calibration is less extreme or explained. - 45 - 0 -> 30 - 0
 - PASS: scoring constants unchanged.
 - PASS: no score cap.
 - PASS: no post-hoc rewrite.
 - PASS: no event deletion.
 - PASS: no event rewrite.
 - PASS: no forced opponent score.
-- PASS: warnings available. - 3
+- PASS: warnings available. - 4
 - PASS: report section visible.
 - PASS: no invented stats. - 0
 - PASS: no global proof claim. - 0
@@ -31,14 +31,14 @@ Status: PASS
 - scope: FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN
 - calibration version: SCORE_ECONOMY_6A
 - official score before calibration: 45 - 0
-- official score after calibration: 24 - 0
-- score delta home: -21
+- official score after calibration: 30 - 0
+- score delta home: -15
 - score delta away: 0
 - scoring event count: 15
 - segment count: 8
 - sequence count: 48
 - finishing opportunity count: 63
-- shot goal share: 0
+- shot goal share: 100
 - try touchdown share: 0
 - conversion share: 0
 - drop goal share: 0
@@ -50,18 +50,18 @@ Status: PASS
 - repeated segment amplification risk: MEDIUM
 - single-run volatility risk: HIGH
 - root-cause primary cause: MIXED_CAUSES
-- root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY
+- root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY
 - root-cause confidence: medium
-- scoring events by family before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":15}
-- scoring events by family after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":8}
-- scoring points by family before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":45}
-- scoring points by family after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":24}
-- selected route mix before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":15}
-- selected route mix after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":8}
-- route success rates before: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":100}
-- route success rates after: {"SHOT_GOAL":0,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":53}
+- scoring events by family before: {"SHOT_GOAL":15,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- scoring events by family after: {"SHOT_GOAL":10,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- scoring points by family before: {"SHOT_GOAL":45,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- scoring points by family after: {"SHOT_GOAL":30,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- selected route mix before: {"SHOT_GOAL":15,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- selected route mix after: {"SHOT_GOAL":10,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- route success rates before: {"SHOT_GOAL":24,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
+- route success rates after: {"SHOT_GOAL":16,"TRY_TOUCHDOWN":0,"CONVERSION_GOAL":0,"DROP_GOAL":0,"PENALTY_SHOT":0,"UNKNOWN":0}
 - goalkeeper impact before: 38
-- goalkeeper impact after: 43
+- goalkeeper impact after: 53
 - fatigue impact before: 63
 - fatigue impact after: 42
 - scoring constants changed: false

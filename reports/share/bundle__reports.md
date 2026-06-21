@@ -25232,6 +25232,9 @@ export function validateFullMatchScoreEconomyCalibration(): readonly string[] {
   assertTest(model.scope === "FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN", "scope must be single-run score economy.");
   assertTest(model.calibrationVersion === "SCORE_ECONOMY_6A", "calibration version must be SCORE_ECONOMY_6A.");
   assertTest(model.rootCause.primaryCause !== "INSUFFICIENT_EVIDENCE", "root-cause classification must be available.");
+  assertTest(model.scoringEventCountByFamily.SHOT_GOAL > 0, "legacy scoring_type_goal tags must map to SHOT_GOAL.");
+  assertTest(model.scoringPointsByFamily.SHOT_GOAL > 0, "SHOT_GOAL points must be attributed before aggregation.");
+  assertTest(model.scoringEventCountByFamily.UNKNOWN < model.scoringEventCount, "scoring families must not all aggregate as UNKNOWN.");
   assertTest(model.rootCause.limitations.some((limitation) => limitation.includes("Single-run")), "single-run limitation must be explicit.");
   assertTest(model.comparison.scoringEventsBefore >= model.comparison.scoringEventsAfter, "after comparison must not increase scoring events.");
   assertTest(afterTotal <= beforeTotal, "projected calibration score must be no more extreme than before.");
@@ -25255,6 +25258,7 @@ export function validateFullMatchScoreEconomyCalibration(): readonly string[] {
 
   return [
     "full-match score economy calibration model is available",
+    "legacy production scoring tags map before family aggregation",
     "root-cause classification and before/after comparison are available",
     "projected calibration is less extreme without score cap or post-hoc rewrite",
     "scoring constants, MatchBonusEvent, batch/live separation, and global proof boundary remain intact",
