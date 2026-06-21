@@ -45284,7 +45284,8 @@ export type CoachMatchHistoryStoreKind =
 export type CoachMatchHistorySaveOperation =
   | "inserted"
   | "replaced"
-  | "ignored_duplicate";
+  | "ignored_duplicate"
+  | "rejected_write";
 
 export interface CoachMatchHistorySaveResult {
   readonly operation: CoachMatchHistorySaveOperation;
@@ -47256,7 +47257,8 @@ import type { CoachMatchHistorySaveResult, CoachMatchHistoryStoreKind } from "./
 export type PersistenceEvidenceScenario =
   | "inserted"
   | "replaced"
-  | "ignored_duplicate";
+  | "ignored_duplicate"
+  | "rejected_write";
 
 export interface CoachReportPersistenceEvidenceSnapshot {
   readonly snapshotId: string;
@@ -48333,7 +48335,6 @@ import type {
 } from "./coachMatchHistory";
 import type { CoachMatchHistorySaveResult } from "./coachMatchHistoryStore";
 import {
-  coachMatchHistoryRecordsHaveSameContent,
   cloneCoachMatchHistoryRecord,
   sortCoachMatchHistoryRecords,
 } from "./coachMatchHistorySerialization";
@@ -48491,21 +48492,18 @@ export function createSqliteLocalReadOnlyCoachMatchHistoryAdapter(input: {
     },
     rejectWrite(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult {
       writeRejectedCount += 1;
-      const existing = records.find((candidate) => candidate.historyRecordId === record.historyRecordId);
 
       return {
-        operation: existing !== undefined && coachMatchHistoryRecordsHaveSameContent(existing, record)
-          ? "ignored_duplicate"
-          : "ignored_duplicate",
+        operation: "rejected_write",
         record: cloneCoachMatchHistoryRecord(record),
         recordsBeforeSaveCount: records.length,
         recordsAfterSaveCount: records.length,
         loadedFromDiskCount: 0,
         writtenToDiskCount: 0,
-        dedupedRecordCount: existing === undefined ? 0 : 1,
+        dedupedRecordCount: 0,
         replacedRecordCount: 0,
-        ignoredDuplicateCount: 1,
-        idempotent: true,
+        ignoredDuplicateCount: 0,
+        idempotent: false,
         warnings: [
           "Write rejected: controlled_local_readonly_db is read-only in Sprint 5G.",
         ],
@@ -49075,19 +49073,18 @@ export function createSqliteRealReadOnlyCoachMatchHistoryAdapter(input: {
     },
     rejectWrite(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult {
       writeRejectedCount += 1;
-      const existing = loaded.records.find((candidate) => candidate.historyRecordId === record.historyRecordId);
 
       return {
-        operation: "ignored_duplicate",
+        operation: "rejected_write",
         record: cloneCoachMatchHistoryRecord(record),
         recordsBeforeSaveCount: loaded.records.length,
         recordsAfterSaveCount: loaded.records.length,
         loadedFromDiskCount: loaded.records.length,
         writtenToDiskCount: 0,
-        dedupedRecordCount: existing === undefined ? 0 : 1,
+        dedupedRecordCount: 0,
         replacedRecordCount: 0,
-        ignoredDuplicateCount: 1,
-        idempotent: true,
+        ignoredDuplicateCount: 0,
+        idempotent: false,
         warnings: [
           "Write rejected: real_sqlite_readonly_io_smoke_test exposes no SQLite write path.",
         ],
@@ -49179,6 +49176,7 @@ export interface CoachMatchHistoryMigrationDryRunModel {
 
 ```ts
 import type { CoachMatchHistoryRecord } from "./coachMatchHistory";
+import type { CoachMatchHistorySaveOperation } from "./coachMatchHistoryStore";
 import type { DatabaseCoachMatchHistoryAdapterSpi } from "./databaseCoachMatchHistoryAdapterSpi";
 import {
   cloneCoachMatchHistoryRecord,
@@ -49211,9 +49209,12 @@ function unsupportedReason(record: CoachMatchHistoryRecord): string | null {
   return null;
 }
 
-function statusFromOperation(operation: "inserted" | "replaced" | "ignored_duplicate"): CoachMatchHistoryMigrationRecordStatus {
+function statusFromOperation(operation: CoachMatchHistorySaveOperation): CoachMatchHistoryMigrationRecordStatus {
   if (operation === "inserted") {
     return "migrable";
+  }
+  if (operation === "rejected_write") {
+    return "rejected_unsupported";
   }
 
   return operation === "replaced" ? "would_replace" : "would_ignore_duplicate";

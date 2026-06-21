@@ -552,19 +552,18 @@ export function createSqliteRealReadOnlyCoachMatchHistoryAdapter(input: {
     },
     rejectWrite(record: CoachMatchHistoryRecord): CoachMatchHistorySaveResult {
       writeRejectedCount += 1;
-      const existing = loaded.records.find((candidate) => candidate.historyRecordId === record.historyRecordId);
 
       return {
-        operation: "ignored_duplicate",
+        operation: "rejected_write",
         record: cloneCoachMatchHistoryRecord(record),
         recordsBeforeSaveCount: loaded.records.length,
         recordsAfterSaveCount: loaded.records.length,
         loadedFromDiskCount: loaded.records.length,
         writtenToDiskCount: 0,
-        dedupedRecordCount: existing === undefined ? 0 : 1,
+        dedupedRecordCount: 0,
         replacedRecordCount: 0,
-        ignoredDuplicateCount: 1,
-        idempotent: true,
+        ignoredDuplicateCount: 0,
+        idempotent: false,
         warnings: [
           "Write rejected: real_sqlite_readonly_io_smoke_test exposes no SQLite write path.",
         ],

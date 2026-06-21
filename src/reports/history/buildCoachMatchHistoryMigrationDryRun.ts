@@ -1,4 +1,5 @@
 import type { CoachMatchHistoryRecord } from "./coachMatchHistory";
+import type { CoachMatchHistorySaveOperation } from "./coachMatchHistoryStore";
 import type { DatabaseCoachMatchHistoryAdapterSpi } from "./databaseCoachMatchHistoryAdapterSpi";
 import {
   cloneCoachMatchHistoryRecord,
@@ -31,9 +32,12 @@ function unsupportedReason(record: CoachMatchHistoryRecord): string | null {
   return null;
 }
 
-function statusFromOperation(operation: "inserted" | "replaced" | "ignored_duplicate"): CoachMatchHistoryMigrationRecordStatus {
+function statusFromOperation(operation: CoachMatchHistorySaveOperation): CoachMatchHistoryMigrationRecordStatus {
   if (operation === "inserted") {
     return "migrable";
+  }
+  if (operation === "rejected_write") {
+    return "rejected_unsupported";
   }
 
   return operation === "replaced" ? "would_replace" : "would_ignore_duplicate";

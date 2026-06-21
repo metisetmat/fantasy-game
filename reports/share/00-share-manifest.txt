@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-21T12:33:41.689Z
+Generated timestamp: 2026-06-21T12:51:44.271Z
 Task/sprint name: Sprint 5H - Real SQLite Read-Only IO Smoke Test
 Final file count: 20
 
@@ -775,22 +775,10 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/matchReportEvidence.ts
- M src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/history/databaseCoachMatchHistoryAdapterSpi.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/adapters/matchReportEvidence.ts
- M src/simulation/adapters/matchReportFocus.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportRealSQLiteReadOnlyIOSmokeTest.ts
-?? src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.test.ts
-?? src/reports/coachReportRealSQLiteReadOnlyIOSmokeTest.ts
-?? src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestCopy.test.ts
-?? src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestGuard.test.ts
-?? src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestRenderer.test.ts
-?? src/reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter.ts
-?? src/reports/sqliteRealReadOnlyCoachMatchHistoryAdapter.test.ts
-?? src/simulation/fullMatch/scoringGuard.5h.test.ts
-?? test-fixtures/
+ M src/reports/coachReportPersistenceEvidenceSnapshot.ts
+ M src/reports/history/buildCoachMatchHistoryMigrationDryRun.ts
+ M src/reports/history/coachMatchHistoryStore.ts
+ M src/reports/history/sqliteLocalReadOnlyCoachMatchHistoryAdapter.ts
+ M src/reports/history/sqliteRealReadOnlyCoachMatchHistoryAdapter.ts
+ M src/reports/sqliteLocalReadOnlyCoachMatchHistoryAdapter.test.ts
+ M src/reports/sqliteRealReadOnlyCoachMatchHistoryAdapter.test.ts

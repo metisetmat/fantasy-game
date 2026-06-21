@@ -46,6 +46,10 @@ export function validateSqliteLocalReadOnlyCoachMatchHistoryAdapter(): readonly 
   assertTest(phase === undefined || phaseQuery.records.some((record) => record.signals.some((signal) => signal.phase === phase)), "query by phase must return matching signals.");
   assertTest(rejectedWrite.writtenToDiskCount === 0, "rejected write must not write to disk.");
   assertTest(rejectedWrite.recordsAfterSaveCount === rejectedWrite.recordsBeforeSaveCount, "rejected write must not change record count.");
+  assertTest(rejectedWrite.operation === "rejected_write", "read-only write rejection must use rejected_write operation.");
+  assertTest(!rejectedWrite.idempotent, "read-only write rejection must not be reported as idempotent duplicate.");
+  assertTest(rejectedWrite.ignoredDuplicateCount === 0, "read-only write rejection must not increment duplicate count.");
+  assertTest(rejectedWrite.dedupedRecordCount === 0, "read-only write rejection must not report deduped records.");
   assertTest(descriptionAfter.controlledReadAttemptCount === 2, "controlled read attempts must be counted.");
   assertTest(descriptionAfter.writeRejectedCount === 1, "write rejections must be counted.");
   assertTest(descriptionAfter.schemaIncompatibleRecordCount === 0, "records must match durable schema.");
@@ -55,7 +59,7 @@ export function validateSqliteLocalReadOnlyCoachMatchHistoryAdapter(): readonly 
     "feature flag and product activation are disabled",
     "real database IO remains 0",
     "query by team and phase pass",
-    "write attempt is rejected without record changes",
+    "write attempt is reported as rejected_write without duplicate semantics",
     "schema compatibility and counters are exposed",
   ];
 }

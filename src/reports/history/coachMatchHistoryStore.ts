@@ -12,7 +12,8 @@ export type CoachMatchHistoryStoreKind =
 export type CoachMatchHistorySaveOperation =
   | "inserted"
   | "replaced"
-  | "ignored_duplicate";
+  | "ignored_duplicate"
+  | "rejected_write";
 
 export interface CoachMatchHistorySaveResult {
   readonly operation: CoachMatchHistorySaveOperation;
