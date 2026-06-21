@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-21T18:02:12.285Z
-Task/sprint: Sprint 6A - Full-Match Score Economy Calibration Reset
+Generated: 2026-06-21T19:36:05.774Z
+Task/sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-score-economy-calibration-6a.md
-- validation.fullmatch-score-economy-calibration-6a.md
+- fullmatch-scoring-family-attribution-6b.md
+- validation.fullmatch-scoring-family-attribution-6b.md
 - README.md
 
 ## Bundle Files

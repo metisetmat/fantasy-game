@@ -6,6 +6,11 @@ import type { PlayerAttributes, PlayerRole } from "../models/player";
 import type { TeamIdentity } from "../models/team";
 import type { MatchReportEvidenceCategory, MatchReportEvidenceFact } from "./matchReportEvidence";
 import type { MatchReportWarning } from "./matchReportWarnings";
+import type {
+  OfficialScoringFamily,
+  ScoringAttributionConfidence,
+  ScoringFamilyAttributionWarningCode,
+} from "./scoringFamily";
 
 export type MatchTimestamp = {
   readonly tick: TacticalTick;
@@ -186,6 +191,14 @@ export interface MatchEvent {
   readonly fatigueContext: FatigueContextSnapshot;
   readonly outcome: EventOutcome;
   readonly consequences: readonly EventConsequence[];
+  readonly scoringFamily?: OfficialScoringFamily;
+  readonly scoringAction?: OfficialScoringFamily;
+  readonly scoringPointValue?: number;
+  readonly scoringAttributionConfidence?: ScoringAttributionConfidence;
+  readonly scoringAttributionReason?: string;
+  readonly scoringAttributionSourceFields?: readonly string[];
+  readonly scoringAttributionMissingFields?: readonly string[];
+  readonly scoringAttributionWarningCodes?: readonly ScoringFamilyAttributionWarningCode[];
   readonly tags: readonly EventTag[];
   readonly narrativeWeight: Rating;
 }

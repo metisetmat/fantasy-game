@@ -1,17 +1,13 @@
 import type { MatchEvent, MatchReport } from "../contracts/engineToCoach";
+import type { OfficialScoringFamily } from "../contracts/scoringFamily";
 import type { ScoreState } from "../models/match";
+import { classifyMatchEventScoringFamily } from "../systems/scoring/scoringFamilyAttribution";
 
 export type FullMatchScoreEconomyCalibrationStatus = "available" | "not_available";
 export type FullMatchScoreEconomyCalibrationScope = "FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN";
 export type FullMatchScoreEconomyCalibrationVersion = "SCORE_ECONOMY_6A";
 
-export type FullMatchScoringFamily =
-  | "SHOT_GOAL"
-  | "TRY_TOUCHDOWN"
-  | "CONVERSION_GOAL"
-  | "DROP_GOAL"
-  | "PENALTY_SHOT"
-  | "UNKNOWN";
+export type FullMatchScoringFamily = OfficialScoringFamily;
 
 export type FullMatchScoreEconomyRootCause =
   | "TOO_MANY_FINISHING_OPPORTUNITIES"
@@ -163,10 +159,9 @@ function scoringPoints(event: MatchEvent): number {
 }
 
 function scoringFamily(event: MatchEvent): FullMatchScoringFamily {
-  const tag = event.tags.find((candidate) => candidate.startsWith("scoring_type_"));
-  const family = tag?.replace("scoring_type_", "");
-  return FAMILIES.includes(family as FullMatchScoringFamily)
-    ? family as FullMatchScoringFamily
+  const attribution = classifyMatchEventScoringFamily(event);
+  return FAMILIES.includes(attribution.family as FullMatchScoringFamily)
+    ? attribution.family as FullMatchScoringFamily
     : "UNKNOWN";
 }
 

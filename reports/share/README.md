@@ -1,6 +1,6 @@
-# Sprint 6A Share Pack
+# Sprint 6B Share Pack
 
-Current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset
+Current sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-score-economy-calibration-6a.md
-- validation.fullmatch-score-economy-calibration-6a.md
+- fullmatch-scoring-family-attribution-6b.md
+- validation.fullmatch-scoring-family-attribution-6b.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-score-economy-calibration-6a.md and validation.fullmatch-score-economy-calibration-6a.md.
+Start with validation.share-pack.md, then fullmatch-scoring-family-attribution-6b.md and validation.fullmatch-scoring-family-attribution-6b.md.
 
-Sprint 6A diagnoses a single full-match score-economy outlier, adds a controlled projection and before/after comparison, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.
+Sprint 6B classifies official score_change events into scoring families, reduces legacy UNKNOWN attribution, adds Origine des points to the coach export, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.
 
 Upload every file in this reports/share directory.

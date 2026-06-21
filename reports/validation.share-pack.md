@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6A - Full-Match Score Economy Calibration Reset
+- current sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -26,20 +26,20 @@ Status: PASS
 - PASS: validation.share-pack.md copied - 
 - PASS: README.md copied - 
 - PASS: manifest.md copied - 
-- PASS: current sprint is Sprint 6A - Sprint 6A - Full-Match Score Economy Calibration Reset
+- PASS: current sprint is Sprint 6B - Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6A oriented - README current
-- PASS: 6A report included - 6A doc included
-- PASS: 6A validation is PASS - 6A validation current
-- PASS: official score before and after are visible - score before/after visible
-- PASS: scoring event before/after counts are visible - event counts visible
-- PASS: root-cause diagnosis is visible - root cause visible
-- PASS: family before/after counts are visible - family counts visible
-- PASS: route mix and success rates are visible - route evidence visible
-- PASS: goalkeeper and fatigue impact are visible - keeper/fatigue visible
-- PASS: single-run and batch limitation are visible - single-run limitation visible
-- PASS: coach export contains calibration section - export calibration visible
+- PASS: README is Sprint 6B oriented - README current
+- PASS: 6B report included - 6B doc included
+- PASS: 6B validation is PASS - 6B validation current
+- PASS: attribution count fields are visible - counts visible
+- PASS: legacy UNKNOWN comparison is visible - legacy comparison visible
+- PASS: attribution coverage is visible - coverage visible
+- PASS: scoring events by family are visible - family events visible
+- PASS: scoring points by family are visible - family points visible
+- PASS: scoring events by family are not all UNKNOWN - events not all UNKNOWN
+- PASS: scoring points by family are not all UNKNOWN - points not all UNKNOWN
+- PASS: coach export contains Origine des points - export attribution visible
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: score cap is not applied - score cap false
 - PASS: post-hoc score rewrite is not applied - rewrite false
@@ -48,13 +48,14 @@ Status: PASS
 - PASS: mutation counts are 0 - mutation counts 0
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
-- PASS: persistence and SQLite are not calibration sources - persistence/SQLite false
+- PASS: persistence and SQLite are not attribution sources - persistence/SQLite false
 - PASS: no invented global or trend claims - claim counts 0
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: bundle includes 6A source files - 6A source bundled
-- PASS: bundle includes 6A executable tests - 6A tests bundled
+- PASS: bundle includes 6B contract files - 6B contract bundled
+- PASS: bundle includes 6B source files - 6B source bundled
+- PASS: bundle includes 6B executable tests - 6B tests bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6A recommendation visible
+- PASS: recommendation visible - 6B recommendation visible
 
 ## Files
 
@@ -68,7 +69,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-score-economy-calibration-6a.md
+- fullmatch-scoring-family-attribution-6b.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -76,5 +77,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-score-economy-calibration-6a.md
+- validation.fullmatch-scoring-family-attribution-6b.md
 - validation.share-pack.md
