@@ -67,15 +67,17 @@ import {
   renderFullMatchWorkbenchChainReplay5EValidation,
   renderFullMatchWorkbenchChainReplay5FDoc,
   renderFullMatchWorkbenchChainReplay5FValidation,
+  renderFullMatchWorkbenchChainReplay5GDoc,
+  renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay4YDoc,
   renderFullMatchWorkbenchChainReplay4YValidation,
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5F - Durable Storage Decision & Disabled Real Adapter Wiring";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5f.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5f.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 5G - Controlled Local Read-Only DB Mode";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-workbench-chain-replay-5g.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-workbench-chain-replay-5g.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1881,6 +1883,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5F disabled sqlite_local adapter wiring preserving dry-run save/query semantics without real database IO",
       },
       {
+        source: "src/reports/history/sqliteLocalReadOnlyCoachMatchHistoryAdapter.ts",
+        required: true,
+        reason: "Sprint 5G controlled local read-only SQLite adapter contract with query support, write rejection, and no real database IO",
+      },
+      {
         source: "src/reports/history/coachMatchHistoryMigrationDryRun.ts",
         required: true,
         reason: "Sprint 5D migration dry-run model exposing migrable, replaceable, duplicate, invalid, and unsupported record counts",
@@ -1919,6 +1926,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/buildCoachReportDurableStorageDecision.ts",
         required: true,
         reason: "Sprint 5F builder selecting sqlite_local and validating disabled real-adapter wiring without product activation",
+      },
+      {
+        source: "src/reports/coachReportControlledLocalReadOnlyDbMode.ts",
+        required: true,
+        reason: "Sprint 5G report model, tags, evidence fact, and guardrails for controlled local read-only DB mode",
+      },
+      {
+        source: "src/reports/buildCoachReportControlledLocalReadOnlyDbMode.ts",
+        required: true,
+        reason: "Sprint 5G builder validating read-only team/phase queries, schema compatibility, deterministic ordering, and write rejection",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -2264,6 +2281,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/scoringGuard.5f.test.ts",
         required: true,
         reason: "Sprint 5F executable scoring guard proving durable storage decision and disabled adapter wiring do not mutate scoring logic or score consequences",
+      },
+      {
+        source: "src/simulation/fullMatch/scoringGuard.5g.test.ts",
+        required: true,
+        reason: "Sprint 5G executable scoring guard proving controlled local read-only DB mode does not mutate scoring logic or score consequences",
       },
       {
         source: "src/simulation/fullMatch/runFullMatchSegmentContextScoringGuard.test.ts",
@@ -3707,6 +3729,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 5F executable sqlite_local disabled-adapter tests for dry-run save/query semantics and no real database IO",
       },
       {
+        source: "src/reports/sqliteLocalReadOnlyCoachMatchHistoryAdapter.test.ts",
+        required: true,
+        reason: "Sprint 5G executable read-only adapter tests for explicit controlled query mode, schema compatibility, and write rejection",
+      },
+      {
         source: "src/reports/coachMatchHistoryMigrationDryRun.test.ts",
         required: true,
         reason: "Sprint 5D executable migration dry-run tests for migrable, duplicate, replacement, invalid, and unsupported records",
@@ -3785,6 +3812,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/coachReportDurableStorageDecisionCopy.test.ts",
         required: true,
         reason: "Sprint 5F executable visible-copy tests proving durable storage wording stays cautious and non-activating",
+      },
+      {
+        source: "src/reports/coachReportControlledLocalReadOnlyDbMode.test.ts",
+        required: true,
+        reason: "Sprint 5G executable model tests proving controlled local read-only DB mode is non-prod, disabled by default, and read-only",
+      },
+      {
+        source: "src/reports/coachReportControlledLocalReadOnlyDbModeRenderer.test.ts",
+        required: true,
+        reason: "Sprint 5G executable renderer tests for the controlled local read-only DB export section and appendix",
+      },
+      {
+        source: "src/reports/coachReportControlledLocalReadOnlyDbModeGuard.test.ts",
+        required: true,
+        reason: "Sprint 5G executable guard tests proving controlled local read-only DB mode cannot drive selection or mutate official state",
+      },
+      {
+        source: "src/reports/coachReportControlledLocalReadOnlyDbModeCopy.test.ts",
+        required: true,
+        reason: "Sprint 5G executable visible-copy tests proving SQLite local wording stays controlled, local, read-only, and non-activating",
       },
       {
         source: "src/reports/generateCoachHtmlReport.ts",
@@ -3982,6 +4029,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 5G")) {
+    return renderFullMatchWorkbenchChainReplay5GDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5F")) {
     return renderFullMatchWorkbenchChainReplay5FDoc(fullMatchTraceValidationModel());
   }
@@ -6184,6 +6234,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 5G")) {
+    return renderFullMatchWorkbenchChainReplay5GValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 5F")) {
     return renderFullMatchWorkbenchChainReplay5FValidation(fullMatchTraceValidationModel());
   }
@@ -8332,6 +8385,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 5G")) {
+    return [
+      "# Sprint 5G Share Pack",
+      "",
+      "Current sprint: Sprint 5G - Controlled Local Read-Only DB Mode",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-workbench-chain-replay-5g.md",
+      "- validation.fullmatch-workbench-chain-replay-5g.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-workbench-chain-replay-5g.md and validation.fullmatch-workbench-chain-replay-5g.md.",
+      "",
+      "Sprint 5G proves controlled local read-only DB mode for test/dev only. The product source remains file_backed, SQLite local is not product truth, and real DB read/write counts stay at 0 in default report mode.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 5F")) {
     return [
       "# Sprint 5F Share Pack",

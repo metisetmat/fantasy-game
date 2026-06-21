@@ -8,6 +8,7 @@ import { buildCoachReportPersistenceEvidenceSnapshot } from "./buildCoachReportP
 import { buildCoachReportDatabaseMigrationPreparation } from "./buildCoachReportDatabaseMigrationPreparation";
 import { buildCoachReportDatabaseAdapterSpike } from "./buildCoachReportDatabaseAdapterSpike";
 import { buildCoachReportDurableStorageDecision } from "./buildCoachReportDurableStorageDecision";
+import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachReportControlledLocalReadOnlyDbMode";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
@@ -22,6 +23,7 @@ import type { CoachReportPersistenceEvidenceSnapshot } from "./coachReportPersis
 import type { CoachReportDatabaseMigrationPreparationModel } from "./coachReportDatabaseMigrationPreparation";
 import type { CoachReportDatabaseAdapterSpikeModel } from "./coachReportDatabaseAdapterSpike";
 import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurableStorageDecision";
+import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
@@ -34,6 +36,7 @@ import { createMockDatabaseCoachMatchHistoryAdapter } from "./history/mockDataba
 import { resolveDatabaseHistoryAdapterFeatureFlag } from "./history/databaseHistoryAdapterFeatureFlag";
 import { createExperimentalDatabaseCoachMatchHistoryAdapter } from "./history/experimentalDatabaseCoachMatchHistoryAdapter";
 import { createSqliteLocalCoachMatchHistoryAdapter } from "./history/sqliteLocalCoachMatchHistoryAdapter";
+import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteLocalReadOnlyCoachMatchHistoryAdapter";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 
@@ -52,6 +55,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly databaseMigrationPreparation: CoachReportDatabaseMigrationPreparationModel;
   readonly databaseAdapterSpike: CoachReportDatabaseAdapterSpikeModel;
   readonly durableStorageDecision: CoachReportDurableStorageDecisionModel;
+  readonly controlledLocalReadOnlyDbMode: CoachReportControlledLocalReadOnlyDbModeModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -187,6 +191,16 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     productReportHtml: productHtml,
     exportReportHtml: baselineExportHtml,
   });
+  const controlledLocalReadOnlyDbMode = buildCoachReportControlledLocalReadOnlyDbMode({
+    durableStorageDecision,
+    sourceRecords: historyStore.listAll(),
+    readOnlyAdapter: createSqliteLocalReadOnlyCoachMatchHistoryAdapter({
+      initialRecords: historyStore.listAll(),
+      featureFlagEnabled: false,
+    }),
+    productReportHtml: productHtml,
+    exportReportHtml: baselineExportHtml,
+  });
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -199,6 +213,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     databaseMigrationPreparation,
     databaseAdapterSpike,
     durableStorageDecision,
+    controlledLocalReadOnlyDbMode,
   });
 
   return {
@@ -216,5 +231,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     databaseMigrationPreparation,
     databaseAdapterSpike,
     durableStorageDecision,
+    controlledLocalReadOnlyDbMode,
   };
 }

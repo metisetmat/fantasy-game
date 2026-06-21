@@ -1,13 +1,14 @@
-# FullMatch Workbench Chain Replay 5F Validation
+# FullMatch Workbench Chain Replay 5G Validation
 
 Status: PASS
 
 ## Checks
-- PASS: Durable Storage Decision model is available. - available
+- PASS: controlled local read-only DB mode exists. - available
+- PASS: mode must be explicitly requested. - controlled_local_readonly_db
 - PASS: storage target selected is sqlite_local. - sqlite_local
 - PASS: schema version is coach_match_history_v1. - coach_match_history_v1
-- PASS: schema covers required fields. - 12
-- PASS: real adapter wiring prepared.
+- PASS: read-only mode is true.
+- PASS: write mode allowed is false.
 - PASS: adapter implemented is true.
 - PASS: adapter production ready is false.
 - PASS: feature flag enabled is false.
@@ -17,15 +18,15 @@ Status: PASS
 - PASS: database used as product truth is false.
 - PASS: report can use as source of truth is false.
 - PASS: real DB write count is 0. - 0
-- PASS: real DB read count is 0. - 0
-- PASS: dry run only is true.
-- PASS: inserted scenario passes.
-- PASS: replaced scenario passes.
-- PASS: ignored duplicate scenario passes.
+- PASS: default real DB read count is 0. - 0
+- PASS: controlled read attempts are visible. - 2
+- PASS: source record count is visible. - 6
+- PASS: read-only adapter record count matches source. - 6/6
 - PASS: query by team passes.
 - PASS: query by phase passes.
 - PASS: deterministic ordering passes.
-- PASS: durable adapter loads every source record. - 6/6
+- PASS: schema compatibility passes.
+- PASS: write rejected passes.
 - PASS: score mutation count is 0. - 0
 - PASS: timeline mutation count is 0. - 0
 - PASS: possession mutation count is 0. - 0
@@ -44,17 +45,18 @@ Status: PASS
 - PASS: scoring constants unchanged.
 - PASS: MatchBonusEvent unchanged.
 - PASS: batch/live separation preserved.
-- PASS: FULL_MATCH_BATCH_ECONOMY remains the only global economy proof.
-- PASS: export contains durable storage decision section.
-- PASS: legacy migration wording is clarified.
+- PASS: FULL_MATCH_BATCH_ECONOMY remains only global economy proof.
+- PASS: export contains controlled local read-only DB section.
+- PASS: export states file_backed remains active.
 - PASS: explicit exhaustive test command is available. - npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
 
 ## Counts
+- controlled local read-only DB mode available: true
+- mode name: controlled_local_readonly_db
 - storage target selected: sqlite_local
 - schema version: coach_match_history_v1
-- decision made: true
-- real adapter wiring prepared: true
-- adapter kind: sqlite_local_disabled
+- read-only mode: true
+- write mode allowed: false
 - adapter implemented: true
 - adapter production ready: false
 - feature flag enabled: false
@@ -64,18 +66,17 @@ Status: PASS
 - database used as product truth: false
 - report can use as source of truth: false
 - real DB write count: 0
-- real DB read count: 0
-- dry run only: true
-- inserted scenario pass: true
-- replaced scenario pass: true
-- ignored duplicate scenario pass: true
+- default real DB read count: 0
+- controlled read attempt count: 2
+- dry-run fallback available: true
+- source record count: 6
+- read-only adapter record count: 6
+- read-only query count: 2
 - query by team pass: true
 - query by phase pass: true
 - deterministic ordering pass: true
-- source record count: 6
-- durable adapter record count: 6
-- dry run save count: 8
-- dry run query count: 2
+- schema compatibility pass: true
+- write rejected pass: true
 - score mutation count: 0
 - timeline mutation count: 0
 - possession mutation count: 0
@@ -89,10 +90,12 @@ Status: PASS
 - trend proof claim count: 0
 - invented statistic count: 0
 - sandbox events promoted to official count: 0
+- visible recommendation wording count: 0
+- visible selection wording count: 0
 
 ## Recommendation
-- CONFIRM_DURABLE_STORAGE_DECISION_SQLITE_LOCAL.
-- CONFIRM_SCHEMA_VERSION_COACH_MATCH_HISTORY_V1.
-- CONFIRM_DISABLED_REAL_ADAPTER_WIRING.
-- CONFIRM_NO_PRODUCT_DATABASE_ACTIVATION.
-- PREPARE_CONTROLLED_LOCAL_TEST_READ_ONLY_DB_MODE.
+- CONFIRM_CONTROLLED_LOCAL_READONLY_DB_MODE.
+- CONFIRM_SQLITE_LOCAL_REMAINS_NON_PRODUCT_TRUTH.
+- CONFIRM_NO_DB_WRITES.
+- CONFIRM_FILE_BACKED_PRODUCT_SOURCE_UNCHANGED.
+- PREPARE_PRODUCT_HISTORY_SOURCE_SWITCH_TRIAL_NON_PROD_ONLY.
