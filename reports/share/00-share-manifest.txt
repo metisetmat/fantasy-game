@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-22T12:52:15.616Z
+Generated timestamp: 2026-06-22T15:12:45.270Z
 Task/sprint name: Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability
 Final file count: 20
 
@@ -802,20 +802,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/coachReportFromTraceAggregates.ts
- M src/reports/fullMatchOfficialScoringConnection.test.ts
- M src/reports/fullMatchOfficialScoringConnection.ts
- M src/reports/fullMatchOfficialScoringConnectionWarnings.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/htmlCoachReport.ts
- M src/reports/persistenceEvidenceMarkdownAlignment.test.ts
- M src/reports/persistenceEvidenceValidationAlignment.test.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchRouteFamilyMixActivation.test.ts
-?? src/reports/fullMatchRouteFamilyMixActivation.ts
-?? src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
-?? src/simulation/fullMatch/fullMatchRouteFamilyMixWarnings.ts
+ M src/reports/fullMatchRouteFamilyMixActivation.test.ts
+ M src/reports/fullMatchRouteFamilyMixActivation.ts
+ M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts

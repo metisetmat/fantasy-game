@@ -1,5 +1,7 @@
 import { buildFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import { scoringRegistryEntry } from "../systems/scoring/scoringActionRegistry";
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -8,6 +10,18 @@ function assertTest(condition: boolean, message: string): void {
 }
 
 const model = buildFullMatchRouteFamilyMixActivationModel(8);
+const timelineOrderReport = runFullMatch({
+  ...engineToCoachPublicContractFixtures.matchInputFixture,
+  seed: "route-family-mix-order-proof",
+});
+const generatedTries = timelineOrderReport.timeline.filter((event) =>
+  event.tags.includes("official_route_family_TRY_TOUCHDOWN") &&
+  event.consequences.some((consequence) => consequence.type === "score_change")
+);
+const generatedConversions = timelineOrderReport.timeline.filter((event) =>
+  event.tags.includes("official_route_family_CONVERSION_GOAL") &&
+  event.consequences.some((consequence) => consequence.type === "score_change")
+);
 
 assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3 points.");
 assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5 points.");
@@ -24,5 +38,13 @@ assertTest(model.batchProof.matchesWithOnlyShotGoals < model.batchProof.matchCou
 assertTest(model.batchProof.scoreFromScoreChangeAllRuns, "score must come from official score_change events.");
 assertTest(model.batchProof.noUnknown, "UNKNOWN scoring family must not appear.");
 assertTest(model.batchProof.noPenaltyLeakage, "PENALTY_SHOT leakage must not appear.");
+assertTest(generatedConversions.length > 0, "order proof must include generated conversion routes.");
+assertTest(generatedConversions.every((conversion) =>
+  generatedTries.some((tryEvent) =>
+    tryEvent.sequenceId === conversion.sequenceId &&
+    tryEvent.teamId === conversion.teamId &&
+    tryEvent.timestamp.tick < conversion.timestamp.tick
+  )
+), "generated conversions must appear after their parent try events.");
 
 console.log("fullMatchRouteFamilyMixActivation tests passed.");

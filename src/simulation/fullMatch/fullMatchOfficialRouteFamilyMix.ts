@@ -457,6 +457,17 @@ function routeTiePriority(family: OfficialRouteFamily): number {
   }
 }
 
+function routeEventTimelineOffset(family: OfficialRouteFamily): number {
+  switch (family) {
+    case "TRY_TOUCHDOWN":
+      return 5;
+    case "CONVERSION_GOAL":
+      return 6;
+    default:
+      return routeTiePriority(family);
+  }
+}
+
 function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed: string): OfficialRouteFamilyCandidate {
   const noise = deterministicNoise(`${seed}:${candidate.candidateId}:resolve`);
   const successScore = candidate.candidateScore + noise - 10;
@@ -566,7 +577,7 @@ function eventForResolvedCandidate(input: {
     eventId: `${input.segmentLabel}-route-family-${input.candidate.family.toLowerCase()}-${input.candidate.teamId}` as MatchEvent["eventId"],
     matchId: input.matchInput.matchId,
     timestamp: {
-      tick: (input.segmentIndex * 100 + 92 + routeTiePriority(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
+      tick: (input.segmentIndex * 100 + 92 + routeEventTimelineOffset(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
       minute: (input.template?.timestamp.minute ?? input.segmentIndex * 10) + 8,
       period: input.template?.timestamp.period ?? "first_half",
     },

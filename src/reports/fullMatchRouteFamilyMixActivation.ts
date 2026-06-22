@@ -122,7 +122,7 @@ export interface FullMatchRouteFamilyMixActivationModel {
   readonly routeFamilyCompetitionCanSelectContinuation: boolean;
   readonly batchProof: FullMatchRouteFamilyMixBatchProofModel;
   readonly warnings: readonly FullMatchRouteFamilyMixWarningCode[];
-  readonly scoringConstantsChanged: false;
+  readonly scoringConstantsChanged: boolean;
   readonly scoreCapApplied: false;
   readonly postHocRewriteApplied: false;
   readonly scoringEventsDeleted: false;
@@ -146,7 +146,7 @@ const ROUTE_FAMILIES: readonly OfficialRouteFamily[] = [
 ];
 
 let cachedFullMatchRouteFamilyMixActivationModel: FullMatchRouteFamilyMixActivationModel | null = null;
-const CACHE_VERSION = "route-family-mix-6f-v2";
+const CACHE_VERSION = "route-family-mix-6f-v3";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-route-family-mix-activation-6f.json");
 
 function emptyCounts(): RouteFamilyCounts {
@@ -510,6 +510,7 @@ export function buildFullMatchRouteFamilyMixActivationModel(matchCount = MATCH_C
   const batchProof = buildBatchProof(matchCount);
   const availabilityRows = availabilityRowsFromRuns(batchProof.runs);
   const scoreShares = scoreShare(batchProof.scoringPointsByFamily);
+  const constantsChanged = scoringConstantsChanged();
   const guardrailsPass =
     batchProof.matchCount >= 50 &&
     batchProof.uniqueSeeds === batchProof.matchCount &&
@@ -524,7 +525,7 @@ export function buildFullMatchRouteFamilyMixActivationModel(matchCount = MATCH_C
     batchProof.noPenaltyLeakage &&
     batchProof.noPersistenceScoring &&
     batchProof.noSQLiteScoring &&
-    !scoringConstantsChanged();
+    !constantsChanged;
   const routeMixPass =
     batchProof.matchesWithTryOrDrop > 0 &&
     batchProof.matchesWithMultipleScoringFamilies > 0 &&
@@ -583,7 +584,7 @@ export function buildFullMatchRouteFamilyMixActivationModel(matchCount = MATCH_C
     routeFamilyCompetitionCanSelectContinuation: batchProof.runs.some((run) => run.continuationSelectedCount > 0),
     batchProof,
     warnings,
-    scoringConstantsChanged: false,
+    scoringConstantsChanged: constantsChanged,
     scoreCapApplied: false,
     postHocRewriteApplied: false,
     scoringEventsDeleted: false,

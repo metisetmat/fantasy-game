@@ -55298,6 +55298,17 @@ function routeTiePriority(family: OfficialRouteFamily): number {
   }
 }
 
+function routeEventTimelineOffset(family: OfficialRouteFamily): number {
+  switch (family) {
+    case "TRY_TOUCHDOWN":
+      return 5;
+    case "CONVERSION_GOAL":
+      return 6;
+    default:
+      return routeTiePriority(family);
+  }
+}
+
 function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed: string): OfficialRouteFamilyCandidate {
   const noise = deterministicNoise(`${seed}:${candidate.candidateId}:resolve`);
   const successScore = candidate.candidateScore + noise - 10;
@@ -55407,7 +55418,7 @@ function eventForResolvedCandidate(input: {
     eventId: `${input.segmentLabel}-route-family-${input.candidate.family.toLowerCase()}-${input.candidate.teamId}` as MatchEvent["eventId"],
     matchId: input.matchInput.matchId,
     timestamp: {
-      tick: (input.segmentIndex * 100 + 92 + routeTiePriority(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
+      tick: (input.segmentIndex * 100 + 92 + routeEventTimelineOffset(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
       minute: (input.template?.timestamp.minute ?? input.segmentIndex * 10) + 8,
       period: input.template?.timestamp.period ?? "first_half",
     },
@@ -55956,7 +55967,7 @@ export interface FullMatchRouteFamilyMixActivationModel {
   readonly routeFamilyCompetitionCanSelectContinuation: boolean;
   readonly batchProof: FullMatchRouteFamilyMixBatchProofModel;
   readonly warnings: readonly FullMatchRouteFamilyMixWarningCode[];
-  readonly scoringConstantsChanged: false;
+  readonly scoringConstantsChanged: boolean;
   readonly scoreCapApplied: false;
   readonly postHocRewriteApplied: false;
   readonly scoringEventsDeleted: false;
@@ -55980,7 +55991,7 @@ const ROUTE_FAMILIES: readonly OfficialRouteFamily[] = [
 ];
 
 let cachedFullMatchRouteFamilyMixActivationModel: FullMatchRouteFamilyMixActivationModel | null = null;
-const CACHE_VERSION = "route-family-mix-6f-v2";
+const CACHE_VERSION = "route-family-mix-6f-v3";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-route-family-mix-activation-6f.json");
 
 function emptyCounts(): RouteFamilyCounts {
@@ -56344,6 +56355,7 @@ export function buildFullMatchRouteFamilyMixActivationModel(matchCount = MATCH_C
   const batchProof = buildBatchProof(matchCount);
   const availabilityRows = availabilityRowsFromRuns(batchProof.runs);
   const scoreShares = scoreShare(batchProof.scoringPointsByFamily);
+  const constantsChanged = scoringConstantsChanged();
   const guardrailsPass =
     batchProof.matchCount >= 50 &&
     batchProof.uniqueSeeds === batchProof.matchCount &&
@@ -56358,7 +56370,7 @@ export function buildFullMatchRouteFamilyMixActivationModel(matchCount = MATCH_C
     batchProof.noPenaltyLeakage &&
     batchProof.noPersistenceScoring &&
     batchProof.noSQLiteScoring &&
-    !scoringConstantsChanged();
+    !constantsChanged;
   const routeMixPass =
     batchProof.matchesWithTryOrDrop > 0 &&
     batchProof.matchesWithMultipleScoringFamilies > 0 &&
@@ -56417,7 +56429,7 @@ export function buildFullMatchRouteFamilyMixActivationModel(matchCount = MATCH_C
     routeFamilyCompetitionCanSelectContinuation: batchProof.runs.some((run) => run.continuationSelectedCount > 0),
     batchProof,
     warnings,
-    scoringConstantsChanged: false,
+    scoringConstantsChanged: constantsChanged,
     scoreCapApplied: false,
     postHocRewriteApplied: false,
     scoringEventsDeleted: false,
@@ -56488,6 +56500,8 @@ export function currentFullMatchRouteFamilyMixActivationModel(): FullMatchRouteF
 ```ts
 import { buildFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import { scoringRegistryEntry } from "../systems/scoring/scoringActionRegistry";
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -56496,6 +56510,18 @@ function assertTest(condition: boolean, message: string): void {
 }
 
 const model = buildFullMatchRouteFamilyMixActivationModel(8);
+const timelineOrderReport = runFullMatch({
+  ...engineToCoachPublicContractFixtures.matchInputFixture,
+  seed: "route-family-mix-order-proof",
+});
+const generatedTries = timelineOrderReport.timeline.filter((event) =>
+  event.tags.includes("official_route_family_TRY_TOUCHDOWN") &&
+  event.consequences.some((consequence) => consequence.type === "score_change")
+);
+const generatedConversions = timelineOrderReport.timeline.filter((event) =>
+  event.tags.includes("official_route_family_CONVERSION_GOAL") &&
+  event.consequences.some((consequence) => consequence.type === "score_change")
+);
 
 assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3 points.");
 assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5 points.");
@@ -56512,6 +56538,14 @@ assertTest(model.batchProof.matchesWithOnlyShotGoals < model.batchProof.matchCou
 assertTest(model.batchProof.scoreFromScoreChangeAllRuns, "score must come from official score_change events.");
 assertTest(model.batchProof.noUnknown, "UNKNOWN scoring family must not appear.");
 assertTest(model.batchProof.noPenaltyLeakage, "PENALTY_SHOT leakage must not appear.");
+assertTest(generatedConversions.length > 0, "order proof must include generated conversion routes.");
+assertTest(generatedConversions.every((conversion) =>
+  generatedTries.some((tryEvent) =>
+    tryEvent.sequenceId === conversion.sequenceId &&
+    tryEvent.teamId === conversion.teamId &&
+    tryEvent.timestamp.tick < conversion.timestamp.tick
+  )
+), "generated conversions must appear after their parent try events.");
 
 console.log("fullMatchRouteFamilyMixActivation tests passed.");
 ```
