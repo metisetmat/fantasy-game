@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6G - Route Family Scoring Rate Calibration. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6H - Segment Scoring Density Calibration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

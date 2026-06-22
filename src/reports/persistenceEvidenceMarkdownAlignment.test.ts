@@ -20,7 +20,7 @@ export function validatePersistenceEvidenceMarkdownAlignment(): readonly string[
   assertTest(markdown.includes("- replaced record count: 0"), "markdown must contain snapshot replaced count.");
   assertTest(markdown.includes("- ignored duplicate count: 0"), "markdown must contain snapshot ignored count.");
   assertTest(markdown.includes("- queried record count: 6"), "markdown must contain snapshot queried record count.");
-  assertTest(markdown.includes("- queried signal count: 42"), "markdown must contain snapshot queried signal count.");
+  assertTest(markdown.includes("- queried signal count: 40"), "markdown must contain snapshot queried signal count.");
 
   return [
     "markdown contains snapshot save operation",

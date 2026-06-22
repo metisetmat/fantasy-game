@@ -77,14 +77,14 @@
       </div>
       <div class="score-box">
         <span class="score-label">Score du rapport full-match</span>
-        <span class="score">19 - 35</span>
+        <span class="score">16 - 0</span>
       </div>
     </div>
   </header>
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>
-    <div class="summary-list"><ul><li>Score final : 19 - 35.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
+    <div class="summary-list"><ul><li>Score final : 16 - 0.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
   </section>
 
   <section id="official-match-reading" class="product-section">
@@ -841,7 +841,7 @@
   </section>
   
   <script type="application/json" id="coach-report-phase-visuals-data">
-{"withBall":{"phase":"with_ball","source":"official_aggregates","signals":[{"zone":"Z2-C","label":"Danger officiel","value":10,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z3-C","label":"Danger officiel","value":6,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-C","label":"Progression utile","value":16,"kind":"progression_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."}]},"withoutBall":{"phase":"without_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Pression / instabilit&eacute;","value":23,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-C","label":"Pression / instabilit&eacute;","value":16,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-HSR","label":"Pression / instabilit&eacute;","value":5,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."}]},"goalkeeper":{"phase":"goalkeeper","source":"controlled_empty_state","signals":[],"emptyStateReason":"Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart."}}
+{"withBall":{"phase":"with_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Danger officiel","value":5,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-C","label":"Progression utile","value":16,"kind":"progression_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-HSR","label":"Progression utile","value":4,"kind":"progression_zone","source":"official_aggregates","confidence":"medium","explanation":"Z5-HSR ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."}]},"withoutBall":{"phase":"without_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Pression / instabilit&eacute;","value":24,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-C","label":"Pression / instabilit&eacute;","value":16,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-HSR","label":"Pression / instabilit&eacute;","value":4,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"medium","explanation":"Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."}]},"goalkeeper":{"phase":"goalkeeper","source":"controlled_empty_state","signals":[],"emptyStateReason":"Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart."}}
   </script>
 
     <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
@@ -913,11 +913,11 @@
         <article class="product-card">
           <h4>Avant / apres batch 50 matchs</h4>
           <ul>
-            <li>Points moyens: 45.1 -> 39.2</li>
-            <li>Scoring events / match: 14.8 -> 12.5</li>
-            <li>Blowout rate: 82% -> 68%</li>
-            <li>Severe blowout rate: 52% -> 42%</li>
-            <li>Scorelines uniques: 45 -> 43</li>
+            <li>Points moyens: 45.1 -> 21</li>
+            <li>Scoring events / match: 14.8 -> 6.9</li>
+            <li>Blowout rate: 82% -> 56%</li>
+            <li>Severe blowout rate: 52% -> 14%</li>
+            <li>Scorelines uniques: 45 -> 32</li>
           </ul>
         </article>
         <article class="product-card">
@@ -943,16 +943,54 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>SHOT_GOAL</td><td>44%</td><td>33%</td><td>67%</td><td>204</td></tr>
-          <tr><td>TRY_TOUCHDOWN</td><td>65%</td><td>65%</td><td>35%</td><td>167</td></tr>
-          <tr><td>CONVERSION_GOAL</td><td>100%</td><td>63%</td><td>37%</td><td>161</td></tr>
-          <tr><td>DROP_GOAL</td><td>49%</td><td>35%</td><td>65%</td><td>95</td></tr>
+          <tr><td>SHOT_GOAL</td><td>44%</td><td>35%</td><td>65%</td><td>208</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>65%</td><td>82%</td><td>18%</td><td>50</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>100%</td><td>85%</td><td>15%</td><td>50</td></tr>
+          <tr><td>DROP_GOAL</td><td>49%</td><td>52%</td><td>48%</td><td>39</td></tr>
         </tbody>
       </table>
       <p class="muted">
         Statut prudent: PASS. Recommendation: REDUCE_SEGMENT_SCORING_DENSITY_NEXT.
         Les blowouts restent a surveiller si le taux demeure haut; cette section confirme seulement la baisse observee
         et la preservation de la diversite des routes.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Densit&eacute; des occasions">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6H</p>
+        <h3>Densit&eacute; des occasions</h3>
+        <p>
+          Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans cap de score
+          et sans r&eacute;&eacute;criture post-run.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apr&egrave;s batch 50 matchs</h4>
+          <ul>
+            <li>Occasions / match: 27.5 -> 15.9</li>
+            <li>Occasions / segment: 3.4 -> 2</li>
+            <li>Scoring events / match: 12.5 -> 6.9</li>
+            <li>Points moyens: 39.2 -> 21</li>
+            <li>Blowout rate: 68% -> 56%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Interruptions de cha&icirc;ne</h4>
+          <ul>
+            <li>Phases neutres / match: 58 -> 69.6</li>
+            <li>R&eacute;cup&eacute;rations d&eacute;fensives / match: 6.5 -> 15.9</li>
+            <li>Phases de reset / match: 19 -> 42.4</li>
+            <li>Continuation disponible: oui</li>
+            <li>Version: <code>SEGMENT_SCORING_DENSITY_6H</code></li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut 6H: PARTIAL. Recommendation: IMPROVE_TEAM_OPPORTUNITY_BALANCE_NEXT.
+        Ce statut reste volontairement prudent si les blowouts demeurent trop hauts, meme lorsque la densit&eacute; baisse.
       </p>
     </section>
 </main>

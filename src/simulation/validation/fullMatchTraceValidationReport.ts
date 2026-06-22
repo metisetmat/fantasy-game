@@ -40,6 +40,10 @@ import {
   renderFullMatchRouteFamilyScoringRateCalibration6GDoc as renderRouteFamilyScoringRateCalibration6GDoc,
   renderFullMatchRouteFamilyScoringRateCalibration6GValidation as renderRouteFamilyScoringRateCalibration6GValidation,
 } from "../../reports/fullMatchRouteFamilyScoringRateCalibration";
+import {
+  renderFullMatchSegmentScoringDensityCalibration6HDoc as renderSegmentScoringDensityCalibration6HDoc,
+  renderFullMatchSegmentScoringDensityCalibration6HValidation as renderSegmentScoringDensityCalibration6HValidation,
+} from "../../reports/fullMatchSegmentScoringDensityCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6297,6 +6301,14 @@ export function renderFullMatchRouteFamilyScoringRateCalibration6GDoc(_model: Fu
 
 export function renderFullMatchRouteFamilyScoringRateCalibration6GValidation(_model: FullMatchTraceValidationModel): string {
   return renderRouteFamilyScoringRateCalibration6GValidation();
+}
+
+export function renderFullMatchSegmentScoringDensityCalibration6HDoc(_model: FullMatchTraceValidationModel): string {
+  return renderSegmentScoringDensityCalibration6HDoc();
+}
+
+export function renderFullMatchSegmentScoringDensityCalibration6HValidation(_model: FullMatchTraceValidationModel): string {
+  return renderSegmentScoringDensityCalibration6HValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

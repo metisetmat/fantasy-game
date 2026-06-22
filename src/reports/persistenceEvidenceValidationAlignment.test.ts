@@ -20,7 +20,7 @@ export function validatePersistenceEvidenceValidationAlignment(): readonly strin
   assertTest(validation.includes("- replaced record count: 0"), "validation must contain snapshot replaced count.");
   assertTest(validation.includes("- ignored duplicate count: 0"), "validation must contain snapshot ignored count.");
   assertTest(validation.includes("- queried record count: 6"), "validation must contain snapshot queried record count.");
-  assertTest(validation.includes("- queried signal count: 42"), "validation must contain snapshot queried signal count.");
+  assertTest(validation.includes("- queried signal count: 40"), "validation must contain snapshot queried signal count.");
 
   return [
     "validation contains snapshot save operation",

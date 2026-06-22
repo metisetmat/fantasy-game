@@ -1,6 +1,6 @@
-# Sprint 6G Share Pack
+# Sprint 6H Share Pack
 
-Current sprint: Sprint 6G - Route Family Scoring Rate Calibration
+Current sprint: Sprint 6H - Segment Scoring Density Calibration
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-route-family-scoring-rate-calibration-6g.md
-- validation.fullmatch-route-family-scoring-rate-calibration-6g.md
+- fullmatch-segment-scoring-density-calibration-6h.md
+- validation.fullmatch-segment-scoring-density-calibration-6h.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-route-family-scoring-rate-calibration-6g.md and validation.fullmatch-route-family-scoring-rate-calibration-6g.md.
+Start with validation.share-pack.md, then fullmatch-segment-scoring-density-calibration-6h.md and validation.fullmatch-segment-scoring-density-calibration-6h.md.
 
-Sprint 6G calibrates full-match route-family scoring rates after 6F route activation. It reduces scoring frequency and blowout pressure while preserving SHOT, TRY, CONVERSION-after-TRY, DROP, and continuation availability. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent scores, or use persistence/SQLite as a scoring source.
+Sprint 6H reduces scoring-opportunity density per segment before score_change events are created. It preserves SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.
 
 Upload every file in this reports/share directory.

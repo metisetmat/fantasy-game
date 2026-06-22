@@ -79,6 +79,8 @@ import {
   renderFullMatchRouteFamilyMixActivation6FValidation,
   renderFullMatchRouteFamilyScoringRateCalibration6GDoc,
   renderFullMatchRouteFamilyScoringRateCalibration6GValidation,
+  renderFullMatchSegmentScoringDensityCalibration6HDoc,
+  renderFullMatchSegmentScoringDensityCalibration6HValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -91,9 +93,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6G - Route Family Scoring Rate Calibration";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-route-family-scoring-rate-calibration-6g.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-route-family-scoring-rate-calibration-6g.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6H - Segment Scoring Density Calibration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-segment-scoring-density-calibration-6h.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-segment-scoring-density-calibration-6h.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2082,6 +2084,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchRouteFamilyScoringRateCalibration.test.ts",
         required: true,
         reason: "Sprint 6G executable test proving scoring-rate reductions, route diversity preservation, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/segmentScoringDensityWarnings.ts",
+        required: true,
+        reason: "Sprint 6H warning-code registry for segment scoring-density diagnostics",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchSegmentScoringDensityAudit.ts",
+        required: true,
+        reason: "Sprint 6H segment-level audit for scoring opportunity density, neutral phases, recoveries, resets, and warnings",
+      },
+      {
+        source: "src/reports/fullMatchSegmentScoringDensityCalibration.ts",
+        required: true,
+        reason: "Sprint 6H full-match segment scoring-density calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchSegmentScoringDensityCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6H executable test proving density reductions, route diversity preservation, and guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4240,6 +4262,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6H")) {
+    return renderFullMatchSegmentScoringDensityCalibration6HDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6G")) {
     return renderFullMatchRouteFamilyScoringRateCalibration6GDoc(fullMatchTraceValidationModel());
   }
@@ -6469,6 +6494,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6H")) {
+    return renderFullMatchSegmentScoringDensityCalibration6HValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6G")) {
     return renderFullMatchRouteFamilyScoringRateCalibration6GValidation(fullMatchTraceValidationModel());
   }
@@ -8644,6 +8672,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6H")) {
+    return [
+      "# Sprint 6H Share Pack",
+      "",
+      "Current sprint: Sprint 6H - Segment Scoring Density Calibration",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-segment-scoring-density-calibration-6h.md",
+      "- validation.fullmatch-segment-scoring-density-calibration-6h.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-segment-scoring-density-calibration-6h.md and validation.fullmatch-segment-scoring-density-calibration-6h.md.",
+      "",
+      "Sprint 6H reduces scoring-opportunity density per segment before score_change events are created. It preserves SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.",
+      "",
+      "Upload every file in this reports/share directory.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6G")) {
     return [
       "# Sprint 6G Share Pack",

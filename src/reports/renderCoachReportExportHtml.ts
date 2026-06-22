@@ -30,6 +30,7 @@ import type { FullMatchOfficialScoringCalibrationConnectionModel } from "./fullM
 import type { FullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
 import type { FullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import type { FullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatchRouteFamilyScoringRateCalibration";
+import type { FullMatchSegmentScoringDensityCalibrationModel } from "./fullMatchSegmentScoringDensityCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2537,6 +2538,53 @@ export function renderFullMatchRouteFamilyScoringRateCalibrationSection(
     </section>`;
 }
 
+export function renderFullMatchSegmentScoringDensityCalibrationSection(
+  model: FullMatchSegmentScoringDensityCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Densit&eacute; des occasions">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6H</p>
+        <h3>Densit&eacute; des occasions</h3>
+        <p>
+          Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans cap de score
+          et sans r&eacute;&eacute;criture post-run.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apr&egrave;s batch 50 matchs</h4>
+          <ul>
+            <li>Occasions / match: ${model.beforeAfter.scoringOpportunitiesPerMatchBefore} -> ${model.beforeAfter.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Occasions / segment: ${model.beforeAfter.scoringOpportunitiesPerSegmentBefore} -> ${model.beforeAfter.scoringOpportunitiesPerSegmentAfter}</li>
+            <li>Scoring events / match: ${model.beforeAfter.scoringEventsPerMatchBefore} -> ${model.beforeAfter.scoringEventsPerMatchAfter}</li>
+            <li>Points moyens: ${model.beforeAfter.averageTotalPointsBefore} -> ${model.beforeAfter.averageTotalPointsAfter}</li>
+            <li>Blowout rate: ${model.beforeAfter.blowoutRateBefore}% -> ${model.beforeAfter.blowoutRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Interruptions de cha&icirc;ne</h4>
+          <ul>
+            <li>Phases neutres / match: ${model.beforeAfter.neutralPhasesPerMatchBefore} -> ${model.beforeAfter.neutralPhasesPerMatchAfter}</li>
+            <li>R&eacute;cup&eacute;rations d&eacute;fensives / match: ${model.beforeAfter.defensiveRecoveriesPerMatchBefore} -> ${model.beforeAfter.defensiveRecoveriesPerMatchAfter}</li>
+            <li>Phases de reset / match: ${model.beforeAfter.resetPhasesPerMatchBefore} -> ${model.beforeAfter.resetPhasesPerMatchAfter}</li>
+            <li>Continuation disponible: ${model.batchAudit.continuationCount > 0 ? "oui" : "non"}</li>
+            <li>Version: <code>${escapeHtml(model.version)}</code></li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut 6H: ${model.status}. Recommendation: ${model.recommendation}.
+        Ce statut reste volontairement prudent si les blowouts demeurent trop hauts, meme lorsque la densit&eacute; baisse.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -3477,6 +3525,7 @@ function renderAppendices(input: {
   readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
   readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
   readonly fullMatchRouteFamilyScoringRateCalibration?: FullMatchRouteFamilyScoringRateCalibrationModel;
+  readonly fullMatchSegmentScoringDensityCalibration?: FullMatchSegmentScoringDensityCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3560,6 +3609,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
   readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
   readonly fullMatchRouteFamilyScoringRateCalibration?: FullMatchRouteFamilyScoringRateCalibrationModel;
+  readonly fullMatchSegmentScoringDensityCalibration?: FullMatchSegmentScoringDensityCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3672,6 +3722,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchBatchEconomyProofSection(input.fullMatchBatchEconomyProof),
     renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(input.fullMatchRouteFamilyScoringRateCalibration),
+    renderFullMatchSegmentScoringDensityCalibrationSection(input.fullMatchSegmentScoringDensityCalibration),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3731,6 +3782,12 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchRouteFamilyMixActivation === undefined
       ? {}
       : { fullMatchRouteFamilyMixActivation: input.fullMatchRouteFamilyMixActivation }),
+    ...(input.fullMatchRouteFamilyScoringRateCalibration === undefined
+      ? {}
+      : { fullMatchRouteFamilyScoringRateCalibration: input.fullMatchRouteFamilyScoringRateCalibration }),
+    ...(input.fullMatchSegmentScoringDensityCalibration === undefined
+      ? {}
+      : { fullMatchSegmentScoringDensityCalibration: input.fullMatchSegmentScoringDensityCalibration }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

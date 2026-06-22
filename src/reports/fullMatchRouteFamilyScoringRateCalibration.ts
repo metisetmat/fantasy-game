@@ -170,7 +170,7 @@ export interface FullMatchRouteFamilyScoringRateCalibrationModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "route-family-scoring-rate-6g-v3";
+const CACHE_VERSION = "route-family-scoring-rate-6g-v4";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-route-family-scoring-rate-calibration-6g.json");
 const ROUTE_FAMILIES: readonly OfficialRouteFamily[] = [
   "SHOT_GOAL",
