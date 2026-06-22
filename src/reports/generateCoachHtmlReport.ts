@@ -14,6 +14,7 @@ import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachRepor
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
+import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -204,6 +205,10 @@ export function writeLatestCoachReport(): void {
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
   const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(experimentalReport);
+  const fullMatchCalibrationCarryoverReconciliation = buildFullMatchCalibrationCarryoverReconciliationModel(
+    experimentalReport,
+    scoringFamilyAttributionAudit,
+  );
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -220,6 +225,7 @@ export function writeLatestCoachReport(): void {
     ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
     fullMatchScoreEconomyCalibration,
     scoringFamilyAttributionAudit,
+    fullMatchCalibrationCarryoverReconciliation,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

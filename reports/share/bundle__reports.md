@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -78,6 +78,8 @@ import {
   renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay5HDoc,
   renderFullMatchWorkbenchChainReplay5HValidation,
+  renderFullMatchCalibrationCarryoverReconciliation6CDoc,
+  renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
   renderFullMatchScoringFamilyAttribution6BValidation,
   renderFullMatchScoreEconomyCalibration6ADoc,
@@ -88,9 +90,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-scoring-family-attribution-6b.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-scoring-family-attribution-6b.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-calibration-carryover-reconciliation-6c.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-calibration-carryover-reconciliation-6c.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1989,6 +1991,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/scoringFamilyAttributionAudit.ts",
         required: true,
         reason: "Sprint 6B scoring family attribution audit model with coverage, legacy UNKNOWN comparison, family points, and no-mutation guardrails",
+      },
+      {
+        source: "src/reports/fullMatchCalibrationCarryoverWarnings.ts",
+        required: true,
+        reason: "Sprint 6C warning-code registry for calibration carryover and full-match regression reconciliation",
+      },
+      {
+        source: "src/reports/fullMatchCalibrationCarryoverReconciliation.ts",
+        required: true,
+        reason: "Sprint 6C diagnostic model comparing historical calibrations with the current official full-match scoring path",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -3942,6 +3954,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6B executable renderer tests proving the coach export includes Origine des points and avoids manual score-correction wording",
       },
       {
+        source: "src/reports/fullMatchCalibrationCarryoverReconciliation.test.ts",
+        required: true,
+        reason: "Sprint 6C executable model tests proving carryover gaps are diagnostic-only and preserve scoring guardrails",
+      },
+      {
+        source: "src/reports/fullMatchCalibrationCarryoverRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6C executable renderer tests proving the coach export exposes calibration reconciliation without score correction wording",
+      },
+      {
         source: "src/reports/generateCoachHtmlReport.ts",
         required: true,
         reason: "Sprint 2E coach HTML report generation script",
@@ -4137,6 +4159,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6C")) {
+    return renderFullMatchCalibrationCarryoverReconciliation6CDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6B")) {
     return renderFullMatchScoringFamilyAttribution6BDoc(fullMatchTraceValidationModel());
   }
@@ -6351,6 +6376,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6C")) {
+    return renderFullMatchCalibrationCarryoverReconciliation6CValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6B")) {
     return renderFullMatchScoringFamilyAttribution6BValidation(fullMatchTraceValidationModel());
   }
@@ -8511,6 +8539,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6C")) {
+    return [
+      "# Sprint 6C Share Pack",
+      "",
+      "Current sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-calibration-carryover-reconciliation-6c.md",
+      "- validation.fullmatch-calibration-carryover-reconciliation-6c.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-calibration-carryover-reconciliation-6c.md and validation.fullmatch-calibration-carryover-reconciliation-6c.md.",
+      "",
+      "Sprint 6C is diagnostic only. It reconciles prior batch/live calibration work with the current official full-match scoring path, explains the SHOT_GOAL-only regression surface, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6B")) {
     return [
       "# Sprint 6B Share Pack",
@@ -25601,6 +25665,91 @@ test("renders the scoring-family attribution section in the coach export", () =>
 });
 ```
 
+## File: src/reports/fullMatchCalibrationCarryoverReconciliation.test.ts
+
+```ts
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
+import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
+
+test("builds a diagnostic-only calibration carryover reconciliation model", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+    enableCoachReportMultiMatchPhaseComparison: true,
+  });
+  const audit = buildScoringFamilyAttributionAuditModel(report);
+  const reconciliation = buildFullMatchCalibrationCarryoverReconciliationModel(report, audit);
+
+  assert.equal(reconciliation.status, "available");
+  assert.equal(reconciliation.scope, "FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN");
+  assert.equal(reconciliation.version, "CALIBRATION_CARRYOVER_6C");
+  assert.equal(reconciliation.officialFullMatchScoringEvents, audit.totalScoringEventCount);
+  assert.equal(reconciliation.officialFullMatchShotGoalEvents, audit.scoringEventsByFamily.SHOT_GOAL);
+  assert.equal(reconciliation.shotDifficultyCalibrationAppliedInBatch, true);
+  assert.equal(reconciliation.shotDifficultyCalibrationAppliedInFullMatch, false);
+  assert.equal(reconciliation.scoringChoiceBalanceAppliedInBatch, true);
+  assert.equal(reconciliation.scoringChoiceBalanceAppliedInFullMatch, false);
+  assert.equal(reconciliation.primaryRegressionCause, "FULLMATCH_PARALLEL_SCORING_PATH");
+  assert.ok(reconciliation.warnings.includes("FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION"));
+  assert.ok(reconciliation.warnings.includes("CALIBRATION_DIAGNOSTIC_ONLY"));
+  assert.ok(reconciliation.warnings.includes("GLOBAL_ECONOMY_NOT_PROVEN"));
+  assert.equal(reconciliation.carryoverMatrix.length >= 8, true);
+  assert.equal(reconciliation.scoringPathAuditRows.some((row) => row.pathType === "batch"), true);
+  assert.equal(reconciliation.scoringPathAuditRows.some((row) => row.pathType === "fullmatch"), true);
+});
+
+test("keeps Sprint 6C as report-only diagnostics without gameplay mutation", () => {
+  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
+    routeSelectionMode: "workbench_chain_replay_experimental",
+  });
+  const reconciliation = buildFullMatchCalibrationCarryoverReconciliationModel(report);
+
+  assert.equal(reconciliation.scoringConstantsChanged, false);
+  assert.equal(reconciliation.scoreCapApplied, false);
+  assert.equal(reconciliation.postHocScoreRewriteApplied, false);
+  assert.equal(reconciliation.scoringEventsDeleted, false);
+  assert.equal(reconciliation.scoringEventsRewritten, false);
+  assert.equal(reconciliation.forcedOpponentScoreApplied, false);
+  assert.equal(reconciliation.officialTimelineMutationCount, 0);
+  assert.equal(reconciliation.officialPossessionMutationCount, 0);
+  assert.equal(reconciliation.batchLiveSeparationPreserved, true);
+  assert.equal(reconciliation.matchBonusEventChanged, false);
+  assert.equal(reconciliation.persistenceUsedForCalibration, false);
+  assert.equal(reconciliation.sqliteUsedAsScoreEconomySource, false);
+  assert.equal(reconciliation.globalEconomyClaimCount, 0);
+  assert.equal(reconciliation.trendProofClaimCount, 0);
+  assert.equal(reconciliation.inventedStatisticCount, 0);
+  assert.equal(reconciliation.fullMatchBatchEconomyRemainsOnlyGlobalProof, true);
+});
+```
+
+## File: src/reports/fullMatchCalibrationCarryoverRenderer.test.ts
+
+```ts
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
+
+test("renders calibration carryover reconciliation in the coach export", () => {
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const html = context.exportHtml;
+
+  assert.match(html, /Reconciliation des calibrations/);
+  assert.match(html, /Diagnostic single-run/);
+  assert.match(html, /Il ne modifie pas le score/);
+  assert.match(html, /FULLMATCH_PARALLEL_SCORING_PATH/);
+  assert.match(html, /FULL_MATCH_BATCH_ECONOMY reste la seule/);
+  assert.doesNotMatch(html, /score corrige/i);
+  assert.doesNotMatch(html, /score ajuste/i);
+  assert.equal(context.fullMatchCalibrationCarryoverReconciliation.status, "available");
+  assert.equal(context.fullMatchCalibrationCarryoverReconciliation.scoreCapApplied, false);
+  assert.equal(context.fullMatchCalibrationCarryoverReconciliation.scoringEventsRewritten, false);
+});
+```
+
 ## File: src/reports/generateCoachHtmlReport.ts
 
 ```ts
@@ -25620,6 +25769,7 @@ import { buildCoachReportControlledLocalReadOnlyDbMode } from "./buildCoachRepor
 import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachReportRealSQLiteReadOnlyIOSmokeTest";
 import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
+import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -25810,6 +25960,10 @@ export function writeLatestCoachReport(): void {
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
   const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(experimentalReport);
+  const fullMatchCalibrationCarryoverReconciliation = buildFullMatchCalibrationCarryoverReconciliationModel(
+    experimentalReport,
+    scoringFamilyAttributionAudit,
+  );
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -25826,6 +25980,7 @@ export function writeLatestCoachReport(): void {
     ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
     fullMatchScoreEconomyCalibration,
     scoringFamilyAttributionAudit,
+    fullMatchCalibrationCarryoverReconciliation,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

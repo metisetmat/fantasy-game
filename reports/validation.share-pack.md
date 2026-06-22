@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
+- current sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -26,20 +26,18 @@ Status: PASS
 - PASS: validation.share-pack.md copied - 
 - PASS: README.md copied - 
 - PASS: manifest.md copied - 
-- PASS: current sprint is Sprint 6B - Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
+- PASS: current sprint is Sprint 6C - Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6B oriented - README current
-- PASS: 6B report included - 6B doc included
-- PASS: 6B validation is PASS - 6B validation current
-- PASS: attribution count fields are visible - counts visible
-- PASS: legacy UNKNOWN comparison is visible - legacy comparison visible
-- PASS: attribution coverage is visible - coverage visible
-- PASS: scoring events by family are visible - family events visible
-- PASS: scoring points by family are visible - family points visible
-- PASS: scoring events by family are not all UNKNOWN - events not all UNKNOWN
-- PASS: scoring points by family are not all UNKNOWN - points not all UNKNOWN
-- PASS: coach export contains Origine des points - export attribution visible
+- PASS: README is Sprint 6C oriented - README current
+- PASS: 6C report included - 6C doc included
+- PASS: 6C validation is PASS - 6C validation current
+- PASS: official full-match score is visible - official score visible
+- PASS: official scoring event counts are visible - official event counts visible
+- PASS: historical calibration references are visible - historical references visible
+- PASS: carryover gaps are visible - carryover gaps visible
+- PASS: warning surface is visible - warnings visible
+- PASS: coach export contains calibration reconciliation section - export 6C visible
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: score cap is not applied - score cap false
 - PASS: post-hoc score rewrite is not applied - rewrite false
@@ -48,14 +46,14 @@ Status: PASS
 - PASS: mutation counts are 0 - mutation counts 0
 - PASS: batch/live separation preserved - batch/live PASS
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
-- PASS: persistence and SQLite are not attribution sources - persistence/SQLite false
+- PASS: persistence and SQLite are not calibration sources - persistence/SQLite false
 - PASS: no invented global or trend claims - claim counts 0
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: bundle includes 6B contract files - 6B contract bundled
-- PASS: bundle includes 6B source files - 6B source bundled
-- PASS: bundle includes 6B executable tests - 6B tests bundled
+- PASS: single-run limitation is explicit - single-run limitation visible
+- PASS: bundle includes 6C source files - 6C source bundled
+- PASS: bundle includes 6C executable tests - 6C tests bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6B recommendation visible
+- PASS: recommendation visible - 6C recommendation visible
 
 ## Files
 
@@ -69,7 +67,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-scoring-family-attribution-6b.md
+- fullmatch-calibration-carryover-reconciliation-6c.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -77,5 +75,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-scoring-family-attribution-6b.md
+- validation.fullmatch-calibration-carryover-reconciliation-6c.md
 - validation.share-pack.md

@@ -1,6 +1,6 @@
-# Sprint 6B Share Pack
+# Sprint 6C Share Pack
 
-Current sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
+Current sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-scoring-family-attribution-6b.md
-- validation.fullmatch-scoring-family-attribution-6b.md
+- fullmatch-calibration-carryover-reconciliation-6c.md
+- validation.fullmatch-calibration-carryover-reconciliation-6c.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-scoring-family-attribution-6b.md and validation.fullmatch-scoring-family-attribution-6b.md.
+Start with validation.share-pack.md, then fullmatch-calibration-carryover-reconciliation-6c.md and validation.fullmatch-calibration-carryover-reconciliation-6c.md.
 
-Sprint 6B classifies official score_change events into scoring families, reduces legacy UNKNOWN attribution, adds Origine des points to the coach export, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.
+Sprint 6C is diagnostic only. It reconciles prior batch/live calibration work with the current official full-match scoring path, explains the SHOT_GOAL-only regression surface, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.
 
 Upload every file in this reports/share directory.

@@ -2533,6 +2533,128 @@
       <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Reconciliation des calibrations">
+      <div>
+        <h3>R&eacute;conciliation des calibrations</h3>
+        <p>Diagnostic single-run : ce bloc explique pourquoi le full-match officiel peut encore produire un score tr&egrave;s &eacute;lev&eacute; malgr&eacute; les calibrations batch/live d&eacute;j&agrave; valid&eacute;es. Il ne modifie pas le score.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Score observ&eacute;</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Score officiel</span><strong>45 - 0</strong></div>
+            <div><span>Score events</span><strong>15</strong></div>
+            <div><span>SHOT_GOAL</span><strong>15</strong></div>
+            <div><span>Points SHOT_GOAL</span><strong>45</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>R&eacute;f&eacute;rence historique</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>SHOT_GOAL / match batch</span><strong>2</strong></div>
+            <div><span>Conversion batch</span><strong>35%</strong></div>
+            <div><span>Confiance</span><strong>high</strong></div>
+            <div><span>Scope</span><strong>FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Cause probable</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Primaire</span><strong>FULLMATCH_PARALLEL_SCORING_PATH</strong></div>
+            <div><span>Chemin parall&egrave;le</span><strong>oui</strong></div>
+            <div><span>Amplification segment</span><strong>oui</strong></div>
+            <div><span>Path legacy shot</span><strong>oui</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Garde-fous</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Cap score</span><strong>non</strong></div>
+            <div><span>Events supprim&eacute;s</span><strong>non</strong></div>
+            <div><span>Events r&eacute;&eacute;crits</span><strong>non</strong></div>
+            <div><span>Batch/live s&eacute;par&eacute;s</span><strong>oui</strong></div>
+          </div>
+        </article>
+      </div>
+      <table class="premium-table">
+        <thead><tr><th>Calibration</th><th>Valid&eacute;e</th><th>Appliqu&eacute;e full-match</th><th>&Eacute;cart</th></tr></thead>
+        <tbody>
+      <tr>
+        <td>Shot difficulty calibration</td>
+        <td>oui</td>
+        <td>non</td>
+        <td>FULLMATCH_NOT_USING_BATCH_CALIBRATION</td>
+      </tr>
+      <tr>
+        <td>Shot outcome resolution</td>
+        <td>oui</td>
+        <td>non</td>
+        <td>FULLMATCH_PARALLEL_SCORING_PATH</td>
+      </tr>
+      <tr>
+        <td>Shot dominance diagnostic</td>
+        <td>oui</td>
+        <td>non</td>
+        <td>FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING</td>
+      </tr>
+      <tr>
+        <td>Scoring choice balance</td>
+        <td>oui</td>
+        <td>non</td>
+        <td>FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING</td>
+      </tr>
+      <tr>
+        <td>Scoring affordance volume</td>
+        <td>oui</td>
+        <td>non</td>
+        <td>FULLMATCH_SEGMENT_AMPLIFICATION_RISK</td>
+      </tr>
+      <tr>
+        <td>Goalkeeper shot-stopping impact</td>
+        <td>oui</td>
+        <td>non</td>
+        <td>FULLMATCH_NOT_USING_BATCH_CALIBRATION</td>
+      </tr></tbody>
+      </table>
+      <table class="premium-table">
+        <thead><tr><th>Chemin scoring</th><th>Type</th><th>Score officiel</th><th>R&eacute;f&eacute;rence globale</th></tr></thead>
+        <tbody>
+      <tr>
+        <td>FULL_MATCH_BATCH_ECONOMY</td>
+        <td>batch</td>
+        <td>non</td>
+        <td>oui</td>
+      </tr>
+      <tr>
+        <td>Live scoring event stream</td>
+        <td>live</td>
+        <td>oui</td>
+        <td>non</td>
+      </tr>
+      <tr>
+        <td>Full-match official scoring path</td>
+        <td>fullmatch</td>
+        <td>oui</td>
+        <td>non</td>
+      </tr>
+      <tr>
+        <td>Coach report export</td>
+        <td>report</td>
+        <td>non</td>
+        <td>non</td>
+      </tr>
+      <tr>
+        <td>Sandbox scoring route</td>
+        <td>sandbox</td>
+        <td>non</td>
+        <td>non</td>
+      </tr></tbody>
+      </table>
+      <p class="durable-storage-decision-boundary">Official full-match output is 45 - 0 with 15 SHOT_GOAL events; historical calibration references exist, but the official full-match score path has not yet carried them over.</p>
+      <p class="durable-storage-decision-guard">6C est diagnostic only : constantes inchang&eacute;es, aucun cap, aucune suppression ou r&eacute;&eacute;criture d&rsquo;&eacute;v&eacute;nements, aucun score adverse forc&eacute;. FULL_MATCH_BATCH_ECONOMY reste la seule r&eacute;f&eacute;rence globale.</p>
+      <p class="durable-storage-decision-warning">PREPARE_6D_CONNECT_FULLMATCH_TO_VALIDATED_SCORING_CALIBRATIONS</p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -3733,6 +3855,54 @@
         <li>persistence used for attribution: false</li>
         <li>SQLite used as score economy source: false</li>
         <li>FULL_MATCH_BATCH_ECONOMY remains only global economy proof: true</li>
+      </ul>
+    </details>
+    <details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails r&eacute;conciliation calibrations 6C</summary>
+      <ul>
+        <li>status: available</li>
+        <li>scope: FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN</li>
+        <li>version: CALIBRATION_CARRYOVER_6C</li>
+        <li>official full-match score: 45 - 0</li>
+        <li>official full-match scoring events: 15</li>
+        <li>official full-match SHOT_GOAL events: 15</li>
+        <li>official full-match SHOT_GOAL points: 45</li>
+        <li>batch calibration known SHOT_GOAL per match: 2</li>
+        <li>batch calibration known conversion rate: 35%</li>
+        <li>primary regression cause: FULLMATCH_PARALLEL_SCORING_PATH</li>
+        <li>secondary regression causes: FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION, FULLMATCH_NOT_USING_SCORING_CHOICE_BALANCE, FULLMATCH_NOT_USING_AFFORDANCE_VOLUME_CONSTRAINTS, FULLMATCH_GOALKEEPER_SUPPRESSION_NOT_APPLIED, FULLMATCH_SEGMENT_AMPLIFICATION_RISK</li>
+        <li>confidence: high</li>
+        <li>warnings: FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION, FULLMATCH_NOT_USING_SCORING_CHOICE_BALANCE, FULLMATCH_NOT_USING_AFFORDANCE_VOLUME_CONSTRAINTS, FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING, FULLMATCH_SHOT_GOAL_MONO_FAMILY, FULLMATCH_SEGMENT_AMPLIFICATION_RISK, FULLMATCH_PARALLEL_SCORING_PATH, FULLMATCH_LEGACY_SCORING_PATH, FULLMATCH_GOALKEEPER_SUPPRESSION_NOT_APPLIED, FULLMATCH_DEFENSIVE_RESISTANCE_NOT_APPLIED, FULLMATCH_FATIGUE_OFFENSIVE_PRECISION_NOT_APPLIED, FULLMATCH_DANGER_PHASE_NOT_CONNECTED, CALIBRATION_DIAGNOSTIC_ONLY, GLOBAL_ECONOMY_NOT_PROVEN</li>
+        <li>matrix rows: 10</li>
+        <li>scoring path audit rows: 5</li>
+        <li>shot difficulty batch/full-match: true/false</li>
+        <li>scoring choice balance batch/full-match: true/false</li>
+        <li>affordance volume batch/full-match: true/false</li>
+        <li>goalkeeper calibration batch/full-match: true/false</li>
+        <li>route family mix batch/full-match: true/false</li>
+        <li>full-match parallel scoring path: true</li>
+        <li>full-match legacy shot path: true</li>
+        <li>full-match fallback route path: true</li>
+        <li>full-match segment amplification path: true</li>
+        <li>scoring constants changed: false</li>
+        <li>score cap applied: false</li>
+        <li>post-hoc score rewrite applied: false</li>
+        <li>scoring events deleted: false</li>
+        <li>scoring events rewritten: false</li>
+        <li>forced opponent score applied: false</li>
+        <li>official timeline mutation count: 0</li>
+        <li>official possession mutation count: 0</li>
+        <li>production scoring event creation count: 0</li>
+        <li>batch/live separation preserved: true</li>
+        <li>MatchBonusEvent changed: false</li>
+        <li>persistence used for calibration: false</li>
+        <li>SQLite used as score economy source: false</li>
+        <li>global economy claim count: 0</li>
+        <li>trend proof claim count: 0</li>
+        <li>invented statistic count: 0</li>
+        <li>single run only: true</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global proof: true</li>
+        <li>recommendation: PREPARE_6D_CONNECT_FULLMATCH_TO_VALIDATED_SCORING_CALIBRATIONS</li>
       </ul>
     </details>
     <details class="appendix">
