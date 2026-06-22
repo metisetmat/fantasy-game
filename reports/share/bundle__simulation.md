@@ -53598,6 +53598,8 @@ function shouldAcceptOfficialScoreChange(input: {
   readonly family: OfficialScoringFamily;
   readonly familyOrdinal: number;
   readonly segmentFamilyOrdinal: number;
+  readonly acceptedTryTouchdownsInSegment: number;
+  readonly acceptedConversionsInSegment: number;
 }): boolean {
   if (input.family === "PENALTY_SHOT" || input.family === "UNKNOWN") {
     return false;
@@ -53613,6 +53615,13 @@ function shouldAcceptOfficialScoreChange(input: {
 
   if (input.family === "DROP_GOAL") {
     return input.familyOrdinal % 2 === 1 && input.segmentFamilyOrdinal <= 1;
+  }
+
+  if (input.family === "CONVERSION_GOAL") {
+    return (
+      input.segmentFamilyOrdinal <= 1 &&
+      input.acceptedTryTouchdownsInSegment > input.acceptedConversionsInSegment
+    );
   }
 
   return input.segmentFamilyOrdinal <= 1;
@@ -53711,7 +53720,19 @@ export function resolveFullMatchOfficialScoringEventsForSegment(input: {
     segmentFamilyAttempts[segmentFamilyKey] = (segmentFamilyAttempts[segmentFamilyKey] ?? 0) + 1;
     const familyOrdinal = attemptedByFamily[family];
     const segmentFamilyOrdinal = segmentFamilyAttempts[segmentFamilyKey];
-    const accepted = shouldAcceptOfficialScoreChange({ family, familyOrdinal, segmentFamilyOrdinal });
+    const acceptedTryTouchdownsInSegment = acceptedDecisions.filter(
+      (decision) => decision.segmentLabel === input.segmentLabel && decision.family === "TRY_TOUCHDOWN",
+    ).length;
+    const acceptedConversionsInSegment = acceptedDecisions.filter(
+      (decision) => decision.segmentLabel === input.segmentLabel && decision.family === "CONVERSION_GOAL",
+    ).length;
+    const accepted = shouldAcceptOfficialScoreChange({
+      family,
+      familyOrdinal,
+      segmentFamilyOrdinal,
+      acceptedTryTouchdownsInSegment,
+      acceptedConversionsInSegment,
+    });
     const selectedReason = accepted
       ? "Official calibrated full-match path authorized score_change before event emission."
       : "Official calibrated full-match path converted this opportunity to a non-scoring outcome before event emission.";

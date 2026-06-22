@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-22T08:02:18.070Z
+Generated timestamp: 2026-06-22T08:48:19.322Z
 Task/sprint name: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
 Final file count: 20
 
@@ -794,15 +794,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/reports/coachReportMultiMatchPhaseComparisonTestUtils.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/htmlCoachReportGuard.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/runFullMatch.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchOfficialScoringConnection.test.ts
-?? src/reports/fullMatchOfficialScoringConnection.ts
-?? src/reports/fullMatchOfficialScoringConnectionRenderer.test.ts
-?? src/reports/fullMatchOfficialScoringConnectionWarnings.ts
-?? src/simulation/fullMatch/fullMatchOfficialScoringPath.ts
+ M src/simulation/fullMatch/fullMatchOfficialScoringPath.ts
+?? src/simulation/fullMatch/fullMatchOfficialScoringPath.test.ts
