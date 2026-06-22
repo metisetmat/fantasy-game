@@ -23,8 +23,13 @@ test("connects official full-match score_change emission to the calibrated path"
   assert.equal(connection.version, "OFFICIAL_SCORING_CONNECTION_6D");
   assert.equal(connection.officialScoreBeforeConnection, "45 - 0");
   assert.equal(connection.officialScoringEventsBeforeConnection, 15);
-  assert.ok(connection.officialScoringEventsAfterConnection < connection.officialScoringEventsBeforeConnection);
   assert.ok(connection.officialShotGoalEventsAfterConnection < connection.officialShotGoalEventsBeforeConnection);
+  assert.ok(
+    connection.routeFamilyMixAfterConnection.tryTouchdownEvents +
+      connection.routeFamilyMixAfterConnection.conversionGoalEvents +
+      connection.routeFamilyMixAfterConnection.dropGoalEvents >
+      0,
+  );
   assert.equal(connection.usesShotDifficultyCalibrationAfter, true);
   assert.equal(connection.usesScoringChoiceBalanceAfter, true);
   assert.equal(connection.usesAffordanceVolumeConstraintsAfter, true);

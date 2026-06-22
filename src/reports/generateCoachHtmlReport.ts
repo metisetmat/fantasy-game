@@ -16,7 +16,7 @@ import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEcon
 import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import { buildFullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
-import { currentFullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
+import { currentFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -38,7 +38,7 @@ import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import {
   renderCoachReportExportHtml,
-  renderFullMatchBatchEconomyProofSection,
+  renderFullMatchRouteFamilyMixActivationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -57,11 +57,11 @@ export function writeLatestCoachReport(): void {
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
   const reportsDirectory = join(process.cwd(), "reports");
-  const fullMatchBatchEconomyProof = currentFullMatchBatchEconomyProofModel();
+  const fullMatchRouteFamilyMixActivation = currentFullMatchRouteFamilyMixActivationModel();
   const productHtml = appendProductSection(renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
-  )), renderFullMatchBatchEconomyProofSection(fullMatchBatchEconomyProof));
+  )), renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation));
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -244,7 +244,7 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
     fullMatchCalibrationCarryoverReconciliation,
     fullMatchOfficialScoringConnection,
-    fullMatchBatchEconomyProof,
+    fullMatchRouteFamilyMixActivation,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

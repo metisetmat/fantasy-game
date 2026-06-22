@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6E - Full-Match Batch Economy Proof. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

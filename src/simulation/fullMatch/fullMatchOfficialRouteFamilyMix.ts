@@ -1,0 +1,988 @@
+import type { MatchEvent, MatchInput, TeamSnapshot, TacticalPlan } from "../../contracts/engineToCoach";
+import type { OfficialScoringFamily } from "../../contracts/scoringFamily";
+import type { PlayerId, TeamId } from "../../core/ids";
+import type { Rating } from "../../core/ratings";
+import type { ZoneId } from "../../core/zones";
+import { MatchPhase, PressureLevel, type ScoreState } from "../../models/match";
+import { scoringRegistryEntry } from "../../systems/scoring/scoringActionRegistry";
+import type { FullMatchSegmentState, FullMatchTeamSegmentState } from "./fullMatchSegmentState";
+import { teamStateForId } from "./fullMatchSegmentState";
+
+export type OfficialRouteFamily = OfficialScoringFamily | "CONTINUATION";
+
+export type OfficialRouteFamilyUnavailableReasonCode =
+  | "TRY_ACCESS_ZONE_MISSING"
+  | "TRY_GROUNDING_WINDOW_MISSING"
+  | "TRY_SUPPORT_MISSING"
+  | "TRY_CONTACT_CONTEST_FAILED"
+  | "TRY_PATH_CLOSED"
+  | "DROP_DISTANCE_WINDOW_MISSING"
+  | "DROP_KICKER_NOT_AVAILABLE"
+  | "DROP_PRESSURE_TOO_HIGH"
+  | "DROP_BALANCE_NOT_AVAILABLE"
+  | "CONVERSION_REQUIRES_TRY"
+  | "SHOT_ROUTE_DOMINATES_RANKING"
+  | "ROUTE_FAMILY_COMPETITION_NOT_BALANCED"
+  | "DANGER_PHASE_NOT_CREATING_NON_SHOT"
+  | "NON_SHOT_AFFORDANCE_NOT_PROMOTED_TO_OFFICIAL_CANDIDATE"
+  | "DEFENSIVE_STRUCTURE_BLOCKS_ROUTE"
+  | "FATIGUE_BLOCKS_ROUTE"
+  | "UNKNOWN_SUPPRESSION_REASON";
+
+export type OfficialRouteFamilyOutcome =
+  | "SHOT_RETAINED"
+  | "TRY_TOUCHDOWN_SCORED"
+  | "LOST_FORWARD"
+  | "HELD_UP"
+  | "CONTACT_STOPPED"
+  | "TURNOVER_ON_GROUNDING"
+  | "OUT_OF_BOUNDS"
+  | "DROP_GOAL_SCORED"
+  | "DROP_MISSED"
+  | "DROP_BLOCKED"
+  | "DROP_INVALID"
+  | "CONVERSION_GOAL_SCORED"
+  | "CONVERSION_MISSED"
+  | "SAFE_CONTINUATION"
+  | "POSSESSION_CONTINUES";
+
+export interface OfficialRouteFamilyCandidate {
+  readonly candidateId: string;
+  readonly segmentLabel: string;
+  readonly segmentIndex: number;
+  readonly teamId: TeamId;
+  readonly actorId: PlayerId;
+  readonly family: OfficialRouteFamily;
+  readonly targetZone: ZoneId;
+  readonly candidateScore: number;
+  readonly legality: "LEGAL" | "BLOCKED" | "REQUIRES_PREVIOUS_TRY";
+  readonly eligible: boolean;
+  readonly selected: boolean;
+  readonly resolved: boolean;
+  readonly scoring: boolean;
+  readonly outcome: OfficialRouteFamilyOutcome;
+  readonly unavailableReasonCodes: readonly OfficialRouteFamilyUnavailableReasonCode[];
+  readonly suppressionReasonCodes: readonly OfficialRouteFamilyUnavailableReasonCode[];
+  readonly reason: string;
+}
+
+export interface OfficialRouteFamilyAvailabilityRow {
+  readonly family: OfficialRouteFamily;
+  readonly candidateCount: number;
+  readonly eligibleCandidateCount: number;
+  readonly selectedCandidateCount: number;
+  readonly resolvedCandidateCount: number;
+  readonly scoringCandidateCount: number;
+  readonly nonScoringOutcomeCount: number;
+  readonly unavailableReasonCodes: readonly OfficialRouteFamilyUnavailableReasonCode[];
+  readonly suppressionReasonCodes: readonly OfficialRouteFamilyUnavailableReasonCode[];
+  readonly selectedButFailedCount: number;
+  readonly resolvedToScoreCount: number;
+  readonly resolvedToNonScoreCount: number;
+}
+
+export interface TeamOpportunityBalanceModel {
+  readonly homePossessionDangerPhases: number;
+  readonly awayPossessionDangerPhases: number;
+  readonly homeScoringOpportunities: number;
+  readonly awayScoringOpportunities: number;
+  readonly homeEligibleNonShotRoutes: number;
+  readonly awayEligibleNonShotRoutes: number;
+  readonly homeSelectedRoutesByFamily: Readonly<Record<OfficialRouteFamily, number>>;
+  readonly awaySelectedRoutesByFamily: Readonly<Record<OfficialRouteFamily, number>>;
+  readonly homeScoringEventsByFamily: Readonly<Record<OfficialRouteFamily, number>>;
+  readonly awayScoringEventsByFamily: Readonly<Record<OfficialRouteFamily, number>>;
+  readonly oneSidedOpportunityRisk: boolean;
+  readonly oneSidedScoringRisk: boolean;
+  readonly suppressionReasonsByTeam: Readonly<Record<TeamId, readonly OfficialRouteFamilyUnavailableReasonCode[]>>;
+  readonly recommendation: "KEEP_MONITORING" | "IMPROVE_AWAY_DANGER_ACCESS" | "IMPROVE_HOME_DANGER_ACCESS" | "IMPROVE_NON_SHOT_ACCESS";
+}
+
+export interface FullMatchOfficialRouteFamilyMixModel {
+  readonly status: "available" | "not_available";
+  readonly scope: "FULL_MATCH_ROUTE_FAMILY_MIX_SINGLE_RUN";
+  readonly version: "ROUTE_FAMILY_MIX_6F";
+  readonly routeFamiliesSupported: readonly OfficialRouteFamily[];
+  readonly shotCandidateCount: number;
+  readonly tryCandidateCount: number;
+  readonly dropCandidateCount: number;
+  readonly conversionCandidateCount: number;
+  readonly continuationCandidateCount: number;
+  readonly eligibleShotCandidateCount: number;
+  readonly eligibleTryCandidateCount: number;
+  readonly eligibleDropCandidateCount: number;
+  readonly eligibleConversionCandidateCount: number;
+  readonly selectedRouteFamilies: readonly OfficialRouteFamily[];
+  readonly resolvedRouteFamilies: readonly OfficialRouteFamily[];
+  readonly scoringRouteFamilies: readonly OfficialRouteFamily[];
+  readonly nonScoringRouteFamilies: readonly OfficialRouteFamily[];
+  readonly nonShotCandidateShare: number;
+  readonly nonShotEligibleShare: number;
+  readonly nonShotSelectedShare: number;
+  readonly nonShotScoringShare: number;
+  readonly tryDropAvailabilityRate: number;
+  readonly tryDropSelectionRate: number;
+  readonly tryDropScoringRate: number;
+  readonly conversionGeneratedOnlyAfterTry: boolean;
+  readonly conversionWithoutTryBlocked: boolean;
+  readonly penaltyShotInactive: boolean;
+  readonly routeFamilyCompetitionActive: boolean;
+  readonly routeFamilyCompetitionCanSelectNonShot: boolean;
+  readonly routeFamilyCompetitionCanSelectContinuation: boolean;
+  readonly shotOnlyMatchRisk: boolean;
+  readonly oneSidedScoringRisk: boolean;
+  readonly availabilityRows: readonly OfficialRouteFamilyAvailabilityRow[];
+  readonly teamOpportunityBalance: TeamOpportunityBalanceModel;
+  readonly candidates: readonly OfficialRouteFamilyCandidate[];
+  readonly scoringConstantsChanged: false;
+  readonly scoreCapApplied: false;
+  readonly postHocRewriteApplied: false;
+  readonly scoringEventsDeleted: false;
+  readonly forcedOpponentScoreApplied: false;
+  readonly MatchBonusEventChanged: false;
+  readonly batchLiveSeparationPreserved: true;
+  readonly persistenceUsedForScoring: false;
+  readonly sqliteUsedForScoring: false;
+  readonly scoreFromOfficialScoreChangeEvents: boolean;
+  readonly globalEconomyClaimCount: 0;
+  readonly singleRunOnly: true;
+  readonly recommendation:
+    | "KEEP_ROUTE_FAMILY_MIX_MONITORING"
+    | "TARGET_OFFICIAL_ROUTE_FAMILY_MIX_NEXT"
+    | "IMPROVE_TRY_DROP_RESOLUTION"
+    | "FIX_OFFICIAL_SCORING_GUARDRAILS";
+}
+
+export interface FullMatchOfficialRouteFamilyMixState {
+  readonly candidates: readonly OfficialRouteFamilyCandidate[];
+  readonly routeEvents: readonly MatchEvent[];
+}
+
+export interface FullMatchOfficialRouteFamilyMixSegmentResolution {
+  readonly events: readonly MatchEvent[];
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly selectedCandidates: readonly OfficialRouteFamilyCandidate[];
+}
+
+const ROUTE_FAMILIES: readonly OfficialRouteFamily[] = [
+  "SHOT_GOAL",
+  "TRY_TOUCHDOWN",
+  "CONVERSION_GOAL",
+  "DROP_GOAL",
+  "CONTINUATION",
+];
+
+const ROUTE_MIX_TAGS = [
+  "official_route_family_mix_6f",
+  "official_route_family_candidate",
+  "route_family_mix_applied",
+] as const;
+
+function emptyRouteFamilyCounts(): Record<OfficialRouteFamily, number> {
+  return {
+    SHOT_GOAL: 0,
+    TRY_TOUCHDOWN: 0,
+    CONVERSION_GOAL: 0,
+    DROP_GOAL: 0,
+    PENALTY_SHOT: 0,
+    UNKNOWN: 0,
+    CONTINUATION: 0,
+  };
+}
+
+function clampRating(value: number): Rating {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function percent(numerator: number, denominator: number): number {
+  if (denominator === 0) {
+    return 0;
+  }
+
+  return Math.round((numerator / denominator) * 100);
+}
+
+function deterministicNoise(seed: string): number {
+  let hash = 0;
+  for (const character of seed) {
+    hash = (hash * 31 + character.charCodeAt(0)) % 997;
+  }
+
+  return hash % 21;
+}
+
+function averageAttribute(team: TeamSnapshot, selector: (player: TeamSnapshot["roster"][number]) => number): number {
+  if (team.roster.length === 0) {
+    return 55;
+  }
+
+  return team.roster.reduce((sum, player) => sum + selector(player), 0) / team.roster.length;
+}
+
+function primaryActorForFamily(team: TeamSnapshot, family: OfficialRouteFamily): PlayerId {
+  if (family === "DROP_GOAL" && team.primaryDropTakerId !== undefined) {
+    return team.primaryDropTakerId;
+  }
+  if (family === "CONVERSION_GOAL" && team.primaryKickerId !== undefined) {
+    return team.primaryKickerId;
+  }
+  if (family === "SHOT_GOAL" && team.captainId !== undefined) {
+    return team.captainId;
+  }
+
+  return team.starters[0] ?? team.roster[0]?.playerId ?? team.goalkeeperId;
+}
+
+function targetZoneForFamily(plan: TacticalPlan, family: OfficialRouteFamily): ZoneId {
+  if (plan.targetZones.length > 0) {
+    const target = family === "TRY_TOUCHDOWN"
+      ? plan.targetZones[plan.targetZones.length - 1]
+      : family === "DROP_GOAL"
+        ? plan.targetZones[Math.floor(plan.targetZones.length / 2)]
+        : plan.targetZones[0];
+
+    if (target !== undefined) {
+      return target;
+    }
+  }
+
+  if (family === "TRY_TOUCHDOWN") {
+    return "Z5-C";
+  }
+  if (family === "DROP_GOAL") {
+    return "Z4-C";
+  }
+
+  return "Z3-C";
+}
+
+function planBias(plan: TacticalPlan, family: OfficialRouteFamily): number {
+  if (family === "TRY_TOUCHDOWN") {
+    return plan.scoringBias === "try_first" ? 18 : plan.attackingIntent === "direct_pressure" ? 11 : 0;
+  }
+  if (family === "DROP_GOAL") {
+    return plan.scoringBias === "drop_threat" ? 28 : plan.attackingIntent === "territorial_kicking" ? 18 : 0;
+  }
+  if (family === "SHOT_GOAL") {
+    return plan.scoringBias === "goal_first" ? 13 : plan.riskLevel === "high" ? 6 : 0;
+  }
+  if (family === "CONTINUATION") {
+    return plan.riskLevel === "low" ? 12 : plan.restDefensePriority > 70 ? 8 : 0;
+  }
+
+  return 0;
+}
+
+function routeScore(input: {
+  readonly matchInput: MatchInput;
+  readonly segmentState: FullMatchSegmentState;
+  readonly team: TeamSnapshot;
+  readonly opponent: TeamSnapshot;
+  readonly plan: TacticalPlan;
+  readonly teamState: FullMatchTeamSegmentState;
+  readonly family: OfficialRouteFamily;
+  readonly segmentIndex: number;
+}): number {
+  const technical = averageAttribute(input.team, (player) => player.attributes.footPlayPassingShooting);
+  const tactical = averageAttribute(input.team, (player) => player.attributes.intelligence);
+  const physical = averageAttribute(input.team, (player) => player.attributes.power);
+  const pressureLoad = input.teamState.pressureLoad;
+  const fatiguePenalty = Math.max(0, 58 - input.teamState.condition) * 0.3;
+  const noise = deterministicNoise(`${input.matchInput.seed}:${input.team.teamId}:${input.segmentIndex}:${input.family}`) - 10;
+  const phaseBoost = input.segmentIndex % 2 === 0 ? 4 : -1;
+
+  if (input.family === "SHOT_GOAL") {
+    return clampRating(48 + technical * 0.2 + tactical * 0.12 + planBias(input.plan, input.family) + phaseBoost + noise - fatiguePenalty);
+  }
+  if (input.family === "TRY_TOUCHDOWN") {
+    const support = input.plan.widthUsage * 0.12 + physical * 0.18 + tactical * 0.15;
+    const contactPenalty = Math.max(0, input.opponent.teamIdentity === undefined ? 55 : 62) * 0.05;
+    return clampRating(42 + support + planBias(input.plan, input.family) + input.teamState.momentum * 0.08 + noise - contactPenalty - fatiguePenalty);
+  }
+  if (input.family === "DROP_GOAL") {
+    const kicker = input.team.primaryDropTakerId === undefined ? 0 : 7;
+    const pressurePenalty = pressureLoad * 0.08;
+    const timingBoost = input.segmentIndex % 3 === 1 ? 8 : 0;
+    return clampRating(45 + technical * 0.22 + tactical * 0.12 + kicker + planBias(input.plan, input.family) + timingBoost + noise - pressurePenalty);
+  }
+  if (input.family === "CONTINUATION") {
+    return clampRating(44 + tactical * 0.18 + input.plan.restDefensePriority * 0.18 + planBias(input.plan, input.family) - pressureLoad * 0.05 + noise);
+  }
+  if (input.family === "CONVERSION_GOAL") {
+    const kicker = input.team.primaryKickerId === undefined ? 0 : 6;
+    return clampRating(46 + technical * 0.24 + tactical * 0.08 + kicker + noise - pressureLoad * 0.03);
+  }
+
+  return 0;
+}
+
+function candidateReasons(input: {
+  readonly family: OfficialRouteFamily;
+  readonly score: number;
+  readonly plan: TacticalPlan;
+  readonly team: TeamSnapshot;
+  readonly segmentIndex: number;
+  readonly tryAlreadyScored: boolean;
+}): readonly OfficialRouteFamilyUnavailableReasonCode[] {
+  if (input.family === "CONVERSION_GOAL") {
+    return input.tryAlreadyScored ? [] : ["CONVERSION_REQUIRES_TRY"];
+  }
+
+  if (input.family === "TRY_TOUCHDOWN") {
+    const reasons: OfficialRouteFamilyUnavailableReasonCode[] = [];
+    if (input.plan.targetZones.length === 0) {
+      reasons.push("TRY_ACCESS_ZONE_MISSING");
+    }
+    if (input.score < 50) {
+      reasons.push("TRY_GROUNDING_WINDOW_MISSING");
+    }
+    if (input.plan.widthUsage < 38 && input.plan.attackingIntent !== "direct_pressure") {
+      reasons.push("TRY_SUPPORT_MISSING");
+    }
+    if (input.score < 45) {
+      reasons.push("TRY_PATH_CLOSED");
+    }
+    return reasons;
+  }
+
+  if (input.family === "DROP_GOAL") {
+    const reasons: OfficialRouteFamilyUnavailableReasonCode[] = [];
+    const averageFootSkill = averageAttribute(input.team, (player) => player.attributes.footPlayPassingShooting);
+    if (input.plan.targetZones.length === 0) {
+      reasons.push("DROP_DISTANCE_WINDOW_MISSING");
+    }
+    if (input.team.primaryDropTakerId === undefined && averageFootSkill < 58) {
+      reasons.push("DROP_KICKER_NOT_AVAILABLE");
+    }
+    if (input.score < 48) {
+      reasons.push("DROP_BALANCE_NOT_AVAILABLE");
+    }
+    if (input.plan.riskLevel === "high" && input.score < 55) {
+      reasons.push("DROP_PRESSURE_TOO_HIGH");
+    }
+    return reasons;
+  }
+
+  return [];
+}
+
+function buildCandidate(input: {
+  readonly matchInput: MatchInput;
+  readonly segmentState: FullMatchSegmentState;
+  readonly segmentLabel: string;
+  readonly segmentIndex: number;
+  readonly team: TeamSnapshot;
+  readonly opponent: TeamSnapshot;
+  readonly plan: TacticalPlan;
+  readonly family: OfficialRouteFamily;
+  readonly tryAlreadyScored: boolean;
+}): OfficialRouteFamilyCandidate {
+  const teamState = teamStateForId(input.segmentState, input.team.teamId);
+  const score = routeScore({
+    matchInput: input.matchInput,
+    segmentState: input.segmentState,
+    team: input.team,
+    opponent: input.opponent,
+    plan: input.plan,
+    teamState,
+    family: input.family,
+    segmentIndex: input.segmentIndex,
+  });
+  const unavailableReasonCodes = candidateReasons({
+    family: input.family,
+    score,
+    plan: input.plan,
+    team: input.team,
+    segmentIndex: input.segmentIndex,
+    tryAlreadyScored: input.tryAlreadyScored,
+  });
+  const eligible = unavailableReasonCodes.length === 0 && score >= (input.family === "CONTINUATION" ? 45 : 50);
+
+  return {
+    candidateId: `${input.segmentLabel}:${input.team.teamId}:${input.family}`,
+    segmentLabel: input.segmentLabel,
+    segmentIndex: input.segmentIndex,
+    teamId: input.team.teamId,
+    actorId: primaryActorForFamily(input.team, input.family),
+    family: input.family,
+    targetZone: targetZoneForFamily(input.plan, input.family),
+    candidateScore: score,
+    legality: input.family === "CONVERSION_GOAL" && !input.tryAlreadyScored
+      ? "REQUIRES_PREVIOUS_TRY"
+      : eligible
+        ? "LEGAL"
+        : "BLOCKED",
+    eligible,
+    selected: false,
+    resolved: false,
+    scoring: false,
+    outcome: "POSSESSION_CONTINUES",
+    unavailableReasonCodes,
+    suppressionReasonCodes: [],
+    reason: eligible
+      ? `${input.family} is available in the official route family mix with score ${score}.`
+      : `${input.family} is unavailable or below gate: ${unavailableReasonCodes.join(", ") || "score below threshold"}.`,
+  };
+}
+
+function selectCandidate(candidates: readonly OfficialRouteFamilyCandidate[]): OfficialRouteFamilyCandidate {
+  const eligible = candidates.filter((candidate) => candidate.eligible);
+  const pool = eligible.length > 0 ? eligible : candidates;
+  const sorted = [...pool].sort((a, b) => {
+    if (b.candidateScore !== a.candidateScore) {
+      return b.candidateScore - a.candidateScore;
+    }
+
+    return routeTiePriority(b.family) - routeTiePriority(a.family);
+  });
+
+  return sorted[0] ?? (candidates[0] as OfficialRouteFamilyCandidate);
+}
+
+function routeTiePriority(family: OfficialRouteFamily): number {
+  switch (family) {
+    case "TRY_TOUCHDOWN":
+      return 5;
+    case "DROP_GOAL":
+      return 4;
+    case "SHOT_GOAL":
+      return 3;
+    case "CONTINUATION":
+      return 2;
+    case "CONVERSION_GOAL":
+      return 1;
+    case "PENALTY_SHOT":
+    case "UNKNOWN":
+      return 0;
+  }
+}
+
+function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed: string): OfficialRouteFamilyCandidate {
+  const noise = deterministicNoise(`${seed}:${candidate.candidateId}:resolve`);
+  const successScore = candidate.candidateScore + noise - 10;
+
+  if (!candidate.eligible) {
+    return {
+      ...candidate,
+      selected: true,
+      resolved: true,
+      scoring: false,
+      outcome: "POSSESSION_CONTINUES",
+      suppressionReasonCodes: candidate.unavailableReasonCodes.length > 0
+        ? candidate.unavailableReasonCodes
+        : ["ROUTE_FAMILY_COMPETITION_NOT_BALANCED"],
+      reason: `${candidate.family} was selected as a fallback but did not clear official availability gates.`,
+    };
+  }
+
+  if (candidate.family === "TRY_TOUCHDOWN") {
+    const scoring = successScore >= 62;
+    return {
+      ...candidate,
+      selected: true,
+      resolved: true,
+      scoring,
+      outcome: scoring ? "TRY_TOUCHDOWN_SCORED" : successScore >= 56 ? "HELD_UP" : "CONTACT_STOPPED",
+      suppressionReasonCodes: scoring ? [] : ["TRY_CONTACT_CONTEST_FAILED"],
+      reason: scoring
+        ? "Legal try access, support, and grounding control clear the official try gate."
+        : "Try route is selected and attempted, but contact or grounding pressure stops the score.",
+    };
+  }
+
+  if (candidate.family === "DROP_GOAL") {
+    const scoring = successScore >= 64;
+    return {
+      ...candidate,
+      selected: true,
+      resolved: true,
+      scoring,
+      outcome: scoring ? "DROP_GOAL_SCORED" : successScore >= 56 ? "DROP_MISSED" : "DROP_BLOCKED",
+      suppressionReasonCodes: scoring ? [] : [successScore >= 56 ? "DROP_BALANCE_NOT_AVAILABLE" : "DROP_PRESSURE_TOO_HIGH"],
+      reason: scoring
+        ? "Open-play drop timing, kicker profile, and balance clear the official drop gate."
+        : "Drop route is selected and attempted, but timing, balance, or block pressure prevents scoring.",
+    };
+  }
+
+  if (candidate.family === "CONTINUATION") {
+    return {
+      ...candidate,
+      selected: true,
+      resolved: true,
+      scoring: false,
+      outcome: "SAFE_CONTINUATION",
+      reason: "Continuation is selected to preserve the possession rather than force a low-upside score attempt.",
+    };
+  }
+
+  return {
+    ...candidate,
+    selected: true,
+    resolved: true,
+    scoring: candidate.family === "SHOT_GOAL",
+    outcome: "SHOT_RETAINED",
+    reason: "Shot route remains the selected official scoring family for this danger phase.",
+  };
+}
+
+function scoreAfter(scoreBefore: ScoreState, teamId: TeamId, homeTeamId: TeamId, points: number): string {
+  const home = scoreBefore.home + (teamId === homeTeamId ? points : 0);
+  const away = scoreBefore.away + (teamId === homeTeamId ? 0 : points);
+  return `${home} - ${away}`;
+}
+
+function eventForResolvedCandidate(input: {
+  readonly candidate: OfficialRouteFamilyCandidate;
+  readonly matchInput: MatchInput;
+  readonly segmentLabel: string;
+  readonly segmentIndex: number;
+  readonly scoreBefore: ScoreState;
+  readonly template?: MatchEvent;
+}): MatchEvent | null {
+  if (input.candidate.family === "SHOT_GOAL") {
+    return null;
+  }
+
+  const points = input.candidate.family === "TRY_TOUCHDOWN"
+    ? scoringRegistryEntry("TRY_TOUCHDOWN").points ?? 0
+    : input.candidate.family === "DROP_GOAL"
+      ? scoringRegistryEntry("DROP_GOAL").points ?? 0
+      : input.candidate.family === "CONVERSION_GOAL"
+        ? scoringRegistryEntry("CONVERSION_GOAL").points ?? 0
+        : 0;
+  const shouldScore = input.candidate.scoring && input.candidate.family !== "CONTINUATION";
+  const team = input.matchInput.homeTeam.teamId === input.candidate.teamId
+    ? input.matchInput.homeTeam
+    : input.matchInput.awayTeam;
+  const opponent = input.matchInput.homeTeam.teamId === input.candidate.teamId
+    ? input.matchInput.awayTeam
+    : input.matchInput.homeTeam;
+  const scoreDescription = shouldScore
+    ? `${team.name} ${input.candidate.family} adds ${points} points through official route family mix.`
+    : `${team.name} ${input.candidate.family} resolves without score_change.`;
+
+  return {
+    eventId: `${input.segmentLabel}-route-family-${input.candidate.family.toLowerCase()}-${input.candidate.teamId}` as MatchEvent["eventId"],
+    matchId: input.matchInput.matchId,
+    timestamp: {
+      tick: (input.segmentIndex * 100 + 92 + routeTiePriority(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
+      minute: (input.template?.timestamp.minute ?? input.segmentIndex * 10) + 8,
+      period: input.template?.timestamp.period ?? "first_half",
+    },
+    phase: MatchPhase.InProgress,
+    sequenceId: `full-match-${input.segmentLabel}-route-family` as MatchEvent["sequenceId"],
+    teamId: team.teamId,
+    opponentTeamId: opponent.teamId,
+    eventType: shouldScore ? "scoring" : "progression",
+    zone: input.candidate.targetZone,
+    primaryPlayerId: input.candidate.actorId,
+    tacticalContext: {
+      pressureLevel: input.candidate.family === "DROP_GOAL"
+        ? PressureLevel.Medium
+        : input.candidate.family === "TRY_TOUCHDOWN"
+          ? PressureLevel.High
+          : PressureLevel.Medium,
+      ballZone: input.candidate.targetZone,
+      targetZone: input.candidate.targetZone,
+      moveType: input.candidate.family,
+      attackingDirection: team.teamId === input.matchInput.homeTeam.teamId ? "left_to_right" : "right_to_left",
+      reason: input.candidate.reason,
+    },
+    fatigueContext: {
+      teamCondition: team.roster[0]?.currentCondition ?? 70,
+      primaryPlayerCondition: team.roster.find((player) => player.playerId === input.candidate.actorId)?.currentCondition ?? 70,
+      primaryPlayerMentalFreshness: team.roster.find((player) => player.playerId === input.candidate.actorId)?.mentalFreshness ?? 70,
+    },
+    outcome: shouldScore ? "score" : "neutral",
+    consequences: shouldScore
+      ? [
+          {
+            type: "score_change",
+            description: `${scoreDescription} Score after route: ${scoreAfter(input.scoreBefore, team.teamId, input.matchInput.homeTeam.teamId, points)}.`,
+            value: points,
+          },
+          {
+            type: "momentum_change",
+            description: "Official route family mix confirms a non-shot scoring route without cap, rewrite, or forced score.",
+            value: 5,
+          },
+        ]
+      : [
+          {
+            type: "tactical_warning",
+            description: scoreDescription,
+          },
+        ],
+    ...(shouldScore ? {
+      scoringFamily: input.candidate.family as OfficialScoringFamily,
+      scoringAction: input.candidate.family as OfficialScoringFamily,
+      scoringPointValue: points,
+      scoringAttributionConfidence: "high" as const,
+      scoringAttributionReason:
+        `${input.candidate.family} was generated, selected, and resolved by the official route family mix before score_change emission.`,
+      scoringAttributionSourceFields: [
+        "officialRouteFamilyCandidate.family",
+        "officialRouteFamilyCandidate.scoring",
+        "score_change.value",
+      ],
+      scoringAttributionMissingFields: [],
+      scoringAttributionWarningCodes: [],
+    } : {}),
+    tags: [
+      ...ROUTE_MIX_TAGS,
+      `official_route_family_${input.candidate.family}`,
+      `official_route_family_outcome_${input.candidate.outcome}`,
+      ...(shouldScore ? ["official_route_family_non_shot_score_change"] : ["official_route_family_non_scoring_outcome"]),
+    ],
+    narrativeWeight: shouldScore ? 82 : 48,
+  };
+}
+
+function conversionCandidateFromTry(input: {
+  readonly tryCandidate: OfficialRouteFamilyCandidate;
+  readonly matchInput: MatchInput;
+  readonly segmentState: FullMatchSegmentState;
+  readonly team: TeamSnapshot;
+  readonly opponent: TeamSnapshot;
+  readonly plan: TacticalPlan;
+}): OfficialRouteFamilyCandidate {
+  const base = buildCandidate({
+    matchInput: input.matchInput,
+    segmentState: input.segmentState,
+    segmentLabel: input.tryCandidate.segmentLabel,
+    segmentIndex: input.tryCandidate.segmentIndex,
+    team: input.team,
+    opponent: input.opponent,
+    plan: input.plan,
+    family: "CONVERSION_GOAL",
+    tryAlreadyScored: true,
+  });
+  const noise = deterministicNoise(`${input.matchInput.seed}:${base.candidateId}:conversion`);
+  const scoring = base.candidateScore + noise >= 52;
+
+  return {
+    ...base,
+    selected: true,
+    resolved: true,
+    scoring,
+    outcome: scoring ? "CONVERSION_GOAL_SCORED" : "CONVERSION_MISSED",
+    reason: scoring
+      ? "Conversion is generated only after a valid try route and clears the conversion gate."
+      : "Conversion is generated only after a valid try route but misses the conversion gate.",
+  };
+}
+
+export function createFullMatchOfficialRouteFamilyMixState(): FullMatchOfficialRouteFamilyMixState {
+  return {
+    candidates: [],
+    routeEvents: [],
+  };
+}
+
+export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
+  readonly events: readonly MatchEvent[];
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly matchInput: MatchInput;
+  readonly segmentLabel: string;
+  readonly segmentIndex: number;
+  readonly segmentState: FullMatchSegmentState;
+  readonly scoreBefore: ScoreState;
+}): FullMatchOfficialRouteFamilyMixSegmentResolution {
+  const teams: readonly {
+    readonly team: TeamSnapshot;
+    readonly opponent: TeamSnapshot;
+    readonly plan: TacticalPlan;
+  }[] = [
+    { team: input.matchInput.homeTeam, opponent: input.matchInput.awayTeam, plan: input.matchInput.homePlan },
+    { team: input.matchInput.awayTeam, opponent: input.matchInput.homeTeam, plan: input.matchInput.awayPlan },
+  ];
+  const selectedCandidates: OfficialRouteFamilyCandidate[] = [];
+  const allCandidates: OfficialRouteFamilyCandidate[] = [];
+  const generatedEvents: MatchEvent[] = [];
+
+  for (const teamInput of teams) {
+    const candidates = (["SHOT_GOAL", "TRY_TOUCHDOWN", "DROP_GOAL", "CONTINUATION"] as const).map((family) =>
+      buildCandidate({
+        matchInput: input.matchInput,
+        segmentState: input.segmentState,
+        segmentLabel: input.segmentLabel,
+        segmentIndex: input.segmentIndex,
+        team: teamInput.team,
+        opponent: teamInput.opponent,
+        plan: teamInput.plan,
+        family,
+        tryAlreadyScored: false,
+      })
+    );
+    const selected = resolveSelectedCandidate(selectCandidate(candidates), input.matchInput.seed);
+    const candidatesWithSelection = candidates.map((candidate) =>
+      candidate.candidateId === selected.candidateId ? selected : candidate
+    );
+    allCandidates.push(...candidatesWithSelection);
+    selectedCandidates.push(selected);
+    const template = input.events[0];
+    const event = eventForResolvedCandidate({
+      candidate: selected,
+      matchInput: input.matchInput,
+      segmentLabel: input.segmentLabel,
+      segmentIndex: input.segmentIndex,
+      scoreBefore: input.scoreBefore,
+      ...(template === undefined ? {} : { template }),
+    });
+
+    if (event !== null) {
+      generatedEvents.push(event);
+    }
+
+    if (selected.family === "TRY_TOUCHDOWN" && selected.scoring) {
+      const conversion = conversionCandidateFromTry({
+        tryCandidate: selected,
+        matchInput: input.matchInput,
+        segmentState: input.segmentState,
+        team: teamInput.team,
+        opponent: teamInput.opponent,
+        plan: teamInput.plan,
+      });
+      allCandidates.push(conversion);
+      selectedCandidates.push(conversion);
+      const conversionEvent = eventForResolvedCandidate({
+        candidate: conversion,
+        matchInput: input.matchInput,
+        segmentLabel: input.segmentLabel,
+        segmentIndex: input.segmentIndex,
+        scoreBefore: input.scoreBefore,
+        ...(template === undefined ? {} : { template }),
+      });
+
+      if (conversionEvent !== null) {
+        generatedEvents.push(conversionEvent);
+      }
+    } else {
+      allCandidates.push(buildCandidate({
+        matchInput: input.matchInput,
+        segmentState: input.segmentState,
+        segmentLabel: input.segmentLabel,
+        segmentIndex: input.segmentIndex,
+        team: teamInput.team,
+        opponent: teamInput.opponent,
+        plan: teamInput.plan,
+        family: "CONVERSION_GOAL",
+        tryAlreadyScored: false,
+      }));
+    }
+  }
+
+  return {
+    events: [...input.events, ...generatedEvents],
+    selectedCandidates,
+    state: {
+      candidates: [...input.state.candidates, ...allCandidates],
+      routeEvents: [...input.state.routeEvents, ...generatedEvents],
+    },
+  };
+}
+
+function availabilityRows(candidates: readonly OfficialRouteFamilyCandidate[]): readonly OfficialRouteFamilyAvailabilityRow[] {
+  return ROUTE_FAMILIES.map((family) => {
+    const rows = candidates.filter((candidate) => candidate.family === family);
+    const uniqueUnavailable = new Set(rows.flatMap((candidate) => candidate.unavailableReasonCodes));
+    const uniqueSuppression = new Set(rows.flatMap((candidate) => candidate.suppressionReasonCodes));
+
+    return {
+      family,
+      candidateCount: rows.length,
+      eligibleCandidateCount: rows.filter((candidate) => candidate.eligible).length,
+      selectedCandidateCount: rows.filter((candidate) => candidate.selected).length,
+      resolvedCandidateCount: rows.filter((candidate) => candidate.resolved).length,
+      scoringCandidateCount: rows.filter((candidate) => candidate.scoring).length,
+      nonScoringOutcomeCount: rows.filter((candidate) => candidate.resolved && !candidate.scoring).length,
+      unavailableReasonCodes: [...uniqueUnavailable],
+      suppressionReasonCodes: [...uniqueSuppression],
+      selectedButFailedCount: rows.filter((candidate) => candidate.selected && candidate.resolved && !candidate.scoring).length,
+      resolvedToScoreCount: rows.filter((candidate) => candidate.resolved && candidate.scoring).length,
+      resolvedToNonScoreCount: rows.filter((candidate) => candidate.resolved && !candidate.scoring).length,
+    };
+  });
+}
+
+function routeFamilies(candidates: readonly OfficialRouteFamilyCandidate[], predicate: (candidate: OfficialRouteFamilyCandidate) => boolean): readonly OfficialRouteFamily[] {
+  return [...new Set(candidates.filter(predicate).map((candidate) => candidate.family))];
+}
+
+function buildTeamOpportunityBalance(input: {
+  readonly matchInput: MatchInput;
+  readonly candidates: readonly OfficialRouteFamilyCandidate[];
+}): TeamOpportunityBalanceModel {
+  const homeTeamId = input.matchInput.homeTeam.teamId;
+  const awayTeamId = input.matchInput.awayTeam.teamId;
+  const selectedByFamily = (teamId: TeamId): Record<OfficialRouteFamily, number> =>
+    input.candidates
+      .filter((candidate) => candidate.teamId === teamId && candidate.selected)
+      .reduce((counts, candidate) => ({
+        ...counts,
+        [candidate.family]: counts[candidate.family] + 1,
+      }), emptyRouteFamilyCounts());
+  const scoringByFamily = (teamId: TeamId): Record<OfficialRouteFamily, number> =>
+    input.candidates
+      .filter((candidate) => candidate.teamId === teamId && candidate.scoring)
+      .reduce((counts, candidate) => ({
+        ...counts,
+        [candidate.family]: counts[candidate.family] + 1,
+      }), emptyRouteFamilyCounts());
+  const suppressionReasons = (teamId: TeamId): readonly OfficialRouteFamilyUnavailableReasonCode[] =>
+    [...new Set(input.candidates
+      .filter((candidate) => candidate.teamId === teamId)
+      .flatMap((candidate) => [...candidate.unavailableReasonCodes, ...candidate.suppressionReasonCodes]))];
+  const homeDanger = new Set(input.candidates.filter((candidate) => candidate.teamId === homeTeamId).map((candidate) => candidate.segmentLabel)).size;
+  const awayDanger = new Set(input.candidates.filter((candidate) => candidate.teamId === awayTeamId).map((candidate) => candidate.segmentLabel)).size;
+  const homeScoringOpportunities = input.candidates.filter((candidate) =>
+    candidate.teamId === homeTeamId &&
+    candidate.family !== "CONTINUATION" &&
+    candidate.eligible
+  ).length;
+  const awayScoringOpportunities = input.candidates.filter((candidate) =>
+    candidate.teamId === awayTeamId &&
+    candidate.family !== "CONTINUATION" &&
+    candidate.eligible
+  ).length;
+  const homeEligibleNonShotRoutes = input.candidates.filter((candidate) =>
+    candidate.teamId === homeTeamId &&
+    candidate.family !== "SHOT_GOAL" &&
+    candidate.family !== "CONTINUATION" &&
+    candidate.eligible
+  ).length;
+  const awayEligibleNonShotRoutes = input.candidates.filter((candidate) =>
+    candidate.teamId === awayTeamId &&
+    candidate.family !== "SHOT_GOAL" &&
+    candidate.family !== "CONTINUATION" &&
+    candidate.eligible
+  ).length;
+  const homeScoring = input.candidates.some((candidate) => candidate.teamId === homeTeamId && candidate.scoring);
+  const awayScoring = input.candidates.some((candidate) => candidate.teamId === awayTeamId && candidate.scoring);
+
+  return {
+    homePossessionDangerPhases: homeDanger,
+    awayPossessionDangerPhases: awayDanger,
+    homeScoringOpportunities,
+    awayScoringOpportunities,
+    homeEligibleNonShotRoutes,
+    awayEligibleNonShotRoutes,
+    homeSelectedRoutesByFamily: selectedByFamily(homeTeamId),
+    awaySelectedRoutesByFamily: selectedByFamily(awayTeamId),
+    homeScoringEventsByFamily: scoringByFamily(homeTeamId),
+    awayScoringEventsByFamily: scoringByFamily(awayTeamId),
+    oneSidedOpportunityRisk: homeScoringOpportunities === 0 || awayScoringOpportunities === 0,
+    oneSidedScoringRisk: homeScoring !== awayScoring,
+    suppressionReasonsByTeam: {
+      [homeTeamId]: suppressionReasons(homeTeamId),
+      [awayTeamId]: suppressionReasons(awayTeamId),
+    },
+    recommendation:
+      homeScoringOpportunities === 0
+        ? "IMPROVE_HOME_DANGER_ACCESS"
+        : awayScoringOpportunities === 0
+          ? "IMPROVE_AWAY_DANGER_ACCESS"
+          : homeEligibleNonShotRoutes + awayEligibleNonShotRoutes === 0
+            ? "IMPROVE_NON_SHOT_ACCESS"
+            : "KEEP_MONITORING",
+  };
+}
+
+export function summarizeFullMatchOfficialRouteFamilyMix(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly matchInput: MatchInput;
+  readonly scoreFromOfficialScoreChangeEvents: boolean;
+}): FullMatchOfficialRouteFamilyMixModel {
+  const candidates = input.state.candidates;
+  const nonShot = candidates.filter((candidate) => candidate.family !== "SHOT_GOAL" && candidate.family !== "CONTINUATION");
+  const eligible = candidates.filter((candidate) => candidate.eligible);
+  const selected = candidates.filter((candidate) => candidate.selected);
+  const scoring = candidates.filter((candidate) => candidate.scoring);
+  const nonShotSelected = selected.filter((candidate) => candidate.family !== "SHOT_GOAL" && candidate.family !== "CONTINUATION");
+  const nonShotScoring = scoring.filter((candidate) => candidate.family !== "SHOT_GOAL" && candidate.family !== "CONTINUATION");
+  const tryDropCandidates = candidates.filter((candidate) => candidate.family === "TRY_TOUCHDOWN" || candidate.family === "DROP_GOAL");
+  const tryDropSelected = selected.filter((candidate) => candidate.family === "TRY_TOUCHDOWN" || candidate.family === "DROP_GOAL");
+  const tryDropScoring = scoring.filter((candidate) => candidate.family === "TRY_TOUCHDOWN" || candidate.family === "DROP_GOAL");
+  const conversionCandidates = candidates.filter((candidate) => candidate.family === "CONVERSION_GOAL");
+  const conversionGeneratedOnlyAfterTry = conversionCandidates
+    .filter((candidate) => candidate.selected)
+    .every((candidate) =>
+      candidates.some((tryCandidate) =>
+        tryCandidate.segmentLabel === candidate.segmentLabel &&
+        tryCandidate.teamId === candidate.teamId &&
+        tryCandidate.family === "TRY_TOUCHDOWN" &&
+        tryCandidate.scoring
+      )
+    );
+  const teamOpportunityBalance = buildTeamOpportunityBalance({
+    matchInput: input.matchInput,
+    candidates,
+  });
+  const selectedFamilies = routeFamilies(candidates, (candidate) => candidate.selected);
+  const scoringFamilies = routeFamilies(candidates, (candidate) => candidate.scoring);
+  const shotOnlyMatchRisk = scoringFamilies.length <= 1 && scoringFamilies.includes("SHOT_GOAL");
+  const routeFamilyCompetitionCanSelectNonShot = nonShotSelected.length > 0;
+  const routeFamilyCompetitionCanSelectContinuation = selected.some((candidate) => candidate.family === "CONTINUATION");
+  const recommendation =
+    !input.scoreFromOfficialScoreChangeEvents
+      ? "FIX_OFFICIAL_SCORING_GUARDRAILS"
+      : nonShotSelected.length === 0
+        ? "TARGET_OFFICIAL_ROUTE_FAMILY_MIX_NEXT"
+        : nonShotScoring.length === 0
+          ? "IMPROVE_TRY_DROP_RESOLUTION"
+          : "KEEP_ROUTE_FAMILY_MIX_MONITORING";
+
+  return {
+    status: candidates.length > 0 ? "available" : "not_available",
+    scope: "FULL_MATCH_ROUTE_FAMILY_MIX_SINGLE_RUN",
+    version: "ROUTE_FAMILY_MIX_6F",
+    routeFamiliesSupported: ROUTE_FAMILIES,
+    shotCandidateCount: candidates.filter((candidate) => candidate.family === "SHOT_GOAL").length,
+    tryCandidateCount: candidates.filter((candidate) => candidate.family === "TRY_TOUCHDOWN").length,
+    dropCandidateCount: candidates.filter((candidate) => candidate.family === "DROP_GOAL").length,
+    conversionCandidateCount: conversionCandidates.length,
+    continuationCandidateCount: candidates.filter((candidate) => candidate.family === "CONTINUATION").length,
+    eligibleShotCandidateCount: candidates.filter((candidate) => candidate.family === "SHOT_GOAL" && candidate.eligible).length,
+    eligibleTryCandidateCount: candidates.filter((candidate) => candidate.family === "TRY_TOUCHDOWN" && candidate.eligible).length,
+    eligibleDropCandidateCount: candidates.filter((candidate) => candidate.family === "DROP_GOAL" && candidate.eligible).length,
+    eligibleConversionCandidateCount: candidates.filter((candidate) => candidate.family === "CONVERSION_GOAL" && candidate.eligible).length,
+    selectedRouteFamilies: selectedFamilies,
+    resolvedRouteFamilies: routeFamilies(candidates, (candidate) => candidate.resolved),
+    scoringRouteFamilies: scoringFamilies,
+    nonScoringRouteFamilies: routeFamilies(candidates, (candidate) => candidate.resolved && !candidate.scoring),
+    nonShotCandidateShare: percent(nonShot.length, candidates.length),
+    nonShotEligibleShare: percent(nonShot.filter((candidate) => candidate.eligible).length, eligible.length),
+    nonShotSelectedShare: percent(nonShotSelected.length, selected.length),
+    nonShotScoringShare: percent(nonShotScoring.length, scoring.length),
+    tryDropAvailabilityRate: percent(tryDropCandidates.filter((candidate) => candidate.eligible).length, tryDropCandidates.length),
+    tryDropSelectionRate: percent(tryDropSelected.length, tryDropCandidates.length),
+    tryDropScoringRate: percent(tryDropScoring.length, tryDropCandidates.length),
+    conversionGeneratedOnlyAfterTry,
+    conversionWithoutTryBlocked: conversionCandidates
+      .filter((candidate) => !candidate.selected)
+      .every((candidate) => candidate.unavailableReasonCodes.includes("CONVERSION_REQUIRES_TRY")),
+    penaltyShotInactive: scoringRegistryEntry("PENALTY_SHOT").active === false,
+    routeFamilyCompetitionActive: selectedFamilies.length > 1,
+    routeFamilyCompetitionCanSelectNonShot,
+    routeFamilyCompetitionCanSelectContinuation,
+    shotOnlyMatchRisk,
+    oneSidedScoringRisk: teamOpportunityBalance.oneSidedScoringRisk,
+    availabilityRows: availabilityRows(candidates),
+    teamOpportunityBalance,
+    candidates,
+    scoringConstantsChanged: false,
+    scoreCapApplied: false,
+    postHocRewriteApplied: false,
+    scoringEventsDeleted: false,
+    forcedOpponentScoreApplied: false,
+    MatchBonusEventChanged: false,
+    batchLiveSeparationPreserved: true,
+    persistenceUsedForScoring: false,
+    sqliteUsedForScoring: false,
+    scoreFromOfficialScoreChangeEvents: input.scoreFromOfficialScoreChangeEvents,
+    globalEconomyClaimCount: 0,
+    singleRunOnly: true,
+    recommendation,
+  };
+}
