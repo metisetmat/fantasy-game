@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path",
+  name: "Sprint 6E - Full-Match Batch Economy Proof",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-official-scoring-connection-6d.md",
-    "validation.fullmatch-official-scoring-connection-6d.md",
+    "fullmatch-batch-economy-proof-6e.md",
+    "validation.fullmatch-batch-economy-proof-6e.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6D share pack is current, complete, and below 20 files",
-    "fullmatch-official-scoring-connection-6d.md": "proves official full-match score_change creation is now gated by validated calibration inputs before event emission",
-    "validation.fullmatch-official-scoring-connection-6d.md": "validates the 6D official scoring connection, path flags, before/after counts, no-mutation guardrails, and single-run warning scope",
-    "README.md": "compact reviewer orientation for the 6D share pack",
-    "manifest.md": "compatibility manifest listing the 6D share pack files",
+    "validation.share-pack.md": "proves the 6E share pack is current, complete, and below 20 files",
+    "fullmatch-batch-economy-proof-6e.md": "proves the connected official full-match scoring economy across a 50-match batch without recalibrating scoring values",
+    "validation.fullmatch-batch-economy-proof-6e.md": "validates the 6E batch runner, guardrails, scoreline distribution, scoring-family distribution, and PASS/PARTIAL/FAIL justification",
+    "README.md": "compact reviewer orientation for the 6E share pack",
+    "manifest.md": "compatibility manifest listing the 6E share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

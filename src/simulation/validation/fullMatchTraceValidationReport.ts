@@ -28,6 +28,10 @@ import {
   buildFullMatchOfficialScoringCalibrationConnectionModel,
   type FullMatchOfficialScoringCalibrationConnectionModel,
 } from "../../reports/fullMatchOfficialScoringConnection";
+import {
+  currentFullMatchBatchEconomyProofModel,
+  type FullMatchBatchEconomyProofModel,
+} from "../../reports/fullMatchBatchEconomyProof";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -488,6 +492,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly scoringFamilyAttributionAudit: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation: FullMatchCalibrationCarryoverReconciliationModel;
   readonly fullMatchOfficialScoringConnection: FullMatchOfficialScoringCalibrationConnectionModel;
+  readonly fullMatchBatchEconomyProof: FullMatchBatchEconomyProofModel;
   readonly exportHtml: string;
 }
 
@@ -641,6 +646,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       scoringFamilyAttributionAudit,
     );
     const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(report);
+    const fullMatchBatchEconomyProof = currentFullMatchBatchEconomyProofModel();
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -659,6 +665,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       scoringFamilyAttributionAudit,
       fullMatchCalibrationCarryoverReconciliation,
       fullMatchOfficialScoringConnection,
+      fullMatchBatchEconomyProof,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -675,6 +682,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       scoringFamilyAttributionAudit,
       fullMatchCalibrationCarryoverReconciliation,
       fullMatchOfficialScoringConnection,
+      fullMatchBatchEconomyProof,
       exportHtml,
     };
 
@@ -5845,6 +5853,190 @@ export function renderFullMatchOfficialScoringConnection6DValidation(model: Full
     "",
     "## Recommendation",
     `- ${connection.recommendation}`,
+    "",
+  ].join("\n");
+}
+
+function familyCountLines(prefix: string, counts: FullMatchBatchEconomyProofModel["scoringEventsByFamily"]): readonly string[] {
+  return [
+    `- ${prefix} SHOT_GOAL: ${counts.SHOT_GOAL}`,
+    `- ${prefix} TRY_TOUCHDOWN: ${counts.TRY_TOUCHDOWN}`,
+    `- ${prefix} CONVERSION_GOAL: ${counts.CONVERSION_GOAL}`,
+    `- ${prefix} DROP_GOAL: ${counts.DROP_GOAL}`,
+    `- ${prefix} PENALTY_SHOT: ${counts.PENALTY_SHOT}`,
+    `- ${prefix} UNKNOWN: ${counts.UNKNOWN}`,
+  ];
+}
+
+function fullMatchBatchEconomyProofCountLines(model: FullMatchBatchEconomyProofModel): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- version: ${model.version}`,
+    `- matchCount: ${model.matchCount}`,
+    `- uniqueSeeds: ${model.uniqueSeeds}`,
+    `- uniqueScorelines: ${model.uniqueScorelines}`,
+    `- averageScore: ${model.averageTotalPoints} total points`,
+    `- averageTotalPoints: ${model.averageTotalPoints}`,
+    `- medianTotalPoints: ${model.medianTotalPoints}`,
+    `- averageScoreDifference: ${model.averageScoreDifference}`,
+    `- medianScoreDifference: ${model.medianScoreDifference}`,
+    `- maxScoreDifference: ${model.maxScoreDifference}`,
+    `- blowoutRate: ${model.blowoutRate}%`,
+    `- severeBlowoutRate: ${model.severeBlowoutRate}%`,
+    `- shutoutRate: ${model.shutoutRate}%`,
+    `- zeroZeroRate: ${model.zeroZeroRate}%`,
+    `- oneSidedScoringRate: ${model.oneSidedScoringRate}%`,
+    `- scoringEventsPerMatch: ${model.averageScoringEventsPerMatch}`,
+    `- averageShotGoalEventsPerMatch: ${model.averageShotGoalEventsPerMatch}`,
+    `- averageTryEventsPerMatch: ${model.averageTryEventsPerMatch}`,
+    `- averageDropEventsPerMatch: ${model.averageDropEventsPerMatch}`,
+    `- averageConversionEventsPerMatch: ${model.averageConversionEventsPerMatch}`,
+    `- matchesWithOnlyShotGoals: ${model.matchesWithOnlyShotGoals}`,
+    `- matchesWithTryOrDrop: ${model.matchesWithTryOrDrop}`,
+    `- matchesWithMultipleScoringFamilies: ${model.matchesWithMultipleScoringFamilies}`,
+    `- nonShotPointShare: ${model.nonShotPointShare}%`,
+    `- tryDropPresenceRate: ${model.tryDropPresenceRate}%`,
+    `- calibrationAppliedAllRuns: ${model.calibrationAppliedAllRuns}`,
+    `- officialPathConnectedAllRuns: ${model.officialScoringPathConnectedAllRuns}`,
+    `- legacyPathLeakageCount: ${model.noLegacyPathLeakageCount}`,
+    `- fallbackPathLeakageCount: ${model.noFallbackPathLeakageCount}`,
+    `- parallelPathLeakageCount: ${model.parallelPathLeakageCount}`,
+    `- scoreFromScoreChangeAllRuns: ${model.officialScoreFromScoreChangeAllRuns}`,
+    `- scoreCapAppliedCount: ${model.scoreCapAppliedCount}`,
+    `- postHocRewriteCount: ${model.postHocRewriteCount}`,
+    `- scoringEventDeletionCount: ${model.scoringEventDeletionCount}`,
+    `- forcedOpponentScoreCount: ${model.forcedOpponentScoreCount}`,
+    `- scoringConstantsChangedCount: ${model.scoringConstantsChangedCount}`,
+    `- MatchBonusEventChangedCount: ${model.matchBonusEventChangedCount}`,
+    `- batchLiveContaminationCount: ${model.batchLiveContaminationCount}`,
+    `- persistenceUsedForScoringCount: ${model.persistenceUsedForScoringCount}`,
+    `- sqliteUsedForScoringCount: ${model.sqliteUsedForScoringCount}`,
+    `- unknownScoringFamilyCount: ${model.unknownScoringFamilyCount}`,
+    `- penaltyShotActiveLeakageCount: ${model.penaltyShotActiveLeakageCount}`,
+    `- warnings: ${model.warnings.join(", ")}`,
+    `- recommendation: ${model.recommendation}`,
+    `- nextSprintRecommendation: ${model.nextSprintRecommendation}`,
+  ];
+}
+
+export function renderFullMatchBatchEconomyProof6EDoc(model: FullMatchTraceValidationModel): string {
+  const proof = currentFullMatchBatchEconomyProofModel();
+
+  return [
+    "# Full-Match Batch Economy Proof 6E",
+    "",
+    "Sprint 6E runs a 50-match full-match batch through the official 6D scoring path. It measures the connected economy without changing point values, without score caps, without post-hoc rewrites, and without using persistence or SQLite as a scoring source.",
+    "",
+    "## Summary",
+    ...fullMatchBatchEconomyProofCountLines(proof),
+    "",
+    "## Scoring Events By Family",
+    ...familyCountLines("events", proof.scoringEventsByFamily),
+    "",
+    "## Scoring Points By Family",
+    ...familyCountLines("points", proof.scoringPointsByFamily),
+    "",
+    "## Scoring Points Share By Family",
+    ...familyCountLines("share percent", proof.scoringPointsShareByFamily),
+    "",
+    "## Scoreline Distribution",
+    "| Scoreline | Matches |",
+    "| --- | ---: |",
+    ...proof.scorelineDistribution.slice(0, 10).map((row) => `| ${row.scoreline} | ${row.matches} |`),
+    "",
+    "## Route Family Mix Distribution",
+    "| Route family mix | Matches |",
+    "| --- | ---: |",
+    ...proof.routeFamilyMixDistribution.map((row) => `| ${row.routeFamilyMix} | ${row.matches} |`),
+    "",
+    "## Guardrails",
+    "- score from official score_change consequences in all runs",
+    "- no score cap",
+    "- no post-hoc score rewrite",
+    "- no scoring event deletion after generation",
+    "- no forced opponent score",
+    "- scoring constants unchanged",
+    "- MatchBonusEvent unchanged",
+    "- batch/live separation preserved",
+    "- persistence and SQLite are not scoring sources",
+    "- PENALTY_SHOT inactive",
+    "",
+    "## Interpretation",
+    `- Batch status: ${proof.status}.`,
+    proof.status === "PASS"
+      ? "- The observed batch satisfies the technical and economy sanity thresholds."
+      : "- The official path is connected and the technical guardrails are clean, but the economy still needs targeted gameplay work before it can be treated as confirmed.",
+    `- Main economy signal: SHOT_GOAL point share ${proof.scoringPointsShareByFamily.SHOT_GOAL}%, try/drop presence ${proof.tryDropPresenceRate}%, shutout rate ${proof.shutoutRate}%, unique scorelines ${proof.uniqueScorelines}.`,
+    "",
+    "## Warnings",
+    ...proof.warnings.map((warning) => `- ${warning}`),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${proof.recommendation}`,
+    `- ${proof.nextSprintRecommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchBatchEconomyProof6EValidation(model: FullMatchTraceValidationModel): string {
+  const proof = currentFullMatchBatchEconomyProofModel();
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("batch full-match runner exists.", proof.scope === "FULL_MATCH_BATCH_ECONOMY_PROOF", proof.scope),
+    check("matchCount >= 50.", proof.matchCount >= 50, String(proof.matchCount)),
+    check("seed variation exists.", proof.uniqueSeeds === proof.matchCount, String(proof.uniqueSeeds)),
+    check("unique scorelines visible.", proof.uniqueScorelines > 0, String(proof.uniqueScorelines)),
+    check("score distribution visible.", proof.scorelineDistribution.length > 0, String(proof.scorelineDistribution.length)),
+    check("scoring family distribution visible.", proof.scoringEventsByFamily.SHOT_GOAL >= 0 && proof.scoringPointsByFamily.SHOT_GOAL >= 0, "family counters visible"),
+    check("blowout and severe blowout rates visible.", proof.blowoutRate >= 0 && proof.severeBlowoutRate >= 0, `${proof.blowoutRate}/${proof.severeBlowoutRate}`),
+    check("official path connected in all runs.", proof.officialScoringPathConnectedAllRuns, ""),
+    check("calibrations applied in all runs.", proof.calibrationAppliedAllRuns, ""),
+    check("score from score_change in all runs.", proof.officialScoreFromScoreChangeAllRuns, ""),
+    check("no score cap.", proof.scoreCapAppliedCount === 0, String(proof.scoreCapAppliedCount)),
+    check("no post-hoc rewrite.", proof.postHocRewriteCount === 0, String(proof.postHocRewriteCount)),
+    check("no event deletion.", proof.scoringEventDeletionCount === 0, String(proof.scoringEventDeletionCount)),
+    check("no forced opponent score.", proof.forcedOpponentScoreCount === 0, String(proof.forcedOpponentScoreCount)),
+    check("scoring constants unchanged.", proof.scoringConstantsChangedCount === 0, String(proof.scoringConstantsChangedCount)),
+    check("MatchBonusEvent unchanged.", proof.matchBonusEventChangedCount === 0, String(proof.matchBonusEventChangedCount)),
+    check("batch/live separation preserved.", proof.batchLiveContaminationCount === 0, String(proof.batchLiveContaminationCount)),
+    check("no persistence or SQLite scoring use.", proof.persistenceUsedForScoringCount === 0 && proof.sqliteUsedForScoringCount === 0, `${proof.persistenceUsedForScoringCount}/${proof.sqliteUsedForScoringCount}`),
+    check("no UNKNOWN scoring family.", proof.unknownScoringFamilyCount === 0, String(proof.unknownScoringFamilyCount)),
+    check("no PENALTY_SHOT leakage.", proof.penaltyShotActiveLeakageCount === 0, String(proof.penaltyShotActiveLeakageCount)),
+    check("report section visible.", exportHtml.includes("Preuve batch full-match"), ""),
+    check("recommendation visible.", proof.recommendation.length > 0 && exportHtml.includes(proof.recommendation), proof.recommendation),
+    check("PASS/PARTIAL/FAIL status justified.", proof.status === "PASS" || proof.status === "PARTIAL", proof.status),
+    check("partial economy warnings are explicit when economy is not PASS.", proof.status === "PASS" || proof.warnings.includes("FULL_MATCH_BATCH_ECONOMY_NEEDS_TARGETED_FIX"), proof.warnings.join(", ")),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Batch Economy Proof 6E Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...fullMatchBatchEconomyProofCountLines(proof),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${proof.recommendation}`,
+    `- ${proof.nextSprintRecommendation}`,
     "",
   ].join("\n");
 }

@@ -27,6 +27,7 @@ import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachRepor
 import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import type { FullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import type { FullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
+import type { FullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2322,6 +2323,84 @@ function renderFullMatchOfficialScoringConnection(
     </section>`;
 }
 
+export function renderFullMatchBatchEconomyProofSection(
+  model: FullMatchBatchEconomyProofModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const pointRows = [
+    ["SHOT_GOAL", model.scoringPointsByFamily.SHOT_GOAL, model.scoringPointsShareByFamily.SHOT_GOAL],
+    ["TRY_TOUCHDOWN", model.scoringPointsByFamily.TRY_TOUCHDOWN, model.scoringPointsShareByFamily.TRY_TOUCHDOWN],
+    ["CONVERSION_GOAL", model.scoringPointsByFamily.CONVERSION_GOAL, model.scoringPointsShareByFamily.CONVERSION_GOAL],
+    ["DROP_GOAL", model.scoringPointsByFamily.DROP_GOAL, model.scoringPointsShareByFamily.DROP_GOAL],
+    ["PENALTY_SHOT", model.scoringPointsByFamily.PENALTY_SHOT, model.scoringPointsShareByFamily.PENALTY_SHOT],
+    ["UNKNOWN", model.scoringPointsByFamily.UNKNOWN, model.scoringPointsShareByFamily.UNKNOWN],
+  ].map(([family, points, share]) => `<tr><td>${escapeHtml(String(family))}</td><td>${points}</td><td>${share}%</td></tr>`).join("");
+  const scorelineRows = model.scorelineDistribution
+    .slice(0, 5)
+    .map((row) => `<tr><td>${escapeHtml(row.scoreline)}</td><td>${row.matches}</td></tr>`)
+    .join("");
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Preuve batch full-match">
+      <div>
+        <h3>Preuve batch full-match</h3>
+        <p>&Eacute;conomie observ&eacute;e sur ${model.matchCount} matchs avec le chemin officiel connect&eacute;. Le score est issu des &eacute;v&eacute;nements officiels <code>score_change</code>; cette lecture mesure la stabilit&eacute; globale sans modifier les valeurs de scoring.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Scorelines</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Status</span><strong>${escapeHtml(model.status)}</strong></div>
+            <div><span>Scorelines uniques</span><strong>${model.uniqueScorelines}</strong></div>
+            <div><span>Points moyens</span><strong>${model.averageTotalPoints}</strong></div>
+            <div><span>&Eacute;cart moyen</span><strong>${model.averageScoreDifference}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Risques score</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Blowout rate</span><strong>${model.blowoutRate}%</strong></div>
+            <div><span>Severe blowout</span><strong>${model.severeBlowoutRate}%</strong></div>
+            <div><span>Shutout rate</span><strong>${model.shutoutRate}%</strong></div>
+            <div><span>0-0</span><strong>${model.zeroZeroRate}%</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Familles</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>SHOT_GOAL share</span><strong>${model.scoringPointsShareByFamily.SHOT_GOAL}%</strong></div>
+            <div><span>TRY/DROP pr&eacute;sence</span><strong>${model.tryDropPresenceRate}%</strong></div>
+            <div><span>Non-shot points</span><strong>${model.nonShotPointShare}%</strong></div>
+            <div><span>Multi-familles</span><strong>${model.matchesWithMultipleScoringFamilies}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Garde-fous</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Chemin officiel</span><strong>${model.officialScoringPathConnectedAllRuns ? "oui" : "non"}</strong></div>
+            <div><span>Calibrations</span><strong>${model.calibrationAppliedAllRuns ? "oui" : "non"}</strong></div>
+            <div><span>Score_change</span><strong>${model.officialScoreFromScoreChangeAllRuns ? "oui" : "non"}</strong></div>
+            <div><span>Cap / rewrite</span><strong>${model.scoreCapAppliedCount + model.postHocRewriteCount}</strong></div>
+          </div>
+        </article>
+      </div>
+      <table class="premium-table">
+        <thead><tr><th>Famille</th><th>Points</th><th>Part</th></tr></thead>
+        <tbody>${pointRows}</tbody>
+      </table>
+      <table class="premium-table">
+        <thead><tr><th>Top scorelines</th><th>Matchs</th></tr></thead>
+        <tbody>${scorelineRows}</tbody>
+      </table>
+      <p class="durable-storage-decision-boundary">Conclusion prudente : ${escapeHtml(model.status)}. ${model.status === "PASS" ? "Les crit&egrave;res batch sont satisfaits." : "Les garde-fous techniques sont propres, mais l&rsquo;&eacute;conomie observ&eacute;e reste &agrave; corriger avant confirmation globale."}</p>
+      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es : SHOT_GOAL = 3, TRY_TOUCHDOWN = 5, CONVERSION_GOAL = 2, DROP_GOAL = 2, PENALTY_SHOT inactif. Aucune correction manuelle du score, aucune retouche post-run.</p>
+      <p class="durable-storage-decision-warning">${escapeHtml(model.recommendation)} — ${escapeHtml(model.nextSprintRecommendation)}</p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -2341,6 +2420,41 @@ function renderFullMatchOfficialScoringConnectionAppendix(
         <li>fallback route path after: ${model.fullMatchUsesFallbackRoutePathAfter}</li>
         <li>segment amplification after: ${escapeHtml(model.segmentAmplificationAfter)}</li>
         <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
+      </ul>
+    </article>`;
+}
+
+function renderFullMatchBatchEconomyProofAppendix(
+  model: FullMatchBatchEconomyProofModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <article class="premium-appendix-card">
+      <h3>Preuve batch full-match 6E</h3>
+      <ul>
+        <li>status: ${escapeHtml(model.status)}</li>
+        <li>scope: ${escapeHtml(model.scope)}</li>
+        <li>version: ${escapeHtml(model.version)}</li>
+        <li>match count: ${model.matchCount}</li>
+        <li>unique seeds: ${model.uniqueSeeds}</li>
+        <li>unique scorelines: ${model.uniqueScorelines}</li>
+        <li>average total points: ${model.averageTotalPoints}</li>
+        <li>average score difference: ${model.averageScoreDifference}</li>
+        <li>blowout rate: ${model.blowoutRate}%</li>
+        <li>severe blowout rate: ${model.severeBlowoutRate}%</li>
+        <li>shutout rate: ${model.shutoutRate}%</li>
+        <li>SHOT_GOAL point share: ${model.scoringPointsShareByFamily.SHOT_GOAL}%</li>
+        <li>try/drop presence rate: ${model.tryDropPresenceRate}%</li>
+        <li>official path connected all runs: ${model.officialScoringPathConnectedAllRuns}</li>
+        <li>calibration applied all runs: ${model.calibrationAppliedAllRuns}</li>
+        <li>score from score_change all runs: ${model.officialScoreFromScoreChangeAllRuns}</li>
+        <li>score cap applied count: ${model.scoreCapAppliedCount}</li>
+        <li>post-hoc rewrite count: ${model.postHocRewriteCount}</li>
+        <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
+        <li>recommendation: ${escapeHtml(model.recommendation)}</li>
       </ul>
     </article>`;
 }
@@ -3224,6 +3338,7 @@ function renderAppendices(input: {
   readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
   readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
+  readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3268,6 +3383,7 @@ function renderAppendices(input: {
     ${renderScoringFamilyAttributionAuditAppendix(input.scoringFamilyAttributionAudit)}
     ${renderFullMatchCalibrationCarryoverReconciliationAppendix(input.fullMatchCalibrationCarryoverReconciliation)}
     ${renderFullMatchOfficialScoringConnectionAppendix(input.fullMatchOfficialScoringConnection)}
+    ${renderFullMatchBatchEconomyProofAppendix(input.fullMatchBatchEconomyProof)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -3303,6 +3419,7 @@ export function renderCoachReportExportHtml(input: {
   readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
   readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
+  readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3412,6 +3529,7 @@ export function renderCoachReportExportHtml(input: {
     renderScoringFamilyAttributionAudit(input.scoringFamilyAttributionAudit),
     renderFullMatchCalibrationCarryoverReconciliation(input.fullMatchCalibrationCarryoverReconciliation),
     renderFullMatchOfficialScoringConnection(input.fullMatchOfficialScoringConnection),
+    renderFullMatchBatchEconomyProofSection(input.fullMatchBatchEconomyProof),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3465,6 +3583,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchOfficialScoringConnection === undefined
       ? {}
       : { fullMatchOfficialScoringConnection: input.fullMatchOfficialScoringConnection }),
+    ...(input.fullMatchBatchEconomyProof === undefined
+      ? {}
+      : { fullMatchBatchEconomyProof: input.fullMatchBatchEconomyProof }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

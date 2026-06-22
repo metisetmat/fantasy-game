@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-22T08:48:19.322Z
-Task/sprint: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
+Generated: 2026-06-22T10:03:42.169Z
+Task/sprint: Sprint 6E - Full-Match Batch Economy Proof
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-official-scoring-connection-6d.md
-- validation.fullmatch-official-scoring-connection-6d.md
+- fullmatch-batch-economy-proof-6e.md
+- validation.fullmatch-batch-economy-proof-6e.md
 - README.md
 
 ## Bundle Files

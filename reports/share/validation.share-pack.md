@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
+- current sprint: Sprint 6E - Full-Match Batch Economy Proof
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -26,39 +26,39 @@ Status: PASS
 - PASS: validation.share-pack.md copied - 
 - PASS: README.md copied - 
 - PASS: manifest.md copied - 
-- PASS: current sprint is Sprint 6D - Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
+- PASS: current sprint is Sprint 6E - Sprint 6E - Full-Match Batch Economy Proof
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6D oriented - README current
-- PASS: 6D report included - 6D doc included
-- PASS: 6D validation is PASS - 6D validation current
-- PASS: before and after score visible - score before/after visible
-- PASS: before and after event counts visible - event counts visible
-- PASS: SHOT_GOAL before and after counts visible - SHOT_GOAL counts visible
-- PASS: official scoring path connected warning visible - path connected
-- PASS: shot difficulty calibration applied after - shot difficulty after true
-- PASS: scoring choice balance applied after - choice balance after true
-- PASS: affordance volume constraints applied after - affordance after true
-- PASS: goalkeeper/rebound/fatigue calibrations applied after - gk/rebound/fatigue after true
-- PASS: route mix defensive resistance and danger gate applied after - route/defense/danger after true
-- PASS: score remains from official score_change - score_change source
-- PASS: no score cap - cap false
-- PASS: no post-hoc rewrite - rewrite false
-- PASS: no scoring event deletion after generation - deletion false
-- PASS: no forced opponent score - forced score false
+- PASS: README is Sprint 6E oriented - README current
+- PASS: 6E report included - 6E doc included
+- PASS: 6E validation is PASS - 6E validation current
+- PASS: batch match count visible - 50 matches visible
+- PASS: seed variation visible - unique seeds visible
+- PASS: scoreline diversity visible - scorelines visible
+- PASS: scoring family distribution visible - family distribution visible
+- PASS: blowout and severe blowout rates visible - blowout rates visible
+- PASS: official path connected all runs - official path all runs
+- PASS: calibrations applied all runs - calibrations all runs
+- PASS: score from score_change all runs - score_change source all runs
+- PASS: no score cap - cap 0
+- PASS: no post-hoc rewrite - rewrite 0
+- PASS: no event deletion - deletion 0
+- PASS: no forced opponent score - forced score 0
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: persistence and SQLite not used for scoring - persistence/SQLite false
-- PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: single-run limitation explicit - single-run limitation visible
-- PASS: coach export contains official calibrated scoring section - export 6D visible
-- PASS: coach export avoids forbidden score correction wording - forbidden wording absent
-- PASS: bundle includes 6D source files - 6D source bundled
-- PASS: bundle includes 6D executable tests - 6D tests bundled
-- PASS: runFullMatch uses official scoring path - runFullMatch connected
+- PASS: persistence and SQLite not used for scoring - persistence/SQLite 0
+- PASS: no UNKNOWN scoring family - UNKNOWN 0
+- PASS: no PENALTY_SHOT leakage - PENALTY 0
+- PASS: PARTIAL/PASS economy status is justified - status justified
+- PASS: economy warnings visible - economy warning visible
+- PASS: coach product contains batch proof section - product 6E visible
+- PASS: coach export contains batch proof section - export 6E visible
+- PASS: coach export avoids forbidden guarantee wording - forbidden wording absent
+- PASS: bundle includes 6E source files - 6E source bundled
+- PASS: bundle includes official scoring path regression test - conversion/try test bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6D recommendation visible
+- PASS: recommendation visible - 6E recommendation visible
 
 ## Files
 
@@ -72,7 +72,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-official-scoring-connection-6d.md
+- fullmatch-batch-economy-proof-6e.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -80,5 +80,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-official-scoring-connection-6d.md
+- validation.fullmatch-batch-economy-proof-6e.md
 - validation.share-pack.md

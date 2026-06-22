@@ -16,6 +16,7 @@ import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEcon
 import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import { buildFullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
+import { currentFullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -35,7 +36,20 @@ import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
-import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
+import {
+  renderCoachReportExportHtml,
+  renderFullMatchBatchEconomyProofSection,
+} from "./renderCoachReportExportHtml";
+
+function appendProductSection(html: string, section: string): string {
+  if (section.length === 0) {
+    return html;
+  }
+
+  return html.includes("</main>")
+    ? html.replace("</main>", `${section}\n</main>`)
+    : `${html}\n${section}`;
+}
 
 export function writeLatestCoachReport(): void {
   const defaultReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
@@ -43,10 +57,11 @@ export function writeLatestCoachReport(): void {
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
   const reportsDirectory = join(process.cwd(), "reports");
-  const productHtml = renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
+  const fullMatchBatchEconomyProof = currentFullMatchBatchEconomyProofModel();
+  const productHtml = appendProductSection(renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
-  ));
+  )), renderFullMatchBatchEconomyProofSection(fullMatchBatchEconomyProof));
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -229,6 +244,7 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
     fullMatchCalibrationCarryoverReconciliation,
     fullMatchOfficialScoringConnection,
+    fullMatchBatchEconomyProof,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
