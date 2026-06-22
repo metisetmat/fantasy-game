@@ -1,31 +1,25 @@
-# Sprint 6H Share Pack
+# Sprint 6I Share Pack
 
-Current sprint: Sprint 6H - Segment Scoring Density Calibration
+Current sprint: Sprint 6I - Team Opportunity Balance Calibration
 
-Included files:
-- package.json
-- tsconfig.json
-- coach-report.latest.html
-- coach-report.default.html
-- coach-report.experimental.html
-- coach-report.product.html
-- coach-report.export.html
-- scoring-events-summary.md
-- sequence-1-action-1.html
-- sequence-1-action-2.html
-- sequence-1-action-3.html
-- fullmatch-segment-scoring-density-calibration-6h.md
-- validation.fullmatch-segment-scoring-density-calibration-6h.md
+Mode: MINIMAL_REVIEW
+
+## What to read first
+
 - validation.share-pack.md
-- README.md
-- manifest.md
-- 00-share-manifest.txt
-- bundle__contracts.md
-- bundle__simulation.md
-- bundle__reports.md
+- fullmatch-team-opportunity-balance-calibration-6i.md
+- validation.fullmatch-team-opportunity-balance-calibration-6i.md
+- coach-report.export.html
+- coach-report.product.html
 
-Start with validation.share-pack.md, then fullmatch-segment-scoring-density-calibration-6h.md and validation.fullmatch-segment-scoring-density-calibration-6h.md.
+## Sprint boundary
 
-Sprint 6H reduces scoring-opportunity density per segment before score_change events are created. It preserves SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.
+Sprint 6I improves home/away access to credible opportunities after Sprint 6H reduced global density. It preserves SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent or trailing-team scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.
 
-Upload every file in this reports/share directory.
+## Review steps
+
+1. Confirm validation.share-pack.md is PASS.
+2. Read the 6I calibration report for before/after balance metrics.
+3. Inspect the 6I validation checklist for guardrails.
+4. Use coach-report.export.html to verify coach-facing wording.
+5. Use bundle__simulation.md and bundle__reports.md for source excerpts.

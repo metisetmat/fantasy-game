@@ -993,6 +993,65 @@
         Ce statut reste volontairement prudent si les blowouts demeurent trop hauts, meme lorsque la densit&eacute; baisse.
       </p>
     </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Equilibre des opportunites">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6I</p>
+        <h3>Equilibre des opportunites</h3>
+        <p>
+          Apres 6H, la densite est plus saine mais les blowouts restent hauts. Cette lecture mesure la repartition
+          des opportunites, des phases dangereuses, des reponses apres avoir encaisse et des chaines de domination,
+          sans score force, sans cap, et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apres batch 50 matchs</h4>
+          <ul>
+            <li>Ecart moyen: 12.9 -> 11.1</li>
+            <li>Blowout rate: 56% -> 48%</li>
+            <li>Severe blowout rate: 8% -> 2%</li>
+            <li>Scoring events / match: 7.2 -> 7.3</li>
+            <li>Opportunites / match: 16.1 -> 16.2</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Home / away</h4>
+          <ul>
+            <li>Opportunites: 500 / 309</li>
+            <li>Danger phases: 500 / 309</li>
+            <li>Scoring events: 226 / 138</li>
+            <li>Points: 697 / 419</li>
+            <li>Index opportunites: 68 -> 76</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Reponse et resets</h4>
+          <ul>
+            <li>Reponse apres avoir encaisse: 28% -> 52.3%</li>
+            <li>Reset vers reponse: 18% -> 39.9%</li>
+            <li>Recuperation defensive vers danger: 14% -> 73.8%</li>
+            <li>Chaine de domination max: 4 -> 16</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Mix familles preserve: oui</li>
+            <li>Densite 6H preservee: oui</li>
+            <li>Score issu des evenements officiels: oui</li>
+            <li>Cap / score force: non</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: REDUCE_DOMINANCE_CHAINS_MORE. Le statut reste prudent si l'equilibre progresse mais que le blowout
+        rate ou les chaines de domination restent trop eleves.
+      </p>
+    </section>
 </main>
 </body>
 </html>
