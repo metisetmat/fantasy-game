@@ -15,14 +15,14 @@ Sprint 6H reduces the number of dangerous and scoring-opportunity beats per segm
 ## Before / After Table
 | Metric | 6G before | 6H after | Direction |
 | --- | ---: | ---: | --- |
-| scoring opportunities / match | 27.5 | 15.9 | reduced |
+| scoring opportunities / match | 27.5 | 16.1 | reduced |
 | scoring opportunities / segment | 3.4 | 2 | reduced |
-| danger phases / match | 31.2 | 15.9 | reduced |
-| scoring events / match | 12.5 | 6.9 | reduced |
-| average total points | 39.2 | 21 | reduced |
+| danger phases / match | 31.2 | 16.1 | reduced |
+| scoring events / match | 12.5 | 7.2 | reduced |
+| average total points | 39.2 | 22 | reduced |
 | average score difference | 21.7 | 12.9 | reduced |
 | blowout rate | 68% | 56% | reduced |
-| severe blowout rate | 42% | 14% | reduced |
+| severe blowout rate | 42% | 8% | reduced |
 | neutral phases / match | 58 | 69.6 | increased |
 | defensive recoveries / match | 6.5 | 15.9 | increased |
 | reset phases / match | 19 | 42.4 | increased |
@@ -30,15 +30,15 @@ Sprint 6H reduces the number of dangerous and scoring-opportunity beats per segm
 ## Segment Density Audit Summary
 - segment density audit exists: true
 - segmentCount: 400
-- scoringOpportunityCount: 797
+- scoringOpportunityCount: 804
 - scoringEventCount: 360
-- dangerPhaseCount: 797
+- dangerPhaseCount: 804
 - neutralPhaseCount: 3480
 - defensiveRecoveryCount: 797
 - resetPhaseCount: 2118
 - continuationCount: 598
-- consecutiveScoringOpportunityCount: 91
-- sameTeamConsecutiveOpportunityCount: 317
+- consecutiveScoringOpportunityCount: 93
+- sameTeamConsecutiveOpportunityCount: 322
 - sameFamilyConsecutiveOpportunityCount: 205
 
 ## Scoring Opportunities By Segment
@@ -67,38 +67,38 @@ Sprint 6H reduces the number of dangerous and scoring-opportunity beats per segm
 
 ## Route Family Mix After
 - route family SHOT_GOAL: 591
-- route family TRY_TOUCHDOWN: 69
-- route family CONVERSION_GOAL: 67
-- route family DROP_GOAL: 70
+- route family TRY_TOUCHDOWN: 72
+- route family CONVERSION_GOAL: 69
+- route family DROP_GOAL: 72
 - route family PENALTY_SHOT: 0
 - route family UNKNOWN: 0
-- route family CONTINUATION: 0
+- route family CONTINUATION: 598
 
 ## Scoring Events By Family After
-- events after SHOT_GOAL: 208
-- events after TRY_TOUCHDOWN: 50
-- events after CONVERSION_GOAL: 50
+- events after SHOT_GOAL: 209
+- events after TRY_TOUCHDOWN: 57
+- events after CONVERSION_GOAL: 55
 - events after DROP_GOAL: 39
 - events after PENALTY_SHOT: 0
 - events after UNKNOWN: 0
 
 ## Scoring Points By Family After
-- points after SHOT_GOAL: 624
-- points after TRY_TOUCHDOWN: 250
-- points after CONVERSION_GOAL: 100
+- points after SHOT_GOAL: 627
+- points after TRY_TOUCHDOWN: 285
+- points after CONVERSION_GOAL: 110
 - points after DROP_GOAL: 78
 - points after PENALTY_SHOT: 0
 - points after UNKNOWN: 0
 
 ## Attempts And Non-Scoring Outcomes After
-- attempts after SHOT_GOAL: 595
-- attempts after TRY_TOUCHDOWN: 61
-- attempts after CONVERSION_GOAL: 59
-- attempts after DROP_GOAL: 75
-- non-scoring after SHOT_GOAL: 387
-- non-scoring after TRY_TOUCHDOWN: 11
-- non-scoring after CONVERSION_GOAL: 9
-- non-scoring after DROP_GOAL: 36
+- attempts after SHOT_GOAL: 591
+- attempts after TRY_TOUCHDOWN: 72
+- attempts after CONVERSION_GOAL: 69
+- attempts after DROP_GOAL: 72
+- non-scoring after SHOT_GOAL: 382
+- non-scoring after TRY_TOUCHDOWN: 15
+- non-scoring after CONVERSION_GOAL: 14
+- non-scoring after DROP_GOAL: 33
 
 ## Guardrails
 - scoreFromScoreChangeAllRuns: true

@@ -10,12 +10,7 @@ import {
 } from "../simulation/fullMatch/fullMatchSegmentScoringDensityAudit";
 import type { SegmentScoringDensityWarningCode } from "../simulation/fullMatch/segmentScoringDensityWarnings";
 import { runFullMatch } from "../simulation/runFullMatch";
-import {
-  buildFullMatchRouteFamilyScoringRateCalibrationModel,
-  type RouteFamilyBatchSummary,
-  type RouteFamilyRateCounts,
-  type ScoringFamilyCounts,
-} from "./fullMatchRouteFamilyScoringRateCalibration";
+import type { RouteFamilyBatchSummary, RouteFamilyRateCounts, ScoringFamilyCounts } from "./fullMatchRouteFamilyScoringRateCalibration";
 import { scoringRegistryEntry } from "../systems/scoring/scoringActionRegistry";
 
 export type FullMatchSegmentScoringDensityCalibrationStatus = "PASS" | "PARTIAL" | "FAIL";
@@ -118,7 +113,7 @@ export interface SegmentRouteFamilySummaryRow {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "segment-scoring-density-6h-v2";
+const CACHE_VERSION = "segment-scoring-density-6h-v3";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-segment-scoring-density-calibration-6h.json");
 
 const BASELINE_6G: SegmentScoringDensityBeforeAfter = {
@@ -150,14 +145,123 @@ const BASELINE_6G: SegmentScoringDensityBeforeAfter = {
 
 let cachedModel: FullMatchSegmentScoringDensityCalibrationModel | null = null;
 
+function emptyScoringCounts(): ScoringFamilyCounts {
+  return {
+    SHOT_GOAL: 0,
+    TRY_TOUCHDOWN: 0,
+    CONVERSION_GOAL: 0,
+    DROP_GOAL: 0,
+    PENALTY_SHOT: 0,
+    UNKNOWN: 0,
+  };
+}
+
+function emptyRateCounts(): RouteFamilyRateCounts {
+  return {
+    SHOT_GOAL: 0,
+    TRY_TOUCHDOWN: 0,
+    CONVERSION_GOAL: 0,
+    DROP_GOAL: 0,
+  };
+}
+
 function round(value: number): number {
   return Math.round(value * 10) / 10;
+}
+
+function percent(numerator: number, denominator: number): number {
+  if (denominator === 0) {
+    return 0;
+  }
+
+  return Math.round((numerator / denominator) * 100);
+}
+
+function average(values: readonly number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return round(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
+function median(values: readonly number[]): number {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  const sorted = [...values].sort((a, b) => a - b);
+  const midpoint = Math.floor(sorted.length / 2);
+  const middle = sorted[midpoint] ?? 0;
+
+  return sorted.length % 2 === 1
+    ? middle
+    : round(((sorted[midpoint - 1] ?? middle) + middle) / 2);
+}
+
+function incrementScoring(counts: ScoringFamilyCounts, family: OfficialScoringFamily, value: number): ScoringFamilyCounts {
+  return {
+    ...counts,
+    [family]: counts[family] + value,
+  };
+}
+
+function incrementRate(counts: RouteFamilyRateCounts, family: keyof RouteFamilyRateCounts, value: number): RouteFamilyRateCounts {
+  return {
+    ...counts,
+    [family]: counts[family] + value,
+  };
 }
 
 function scoreChangePoints(event: MatchEvent): number {
   return event.consequences
     .filter((consequence) => consequence.type === "score_change")
     .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function officialScoringFamilyFromEvent(event: MatchEvent): OfficialScoringFamily | null {
+  const accepted = event.tags.find((tag) => tag.startsWith("official_scoring_accepted_family_"));
+  const rejected = event.tags.find((tag) => tag.startsWith("official_scoring_rejected_family_"));
+  const explicitFamily = (accepted ?? rejected)
+    ?.replace("official_scoring_accepted_family_", "")
+    .replace("official_scoring_rejected_family_", "");
+
+  if (
+    explicitFamily === "SHOT_GOAL" ||
+    explicitFamily === "TRY_TOUCHDOWN" ||
+    explicitFamily === "CONVERSION_GOAL" ||
+    explicitFamily === "DROP_GOAL" ||
+    explicitFamily === "PENALTY_SHOT" ||
+    explicitFamily === "UNKNOWN"
+  ) {
+    return explicitFamily;
+  }
+
+  if (event.scoringFamily !== undefined) {
+    return event.scoringFamily;
+  }
+
+  const exactFamilies: readonly OfficialScoringFamily[] = [
+    "SHOT_GOAL",
+    "TRY_TOUCHDOWN",
+    "CONVERSION_GOAL",
+    "DROP_GOAL",
+    "PENALTY_SHOT",
+    "UNKNOWN",
+  ];
+
+  return exactFamilies.find((family) => event.tags.includes(`official_route_family_${family}`)) ?? null;
+}
+
+function scorelineDistribution(scorelines: readonly string[]): readonly { readonly scoreline: string; readonly matches: number }[] {
+  const counts = new Map<string, number>();
+  for (const scoreline of scorelines) {
+    counts.set(scoreline, (counts.get(scoreline) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([scoreline, matches]) => ({ scoreline, matches }));
 }
 
 function buildScenarioInput(index: number): MatchInput {
@@ -262,11 +366,30 @@ function routeFamilyMixSummary(rows: readonly FullMatchSegmentScoringDensityAudi
 
 function buildBatchAudit(): {
   readonly batchAudit: SegmentScoringDensityBatchAuditSummary;
+  readonly afterBatch: RouteFamilyBatchSummary;
+  readonly attemptedByFamily: RouteFamilyRateCounts;
+  readonly acceptedByFamily: RouteFamilyRateCounts;
+  readonly nonScoringOutcomesByFamily: RouteFamilyRateCounts;
+  readonly scoringEventsByFamily: ScoringFamilyCounts;
+  readonly scoringPointsByFamily: ScoringFamilyCounts;
   readonly scoreFromScoreChangeAllRuns: boolean;
   readonly officialPathConnectedAllRuns: boolean;
   readonly calibrationAppliedAllRuns: boolean;
+  readonly unknownScoringFamilyCount: number;
+  readonly penaltyShotActiveLeakageCount: number;
 } {
   const rows: FullMatchSegmentScoringDensityAuditRow[] = [];
+  let attemptedByFamily = emptyRateCounts();
+  let acceptedByFamily = emptyRateCounts();
+  let scoringEventsByFamily = emptyScoringCounts();
+  let scoringPointsByFamily = emptyScoringCounts();
+  let continuationSelectedCount = 0;
+  let unknownScoringFamilyCount = 0;
+  let penaltyShotActiveLeakageCount = 0;
+  const totalPoints: number[] = [];
+  const scoreDifferences: number[] = [];
+  const scorelines: string[] = [];
+  const routeMixes: RouteFamilyBatchSummary["routeFamilyMixDistribution"][number]["routeFamilyMix"][] = [];
   let scoreFromScoreChangeAllRuns = true;
   let officialPathConnectedAllRuns = true;
   let calibrationAppliedAllRuns = true;
@@ -274,14 +397,70 @@ function buildBatchAudit(): {
   for (let index = 0; index < MATCH_COUNT; index += 1) {
     const report = runFullMatch(buildScenarioInput(index));
     const audit = auditFullMatchSegmentScoringDensity(report);
+    const scoringFamiliesForMatch = new Set<OfficialScoringFamily>();
     rows.push(...audit.rows);
+    totalPoints.push(report.score.home + report.score.away);
+    scoreDifferences.push(Math.abs(report.score.home - report.score.away));
+    scorelines.push(`${report.score.home} - ${report.score.away}`);
     scoreFromScoreChangeAllRuns = scoreFromScoreChangeAllRuns && scoreMatchesScoreChange(report);
     officialPathConnectedAllRuns = officialPathConnectedAllRuns && hasOfficialPath(report);
     calibrationAppliedAllRuns = calibrationAppliedAllRuns && hasCalibration(report);
+
+    for (const event of report.timeline) {
+      if (event.tags.includes("official_route_family_CONTINUATION")) {
+        continuationSelectedCount += 1;
+      }
+
+      const family = officialScoringFamilyFromEvent(event);
+      if (family !== null && family !== "PENALTY_SHOT" && family !== "UNKNOWN") {
+        attemptedByFamily = incrementRate(attemptedByFamily, family, 1);
+        if (event.tags.includes(`official_scoring_accepted_family_${family}`)) {
+          acceptedByFamily = incrementRate(acceptedByFamily, family, 1);
+        }
+      }
+
+      const points = scoreChangePoints(event);
+      if (points > 0) {
+        const scoringFamily = event.scoringFamily ?? family ?? "UNKNOWN";
+        scoringEventsByFamily = incrementScoring(scoringEventsByFamily, scoringFamily, 1);
+        scoringPointsByFamily = incrementScoring(scoringPointsByFamily, scoringFamily, points);
+        scoringFamiliesForMatch.add(scoringFamily);
+        if (scoringFamily === "UNKNOWN") {
+          unknownScoringFamilyCount += 1;
+        }
+        if (scoringFamily === "PENALTY_SHOT") {
+          penaltyShotActiveLeakageCount += 1;
+        }
+      }
+    }
+
+    const scoringFamilies = [...scoringFamiliesForMatch];
+    const hasTryOrDrop = scoringFamilies.includes("TRY_TOUCHDOWN") || scoringFamilies.includes("DROP_GOAL");
+    routeMixes.push(scoringFamilies.length === 0
+      ? "NO_SCORING"
+      : scoringFamilies.length === 1 && scoringFamilies.includes("SHOT_GOAL")
+        ? "SHOT_ONLY"
+        : hasTryOrDrop
+          ? "MULTI_FAMILY"
+          : "NON_SHOT_PRESENT");
   }
 
   const sum = (selector: (row: FullMatchSegmentScoringDensityAuditRow) => number): number =>
     rows.reduce((total, row) => total + selector(row), 0);
+  let nonScoringOutcomesByFamily = emptyRateCounts();
+  for (const family of Object.keys(attemptedByFamily) as readonly (keyof RouteFamilyRateCounts)[]) {
+    nonScoringOutcomesByFamily = incrementRate(
+      nonScoringOutcomesByFamily,
+      family,
+      Math.max(0, attemptedByFamily[family] - acceptedByFamily[family]),
+    );
+  }
+  const routeFamilyMixDistribution = (["SHOT_ONLY", "NON_SHOT_PRESENT", "MULTI_FAMILY", "NO_SCORING"] as const)
+    .map((routeFamilyMix) => ({
+      routeFamilyMix,
+      matches: routeMixes.filter((value) => value === routeFamilyMix).length,
+    }))
+    .filter((row) => row.matches > 0);
 
   return {
     batchAudit: {
@@ -301,9 +480,37 @@ function buildBatchAudit(): {
       rows,
       warningCounts: warningCounts(rows),
     },
+    afterBatch: {
+      matchCount: MATCH_COUNT,
+      uniqueSeeds: MATCH_COUNT,
+      uniqueScorelines: new Set(scorelines).size,
+      averageTotalPoints: average(totalPoints),
+      medianTotalPoints: median(totalPoints),
+      averageScoreDifference: average(scoreDifferences),
+      medianScoreDifference: median(scoreDifferences),
+      maxScoreDifference: Math.max(...scoreDifferences),
+      blowoutRate: percent(scoreDifferences.filter((value) => value >= 12).length, MATCH_COUNT),
+      severeBlowoutRate: percent(scoreDifferences.filter((value) => value >= 24).length, MATCH_COUNT),
+      shutoutRate: percent(scorelines.filter((scoreline) => scoreline.startsWith("0 - ") || scoreline.endsWith(" - 0")).length, MATCH_COUNT),
+      oneSidedScoringRate: percent(scorelines.filter((scoreline) => scoreline.startsWith("0 - ") || scoreline.endsWith(" - 0")).length, MATCH_COUNT),
+      scoringEventsPerMatch: round(Object.values(scoringEventsByFamily).reduce((sumValue, value) => sumValue + value, 0) / MATCH_COUNT),
+      averageShotGoalEventsPerMatch: round(scoringEventsByFamily.SHOT_GOAL / MATCH_COUNT),
+      averageTryEventsPerMatch: round(scoringEventsByFamily.TRY_TOUCHDOWN / MATCH_COUNT),
+      averageDropEventsPerMatch: round(scoringEventsByFamily.DROP_GOAL / MATCH_COUNT),
+      averageConversionEventsPerMatch: round(scoringEventsByFamily.CONVERSION_GOAL / MATCH_COUNT),
+      routeFamilyMixDistribution,
+      scorelineDistribution: scorelineDistribution(scorelines).slice(0, 12),
+    },
+    attemptedByFamily,
+    acceptedByFamily,
+    nonScoringOutcomesByFamily,
+    scoringEventsByFamily,
+    scoringPointsByFamily,
     scoreFromScoreChangeAllRuns,
     officialPathConnectedAllRuns,
     calibrationAppliedAllRuns,
+    unknownScoringFamilyCount,
+    penaltyShotActiveLeakageCount,
   };
 }
 
@@ -376,37 +583,44 @@ function buildWarnings(input: {
 }
 
 export function buildFullMatchSegmentScoringDensityCalibrationModel(): FullMatchSegmentScoringDensityCalibrationModel {
-  const scoringRateModel = buildFullMatchRouteFamilyScoringRateCalibrationModel();
   const audit = buildBatchAudit();
   const beforeAfter: SegmentScoringDensityBeforeAfter = {
     ...BASELINE_6G,
     scoringOpportunitiesPerMatchAfter: round(audit.batchAudit.scoringOpportunityCount / MATCH_COUNT),
     scoringOpportunitiesPerSegmentAfter: round(audit.batchAudit.scoringOpportunityCount / Math.max(1, audit.batchAudit.segmentCount)),
     dangerPhasesPerMatchAfter: round(audit.batchAudit.dangerPhaseCount / MATCH_COUNT),
-    scoringEventsPerMatchAfter: scoringRateModel.afterBatch.scoringEventsPerMatch,
-    averageTotalPointsAfter: scoringRateModel.averageTotalPointsAfter,
-    averageScoreDifferenceAfter: scoringRateModel.averageScoreDifferenceAfter,
-    blowoutRateAfter: scoringRateModel.blowoutRateAfter,
-    severeBlowoutRateAfter: scoringRateModel.severeBlowoutRateAfter,
+    scoringEventsPerMatchAfter: audit.afterBatch.scoringEventsPerMatch,
+    averageTotalPointsAfter: audit.afterBatch.averageTotalPoints,
+    averageScoreDifferenceAfter: audit.afterBatch.averageScoreDifference,
+    blowoutRateAfter: audit.afterBatch.blowoutRate,
+    severeBlowoutRateAfter: audit.afterBatch.severeBlowoutRate,
     neutralPhasesPerMatchAfter: round(audit.batchAudit.neutralPhaseCount / MATCH_COUNT),
     defensiveRecoveriesPerMatchAfter: round(audit.batchAudit.defensiveRecoveryCount / MATCH_COUNT),
     resetPhasesPerMatchAfter: round(audit.batchAudit.resetPhaseCount / MATCH_COUNT),
     continuationCountAfter: audit.batchAudit.continuationCount,
   };
   const constantsChanged = scoringConstantsChanged();
-  const routeFamilyDiversityPreserved = scoringRateModel.matchesWithTryOrDropAfter > 0 &&
-    scoringRateModel.matchesWithMultipleScoringFamiliesAfter > 0;
+  const matchesWithTryOrDropAfter = audit.afterBatch.routeFamilyMixDistribution
+    .filter((row) => row.routeFamilyMix === "MULTI_FAMILY" || row.routeFamilyMix === "NON_SHOT_PRESENT")
+    .reduce((sumValue, row) => sumValue + row.matches, 0);
+  const matchesWithMultipleScoringFamiliesAfter = audit.afterBatch.routeFamilyMixDistribution
+    .filter((row) => row.routeFamilyMix === "MULTI_FAMILY")
+    .reduce((sumValue, row) => sumValue + row.matches, 0);
+  const matchesWithOnlyShotGoalsAfter = audit.afterBatch.routeFamilyMixDistribution
+    .filter((row) => row.routeFamilyMix === "SHOT_ONLY")
+    .reduce((sumValue, row) => sumValue + row.matches, 0);
+  const routeFamilyDiversityPreserved = matchesWithTryOrDropAfter > 0 &&
+    matchesWithMultipleScoringFamiliesAfter > 0 &&
+    matchesWithOnlyShotGoalsAfter < MATCH_COUNT &&
+    audit.batchAudit.continuationCount > 0;
   const guardrailsPass = !constantsChanged &&
-    scoringRateModel.scoreFromScoreChangeAllRuns &&
-    scoringRateModel.officialPathConnectedAllRuns &&
-    scoringRateModel.calibrationAppliedAllRuns &&
-    scoringRateModel.unknownScoringFamilyCount === 0 &&
-    scoringRateModel.penaltyShotActiveLeakageCount === 0 &&
     audit.scoreFromScoreChangeAllRuns &&
     audit.officialPathConnectedAllRuns &&
     audit.calibrationAppliedAllRuns &&
+    audit.unknownScoringFamilyCount === 0 &&
+    audit.penaltyShotActiveLeakageCount === 0 &&
     routeFamilyDiversityPreserved &&
-    scoringRateModel.noRollbackToShotOnly;
+    matchesWithOnlyShotGoalsAfter < MATCH_COUNT;
   const densityImproved = beforeAfter.scoringOpportunitiesPerMatchAfter < beforeAfter.scoringOpportunitiesPerMatchBefore &&
     beforeAfter.scoringOpportunitiesPerSegmentAfter < beforeAfter.scoringOpportunitiesPerSegmentBefore &&
     beforeAfter.dangerPhasesPerMatchAfter < beforeAfter.dangerPhasesPerMatchBefore &&
@@ -427,10 +641,10 @@ export function buildFullMatchSegmentScoringDensityCalibrationModel(): FullMatch
   const warnings = buildWarnings({
     guardrailsPass,
     beforeAfter,
-    noRollbackToShotOnly: scoringRateModel.noRollbackToShotOnly,
+    noRollbackToShotOnly: matchesWithOnlyShotGoalsAfter < MATCH_COUNT,
     routeFamilyDiversityPreserved,
-    unknownScoringFamilyCount: scoringRateModel.unknownScoringFamilyCount,
-    penaltyShotActiveLeakageCount: scoringRateModel.penaltyShotActiveLeakageCount,
+    unknownScoringFamilyCount: audit.unknownScoringFamilyCount,
+    penaltyShotActiveLeakageCount: audit.penaltyShotActiveLeakageCount,
   });
   const recommendation: FullMatchSegmentScoringDensityCalibrationRecommendation = !guardrailsPass
     ? "FIX_SCORING_GUARDRAILS"
@@ -447,15 +661,15 @@ export function buildFullMatchSegmentScoringDensityCalibrationModel(): FullMatch
     densityCalibrationApplied: true,
     beforeAfter,
     batchAudit: audit.batchAudit,
-    afterBatch: scoringRateModel.afterBatch,
-    attemptedByFamilyAfter: scoringRateModel.attemptedByFamilyAfter,
-    nonScoringOutcomesByFamilyAfter: scoringRateModel.nonScoringOutcomesByFamilyAfter,
-    scoringEventsByFamilyAfter: scoringRateModel.scoringEventsByFamilyAfter,
-    scoringPointsByFamilyAfter: scoringRateModel.scoringPointsByFamilyAfter,
+    afterBatch: audit.afterBatch,
+    attemptedByFamilyAfter: audit.attemptedByFamily,
+    nonScoringOutcomesByFamilyAfter: audit.nonScoringOutcomesByFamily,
+    scoringEventsByFamilyAfter: audit.scoringEventsByFamily,
+    scoringPointsByFamilyAfter: audit.scoringPointsByFamily,
     routeFamilyMixAfter: routeFamilyMixSummary(audit.batchAudit.rows),
-    scoreFromScoreChangeAllRuns: scoringRateModel.scoreFromScoreChangeAllRuns && audit.scoreFromScoreChangeAllRuns,
-    officialPathConnectedAllRuns: scoringRateModel.officialPathConnectedAllRuns && audit.officialPathConnectedAllRuns,
-    calibrationAppliedAllRuns: scoringRateModel.calibrationAppliedAllRuns && audit.calibrationAppliedAllRuns,
+    scoreFromScoreChangeAllRuns: audit.scoreFromScoreChangeAllRuns,
+    officialPathConnectedAllRuns: audit.officialPathConnectedAllRuns,
+    calibrationAppliedAllRuns: audit.calibrationAppliedAllRuns,
     scoringConstantsChanged: constantsChanged,
     scoreCapApplied: false,
     postHocRewriteApplied: false,
@@ -465,10 +679,10 @@ export function buildFullMatchSegmentScoringDensityCalibrationModel(): FullMatch
     batchLiveSeparationPreserved: true,
     persistenceUsedForScoring: false,
     sqliteUsedForScoring: false,
-    unknownScoringFamilyCount: scoringRateModel.unknownScoringFamilyCount,
-    penaltyShotActiveLeakageCount: scoringRateModel.penaltyShotActiveLeakageCount,
-    noRollbackToShotOnly: scoringRateModel.noRollbackToShotOnly,
-    conversionOnlyAfterTry: scoringRateModel.conversionGoalsAfter <= scoringRateModel.triesScoredAfter,
+    unknownScoringFamilyCount: audit.unknownScoringFamilyCount,
+    penaltyShotActiveLeakageCount: audit.penaltyShotActiveLeakageCount,
+    noRollbackToShotOnly: matchesWithOnlyShotGoalsAfter < MATCH_COUNT,
+    conversionOnlyAfterTry: audit.scoringEventsByFamily.CONVERSION_GOAL <= audit.scoringEventsByFamily.TRY_TOUCHDOWN,
     warnings,
     recommendation,
     nextSprintRecommendation: economyStillTooHot

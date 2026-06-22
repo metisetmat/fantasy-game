@@ -636,6 +636,7 @@ function eventForResolvedCandidate(input: {
   readonly segmentLabel: string;
   readonly segmentIndex: number;
   readonly scoreBefore: ScoreState;
+  readonly timelineOffset?: number;
   readonly template?: MatchEvent;
 }): MatchEvent | null {
   if (input.candidate.family === "SHOT_GOAL") {
@@ -665,7 +666,7 @@ function eventForResolvedCandidate(input: {
     eventId: `${input.segmentLabel}-route-family-${input.candidate.family.toLowerCase()}-${input.candidate.teamId}` as MatchEvent["eventId"],
     matchId: input.matchInput.matchId,
     timestamp: {
-      tick: (input.segmentIndex * 100 + 92 + routeEventTimelineOffset(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
+      tick: (input.segmentIndex * 100 + 92 + (input.timelineOffset ?? routeEventTimelineOffset(input.candidate.family))) as MatchEvent["timestamp"]["tick"],
       minute: (input.template?.timestamp.minute ?? input.segmentIndex * 10) + 8,
       period: input.template?.timestamp.period ?? "first_half",
     },
@@ -857,7 +858,11 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
         matchInput: input.matchInput,
         segmentLabel: input.segmentLabel,
         segmentIndex: input.segmentIndex,
-        scoreBefore: input.scoreBefore,
+        scoreBefore: {
+          home: input.scoreBefore.home + (selected.teamId === input.matchInput.homeTeam.teamId ? (scoringRegistryEntry("TRY_TOUCHDOWN").points ?? 0) : 0),
+          away: input.scoreBefore.away + (selected.teamId === input.matchInput.homeTeam.teamId ? 0 : (scoringRegistryEntry("TRY_TOUCHDOWN").points ?? 0)),
+        },
+        timelineOffset: routeEventTimelineOffset(selected.family) + 1,
         ...(template === undefined ? {} : { template }),
       });
 

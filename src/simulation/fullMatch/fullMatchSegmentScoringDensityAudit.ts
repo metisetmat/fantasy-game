@@ -113,21 +113,17 @@ function routeFamilyForEvent(event: MatchEvent): OfficialScoringFamily | "CONTIN
     return event.scoringFamily;
   }
 
-  const routeFamilyTag = event.tags.find((tag) => tag.startsWith("official_route_family_"));
-  const routeFamily = routeFamilyTag?.replace("official_route_family_", "");
+  const exactFamilies: readonly (OfficialScoringFamily | "CONTINUATION")[] = [
+    "SHOT_GOAL",
+    "TRY_TOUCHDOWN",
+    "CONVERSION_GOAL",
+    "DROP_GOAL",
+    "PENALTY_SHOT",
+    "UNKNOWN",
+    "CONTINUATION",
+  ];
 
-  switch (routeFamily) {
-    case "SHOT_GOAL":
-    case "TRY_TOUCHDOWN":
-    case "CONVERSION_GOAL":
-    case "DROP_GOAL":
-    case "PENALTY_SHOT":
-    case "UNKNOWN":
-    case "CONTINUATION":
-      return routeFamily;
-    default:
-      return null;
-  }
+  return exactFamilies.find((family) => event.tags.includes(`official_route_family_${family}`)) ?? null;
 }
 
 function isRouteFamilyOpportunity(event: MatchEvent): boolean {
