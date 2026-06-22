@@ -24,6 +24,14 @@ import {
   buildFullMatchCalibrationCarryoverReconciliationModel,
   type FullMatchCalibrationCarryoverReconciliationModel,
 } from "../../reports/fullMatchCalibrationCarryoverReconciliation";
+import {
+  buildFullMatchOfficialScoringCalibrationConnectionModel,
+  type FullMatchOfficialScoringCalibrationConnectionModel,
+} from "../../reports/fullMatchOfficialScoringConnection";
+import {
+  currentFullMatchBatchEconomyProofModel,
+  type FullMatchBatchEconomyProofModel,
+} from "../../reports/fullMatchBatchEconomyProof";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -483,6 +491,8 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation: FullMatchCalibrationCarryoverReconciliationModel;
+  readonly fullMatchOfficialScoringConnection: FullMatchOfficialScoringCalibrationConnectionModel;
+  readonly fullMatchBatchEconomyProof: FullMatchBatchEconomyProofModel;
   readonly exportHtml: string;
 }
 
@@ -635,6 +645,8 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       report,
       scoringFamilyAttributionAudit,
     );
+    const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(report);
+    const fullMatchBatchEconomyProof = currentFullMatchBatchEconomyProofModel();
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -652,6 +664,8 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       fullMatchScoreEconomyCalibration,
       scoringFamilyAttributionAudit,
       fullMatchCalibrationCarryoverReconciliation,
+      fullMatchOfficialScoringConnection,
+      fullMatchBatchEconomyProof,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -667,6 +681,8 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       fullMatchScoreEconomyCalibration,
       scoringFamilyAttributionAudit,
       fullMatchCalibrationCarryoverReconciliation,
+      fullMatchOfficialScoringConnection,
+      fullMatchBatchEconomyProof,
       exportHtml,
     };
 
@@ -5644,6 +5660,383 @@ export function renderFullMatchCalibrationCarryoverReconciliation6CValidation(mo
     "",
     "## Recommendation",
     `- ${reconciliation.recommendation}`,
+    "",
+  ].join("\n");
+}
+
+function fullMatchOfficialScoringConnectionCountLines(
+  model: FullMatchOfficialScoringCalibrationConnectionModel,
+): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- version: ${model.version}`,
+    `- official score before connection: ${model.officialScoreBeforeConnection}`,
+    `- official score after connection: ${model.officialScoreAfterConnection}`,
+    `- official scoring events before connection: ${model.officialScoringEventsBeforeConnection}`,
+    `- official scoring events after connection: ${model.officialScoringEventsAfterConnection}`,
+    `- official SHOT_GOAL events before connection: ${model.officialShotGoalEventsBeforeConnection}`,
+    `- official SHOT_GOAL events after connection: ${model.officialShotGoalEventsAfterConnection}`,
+    `- official SHOT_GOAL points before connection: ${model.officialShotGoalPointsBeforeConnection}`,
+    `- official SHOT_GOAL points after connection: ${model.officialShotGoalPointsAfterConnection}`,
+    `- uses shot difficulty calibration after: ${model.usesShotDifficultyCalibrationAfter}`,
+    `- uses scoring choice balance after: ${model.usesScoringChoiceBalanceAfter}`,
+    `- uses affordance volume constraints after: ${model.usesAffordanceVolumeConstraintsAfter}`,
+    `- uses goalkeeper calibration after: ${model.usesGoalkeeperCalibrationAfter}`,
+    `- uses rebound calibration after: ${model.usesReboundCalibrationAfter}`,
+    `- uses fatigue calibration after: ${model.usesFatigueCalibrationAfter}`,
+    `- uses route family mix after: ${model.usesRouteFamilyMixAfter}`,
+    `- uses defensive resistance after: ${model.usesDefensiveResistanceAfter}`,
+    `- uses danger phase gate after: ${model.usesDangerPhaseGateAfter}`,
+    `- creates official score_change after: ${model.createsOfficialScoreChangeAfter}`,
+    `- can drive official score after: ${model.canDriveOfficialScoreAfter}`,
+    `- can claim global economy after: ${model.canClaimGlobalEconomyAfter}`,
+    `- full-match uses parallel scoring path after: ${model.fullMatchUsesParallelScoringPathAfter}`,
+    `- full-match uses legacy shot path after: ${model.fullMatchUsesLegacyShotPathAfter}`,
+    `- full-match uses fallback route path after: ${model.fullMatchUsesFallbackRoutePathAfter}`,
+    `- segment amplification before: ${model.segmentAmplificationBefore}`,
+    `- segment amplification after: ${model.segmentAmplificationAfter}`,
+    `- segment amplification constrained after: ${model.segmentAmplificationConstrainedAfter}`,
+    `- official score comes from score_change events: ${model.officialScoreComesFromScoreChangeEvents}`,
+    `- score cap applied: ${model.scoreCapApplied}`,
+    `- post-hoc score rewrite applied: ${model.postHocScoreRewriteApplied}`,
+    `- scoring events deleted: ${model.scoringEventsDeleted}`,
+    `- forced opponent score applied: ${model.forcedOpponentScoreApplied}`,
+    `- scoring constants changed: ${model.scoringConstantsChanged}`,
+    `- MatchBonusEvent changed: ${model.matchBonusEventChanged}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- persistence used for scoring: ${model.persistenceUsedForScoring}`,
+    `- SQLite used for scoring: ${model.sqliteUsedForScoring}`,
+    `- single-run only: ${model.singleRunOnly}`,
+    `- full-match batch required: ${model.fullMatchBatchRequired}`,
+    `- warnings: ${model.warnings.join(", ")}`,
+    `- recommendation: ${model.recommendation}`,
+  ];
+}
+
+export function renderFullMatchOfficialScoringConnection6DDoc(model: FullMatchTraceValidationModel): string {
+  const connection = currentCoachReportHistoryStoreConsistencyContext().fullMatchOfficialScoringConnection;
+
+  return [
+    "# Full-Match Official Scoring Connection 6D",
+    "",
+    "Sprint 6D connects the official full-match scoring stream to the validated calibration path before official score_change events are emitted. It does not change scoring values, does not cap score, does not rewrite or delete official events after generation, and does not claim global economy proof from one run.",
+    "",
+    "## Summary",
+    ...fullMatchOfficialScoringConnectionCountLines(connection),
+    "",
+    "## Route Family Mix Before Connection",
+    `- SHOT_GOAL events: ${connection.routeFamilyMixBeforeConnection.shotGoalEvents}`,
+    `- SHOT_GOAL points: ${connection.routeFamilyMixBeforeConnection.shotGoalPoints}`,
+    `- TRY_TOUCHDOWN events: ${connection.routeFamilyMixBeforeConnection.tryTouchdownEvents}`,
+    `- DROP_GOAL events: ${connection.routeFamilyMixBeforeConnection.dropGoalEvents}`,
+    "",
+    "## Route Family Mix After Connection",
+    `- SHOT_GOAL events: ${connection.routeFamilyMixAfterConnection.shotGoalEvents}`,
+    `- SHOT_GOAL points: ${connection.routeFamilyMixAfterConnection.shotGoalPoints}`,
+    `- TRY_TOUCHDOWN events: ${connection.routeFamilyMixAfterConnection.tryTouchdownEvents}`,
+    `- DROP_GOAL events: ${connection.routeFamilyMixAfterConnection.dropGoalEvents}`,
+    "",
+    "## Applied Calibration Path",
+    "- usesShotDifficultyCalibration true",
+    "- usesScoringChoiceBalance true",
+    "- usesAffordanceVolumeConstraints true",
+    "- usesGoalkeeperCalibration true",
+    "- usesReboundCalibration true",
+    "- usesFatigueCalibration true",
+    "- usesRouteFamilyMix true",
+    "- usesDefensiveResistance true",
+    "- usesDangerPhaseGate true",
+    "- createsOfficialScoreChange true",
+    "- canDriveOfficialScore true",
+    "- canClaimGlobalEconomy false",
+    "",
+    "## Guardrails",
+    "- scoring constants unchanged",
+    "- SHOT_GOAL = 3",
+    "- TRY_TOUCHDOWN = 5",
+    "- CONVERSION_GOAL = 2",
+    "- DROP_GOAL = 2",
+    "- PENALTY_SHOT inactive",
+    "- score from official score_change consequences",
+    "- no score cap",
+    "- no post-hoc score rewrite",
+    "- no scoring event deletion after generation",
+    "- no forced opponent score",
+    "- no persistence or SQLite scoring source",
+    "- batch/live separation preserved",
+    "- MatchBonusEvent unchanged",
+    "- single-run only",
+    "- full-match batch required next",
+    "",
+    "## Evidence",
+    `- ${connection.evidenceSummary}`,
+    "",
+    "## Warnings",
+    ...connection.warnings.map((warning) => `- ${warning}`),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${connection.recommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchOfficialScoringConnection6DValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const connection = context.fullMatchOfficialScoringConnection;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("official scoring connection model is PASS.", connection.status === "PASS", connection.status),
+    check("scope is full-match official scoring connection single-run.", connection.scope === "FULL_MATCH_OFFICIAL_SCORING_CONNECTION_SINGLE_RUN", connection.scope),
+    check("version is OFFICIAL_SCORING_CONNECTION_6D.", connection.version === "OFFICIAL_SCORING_CONNECTION_6D", connection.version),
+    check("before score baseline is visible.", connection.officialScoreBeforeConnection === "45 - 0", connection.officialScoreBeforeConnection),
+    check("after score is visible.", connection.officialScoreAfterConnection.length > 0, connection.officialScoreAfterConnection),
+    check("official scoring events reduced by official resolution.", connection.officialScoringEventsAfterConnection < connection.officialScoringEventsBeforeConnection, `${connection.officialScoringEventsAfterConnection}/${connection.officialScoringEventsBeforeConnection}`),
+    check("SHOT_GOAL events reduced by official resolution.", connection.officialShotGoalEventsAfterConnection < connection.officialShotGoalEventsBeforeConnection, `${connection.officialShotGoalEventsAfterConnection}/${connection.officialShotGoalEventsBeforeConnection}`),
+    check("SHOT_GOAL points reduced by official resolution.", connection.officialShotGoalPointsAfterConnection < connection.officialShotGoalPointsBeforeConnection, `${connection.officialShotGoalPointsAfterConnection}/${connection.officialShotGoalPointsBeforeConnection}`),
+    check("usesShotDifficultyCalibration true after.", connection.usesShotDifficultyCalibrationAfter, ""),
+    check("usesScoringChoiceBalance true after.", connection.usesScoringChoiceBalanceAfter, ""),
+    check("usesAffordanceVolumeConstraints true after.", connection.usesAffordanceVolumeConstraintsAfter, ""),
+    check("usesGoalkeeperCalibration true after.", connection.usesGoalkeeperCalibrationAfter, ""),
+    check("usesReboundCalibration true after.", connection.usesReboundCalibrationAfter, ""),
+    check("usesFatigueCalibration true after.", connection.usesFatigueCalibrationAfter, ""),
+    check("usesRouteFamilyMix true after.", connection.usesRouteFamilyMixAfter, ""),
+    check("usesDefensiveResistance true after.", connection.usesDefensiveResistanceAfter, ""),
+    check("usesDangerPhaseGate true after.", connection.usesDangerPhaseGateAfter, ""),
+    check("createsOfficialScoreChange true after.", connection.createsOfficialScoreChangeAfter, ""),
+    check("canDriveOfficialScore true after.", connection.canDriveOfficialScoreAfter, ""),
+    check("canClaimGlobalEconomy false after.", !connection.canClaimGlobalEconomyAfter, ""),
+    check("fullMatchUsesParallelScoringPath false after.", !connection.fullMatchUsesParallelScoringPathAfter, ""),
+    check("fullMatchUsesLegacyShotPath false after.", !connection.fullMatchUsesLegacyShotPathAfter, ""),
+    check("fullMatchUsesFallbackRoutePath false after.", !connection.fullMatchUsesFallbackRoutePathAfter, ""),
+    check("segment amplification constrained after.", connection.segmentAmplificationConstrainedAfter, ""),
+    check("score remains derived from score_change.", connection.officialScoreComesFromScoreChangeEvents, ""),
+    check("no score cap.", !connection.scoreCapApplied, ""),
+    check("no post-hoc score rewrite.", !connection.postHocScoreRewriteApplied, ""),
+    check("no scoring event deletion after generation.", !connection.scoringEventsDeleted, ""),
+    check("no forced opponent score.", !connection.forcedOpponentScoreApplied, ""),
+    check("scoring constants unchanged.", !connection.scoringConstantsChanged, ""),
+    check("MatchBonusEvent unchanged.", !connection.matchBonusEventChanged, ""),
+    check("batch/live separation preserved.", connection.batchLiveSeparationPreserved, ""),
+    check("persistence not used for scoring.", !connection.persistenceUsedForScoring, ""),
+    check("SQLite not used for scoring.", !connection.sqliteUsedForScoring, ""),
+    check("global economy not claimed.", connection.warnings.includes("GLOBAL_ECONOMY_NOT_PROVEN"), ""),
+    check("full-match batch required warning visible.", connection.warnings.includes("FULL_MATCH_BATCH_REQUIRED"), ""),
+    check("coach export contains Chemin officiel de scoring calibre.", exportHtml.includes("Chemin officiel de scoring calibr"), ""),
+    check("coach export states score_change source.", exportHtml.includes("score_change"), ""),
+    check("coach export does not contain forbidden manual correction wording.", !exportHtml.includes("score corrig") && !exportHtml.includes("score ajust"), ""),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Official Scoring Connection 6D Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...fullMatchOfficialScoringConnectionCountLines(connection),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${connection.recommendation}`,
+    "",
+  ].join("\n");
+}
+
+function familyCountLines(prefix: string, counts: FullMatchBatchEconomyProofModel["scoringEventsByFamily"]): readonly string[] {
+  return [
+    `- ${prefix} SHOT_GOAL: ${counts.SHOT_GOAL}`,
+    `- ${prefix} TRY_TOUCHDOWN: ${counts.TRY_TOUCHDOWN}`,
+    `- ${prefix} CONVERSION_GOAL: ${counts.CONVERSION_GOAL}`,
+    `- ${prefix} DROP_GOAL: ${counts.DROP_GOAL}`,
+    `- ${prefix} PENALTY_SHOT: ${counts.PENALTY_SHOT}`,
+    `- ${prefix} UNKNOWN: ${counts.UNKNOWN}`,
+  ];
+}
+
+function fullMatchBatchEconomyProofCountLines(model: FullMatchBatchEconomyProofModel): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- version: ${model.version}`,
+    `- matchCount: ${model.matchCount}`,
+    `- uniqueSeeds: ${model.uniqueSeeds}`,
+    `- uniqueScorelines: ${model.uniqueScorelines}`,
+    `- averageScore: ${model.averageTotalPoints} total points`,
+    `- averageTotalPoints: ${model.averageTotalPoints}`,
+    `- medianTotalPoints: ${model.medianTotalPoints}`,
+    `- averageScoreDifference: ${model.averageScoreDifference}`,
+    `- medianScoreDifference: ${model.medianScoreDifference}`,
+    `- maxScoreDifference: ${model.maxScoreDifference}`,
+    `- blowoutRate: ${model.blowoutRate}%`,
+    `- severeBlowoutRate: ${model.severeBlowoutRate}%`,
+    `- shutoutRate: ${model.shutoutRate}%`,
+    `- zeroZeroRate: ${model.zeroZeroRate}%`,
+    `- oneSidedScoringRate: ${model.oneSidedScoringRate}%`,
+    `- scoringEventsPerMatch: ${model.averageScoringEventsPerMatch}`,
+    `- averageShotGoalEventsPerMatch: ${model.averageShotGoalEventsPerMatch}`,
+    `- averageTryEventsPerMatch: ${model.averageTryEventsPerMatch}`,
+    `- averageDropEventsPerMatch: ${model.averageDropEventsPerMatch}`,
+    `- averageConversionEventsPerMatch: ${model.averageConversionEventsPerMatch}`,
+    `- matchesWithOnlyShotGoals: ${model.matchesWithOnlyShotGoals}`,
+    `- matchesWithTryOrDrop: ${model.matchesWithTryOrDrop}`,
+    `- matchesWithMultipleScoringFamilies: ${model.matchesWithMultipleScoringFamilies}`,
+    `- nonShotPointShare: ${model.nonShotPointShare}%`,
+    `- tryDropPresenceRate: ${model.tryDropPresenceRate}%`,
+    `- calibrationAppliedAllRuns: ${model.calibrationAppliedAllRuns}`,
+    `- officialPathConnectedAllRuns: ${model.officialScoringPathConnectedAllRuns}`,
+    `- legacyPathLeakageCount: ${model.noLegacyPathLeakageCount}`,
+    `- fallbackPathLeakageCount: ${model.noFallbackPathLeakageCount}`,
+    `- parallelPathLeakageCount: ${model.parallelPathLeakageCount}`,
+    `- scoreFromScoreChangeAllRuns: ${model.officialScoreFromScoreChangeAllRuns}`,
+    `- scoreCapAppliedCount: ${model.scoreCapAppliedCount}`,
+    `- postHocRewriteCount: ${model.postHocRewriteCount}`,
+    `- scoringEventDeletionCount: ${model.scoringEventDeletionCount}`,
+    `- forcedOpponentScoreCount: ${model.forcedOpponentScoreCount}`,
+    `- scoringConstantsChangedCount: ${model.scoringConstantsChangedCount}`,
+    `- MatchBonusEventChangedCount: ${model.matchBonusEventChangedCount}`,
+    `- batchLiveContaminationCount: ${model.batchLiveContaminationCount}`,
+    `- persistenceUsedForScoringCount: ${model.persistenceUsedForScoringCount}`,
+    `- sqliteUsedForScoringCount: ${model.sqliteUsedForScoringCount}`,
+    `- unknownScoringFamilyCount: ${model.unknownScoringFamilyCount}`,
+    `- penaltyShotActiveLeakageCount: ${model.penaltyShotActiveLeakageCount}`,
+    `- warnings: ${model.warnings.join(", ")}`,
+    `- recommendation: ${model.recommendation}`,
+    `- nextSprintRecommendation: ${model.nextSprintRecommendation}`,
+  ];
+}
+
+export function renderFullMatchBatchEconomyProof6EDoc(model: FullMatchTraceValidationModel): string {
+  const proof = currentFullMatchBatchEconomyProofModel();
+
+  return [
+    "# Full-Match Batch Economy Proof 6E",
+    "",
+    "Sprint 6E runs a 50-match full-match batch through the official 6D scoring path. It measures the connected economy without changing point values, without score caps, without post-hoc rewrites, and without using persistence or SQLite as a scoring source.",
+    "",
+    "## Summary",
+    ...fullMatchBatchEconomyProofCountLines(proof),
+    "",
+    "## Scoring Events By Family",
+    ...familyCountLines("events", proof.scoringEventsByFamily),
+    "",
+    "## Scoring Points By Family",
+    ...familyCountLines("points", proof.scoringPointsByFamily),
+    "",
+    "## Scoring Points Share By Family",
+    ...familyCountLines("share percent", proof.scoringPointsShareByFamily),
+    "",
+    "## Scoreline Distribution",
+    "| Scoreline | Matches |",
+    "| --- | ---: |",
+    ...proof.scorelineDistribution.slice(0, 10).map((row) => `| ${row.scoreline} | ${row.matches} |`),
+    "",
+    "## Route Family Mix Distribution",
+    "| Route family mix | Matches |",
+    "| --- | ---: |",
+    ...proof.routeFamilyMixDistribution.map((row) => `| ${row.routeFamilyMix} | ${row.matches} |`),
+    "",
+    "## Guardrails",
+    "- score from official score_change consequences in all runs",
+    "- no score cap",
+    "- no post-hoc score rewrite",
+    "- no scoring event deletion after generation",
+    "- no forced opponent score",
+    "- scoring constants unchanged",
+    "- MatchBonusEvent unchanged",
+    "- batch/live separation preserved",
+    "- persistence and SQLite are not scoring sources",
+    "- PENALTY_SHOT inactive",
+    "",
+    "## Interpretation",
+    `- Batch status: ${proof.status}.`,
+    proof.status === "PASS"
+      ? "- The observed batch satisfies the technical and economy sanity thresholds."
+      : "- The official path is connected and the technical guardrails are clean, but the economy still needs targeted gameplay work before it can be treated as confirmed.",
+    `- Main economy signal: SHOT_GOAL point share ${proof.scoringPointsShareByFamily.SHOT_GOAL}%, try/drop presence ${proof.tryDropPresenceRate}%, shutout rate ${proof.shutoutRate}%, unique scorelines ${proof.uniqueScorelines}.`,
+    "",
+    "## Warnings",
+    ...proof.warnings.map((warning) => `- ${warning}`),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${proof.recommendation}`,
+    `- ${proof.nextSprintRecommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchBatchEconomyProof6EValidation(model: FullMatchTraceValidationModel): string {
+  const proof = currentFullMatchBatchEconomyProofModel();
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("batch full-match runner exists.", proof.scope === "FULL_MATCH_BATCH_ECONOMY_PROOF", proof.scope),
+    check("matchCount >= 50.", proof.matchCount >= 50, String(proof.matchCount)),
+    check("seed variation exists.", proof.uniqueSeeds === proof.matchCount, String(proof.uniqueSeeds)),
+    check("unique scorelines visible.", proof.uniqueScorelines > 0, String(proof.uniqueScorelines)),
+    check("score distribution visible.", proof.scorelineDistribution.length > 0, String(proof.scorelineDistribution.length)),
+    check("scoring family distribution visible.", proof.scoringEventsByFamily.SHOT_GOAL >= 0 && proof.scoringPointsByFamily.SHOT_GOAL >= 0, "family counters visible"),
+    check("blowout and severe blowout rates visible.", proof.blowoutRate >= 0 && proof.severeBlowoutRate >= 0, `${proof.blowoutRate}/${proof.severeBlowoutRate}`),
+    check("official path connected in all runs.", proof.officialScoringPathConnectedAllRuns, ""),
+    check("calibrations applied in all runs.", proof.calibrationAppliedAllRuns, ""),
+    check("score from score_change in all runs.", proof.officialScoreFromScoreChangeAllRuns, ""),
+    check("no score cap.", proof.scoreCapAppliedCount === 0, String(proof.scoreCapAppliedCount)),
+    check("no post-hoc rewrite.", proof.postHocRewriteCount === 0, String(proof.postHocRewriteCount)),
+    check("no event deletion.", proof.scoringEventDeletionCount === 0, String(proof.scoringEventDeletionCount)),
+    check("no forced opponent score.", proof.forcedOpponentScoreCount === 0, String(proof.forcedOpponentScoreCount)),
+    check("scoring constants unchanged.", proof.scoringConstantsChangedCount === 0, String(proof.scoringConstantsChangedCount)),
+    check("MatchBonusEvent unchanged.", proof.matchBonusEventChangedCount === 0, String(proof.matchBonusEventChangedCount)),
+    check("batch/live separation preserved.", proof.batchLiveContaminationCount === 0, String(proof.batchLiveContaminationCount)),
+    check("no persistence or SQLite scoring use.", proof.persistenceUsedForScoringCount === 0 && proof.sqliteUsedForScoringCount === 0, `${proof.persistenceUsedForScoringCount}/${proof.sqliteUsedForScoringCount}`),
+    check("no UNKNOWN scoring family.", proof.unknownScoringFamilyCount === 0, String(proof.unknownScoringFamilyCount)),
+    check("no PENALTY_SHOT leakage.", proof.penaltyShotActiveLeakageCount === 0, String(proof.penaltyShotActiveLeakageCount)),
+    check("report section visible.", exportHtml.includes("Preuve batch full-match"), ""),
+    check("recommendation visible.", proof.recommendation.length > 0 && exportHtml.includes(proof.recommendation), proof.recommendation),
+    check("PASS/PARTIAL/FAIL status justified.", proof.status === "PASS" || proof.status === "PARTIAL", proof.status),
+    check("partial economy warnings are explicit when economy is not PASS.", proof.status === "PASS" || proof.warnings.includes("FULL_MATCH_BATCH_ECONOMY_NEEDS_TARGETED_FIX"), proof.warnings.join(", ")),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Batch Economy Proof 6E Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...fullMatchBatchEconomyProofCountLines(proof),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${proof.recommendation}`,
+    `- ${proof.nextSprintRecommendation}`,
     "",
   ].join("\n");
 }

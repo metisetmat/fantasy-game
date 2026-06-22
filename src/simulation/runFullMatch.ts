@@ -35,6 +35,11 @@ import {
   type FullMatchFatiguePropagationResult,
 } from "./fullMatch/fullMatchFatiguePropagation";
 import {
+  createFullMatchOfficialScoringPathState,
+  resolveFullMatchOfficialScoringEventsForSegment,
+  summarizeFullMatchOfficialScoringPath,
+} from "./fullMatch/fullMatchOfficialScoringPath";
+import {
   createFullMatchSegmentInfluence,
   type FullMatchSegmentInfluence,
 } from "./fullMatch/fullMatchSegmentInfluence";
@@ -2967,6 +2972,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   let segmentState = createInitialFullMatchSegmentState(input);
   let cumulativeScore = { home: 0, away: 0 };
   let previousEventPattern = "";
+  let officialScoringPathState = createFullMatchOfficialScoringPathState();
   const segmentResults: FullMatchSegmentResult[] = [];
   const timelineSegments: MatchEvent[][] = [];
   const fatiguePropagation: FullMatchFatiguePropagationResult[] = [];
@@ -3018,27 +3024,35 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && controlledSegmentSandboxTimelineModel.status !== "not_available" ? { controlledSegmentSandboxTimelineModel } : {}),
         },
       });
+    const officialScoringPathResolution = resolveFullMatchOfficialScoringEventsForSegment({
+      events: rawSegmentEvents,
+      state: officialScoringPathState,
+      segmentLabel: config.label,
+      segmentIndex: index,
+    });
+    officialScoringPathState = officialScoringPathResolution.state;
+    const officialSegmentEvents = officialScoringPathResolution.events;
     const segmentScore = scoreFromTimeline({
-      timeline: rawSegmentEvents,
+      timeline: officialSegmentEvents,
       homeTeamId: input.homeTeam.teamId,
       awayTeamId: input.awayTeam.teamId,
     });
     const scoreAfterSegment = addScoreState(cumulativeScore, segmentScore);
-    const eventPattern = rawSegmentEvents.map((event) => event.eventType).join(">");
+    const eventPattern = officialSegmentEvents.map((event) => event.eventType).join(">");
     const repeatedPatternCount = previousEventPattern === eventPattern
       ? segmentState.repeatedPatternCount + 1
       : segmentState.repeatedPatternCount;
     const propagation = propagateFullMatchFatigue({
       matchInput: input,
       previousState: segmentState,
-      segmentEvents: rawSegmentEvents,
+      segmentEvents: officialSegmentEvents,
       segmentIndex: index,
       minute: config.startMinute,
       scoreAfterSegment,
       repeatedPatternCount,
     });
     const segmentEvents = applySegmentFatigueToEvents({
-      events: rawSegmentEvents,
+      events: officialSegmentEvents,
       stateBeforeSegment: segmentState,
       stateAfterSegment: propagation.stateAfterSegment,
     });
@@ -3058,6 +3072,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   }
 
   const timeline = timelineSegments.flat().sort(compareTimelineEvents);
+  const officialScoringPathSummary = summarizeFullMatchOfficialScoringPath(officialScoringPathState);
   const score = scoreFromTimeline({
     timeline,
     homeTeamId: input.homeTeam.teamId,
@@ -3135,6 +3150,8 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...sandboxDecisionBatchConfidenceCalibrationModelLimitations(sandboxDecisionBatchConfidenceCalibrationModel),
       ...multiScenarioCoachTestPlanModelLimitations(multiScenarioCoachTestPlanModel),
       ...selectionPreviewModelLimitations(selectionPreviewModel),
+      `Full-match official scoring path connected: accepted ${officialScoringPathSummary.acceptedOfficialScoreChangeEvents} score_change events and resolved ${officialScoringPathSummary.rejectedBeforeOfficialScoreChangeEvents} opportunities before official score emission.`,
+      "Official scoring connection is single-run only and cannot claim global economy proof.",
     ],
   });
   const matchTraceSpineModel = buildMatchTraceSpine({

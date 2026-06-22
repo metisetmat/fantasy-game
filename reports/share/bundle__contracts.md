@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6E - Full-Match Batch Economy Proof. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
