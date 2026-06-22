@@ -315,6 +315,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchScoreEconomyCalibration6AValidation = readIfExists(join(shareDirectory, "validation.fullmatch-score-economy-calibration-6a.md"));
   const fullMatchScoringFamilyAttribution6B = readIfExists(join(shareDirectory, "fullmatch-scoring-family-attribution-6b.md"));
   const fullMatchScoringFamilyAttribution6BValidation = readIfExists(join(shareDirectory, "validation.fullmatch-scoring-family-attribution-6b.md"));
+  const fullMatchCalibrationCarryoverReconciliation6C = readIfExists(join(shareDirectory, "fullmatch-calibration-carryover-reconciliation-6c.md"));
+  const fullMatchCalibrationCarryoverReconciliation6CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-calibration-carryover-reconciliation-6c.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2860,6 +2862,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-score-economy-calibration-6a.md",
     ...sprint6AForbiddenLeftovers,
   ];
+  const sprint6CExpectedFiles = sprint6BExpectedFiles.map((file) =>
+    file === "fullmatch-scoring-family-attribution-6b.md"
+      ? "fullmatch-calibration-carryover-reconciliation-6c.md"
+      : file === "validation.fullmatch-scoring-family-attribution-6b.md"
+        ? "validation.fullmatch-calibration-carryover-reconciliation-6c.md"
+        : file
+  );
+  const sprint6CForbiddenLeftovers = [
+    "fullmatch-scoring-family-attribution-6b.md",
+    "validation.fullmatch-scoring-family-attribution-6b.md",
+    ...sprint6BForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3540,6 +3554,48 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
   ];
+  const sprint6CChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6CExpectedFiles.every((file) => requiredCopied(file)), sprint6CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6CExpectedFiles.every((file) => manifest.includes(file)), sprint6CExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("package.json copied", requiredCopied("package.json"), ""),
+    check("tsconfig.json copied", requiredCopied("tsconfig.json"), ""),
+    check("coach-report.export.html copied", requiredCopied("coach-report.export.html"), ""),
+    check("validation.share-pack.md copied", requiredCopied("validation.share-pack.md"), ""),
+    check("README.md copied", requiredCopied("README.md"), ""),
+    check("manifest.md copied", requiredCopied("manifest.md"), ""),
+    check("current sprint is Sprint 6C", activeConfig.sprintName === "Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation", activeConfig.sprintName),
+    check("missing expected files are none", sprint6CExpectedFiles.every((file) => requiredCopied(file)), sprint6CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint6CForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6CForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6C oriented", readme.includes("# Sprint 6C Share Pack") && readme.includes("fullmatch-calibration-carryover-reconciliation-6c.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6C report included", fullMatchCalibrationCarryoverReconciliation6C.includes("# Full-Match Calibration Carryover Reconciliation 6C") && fullMatchCalibrationCarryoverReconciliation6C.includes("Calibration Carryover Matrix") && fullMatchCalibrationCarryoverReconciliation6C.includes("Batch / Live / Full-Match Scoring Path Audit"), "6C doc included"),
+    check("6C validation is PASS", fullMatchCalibrationCarryoverReconciliation6CValidation.includes("Status: PASS") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("calibration carryover model is available") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("explicit exhaustive test command is available"), "6C validation current"),
+    check("official full-match score is visible", fullMatchCalibrationCarryoverReconciliation6C.includes("official full-match score:") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("official full-match score is visible"), "official score visible"),
+    check("official scoring event counts are visible", fullMatchCalibrationCarryoverReconciliation6C.includes("official full-match scoring events:") && fullMatchCalibrationCarryoverReconciliation6C.includes("official full-match SHOT_GOAL events:"), "official event counts visible"),
+    check("historical calibration references are visible", fullMatchCalibrationCarryoverReconciliation6C.includes("batch calibration known SHOT_GOAL per match:") && fullMatchCalibrationCarryoverReconciliation6C.includes("batch calibration known conversion rate:"), "historical references visible"),
+    check("carryover gaps are visible", fullMatchCalibrationCarryoverReconciliation6C.includes("FULLMATCH_NOT_USING_BATCH_CALIBRATION") && fullMatchCalibrationCarryoverReconciliation6C.includes("FULLMATCH_PARALLEL_SCORING_PATH"), "carryover gaps visible"),
+    check("warning surface is visible", fullMatchCalibrationCarryoverReconciliation6C.includes("FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION") && fullMatchCalibrationCarryoverReconciliation6C.includes("GLOBAL_ECONOMY_NOT_PROVEN") && fullMatchCalibrationCarryoverReconciliation6C.includes("CALIBRATION_DIAGNOSTIC_ONLY"), "warnings visible"),
+    check("coach export contains calibration reconciliation section", coachExportHtml.includes("Reconciliation des calibrations") && coachExportHtml.includes("Diagnostic single-run") && coachExportHtml.includes("Il ne modifie pas le score"), "export 6C visible"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("PENALTY_SHOT") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("score cap is not applied", fullMatchCalibrationCarryoverReconciliation6C.includes("score cap applied: false") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no score cap"), "score cap false"),
+    check("post-hoc score rewrite is not applied", fullMatchCalibrationCarryoverReconciliation6C.includes("post-hoc score rewrite applied: false") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no post-hoc rewrite"), "rewrite false"),
+    check("scoring events are not deleted or rewritten", fullMatchCalibrationCarryoverReconciliation6C.includes("scoring events deleted: false") && fullMatchCalibrationCarryoverReconciliation6C.includes("scoring events rewritten: false") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no scoring event deletion") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no scoring event rewrite"), "event mutation false"),
+    check("forced opponent score is not applied", fullMatchCalibrationCarryoverReconciliation6C.includes("forced opponent score applied: false") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no forced opponent score"), "forced score false"),
+    check("mutation counts are 0", fullMatchCalibrationCarryoverReconciliation6C.includes("official timeline mutation count: 0") && fullMatchCalibrationCarryoverReconciliation6C.includes("official possession mutation count: 0") && fullMatchCalibrationCarryoverReconciliation6C.includes("production scoring event creation count: 0"), "mutation counts 0"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchCalibrationCarryoverReconciliation6C.includes("batch/live separation preserved: true") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchCalibrationCarryoverReconciliation6C.includes("MatchBonusEvent changed: false") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("persistence and SQLite are not calibration sources", fullMatchCalibrationCarryoverReconciliation6C.includes("persistence used for calibration: false") && fullMatchCalibrationCarryoverReconciliation6C.includes("SQLite used as score economy source: false") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("persistence not used for calibration") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("SQLite not used as score economy source"), "persistence/SQLite false"),
+    check("no invented global or trend claims", fullMatchCalibrationCarryoverReconciliation6C.includes("invented statistic count: 0") && fullMatchCalibrationCarryoverReconciliation6C.includes("trend proof claim count: 0") && fullMatchCalibrationCarryoverReconciliation6C.includes("global economy claim count: 0") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no invented stats") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no global economy claim from single run") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("no trend proof claim"), "claim counts 0"),
+    check("50-match economy remains global reference", fullMatchCalibrationCarryoverReconciliation6C.includes("FULL_MATCH_BATCH_ECONOMY remains the only global reference") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single-run limitation is explicit", fullMatchCalibrationCarryoverReconciliation6C.includes("single-run only: true") && fullMatchCalibrationCarryoverReconciliation6C.includes("This single run is a regression surface"), "single-run limitation visible"),
+    check("bundle includes 6C source files", bundleReports.includes("src/reports/fullMatchCalibrationCarryoverWarnings.ts") && bundleReports.includes("src/reports/fullMatchCalibrationCarryoverReconciliation.ts") && bundleReports.includes("buildFullMatchCalibrationCarryoverReconciliationModel"), "6C source bundled"),
+    check("bundle includes 6C executable tests", bundleReports.includes("fullMatchCalibrationCarryoverReconciliation.test.ts") && bundleReports.includes("fullMatchCalibrationCarryoverRenderer.test.ts"), "6C tests bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchCalibrationCarryoverReconciliation6CValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchCalibrationCarryoverReconciliation6C.includes("PREPARE_6D_CONNECT_FULLMATCH_TO_VALIDATED_SCORING_CALIBRATIONS"), "6C recommendation visible"),
+  ];
+
   const sprint6BChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
@@ -7135,6 +7191,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation")
+      ? sprint6CChecks
     : activeConfig.sprintName.includes("Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup")
       ? sprint6BChecks
     : activeConfig.sprintName.includes("Sprint 6A - Full-Match Score Economy Calibration Reset")

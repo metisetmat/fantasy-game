@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-21T20:11:43.007Z
-Task/sprint: Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup
+Generated: 2026-06-22T06:50:04.564Z
+Task/sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-scoring-family-attribution-6b.md
-- validation.fullmatch-scoring-family-attribution-6b.md
+- fullmatch-calibration-carryover-reconciliation-6c.md
+- validation.fullmatch-calibration-carryover-reconciliation-6c.md
 - README.md
 
 ## Bundle Files

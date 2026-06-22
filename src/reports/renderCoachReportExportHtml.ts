@@ -25,6 +25,7 @@ import type { CoachReportDurableStorageDecisionModel } from "./coachReportDurabl
 import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachReportControlledLocalReadOnlyDbMode";
 import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
+import type { FullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2178,6 +2179,91 @@ function renderScoringFamilyAttributionAudit(
     </section>`;
 }
 
+function renderFullMatchCalibrationCarryoverReconciliation(
+  model: FullMatchCalibrationCarryoverReconciliationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const matrixRows = model.carryoverMatrix
+    .slice(0, 6)
+    .map((row) => `
+      <tr>
+        <td>${escapeHtml(row.calibrationName)}</td>
+        <td>${row.validated ? "oui" : "non"}</td>
+        <td>${row.fullMatchOfficialApplied ? "oui" : "non"}</td>
+        <td>${escapeHtml(row.gap)}</td>
+      </tr>`)
+    .join("");
+  const pathRows = model.scoringPathAuditRows
+    .map((row) => `
+      <tr>
+        <td>${escapeHtml(row.pathName)}</td>
+        <td>${escapeHtml(row.pathType)}</td>
+        <td>${row.canDriveOfficialScore ? "oui" : "non"}</td>
+        <td>${row.canClaimGlobalEconomy ? "oui" : "non"}</td>
+      </tr>`)
+    .join("");
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Reconciliation des calibrations">
+      <div>
+        <h3>R&eacute;conciliation des calibrations</h3>
+        <p>Diagnostic single-run : ce bloc explique pourquoi le full-match officiel peut encore produire un score tr&egrave;s &eacute;lev&eacute; malgr&eacute; les calibrations batch/live d&eacute;j&agrave; valid&eacute;es. Il ne modifie pas le score.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Score observ&eacute;</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Score officiel</span><strong>${escapeHtml(model.officialFullMatchScore)}</strong></div>
+            <div><span>Score events</span><strong>${model.officialFullMatchScoringEvents}</strong></div>
+            <div><span>SHOT_GOAL</span><strong>${model.officialFullMatchShotGoalEvents}</strong></div>
+            <div><span>Points SHOT_GOAL</span><strong>${model.officialFullMatchShotGoalPoints}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>R&eacute;f&eacute;rence historique</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>SHOT_GOAL / match batch</span><strong>${model.batchCalibrationKnownShotGoalsPerMatch}</strong></div>
+            <div><span>Conversion batch</span><strong>${model.batchCalibrationKnownConversionRate}%</strong></div>
+            <div><span>Confiance</span><strong>${escapeHtml(model.confidence)}</strong></div>
+            <div><span>Scope</span><strong>${escapeHtml(model.scope)}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Cause probable</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Primaire</span><strong>${escapeHtml(model.primaryRegressionCause)}</strong></div>
+            <div><span>Chemin parall&egrave;le</span><strong>${model.fullMatchUsesParallelScoringPath ? "oui" : "non"}</strong></div>
+            <div><span>Amplification segment</span><strong>${model.fullMatchUsesSegmentAmplificationPath ? "oui" : "non"}</strong></div>
+            <div><span>Path legacy shot</span><strong>${model.fullMatchUsesLegacyShotPath ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Garde-fous</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Cap score</span><strong>${model.scoreCapApplied ? "oui" : "non"}</strong></div>
+            <div><span>Events supprim&eacute;s</span><strong>${model.scoringEventsDeleted ? "oui" : "non"}</strong></div>
+            <div><span>Events r&eacute;&eacute;crits</span><strong>${model.scoringEventsRewritten ? "oui" : "non"}</strong></div>
+            <div><span>Batch/live s&eacute;par&eacute;s</span><strong>${model.batchLiveSeparationPreserved ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+      </div>
+      <table class="premium-table">
+        <thead><tr><th>Calibration</th><th>Valid&eacute;e</th><th>Appliqu&eacute;e full-match</th><th>&Eacute;cart</th></tr></thead>
+        <tbody>${matrixRows}</tbody>
+      </table>
+      <table class="premium-table">
+        <thead><tr><th>Chemin scoring</th><th>Type</th><th>Score officiel</th><th>R&eacute;f&eacute;rence globale</th></tr></thead>
+        <tbody>${pathRows}</tbody>
+      </table>
+      <p class="durable-storage-decision-boundary">${escapeHtml(model.evidenceSummary)}</p>
+      <p class="durable-storage-decision-guard">6C est diagnostic only : constantes inchang&eacute;es, aucun cap, aucune suppression ou r&eacute;&eacute;criture d&rsquo;&eacute;v&eacute;nements, aucun score adverse forc&eacute;. FULL_MATCH_BATCH_ECONOMY reste la seule r&eacute;f&eacute;rence globale.</p>
+      <p class="durable-storage-decision-warning">${escapeHtml(model.recommendation)}</p>
+    </section>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -2977,6 +3063,63 @@ function renderScoringFamilyAttributionAuditAppendix(
     </details>`;
 }
 
+function renderFullMatchCalibrationCarryoverReconciliationAppendix(
+  model: FullMatchCalibrationCarryoverReconciliationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `<details class="appendix report-appendix-stack">
+      <summary>D&eacute;tails r&eacute;conciliation calibrations 6C</summary>
+      <ul>
+        <li>status: ${model.status}</li>
+        <li>scope: ${model.scope}</li>
+        <li>version: ${model.version}</li>
+        <li>official full-match score: ${escapeHtml(model.officialFullMatchScore)}</li>
+        <li>official full-match scoring events: ${model.officialFullMatchScoringEvents}</li>
+        <li>official full-match SHOT_GOAL events: ${model.officialFullMatchShotGoalEvents}</li>
+        <li>official full-match SHOT_GOAL points: ${model.officialFullMatchShotGoalPoints}</li>
+        <li>batch calibration known SHOT_GOAL per match: ${model.batchCalibrationKnownShotGoalsPerMatch}</li>
+        <li>batch calibration known conversion rate: ${model.batchCalibrationKnownConversionRate}%</li>
+        <li>primary regression cause: ${model.primaryRegressionCause}</li>
+        <li>secondary regression causes: ${escapeHtml(model.secondaryRegressionCauses.join(", "))}</li>
+        <li>confidence: ${model.confidence}</li>
+        <li>warnings: ${escapeHtml(model.warnings.join(", "))}</li>
+        <li>matrix rows: ${model.carryoverMatrix.length}</li>
+        <li>scoring path audit rows: ${model.scoringPathAuditRows.length}</li>
+        <li>shot difficulty batch/full-match: ${model.shotDifficultyCalibrationAppliedInBatch}/${model.shotDifficultyCalibrationAppliedInFullMatch}</li>
+        <li>scoring choice balance batch/full-match: ${model.scoringChoiceBalanceAppliedInBatch}/${model.scoringChoiceBalanceAppliedInFullMatch}</li>
+        <li>affordance volume batch/full-match: ${model.scoringAffordanceVolumeAppliedInBatch}/${model.scoringAffordanceVolumeAppliedInFullMatch}</li>
+        <li>goalkeeper calibration batch/full-match: ${model.goalkeeperCalibrationAppliedInBatch}/${model.goalkeeperCalibrationAppliedInFullMatch}</li>
+        <li>route family mix batch/full-match: ${model.routeFamilyMixAppliedInBatch}/${model.routeFamilyMixAppliedInFullMatch}</li>
+        <li>full-match parallel scoring path: ${model.fullMatchUsesParallelScoringPath}</li>
+        <li>full-match legacy shot path: ${model.fullMatchUsesLegacyShotPath}</li>
+        <li>full-match fallback route path: ${model.fullMatchUsesFallbackRoutePath}</li>
+        <li>full-match segment amplification path: ${model.fullMatchUsesSegmentAmplificationPath}</li>
+        <li>scoring constants changed: ${model.scoringConstantsChanged}</li>
+        <li>score cap applied: ${model.scoreCapApplied}</li>
+        <li>post-hoc score rewrite applied: ${model.postHocScoreRewriteApplied}</li>
+        <li>scoring events deleted: ${model.scoringEventsDeleted}</li>
+        <li>scoring events rewritten: ${model.scoringEventsRewritten}</li>
+        <li>forced opponent score applied: ${model.forcedOpponentScoreApplied}</li>
+        <li>official timeline mutation count: ${model.officialTimelineMutationCount}</li>
+        <li>official possession mutation count: ${model.officialPossessionMutationCount}</li>
+        <li>production scoring event creation count: ${model.productionScoringEventCreationCount}</li>
+        <li>batch/live separation preserved: ${model.batchLiveSeparationPreserved}</li>
+        <li>MatchBonusEvent changed: ${model.matchBonusEventChanged}</li>
+        <li>persistence used for calibration: ${model.persistenceUsedForCalibration}</li>
+        <li>SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}</li>
+        <li>global economy claim count: ${model.globalEconomyClaimCount}</li>
+        <li>trend proof claim count: ${model.trendProofClaimCount}</li>
+        <li>invented statistic count: ${model.inventedStatisticCount}</li>
+        <li>single run only: ${model.singleRunOnly}</li>
+        <li>FULL_MATCH_BATCH_ECONOMY remains only global proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}</li>
+        <li>recommendation: ${escapeHtml(model.recommendation)}</li>
+      </ul>
+    </details>`;
+}
+
 function renderAppendices(input: {
   readonly html: string;
   readonly exportHtmlBeforeAppendix: string;
@@ -2998,6 +3141,7 @@ function renderAppendices(input: {
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
+  readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3040,6 +3184,7 @@ function renderAppendices(input: {
     ${renderRealSQLiteReadOnlyIOSmokeTestAppendix(input.realSQLiteReadOnlyIOSmokeTest)}
     ${renderFullMatchScoreEconomyCalibrationAppendix(input.fullMatchScoreEconomyCalibration)}
     ${renderScoringFamilyAttributionAuditAppendix(input.scoringFamilyAttributionAudit)}
+    ${renderFullMatchCalibrationCarryoverReconciliationAppendix(input.fullMatchCalibrationCarryoverReconciliation)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -3073,6 +3218,7 @@ export function renderCoachReportExportHtml(input: {
   readonly realSQLiteReadOnlyIOSmokeTest?: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
+  readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3180,6 +3326,7 @@ export function renderCoachReportExportHtml(input: {
     renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
     renderFullMatchScoreEconomyCalibration(input.fullMatchScoreEconomyCalibration),
     renderScoringFamilyAttributionAudit(input.scoringFamilyAttributionAudit),
+    renderFullMatchCalibrationCarryoverReconciliation(input.fullMatchCalibrationCarryoverReconciliation),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3227,6 +3374,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.scoringFamilyAttributionAudit === undefined
       ? {}
       : { scoringFamilyAttributionAudit: input.scoringFamilyAttributionAudit }),
+    ...(input.fullMatchCalibrationCarryoverReconciliation === undefined
+      ? {}
+      : { fullMatchCalibrationCarryoverReconciliation: input.fullMatchCalibrationCarryoverReconciliation }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

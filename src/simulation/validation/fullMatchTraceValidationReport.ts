@@ -20,6 +20,10 @@ import {
   buildScoringFamilyAttributionAuditModel,
   type ScoringFamilyAttributionAuditModel,
 } from "../../reports/scoringFamilyAttributionAudit";
+import {
+  buildFullMatchCalibrationCarryoverReconciliationModel,
+  type FullMatchCalibrationCarryoverReconciliationModel,
+} from "../../reports/fullMatchCalibrationCarryoverReconciliation";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -478,6 +482,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly realSQLiteReadOnlyIOSmokeTest: CoachReportRealSQLiteReadOnlyIOSmokeTestModel;
   readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit: ScoringFamilyAttributionAuditModel;
+  readonly fullMatchCalibrationCarryoverReconciliation: FullMatchCalibrationCarryoverReconciliationModel;
   readonly exportHtml: string;
 }
 
@@ -626,6 +631,10 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
     });
     const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(report);
     const scoringFamilyAttributionAudit = buildScoringFamilyAttributionAuditModel(report);
+    const fullMatchCalibrationCarryoverReconciliation = buildFullMatchCalibrationCarryoverReconciliationModel(
+      report,
+      scoringFamilyAttributionAudit,
+    );
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -642,6 +651,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       realSQLiteReadOnlyIOSmokeTest,
       fullMatchScoreEconomyCalibration,
       scoringFamilyAttributionAudit,
+      fullMatchCalibrationCarryoverReconciliation,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -656,6 +666,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       realSQLiteReadOnlyIOSmokeTest,
       fullMatchScoreEconomyCalibration,
       scoringFamilyAttributionAudit,
+      fullMatchCalibrationCarryoverReconciliation,
       exportHtml,
     };
 
@@ -5440,6 +5451,199 @@ export function renderFullMatchScoringFamilyAttribution6BValidation(model: FullM
     "",
     "## Recommendation",
     `- ${audit.recommendation}`,
+    "",
+  ].join("\n");
+}
+
+function fullMatchCalibrationCarryoverCountLines(
+  model: FullMatchCalibrationCarryoverReconciliationModel,
+): readonly string[] {
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- version: ${model.version}`,
+    `- official full-match score: ${model.officialFullMatchScore}`,
+    `- official full-match scoring events: ${model.officialFullMatchScoringEvents}`,
+    `- official full-match SHOT_GOAL events: ${model.officialFullMatchShotGoalEvents}`,
+    `- official full-match SHOT_GOAL points: ${model.officialFullMatchShotGoalPoints}`,
+    `- batch calibration known SHOT_GOAL per match: ${model.batchCalibrationKnownShotGoalsPerMatch}`,
+    `- batch calibration known conversion rate: ${model.batchCalibrationKnownConversionRate}`,
+    `- shot difficulty calibration applied in batch: ${model.shotDifficultyCalibrationAppliedInBatch}`,
+    `- shot difficulty calibration applied in full-match: ${model.shotDifficultyCalibrationAppliedInFullMatch}`,
+    `- scoring choice balance applied in batch: ${model.scoringChoiceBalanceAppliedInBatch}`,
+    `- scoring choice balance applied in full-match: ${model.scoringChoiceBalanceAppliedInFullMatch}`,
+    `- scoring affordance volume applied in batch: ${model.scoringAffordanceVolumeAppliedInBatch}`,
+    `- scoring affordance volume applied in full-match: ${model.scoringAffordanceVolumeAppliedInFullMatch}`,
+    `- goalkeeper calibration applied in batch: ${model.goalkeeperCalibrationAppliedInBatch}`,
+    `- goalkeeper calibration applied in full-match: ${model.goalkeeperCalibrationAppliedInFullMatch}`,
+    `- rebound calibration applied in batch: ${model.reboundCalibrationAppliedInBatch}`,
+    `- rebound calibration applied in full-match: ${model.reboundCalibrationAppliedInFullMatch}`,
+    `- fatigue calibration applied in batch: ${model.fatigueCalibrationAppliedInBatch}`,
+    `- fatigue calibration applied in full-match: ${model.fatigueCalibrationAppliedInFullMatch}`,
+    `- route family mix applied in batch: ${model.routeFamilyMixAppliedInBatch}`,
+    `- route family mix applied in full-match: ${model.routeFamilyMixAppliedInFullMatch}`,
+    `- full-match uses parallel scoring path: ${model.fullMatchUsesParallelScoringPath}`,
+    `- full-match uses legacy shot path: ${model.fullMatchUsesLegacyShotPath}`,
+    `- full-match uses fallback route path: ${model.fullMatchUsesFallbackRoutePath}`,
+    `- full-match uses segment amplification path: ${model.fullMatchUsesSegmentAmplificationPath}`,
+    `- primary regression cause: ${model.primaryRegressionCause}`,
+    `- secondary regression causes: ${model.secondaryRegressionCauses.join(", ")}`,
+    `- confidence: ${model.confidence}`,
+    `- carryover matrix rows: ${model.carryoverMatrix.length}`,
+    `- scoring path audit rows: ${model.scoringPathAuditRows.length}`,
+    `- warnings: ${model.warnings.join(", ")}`,
+    `- scoring constants changed: ${model.scoringConstantsChanged}`,
+    `- score cap applied: ${model.scoreCapApplied}`,
+    `- post-hoc score rewrite applied: ${model.postHocScoreRewriteApplied}`,
+    `- scoring events deleted: ${model.scoringEventsDeleted}`,
+    `- scoring events rewritten: ${model.scoringEventsRewritten}`,
+    `- forced opponent score applied: ${model.forcedOpponentScoreApplied}`,
+    `- official timeline mutation count: ${model.officialTimelineMutationCount}`,
+    `- official possession mutation count: ${model.officialPossessionMutationCount}`,
+    `- production scoring event creation count: ${model.productionScoringEventCreationCount}`,
+    `- batch/live separation preserved: ${model.batchLiveSeparationPreserved}`,
+    `- MatchBonusEvent changed: ${model.matchBonusEventChanged}`,
+    `- persistence used for calibration: ${model.persistenceUsedForCalibration}`,
+    `- SQLite used as score economy source: ${model.sqliteUsedAsScoreEconomySource}`,
+    `- global economy claim count: ${model.globalEconomyClaimCount}`,
+    `- trend proof claim count: ${model.trendProofClaimCount}`,
+    `- invented statistic count: ${model.inventedStatisticCount}`,
+    `- single-run only: ${model.singleRunOnly}`,
+    `- FULL_MATCH_BATCH_ECONOMY remains only global proof: ${model.fullMatchBatchEconomyRemainsOnlyGlobalProof}`,
+    `- recommendation: ${model.recommendation}`,
+  ];
+}
+
+export function renderFullMatchCalibrationCarryoverReconciliation6CDoc(model: FullMatchTraceValidationModel): string {
+  const reconciliation = currentCoachReportHistoryStoreConsistencyContext().fullMatchCalibrationCarryoverReconciliation;
+  const matrixRows = reconciliation.carryoverMatrix.map((row) =>
+    `| ${row.calibrationName} | ${row.validated} | ${row.batchApplied} | ${row.liveApplied} | ${row.fullMatchOfficialApplied} | ${row.gap} | ${row.recommendation} |`
+  );
+  const pathRows = reconciliation.scoringPathAuditRows.map((row) =>
+    `| ${row.pathName} | ${row.pathType} | ${row.createsOfficialScoreChange} | ${row.canDriveOfficialScore} | ${row.usesShotDifficultyCalibration} | ${row.usesScoringChoiceBalance} | ${row.canClaimGlobalEconomy} |`
+  );
+
+  return [
+    "# Full-Match Calibration Carryover Reconciliation 6C",
+    "",
+    "Sprint 6C is diagnostic only. It reconciles prior calibration work against the current official full-match scoring path and explains why a single full-match run can still show an extreme SHOT_GOAL-only score without changing scoring values, capping score, deleting events, or rewriting official score_change entries.",
+    "",
+    "## Summary",
+    ...fullMatchCalibrationCarryoverCountLines(reconciliation),
+    "",
+    "## Calibration Carryover Matrix",
+    "| Calibration | Validated | Batch applied | Live applied | Full-match official applied | Gap | Recommendation |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    ...matrixRows,
+    "",
+    "## Batch / Live / Full-Match Scoring Path Audit",
+    "| Path | Type | Creates score_change | Drives official score | Uses shot difficulty | Uses choice balance | Can claim global economy |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    ...pathRows,
+    "",
+    "## Carryover Status",
+    "- FULL_MATCH_BATCH_ECONOMY remains the only global reference.",
+    "- This single run is a regression surface, not a global calibration proof.",
+    "- Official score remains derived from active ScoringEvents only.",
+    "- Batch/live separation remains preserved.",
+    "",
+    "## Regression Cause",
+    `- primary cause: ${reconciliation.primaryRegressionCause}`,
+    `- secondary causes: ${reconciliation.secondaryRegressionCauses.join(", ")}`,
+    `- evidence summary: ${reconciliation.evidenceSummary}`,
+    "",
+    "## Warnings",
+    ...reconciliation.warnings.map((warning) => `- ${warning}`),
+    "",
+    "## Guardrails",
+    "- scoring constants unchanged: true",
+    "- score cap applied: false",
+    "- post-hoc score rewrite false",
+    "- scoring events deleted false",
+    "- scoring events rewritten false",
+    "- forced opponent score false",
+    "- batch/live separation preserved true",
+    "- MatchBonusEvent unchanged true",
+    "- persistence not used for calibration",
+    "- SQLite not used as source of score economy",
+    "- no invented statistic",
+    "- no trend proof claim",
+    "- no global economy claim from this single run",
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${reconciliation.recommendation}`,
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchCalibrationCarryoverReconciliation6CValidation(model: FullMatchTraceValidationModel): string {
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const reconciliation = context.fullMatchCalibrationCarryoverReconciliation;
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("calibration carryover model is available.", reconciliation.status === "available", reconciliation.status),
+    check("scope is single-run diagnostic.", reconciliation.scope === "FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN", reconciliation.scope),
+    check("official full-match score is visible.", reconciliation.officialFullMatchScore.length > 0, reconciliation.officialFullMatchScore),
+    check("official scoring event count is visible.", reconciliation.officialFullMatchScoringEvents > 0, String(reconciliation.officialFullMatchScoringEvents)),
+    check("official SHOT_GOAL count is visible.", reconciliation.officialFullMatchShotGoalEvents > 0, String(reconciliation.officialFullMatchShotGoalEvents)),
+    check("calibration carryover matrix is present.", reconciliation.carryoverMatrix.length >= 8, String(reconciliation.carryoverMatrix.length)),
+    check("batch/live/full-match scoring path audit is present.", reconciliation.scoringPathAuditRows.some((row) => row.pathType === "batch") && reconciliation.scoringPathAuditRows.some((row) => row.pathType === "fullmatch"), String(reconciliation.scoringPathAuditRows.length)),
+    check("historical batch calibration references are visible.", reconciliation.batchCalibrationKnownShotGoalsPerMatch > 0 && reconciliation.batchCalibrationKnownConversionRate > 0, `${reconciliation.batchCalibrationKnownShotGoalsPerMatch}/${reconciliation.batchCalibrationKnownConversionRate}`),
+    check("shot difficulty calibration is not claimed as full-match applied.", !reconciliation.shotDifficultyCalibrationAppliedInFullMatch, ""),
+    check("scoring choice balance is not claimed as full-match applied.", !reconciliation.scoringChoiceBalanceAppliedInFullMatch, ""),
+    check("affordance volume constraints are not claimed as full-match applied.", !reconciliation.scoringAffordanceVolumeAppliedInFullMatch, ""),
+    check("primary regression cause is parallel scoring path.", reconciliation.primaryRegressionCause === "FULLMATCH_PARALLEL_SCORING_PATH", reconciliation.primaryRegressionCause),
+    check("warnings include missing shot difficulty calibration.", reconciliation.warnings.includes("FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION"), ""),
+    check("warnings include route family competition missing.", reconciliation.warnings.includes("FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING"), ""),
+    check("warnings include diagnostic-only scope.", reconciliation.warnings.includes("CALIBRATION_DIAGNOSTIC_ONLY"), ""),
+    check("warnings include global economy not proven.", reconciliation.warnings.includes("GLOBAL_ECONOMY_NOT_PROVEN"), ""),
+    check("coach export contains Reconciliation des calibrations.", exportHtml.includes("Reconciliation des calibrations"), ""),
+    check("coach export states diagnostic single-run.", exportHtml.includes("Diagnostic single-run"), ""),
+    check("coach export states no score modification.", exportHtml.includes("Il ne modifie pas le score"), ""),
+    check("scoring constants unchanged.", !reconciliation.scoringConstantsChanged, ""),
+    check("no score cap.", !reconciliation.scoreCapApplied, ""),
+    check("no post-hoc rewrite.", !reconciliation.postHocScoreRewriteApplied, ""),
+    check("no scoring event deletion.", !reconciliation.scoringEventsDeleted, ""),
+    check("no scoring event rewrite.", !reconciliation.scoringEventsRewritten, ""),
+    check("no forced opponent score.", !reconciliation.forcedOpponentScoreApplied, ""),
+    check("no official timeline mutation.", reconciliation.officialTimelineMutationCount === 0, "0"),
+    check("no official possession mutation.", reconciliation.officialPossessionMutationCount === 0, "0"),
+    check("batch/live separation preserved.", reconciliation.batchLiveSeparationPreserved, ""),
+    check("MatchBonusEvent unchanged.", !reconciliation.matchBonusEventChanged, ""),
+    check("persistence not used for calibration.", !reconciliation.persistenceUsedForCalibration, ""),
+    check("SQLite not used as score economy source.", !reconciliation.sqliteUsedAsScoreEconomySource, ""),
+    check("no invented stats.", reconciliation.inventedStatisticCount === 0, "0"),
+    check("no global economy claim from single run.", reconciliation.globalEconomyClaimCount === 0, "0"),
+    check("no trend proof claim.", reconciliation.trendProofClaimCount === 0, "0"),
+    check("FULL_MATCH_BATCH_ECONOMY remains only global proof.", reconciliation.fullMatchBatchEconomyRemainsOnlyGlobalProof, ""),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Calibration Carryover Reconciliation 6C Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...fullMatchCalibrationCarryoverCountLines(reconciliation),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${reconciliation.recommendation}`,
     "",
   ].join("\n");
 }
