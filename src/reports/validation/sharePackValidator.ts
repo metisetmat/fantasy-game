@@ -329,6 +329,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchSegmentScoringDensityCalibration6HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-segment-scoring-density-calibration-6h.md"));
   const fullMatchTeamOpportunityBalanceCalibration6I = readIfExists(join(shareDirectory, "fullmatch-team-opportunity-balance-calibration-6i.md"));
   const fullMatchTeamOpportunityBalanceCalibration6IValidation = readIfExists(join(shareDirectory, "validation.fullmatch-team-opportunity-balance-calibration-6i.md"));
+  const fullMatchDominanceChainCalibration6J = readIfExists(join(shareDirectory, "fullmatch-dominance-chain-calibration-6j.md"));
+  const fullMatchDominanceChainCalibration6JValidation = readIfExists(join(shareDirectory, "validation.fullmatch-dominance-chain-calibration-6j.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2958,6 +2960,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-segment-scoring-density-calibration-6h.md",
     ...sprint6HForbiddenLeftovers,
   ];
+  const sprint6JExpectedFiles = sprint6IExpectedFiles.map((file) =>
+    file === "fullmatch-team-opportunity-balance-calibration-6i.md"
+      ? "fullmatch-dominance-chain-calibration-6j.md"
+      : file === "validation.fullmatch-team-opportunity-balance-calibration-6i.md"
+        ? "validation.fullmatch-dominance-chain-calibration-6j.md"
+        : file
+  );
+  const sprint6JForbiddenLeftovers = [
+    "fullmatch-team-opportunity-balance-calibration-6i.md",
+    "validation.fullmatch-team-opportunity-balance-calibration-6i.md",
+    ...sprint6IForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3637,6 +3651,44 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint6JChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6JExpectedFiles.every((file) => requiredCopied(file)), sprint6JExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6JExpectedFiles.every((file) => manifest.includes(file)), sprint6JExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6J", activeConfig.sprintName === "Sprint 6J - Team Response And Dominance Chain Follow-up", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6JForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6JForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6J oriented", readme.includes("# Sprint 6J Share Pack") && readme.includes("fullmatch-dominance-chain-calibration-6j.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6J report included", fullMatchDominanceChainCalibration6J.includes("# Full-Match Dominance Chain Calibration 6J") && fullMatchDominanceChainCalibration6J.includes("Before / After Table") && fullMatchDominanceChainCalibration6J.includes("Dominance Chain Metrics") && fullMatchDominanceChainCalibration6J.includes("Break Dominance Metrics"), "6J doc included"),
+    check("6J validation is PASS", fullMatchDominanceChainCalibration6JValidation.includes("Status: PASS") && fullMatchDominanceChainCalibration6JValidation.includes("dominance chain audit exists") && fullMatchDominanceChainCalibration6JValidation.includes("Explicit Exhaustive Test Command"), "6J validation current"),
+    check("batch match count visible", fullMatchDominanceChainCalibration6J.includes("matchCount: 50") && fullMatchDominanceChainCalibration6JValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6I metrics are visible", fullMatchDominanceChainCalibration6J.includes("Baseline 6I Summary") && fullMatchDominanceChainCalibration6J.includes("dominantTeamOpportunityChainMax") && fullMatchDominanceChainCalibration6J.includes("blowout rate"), "6I baseline visible"),
+    check("dominance chain metrics measured", fullMatchDominanceChainCalibration6J.includes("Dominance Chain Metrics") && fullMatchDominanceChainCalibration6JValidation.includes("dominantTeamOpportunityChainMax measured"), "dominance metrics visible"),
+    check("break dominance metrics measured", fullMatchDominanceChainCalibration6J.includes("resetBreaksDominanceRate") && fullMatchDominanceChainCalibration6J.includes("defensiveRecoveryBreaksDominanceRate") && fullMatchDominanceChainCalibration6J.includes("goalkeeperSecureBreaksDominanceRate"), "break metrics visible"),
+    check("density calibration preserved", fullMatchDominanceChainCalibration6J.includes("densityCalibrationPreserved: true") && fullMatchDominanceChainCalibration6JValidation.includes("density calibration preserved"), "density preserved"),
+    check("team opportunity balance preserved", fullMatchDominanceChainCalibration6J.includes("teamOpportunityBalancePreserved: true") && fullMatchDominanceChainCalibration6JValidation.includes("team opportunity balance preserved"), "team balance preserved"),
+    check("route family diversity preserved", fullMatchDominanceChainCalibration6J.includes("routeFamilyDiversityPreserved: true") && fullMatchDominanceChainCalibration6JValidation.includes("route family diversity preserved"), "route diversity preserved"),
+    check("TRY/DROP/CONVERSION remain available", fullMatchDominanceChainCalibration6JValidation.includes("TRY route remains available") && fullMatchDominanceChainCalibration6JValidation.includes("DROP route remains available") && fullMatchDominanceChainCalibration6JValidation.includes("CONVERSION only after TRY"), "non-shot preserved"),
+    check("CONTINUATION remains available", fullMatchDominanceChainCalibration6JValidation.includes("CONTINUATION remains available"), "continuation preserved"),
+    check("score from score_change all runs", fullMatchDominanceChainCalibration6J.includes("scoreFromScoreChangeAllRuns: true") && fullMatchDominanceChainCalibration6JValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchDominanceChainCalibration6J.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchDominanceChainCalibration6J.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score cap/rewrite/deletion/forced score", fullMatchDominanceChainCalibration6J.includes("scoreCapApplied: false") && fullMatchDominanceChainCalibration6J.includes("postHocRewriteApplied: false") && fullMatchDominanceChainCalibration6J.includes("scoringEventsDeleted: false") && fullMatchDominanceChainCalibration6J.includes("forcedOpponentScoreApplied: false") && fullMatchDominanceChainCalibration6J.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchDominanceChainCalibration6JValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchDominanceChainCalibration6J.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchDominanceChainCalibration6J.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchDominanceChainCalibration6J.includes("persistenceUsedForScoring: false") && fullMatchDominanceChainCalibration6J.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchDominanceChainCalibration6J.includes("unknownScoringFamilyCount: 0") && fullMatchDominanceChainCalibration6JValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchDominanceChainCalibration6J.includes("penaltyShotActiveLeakageCount: 0") && fullMatchDominanceChainCalibration6JValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("no contradictory healthy warning", fullMatchDominanceChainCalibration6JValidation.includes("no contradictory healthy warning when dominance still weak") && !(fullMatchDominanceChainCalibration6J.includes("BLOWOUT_RATE_STILL_TOO_HIGH") && fullMatchDominanceChainCalibration6J.includes("FULL_MATCH_BATCH_ECONOMY_HEALTHY")), "healthy warning guarded"),
+    check("coach product contains dominance-chain section", coachProductHtml.includes("Chaines de domination") && coachProductHtml.includes("Sprint 6J"), "product 6J visible"),
+    check("coach export contains dominance-chain section", coachExportHtml.includes("Chaines de domination") && coachExportHtml.includes("Sprint 6J"), "export 6J visible"),
+    check("coach export avoids forbidden dominance wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score (applique|detecte|actif)|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6J source files", bundleSimulation.includes("src/simulation/fullMatch/dominanceChainWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchDominanceChainAudit.ts") && bundleReports.includes("src/reports/fullMatchDominanceChainCalibration.ts") && bundleReports.includes("src/reports/fullMatchDominanceChainCalibration.test.ts"), "6J source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchDominanceChainCalibration6JValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchDominanceChainCalibration6J.includes("## Recommendation") && fullMatchDominanceChainCalibration6J.includes("Sprint 6K"), "6J recommendation visible"),
   ];
   const sprint6IChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7526,6 +7578,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6J - Team Response And Dominance Chain Follow-up")
+      ? sprint6JChecks
     : activeConfig.sprintName.includes("Sprint 6I - Team Opportunity Balance Calibration")
       ? sprint6IChecks
     : activeConfig.sprintName.includes("Sprint 6H - Segment Scoring Density Calibration")

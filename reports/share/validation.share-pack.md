@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6I - Team Opportunity Balance Calibration
+- current sprint: Sprint 6J - Team Response And Dominance Chain Follow-up
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,19 +20,17 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 6I - Sprint 6I - Team Opportunity Balance Calibration
+- PASS: current sprint is Sprint 6J - Sprint 6J - Team Response And Dominance Chain Follow-up
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6I oriented - README current
-- PASS: 6I report included - 6I doc included
-- PASS: 6I validation is PASS - 6I validation current
+- PASS: README is Sprint 6J oriented - README current
+- PASS: 6J report included - 6J doc included
+- PASS: 6J validation is PASS - 6J validation current
 - PASS: batch match count visible - 50 matches visible
-- PASS: baseline 6H metrics are visible - 6H baseline visible
-- PASS: home/away opportunities measured - home/away opportunities visible
-- PASS: home/away scoring measured - home/away scoring visible
-- PASS: opportunity balance measured - balance index visible
-- PASS: trailing response measured - response measured
-- PASS: dominance chain measured - dominance measured
+- PASS: baseline 6I metrics are visible - 6I baseline visible
+- PASS: dominance chain metrics measured - dominance metrics visible
+- PASS: break dominance metrics measured - break metrics visible
 - PASS: density calibration preserved - density preserved
+- PASS: team opportunity balance preserved - team balance preserved
 - PASS: route family diversity preserved - route diversity preserved
 - PASS: TRY/DROP/CONVERSION remain available - non-shot preserved
 - PASS: CONTINUATION remains available - continuation preserved
@@ -47,12 +45,12 @@ Status: PASS
 - PASS: no UNKNOWN scoring family - UNKNOWN blocked
 - PASS: no PENALTY_SHOT leakage - PENALTY blocked
 - PASS: no contradictory healthy warning - healthy warning guarded
-- PASS: coach product contains team opportunity section - product 6I visible
-- PASS: coach export contains team opportunity section - export 6I visible
-- PASS: coach export avoids forbidden team-balance wording - forbidden wording absent
-- PASS: bundle includes 6I source files - 6I source bundled
+- PASS: coach product contains dominance-chain section - product 6J visible
+- PASS: coach export contains dominance-chain section - export 6J visible
+- PASS: coach export avoids forbidden dominance wording - forbidden wording absent
+- PASS: bundle includes 6J source files - 6J source bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6I recommendation visible
+- PASS: recommendation visible - 6J recommendation visible
 
 ## Files
 
@@ -66,7 +64,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-team-opportunity-balance-calibration-6i.md
+- fullmatch-dominance-chain-calibration-6j.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -74,5 +72,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-team-opportunity-balance-calibration-6i.md
+- validation.fullmatch-dominance-chain-calibration-6j.md
 - validation.share-pack.md

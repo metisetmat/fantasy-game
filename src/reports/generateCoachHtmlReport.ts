@@ -20,6 +20,7 @@ import { currentFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteF
 import { currentFullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatchRouteFamilyScoringRateCalibration";
 import { currentFullMatchSegmentScoringDensityCalibrationModel } from "./fullMatchSegmentScoringDensityCalibration";
 import { currentFullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMatchTeamOpportunityBalanceCalibration";
+import { currentFullMatchDominanceChainCalibrationModel } from "./fullMatchDominanceChainCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -45,6 +46,7 @@ import {
   renderFullMatchRouteFamilyScoringRateCalibrationSection,
   renderFullMatchSegmentScoringDensityCalibrationSection,
   renderFullMatchTeamOpportunityBalanceCalibrationSection,
+  renderFullMatchDominanceChainCalibrationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -67,11 +69,13 @@ export function writeLatestCoachReport(): void {
   const fullMatchRouteFamilyScoringRateCalibration = currentFullMatchRouteFamilyScoringRateCalibrationModel();
   const fullMatchSegmentScoringDensityCalibration = currentFullMatchSegmentScoringDensityCalibrationModel();
   const fullMatchTeamOpportunityBalanceCalibration = currentFullMatchTeamOpportunityBalanceCalibrationModel();
+  const fullMatchDominanceChainCalibration = currentFullMatchDominanceChainCalibrationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
     renderFullMatchTeamOpportunityBalanceCalibrationSection(fullMatchTeamOpportunityBalanceCalibration),
+    renderFullMatchDominanceChainCalibrationSection(fullMatchDominanceChainCalibration),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -84,6 +88,7 @@ export function writeLatestCoachReport(): void {
     productReportHtml: productHtml,
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -264,6 +269,7 @@ export function writeLatestCoachReport(): void {
     fullMatchRouteFamilyScoringRateCalibration,
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
