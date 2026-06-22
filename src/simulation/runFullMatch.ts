@@ -40,6 +40,11 @@ import {
   summarizeFullMatchOfficialScoringPath,
 } from "./fullMatch/fullMatchOfficialScoringPath";
 import {
+  createFullMatchOfficialRouteFamilyMixState,
+  resolveFullMatchOfficialRouteFamilyMixForSegment,
+  summarizeFullMatchOfficialRouteFamilyMix,
+} from "./fullMatch/fullMatchOfficialRouteFamilyMix";
+import {
   createFullMatchSegmentInfluence,
   type FullMatchSegmentInfluence,
 } from "./fullMatch/fullMatchSegmentInfluence";
@@ -2972,6 +2977,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
   let segmentState = createInitialFullMatchSegmentState(input);
   let cumulativeScore = { home: 0, away: 0 };
   let previousEventPattern = "";
+  let officialRouteFamilyMixState = createFullMatchOfficialRouteFamilyMixState();
   let officialScoringPathState = createFullMatchOfficialScoringPathState();
   const segmentResults: FullMatchSegmentResult[] = [];
   const timelineSegments: MatchEvent[][] = [];
@@ -3024,8 +3030,18 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
           ...(index === 0 && controlledSegmentSandboxTimelineModel.status !== "not_available" ? { controlledSegmentSandboxTimelineModel } : {}),
         },
       });
-    const officialScoringPathResolution = resolveFullMatchOfficialScoringEventsForSegment({
+    const routeFamilyMixResolution = resolveFullMatchOfficialRouteFamilyMixForSegment({
       events: rawSegmentEvents,
+      state: officialRouteFamilyMixState,
+      matchInput: input,
+      segmentLabel: config.label,
+      segmentIndex: index,
+      segmentState,
+      scoreBefore: cumulativeScore,
+    });
+    officialRouteFamilyMixState = routeFamilyMixResolution.state;
+    const officialScoringPathResolution = resolveFullMatchOfficialScoringEventsForSegment({
+      events: routeFamilyMixResolution.events,
       state: officialScoringPathState,
       segmentLabel: config.label,
       segmentIndex: index,
@@ -3077,6 +3093,11 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
     timeline,
     homeTeamId: input.homeTeam.teamId,
     awayTeamId: input.awayTeam.teamId,
+  });
+  const officialRouteFamilyMixModel = summarizeFullMatchOfficialRouteFamilyMix({
+    state: officialRouteFamilyMixState,
+    matchInput: input,
+    scoreFromOfficialScoreChangeEvents: true,
   });
   const officialTimelineDiffViewModel = officialTimelineDiffFromSandboxTimeline({
     matchInput: input,
@@ -3150,6 +3171,7 @@ export function runFullMatch(input: MatchInput, options?: FullMatchOptions): Mat
       ...sandboxDecisionBatchConfidenceCalibrationModelLimitations(sandboxDecisionBatchConfidenceCalibrationModel),
       ...multiScenarioCoachTestPlanModelLimitations(multiScenarioCoachTestPlanModel),
       ...selectionPreviewModelLimitations(selectionPreviewModel),
+      `Official route family mix 6F: selected families ${officialRouteFamilyMixModel.selectedRouteFamilies.join(", ") || "none"}; scoring families ${officialRouteFamilyMixModel.scoringRouteFamilies.join(", ") || "none"}; non-shot selected share ${officialRouteFamilyMixModel.nonShotSelectedShare}%; conversion only after try=${officialRouteFamilyMixModel.conversionGeneratedOnlyAfterTry}.`,
       `Full-match official scoring path connected: accepted ${officialScoringPathSummary.acceptedOfficialScoreChangeEvents} score_change events and resolved ${officialScoringPathSummary.rejectedBeforeOfficialScoreChangeEvents} opportunities before official score emission.`,
       "Official scoring connection is single-run only and cannot claim global economy proof.",
     ],

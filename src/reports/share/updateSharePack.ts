@@ -75,6 +75,8 @@ import {
   renderFullMatchOfficialScoringConnection6DValidation,
   renderFullMatchBatchEconomyProof6EDoc,
   renderFullMatchBatchEconomyProof6EValidation,
+  renderFullMatchRouteFamilyMixActivation6FDoc,
+  renderFullMatchRouteFamilyMixActivation6FValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -87,9 +89,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6E - Full-Match Batch Economy Proof";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-batch-economy-proof-6e.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-batch-economy-proof-6e.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-route-family-mix-activation-6f.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-route-family-mix-activation-6f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2043,6 +2045,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchBatchEconomyProof.test.ts",
         required: true,
         reason: "Sprint 6E executable test proving the batch proof guardrails and minimum match count",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchRouteFamilyMixWarnings.ts",
+        required: true,
+        reason: "Sprint 6F warning-code registry for official route family mix activation diagnostics",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts",
+        required: true,
+        reason: "Sprint 6F official route family candidate generation, availability gates, selection, and resolver",
+      },
+      {
+        source: "src/reports/fullMatchRouteFamilyMixActivation.ts",
+        required: true,
+        reason: "Sprint 6F full-match route family mix batch proof and team opportunity balance model",
+      },
+      {
+        source: "src/reports/fullMatchRouteFamilyMixActivation.test.ts",
+        required: true,
+        reason: "Sprint 6F executable test proving non-shot route selection, continuation selection, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4201,6 +4223,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6F")) {
+    return renderFullMatchRouteFamilyMixActivation6FDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6E")) {
     return renderFullMatchBatchEconomyProof6EDoc(fullMatchTraceValidationModel());
   }
@@ -6424,6 +6449,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6F")) {
+    return renderFullMatchRouteFamilyMixActivation6FValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6E")) {
     return renderFullMatchBatchEconomyProof6EValidation(fullMatchTraceValidationModel());
   }
@@ -8593,6 +8621,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6F")) {
+    return [
+      "# Sprint 6F Share Pack",
+      "",
+      "Current sprint: Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-route-family-mix-activation-6f.md",
+      "- validation.fullmatch-route-family-mix-activation-6f.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-route-family-mix-activation-6f.md and validation.fullmatch-route-family-mix-activation-6f.md.",
+      "",
+      "Sprint 6F activates official route-family competition in the full-match path. It measures SHOT, TRY, CONVERSION-after-TRY, DROP, and continuation availability without changing scoring values, forcing scores, capping score, or replacing official score_change events.",
+      "",
+      "Upload every file in this reports/share directory.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6E")) {
     return [
       "# Sprint 6E Share Pack",

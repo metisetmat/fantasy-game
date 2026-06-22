@@ -1,6 +1,6 @@
-# Sprint 6E Share Pack
+# Sprint 6F Share Pack
 
-Current sprint: Sprint 6E - Full-Match Batch Economy Proof
+Current sprint: Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-batch-economy-proof-6e.md
-- validation.fullmatch-batch-economy-proof-6e.md
+- fullmatch-route-family-mix-activation-6f.md
+- validation.fullmatch-route-family-mix-activation-6f.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-batch-economy-proof-6e.md and validation.fullmatch-batch-economy-proof-6e.md.
+Start with validation.share-pack.md, then fullmatch-route-family-mix-activation-6f.md and validation.fullmatch-route-family-mix-activation-6f.md.
 
-Sprint 6E runs a 50-match full-match batch through the official connected 6D scoring path. It measures scoreline variation, scoring-family distribution, blowouts, shutouts, and guardrails without changing scoring values or replacing official score_change events.
+Sprint 6F activates official route-family competition in the full-match path. It measures SHOT, TRY, CONVERSION-after-TRY, DROP, and continuation availability without changing scoring values, forcing scores, capping score, or replacing official score_change events.
 
 Upload every file in this reports/share directory.

@@ -321,6 +321,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchOfficialScoringConnection6DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-official-scoring-connection-6d.md"));
   const fullMatchBatchEconomyProof6E = readIfExists(join(shareDirectory, "fullmatch-batch-economy-proof-6e.md"));
   const fullMatchBatchEconomyProof6EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-batch-economy-proof-6e.md"));
+  const fullMatchRouteFamilyMixActivation6F = readIfExists(join(shareDirectory, "fullmatch-route-family-mix-activation-6f.md"));
+  const fullMatchRouteFamilyMixActivation6FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-family-mix-activation-6f.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2902,6 +2904,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-official-scoring-connection-6d.md",
     ...sprint6DForbiddenLeftovers,
   ];
+  const sprint6FExpectedFiles = sprint6EExpectedFiles.map((file) =>
+    file === "fullmatch-batch-economy-proof-6e.md"
+      ? "fullmatch-route-family-mix-activation-6f.md"
+      : file === "validation.fullmatch-batch-economy-proof-6e.md"
+        ? "validation.fullmatch-route-family-mix-activation-6f.md"
+        : file
+  );
+  const sprint6FForbiddenLeftovers = [
+    "fullmatch-batch-economy-proof-6e.md",
+    "validation.fullmatch-batch-economy-proof-6e.md",
+    ...sprint6EForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3581,6 +3595,44 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint6FChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6FExpectedFiles.every((file) => requiredCopied(file)), sprint6FExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6FExpectedFiles.every((file) => manifest.includes(file)), sprint6FExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6F", activeConfig.sprintName === "Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6FForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6FForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6F oriented", readme.includes("# Sprint 6F Share Pack") && readme.includes("fullmatch-route-family-mix-activation-6f.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6F report included", fullMatchRouteFamilyMixActivation6F.includes("# Full-Match Route Family Mix Activation 6F") && fullMatchRouteFamilyMixActivation6F.includes("Route Family Mix Distribution") && fullMatchRouteFamilyMixActivation6F.includes("Team Opportunity Balance"), "6F doc included"),
+    check("6F validation is PASS", fullMatchRouteFamilyMixActivation6FValidation.includes("Status: PASS") && fullMatchRouteFamilyMixActivation6FValidation.includes("batch 50 matches exists") && fullMatchRouteFamilyMixActivation6FValidation.includes("explicit exhaustive test command is available"), "6F validation current"),
+    check("batch match count visible", fullMatchRouteFamilyMixActivation6F.includes("matchCount: 50") && fullMatchRouteFamilyMixActivation6FValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("TRY route can be available and score", fullMatchRouteFamilyMixActivation6F.includes("eligibleTryCandidateCount:") && fullMatchRouteFamilyMixActivation6F.includes("events TRY_TOUCHDOWN:") && fullMatchRouteFamilyMixActivation6FValidation.includes("TRY route can be available"), "TRY visible"),
+    check("DROP route can be available and score", fullMatchRouteFamilyMixActivation6F.includes("eligibleDropCandidateCount:") && fullMatchRouteFamilyMixActivation6F.includes("events DROP_GOAL:") && fullMatchRouteFamilyMixActivation6FValidation.includes("DROP route can be available"), "DROP visible"),
+    check("CONVERSION only generated after TRY", fullMatchRouteFamilyMixActivation6F.includes("conversionGeneratedOnlyAfterTry: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("CONVERSION only generated after TRY"), "conversion guarded"),
+    check("route family competition can select non-shot", fullMatchRouteFamilyMixActivation6F.includes("routeFamilyCompetitionCanSelectNonShot: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("route family competition can select non-shot"), "non-shot selected"),
+    check("route family competition can select continuation", fullMatchRouteFamilyMixActivation6F.includes("routeFamilyCompetitionCanSelectContinuation: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("route family competition can select continuation"), "continuation selected"),
+    check("route family mix is no longer 100% SHOT_ONLY", fullMatchRouteFamilyMixActivation6F.includes("matchesWithOnlyShotGoals: 0") && fullMatchRouteFamilyMixActivation6FValidation.includes("route family mix is no longer 100% SHOT_ONLY"), "SHOT_ONLY reduced"),
+    check("matchesWithTryOrDrop measured above zero", !fullMatchRouteFamilyMixActivation6F.includes("matchesWithTryOrDrop: 0") && fullMatchRouteFamilyMixActivation6FValidation.includes("matchesWithTryOrDrop measured"), "TRY/DROP presence"),
+    check("matchesWithMultipleScoringFamilies measured above zero", !fullMatchRouteFamilyMixActivation6F.includes("matchesWithMultipleScoringFamilies: 0") && fullMatchRouteFamilyMixActivation6FValidation.includes("matchesWithMultipleScoringFamilies > 0"), "multi-family"),
+    check("shutout and one-sided rates below 100", !fullMatchRouteFamilyMixActivation6F.includes("shutoutRate: 100%") && !fullMatchRouteFamilyMixActivation6F.includes("oneSidedScoringRate: 100%"), "rates below 100"),
+    check("score from score_change all runs", fullMatchRouteFamilyMixActivation6F.includes("scoreFromScoreChangeAllRuns: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchRouteFamilyMixActivation6F.includes("officialPathConnectedAllRuns: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("official path still connected"), "official path all runs"),
+    check("calibrations applied all runs", fullMatchRouteFamilyMixActivation6F.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score cap/rewrite/deletion/forced score", fullMatchRouteFamilyMixActivation6F.includes("noScoreCap: true") && fullMatchRouteFamilyMixActivation6F.includes("noRewrite: true") && fullMatchRouteFamilyMixActivation6F.includes("noDeletion: true") && fullMatchRouteFamilyMixActivation6F.includes("noForcedScore: true"), "guardrails true"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchRouteFamilyMixActivation6FValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchRouteFamilyMixActivation6F.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchRouteFamilyMixActivation6F.includes("noPersistenceScoring: true") && fullMatchRouteFamilyMixActivation6F.includes("noSQLiteScoring: true"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchRouteFamilyMixActivation6F.includes("noUnknown: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchRouteFamilyMixActivation6F.includes("noPenaltyLeakage: true") && fullMatchRouteFamilyMixActivation6FValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("coach product contains route mix section", coachProductHtml.includes("Mix des familles de score") && coachProductHtml.includes("score_change"), "product 6F visible"),
+    check("coach export contains route mix section", coachExportHtml.includes("Mix des familles de score") && coachExportHtml.includes("score_change"), "export 6F visible"),
+    check("coach export avoids forbidden route-mix wording", !/équilibre garanti|essais forcés|drops injectés|score corrigé|score ajusté|preuve définitive/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6F source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchRouteFamilyMixWarnings.ts") && bundleSimulation.includes("src/reports/fullMatchRouteFamilyMixActivation.ts") && bundleSimulation.includes("src/reports/fullMatchRouteFamilyMixActivation.test.ts"), "6F source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchRouteFamilyMixActivation6FValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchRouteFamilyMixActivation6F.includes("recommendation:") && fullMatchRouteFamilyMixActivation6F.includes("nextSprintRecommendation:"), "6F recommendation visible"),
   ];
   const sprint6EChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7313,6 +7365,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability")
+      ? sprint6FChecks
     : activeConfig.sprintName.includes("Sprint 6E - Full-Match Batch Economy Proof")
       ? sprint6EChecks
     : activeConfig.sprintName.includes("Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path")

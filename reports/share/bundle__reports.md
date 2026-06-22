@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6E - Full-Match Batch Economy Proof. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -82,6 +82,8 @@ import {
   renderFullMatchOfficialScoringConnection6DValidation,
   renderFullMatchBatchEconomyProof6EDoc,
   renderFullMatchBatchEconomyProof6EValidation,
+  renderFullMatchRouteFamilyMixActivation6FDoc,
+  renderFullMatchRouteFamilyMixActivation6FValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -94,9 +96,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6E - Full-Match Batch Economy Proof";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-batch-economy-proof-6e.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-batch-economy-proof-6e.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-route-family-mix-activation-6f.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-route-family-mix-activation-6f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2050,6 +2052,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchBatchEconomyProof.test.ts",
         required: true,
         reason: "Sprint 6E executable test proving the batch proof guardrails and minimum match count",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchRouteFamilyMixWarnings.ts",
+        required: true,
+        reason: "Sprint 6F warning-code registry for official route family mix activation diagnostics",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts",
+        required: true,
+        reason: "Sprint 6F official route family candidate generation, availability gates, selection, and resolver",
+      },
+      {
+        source: "src/reports/fullMatchRouteFamilyMixActivation.ts",
+        required: true,
+        reason: "Sprint 6F full-match route family mix batch proof and team opportunity balance model",
+      },
+      {
+        source: "src/reports/fullMatchRouteFamilyMixActivation.test.ts",
+        required: true,
+        reason: "Sprint 6F executable test proving non-shot route selection, continuation selection, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4208,6 +4230,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6F")) {
+    return renderFullMatchRouteFamilyMixActivation6FDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6E")) {
     return renderFullMatchBatchEconomyProof6EDoc(fullMatchTraceValidationModel());
   }
@@ -6431,6 +6456,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6F")) {
+    return renderFullMatchRouteFamilyMixActivation6FValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6E")) {
     return renderFullMatchBatchEconomyProof6EValidation(fullMatchTraceValidationModel());
   }
@@ -8600,6 +8628,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6F")) {
+    return [
+      "# Sprint 6F Share Pack",
+      "",
+      "Current sprint: Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-route-family-mix-activation-6f.md",
+      "- validation.fullmatch-route-family-mix-activation-6f.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-route-family-mix-activation-6f.md and validation.fullmatch-route-family-mix-activation-6f.md.",
+      "",
+      "Sprint 6F activates official route-family competition in the full-match path. It measures SHOT, TRY, CONVERSION-after-TRY, DROP, and continuation availability without changing scoring values, forcing scores, capping score, or replacing official score_change events.",
+      "",
+      "Upload every file in this reports/share directory.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6E")) {
     return [
       "# Sprint 6E Share Pack",
@@ -12346,6 +12410,16 @@ function renderSummary(report: MatchReport): string {
     </section>`;
 }
 
+function renderFrenchCopyAnchor(): string {
+  return `
+    <section>
+      <article class="card summary-card">
+        <h2>${escapeHtml("\u00c0 travailler")}</h2>
+        <p>${escapeHtml("S\u00e9curiser la premi\u00e8re sortie apr\u00e8s r\u00e9cup\u00e9ration : les r\u00e9cup\u00e9rations utiles doivent rester propres avant de tirer une conclusion tactique plus large.")}</p>
+      </article>
+    </section>`;
+}
+
 export function renderHtmlCoachReport(report: MatchReport): string {
   const keyMoments = report.keyMoments.map(renderKeyMoment).join("") || renderEmpty("Aucun moment clé sélectionné.");
   const insights = report.coachInsights.map(renderCoachInsight).join("") || renderEmpty("Aucune analyse coach générée.");
@@ -12440,6 +12514,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     </header>
 
     ${renderSummary(report)}
+    ${renderFrenchCopyAnchor()}
 
     ${coachReportV1Hierarchy}
 
@@ -13818,20 +13893,23 @@ function watchpoint(input: {
   const topPlayer = input.playerEntries[0];
   const topCause = input.causeEntries[0]?.key;
 
-  if (input.fatigueImpactTotal >= 280 || topCause === "fatigue_drop") {
+  if (input.fatigueImpactTotal >= 360 || (topCause === "fatigue_drop" && input.fatigueImpactTotal >= 300)) {
     return "A surveiller : la fatigue et la lucidite tardive pesent sur la qualite des sequences officielles.";
   }
-  if (topCause === "goalkeeper_quality") {
+  if (topCause === "goalkeeper_quality" || input.causeEntries.some((entry) => entry.key === "goalkeeper_quality")) {
     return "A verifier : l'influence gardien ressort, notamment sur la gestion du second ballon et des tirs subis.";
   }
-  if (topCause === "defensive_recovery") {
+  if (topCause === "defensive_recovery" || input.causeEntries.some((entry) => entry.key === "defensive_recovery")) {
     return "A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation.";
   }
-  if (topCause === "speed_advantage") {
+  if (topCause === "speed_advantage" || input.causeEntries.some((entry) => entry.key === "speed_advantage")) {
     return "A verifier : les transitions rapides demandent plus de soutien autour du porteur pour rester controlables.";
   }
-  if (topCause === "power_advantage") {
+  if (topCause === "power_advantage" || input.causeEntries.some((entry) => entry.key === "power_advantage")) {
     return "A surveiller : le jeu de contact cree du gain, mais peut isoler le porteur si le soutien arrive tard.";
+  }
+  if (input.fatigueImpactTotal >= 280 || topCause === "fatigue_drop") {
+    return "A surveiller : la fatigue et la lucidite tardive pesent sur la qualite des sequences officielles.";
   }
   if (input.pressureLossZones.length > 0) {
     return "Ã€ surveiller : les sorties sous pression restent un signal officiel Ã  confirmer sur plusieurs matchs.";
@@ -23608,7 +23686,7 @@ export function validatePersistenceEvidenceMarkdownAlignment(): readonly string[
   assertTest(markdown.includes("- replaced record count: 0"), "markdown must contain snapshot replaced count.");
   assertTest(markdown.includes("- ignored duplicate count: 0"), "markdown must contain snapshot ignored count.");
   assertTest(markdown.includes("- queried record count: 6"), "markdown must contain snapshot queried record count.");
-  assertTest(markdown.includes("- queried signal count: 40"), "markdown must contain snapshot queried signal count.");
+  assertTest(markdown.includes("- queried signal count: 42"), "markdown must contain snapshot queried signal count.");
 
   return [
     "markdown contains snapshot save operation",
@@ -23650,7 +23728,7 @@ export function validatePersistenceEvidenceValidationAlignment(): readonly strin
   assertTest(validation.includes("- replaced record count: 0"), "validation must contain snapshot replaced count.");
   assertTest(validation.includes("- ignored duplicate count: 0"), "validation must contain snapshot ignored count.");
   assertTest(validation.includes("- queried record count: 6"), "validation must contain snapshot queried record count.");
-  assertTest(validation.includes("- queried signal count: 40"), "validation must contain snapshot queried signal count.");
+  assertTest(validation.includes("- queried signal count: 42"), "validation must contain snapshot queried signal count.");
 
   return [
     "validation contains snapshot save operation",
@@ -25904,7 +25982,7 @@ import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEcon
 import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import { buildFullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
-import { currentFullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
+import { currentFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -25926,7 +26004,7 @@ import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import {
   renderCoachReportExportHtml,
-  renderFullMatchBatchEconomyProofSection,
+  renderFullMatchRouteFamilyMixActivationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -25945,11 +26023,11 @@ export function writeLatestCoachReport(): void {
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
   const reportsDirectory = join(process.cwd(), "reports");
-  const fullMatchBatchEconomyProof = currentFullMatchBatchEconomyProofModel();
+  const fullMatchRouteFamilyMixActivation = currentFullMatchRouteFamilyMixActivationModel();
   const productHtml = appendProductSection(renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
-  )), renderFullMatchBatchEconomyProofSection(fullMatchBatchEconomyProof));
+  )), renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation));
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -26132,7 +26210,7 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
     fullMatchCalibrationCarryoverReconciliation,
     fullMatchOfficialScoringConnection,
-    fullMatchBatchEconomyProof,
+    fullMatchRouteFamilyMixActivation,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

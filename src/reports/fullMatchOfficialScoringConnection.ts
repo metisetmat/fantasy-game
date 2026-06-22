@@ -186,7 +186,8 @@ export function buildFullMatchOfficialScoringCalibrationConnectionModel(
     afterRouteMix.shotGoalEvents < BEFORE_ROUTE_MIX.shotGoalEvents;
   const warnings: FullMatchOfficialScoringConnectionWarningCode[] = [
     pathConnected ? "OFFICIAL_SCORING_PATH_CONNECTED" : "OFFICIAL_SCORING_PATH_STILL_PARALLEL",
-    "SCORE_REDUCED_BY_OFFICIAL_RESOLUTION",
+    ...(scoreChangeTotal(report) < BEFORE_ROUTE_MIX.shotGoalPoints ? ["SCORE_REDUCED_BY_OFFICIAL_RESOLUTION" as const] : []),
+    "SHOT_GOAL_REDUCED_BY_OFFICIAL_RESOLUTION",
     ...(segmentAmplificationRisk(afterScoringEvents.length) === "HIGH" ? ["SEGMENT_AMPLIFICATION_STILL_HIGH" as const] : []),
     ...(report.score.home + report.score.away >= 21 ? ["SCORE_STILL_EXTREME_SINGLE_RUN" as const] : []),
     "GLOBAL_ECONOMY_NOT_PROVEN",
@@ -254,7 +255,7 @@ export function buildFullMatchOfficialScoringCalibrationConnectionModel(
     fullMatchBatchRequired: true,
     warnings,
     evidenceSummary:
-      `Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has ${afterRouteMix.shotGoalEvents} SHOT_GOAL events for ${afterRouteMix.shotGoalPoints} points and keeps the score derived from official score_change consequences.`,
+      `Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has ${afterRouteMix.shotGoalEvents} SHOT_GOAL events for ${afterRouteMix.shotGoalPoints} points plus ${afterRouteMix.tryTouchdownEvents + afterRouteMix.conversionGoalEvents + afterRouteMix.dropGoalEvents} official non-shot scoring events, and keeps the score derived from official score_change consequences.`,
     recommendation: afterFlagsPass
       ? "CONFIRM_OFFICIAL_SCORING_PATH_CONNECTED_AND_RUN_FULL_MATCH_BATCH_NEXT"
       : "FIX_OFFICIAL_SCORING_PATH_CONNECTION_BEFORE_6E",

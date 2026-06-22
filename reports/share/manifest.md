@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-22T10:03:42.169Z
-Task/sprint: Sprint 6E - Full-Match Batch Economy Proof
+Generated: 2026-06-22T15:12:45.270Z
+Task/sprint: Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-batch-economy-proof-6e.md
-- validation.fullmatch-batch-economy-proof-6e.md
+- fullmatch-route-family-mix-activation-6f.md
+- validation.fullmatch-route-family-mix-activation-6f.md
 - README.md
 
 ## Bundle Files

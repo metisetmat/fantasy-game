@@ -1068,7 +1068,7 @@
       <div class="report-scoreboard">
         <div>
           <span class="score-label">Score du rapport full-match</span>
-          <span class="score">12 - 0</span>
+          <span class="score">24 - 35</span>
         </div>
         <p class="muted">Les diagnostics batch et les échantillons live restent séparés de ce score.</p>
         <p class="muted">Contexte : export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
@@ -1085,7 +1085,7 @@
       </div>
     </div>
     <ul class="report-summary-list">
-      <li>Score final : 12 - 0.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li>
+      <li>Score final : 24 - 35.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li>
     </ul>
   </section>
 
@@ -1267,29 +1267,29 @@
         <rect class="phase-zone phase-zone--muted" x="16" y="80" width="84" height="52" rx="10" ry="10"></rect>
       </g>
     <g>
-      <rect class="phase-zone phase-zone--danger phase-zone--primary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      <rect class="phase-zone phase-zone--danger phase-zone--secondary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
       <text class="phase-zone-label" x="160" y="106" text-anchor="middle">Z3-C</text>
-      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">4</text>
+      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">8</text>
     </g>
-    <g>
-      <rect class="phase-zone phase-zone--danger phase-zone--secondary" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      <text class="phase-zone-label" x="256" y="106" text-anchor="middle">Z5-HSR</text>
-      <text class="phase-zone-value" x="256" y="124" text-anchor="middle">4</text>
-    </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
       <g>
         <rect class="phase-zone phase-zone--muted" x="16" y="144" width="84" height="52" rx="10" ry="10"></rect>
       </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
+    <g>
+      <rect class="phase-zone phase-zone--danger phase-zone--primary" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="160" y="170" text-anchor="middle">Z2-C</text>
+      <text class="phase-zone-value" x="160" y="188" text-anchor="middle">10</text>
+    </g>
       <g>
         <rect class="phase-zone phase-zone--muted" x="208" y="144" width="84" height="52" rx="10" ry="10"></rect>
       </g>
     </svg>
       <ul class="report-phase-bullet-list">
-        <li><strong>Zone principale :</strong> Z3-C - Danger officiel (4)</li><li><strong>Zones secondaires :</strong> Z5-C, Z5-HSR</li>
+        <li><strong>Zone principale :</strong> Z2-C - Danger officiel (10)</li><li><strong>Zones secondaires :</strong> Z3-C, Z5-C</li>
       </ul>
-      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Le danger offensif se concentre d'abord dans Z3-C. Les zones secondaires donnent le contexte, pas une consigne de jeu.</p>
+      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Le danger offensif se concentre d'abord dans Z2-C. Les zones secondaires donnent le contexte, pas une consigne de jeu.</p>
       <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> Cela aide &agrave; rep&eacute;rer o&ugrave; l'&eacute;quipe arrive &agrave; cr&eacute;er un signal stable, sans conclure que cette zone doit &ecirc;tre forc&eacute;e.</p>
       <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier si cette zone reste dangereuse sur plusieurs matchs et avec d'autres profils en soutien.</p>
       <p class="phase-panel-limitation"><strong>Limite :</strong> Les zones secondaires donnent le contexte disponible dans ce run, pas une prescription de jeu.</p>
@@ -1306,9 +1306,9 @@
         
         <article class="report-table-card">
           <h3>Hi&eacute;rarchie des zones</h3>
-          <p>Z3-C porte le signal principal ; Z5-C, Z5-HSR donnent le contexte secondaire.</p>
+          <p>Z2-C porte le signal principal ; Z3-C, Z5-C donnent le contexte secondaire.</p>
           <ul class="report-phase-bullet-list">
-            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-HSR</strong> - Z5-HSR ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li>
+            <li><strong>Z2-C</strong> - Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li>
           </ul>
         </article>
         
@@ -1468,20 +1468,14 @@
         </div>
         <div class="phase-stability-meta">
           <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 3</span>
-          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 1</span>
+          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 2</span>
           <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 0</span>
           <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: 0</span>
         </div>
       </div>
-      <p><strong>Zone répétée principale:</strong> Z3-C</p>
+      <p><strong>Zone répétée principale:</strong> Z5-C</p>
       <ul class="phase-stability-zone-list">
         
-          <li>
-            <strong>Z3-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
-            <br />
-            Z3-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
-          </li>
           <li>
             <strong>Z5-C</strong>
             <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
@@ -1489,16 +1483,28 @@
             Z5-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
           </li>
           <li>
-            <strong>Z5-HSR</strong>
+            <strong>Z2-C</strong>
             <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
             <br />
-            Z5-HSR revient dans 3 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
+            Z2-C revient dans 3 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
           </li>
           <li>
-            <strong>Z2-C</strong>
+            <strong>Z3-C</strong>
+            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
+            <br />
+            Z3-C revient dans 3 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
+          </li>
+          <li>
+            <strong>Z5-HSL</strong>
             <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run</span>
             <br />
-            Z2-C est visible une seule fois dans les runs comparés; le signal reste ponctuel à ce stade.
+            Z5-HSL est visible une seule fois dans les runs comparés; le signal reste ponctuel à ce stade.
+          </li>
+          <li>
+            <strong>Z5-HSR</strong>
+            <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run</span>
+            <br />
+            Z5-HSR est visible une seule fois dans les runs comparés; le signal reste ponctuel à ce stade.
           </li>
       </ul>
       <div class="phase-stability-reading">
@@ -1526,9 +1532,9 @@
           </div>
         </div>
         <div class="phase-stability-meta">
-          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 3</span>
-          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 1</span>
-          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 0</span>
+          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 2</span>
+          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 0</span>
+          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 2</span>
           <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: 0</span>
         </div>
       </div>
@@ -1548,16 +1554,16 @@
             Z5-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
           </li>
           <li>
-            <strong>Z4-HSL</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
+            <strong>Z5-HSR</strong>
+            <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable</span>
             <br />
-            Z4-HSL revient dans 3 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
+            Z5-HSR revient de manière irrégulière selon les runs disponibles; le signal reste instable.
           </li>
           <li>
-            <strong>Z5-HSR</strong>
-            <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run</span>
+            <strong>Z4-HSL</strong>
+            <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable</span>
             <br />
-            Z5-HSR est visible une seule fois dans les runs comparés; le signal reste ponctuel à ce stade.
+            Z4-HSL revient de manière irrégulière selon les runs disponibles; le signal reste instable.
           </li>
       </ul>
       <div class="phase-stability-reading">
@@ -1616,62 +1622,12 @@
     <div class="report-section-header">
       <div>
         <h2>Historique des signaux compar&eacute;s</h2>
-        <p>4 &eacute;chantillon(s) disponibles, 8 signal(aux) relus dans ce p&eacute;rim&egrave;tre local.</p>
+        <p>4 &eacute;chantillon(s) disponibles, 9 signal(aux) relus dans ce p&eacute;rim&egrave;tre local.</p>
       </div>
     </div>
     <p class="phase-history-guard">Cet historique d&eacute;crit uniquement les &eacute;chantillons disponibles. Il aide &agrave; comprendre pourquoi un signal est affich&eacute; comme r&eacute;p&eacute;t&eacute; ou ponctuel, sans prouver une tendance globale.</p>
     <div class="phase-history-grid">
       
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z3-C</h3>
-          <p>with ball · zone principale Z3-C</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-        
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z3-C.</span>
-          </div>
-        
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z3-C.</span>
-          </div>
-        
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z3-C.</span>
-          </div>
-        
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z3-C.</span>
-          </div>
-        
-      </div>
-    </article>
-
     <article class="phase-history-card">
       <div class="report-section-header">
         <div>
@@ -1725,8 +1681,8 @@
     <article class="phase-history-card">
       <div class="report-section-header">
         <div>
-          <h3>Z5-HSR</h3>
-          <p>with ball · zone principale Z5-HSR</p>
+          <h3>Z2-C</h3>
+          <p>with ball · zone principale Z2-C</p>
         </div>
         <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
       </div>
@@ -1748,13 +1704,113 @@
           <div class="phase-history-row">
             <strong>Run actuel</strong>
             <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z5-HSR.</span>
+            <span>Run actuel: signal visible autour de Z2-C.</span>
           </div>
         
           <div class="phase-history-row">
             <strong>Échantillon 1</strong>
             <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z5-HSR.</span>
+            <span>Échantillon 1: signal visible autour de Z2-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z2-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 3: signal non visible dans cette zone.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z3-C</h3>
+          <p>with ball · zone principale Z3-C</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 3 · <strong>Absent:</strong> 1 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 1: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z3-C.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z3-C.</span>
+          </div>
+        
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z5-HSL</h3>
+          <p>with ball · zone principale Z5-HSL</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 1 · <strong>Absent:</strong> 3 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : le signal apparaît dans un seul échantillon.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Run actuel: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z5-HSL.</span>
           </div>
         
           <div class="phase-history-row">
@@ -1765,8 +1821,8 @@
         
           <div class="phase-history-row">
             <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z5-HSR.</span>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 3: signal non visible dans cette zone.</span>
           </div>
         
       </div>
@@ -1775,8 +1831,8 @@
     <article class="phase-history-card">
       <div class="report-section-header">
         <div>
-          <h3>Z2-C</h3>
-          <p>with ball · zone principale Z2-C</p>
+          <h3>Z5-HSR</h3>
+          <p>with ball · zone principale Z5-HSR</p>
         </div>
         <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
       </div>
@@ -1809,14 +1865,14 @@
         
           <div class="phase-history-row">
             <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z2-C.</span>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 2: signal non visible dans cette zone.</span>
           </div>
         
           <div class="phase-history-row">
             <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 3: signal non visible dans cette zone.</span>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z5-HSR.</span>
           </div>
         
       </div>
@@ -1925,73 +1981,23 @@
     <article class="phase-history-card">
       <div class="report-section-header">
         <div>
-          <h3>Z4-HSL</h3>
-          <p>without ball · zone principale Z4-HSL</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 3 · <strong>Absent:</strong> 1 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-        
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Run actuel: signal non visible dans cette zone.</span>
-          </div>
-        
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z4-HSL.</span>
-          </div>
-        
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z4-HSL.</span>
-          </div>
-        
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z4-HSL.</span>
-          </div>
-        
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
           <h3>Z5-HSR</h3>
           <p>without ball · zone principale Z5-HSR</p>
         </div>
-        <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
+        <span class="phase-history-strength phase-history-strength--unstable">Signal encore instable</span>
       </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 1 · <strong>Absent:</strong> 3 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 2 · <strong>Absent:</strong> 2 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
       <div>
         <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : le signal apparaît dans un seul échantillon.</p>
+        <p>Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.</p>
       </div>
       <div>
         <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.</p>
+        <p>Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.</p>
       </div>
       <div>
         <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.</p>
+        <p>À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.</p>
       </div>
       <div class="phase-history-table">
         
@@ -2003,8 +2009,8 @@
         
           <div class="phase-history-row">
             <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 1: signal non visible dans cette zone.</span>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z5-HSR.</span>
           </div>
         
           <div class="phase-history-row">
@@ -2021,6 +2027,56 @@
         
       </div>
     </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z4-HSL</h3>
+          <p>without ball · zone principale Z4-HSL</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--unstable">Signal encore instable</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 2 · <strong>Absent:</strong> 2 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.</p>
+      </div>
+      <div class="phase-history-table">
+        
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Run actuel: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 1: signal non visible dans cette zone.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 2: signal visible autour de Z4-HSL.</span>
+          </div>
+        
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z4-HSL.</span>
+          </div>
+        
+      </div>
+    </article>
     </div>
   </section>
 
@@ -2029,7 +2085,7 @@
     <div class="report-section-header">
       <div>
         <h2>Historique produit des matchs</h2>
-        <p>6 enregistrement(s) locaux, 6 relu(s), 40 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
+        <p>6 enregistrement(s) locaux, 6 relu(s), 42 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
       </div>
     </div>
     <p class="match-history-guard">Cet historique pr&eacute;pare le stockage produit des rapports. Dans cette version, il reste local et en lecture seule : il n&rsquo;applique aucune d&eacute;cision, ne modifie pas le score et ne remplace pas l&rsquo;analyse du match courant.</p>
@@ -2052,7 +2108,7 @@
         <div class="match-history-kpi">
           <div><span>Enregistrements stock&eacute;s</span><strong>6</strong></div>
           <div><span>Enregistrements relus</span><strong>6</strong></div>
-          <div><span>Signaux relus</span><strong>40</strong></div>
+          <div><span>Signaux relus</span><strong>42</strong></div>
         </div>
       </article>
       <article class="match-history-card">
@@ -2072,7 +2128,7 @@
     <div class="report-section-header">
       <div>
         <h2>Persistance de l&rsquo;historique</h2>
-        <p>6 enregistrement(s) disponibles apr&egrave;s sauvegarde, 6 relu(s), 40 signal(aux) dans la requ&ecirc;te active.</p>
+        <p>6 enregistrement(s) disponibles apr&egrave;s sauvegarde, 6 relu(s), 42 signal(aux) dans la requ&ecirc;te active.</p>
       </div>
     </div>
     <p class="persistent-history-guard">L&rsquo;historique persistant sert &agrave; relire les rapports pass&eacute;s. Il reste une couche d&rsquo;observation : il ne choisit pas les joueurs, ne modifie pas la composition, ne change pas le score et ne cr&eacute;e aucun &eacute;v&eacute;nement de match.</p>
@@ -2093,7 +2149,7 @@
           <div><span>Avant sauvegarde</span><strong>6</strong></div>
           <div><span>Apr&egrave;s sauvegarde</span><strong>6</strong></div>
           <div><span>Records relus</span><strong>6</strong></div>
-          <div><span>Signaux relus</span><strong>40</strong></div>
+          <div><span>Signaux relus</span><strong>42</strong></div>
           <div><span>Match courant sauv&eacute;</span><strong>oui</strong></div>
         </div>
       </article>
@@ -2113,7 +2169,7 @@
         <p>La coh&eacute;rence de stockage affiche un instantan&eacute; unique de sauvegarde. Les compteurs visibles dans le rapport, la validation et l&rsquo;export doivent correspondre exactement.</p>
       </div>
       <ul class="history-consistency-snapshot">
-        <li>snapshot id: 5c-replaced-6-6-6-40</li>
+        <li>snapshot id: 5c-replaced-6-6-6-42</li>
         <li>scenario: replaced</li>
         <li>save operation: replaced</li>
         <li>idempotent save: false</li>
@@ -2125,7 +2181,7 @@
         <li>replaced record count: 1</li>
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
-        <li>queried signal count: 40</li>
+        <li>queried signal count: 42</li>
         <li>migration SPI adapter implemented false: true</li>
         <li>migration from file-backed required true: true</li>
       </ul>
@@ -2148,7 +2204,7 @@
             <div><span>Remplac&eacute;s</span><strong>1</strong></div>
             <div><span>Doublons ignor&eacute;s</span><strong>0</strong></div>
             <div><span>Records relus</span><strong>6</strong></div>
-            <div><span>Signaux relus</span><strong>40</strong></div>
+            <div><span>Signaux relus</span><strong>42</strong></div>
           </div>
         </article>
         <article class="history-consistency-card">
@@ -2270,7 +2326,7 @@
       </div>
       <p class="database-adapter-spike-boundary">Boundary 5E : file_backed reste la source produit active ; l&rsquo;adapter experimental_database reste un spike technique non appliqu&eacute;.</p>
       <p class="database-adapter-spike-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
-      <p class="database-adapter-spike-warning">Experimental database adapter exists behind a disabled-by-default feature flag. Product history source remains file_backed; database adapter is not product truth. Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active. Persistence snapshot consumed: 5c-replaced-6-6-6-40.</p>
+      <p class="database-adapter-spike-warning">Experimental database adapter exists behind a disabled-by-default feature flag. Product history source remains file_backed; database adapter is not product truth. Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active. Persistence snapshot consumed: 5c-replaced-6-6-6-42.</p>
     </section>
 
     <section class="durable-storage-decision-section" aria-label="D&eacute;cision stockage durable">
@@ -2325,7 +2381,7 @@
       </div>
       <p class="durable-storage-decision-boundary">Boundary 5F : sqlite_local est une cible de pr&eacute;paration ; file_backed reste la source active, la base n&rsquo;est pas utilis&eacute;e comme v&eacute;rit&eacute; produit et les compteurs DB r&eacute;els restent &agrave; 0.</p>
       <p class="durable-storage-decision-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
-      <p class="durable-storage-decision-warning">Durable storage target selected for preparation only: sqlite_local. SQLite local adapter wiring is disabled/no-IO in Sprint 5F. Product history source remains file_backed; database adapter is not product truth. Persistence snapshot consumed: 5c-replaced-6-6-6-40. Migration preparation status carried forward: available. Database adapter spike status carried forward: available.</p>
+      <p class="durable-storage-decision-warning">Durable storage target selected for preparation only: sqlite_local. SQLite local adapter wiring is disabled/no-IO in Sprint 5F. Product history source remains file_backed; database adapter is not product truth. Persistence snapshot consumed: 5c-replaced-6-6-6-42. Migration preparation status carried forward: available. Database adapter spike status carried forward: available.</p>
     </section>
 
     <section class="controlled-local-readonly-db-section" aria-label="Lecture SQLite locale contr&ocirc;l&eacute;e">
@@ -2451,10 +2507,10 @@
         <article class="durable-storage-decision-card">
           <h4>Avant / apr&egrave;s projet&eacute;</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Score full-match avant calibration</span><strong>12 - 0</strong></div>
-            <div><span>Projection apr&egrave;s calibration</span><strong>9 - 0</strong></div>
-            <div><span>Scoring events avant</span><strong>4</strong></div>
-            <div><span>Scoring events apr&egrave;s</span><strong>3</strong></div>
+            <div><span>Score full-match avant calibration</span><strong>24 - 35</strong></div>
+            <div><span>Projection apr&egrave;s calibration</span><strong>19 - 26</strong></div>
+            <div><span>Scoring events avant</span><strong>18</strong></div>
+            <div><span>Scoring events apr&egrave;s</span><strong>13</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2462,17 +2518,17 @@
           <div class="durable-storage-decision-kpi">
             <div><span>Cause principale</span><strong>MIXED_CAUSES</strong></div>
             <div><span>Confiance</span><strong>medium</strong></div>
-            <div><span>SHOT_GOAL share</span><strong>100%</strong></div>
-            <div><span>Dominance &eacute;quipe</span><strong>100%</strong></div>
+            <div><span>SHOT_GOAL share</span><strong>25%</strong></div>
+            <div><span>Dominance &eacute;quipe</span><strong>59%</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Sanity warnings</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Segments</span><strong>8</strong></div>
-            <div><span>Occasions danger</span><strong>63</strong></div>
-            <div><span>Risque amplification</span><strong>LOW</strong></div>
-            <div><span>Volatilit&eacute; single-run</span><strong>MEDIUM</strong></div>
+            <div><span>Occasions danger</span><strong>84</strong></div>
+            <div><span>Risque amplification</span><strong>MEDIUM</strong></div>
+            <div><span>Volatilit&eacute; single-run</span><strong>HIGH</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2485,7 +2541,7 @@
           </div>
         </article>
       </div>
-      <p class="durable-storage-decision-boundary">Single-run score economy shows 4 scoring events, 100% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 1 scoring events in one segment.</p>
+      <p class="durable-storage-decision-boundary">Single-run score economy shows 18 scoring events, 25% SHOT_GOAL point share, 59% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</p>
       <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun cap de score, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
       <p class="durable-storage-decision-warning">KEEP_SCORING_CONSTANTS_AND_CONFIRM_ON_FULL_MATCH_BATCH_BEFORE_GLOBAL_ECONOMY_DECISION</p>
     </section>
@@ -2499,35 +2555,35 @@
         <article class="durable-storage-decision-card">
           <h4>Score officiel</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Points traces</span><strong>12</strong></div>
-            <div><span>Evenements officiels</span><strong>4</strong></div>
+            <div><span>Points traces</span><strong>59</strong></div>
+            <div><span>Evenements officiels</span><strong>18</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Couverture</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Attribution</span><strong>100%</strong></div>
-            <div><span>Attribues</span><strong>4/4</strong></div>
+            <div><span>Attribues</span><strong>18/18</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>UNKNOWN</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Apres 6B</span><strong>0</strong></div>
-            <div><span>Legacy 6A</span><strong>4</strong></div>
+            <div><span>Legacy 6A</span><strong>18</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Confiance</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Haute</span><strong>4</strong></div>
+            <div><span>Haute</span><strong>18</strong></div>
             <div><span>Moyenne / basse</span><strong>0 / 0</strong></div>
           </div>
         </article>
       </div>
       <table class="premium-table">
         <thead><tr><th>Famille de score</th><th>Evenements</th><th>Points</th></tr></thead>
-        <tbody><tr><td>SHOT_GOAL</td><td>4</td><td>12</td></tr><tr><td>TRY_TOUCHDOWN</td><td>0</td><td>0</td></tr><tr><td>CONVERSION_GOAL</td><td>0</td><td>0</td></tr><tr><td>DROP_GOAL</td><td>0</td><td>0</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0</td></tr></tbody>
+        <tbody><tr><td>SHOT_GOAL</td><td>5</td><td>15</td></tr><tr><td>TRY_TOUCHDOWN</td><td>6</td><td>30</td></tr><tr><td>CONVERSION_GOAL</td><td>6</td><td>12</td></tr><tr><td>DROP_GOAL</td><td>1</td><td>2</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0</td></tr></tbody>
       </table>
       <p class="durable-storage-decision-guard">Aucun evenement de score officiel ne reste sans famille.</p>
       <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
@@ -2542,10 +2598,10 @@
         <article class="durable-storage-decision-card">
           <h4>Score observ&eacute;</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Score officiel</span><strong>12 - 0</strong></div>
-            <div><span>Score events</span><strong>4</strong></div>
-            <div><span>SHOT_GOAL</span><strong>4</strong></div>
-            <div><span>Points SHOT_GOAL</span><strong>12</strong></div>
+            <div><span>Score officiel</span><strong>24 - 35</strong></div>
+            <div><span>Score events</span><strong>18</strong></div>
+            <div><span>SHOT_GOAL</span><strong>5</strong></div>
+            <div><span>Points SHOT_GOAL</span><strong>15</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2650,7 +2706,7 @@
         <td>non</td>
       </tr></tbody>
       </table>
-      <p class="durable-storage-decision-boundary">Official full-match output is 12 - 0 with 4 SHOT_GOAL events; historical calibration references exist, but the official full-match score path has not yet carried them over.</p>
+      <p class="durable-storage-decision-boundary">Official full-match output is 24 - 35 with 5 SHOT_GOAL events; historical calibration references exist, but the official full-match score path has not yet carried them over.</p>
       <p class="durable-storage-decision-guard">6C est diagnostic only : constantes inchang&eacute;es, aucun cap, aucune suppression ou r&eacute;&eacute;criture d&rsquo;&eacute;v&eacute;nements, aucun score adverse forc&eacute;. FULL_MATCH_BATCH_ECONOMY reste la seule r&eacute;f&eacute;rence globale.</p>
       <p class="durable-storage-decision-warning">PREPARE_6D_CONNECT_FULLMATCH_TO_VALIDATED_SCORING_CALIBRATIONS</p>
     </section>
@@ -2665,18 +2721,18 @@
           <h4>Avant / apr&egrave;s connexion</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Score avant</span><strong>45 - 0</strong></div>
-            <div><span>Score apr&egrave;s</span><strong>12 - 0</strong></div>
+            <div><span>Score apr&egrave;s</span><strong>24 - 35</strong></div>
             <div><span>Score events avant</span><strong>15</strong></div>
-            <div><span>Score events apr&egrave;s</span><strong>4</strong></div>
+            <div><span>Score events apr&egrave;s</span><strong>18</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Famille SHOT_GOAL</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Events avant</span><strong>15</strong></div>
-            <div><span>Events apr&egrave;s</span><strong>4</strong></div>
+            <div><span>Events apr&egrave;s</span><strong>5</strong></div>
             <div><span>Points avant</span><strong>45</strong></div>
-            <div><span>Points apr&egrave;s</span><strong>12</strong></div>
+            <div><span>Points apr&egrave;s</span><strong>15</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2698,65 +2754,65 @@
           </div>
         </article>
       </div>
-      <p class="durable-storage-decision-boundary">Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has 4 SHOT_GOAL events for 12 points and keeps the score derived from official score_change consequences.</p>
+      <p class="durable-storage-decision-boundary">Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has 5 SHOT_GOAL events for 15 points plus 13 official non-shot scoring events, and keeps the score derived from official score_change consequences.</p>
       <p class="durable-storage-decision-guard">Constantes inchang&eacute;es : SHOT_GOAL = 3, TRY_TOUCHDOWN = 5, CONVERSION_GOAL = 2, DROP_GOAL = 2, PENALTY_SHOT inactif. Aucun score adverse forc&eacute;, aucune suppression apr&egrave;s g&eacute;n&eacute;ration.</p>
       <p class="durable-storage-decision-warning">CONFIRM_OFFICIAL_SCORING_PATH_CONNECTED_AND_RUN_FULL_MATCH_BATCH_NEXT</p>
     </section>
 
-    <section class="controlled-local-readonly-db-section" aria-label="Preuve batch full-match">
-      <div>
-        <h3>Preuve batch full-match</h3>
-        <p>&Eacute;conomie observ&eacute;e sur 50 matchs avec le chemin officiel connect&eacute;. Le score est issu des &eacute;v&eacute;nements officiels <code>score_change</code>; cette lecture mesure la stabilit&eacute; globale sans modifier les valeurs de scoring.</p>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6F</p>
+        <h3>Mix des familles de score</h3>
+        <p>
+          Le chemin officiel active des routes disponibles et eligibles pour SHOT_GOAL, TRY_TOUCHDOWN,
+          DROP_GOAL, CONVERSION_GOAL apres essai valide, et continuation. Ces routes ne sont pas forcees :
+          le score reste issu des evenements officiels <code>score_change</code>.
+        </p>
       </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Scorelines</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Status</span><strong>PARTIAL</strong></div>
-            <div><span>Scorelines uniques</span><strong>7</strong></div>
-            <div><span>Points moyens</span><strong>16.3</strong></div>
-            <div><span>&Eacute;cart moyen</span><strong>16.3</strong></div>
-          </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Match courant et routes</h4>
+          <ul>
+            <li>Familles supportees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
+            <li>Familles selectionnees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
+            <li>Familles scorantes: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL</li>
+            <li>Conversion uniquement apres TRY: oui</li>
+            <li>PENALTY_SHOT inactive: oui</li>
+          </ul>
         </article>
-        <article class="durable-storage-decision-card">
-          <h4>Risques score</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Blowout rate</span><strong>100%</strong></div>
-            <div><span>Severe blowout</span><strong>16%</strong></div>
-            <div><span>Shutout rate</span><strong>100%</strong></div>
-            <div><span>0-0</span><strong>0%</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Familles</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>SHOT_GOAL share</span><strong>100%</strong></div>
-            <div><span>TRY/DROP pr&eacute;sence</span><strong>0%</strong></div>
-            <div><span>Non-shot points</span><strong>0%</strong></div>
-            <div><span>Multi-familles</span><strong>0</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Garde-fous</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Chemin officiel</span><strong>oui</strong></div>
-            <div><span>Calibrations</span><strong>oui</strong></div>
-            <div><span>Score_change</span><strong>oui</strong></div>
-            <div><span>Cap / rewrite</span><strong>0</strong></div>
-          </div>
+        <article class="product-card">
+          <h4>Batch 6F</h4>
+          <ul>
+            <li>Matchs: 50</li>
+            <li>Scorelines uniques: 45</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Matchs uniquement SHOT: 0</li>
+            <li>Matchs multi-familles: 50</li>
+            <li>Shutout rate: 12%</li>
+          </ul>
         </article>
       </div>
-      <table class="premium-table">
-        <thead><tr><th>Famille</th><th>Points</th><th>Part</th></tr></thead>
-        <tbody><tr><td>SHOT_GOAL</td><td>813</td><td>100%</td></tr><tr><td>TRY_TOUCHDOWN</td><td>0</td><td>0%</td></tr><tr><td>CONVERSION_GOAL</td><td>0</td><td>0%</td></tr><tr><td>DROP_GOAL</td><td>0</td><td>0%</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0%</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0%</td></tr></tbody>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Evenements</th>
+            <th>Points</th>
+            <th>Part points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>270</td><td>810</td><td>36%</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>170</td><td>850</td><td>38%</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>170</td><td>340</td><td>15%</td></tr>
+          <tr><td>DROP_GOAL</td><td>128</td><td>256</td><td>11%</td></tr>
+        </tbody>
       </table>
-      <table class="premium-table">
-        <thead><tr><th>Top scorelines</th><th>Matchs</th></tr></thead>
-        <tbody><tr><td>15 - 0</td><td>12</td></tr><tr><td>18 - 0</td><td>10</td></tr><tr><td>21 - 0</td><td>8</td></tr><tr><td>12 - 0</td><td>7</td></tr><tr><td>0 - 15</td><td>5</td></tr></tbody>
-      </table>
-      <p class="durable-storage-decision-boundary">Conclusion prudente : PARTIAL. Les garde-fous techniques sont propres, mais l&rsquo;&eacute;conomie observ&eacute;e reste &agrave; corriger avant confirmation globale.</p>
-      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es : SHOT_GOAL = 3, TRY_TOUCHDOWN = 5, CONVERSION_GOAL = 2, DROP_GOAL = 2, PENALTY_SHOT inactif. Aucune correction manuelle du score, aucune retouche post-run.</p>
-      <p class="durable-storage-decision-warning">TARGET_OFFICIAL_ROUTE_FAMILY_MIX_NEXT — Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability</p>
+      <p class="muted">
+        Conclusion prudente: PASS. Recommendation: KEEP_ROUTE_FAMILY_MIX_MONITORING.
+        Aucune valeur de score n'est changee, aucun score adverse n'est force, aucune reecriture post-run n'est appliquee.
+      </p>
     </section>
 
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
@@ -3502,10 +3558,10 @@
         <li>multi-match phase comparison status available</li>
         <li>sample count 4</li>
         <li>panel count 3</li>
-        <li>compared signal count 8</li>
-        <li>repeated signal count 6</li>
+        <li>compared signal count 9</li>
+        <li>repeated signal count 5</li>
         <li>visible-once signal count 2</li>
-        <li>unstable signal count 0</li>
+        <li>unstable signal count 2</li>
         <li>insufficient data count 1</li>
         <li>local comparison only true</li>
         <li>global proof claim count 0</li>
@@ -3533,11 +3589,11 @@
       <ul>
         <li>history view status available</li>
         <li>sample count 4</li>
-        <li>drilldown count 8</li>
-        <li>history sample row count 32</li>
-        <li>local repeated drilldown count 6</li>
+        <li>drilldown count 9</li>
+        <li>history sample row count 36</li>
+        <li>local repeated drilldown count 5</li>
         <li>local visible-once drilldown count 2</li>
-        <li>local unstable drilldown count 0</li>
+        <li>local unstable drilldown count 2</li>
         <li>insufficient data drilldown count 0</li>
         <li>trend proof claim count 0</li>
         <li>global proof claim count 0</li>
@@ -3567,7 +3623,7 @@
         <li>store kind file_backed</li>
         <li>stored record count 6</li>
         <li>queried record count 6</li>
-        <li>queried signal count 40</li>
+        <li>queried signal count 42</li>
         <li>controlled sample record count 4</li>
         <li>simulated match history record count 1</li>
         <li>product history record count 1</li>
@@ -3605,7 +3661,7 @@
         <li>records before save count 6</li>
         <li>records after save count 6</li>
         <li>queried record count 6</li>
-        <li>queried signal count 40</li>
+        <li>queried signal count 42</li>
         <li>current match record saved true</li>
         <li>report queries read-only true</li>
         <li>persistence boundary visible true</li>
@@ -3634,7 +3690,7 @@
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
       <ul>
-        <li>snapshot id: 5c-replaced-6-6-6-40</li>
+        <li>snapshot id: 5c-replaced-6-6-6-42</li>
         <li>scenario: replaced</li>
         <li>save operation: replaced</li>
         <li>idempotent save: false</li>
@@ -3646,7 +3702,7 @@
         <li>replaced record count: 1</li>
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
-        <li>queried signal count: 40</li>
+        <li>queried signal count: 42</li>
         <li>migration SPI adapter implemented false: true</li>
         <li>migration from file-backed required true: true</li>
         <li>report queries read-only: true</li>
@@ -3880,10 +3936,10 @@
         <li>status: available</li>
         <li>scope: FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN</li>
         <li>calibration version: SCORE_ECONOMY_6A</li>
-        <li>official score before calibration: 12 - 0</li>
-        <li>official score after calibration: 9 - 0</li>
-        <li>score delta home: -3</li>
-        <li>score delta away: 0</li>
+        <li>official score before calibration: 24 - 35</li>
+        <li>official score after calibration: 19 - 26</li>
+        <li>score delta home: -5</li>
+        <li>score delta away: -9</li>
         <li>scoring constants changed: false</li>
         <li>score cap applied: false</li>
         <li>post-hoc score rewrite applied: false</li>
@@ -3891,25 +3947,25 @@
         <li>scoring events rewritten: false</li>
         <li>forced opponent score applied: false</li>
         <li>root-cause primary cause: MIXED_CAUSES</li>
-        <li>root-cause secondary causes: TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, GOALKEEPER_UNDERWEIGHTED, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY</li>
+        <li>root-cause secondary causes: TOO_MANY_FINISHING_OPPORTUNITIES, GOALKEEPER_UNDERWEIGHTED, SEGMENT_AGGREGATION_AMPLIFIES_SCORE, FATIGUE_ERRORS_TOO_PUNITIVE, SINGLE_RUN_VOLATILITY</li>
         <li>root-cause confidence: medium</li>
-        <li>root-cause evidence: Single-run score economy shows 4 scoring events, 100% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 1 scoring events in one segment.</li>
+        <li>root-cause evidence: Single-run score economy shows 18 scoring events, 25% SHOT_GOAL point share, 59% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</li>
         <li>segment count: 8</li>
-        <li>sequence count: 48</li>
-        <li>scoring event count: 4</li>
-        <li>scoring events by family before: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring events by family after: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring points by family before: {&quot;SHOT_GOAL&quot;:12,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring points by family after: {&quot;SHOT_GOAL&quot;:9,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>selected route mix before: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>selected route mix after: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>route success rates before: {&quot;SHOT_GOAL&quot;:6,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>route success rates after: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>goalkeeper impact before: 85</li>
-        <li>goalkeeper impact after: 100</li>
-        <li>fatigue impact before: 63</li>
-        <li>fatigue impact after: 42</li>
-        <li>segment amplification risk: LOW</li>
+        <li>sequence count: 56</li>
+        <li>scoring event count: 18</li>
+        <li>scoring events by family before: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:6,&quot;CONVERSION_GOAL&quot;:6,&quot;DROP_GOAL&quot;:1,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring events by family after: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:3,&quot;DROP_GOAL&quot;:1,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family before: {&quot;SHOT_GOAL&quot;:15,&quot;TRY_TOUCHDOWN&quot;:30,&quot;CONVERSION_GOAL&quot;:12,&quot;DROP_GOAL&quot;:2,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family after: {&quot;SHOT_GOAL&quot;:12,&quot;TRY_TOUCHDOWN&quot;:25,&quot;CONVERSION_GOAL&quot;:6,&quot;DROP_GOAL&quot;:2,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>selected route mix before: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:6,&quot;CONVERSION_GOAL&quot;:6,&quot;DROP_GOAL&quot;:1,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>selected route mix after: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:3,&quot;DROP_GOAL&quot;:1,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>route success rates before: {&quot;SHOT_GOAL&quot;:6,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:100,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>route success rates after: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:83,&quot;CONVERSION_GOAL&quot;:50,&quot;DROP_GOAL&quot;:100,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>goalkeeper impact before: 69</li>
+        <li>goalkeeper impact after: 84</li>
+        <li>fatigue impact before: 81</li>
+        <li>fatigue impact after: 54</li>
+        <li>segment amplification risk: MEDIUM</li>
         <li>single-run limitation: true</li>
         <li>batch/live separation preserved: true</li>
         <li>MatchBonusEvent changed: false</li>
@@ -3931,16 +3987,16 @@
         <li>status: PASS</li>
         <li>scope: FULL_MATCH_SCORING_FAMILY_SINGLE_RUN</li>
         <li>attribution version: SCORING_FAMILY_ATTRIBUTION_6B</li>
-        <li>total scoring event count: 4</li>
-        <li>attributed scoring event count: 4</li>
+        <li>total scoring event count: 18</li>
+        <li>attributed scoring event count: 18</li>
         <li>unknown scoring event count: 0</li>
-        <li>legacy unknown scoring event count: 4</li>
+        <li>legacy unknown scoring event count: 18</li>
         <li>unknown scoring point total: 0</li>
         <li>attribution coverage rate: 100</li>
-        <li>scoring events by family: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring points by family: {&quot;SHOT_GOAL&quot;:12,&quot;TRY_TOUCHDOWN&quot;:0,&quot;CONVERSION_GOAL&quot;:0,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring events by family: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:6,&quot;CONVERSION_GOAL&quot;:6,&quot;DROP_GOAL&quot;:1,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family: {&quot;SHOT_GOAL&quot;:15,&quot;TRY_TOUCHDOWN&quot;:30,&quot;CONVERSION_GOAL&quot;:12,&quot;DROP_GOAL&quot;:2,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
         <li>unknown reasons: none</li>
-        <li>high confidence count: 4</li>
+        <li>high confidence count: 18</li>
         <li>medium confidence count: 0</li>
         <li>low confidence count: 0</li>
         <li>family attribution warnings: none</li>
@@ -3967,16 +4023,16 @@
         <li>status: available</li>
         <li>scope: FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN</li>
         <li>version: CALIBRATION_CARRYOVER_6C</li>
-        <li>official full-match score: 12 - 0</li>
-        <li>official full-match scoring events: 4</li>
-        <li>official full-match SHOT_GOAL events: 4</li>
-        <li>official full-match SHOT_GOAL points: 12</li>
+        <li>official full-match score: 24 - 35</li>
+        <li>official full-match scoring events: 18</li>
+        <li>official full-match SHOT_GOAL events: 5</li>
+        <li>official full-match SHOT_GOAL points: 15</li>
         <li>batch calibration known SHOT_GOAL per match: 2</li>
         <li>batch calibration known conversion rate: 35%</li>
         <li>primary regression cause: FULLMATCH_PARALLEL_SCORING_PATH</li>
         <li>secondary regression causes: FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION, FULLMATCH_NOT_USING_SCORING_CHOICE_BALANCE, FULLMATCH_NOT_USING_AFFORDANCE_VOLUME_CONSTRAINTS, FULLMATCH_GOALKEEPER_SUPPRESSION_NOT_APPLIED, FULLMATCH_SEGMENT_AMPLIFICATION_RISK</li>
         <li>confidence: high</li>
-        <li>warnings: FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION, FULLMATCH_NOT_USING_SCORING_CHOICE_BALANCE, FULLMATCH_NOT_USING_AFFORDANCE_VOLUME_CONSTRAINTS, FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING, FULLMATCH_SHOT_GOAL_MONO_FAMILY, FULLMATCH_SEGMENT_AMPLIFICATION_RISK, FULLMATCH_PARALLEL_SCORING_PATH, FULLMATCH_LEGACY_SCORING_PATH, FULLMATCH_GOALKEEPER_SUPPRESSION_NOT_APPLIED, FULLMATCH_DEFENSIVE_RESISTANCE_NOT_APPLIED, FULLMATCH_FATIGUE_OFFENSIVE_PRECISION_NOT_APPLIED, FULLMATCH_DANGER_PHASE_NOT_CONNECTED, CALIBRATION_DIAGNOSTIC_ONLY, GLOBAL_ECONOMY_NOT_PROVEN</li>
+        <li>warnings: FULLMATCH_NOT_USING_SHOT_DIFFICULTY_CALIBRATION, FULLMATCH_NOT_USING_SCORING_CHOICE_BALANCE, FULLMATCH_NOT_USING_AFFORDANCE_VOLUME_CONSTRAINTS, FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING, FULLMATCH_SEGMENT_AMPLIFICATION_RISK, FULLMATCH_PARALLEL_SCORING_PATH, FULLMATCH_LEGACY_SCORING_PATH, FULLMATCH_GOALKEEPER_SUPPRESSION_NOT_APPLIED, FULLMATCH_DEFENSIVE_RESISTANCE_NOT_APPLIED, FULLMATCH_FATIGUE_OFFENSIVE_PRECISION_NOT_APPLIED, FULLMATCH_DANGER_PHASE_NOT_CONNECTED, CALIBRATION_DIAGNOSTIC_ONLY, GLOBAL_ECONOMY_NOT_PROVEN</li>
         <li>matrix rows: 10</li>
         <li>scoring path audit rows: 5</li>
         <li>shot difficulty batch/full-match: true/false</li>
@@ -4019,36 +4075,11 @@
         <li>parallel path after: false</li>
         <li>legacy shot path after: false</li>
         <li>fallback route path after: false</li>
-        <li>segment amplification after: LOW</li>
-        <li>warnings: OFFICIAL_SCORING_PATH_CONNECTED, SCORE_REDUCED_BY_OFFICIAL_RESOLUTION, GLOBAL_ECONOMY_NOT_PROVEN, FULL_MATCH_BATCH_REQUIRED</li>
+        <li>segment amplification after: HIGH</li>
+        <li>warnings: OFFICIAL_SCORING_PATH_CONNECTED, SHOT_GOAL_REDUCED_BY_OFFICIAL_RESOLUTION, SEGMENT_AMPLIFICATION_STILL_HIGH, SCORE_STILL_EXTREME_SINGLE_RUN, GLOBAL_ECONOMY_NOT_PROVEN, FULL_MATCH_BATCH_REQUIRED</li>
       </ul>
     </article>
     
-    <article class="premium-appendix-card">
-      <h3>Preuve batch full-match 6E</h3>
-      <ul>
-        <li>status: PARTIAL</li>
-        <li>scope: FULL_MATCH_BATCH_ECONOMY_PROOF</li>
-        <li>version: FULL_MATCH_BATCH_ECONOMY_6E</li>
-        <li>match count: 50</li>
-        <li>unique seeds: 50</li>
-        <li>unique scorelines: 7</li>
-        <li>average total points: 16.3</li>
-        <li>average score difference: 16.3</li>
-        <li>blowout rate: 100%</li>
-        <li>severe blowout rate: 16%</li>
-        <li>shutout rate: 100%</li>
-        <li>SHOT_GOAL point share: 100%</li>
-        <li>try/drop presence rate: 0%</li>
-        <li>official path connected all runs: true</li>
-        <li>calibration applied all runs: true</li>
-        <li>score from score_change all runs: true</li>
-        <li>score cap applied count: 0</li>
-        <li>post-hoc rewrite count: 0</li>
-        <li>warnings: FULL_MATCH_BATCH_PARTIAL, TOO_MANY_SHOT_ONLY_MATCHES, SHOT_GOAL_SHARE_TOO_HIGH, NON_SHOT_SCORING_TOO_LOW, TRY_DROP_PRESENCE_TOO_LOW, TOO_MANY_SHUTOUTS, TOO_MANY_BLOWOUTS, SCORELINE_VARIATION_LOW, FULL_MATCH_BATCH_ECONOMY_NEEDS_TARGETED_FIX</li>
-        <li>recommendation: TARGET_OFFICIAL_ROUTE_FAMILY_MIX_NEXT</li>
-      </ul>
-    </article>
     <details class="appendix">
       <summary>Hypothèses sandbox</summary>
       <p>Les hypothèses expérimentales restent séparées du rapport principal.</p>

@@ -164,20 +164,23 @@ function watchpoint(input: {
   const topPlayer = input.playerEntries[0];
   const topCause = input.causeEntries[0]?.key;
 
-  if (input.fatigueImpactTotal >= 280 || topCause === "fatigue_drop") {
+  if (input.fatigueImpactTotal >= 360 || (topCause === "fatigue_drop" && input.fatigueImpactTotal >= 300)) {
     return "A surveiller : la fatigue et la lucidite tardive pesent sur la qualite des sequences officielles.";
   }
-  if (topCause === "goalkeeper_quality") {
+  if (topCause === "goalkeeper_quality" || input.causeEntries.some((entry) => entry.key === "goalkeeper_quality")) {
     return "A verifier : l'influence gardien ressort, notamment sur la gestion du second ballon et des tirs subis.";
   }
-  if (topCause === "defensive_recovery") {
+  if (topCause === "defensive_recovery" || input.causeEntries.some((entry) => entry.key === "defensive_recovery")) {
     return "A travailler : les recuperations existent, mais il faut securiser la premiere sortie apres recuperation.";
   }
-  if (topCause === "speed_advantage") {
+  if (topCause === "speed_advantage" || input.causeEntries.some((entry) => entry.key === "speed_advantage")) {
     return "A verifier : les transitions rapides demandent plus de soutien autour du porteur pour rester controlables.";
   }
-  if (topCause === "power_advantage") {
+  if (topCause === "power_advantage" || input.causeEntries.some((entry) => entry.key === "power_advantage")) {
     return "A surveiller : le jeu de contact cree du gain, mais peut isoler le porteur si le soutien arrive tard.";
+  }
+  if (input.fatigueImpactTotal >= 280 || topCause === "fatigue_drop") {
+    return "A surveiller : la fatigue et la lucidite tardive pesent sur la qualite des sequences officielles.";
   }
   if (input.pressureLossZones.length > 0) {
     return "Ã€ surveiller : les sorties sous pression restent un signal officiel Ã  confirmer sur plusieurs matchs.";

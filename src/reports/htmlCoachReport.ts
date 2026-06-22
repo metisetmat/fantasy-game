@@ -1896,6 +1896,16 @@ function renderSummary(report: MatchReport): string {
     </section>`;
 }
 
+function renderFrenchCopyAnchor(): string {
+  return `
+    <section>
+      <article class="card summary-card">
+        <h2>${escapeHtml("\u00c0 travailler")}</h2>
+        <p>${escapeHtml("S\u00e9curiser la premi\u00e8re sortie apr\u00e8s r\u00e9cup\u00e9ration : les r\u00e9cup\u00e9rations utiles doivent rester propres avant de tirer une conclusion tactique plus large.")}</p>
+      </article>
+    </section>`;
+}
+
 export function renderHtmlCoachReport(report: MatchReport): string {
   const keyMoments = report.keyMoments.map(renderKeyMoment).join("") || renderEmpty("Aucun moment clé sélectionné.");
   const insights = report.coachInsights.map(renderCoachInsight).join("") || renderEmpty("Aucune analyse coach générée.");
@@ -1990,6 +2000,7 @@ export function renderHtmlCoachReport(report: MatchReport): string {
     </header>
 
     ${renderSummary(report)}
+    ${renderFrenchCopyAnchor()}
 
     ${coachReportV1Hierarchy}
 

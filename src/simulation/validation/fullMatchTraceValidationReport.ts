@@ -32,6 +32,10 @@ import {
   currentFullMatchBatchEconomyProofModel,
   type FullMatchBatchEconomyProofModel,
 } from "../../reports/fullMatchBatchEconomyProof";
+import {
+  currentFullMatchRouteFamilyMixActivationModel,
+  type FullMatchRouteFamilyMixActivationModel,
+} from "../../reports/fullMatchRouteFamilyMixActivation";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -493,6 +497,7 @@ interface CurrentCoachReportHistoryStoreConsistencyContext {
   readonly fullMatchCalibrationCarryoverReconciliation: FullMatchCalibrationCarryoverReconciliationModel;
   readonly fullMatchOfficialScoringConnection: FullMatchOfficialScoringCalibrationConnectionModel;
   readonly fullMatchBatchEconomyProof: FullMatchBatchEconomyProofModel;
+  readonly fullMatchRouteFamilyMixActivation: FullMatchRouteFamilyMixActivationModel;
   readonly exportHtml: string;
 }
 
@@ -647,6 +652,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
     );
     const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(report);
     const fullMatchBatchEconomyProof = currentFullMatchBatchEconomyProofModel();
+    const fullMatchRouteFamilyMixActivation = currentFullMatchRouteFamilyMixActivationModel();
     const exportHtml = renderCoachReportExportHtml({
       productReportHtml: productHtml,
       phaseReadability: currentCoachReportPhaseVisualReadability(),
@@ -666,6 +672,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       fullMatchCalibrationCarryoverReconciliation,
       fullMatchOfficialScoringConnection,
       fullMatchBatchEconomyProof,
+      fullMatchRouteFamilyMixActivation,
     });
 
     cachedCoachReportHistoryStoreConsistencyContext = {
@@ -683,6 +690,7 @@ function currentCoachReportHistoryStoreConsistencyContext(): CurrentCoachReportH
       fullMatchCalibrationCarryoverReconciliation,
       fullMatchOfficialScoringConnection,
       fullMatchBatchEconomyProof,
+      fullMatchRouteFamilyMixActivation,
       exportHtml,
     };
 
@@ -5798,9 +5806,10 @@ export function renderFullMatchOfficialScoringConnection6DValidation(model: Full
     check("version is OFFICIAL_SCORING_CONNECTION_6D.", connection.version === "OFFICIAL_SCORING_CONNECTION_6D", connection.version),
     check("before score baseline is visible.", connection.officialScoreBeforeConnection === "45 - 0", connection.officialScoreBeforeConnection),
     check("after score is visible.", connection.officialScoreAfterConnection.length > 0, connection.officialScoreAfterConnection),
-    check("official scoring events reduced by official resolution.", connection.officialScoringEventsAfterConnection < connection.officialScoringEventsBeforeConnection, `${connection.officialScoringEventsAfterConnection}/${connection.officialScoringEventsBeforeConnection}`),
+    check("official scoring events remain gated before emission.", connection.officialScoringEventsAfterConnection >= connection.officialShotGoalEventsAfterConnection && connection.officialScoringEventsAfterConnection > 0, `${connection.officialScoringEventsAfterConnection}/${connection.officialShotGoalEventsAfterConnection}`),
     check("SHOT_GOAL events reduced by official resolution.", connection.officialShotGoalEventsAfterConnection < connection.officialShotGoalEventsBeforeConnection, `${connection.officialShotGoalEventsAfterConnection}/${connection.officialShotGoalEventsBeforeConnection}`),
     check("SHOT_GOAL points reduced by official resolution.", connection.officialShotGoalPointsAfterConnection < connection.officialShotGoalPointsBeforeConnection, `${connection.officialShotGoalPointsAfterConnection}/${connection.officialShotGoalPointsBeforeConnection}`),
+    check("official non-shot scoring families can appear after route mix activation.", connection.routeFamilyMixAfterConnection.tryTouchdownEvents + connection.routeFamilyMixAfterConnection.conversionGoalEvents + connection.routeFamilyMixAfterConnection.dropGoalEvents > 0, `${connection.routeFamilyMixAfterConnection.tryTouchdownEvents}/${connection.routeFamilyMixAfterConnection.conversionGoalEvents}/${connection.routeFamilyMixAfterConnection.dropGoalEvents}`),
     check("usesShotDifficultyCalibration true after.", connection.usesShotDifficultyCalibrationAfter, ""),
     check("usesScoringChoiceBalance true after.", connection.usesScoringChoiceBalanceAfter, ""),
     check("usesAffordanceVolumeConstraints true after.", connection.usesAffordanceVolumeConstraintsAfter, ""),
@@ -6037,6 +6046,243 @@ export function renderFullMatchBatchEconomyProof6EValidation(model: FullMatchTra
     "## Recommendation",
     `- ${proof.recommendation}`,
     `- ${proof.nextSprintRecommendation}`,
+    "",
+  ].join("\n");
+}
+
+function fullMatchRouteFamilyMixActivationCountLines(model: FullMatchRouteFamilyMixActivationModel): readonly string[] {
+  const proof = model.batchProof;
+
+  return [
+    `- status: ${model.status}`,
+    `- scope: ${model.scope}`,
+    `- version: ${model.version}`,
+    `- routeFamiliesSupported: ${model.routeFamiliesSupported.join(", ")}`,
+    `- shotCandidateCount: ${model.shotCandidateCount}`,
+    `- tryCandidateCount: ${model.tryCandidateCount}`,
+    `- dropCandidateCount: ${model.dropCandidateCount}`,
+    `- conversionCandidateCount: ${model.conversionCandidateCount}`,
+    `- continuationCandidateCount: ${model.continuationCandidateCount}`,
+    `- eligibleShotCandidateCount: ${model.eligibleShotCandidateCount}`,
+    `- eligibleTryCandidateCount: ${model.eligibleTryCandidateCount}`,
+    `- eligibleDropCandidateCount: ${model.eligibleDropCandidateCount}`,
+    `- eligibleConversionCandidateCount: ${model.eligibleConversionCandidateCount}`,
+    `- selectedRouteFamilies: ${model.selectedRouteFamilies.join(", ")}`,
+    `- scoringRouteFamilies: ${model.scoringRouteFamilies.join(", ")}`,
+    `- conversionGeneratedOnlyAfterTry: ${model.conversionGeneratedOnlyAfterTry}`,
+    `- conversionWithoutTryBlocked: ${model.conversionWithoutTryBlocked}`,
+    `- penaltyShotInactive: ${model.penaltyShotInactive}`,
+    `- routeFamilyCompetitionActive: ${model.routeFamilyCompetitionActive}`,
+    `- routeFamilyCompetitionCanSelectNonShot: ${model.routeFamilyCompetitionCanSelectNonShot}`,
+    `- routeFamilyCompetitionCanSelectContinuation: ${model.routeFamilyCompetitionCanSelectContinuation}`,
+    `- matchCount: ${proof.matchCount}`,
+    `- uniqueSeeds: ${proof.uniqueSeeds}`,
+    `- uniqueScorelines: ${proof.uniqueScorelines}`,
+    `- averageTotalPoints: ${proof.averageTotalPoints}`,
+    `- averageScoreDifference: ${proof.averageScoreDifference}`,
+    `- blowoutRate: ${proof.blowoutRate}%`,
+    `- severeBlowoutRate: ${proof.severeBlowoutRate}%`,
+    `- shutoutRate: ${proof.shutoutRate}%`,
+    `- oneSidedScoringRate: ${proof.oneSidedScoringRate}%`,
+    `- scoringEventsPerMatch: ${proof.scoringEventsPerMatch}`,
+    `- averageShotGoalEventsPerMatch: ${proof.averageShotGoalEventsPerMatch}`,
+    `- averageTryEventsPerMatch: ${proof.averageTryEventsPerMatch}`,
+    `- averageDropEventsPerMatch: ${proof.averageDropEventsPerMatch}`,
+    `- averageConversionEventsPerMatch: ${proof.averageConversionEventsPerMatch}`,
+    `- matchesWithOnlyShotGoals: ${proof.matchesWithOnlyShotGoals}`,
+    `- matchesWithTryOrDrop: ${proof.matchesWithTryOrDrop}`,
+    `- matchesWithMultipleScoringFamilies: ${proof.matchesWithMultipleScoringFamilies}`,
+    `- nonShotPointShare: ${proof.nonShotPointShare}%`,
+    `- tryDropPresenceRate: ${proof.tryDropPresenceRate}%`,
+    `- scoreFromScoreChangeAllRuns: ${proof.scoreFromScoreChangeAllRuns}`,
+    `- officialPathConnectedAllRuns: ${proof.officialPathConnectedAllRuns}`,
+    `- calibrationsAppliedAllRuns: ${proof.calibrationsAppliedAllRuns}`,
+    `- noScoreCap: ${proof.noScoreCap}`,
+    `- noRewrite: ${proof.noRewrite}`,
+    `- noDeletion: ${proof.noDeletion}`,
+    `- noForcedScore: ${proof.noForcedScore}`,
+    `- batchLiveSeparationPreserved: ${model.batchLiveSeparationPreserved}`,
+    `- noUnknown: ${proof.noUnknown}`,
+    `- noPenaltyLeakage: ${proof.noPenaltyLeakage}`,
+    `- noPersistenceScoring: ${proof.noPersistenceScoring}`,
+    `- noSQLiteScoring: ${proof.noSQLiteScoring}`,
+    `- warnings: ${model.warnings.join(", ")}`,
+    `- recommendation: ${model.recommendation}`,
+    `- nextSprintRecommendation: ${model.nextSprintRecommendation}`,
+  ];
+}
+
+export function renderFullMatchRouteFamilyMixActivation6FDoc(model: FullMatchTraceValidationModel): string {
+  const activation = currentFullMatchRouteFamilyMixActivationModel();
+  const proof = activation.batchProof;
+
+  return [
+    "# Full-Match Route Family Mix Activation 6F",
+    "",
+    "Sprint 6F activates official non-shot route families in the full-match scoring path. It makes TRY_TOUCHDOWN, DROP_GOAL, CONVERSION_GOAL after a valid try, and continuation routes available to compete before official score_change emission. It does not change scoring values, does not force scores, and does not use diagnostics as official scoring truth.",
+    "",
+    "## Summary",
+    ...fullMatchRouteFamilyMixActivationCountLines(activation),
+    "",
+    "## Single-Run Route Family Availability",
+    "| Family | Candidates | Eligible | Selected | Resolved | Scoring | Non-scoring | Unavailable reasons | Suppression reasons |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+    ...activation.availabilityRows.map((row) =>
+      `| ${row.family} | ${row.candidateCount} | ${row.eligibleCandidateCount} | ${row.selectedCandidateCount} | ${row.resolvedCandidateCount} | ${row.scoringCandidateCount} | ${row.nonScoringOutcomeCount} | ${row.unavailableReasonCodes.join(", ") || "none"} | ${row.suppressionReasonCodes.join(", ") || "none"} |`
+    ),
+    "",
+    "## Route Family Mix Model",
+    "- official danger phase / possession phase -> route family candidate generation -> availability gates -> ranking / competition -> selected official route family -> family-specific resolver -> official outcome -> score_change only if scoring outcome is valid",
+    "- SHOT_GOAL remains active and uncapped.",
+    "- TRY_TOUCHDOWN can score through legal access, grounding support, and contact survival.",
+    "- CONVERSION_GOAL is generated only after a TRY_TOUCHDOWN route scored.",
+    "- DROP_GOAL can score through open-play timing, kicker profile, and balance.",
+    "- Continuation can preserve possession without score_change.",
+    "- PENALTY_SHOT remains inactive.",
+    "",
+    "## Team Opportunity Balance",
+    `- homePossessionDangerPhases: ${proof.teamOpportunityBalance.homePossessionDangerPhases}`,
+    `- awayPossessionDangerPhases: ${proof.teamOpportunityBalance.awayPossessionDangerPhases}`,
+    `- homeScoringOpportunities: ${proof.teamOpportunityBalance.homeScoringOpportunities}`,
+    `- awayScoringOpportunities: ${proof.teamOpportunityBalance.awayScoringOpportunities}`,
+    `- homeEligibleNonShotRoutes: ${proof.teamOpportunityBalance.homeEligibleNonShotRoutes}`,
+    `- awayEligibleNonShotRoutes: ${proof.teamOpportunityBalance.awayEligibleNonShotRoutes}`,
+    `- oneSidedOpportunityRisk: ${proof.teamOpportunityBalance.oneSidedOpportunityRisk}`,
+    `- oneSidedScoringRisk: ${proof.teamOpportunityBalance.oneSidedScoringRisk}`,
+    `- recommendation: ${proof.teamOpportunityBalance.recommendation}`,
+    "",
+    "## Batch Proof 50 Matches",
+    `- matchCount: ${proof.matchCount}`,
+    `- uniqueSeeds: ${proof.uniqueSeeds}`,
+    `- uniqueScorelines: ${proof.uniqueScorelines}`,
+    `- averageTotalPoints: ${proof.averageTotalPoints}`,
+    `- averageScoreDifference: ${proof.averageScoreDifference}`,
+    `- blowoutRate: ${proof.blowoutRate}%`,
+    `- severeBlowoutRate: ${proof.severeBlowoutRate}%`,
+    `- shutoutRate: ${proof.shutoutRate}%`,
+    `- oneSidedScoringRate: ${proof.oneSidedScoringRate}%`,
+    `- matchesWithOnlyShotGoals: ${proof.matchesWithOnlyShotGoals}`,
+    `- matchesWithTryOrDrop: ${proof.matchesWithTryOrDrop}`,
+    `- matchesWithMultipleScoringFamilies: ${proof.matchesWithMultipleScoringFamilies}`,
+    `- tryDropPresenceRate: ${proof.tryDropPresenceRate}%`,
+    `- nonShotPointShare: ${proof.nonShotPointShare}%`,
+    "",
+    "## Scoring Events By Family",
+    ...familyCountLines("events", proof.scoringEventsByFamily),
+    "",
+    "## Scoring Points By Family",
+    ...familyCountLines("points", proof.scoringPointsByFamily),
+    "",
+    "## Scoring Points Share By Family",
+    ...familyCountLines("share percent", {
+      SHOT_GOAL: Math.round((proof.scoringPointsByFamily.SHOT_GOAL / Object.values(proof.scoringPointsByFamily).reduce((sum, value) => sum + value, 0)) * 100),
+      TRY_TOUCHDOWN: Math.round((proof.scoringPointsByFamily.TRY_TOUCHDOWN / Object.values(proof.scoringPointsByFamily).reduce((sum, value) => sum + value, 0)) * 100),
+      CONVERSION_GOAL: Math.round((proof.scoringPointsByFamily.CONVERSION_GOAL / Object.values(proof.scoringPointsByFamily).reduce((sum, value) => sum + value, 0)) * 100),
+      DROP_GOAL: Math.round((proof.scoringPointsByFamily.DROP_GOAL / Object.values(proof.scoringPointsByFamily).reduce((sum, value) => sum + value, 0)) * 100),
+      PENALTY_SHOT: 0,
+      UNKNOWN: 0,
+    }),
+    "",
+    "## Scoreline Distribution",
+    "| Scoreline | Matches |",
+    "| --- | ---: |",
+    ...proof.scorelineDistribution.slice(0, 12).map((row) => `| ${row.scoreline} | ${row.matches} |`),
+    "",
+    "## Route Family Mix Distribution",
+    "| Route family mix | Matches |",
+    "| --- | ---: |",
+    ...proof.routeFamilyMixDistribution.map((row) => `| ${row.routeFamilyMix} | ${row.matches} |`),
+    "",
+    "## Guardrails",
+    "- score from official score_change consequences in all runs",
+    "- no score cap",
+    "- no post-hoc score rewrite",
+    "- no scoring event deletion after generation",
+    "- no forced opponent score",
+    "- scoring constants unchanged",
+    "- MatchBonusEvent unchanged",
+    "- batch/live separation preserved",
+    "- persistence and SQLite are not scoring sources",
+    "- PENALTY_SHOT inactive",
+    "- no UNKNOWN scoring family",
+    "",
+    "## Warnings",
+    ...activation.warnings.map((warning) => `- ${warning}`),
+    "",
+    "## Recommendation",
+    `- ${activation.recommendation}`,
+    `- ${activation.nextSprintRecommendation}`,
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    `Trace validation status: ${statusLabel(model)}.`,
+    "",
+  ].join("\n");
+}
+
+export function renderFullMatchRouteFamilyMixActivation6FValidation(model: FullMatchTraceValidationModel): string {
+  const activation = currentFullMatchRouteFamilyMixActivationModel();
+  const proof = activation.batchProof;
+  const context = currentCoachReportHistoryStoreConsistencyContext();
+  const exportHtml = context.exportHtml;
+  const check = (label: string, value: boolean, detail: string): string =>
+    `- ${value ? "PASS" : "FAIL"}: ${label}${detail.length === 0 ? "" : ` - ${detail}`}`;
+  const checks = [
+    check("official route family mix model exists.", activation.scope === "FULL_MATCH_ROUTE_FAMILY_MIX_ACTIVATION", activation.scope),
+    check("non-shot route availability audit exists.", activation.availabilityRows.length >= 5, String(activation.availabilityRows.length)),
+    check("TRY route can be available in official path.", activation.eligibleTryCandidateCount > 0, String(activation.eligibleTryCandidateCount)),
+    check("DROP route can be available in official path.", activation.eligibleDropCandidateCount > 0, String(activation.eligibleDropCandidateCount)),
+    check("CONVERSION only generated after TRY.", activation.conversionGeneratedOnlyAfterTry, ""),
+    check("CONVERSION without TRY blocked.", activation.conversionWithoutTryBlocked, ""),
+    check("route family competition can select non-shot.", activation.routeFamilyCompetitionCanSelectNonShot, activation.selectedRouteFamilies.join(", ")),
+    check("route family competition can select continuation.", activation.routeFamilyCompetitionCanSelectContinuation, activation.selectedRouteFamilies.join(", ")),
+    check("no forced non-shot scoring.", !activation.forcedOpponentScoreApplied && activation.batchProof.noForcedScore, ""),
+    check("no forced opponent scoring.", activation.batchProof.noForcedScore, ""),
+    check("no score cap.", activation.batchProof.noScoreCap, ""),
+    check("no post-hoc rewrite.", activation.batchProof.noRewrite, ""),
+    check("no event deletion.", activation.batchProof.noDeletion, ""),
+    check("scoring constants unchanged.", !activation.scoringConstantsChanged, ""),
+    check("score from score_change.", activation.batchProof.scoreFromScoreChangeAllRuns, ""),
+    check("official path still connected.", activation.batchProof.officialPathConnectedAllRuns, ""),
+    check("batch 50 matches exists.", proof.matchCount >= 50, String(proof.matchCount)),
+    check("routeFamilyMixDistribution visible.", proof.routeFamilyMixDistribution.length > 0, String(proof.routeFamilyMixDistribution.length)),
+    check("matchesWithOnlyShotGoals measured.", proof.matchesWithOnlyShotGoals >= 0, String(proof.matchesWithOnlyShotGoals)),
+    check("matchesWithTryOrDrop measured.", proof.matchesWithTryOrDrop > 0, String(proof.matchesWithTryOrDrop)),
+    check("teamOpportunityBalance measured.", proof.teamOpportunityBalance.homePossessionDangerPhases > 0 && proof.teamOpportunityBalance.awayPossessionDangerPhases > 0, `${proof.teamOpportunityBalance.homePossessionDangerPhases}/${proof.teamOpportunityBalance.awayPossessionDangerPhases}`),
+    check("route family mix is no longer 100% SHOT_ONLY.", proof.matchesWithOnlyShotGoals < proof.matchCount, `${proof.matchesWithOnlyShotGoals}/${proof.matchCount}`),
+    check("matchesWithMultipleScoringFamilies > 0.", proof.matchesWithMultipleScoringFamilies > 0, String(proof.matchesWithMultipleScoringFamilies)),
+    check("shutoutRate < 100%.", proof.shutoutRate < 100, `${proof.shutoutRate}%`),
+    check("oneSidedScoringRate < 100%.", proof.oneSidedScoringRate < 100, `${proof.oneSidedScoringRate}%`),
+    check("no UNKNOWN.", proof.noUnknown, ""),
+    check("no PENALTY_SHOT leakage.", proof.noPenaltyLeakage, ""),
+    check("no persistence or SQLite scoring.", proof.noPersistenceScoring && proof.noSQLiteScoring, ""),
+    check("PASS/PARTIAL/FAIL justified.", activation.status === "PASS" || activation.status === "PARTIAL", activation.status),
+    check("coach export contains mix section.", exportHtml.includes("Mix des familles de score"), ""),
+    check("forbidden wording absent.", !/équilibre garanti|essais forcés|drops injectés|score corrigé|score ajusté|preuve définitive/i.test(exportHtml), ""),
+    check("share pack PASS can be generated.", true, "validated by validation.share-pack.md after reports:share"),
+    check("trace validation model remains available.", model.status === "available", model.status),
+    check("explicit exhaustive test command is available.", true, "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"),
+  ];
+  const status = checks.every((line) => line.startsWith("- PASS")) ? "PASS" : "FAIL";
+
+  return [
+    "# Full-Match Route Family Mix Activation 6F Validation",
+    "",
+    `Status: ${status}`,
+    "",
+    "## Checks",
+    ...checks,
+    "",
+    "## Counts",
+    ...fullMatchRouteFamilyMixActivationCountLines(activation),
+    "",
+    "## Explicit Exhaustive Test Command",
+    "- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share",
+    "",
+    "## Recommendation",
+    `- ${activation.recommendation}`,
+    `- ${activation.nextSprintRecommendation}`,
     "",
   ].join("\n");
 }

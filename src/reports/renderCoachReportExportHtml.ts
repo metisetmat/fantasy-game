@@ -28,6 +28,7 @@ import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEcon
 import type { FullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import type { FullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
 import type { FullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
+import type { FullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2401,6 +2402,74 @@ export function renderFullMatchBatchEconomyProofSection(
     </section>`;
 }
 
+export function renderFullMatchRouteFamilyMixActivationSection(
+  model: FullMatchRouteFamilyMixActivationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const proof = model.batchProof;
+  const totalPoints = Object.values(proof.scoringPointsByFamily).reduce((sum, value) => sum + value, 0);
+  const share = (value: number): number => totalPoints === 0 ? 0 : Math.round((value / totalPoints) * 100);
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6F</p>
+        <h3>Mix des familles de score</h3>
+        <p>
+          Le chemin officiel active des routes disponibles et eligibles pour SHOT_GOAL, TRY_TOUCHDOWN,
+          DROP_GOAL, CONVERSION_GOAL apres essai valide, et continuation. Ces routes ne sont pas forcees :
+          le score reste issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Match courant et routes</h4>
+          <ul>
+            <li>Familles supportees: ${model.routeFamiliesSupported.join(", ")}</li>
+            <li>Familles selectionnees: ${model.selectedRouteFamilies.join(", ")}</li>
+            <li>Familles scorantes: ${model.scoringRouteFamilies.join(", ")}</li>
+            <li>Conversion uniquement apres TRY: ${model.conversionGeneratedOnlyAfterTry ? "oui" : "non"}</li>
+            <li>PENALTY_SHOT inactive: ${model.penaltyShotInactive ? "oui" : "non"}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Batch 6F</h4>
+          <ul>
+            <li>Matchs: ${proof.matchCount}</li>
+            <li>Scorelines uniques: ${proof.uniqueScorelines}</li>
+            <li>Matchs avec TRY/DROP: ${proof.matchesWithTryOrDrop}</li>
+            <li>Matchs uniquement SHOT: ${proof.matchesWithOnlyShotGoals}</li>
+            <li>Matchs multi-familles: ${proof.matchesWithMultipleScoringFamilies}</li>
+            <li>Shutout rate: ${proof.shutoutRate}%</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Evenements</th>
+            <th>Points</th>
+            <th>Part points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>${proof.scoringEventsByFamily.SHOT_GOAL}</td><td>${proof.scoringPointsByFamily.SHOT_GOAL}</td><td>${share(proof.scoringPointsByFamily.SHOT_GOAL)}%</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>${proof.scoringEventsByFamily.TRY_TOUCHDOWN}</td><td>${proof.scoringPointsByFamily.TRY_TOUCHDOWN}</td><td>${share(proof.scoringPointsByFamily.TRY_TOUCHDOWN)}%</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>${proof.scoringEventsByFamily.CONVERSION_GOAL}</td><td>${proof.scoringPointsByFamily.CONVERSION_GOAL}</td><td>${share(proof.scoringPointsByFamily.CONVERSION_GOAL)}%</td></tr>
+          <tr><td>DROP_GOAL</td><td>${proof.scoringEventsByFamily.DROP_GOAL}</td><td>${proof.scoringPointsByFamily.DROP_GOAL}</td><td>${share(proof.scoringPointsByFamily.DROP_GOAL)}%</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Conclusion prudente: ${model.status}. Recommendation: ${model.recommendation}.
+        Aucune valeur de score n'est changee, aucun score adverse n'est force, aucune reecriture post-run n'est appliquee.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -3339,6 +3408,7 @@ function renderAppendices(input: {
   readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
   readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
   readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
+  readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3420,6 +3490,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
   readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
   readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
+  readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3530,6 +3601,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchCalibrationCarryoverReconciliation(input.fullMatchCalibrationCarryoverReconciliation),
     renderFullMatchOfficialScoringConnection(input.fullMatchOfficialScoringConnection),
     renderFullMatchBatchEconomyProofSection(input.fullMatchBatchEconomyProof),
+    renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3586,6 +3658,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchBatchEconomyProof === undefined
       ? {}
       : { fullMatchBatchEconomyProof: input.fullMatchBatchEconomyProof }),
+    ...(input.fullMatchRouteFamilyMixActivation === undefined
+      ? {}
+      : { fullMatchRouteFamilyMixActivation: input.fullMatchRouteFamilyMixActivation }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
