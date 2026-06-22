@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6G - Route Family Scoring Rate Calibration",
+  name: "Sprint 6H - Segment Scoring Density Calibration",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-route-family-scoring-rate-calibration-6g.md",
-    "validation.fullmatch-route-family-scoring-rate-calibration-6g.md",
+    "fullmatch-segment-scoring-density-calibration-6h.md",
+    "validation.fullmatch-segment-scoring-density-calibration-6h.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6G share pack is current, complete, and below 20 files",
-    "fullmatch-route-family-scoring-rate-calibration-6g.md": "proves route-family scoring rates are calibrated down versus 6F while preserving non-shot route diversity",
-    "validation.fullmatch-route-family-scoring-rate-calibration-6g.md": "validates the 6G scoring-rate calibration, before/after economy, route diversity, and scoring guardrails",
-    "README.md": "compact reviewer orientation for the 6G share pack",
-    "manifest.md": "compatibility manifest listing the 6G share pack files",
+    "validation.share-pack.md": "proves the 6H share pack is current, complete, and below 20 files",
+    "fullmatch-segment-scoring-density-calibration-6h.md": "proves segment scoring-opportunity density is reduced before score_change while preserving official route diversity",
+    "validation.fullmatch-segment-scoring-density-calibration-6h.md": "validates the 6H segment-density audit, before/after economy, route diversity, and scoring guardrails",
+    "README.md": "compact reviewer orientation for the 6H share pack",
+    "manifest.md": "compatibility manifest listing the 6H share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

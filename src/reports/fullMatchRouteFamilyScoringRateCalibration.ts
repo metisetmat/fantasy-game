@@ -170,7 +170,7 @@ export interface FullMatchRouteFamilyScoringRateCalibrationModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "route-family-scoring-rate-6g-v2";
+const CACHE_VERSION = "route-family-scoring-rate-6g-v4";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-route-family-scoring-rate-calibration-6g.json");
 const ROUTE_FAMILIES: readonly OfficialRouteFamily[] = [
   "SHOT_GOAL",
@@ -303,6 +303,10 @@ function incrementRate(counts: RouteFamilyRateCounts, family: keyof RouteFamilyR
   };
 }
 
+function isOfficialScoringFamily(value: OfficialRouteFamily): value is OfficialScoringFamily {
+  return value !== "CONTINUATION";
+}
+
 function officialScoringFamilyFromEvent(event: MatchEvent): OfficialScoringFamily | null {
   const accepted = event.tags.find((tag) => tag.startsWith("official_scoring_accepted_family_"));
   const rejected = event.tags.find((tag) => tag.startsWith("official_scoring_rejected_family_"));
@@ -312,7 +316,15 @@ function officialScoringFamilyFromEvent(event: MatchEvent): OfficialScoringFamil
     return family;
   }
 
-  return event.scoringFamily ?? null;
+  if (event.scoringFamily !== undefined) {
+    return event.scoringFamily;
+  }
+
+  const routeFamily = ROUTE_FAMILIES.filter(isOfficialScoringFamily).find((candidate) =>
+    event.tags.includes(`official_route_family_${candidate}`)
+  );
+
+  return routeFamily ?? null;
 }
 
 function scoreChangePoints(event: MatchEvent): number {

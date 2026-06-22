@@ -28,6 +28,9 @@ assertTest(model.averageScoreDifferenceAfter < model.averageScoreDifferenceBefor
 assertTest(model.blowoutRateAfter < model.blowoutRateBefore, "blowout rate must decrease versus 6F.");
 assertTest(model.severeBlowoutRateAfter < model.severeBlowoutRateBefore, "severe blowout rate must decrease versus 6F.");
 assertTest(model.conversionSuccessRateAfter < 100, "conversion success rate must not remain automatic.");
+assertTest(model.tryAttemptsAfter > model.triesScoredAfter, "TRY attempts must include selected non-scoring route outcomes.");
+assertTest(model.dropAttemptsAfter > model.dropGoalsAfter, "DROP attempts must include selected non-scoring route outcomes.");
+assertTest(model.conversionAttemptsAfter > model.conversionGoalsAfter, "CONVERSION attempts must include selected non-scoring route outcomes.");
 assertTest(model.conversionGoalsAfter <= model.triesScoredAfter, "conversion goals cannot exceed scored tries.");
 assertTest(model.scoreFromScoreChangeAllRuns, "score must derive from official score_change events.");
 assertTest(model.officialPathConnectedAllRuns, "official scoring path must remain connected.");

@@ -325,6 +325,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchRouteFamilyMixActivation6FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-family-mix-activation-6f.md"));
   const fullMatchRouteFamilyScoringRateCalibration6G = readIfExists(join(shareDirectory, "fullmatch-route-family-scoring-rate-calibration-6g.md"));
   const fullMatchRouteFamilyScoringRateCalibration6GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-family-scoring-rate-calibration-6g.md"));
+  const fullMatchSegmentScoringDensityCalibration6H = readIfExists(join(shareDirectory, "fullmatch-segment-scoring-density-calibration-6h.md"));
+  const fullMatchSegmentScoringDensityCalibration6HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-segment-scoring-density-calibration-6h.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2930,6 +2932,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-route-family-mix-activation-6f.md",
     ...sprint6FForbiddenLeftovers,
   ];
+  const sprint6HExpectedFiles = sprint6GExpectedFiles.map((file) =>
+    file === "fullmatch-route-family-scoring-rate-calibration-6g.md"
+      ? "fullmatch-segment-scoring-density-calibration-6h.md"
+      : file === "validation.fullmatch-route-family-scoring-rate-calibration-6g.md"
+        ? "validation.fullmatch-segment-scoring-density-calibration-6h.md"
+        : file
+  );
+  const sprint6HForbiddenLeftovers = [
+    "fullmatch-route-family-scoring-rate-calibration-6g.md",
+    "validation.fullmatch-route-family-scoring-rate-calibration-6g.md",
+    ...sprint6GForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3609,6 +3623,46 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint6HChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6HExpectedFiles.every((file) => requiredCopied(file)), sprint6HExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6HExpectedFiles.every((file) => manifest.includes(file)), sprint6HExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6H", activeConfig.sprintName === "Sprint 6H - Segment Scoring Density Calibration", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6HForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6HForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6H oriented", readme.includes("# Sprint 6H Share Pack") && readme.includes("fullmatch-segment-scoring-density-calibration-6h.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6H report included", fullMatchSegmentScoringDensityCalibration6H.includes("# Full-Match Segment Scoring Density Calibration 6H") && fullMatchSegmentScoringDensityCalibration6H.includes("Before / After Table") && fullMatchSegmentScoringDensityCalibration6H.includes("Segment Density Audit Summary") && fullMatchSegmentScoringDensityCalibration6H.includes("Scoring Opportunities By Segment"), "6H doc included"),
+    check("6H validation is PASS", fullMatchSegmentScoringDensityCalibration6HValidation.includes("Status: PASS") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("segment density audit exists") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("Explicit Exhaustive Test Command"), "6H validation current"),
+    check("batch match count visible", fullMatchSegmentScoringDensityCalibration6H.includes("matchCount: 50") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6G metrics are visible", fullMatchSegmentScoringDensityCalibration6H.includes("| average total points | 39.2 |") && fullMatchSegmentScoringDensityCalibration6H.includes("| scoring events / match | 12.5 |"), "6G baseline visible"),
+    check("scoring opportunities per match decrease", fullMatchSegmentScoringDensityCalibration6HValidation.includes("scoring opportunities per match decrease versus 6G"), "opportunities reduced"),
+    check("scoring opportunities per segment decrease", fullMatchSegmentScoringDensityCalibration6HValidation.includes("scoring opportunities per segment decrease versus 6G"), "segment density reduced"),
+    check("danger phases per match decrease", fullMatchSegmentScoringDensityCalibration6HValidation.includes("danger phases per match decrease versus 6G"), "danger reduced"),
+    check("averageTotalPoints decreases versus 6G", fullMatchSegmentScoringDensityCalibration6HValidation.includes("average total points decreases versus 6G"), "average points reduced"),
+    check("blowout rates decrease versus 6G", fullMatchSegmentScoringDensityCalibration6HValidation.includes("blowout rate decreases versus 6G") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("severe blowout rate decreases versus 6G"), "blowout reduced"),
+    check("neutral/resets/recoveries increase", fullMatchSegmentScoringDensityCalibration6HValidation.includes("neutral phases increase") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("defensive recoveries increase") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("reset phases increase"), "interruptions increased"),
+    check("TRY/DROP/CONVERSION remain available", fullMatchSegmentScoringDensityCalibration6HValidation.includes("TRY route remains available") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("DROP route remains available") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("CONVERSION remains available after TRY"), "non-shot preserved"),
+    check("CONTINUATION remains available", fullMatchSegmentScoringDensityCalibration6HValidation.includes("CONTINUATION remains available"), "continuation preserved"),
+    check("no rollback to SHOT_ONLY", fullMatchSegmentScoringDensityCalibration6HValidation.includes("no rollback to SHOT_ONLY"), "SHOT_ONLY blocked"),
+    check("score from score_change all runs", fullMatchSegmentScoringDensityCalibration6H.includes("scoreFromScoreChangeAllRuns: true") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchSegmentScoringDensityCalibration6H.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchSegmentScoringDensityCalibration6H.includes("calibrationAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score cap/rewrite/deletion/forced score", fullMatchSegmentScoringDensityCalibration6H.includes("scoreCapApplied: false") && fullMatchSegmentScoringDensityCalibration6H.includes("postHocRewriteApplied: false") && fullMatchSegmentScoringDensityCalibration6H.includes("scoringEventsDeleted: false") && fullMatchSegmentScoringDensityCalibration6H.includes("forcedOpponentScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchSegmentScoringDensityCalibration6H.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchSegmentScoringDensityCalibration6H.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchSegmentScoringDensityCalibration6H.includes("persistenceUsedForScoring: false") && fullMatchSegmentScoringDensityCalibration6H.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchSegmentScoringDensityCalibration6H.includes("unknownScoringFamilyCount: 0") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchSegmentScoringDensityCalibration6H.includes("penaltyShotActiveLeakageCount: 0") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("no contradictory healthy warning", fullMatchSegmentScoringDensityCalibration6HValidation.includes("no contradictory healthy warning when blowout is still high") && !(fullMatchSegmentScoringDensityCalibration6H.includes("BLOWOUT_RATE_STILL_TOO_HIGH") && fullMatchSegmentScoringDensityCalibration6H.includes("FULL_MATCH_BATCH_ECONOMY_HEALTHY")), "healthy warning guarded"),
+    check("coach product contains segment density section", coachProductHtml.includes("Densit") && coachProductHtml.includes("SEGMENT_SCORING_DENSITY_6H"), "product 6H visible"),
+    check("coach export contains segment density section", coachExportHtml.includes("Densit") && coachExportHtml.includes("SEGMENT_SCORING_DENSITY_6H"), "export 6H visible"),
+    check("coach export avoids forbidden segment-density wording", !/score corrig|score ajust|equilibre garanti|ÃƒÂ©quilibre garanti|preuve definitive|preuve dÃƒÂ©finitive|opportunites forcees|occasions forcees/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6H source files", bundleSimulation.includes("src/simulation/fullMatch/segmentScoringDensityWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchSegmentScoringDensityAudit.ts") && bundleReports.includes("src/reports/fullMatchSegmentScoringDensityCalibration.ts") && bundleReports.includes("src/reports/fullMatchSegmentScoringDensityCalibration.test.ts"), "6H source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchSegmentScoringDensityCalibration6HValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchSegmentScoringDensityCalibration6H.includes("## Recommendation") && fullMatchSegmentScoringDensityCalibration6H.includes("IMPROVE_TEAM_OPPORTUNITY_BALANCE_NEXT"), "6H recommendation visible"),
   ];
   const sprint6GChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7418,6 +7472,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6H - Segment Scoring Density Calibration")
+      ? sprint6HChecks
     : activeConfig.sprintName.includes("Sprint 6G - Route Family Scoring Rate Calibration")
       ? sprint6GChecks
     : activeConfig.sprintName.includes("Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability")

@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6G - Route Family Scoring Rate Calibration
+- current sprint: Sprint 6H - Segment Scoring Density Calibration
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,25 +20,25 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 6G - Sprint 6G - Route Family Scoring Rate Calibration
+- PASS: current sprint is Sprint 6H - Sprint 6H - Segment Scoring Density Calibration
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6G oriented - README current
-- PASS: 6G report included - 6G doc included
-- PASS: 6G validation is PASS - 6G validation current
+- PASS: README is Sprint 6H oriented - README current
+- PASS: 6H report included - 6H doc included
+- PASS: 6H validation is PASS - 6H validation current
 - PASS: batch match count visible - 50 matches visible
-- PASS: baseline 6F metrics are visible - 6F baseline visible
-- PASS: averageTotalPoints decreases versus 6F - average points reduced
-- PASS: scoringEventsPerMatch decreases versus 6F - event count reduced
-- PASS: blowout rates decrease versus 6F - blowout reduced
-- PASS: conversion success not automatic - conversion measured
-- PASS: TRY and DROP remain available - TRY/DROP preserved
-- PASS: multiple scoring families remain available - multi-family preserved
-- PASS: continuation remains available - continuation preserved
+- PASS: baseline 6G metrics are visible - 6G baseline visible
+- PASS: scoring opportunities per match decrease - opportunities reduced
+- PASS: scoring opportunities per segment decrease - segment density reduced
+- PASS: danger phases per match decrease - danger reduced
+- PASS: averageTotalPoints decreases versus 6G - average points reduced
+- PASS: blowout rates decrease versus 6G - blowout reduced
+- PASS: neutral/resets/recoveries increase - interruptions increased
+- PASS: TRY/DROP/CONVERSION remain available - non-shot preserved
+- PASS: CONTINUATION remains available - continuation preserved
 - PASS: no rollback to SHOT_ONLY - SHOT_ONLY blocked
-- PASS: CONVERSION only after TRY - conversion guarded
 - PASS: score from score_change all runs - score_change source all runs
 - PASS: official path connected all runs - official path all runs
-- PASS: calibrations applied all runs - calibrations all runs
+- PASS: calibration applied all runs - calibrations all runs
 - PASS: no score cap/rewrite/deletion/forced score - guardrails false
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
@@ -46,12 +46,13 @@ Status: PASS
 - PASS: persistence and SQLite not used for scoring - persistence/SQLite false
 - PASS: no UNKNOWN scoring family - UNKNOWN blocked
 - PASS: no PENALTY_SHOT leakage - PENALTY blocked
-- PASS: coach product contains scoring-rate calibration section - product 6G visible
-- PASS: coach export contains scoring-rate calibration section - export 6G visible
-- PASS: coach export avoids forbidden scoring-rate wording - forbidden wording absent
-- PASS: bundle includes 6G source files - 6G source bundled
+- PASS: no contradictory healthy warning - healthy warning guarded
+- PASS: coach product contains segment density section - product 6H visible
+- PASS: coach export contains segment density section - export 6H visible
+- PASS: coach export avoids forbidden segment-density wording - forbidden wording absent
+- PASS: bundle includes 6H source files - 6H source bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6G recommendation visible
+- PASS: recommendation visible - 6H recommendation visible
 
 ## Files
 
@@ -65,7 +66,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-route-family-scoring-rate-calibration-6g.md
+- fullmatch-segment-scoring-density-calibration-6h.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -73,5 +74,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-route-family-scoring-rate-calibration-6g.md
+- validation.fullmatch-segment-scoring-density-calibration-6h.md
 - validation.share-pack.md

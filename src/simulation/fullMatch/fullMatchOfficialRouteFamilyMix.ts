@@ -439,6 +439,64 @@ function selectCandidate(candidates: readonly OfficialRouteFamilyCandidate[]): O
   return sorted[0] ?? (candidates[0] as OfficialRouteFamilyCandidate);
 }
 
+function densitySelectedCandidate(input: {
+  readonly candidates: readonly OfficialRouteFamilyCandidate[];
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly teamId: TeamId;
+  readonly segmentIndex: number;
+  readonly teamState: FullMatchTeamSegmentState;
+  readonly seed: string;
+}): OfficialRouteFamilyCandidate {
+  const selected = selectCandidate(input.candidates);
+  const continuation = input.candidates.find((candidate) => candidate.family === "CONTINUATION" && candidate.eligible);
+
+  if (continuation === undefined || selected.family === "CONTINUATION") {
+    return selected;
+  }
+
+  const previousTeamSelections = input.state.candidates.filter((candidate) =>
+    candidate.teamId === input.teamId &&
+    candidate.selected &&
+    candidate.segmentIndex < input.segmentIndex
+  );
+  const lastTeamSelection = previousTeamSelections[previousTeamSelections.length - 1];
+  const recentTeamOpportunities = previousTeamSelections
+    .filter((candidate) => candidate.family !== "CONTINUATION" && input.segmentIndex - candidate.segmentIndex <= 2)
+    .length;
+  const recentSameFamily = previousTeamSelections
+    .filter((candidate) => candidate.family === selected.family && input.segmentIndex - candidate.segmentIndex <= 3)
+    .length;
+  const pressureFatigueLoad = input.teamState.pressureLoad + Math.max(0, 68 - input.teamState.condition);
+  const deterministicBreak = deterministicNoise(`${input.seed}:${input.teamId}:${input.segmentIndex}:density-break`);
+  const possessionResetWindow = lastTeamSelection?.scoring === true && input.segmentIndex - lastTeamSelection.segmentIndex <= 1;
+  const goalkeeperOrDefensiveResetWindow =
+    lastTeamSelection !== undefined &&
+    !lastTeamSelection.scoring &&
+    lastTeamSelection.family !== "CONTINUATION" &&
+    input.segmentIndex - lastTeamSelection.segmentIndex <= 1;
+  const sameTeamChainTooLong = recentTeamOpportunities >= 2;
+  const sameFamilyRepeatTooHigh = recentSameFamily >= 1 && selected.family !== "CONVERSION_GOAL";
+  const pressureForcesNeutralPhase = pressureFatigueLoad + deterministicBreak >= 92;
+  const plannedNeutralBeat = (input.segmentIndex + deterministicNoise(`${input.seed}:${input.teamId}:neutral-offset`)) % 4 === 0;
+
+  if (
+    possessionResetWindow ||
+    goalkeeperOrDefensiveResetWindow ||
+    sameTeamChainTooLong ||
+    sameFamilyRepeatTooHigh ||
+    pressureForcesNeutralPhase ||
+    plannedNeutralBeat
+  ) {
+    return {
+      ...continuation,
+      candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
+      reason: "Segment density calibration selects continuation/reset before another scoring opportunity: recent danger, pressure, fatigue, or route repetition interrupts the chain.",
+    };
+  }
+
+  return selected;
+}
+
 function routeTiePriority(family: OfficialRouteFamily): number {
   switch (family) {
     case "TRY_TOUCHDOWN":
@@ -578,6 +636,7 @@ function eventForResolvedCandidate(input: {
   readonly segmentLabel: string;
   readonly segmentIndex: number;
   readonly scoreBefore: ScoreState;
+  readonly timelineOffset?: number;
   readonly template?: MatchEvent;
 }): MatchEvent | null {
   if (input.candidate.family === "SHOT_GOAL") {
@@ -607,7 +666,7 @@ function eventForResolvedCandidate(input: {
     eventId: `${input.segmentLabel}-route-family-${input.candidate.family.toLowerCase()}-${input.candidate.teamId}` as MatchEvent["eventId"],
     matchId: input.matchInput.matchId,
     timestamp: {
-      tick: (input.segmentIndex * 100 + 92 + routeEventTimelineOffset(input.candidate.family)) as MatchEvent["timestamp"]["tick"],
+      tick: (input.segmentIndex * 100 + 92 + (input.timelineOffset ?? routeEventTimelineOffset(input.candidate.family))) as MatchEvent["timestamp"]["tick"],
       minute: (input.template?.timestamp.minute ?? input.segmentIndex * 10) + 8,
       period: input.template?.timestamp.period ?? "first_half",
     },
@@ -756,7 +815,14 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
         tryAlreadyScored: false,
       })
     );
-    const selected = resolveSelectedCandidate(selectCandidate(candidates), input.matchInput.seed);
+    const selected = resolveSelectedCandidate(densitySelectedCandidate({
+      candidates,
+      state: input.state,
+      teamId: teamInput.team.teamId,
+      segmentIndex: input.segmentIndex,
+      teamState: teamStateForId(input.segmentState, teamInput.team.teamId),
+      seed: input.matchInput.seed,
+    }), input.matchInput.seed);
     const candidatesWithSelection = candidates.map((candidate) =>
       candidate.candidateId === selected.candidateId ? selected : candidate
     );
@@ -792,7 +858,11 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
         matchInput: input.matchInput,
         segmentLabel: input.segmentLabel,
         segmentIndex: input.segmentIndex,
-        scoreBefore: input.scoreBefore,
+        scoreBefore: {
+          home: input.scoreBefore.home + (selected.teamId === input.matchInput.homeTeam.teamId ? (scoringRegistryEntry("TRY_TOUCHDOWN").points ?? 0) : 0),
+          away: input.scoreBefore.away + (selected.teamId === input.matchInput.homeTeam.teamId ? 0 : (scoringRegistryEntry("TRY_TOUCHDOWN").points ?? 0)),
+        },
+        timelineOffset: routeEventTimelineOffset(selected.family) + 1,
         ...(template === undefined ? {} : { template }),
       });
 

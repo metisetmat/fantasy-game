@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-22T17:33:15.774Z
-Task/sprint: Sprint 6G - Route Family Scoring Rate Calibration
+Generated: 2026-06-22T20:05:39.551Z
+Task/sprint: Sprint 6H - Segment Scoring Density Calibration
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-route-family-scoring-rate-calibration-6g.md
-- validation.fullmatch-route-family-scoring-rate-calibration-6g.md
+- fullmatch-segment-scoring-density-calibration-6h.md
+- validation.fullmatch-segment-scoring-density-calibration-6h.md
 - README.md
 
 ## Bundle Files
