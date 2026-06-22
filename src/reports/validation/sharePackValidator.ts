@@ -323,6 +323,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchBatchEconomyProof6EValidation = readIfExists(join(shareDirectory, "validation.fullmatch-batch-economy-proof-6e.md"));
   const fullMatchRouteFamilyMixActivation6F = readIfExists(join(shareDirectory, "fullmatch-route-family-mix-activation-6f.md"));
   const fullMatchRouteFamilyMixActivation6FValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-family-mix-activation-6f.md"));
+  const fullMatchRouteFamilyScoringRateCalibration6G = readIfExists(join(shareDirectory, "fullmatch-route-family-scoring-rate-calibration-6g.md"));
+  const fullMatchRouteFamilyScoringRateCalibration6GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-family-scoring-rate-calibration-6g.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2916,6 +2918,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-batch-economy-proof-6e.md",
     ...sprint6EForbiddenLeftovers,
   ];
+  const sprint6GExpectedFiles = sprint6FExpectedFiles.map((file) =>
+    file === "fullmatch-route-family-mix-activation-6f.md"
+      ? "fullmatch-route-family-scoring-rate-calibration-6g.md"
+      : file === "validation.fullmatch-route-family-mix-activation-6f.md"
+        ? "validation.fullmatch-route-family-scoring-rate-calibration-6g.md"
+        : file
+  );
+  const sprint6GForbiddenLeftovers = [
+    "fullmatch-route-family-mix-activation-6f.md",
+    "validation.fullmatch-route-family-mix-activation-6f.md",
+    ...sprint6FForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3595,6 +3609,45 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint6GChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6GExpectedFiles.every((file) => requiredCopied(file)), sprint6GExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6GExpectedFiles.every((file) => manifest.includes(file)), sprint6GExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6G", activeConfig.sprintName === "Sprint 6G - Route Family Scoring Rate Calibration", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6GForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6GForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6G oriented", readme.includes("# Sprint 6G Share Pack") && readme.includes("fullmatch-route-family-scoring-rate-calibration-6g.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6G report included", fullMatchRouteFamilyScoringRateCalibration6G.includes("# Full-Match Route Family Scoring Rate Calibration 6G") && fullMatchRouteFamilyScoringRateCalibration6G.includes("Before / After Table") && fullMatchRouteFamilyScoringRateCalibration6G.includes("Scoring Rates By Family") && fullMatchRouteFamilyScoringRateCalibration6G.includes("Route Family Mix Distribution"), "6G doc included"),
+    check("6G validation is PASS", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("Status: PASS") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("batch 50 matches after calibration exists") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("Explicit Exhaustive Test Command"), "6G validation current"),
+    check("batch match count visible", fullMatchRouteFamilyScoringRateCalibration6G.includes("matchCount: 50") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6F metrics are visible", fullMatchRouteFamilyScoringRateCalibration6G.includes("averageTotalPointsBefore: 45.1") && fullMatchRouteFamilyScoringRateCalibration6G.includes("scoringEventsPerMatchBefore: 14.8"), "6F baseline visible"),
+    check("averageTotalPoints decreases versus 6F", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("averageTotalPoints decreases versus 6F") && fullMatchRouteFamilyScoringRateCalibration6G.includes("| average total points | 45.1 |"), "average points reduced"),
+    check("scoringEventsPerMatch decreases versus 6F", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("scoringEventsPerMatch decreases versus 6F") && fullMatchRouteFamilyScoringRateCalibration6G.includes("| scoring events / match | 14.8 |"), "event count reduced"),
+    check("blowout rates decrease versus 6F", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("blowoutRate decreases versus 6F") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("severeBlowoutRate decreases versus 6F"), "blowout reduced"),
+    check("conversion success not automatic", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("conversionSuccessRate is measured and not automatic") && fullMatchRouteFamilyScoringRateCalibration6G.includes("CONVERSION_GOAL"), "conversion measured"),
+    check("TRY and DROP remain available", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("TRY route remains available") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("DROP route remains available") && fullMatchRouteFamilyScoringRateCalibration6G.includes("matchesWithTryOrDropAfter:"), "TRY/DROP preserved"),
+    check("multiple scoring families remain available", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("route family diversity preserved") && fullMatchRouteFamilyScoringRateCalibration6G.includes("matchesWithMultipleScoringFamiliesAfter:"), "multi-family preserved"),
+    check("continuation remains available", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("continuation remains available") && fullMatchRouteFamilyScoringRateCalibration6G.includes("continuationSelectedCountAfter:"), "continuation preserved"),
+    check("no rollback to SHOT_ONLY", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("route family diversity preserved") && fullMatchRouteFamilyScoringRateCalibration6G.includes("matchesWithOnlyShotGoalsAfter: 0") && fullMatchRouteFamilyScoringRateCalibration6G.includes("noRollbackToShotOnly: true"), "SHOT_ONLY blocked"),
+    check("CONVERSION only after TRY", fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("CONVERSION only after TRY"), "conversion guarded"),
+    check("score from score_change all runs", fullMatchRouteFamilyScoringRateCalibration6G.includes("scoreFromScoreChangeAllRuns: true") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchRouteFamilyScoringRateCalibration6G.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibrations applied all runs", fullMatchRouteFamilyScoringRateCalibration6G.includes("calibrationAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score cap/rewrite/deletion/forced score", fullMatchRouteFamilyScoringRateCalibration6G.includes("scoreCapApplied: false") && fullMatchRouteFamilyScoringRateCalibration6G.includes("postHocRewriteApplied: false") && fullMatchRouteFamilyScoringRateCalibration6G.includes("scoringEventsDeleted: false") && fullMatchRouteFamilyScoringRateCalibration6G.includes("forcedOpponentScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchRouteFamilyScoringRateCalibration6G.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchRouteFamilyScoringRateCalibration6G.includes("persistenceUsedForScoring: false") && fullMatchRouteFamilyScoringRateCalibration6G.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchRouteFamilyScoringRateCalibration6G.includes("unknownScoringFamilyCount: 0") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchRouteFamilyScoringRateCalibration6G.includes("penaltyShotActiveLeakageCount: 0") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("coach product contains scoring-rate calibration section", coachProductHtml.includes("Calibration des taux de scoring") && coachProductHtml.includes("SCORING_RATE_CALIBRATION_6G"), "product 6G visible"),
+    check("coach export contains scoring-rate calibration section", coachExportHtml.includes("Calibration des taux de scoring") && coachExportHtml.includes("SCORING_RATE_CALIBRATION_6G"), "export 6G visible"),
+    check("coach export avoids forbidden scoring-rate wording", !/score corrig|score ajust|equilibre garanti|Ã©quilibre garanti|preuve definitive|preuve dÃ©finitive|essais forc|drops forc/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6G source files", bundleSimulation.includes("src/simulation/fullMatch/routeFamilyScoringRateWarnings.ts") && bundleReports.includes("src/reports/fullMatchRouteFamilyScoringRateCalibration.ts") && bundleReports.includes("src/reports/fullMatchRouteFamilyScoringRateCalibration.test.ts"), "6G source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchRouteFamilyScoringRateCalibration6GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchRouteFamilyScoringRateCalibration6G.includes("## Recommendation") && fullMatchRouteFamilyScoringRateCalibration6G.includes("REDUCE_SEGMENT_SCORING_DENSITY_NEXT"), "6G recommendation visible"),
   ];
   const sprint6FChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7365,6 +7418,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6G - Route Family Scoring Rate Calibration")
+      ? sprint6GChecks
     : activeConfig.sprintName.includes("Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability")
       ? sprint6FChecks
     : activeConfig.sprintName.includes("Sprint 6E - Full-Match Batch Economy Proof")

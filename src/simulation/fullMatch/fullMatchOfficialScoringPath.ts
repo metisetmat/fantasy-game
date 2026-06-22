@@ -163,7 +163,7 @@ function shouldAcceptOfficialScoreChange(input: {
   }
 
   if (input.family === "SHOT_GOAL") {
-    return input.familyOrdinal <= 7 && input.segmentFamilyOrdinal === 1;
+    return input.familyOrdinal <= 5 && input.segmentFamilyOrdinal === 1;
   }
 
   if (input.family === "TRY_TOUCHDOWN") {
@@ -171,7 +171,7 @@ function shouldAcceptOfficialScoreChange(input: {
   }
 
   if (input.family === "DROP_GOAL") {
-    return input.familyOrdinal % 2 === 1 && input.segmentFamilyOrdinal <= 1;
+    return input.familyOrdinal % 3 === 1 && input.segmentFamilyOrdinal <= 1;
   }
 
   if (input.family === "CONVERSION_GOAL") {

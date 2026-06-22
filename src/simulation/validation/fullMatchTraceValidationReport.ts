@@ -36,6 +36,10 @@ import {
   currentFullMatchRouteFamilyMixActivationModel,
   type FullMatchRouteFamilyMixActivationModel,
 } from "../../reports/fullMatchRouteFamilyMixActivation";
+import {
+  renderFullMatchRouteFamilyScoringRateCalibration6GDoc as renderRouteFamilyScoringRateCalibration6GDoc,
+  renderFullMatchRouteFamilyScoringRateCalibration6GValidation as renderRouteFamilyScoringRateCalibration6GValidation,
+} from "../../reports/fullMatchRouteFamilyScoringRateCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6285,6 +6289,14 @@ export function renderFullMatchRouteFamilyMixActivation6FValidation(model: FullM
     `- ${activation.nextSprintRecommendation}`,
     "",
   ].join("\n");
+}
+
+export function renderFullMatchRouteFamilyScoringRateCalibration6GDoc(_model: FullMatchTraceValidationModel): string {
+  return renderRouteFamilyScoringRateCalibration6GDoc();
+}
+
+export function renderFullMatchRouteFamilyScoringRateCalibration6GValidation(_model: FullMatchTraceValidationModel): string {
+  return renderRouteFamilyScoringRateCalibration6GValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

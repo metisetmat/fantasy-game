@@ -29,6 +29,7 @@ import type { FullMatchCalibrationCarryoverReconciliationModel } from "./fullMat
 import type { FullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
 import type { FullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyProof";
 import type { FullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
+import type { FullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatchRouteFamilyScoringRateCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2470,6 +2471,72 @@ export function renderFullMatchRouteFamilyMixActivationSection(
     </section>`;
 }
 
+export function renderFullMatchRouteFamilyScoringRateCalibrationSection(
+  model: FullMatchRouteFamilyScoringRateCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Calibration des taux de scoring">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6G</p>
+        <h3>Calibration des taux de scoring</h3>
+        <p>
+          Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
+          Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
+          sans cap, et avec un score issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apres batch 50 matchs</h4>
+          <ul>
+            <li>Points moyens: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Scoring events / match: 14.8 -> ${model.afterBatch.scoringEventsPerMatch}</li>
+            <li>Blowout rate: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout rate: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Scorelines uniques: ${model.scorelineDiversityBefore} -> ${model.scorelineDiversityAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Familles toujours presentes: ${model.matchesWithTryOrDropAfter > 0 ? "oui" : "non"}</li>
+            <li>Continuation disponible: ${model.routeFamilyCompetitionCanSelectContinuation ? "oui" : "non"}</li>
+            <li>Conversion seulement apres TRY: ${model.conversionGoalsAfter <= model.triesScoredAfter ? "oui" : "non"}</li>
+            <li>Score issu des evenements officiels: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
+            <li>Version calibration: <code>${escapeHtml(model.calibrationVersion)}</code></li>
+            <li>Cap / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied ? "alerte" : "non"}</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Taux avant</th>
+            <th>Taux apres</th>
+            <th>Issues non-scoring apres</th>
+            <th>Scores apres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>${model.shotScoringRateBefore}%</td><td>${model.shotScoringRateAfter}%</td><td>${model.nonScoringOutcomeRateByFamilyAfter.SHOT_GOAL}%</td><td>${model.shotGoalsAfter}</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>${model.tryScoringRateBefore}%</td><td>${model.tryScoringRateAfter}%</td><td>${model.nonScoringOutcomeRateByFamilyAfter.TRY_TOUCHDOWN}%</td><td>${model.triesScoredAfter}</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>${model.conversionSuccessRateBefore}%</td><td>${model.conversionSuccessRateAfter}%</td><td>${model.nonScoringOutcomeRateByFamilyAfter.CONVERSION_GOAL}%</td><td>${model.conversionGoalsAfter}</td></tr>
+          <tr><td>DROP_GOAL</td><td>${model.dropSuccessRateBefore}%</td><td>${model.dropSuccessRateAfter}%</td><td>${model.nonScoringOutcomeRateByFamilyAfter.DROP_GOAL}%</td><td>${model.dropGoalsAfter}</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Statut prudent: ${model.status}. Recommendation: ${model.recommendation}.
+        Les blowouts restent a surveiller si le taux demeure haut; cette section confirme seulement la baisse observee
+        et la preservation de la diversite des routes.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -3409,6 +3476,7 @@ function renderAppendices(input: {
   readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
   readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
   readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
+  readonly fullMatchRouteFamilyScoringRateCalibration?: FullMatchRouteFamilyScoringRateCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3491,6 +3559,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
   readonly fullMatchBatchEconomyProof?: FullMatchBatchEconomyProofModel;
   readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
+  readonly fullMatchRouteFamilyScoringRateCalibration?: FullMatchRouteFamilyScoringRateCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3602,6 +3671,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchOfficialScoringConnection(input.fullMatchOfficialScoringConnection),
     renderFullMatchBatchEconomyProofSection(input.fullMatchBatchEconomyProof),
     renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation),
+    renderFullMatchRouteFamilyScoringRateCalibrationSection(input.fullMatchRouteFamilyScoringRateCalibration),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

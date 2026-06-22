@@ -468,6 +468,23 @@ function routeEventTimelineOffset(family: OfficialRouteFamily): number {
   }
 }
 
+function routeFamilyCoachLabel(family: OfficialRouteFamily): string {
+  switch (family) {
+    case "TRY_TOUCHDOWN":
+      return "essai";
+    case "CONVERSION_GOAL":
+      return "conversion";
+    case "DROP_GOAL":
+      return "drop";
+    case "SHOT_GOAL":
+      return "tir au but";
+    case "CONTINUATION":
+      return "continuite";
+    default:
+      return "route de score";
+  }
+}
+
 function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed: string): OfficialRouteFamilyCandidate {
   const noise = deterministicNoise(`${seed}:${candidate.candidateId}:resolve`);
   const successScore = candidate.candidateScore + noise - 10;
@@ -487,29 +504,41 @@ function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed:
   }
 
   if (candidate.family === "TRY_TOUCHDOWN") {
-    const scoring = successScore >= 62;
+    const scoring = successScore >= 74;
     return {
       ...candidate,
       selected: true,
       resolved: true,
       scoring,
-      outcome: scoring ? "TRY_TOUCHDOWN_SCORED" : successScore >= 56 ? "HELD_UP" : "CONTACT_STOPPED",
-      suppressionReasonCodes: scoring ? [] : ["TRY_CONTACT_CONTEST_FAILED"],
+      outcome: scoring
+        ? "TRY_TOUCHDOWN_SCORED"
+        : successScore >= 66
+          ? "HELD_UP"
+          : successScore >= 58
+            ? "LOST_FORWARD"
+            : "CONTACT_STOPPED",
+      suppressionReasonCodes: scoring ? [] : [successScore >= 66 ? "TRY_CONTACT_CONTEST_FAILED" : "TRY_GROUNDING_WINDOW_MISSING"],
       reason: scoring
         ? "Legal try access, support, and grounding control clear the official try gate."
-        : "Try route is selected and attempted, but contact or grounding pressure stops the score.",
+        : "Try route is selected and attempted, but grounding pressure, ball control, or contact resistance stops the score.",
     };
   }
 
   if (candidate.family === "DROP_GOAL") {
-    const scoring = successScore >= 64;
+    const scoring = successScore >= 76;
     return {
       ...candidate,
       selected: true,
       resolved: true,
       scoring,
-      outcome: scoring ? "DROP_GOAL_SCORED" : successScore >= 56 ? "DROP_MISSED" : "DROP_BLOCKED",
-      suppressionReasonCodes: scoring ? [] : [successScore >= 56 ? "DROP_BALANCE_NOT_AVAILABLE" : "DROP_PRESSURE_TOO_HIGH"],
+      outcome: scoring
+        ? "DROP_GOAL_SCORED"
+        : successScore >= 66
+          ? "DROP_MISSED"
+          : successScore >= 56
+            ? "DROP_BLOCKED"
+            : "DROP_INVALID",
+      suppressionReasonCodes: scoring ? [] : [successScore >= 66 ? "DROP_BALANCE_NOT_AVAILABLE" : "DROP_PRESSURE_TOO_HIGH"],
       reason: scoring
         ? "Open-play drop timing, kicker profile, and balance clear the official drop gate."
         : "Drop route is selected and attempted, but timing, balance, or block pressure prevents scoring.",
@@ -569,9 +598,10 @@ function eventForResolvedCandidate(input: {
   const opponent = input.matchInput.homeTeam.teamId === input.candidate.teamId
     ? input.matchInput.awayTeam
     : input.matchInput.homeTeam;
+  const familyLabel = routeFamilyCoachLabel(input.candidate.family);
   const scoreDescription = shouldScore
-    ? `${team.name} ${input.candidate.family} adds ${points} points through official route family mix.`
-    : `${team.name} ${input.candidate.family} resolves without score_change.`;
+    ? `${team.name} marque ${points} points via ${familyLabel}.`
+    : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;
 
   return {
     eventId: `${input.segmentLabel}-route-family-${input.candidate.family.toLowerCase()}-${input.candidate.teamId}` as MatchEvent["eventId"],
@@ -610,12 +640,12 @@ function eventForResolvedCandidate(input: {
       ? [
           {
             type: "score_change",
-            description: `${scoreDescription} Score after route: ${scoreAfter(input.scoreBefore, team.teamId, input.matchInput.homeTeam.teamId, points)}.`,
+            description: `${scoreDescription} Score apres action: ${scoreAfter(input.scoreBefore, team.teamId, input.matchInput.homeTeam.teamId, points)}.`,
             value: points,
           },
           {
             type: "momentum_change",
-            description: "Official route family mix confirms a non-shot scoring route without cap, rewrite, or forced score.",
+            description: "La route non-shot choisie marque sans cap, reecriture, ni score force.",
             value: 5,
           },
         ]
@@ -670,7 +700,7 @@ function conversionCandidateFromTry(input: {
     tryAlreadyScored: true,
   });
   const noise = deterministicNoise(`${input.matchInput.seed}:${base.candidateId}:conversion`);
-  const scoring = base.candidateScore + noise >= 52;
+  const scoring = base.candidateScore + noise >= 68;
 
   return {
     ...base,

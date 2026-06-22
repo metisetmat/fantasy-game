@@ -146,7 +146,7 @@ const ROUTE_FAMILIES: readonly OfficialRouteFamily[] = [
 ];
 
 let cachedFullMatchRouteFamilyMixActivationModel: FullMatchRouteFamilyMixActivationModel | null = null;
-const CACHE_VERSION = "route-family-mix-6f-v3";
+const CACHE_VERSION = "route-family-mix-6f-v5";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-route-family-mix-activation-6f.json");
 
 function emptyCounts(): RouteFamilyCounts {
