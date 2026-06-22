@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6G - Route Family Scoring Rate Calibration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -84,6 +84,8 @@ import {
   renderFullMatchBatchEconomyProof6EValidation,
   renderFullMatchRouteFamilyMixActivation6FDoc,
   renderFullMatchRouteFamilyMixActivation6FValidation,
+  renderFullMatchRouteFamilyScoringRateCalibration6GDoc,
+  renderFullMatchRouteFamilyScoringRateCalibration6GValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -96,9 +98,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6F - Official Route Family Mix Activation / Non-Shot Route Availability";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-route-family-mix-activation-6f.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-route-family-mix-activation-6f.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6G - Route Family Scoring Rate Calibration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-route-family-scoring-rate-calibration-6g.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-route-family-scoring-rate-calibration-6g.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2072,6 +2074,21 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchRouteFamilyMixActivation.test.ts",
         required: true,
         reason: "Sprint 6F executable test proving non-shot route selection, continuation selection, and scoring guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/routeFamilyScoringRateWarnings.ts",
+        required: true,
+        reason: "Sprint 6G warning-code registry for route-family scoring-rate calibration diagnostics",
+      },
+      {
+        source: "src/reports/fullMatchRouteFamilyScoringRateCalibration.ts",
+        required: true,
+        reason: "Sprint 6G full-match route-family scoring-rate calibration model, batch proof, and report renderer",
+      },
+      {
+        source: "src/reports/fullMatchRouteFamilyScoringRateCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6G executable test proving scoring-rate reductions, route diversity preservation, and guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4230,6 +4247,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6G")) {
+    return renderFullMatchRouteFamilyScoringRateCalibration6GDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6F")) {
     return renderFullMatchRouteFamilyMixActivation6FDoc(fullMatchTraceValidationModel());
   }
@@ -6456,6 +6476,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6G")) {
+    return renderFullMatchRouteFamilyScoringRateCalibration6GValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6F")) {
     return renderFullMatchRouteFamilyMixActivation6FValidation(fullMatchTraceValidationModel());
   }
@@ -8628,6 +8651,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6G")) {
+    return [
+      "# Sprint 6G Share Pack",
+      "",
+      "Current sprint: Sprint 6G - Route Family Scoring Rate Calibration",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-route-family-scoring-rate-calibration-6g.md",
+      "- validation.fullmatch-route-family-scoring-rate-calibration-6g.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-route-family-scoring-rate-calibration-6g.md and validation.fullmatch-route-family-scoring-rate-calibration-6g.md.",
+      "",
+      "Sprint 6G calibrates full-match route-family scoring rates after 6F route activation. It reduces scoring frequency and blowout pressure while preserving SHOT, TRY, CONVERSION-after-TRY, DROP, and continuation availability. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent scores, or use persistence/SQLite as a scoring source.",
+      "",
+      "Upload every file in this reports/share directory.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6F")) {
     return [
       "# Sprint 6F Share Pack",
@@ -25983,6 +26042,7 @@ import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttribut
 import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
 import { buildFullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
 import { currentFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
+import { currentFullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatchRouteFamilyScoringRateCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26005,6 +26065,7 @@ import { renderCoachProductReport } from "./renderCoachProductReport";
 import {
   renderCoachReportExportHtml,
   renderFullMatchRouteFamilyMixActivationSection,
+  renderFullMatchRouteFamilyScoringRateCalibrationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26024,10 +26085,14 @@ export function writeLatestCoachReport(): void {
   });
   const reportsDirectory = join(process.cwd(), "reports");
   const fullMatchRouteFamilyMixActivation = currentFullMatchRouteFamilyMixActivationModel();
-  const productHtml = appendProductSection(renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
+  const fullMatchRouteFamilyScoringRateCalibration = currentFullMatchRouteFamilyScoringRateCalibrationModel();
+  const productHtml = [
+    renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
+    renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
+  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
-  )), renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation));
+  )));
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -26211,6 +26276,7 @@ export function writeLatestCoachReport(): void {
     fullMatchCalibrationCarryoverReconciliation,
     fullMatchOfficialScoringConnection,
     fullMatchRouteFamilyMixActivation,
+    fullMatchRouteFamilyScoringRateCalibration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

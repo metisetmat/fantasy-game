@@ -77,14 +77,14 @@
       </div>
       <div class="score-box">
         <span class="score-label">Score du rapport full-match</span>
-        <span class="score">24 - 35</span>
+        <span class="score">19 - 35</span>
       </div>
     </div>
   </header>
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>
-    <div class="summary-list"><ul><li>Score final : 24 - 35.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
+    <div class="summary-list"><ul><li>Score final : 19 - 35.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
   </section>
 
   <section id="official-match-reading" class="product-section">
@@ -841,7 +841,7 @@
   </section>
   
   <script type="application/json" id="coach-report-phase-visuals-data">
-{"withBall":{"phase":"with_ball","source":"official_aggregates","signals":[{"zone":"Z2-C","label":"Danger officiel","value":10,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z3-C","label":"Danger officiel","value":8,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-C","label":"Progression utile","value":16,"kind":"progression_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."}]},"withoutBall":{"phase":"without_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Pression / instabilit&eacute;","value":24,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-C","label":"Pression / instabilit&eacute;","value":16,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-HSR","label":"Pression / instabilit&eacute;","value":4,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"medium","explanation":"Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."}]},"goalkeeper":{"phase":"goalkeeper","source":"controlled_empty_state","signals":[],"emptyStateReason":"Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart."}}
+{"withBall":{"phase":"with_ball","source":"official_aggregates","signals":[{"zone":"Z2-C","label":"Danger officiel","value":10,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z3-C","label":"Danger officiel","value":6,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-C","label":"Progression utile","value":16,"kind":"progression_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."}]},"withoutBall":{"phase":"without_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Pression / instabilit&eacute;","value":23,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-C","label":"Pression / instabilit&eacute;","value":16,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-HSR","label":"Pression / instabilit&eacute;","value":5,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."}]},"goalkeeper":{"phase":"goalkeeper","source":"controlled_empty_state","signals":[],"emptyStateReason":"Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart."}}
   </script>
 
     <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
@@ -869,11 +869,11 @@
           <h4>Batch 6F</h4>
           <ul>
             <li>Matchs: 50</li>
-            <li>Scorelines uniques: 45</li>
+            <li>Scorelines uniques: 44</li>
             <li>Matchs avec TRY/DROP: 50</li>
             <li>Matchs uniquement SHOT: 0</li>
             <li>Matchs multi-familles: 50</li>
-            <li>Shutout rate: 12%</li>
+            <li>Shutout rate: 14%</li>
           </ul>
         </article>
       </div>
@@ -887,15 +887,72 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>SHOT_GOAL</td><td>270</td><td>810</td><td>36%</td></tr>
-          <tr><td>TRY_TOUCHDOWN</td><td>170</td><td>850</td><td>38%</td></tr>
-          <tr><td>CONVERSION_GOAL</td><td>170</td><td>340</td><td>15%</td></tr>
-          <tr><td>DROP_GOAL</td><td>128</td><td>256</td><td>11%</td></tr>
+          <tr><td>SHOT_GOAL</td><td>208</td><td>624</td><td>31%</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>169</td><td>845</td><td>42%</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>165</td><td>330</td><td>17%</td></tr>
+          <tr><td>DROP_GOAL</td><td>99</td><td>198</td><td>10%</td></tr>
         </tbody>
       </table>
       <p class="muted">
         Conclusion prudente: PASS. Recommendation: KEEP_ROUTE_FAMILY_MIX_MONITORING.
         Aucune valeur de score n'est changee, aucun score adverse n'est force, aucune reecriture post-run n'est appliquee.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Calibration des taux de scoring">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6G</p>
+        <h3>Calibration des taux de scoring</h3>
+        <p>
+          Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
+          Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
+          sans cap, et avec un score issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apres batch 50 matchs</h4>
+          <ul>
+            <li>Points moyens: 45.1 -> 39.2</li>
+            <li>Scoring events / match: 14.8 -> 12.5</li>
+            <li>Blowout rate: 82% -> 68%</li>
+            <li>Severe blowout rate: 52% -> 42%</li>
+            <li>Scorelines uniques: 45 -> 43</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Familles toujours presentes: oui</li>
+            <li>Continuation disponible: oui</li>
+            <li>Conversion seulement apres TRY: oui</li>
+            <li>Score issu des evenements officiels: oui</li>
+            <li>Version calibration: <code>SCORING_RATE_CALIBRATION_6G</code></li>
+            <li>Cap / score force: non</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Taux avant</th>
+            <th>Taux apres</th>
+            <th>Issues non-scoring apres</th>
+            <th>Scores apres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>44%</td><td>33%</td><td>67%</td><td>204</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>65%</td><td>66%</td><td>34%</td><td>167</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>100%</td><td>67%</td><td>33%</td><td>161</td></tr>
+          <tr><td>DROP_GOAL</td><td>49%</td><td>36%</td><td>64%</td><td>95</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Statut prudent: PASS. Recommendation: REDUCE_SEGMENT_SCORING_DENSITY_NEXT.
+        Les blowouts restent a surveiller si le taux demeure haut; cette section confirme seulement la baisse observee
+        et la preservation de la diversite des routes.
       </p>
     </section>
 </main>
