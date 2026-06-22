@@ -80,15 +80,15 @@ Sprint 6G calibrates scoring rates after Sprint 6F activated official route-fami
 | Family | Rate before | Rate after | Non-scoring after | Attempts after | Scores after |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | SHOT_GOAL | 44% | 33% | 67% | 622 | 204 |
-| TRY_TOUCHDOWN | 65% | 66% | 34% | 254 | 167 |
-| CONVERSION_GOAL | 100% | 67% | 33% | 240 | 161 |
-| DROP_GOAL | 49% | 36% | 64% | 265 | 95 |
+| TRY_TOUCHDOWN | 65% | 65% | 35% | 257 | 167 |
+| CONVERSION_GOAL | 100% | 63% | 37% | 254 | 161 |
+| DROP_GOAL | 49% | 35% | 65% | 268 | 95 |
 
 ## Non-Scoring Outcome Rates
 - non-scoring rate after SHOT_GOAL: 67
-- non-scoring rate after TRY_TOUCHDOWN: 34
-- non-scoring rate after CONVERSION_GOAL: 33
-- non-scoring rate after DROP_GOAL: 64
+- non-scoring rate after TRY_TOUCHDOWN: 35
+- non-scoring rate after CONVERSION_GOAL: 37
+- non-scoring rate after DROP_GOAL: 65
 - continuationSelectionRateAfter: 55%
 - continuationSelectedCountAfter: 55
 

@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-22T17:33:15.774Z
+Generated timestamp: 2026-06-22T17:48:28.619Z
 Task/sprint name: Sprint 6G - Route Family Scoring Rate Calibration
 Final file count: 20
 
@@ -805,14 +805,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/fullMatchRouteFamilyMixActivation.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/fullMatch/fullMatchOfficialScoringPath.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchRouteFamilyScoringRateCalibration.test.ts
-?? src/reports/fullMatchRouteFamilyScoringRateCalibration.ts
-?? src/simulation/fullMatch/routeFamilyScoringRateWarnings.ts
+ M src/reports/fullMatchRouteFamilyScoringRateCalibration.test.ts
+ M src/reports/fullMatchRouteFamilyScoringRateCalibration.ts

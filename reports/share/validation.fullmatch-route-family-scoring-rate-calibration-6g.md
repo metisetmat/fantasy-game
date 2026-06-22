@@ -14,7 +14,7 @@ Status: PASS
 - PASS: averageTotalPoints decreases versus 6F - 45.1 -> 39.2
 - PASS: blowoutRate decreases versus 6F - 82% -> 68%
 - PASS: severeBlowoutRate decreases versus 6F - 52% -> 42%
-- PASS: conversionSuccessRate is measured and not automatic - 67%
+- PASS: conversionSuccessRate is measured and not automatic - 63%
 - PASS: route family diversity preserved - 50/0
 - PASS: score from score_change
 - PASS: no cap
@@ -40,9 +40,9 @@ Status: PASS
 - blowoutRate after: 68%
 - severeBlowoutRate before: 52%
 - severeBlowoutRate after: 42%
-- conversionSuccessRate after: 67%
-- tryScoringRate after: 66%
-- dropSuccessRate after: 36%
+- conversionSuccessRate after: 63%
+- tryScoringRate after: 65%
+- dropSuccessRate after: 35%
 - unknownScoringFamilyCount: 0
 - penaltyShotActiveLeakageCount: 0
 
