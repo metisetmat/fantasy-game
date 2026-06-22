@@ -327,6 +327,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchRouteFamilyScoringRateCalibration6GValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-family-scoring-rate-calibration-6g.md"));
   const fullMatchSegmentScoringDensityCalibration6H = readIfExists(join(shareDirectory, "fullmatch-segment-scoring-density-calibration-6h.md"));
   const fullMatchSegmentScoringDensityCalibration6HValidation = readIfExists(join(shareDirectory, "validation.fullmatch-segment-scoring-density-calibration-6h.md"));
+  const fullMatchTeamOpportunityBalanceCalibration6I = readIfExists(join(shareDirectory, "fullmatch-team-opportunity-balance-calibration-6i.md"));
+  const fullMatchTeamOpportunityBalanceCalibration6IValidation = readIfExists(join(shareDirectory, "validation.fullmatch-team-opportunity-balance-calibration-6i.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2944,6 +2946,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-route-family-scoring-rate-calibration-6g.md",
     ...sprint6GForbiddenLeftovers,
   ];
+  const sprint6IExpectedFiles = sprint6HExpectedFiles.map((file) =>
+    file === "fullmatch-segment-scoring-density-calibration-6h.md"
+      ? "fullmatch-team-opportunity-balance-calibration-6i.md"
+      : file === "validation.fullmatch-segment-scoring-density-calibration-6h.md"
+        ? "validation.fullmatch-team-opportunity-balance-calibration-6i.md"
+        : file
+  );
+  const sprint6IForbiddenLeftovers = [
+    "fullmatch-segment-scoring-density-calibration-6h.md",
+    "validation.fullmatch-segment-scoring-density-calibration-6h.md",
+    ...sprint6HForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3623,6 +3637,46 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint6IChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6IExpectedFiles.every((file) => requiredCopied(file)), sprint6IExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6IExpectedFiles.every((file) => manifest.includes(file)), sprint6IExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6I", activeConfig.sprintName === "Sprint 6I - Team Opportunity Balance Calibration", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6IForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6IForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6I oriented", readme.includes("# Sprint 6I Share Pack") && readme.includes("fullmatch-team-opportunity-balance-calibration-6i.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6I report included", fullMatchTeamOpportunityBalanceCalibration6I.includes("# Full-Match Team Opportunity Balance Calibration 6I") && fullMatchTeamOpportunityBalanceCalibration6I.includes("Before / After Table") && fullMatchTeamOpportunityBalanceCalibration6I.includes("Team Opportunity Balance Audit Summary") && fullMatchTeamOpportunityBalanceCalibration6I.includes("Home / Away Opportunities"), "6I doc included"),
+    check("6I validation is PASS", fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("Status: PASS") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("team opportunity audit exists") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("Explicit Exhaustive Test Command"), "6I validation current"),
+    check("batch match count visible", fullMatchTeamOpportunityBalanceCalibration6I.includes("matchCount: 50") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6H metrics are visible", fullMatchTeamOpportunityBalanceCalibration6I.includes("Baseline 6H Summary") && fullMatchTeamOpportunityBalanceCalibration6I.includes("scoring opportunities / match: 16.1") && fullMatchTeamOpportunityBalanceCalibration6I.includes("average total points: 22"), "6H baseline visible"),
+    check("home/away opportunities measured", fullMatchTeamOpportunityBalanceCalibration6I.includes("Home / Away Opportunities") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("home/away scoring opportunities measured"), "home/away opportunities visible"),
+    check("home/away scoring measured", fullMatchTeamOpportunityBalanceCalibration6I.includes("Home / Away Scoring") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("home/away points measured"), "home/away scoring visible"),
+    check("opportunity balance measured", fullMatchTeamOpportunityBalanceCalibration6I.includes("opportunityBalanceIndex") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("opportunityBalanceIndex measured"), "balance index visible"),
+    check("trailing response measured", fullMatchTeamOpportunityBalanceCalibration6I.includes("trailingTeamResponseRate") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("trailingTeamResponseRate measured"), "response measured"),
+    check("dominance chain measured", fullMatchTeamOpportunityBalanceCalibration6I.includes("dominantTeamOpportunityChainMax") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("dominance chain measured"), "dominance measured"),
+    check("density calibration preserved", fullMatchTeamOpportunityBalanceCalibration6I.includes("densityCalibrationPreserved: true") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("density calibration preserved"), "density preserved"),
+    check("route family diversity preserved", fullMatchTeamOpportunityBalanceCalibration6I.includes("routeFamilyDiversityPreserved: true") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("route family diversity preserved"), "route diversity preserved"),
+    check("TRY/DROP/CONVERSION remain available", fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("TRY route remains available") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("DROP route remains available") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("CONVERSION only after TRY"), "non-shot preserved"),
+    check("CONTINUATION remains available", fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("CONTINUATION remains available"), "continuation preserved"),
+    check("score from score_change all runs", fullMatchTeamOpportunityBalanceCalibration6I.includes("scoreFromScoreChangeAllRuns: true") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchTeamOpportunityBalanceCalibration6I.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchTeamOpportunityBalanceCalibration6I.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score cap/rewrite/deletion/forced score", fullMatchTeamOpportunityBalanceCalibration6I.includes("scoreCapApplied: false") && fullMatchTeamOpportunityBalanceCalibration6I.includes("postHocRewriteApplied: false") && fullMatchTeamOpportunityBalanceCalibration6I.includes("scoringEventsDeleted: false") && fullMatchTeamOpportunityBalanceCalibration6I.includes("forcedOpponentScoreApplied: false") && fullMatchTeamOpportunityBalanceCalibration6I.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchTeamOpportunityBalanceCalibration6I.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchTeamOpportunityBalanceCalibration6I.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchTeamOpportunityBalanceCalibration6I.includes("persistenceUsedForScoring: false") && fullMatchTeamOpportunityBalanceCalibration6I.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchTeamOpportunityBalanceCalibration6I.includes("unknownScoringFamilyCount: 0") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchTeamOpportunityBalanceCalibration6I.includes("penaltyShotActiveLeakageCount: 0") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("no contradictory healthy warning", fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("no contradictory healthy warning when balance still weak") && !(fullMatchTeamOpportunityBalanceCalibration6I.includes("BLOWOUT_RATE_STILL_TOO_HIGH") && fullMatchTeamOpportunityBalanceCalibration6I.includes("FULL_MATCH_BATCH_ECONOMY_HEALTHY")), "healthy warning guarded"),
+    check("coach product contains team opportunity section", coachProductHtml.includes("Equilibre des opportunites") && coachProductHtml.includes("Sprint 6I"), "product 6I visible"),
+    check("coach export contains team opportunity section", coachExportHtml.includes("Equilibre des opportunites") && coachExportHtml.includes("Sprint 6I"), "export 6I visible"),
+    check("coach export avoids forbidden team-balance wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score (applique|detecte|actif)|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6I source files", bundleSimulation.includes("src/simulation/fullMatch/teamOpportunityBalanceWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchTeamOpportunityBalanceAudit.ts") && bundleReports.includes("src/reports/fullMatchTeamOpportunityBalanceCalibration.ts") && bundleReports.includes("src/reports/fullMatchTeamOpportunityBalanceCalibration.test.ts"), "6I source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchTeamOpportunityBalanceCalibration6IValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchTeamOpportunityBalanceCalibration6I.includes("## Recommendation") && fullMatchTeamOpportunityBalanceCalibration6I.includes("Sprint 6J"), "6I recommendation visible"),
   ];
   const sprint6HChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7472,6 +7526,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6I - Team Opportunity Balance Calibration")
+      ? sprint6IChecks
     : activeConfig.sprintName.includes("Sprint 6H - Segment Scoring Density Calibration")
       ? sprint6HChecks
     : activeConfig.sprintName.includes("Sprint 6G - Route Family Scoring Rate Calibration")

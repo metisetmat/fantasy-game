@@ -31,6 +31,7 @@ import type { FullMatchBatchEconomyProofModel } from "./fullMatchBatchEconomyPro
 import type { FullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import type { FullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatchRouteFamilyScoringRateCalibration";
 import type { FullMatchSegmentScoringDensityCalibrationModel } from "./fullMatchSegmentScoringDensityCalibration";
+import type { FullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMatchTeamOpportunityBalanceCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2585,6 +2586,74 @@ export function renderFullMatchSegmentScoringDensityCalibrationSection(
     </section>`;
 }
 
+export function renderFullMatchTeamOpportunityBalanceCalibrationSection(
+  model: FullMatchTeamOpportunityBalanceCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Equilibre des opportunites">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6I</p>
+        <h3>Equilibre des opportunites</h3>
+        <p>
+          Apres 6H, la densite est plus saine mais les blowouts restent hauts. Cette lecture mesure la repartition
+          des opportunites, des phases dangereuses, des reponses apres avoir encaisse et des chaines de domination,
+          sans score force, sans cap, et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apres batch 50 matchs</h4>
+          <ul>
+            <li>Ecart moyen: ${model.averageScoreDifferenceBefore} -> ${model.averageScoreDifferenceAfter}</li>
+            <li>Blowout rate: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout rate: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Scoring events / match: ${model.scoringEventsPerMatchBefore} -> ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunites / match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Home / away</h4>
+          <ul>
+            <li>Opportunites: ${model.teamOpportunityBalance.home.scoringOpportunityCount} / ${model.teamOpportunityBalance.away.scoringOpportunityCount}</li>
+            <li>Danger phases: ${model.teamOpportunityBalance.home.dangerPhaseCount} / ${model.teamOpportunityBalance.away.dangerPhaseCount}</li>
+            <li>Scoring events: ${model.teamOpportunityBalance.home.scoringEventCount} / ${model.teamOpportunityBalance.away.scoringEventCount}</li>
+            <li>Points: ${model.teamOpportunityBalance.home.points} / ${model.teamOpportunityBalance.away.points}</li>
+            <li>Index opportunites: ${model.opportunityBalanceIndexBefore} -> ${model.opportunityBalanceIndexAfter}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Reponse et resets</h4>
+          <ul>
+            <li>Reponse apres avoir encaisse: ${model.trailingTeamResponseRateBefore}% -> ${model.trailingTeamResponseRateAfter}%</li>
+            <li>Reset vers reponse: ${model.resetToResponseRateBefore}% -> ${model.resetToResponseRateAfter}%</li>
+            <li>Recuperation defensive vers danger: ${model.defensiveRecoveryToDangerRateBefore}% -> ${model.defensiveRecoveryToDangerRateAfter}%</li>
+            <li>Chaine de domination max: ${model.dominantTeamOpportunityChainBefore} -> ${model.dominantTeamOpportunityChainAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
+            <li>Densite 6H preservee: ${model.densityCalibrationPreserved ? "oui" : "non"}</li>
+            <li>Score issu des evenements officiels: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
+            <li>Cap / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied ? "alerte" : "non"}</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${model.recommendation}. Le statut reste prudent si l'equilibre progresse mais que le blowout
+        rate ou les chaines de domination restent trop eleves.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -2639,6 +2708,35 @@ function renderFullMatchBatchEconomyProofAppendix(
         <li>post-hoc rewrite count: ${model.postHocRewriteCount}</li>
         <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
         <li>recommendation: ${escapeHtml(model.recommendation)}</li>
+      </ul>
+    </article>`;
+}
+
+function renderFullMatchTeamOpportunityBalanceCalibrationAppendix(
+  model: FullMatchTeamOpportunityBalanceCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <article class="premium-appendix-card">
+      <h3>Equilibre opportunites 6I</h3>
+      <ul>
+        <li>status: ${escapeHtml(model.status)}</li>
+        <li>scope: ${escapeHtml(model.scope)}</li>
+        <li>version: ${escapeHtml(model.version)}</li>
+        <li>match count: ${model.matchCount}</li>
+        <li>opportunity balance index: ${model.opportunityBalanceIndexBefore} -> ${model.opportunityBalanceIndexAfter}</li>
+        <li>danger balance index: ${model.dangerBalanceIndexBefore} -> ${model.dangerBalanceIndexAfter}</li>
+        <li>scoring balance index: ${model.scoringBalanceIndexBefore} -> ${model.scoringBalanceIndexAfter}</li>
+        <li>point balance index: ${model.pointBalanceIndexBefore} -> ${model.pointBalanceIndexAfter}</li>
+        <li>trailing response rate: ${model.trailingTeamResponseRateBefore}% -> ${model.trailingTeamResponseRateAfter}%</li>
+        <li>dominance chain max: ${model.dominantTeamOpportunityChainBefore} -> ${model.dominantTeamOpportunityChainAfter}</li>
+        <li>density preserved: ${model.densityCalibrationPreserved}</li>
+        <li>route family diversity preserved: ${model.routeFamilyDiversityPreserved}</li>
+        <li>forced trailing team score: ${model.forcedTrailingTeamScoreApplied}</li>
+        <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
       </ul>
     </article>`;
 }
@@ -3526,6 +3624,7 @@ function renderAppendices(input: {
   readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
   readonly fullMatchRouteFamilyScoringRateCalibration?: FullMatchRouteFamilyScoringRateCalibrationModel;
   readonly fullMatchSegmentScoringDensityCalibration?: FullMatchSegmentScoringDensityCalibrationModel;
+  readonly fullMatchTeamOpportunityBalanceCalibration?: FullMatchTeamOpportunityBalanceCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3571,6 +3670,7 @@ function renderAppendices(input: {
     ${renderFullMatchCalibrationCarryoverReconciliationAppendix(input.fullMatchCalibrationCarryoverReconciliation)}
     ${renderFullMatchOfficialScoringConnectionAppendix(input.fullMatchOfficialScoringConnection)}
     ${renderFullMatchBatchEconomyProofAppendix(input.fullMatchBatchEconomyProof)}
+    ${renderFullMatchTeamOpportunityBalanceCalibrationAppendix(input.fullMatchTeamOpportunityBalanceCalibration)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -3610,6 +3710,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchRouteFamilyMixActivation?: FullMatchRouteFamilyMixActivationModel;
   readonly fullMatchRouteFamilyScoringRateCalibration?: FullMatchRouteFamilyScoringRateCalibrationModel;
   readonly fullMatchSegmentScoringDensityCalibration?: FullMatchSegmentScoringDensityCalibrationModel;
+  readonly fullMatchTeamOpportunityBalanceCalibration?: FullMatchTeamOpportunityBalanceCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3723,6 +3824,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(input.fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(input.fullMatchSegmentScoringDensityCalibration),
+    renderFullMatchTeamOpportunityBalanceCalibrationSection(input.fullMatchTeamOpportunityBalanceCalibration),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3788,6 +3890,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchSegmentScoringDensityCalibration === undefined
       ? {}
       : { fullMatchSegmentScoringDensityCalibration: input.fullMatchSegmentScoringDensityCalibration }),
+    ...(input.fullMatchTeamOpportunityBalanceCalibration === undefined
+      ? {}
+      : { fullMatchTeamOpportunityBalanceCalibration: input.fullMatchTeamOpportunityBalanceCalibration }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6H - Segment Scoring Density Calibration. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6I - Team Opportunity Balance Calibration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -88,6 +88,8 @@ import {
   renderFullMatchRouteFamilyScoringRateCalibration6GValidation,
   renderFullMatchSegmentScoringDensityCalibration6HDoc,
   renderFullMatchSegmentScoringDensityCalibration6HValidation,
+  renderFullMatchTeamOpportunityBalanceCalibration6IDoc,
+  renderFullMatchTeamOpportunityBalanceCalibration6IValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -100,9 +102,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6H - Segment Scoring Density Calibration";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-segment-scoring-density-calibration-6h.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-segment-scoring-density-calibration-6h.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6I - Team Opportunity Balance Calibration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-team-opportunity-balance-calibration-6i.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-team-opportunity-balance-calibration-6i.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2111,6 +2113,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchSegmentScoringDensityCalibration.test.ts",
         required: true,
         reason: "Sprint 6H executable test proving density reductions, route diversity preservation, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/teamOpportunityBalanceWarnings.ts",
+        required: true,
+        reason: "Sprint 6I warning-code registry for team opportunity balance, trailing response, dominance chains, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchTeamOpportunityBalanceAudit.ts",
+        required: true,
+        reason: "Sprint 6I official timeline audit for home/away opportunities, danger, scoring, resets, responses, route mix, and dominance chains",
+      },
+      {
+        source: "src/reports/fullMatchTeamOpportunityBalanceCalibration.ts",
+        required: true,
+        reason: "Sprint 6I full-match team opportunity balance calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchTeamOpportunityBalanceCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6I executable test proving team balance metrics, density preservation, route diversity, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4269,6 +4291,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6I")) {
+    return renderFullMatchTeamOpportunityBalanceCalibration6IDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6H")) {
     return renderFullMatchSegmentScoringDensityCalibration6HDoc(fullMatchTraceValidationModel());
   }
@@ -6501,6 +6527,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6I")) {
+    return renderFullMatchTeamOpportunityBalanceCalibration6IValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6H")) {
     return renderFullMatchSegmentScoringDensityCalibration6HValidation(fullMatchTraceValidationModel());
   }
@@ -8679,6 +8709,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6I")) {
+    return [
+      "# Sprint 6I Share Pack",
+      "",
+      "Current sprint: Sprint 6I - Team Opportunity Balance Calibration",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-team-opportunity-balance-calibration-6i.md",
+      "- validation.fullmatch-team-opportunity-balance-calibration-6i.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 6I improves home/away access to credible opportunities after Sprint 6H reduced global density. It preserves SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent or trailing-team scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.",
+      "",
+      "## Review steps",
+      "",
+      "1. Confirm validation.share-pack.md is PASS.",
+      "2. Read the 6I calibration report for before/after balance metrics.",
+      "3. Inspect the 6I validation checklist for guardrails.",
+      "4. Use coach-report.export.html to verify coach-facing wording.",
+      "5. Use bundle__simulation.md and bundle__reports.md for source excerpts.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6H")) {
     return [
       "# Sprint 6H Share Pack",
@@ -26108,6 +26169,7 @@ import { buildFullMatchOfficialScoringCalibrationConnectionModel } from "./fullM
 import { currentFullMatchRouteFamilyMixActivationModel } from "./fullMatchRouteFamilyMixActivation";
 import { currentFullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatchRouteFamilyScoringRateCalibration";
 import { currentFullMatchSegmentScoringDensityCalibrationModel } from "./fullMatchSegmentScoringDensityCalibration";
+import { currentFullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMatchTeamOpportunityBalanceCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26132,6 +26194,7 @@ import {
   renderFullMatchRouteFamilyMixActivationSection,
   renderFullMatchRouteFamilyScoringRateCalibrationSection,
   renderFullMatchSegmentScoringDensityCalibrationSection,
+  renderFullMatchTeamOpportunityBalanceCalibrationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26153,10 +26216,12 @@ export function writeLatestCoachReport(): void {
   const fullMatchRouteFamilyMixActivation = currentFullMatchRouteFamilyMixActivationModel();
   const fullMatchRouteFamilyScoringRateCalibration = currentFullMatchRouteFamilyScoringRateCalibrationModel();
   const fullMatchSegmentScoringDensityCalibration = currentFullMatchSegmentScoringDensityCalibrationModel();
+  const fullMatchTeamOpportunityBalanceCalibration = currentFullMatchTeamOpportunityBalanceCalibrationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
+    renderFullMatchTeamOpportunityBalanceCalibrationSection(fullMatchTeamOpportunityBalanceCalibration),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26168,6 +26233,7 @@ export function writeLatestCoachReport(): void {
   const baselineExportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -26347,6 +26413,7 @@ export function writeLatestCoachReport(): void {
     fullMatchRouteFamilyMixActivation,
     fullMatchRouteFamilyScoringRateCalibration,
     fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

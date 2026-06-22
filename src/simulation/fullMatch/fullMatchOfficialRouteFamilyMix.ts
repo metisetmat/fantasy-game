@@ -282,6 +282,7 @@ function routeScore(input: {
   readonly teamState: FullMatchTeamSegmentState;
   readonly family: OfficialRouteFamily;
   readonly segmentIndex: number;
+  readonly scoreBefore: ScoreState;
 }): number {
   const technical = averageAttribute(input.team, (player) => player.attributes.footPlayPassingShooting);
   const tactical = averageAttribute(input.team, (player) => player.attributes.intelligence);
@@ -290,23 +291,30 @@ function routeScore(input: {
   const fatiguePenalty = Math.max(0, 58 - input.teamState.condition) * 0.3;
   const noise = deterministicNoise(`${input.matchInput.seed}:${input.team.teamId}:${input.segmentIndex}:${input.family}`) - 10;
   const phaseBoost = input.segmentIndex % 2 === 0 ? 4 : -1;
+  const teamPoints = input.team.teamId === input.matchInput.homeTeam.teamId ? input.scoreBefore.home : input.scoreBefore.away;
+  const opponentPoints = input.team.teamId === input.matchInput.homeTeam.teamId ? input.scoreBefore.away : input.scoreBefore.home;
+  const scoreDelta = teamPoints - opponentPoints;
+  const trailingResponseBoost = scoreDelta < 0 ? Math.min(14, Math.abs(scoreDelta) * 0.65) : 0;
+  const dominantMomentumDampening = scoreDelta > 7 ? Math.min(12, (scoreDelta - 5) * 0.45) : 0;
+  const responseWindowBoost = scoreDelta < 0 && input.segmentIndex % 3 !== 0 ? 3 : 0;
+  const resetStabilityBoost = scoreDelta < 0 ? 4 : scoreDelta > 7 ? 8 : 0;
 
   if (input.family === "SHOT_GOAL") {
-    return clampRating(48 + technical * 0.2 + tactical * 0.12 + planBias(input.plan, input.family) + phaseBoost + noise - fatiguePenalty);
+    return clampRating(48 + technical * 0.2 + tactical * 0.12 + planBias(input.plan, input.family) + phaseBoost + noise - fatiguePenalty + trailingResponseBoost * 0.25 - dominantMomentumDampening * 0.55);
   }
   if (input.family === "TRY_TOUCHDOWN") {
     const support = input.plan.widthUsage * 0.12 + physical * 0.18 + tactical * 0.15;
     const contactPenalty = Math.max(0, input.opponent.teamIdentity === undefined ? 55 : 62) * 0.05;
-    return clampRating(42 + support + planBias(input.plan, input.family) + input.teamState.momentum * 0.08 + noise - contactPenalty - fatiguePenalty);
+    return clampRating(42 + support + planBias(input.plan, input.family) + input.teamState.momentum * 0.08 + noise - contactPenalty - fatiguePenalty + trailingResponseBoost * 0.7 + responseWindowBoost - dominantMomentumDampening * 0.5);
   }
   if (input.family === "DROP_GOAL") {
     const kicker = input.team.primaryDropTakerId === undefined ? 0 : 7;
     const pressurePenalty = pressureLoad * 0.08;
     const timingBoost = input.segmentIndex % 3 === 1 ? 8 : 0;
-    return clampRating(45 + technical * 0.22 + tactical * 0.12 + kicker + planBias(input.plan, input.family) + timingBoost + noise - pressurePenalty);
+    return clampRating(45 + technical * 0.22 + tactical * 0.12 + kicker + planBias(input.plan, input.family) + timingBoost + noise - pressurePenalty + trailingResponseBoost * 0.45 - dominantMomentumDampening * 0.45);
   }
   if (input.family === "CONTINUATION") {
-    return clampRating(44 + tactical * 0.18 + input.plan.restDefensePriority * 0.18 + planBias(input.plan, input.family) - pressureLoad * 0.05 + noise);
+    return clampRating(44 + tactical * 0.18 + input.plan.restDefensePriority * 0.18 + planBias(input.plan, input.family) - pressureLoad * 0.05 + noise + resetStabilityBoost);
   }
   if (input.family === "CONVERSION_GOAL") {
     const kicker = input.team.primaryKickerId === undefined ? 0 : 6;
@@ -376,6 +384,7 @@ function buildCandidate(input: {
   readonly plan: TacticalPlan;
   readonly family: OfficialRouteFamily;
   readonly tryAlreadyScored: boolean;
+  readonly scoreBefore: ScoreState;
 }): OfficialRouteFamilyCandidate {
   const teamState = teamStateForId(input.segmentState, input.team.teamId);
   const score = routeScore({
@@ -387,6 +396,7 @@ function buildCandidate(input: {
     teamState,
     family: input.family,
     segmentIndex: input.segmentIndex,
+    scoreBefore: input.scoreBefore,
   });
   const unavailableReasonCodes = candidateReasons({
     family: input.family,
@@ -446,9 +456,28 @@ function densitySelectedCandidate(input: {
   readonly segmentIndex: number;
   readonly teamState: FullMatchTeamSegmentState;
   readonly seed: string;
+  readonly scoreBefore: ScoreState;
+  readonly homeTeamId: TeamId;
 }): OfficialRouteFamilyCandidate {
   const selected = selectCandidate(input.candidates);
   const continuation = input.candidates.find((candidate) => candidate.family === "CONTINUATION" && candidate.eligible);
+  const teamPoints = input.teamId === input.homeTeamId ? input.scoreBefore.home : input.scoreBefore.away;
+  const opponentPoints = input.teamId === input.homeTeamId ? input.scoreBefore.away : input.scoreBefore.home;
+  const scoreDelta = teamPoints - opponentPoints;
+  const bestScoringCandidate = selectCandidate(input.candidates.filter((candidate) => candidate.family !== "CONTINUATION"));
+
+  if (
+    scoreDelta < -5 &&
+    selected.family === "CONTINUATION" &&
+    bestScoringCandidate.eligible &&
+    bestScoringCandidate.candidateScore + 9 >= selected.candidateScore
+  ) {
+    return {
+      ...bestScoringCandidate,
+      candidateScore: Math.max(bestScoringCandidate.candidateScore, selected.candidateScore + 1),
+      reason: "Team opportunity balance calibration opens a trailing-team response window: legal scoring route access is preferred over another safe reset without forcing a score.",
+    };
+  }
 
   if (continuation === undefined || selected.family === "CONTINUATION") {
     return selected;
@@ -478,6 +507,8 @@ function densitySelectedCandidate(input: {
   const sameFamilyRepeatTooHigh = recentSameFamily >= 1 && selected.family !== "CONVERSION_GOAL";
   const pressureForcesNeutralPhase = pressureFatigueLoad + deterministicBreak >= 92;
   const plannedNeutralBeat = (input.segmentIndex + deterministicNoise(`${input.seed}:${input.teamId}:neutral-offset`)) % 4 === 0;
+  const dominantTeamNeedsReset = scoreDelta > 8 &&
+    deterministicNoise(`${input.seed}:${input.teamId}:${input.segmentIndex}:dominance-dampening`) >= 9;
 
   if (
     possessionResetWindow ||
@@ -485,12 +516,15 @@ function densitySelectedCandidate(input: {
     sameTeamChainTooLong ||
     sameFamilyRepeatTooHigh ||
     pressureForcesNeutralPhase ||
-    plannedNeutralBeat
+    plannedNeutralBeat ||
+    dominantTeamNeedsReset
   ) {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
-      reason: "Segment density calibration selects continuation/reset before another scoring opportunity: recent danger, pressure, fatigue, or route repetition interrupts the chain.",
+      reason: dominantTeamNeedsReset
+        ? "Team opportunity balance calibration dampens a dominant-team chain through a continuation/reset beat without deleting events or changing score values."
+        : "Segment density calibration selects continuation/reset before another scoring opportunity: recent danger, pressure, fatigue, or route repetition interrupts the chain.",
     };
   }
 
@@ -746,6 +780,7 @@ function conversionCandidateFromTry(input: {
   readonly team: TeamSnapshot;
   readonly opponent: TeamSnapshot;
   readonly plan: TacticalPlan;
+  readonly scoreBefore: ScoreState;
 }): OfficialRouteFamilyCandidate {
   const base = buildCandidate({
     matchInput: input.matchInput,
@@ -757,6 +792,7 @@ function conversionCandidateFromTry(input: {
     plan: input.plan,
     family: "CONVERSION_GOAL",
     tryAlreadyScored: true,
+    scoreBefore: input.scoreBefore,
   });
   const noise = deterministicNoise(`${input.matchInput.seed}:${base.candidateId}:conversion`);
   const scoring = base.candidateScore + noise >= 68;
@@ -813,6 +849,7 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
         plan: teamInput.plan,
         family,
         tryAlreadyScored: false,
+        scoreBefore: input.scoreBefore,
       })
     );
     const selected = resolveSelectedCandidate(densitySelectedCandidate({
@@ -822,6 +859,8 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
       segmentIndex: input.segmentIndex,
       teamState: teamStateForId(input.segmentState, teamInput.team.teamId),
       seed: input.matchInput.seed,
+      scoreBefore: input.scoreBefore,
+      homeTeamId: input.matchInput.homeTeam.teamId,
     }), input.matchInput.seed);
     const candidatesWithSelection = candidates.map((candidate) =>
       candidate.candidateId === selected.candidateId ? selected : candidate
@@ -850,6 +889,7 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
         team: teamInput.team,
         opponent: teamInput.opponent,
         plan: teamInput.plan,
+        scoreBefore: input.scoreBefore,
       });
       allCandidates.push(conversion);
       selectedCandidates.push(conversion);
@@ -880,6 +920,7 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
         plan: teamInput.plan,
         family: "CONVERSION_GOAL",
         tryAlreadyScored: false,
+        scoreBefore: input.scoreBefore,
       }));
     }
   }
