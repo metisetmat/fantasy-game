@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-22T21:47:14.943Z
+Generated timestamp: 2026-06-22T22:02:54.449Z
 Task/sprint name: Sprint 6I - Team Opportunity Balance Calibration
 Final file count: 20
 
@@ -813,13 +813,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchTeamOpportunityBalanceCalibration.test.ts
-?? src/reports/fullMatchTeamOpportunityBalanceCalibration.ts
-?? src/simulation/fullMatch/fullMatchTeamOpportunityBalanceAudit.ts
-?? src/simulation/fullMatch/teamOpportunityBalanceWarnings.ts
+ M src/reports/fullMatchTeamOpportunityBalanceCalibration.test.ts
+ M src/reports/fullMatchTeamOpportunityBalanceCalibration.ts
+ M src/simulation/fullMatch/fullMatchTeamOpportunityBalanceAudit.ts

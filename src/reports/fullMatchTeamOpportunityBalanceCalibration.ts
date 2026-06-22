@@ -123,7 +123,7 @@ export interface FullMatchTeamOpportunityBalanceCalibrationModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "team-opportunity-balance-6i-v1";
+const CACHE_VERSION = "team-opportunity-balance-6i-v2";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-team-opportunity-balance-calibration-6i.json");
 
 const BASELINE_6H = {
@@ -232,6 +232,35 @@ function routeFamilyForEvent(event: MatchEvent): OfficialScoringFamily | "CONTIN
     "CONTINUATION",
   ];
   return families.find((family) => event.tags.includes(`official_route_family_${family}`)) ?? null;
+}
+
+function chronologicalOpportunityEvents(report: MatchReport): readonly MatchEvent[] {
+  return [...report.timeline]
+    .sort((a, b) => a.timestamp.minute - b.timestamp.minute || a.timestamp.tick - b.timestamp.tick)
+    .filter((event) => {
+      const family = routeFamilyForEvent(event);
+      return family !== null && family !== "CONTINUATION";
+    });
+}
+
+function countConsecutiveOpportunityTransitions(report: MatchReport): {
+  readonly sameTeam: number;
+  readonly sameFamily: number;
+} {
+  return chronologicalOpportunityEvents(report).reduce((counts, event, index, events) => {
+    const previous = index === 0 ? null : events[index - 1] ?? null;
+    if (previous === null) {
+      return counts;
+    }
+
+    const family = routeFamilyForEvent(event);
+    const previousFamily = routeFamilyForEvent(previous);
+
+    return {
+      sameTeam: counts.sameTeam + (event.teamId === previous.teamId ? 1 : 0),
+      sameFamily: counts.sameFamily + (family !== null && family === previousFamily ? 1 : 0),
+    };
+  }, { sameTeam: 0, sameFamily: 0 });
 }
 
 function buildScenarioInput(index: number): MatchInput {
@@ -418,14 +447,9 @@ export function buildFullMatchTeamOpportunityBalanceCalibrationModel(): FullMatc
     resetPhaseCount += audit.home.resetPhaseCount + audit.away.resetPhaseCount;
     continuationCount += audit.home.continuationCount + audit.away.continuationCount;
     segmentCount += audit.rows.length;
-    sameTeamConsecutiveOpportunityCount += audit.rows.reduce((sum, row) => sum + Math.max(0, Math.max(row.home.dominanceChainMax, row.away.dominanceChainMax) - 1), 0);
-    sameFamilyConsecutiveOpportunityCount += report.timeline
-      .filter((event) => event.tags.includes("official_route_family_candidate"))
-      .reduce((sum, event, eventIndex, events) => {
-        const previousFamily = eventIndex === 0 ? null : routeFamilyForEvent(events[eventIndex - 1] as MatchEvent);
-        const family = routeFamilyForEvent(event);
-        return family !== null && family === previousFamily ? sum + 1 : sum;
-      }, 0);
+    const consecutiveOpportunityTransitions = countConsecutiveOpportunityTransitions(report);
+    sameTeamConsecutiveOpportunityCount += consecutiveOpportunityTransitions.sameTeam;
+    sameFamilyConsecutiveOpportunityCount += consecutiveOpportunityTransitions.sameFamily;
     for (const event of report.timeline) {
       const family = event.scoringFamily ?? routeFamilyForEvent(event);
       if (scoreChangePoints(event) > 0 && family === "UNKNOWN") {

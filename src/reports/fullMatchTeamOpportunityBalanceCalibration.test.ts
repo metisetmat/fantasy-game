@@ -31,6 +31,9 @@ assertTest(model.status !== "PASS" || model.blowoutRateAfter < model.blowoutRate
 assertTest(model.status !== "PASS" || model.oneSidedScoringRateAfter < model.oneSidedScoringRateBefore, "PASS requires one-sided scoring reduction.");
 assertTest(model.trailingTeamResponseRateAfter >= 0, "trailing team response rate must be measured.");
 assertTest(model.dominantTeamOpportunityChainAfter >= 0, "dominance chain must be measured.");
+assertTest(model.sameTeamConsecutiveOpportunityRate >= 0 && model.sameTeamConsecutiveOpportunityRate <= 100, "same-team consecutive opportunity rate must be a bounded transition rate.");
+assertTest(model.sameFamilyConsecutiveOpportunityRate >= 0 && model.sameFamilyConsecutiveOpportunityRate <= 100, "same-family consecutive opportunity rate must be a bounded transition rate.");
+assertTest(model.defensiveRecoveryToDangerRateAfter >= 0 && model.defensiveRecoveryToDangerRateAfter <= 100, "defensive recovery to danger rate must use a recovery-specific bounded numerator.");
 assertTest(model.densityCalibrationPreserved, "6I must preserve 6H density calibration.");
 assertTest(model.routeFamilyDiversityPreserved, "6I must preserve route family diversity.");
 assertTest(model.routeFamilyMixByTeam.home.TRY_TOUCHDOWN + model.routeFamilyMixByTeam.away.TRY_TOUCHDOWN > 0, "TRY route must remain available.");

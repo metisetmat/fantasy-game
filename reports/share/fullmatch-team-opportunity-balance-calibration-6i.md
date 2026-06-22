@@ -66,13 +66,13 @@ Sprint 6I improves access to credible opportunities for both teams after 6H redu
 ## Response After Conceding Metrics
 - trailingTeamResponseRate: 52.3%
 - resetToResponseRate: 39.9%
-- defensiveRecoveryToDangerRate: 56.8%
+- defensiveRecoveryToDangerRate: 73.8%
 - possessionAfterConcedingDangerRate: 52.3%
 
 ## Dominance Chain Metrics
 - dominantTeamOpportunityChainMax: 16
-- sameTeamConsecutiveOpportunityRate: 171%
-- sameFamilyConsecutiveOpportunityRate: 58%
+- sameTeamConsecutiveOpportunityRate: 74%
+- sameFamilyConsecutiveOpportunityRate: 54%
 
 ## Density Preservation Metrics
 - densityCalibrationPreserved: true

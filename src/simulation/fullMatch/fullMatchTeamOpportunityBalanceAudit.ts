@@ -20,6 +20,7 @@ export interface TeamOpportunityBalanceSideMetrics {
   readonly nonShotRouteCount: number;
   readonly possessionAfterResetCount: number;
   readonly dangerAfterResetCount: number;
+  readonly dangerAfterDefensiveRecoveryCount: number;
   readonly responseAfterConcedingCount: number;
   readonly scorelessPossessionStreakMax: number;
   readonly dominanceChainMax: number;
@@ -83,6 +84,7 @@ type MutableSide = {
   nonShotRouteCount: number;
   possessionAfterResetCount: number;
   dangerAfterResetCount: number;
+  dangerAfterDefensiveRecoveryCount: number;
   responseAfterConcedingCount: number;
   scorelessPossessionStreakCurrent: number;
   scorelessPossessionStreakMax: number;
@@ -127,6 +129,7 @@ function emptySide(): MutableSide {
     nonShotRouteCount: 0,
     possessionAfterResetCount: 0,
     dangerAfterResetCount: 0,
+    dangerAfterDefensiveRecoveryCount: 0,
     responseAfterConcedingCount: 0,
     scorelessPossessionStreakCurrent: 0,
     scorelessPossessionStreakMax: 0,
@@ -235,6 +238,7 @@ function toSideMetrics(side: MutableSide): TeamOpportunityBalanceSideMetrics {
     nonShotRouteCount: side.nonShotRouteCount,
     possessionAfterResetCount: side.possessionAfterResetCount,
     dangerAfterResetCount: side.dangerAfterResetCount,
+    dangerAfterDefensiveRecoveryCount: side.dangerAfterDefensiveRecoveryCount,
     responseAfterConcedingCount: side.responseAfterConcedingCount,
     scorelessPossessionStreakMax: side.scorelessPossessionStreakMax,
     dominanceChainMax: side.dominanceChainMax,
@@ -262,6 +266,7 @@ function addSide(a: TeamOpportunityBalanceSideMetrics, b: TeamOpportunityBalance
     nonShotRouteCount: a.nonShotRouteCount + b.nonShotRouteCount,
     possessionAfterResetCount: a.possessionAfterResetCount + b.possessionAfterResetCount,
     dangerAfterResetCount: a.dangerAfterResetCount + b.dangerAfterResetCount,
+    dangerAfterDefensiveRecoveryCount: a.dangerAfterDefensiveRecoveryCount + b.dangerAfterDefensiveRecoveryCount,
     responseAfterConcedingCount: a.responseAfterConcedingCount + b.responseAfterConcedingCount,
     scorelessPossessionStreakMax: Math.max(a.scorelessPossessionStreakMax, b.scorelessPossessionStreakMax),
     dominanceChainMax: Math.max(a.dominanceChainMax, b.dominanceChainMax),
@@ -373,6 +378,7 @@ export function auditFullMatchTeamOpportunityBalance(report: MatchReport): FullM
   }
   const segments = new Map<string, MutableSegment>();
   let lastResetTeamId: TeamId | null = null;
+  let lastDefensiveRecoveryTeamId: TeamId | null = null;
   let lastScoringTeamId: TeamId | null = null;
   let previousOpportunityTeamId: TeamId | null = null;
   let currentGlobalOpportunityChain = 0;
@@ -407,6 +413,10 @@ export function auditFullMatchTeamOpportunityBalance(report: MatchReport): FullM
       if (lastResetTeamId === event.teamId) {
         side.dangerAfterResetCount += 1;
       }
+      if (lastDefensiveRecoveryTeamId === event.teamId) {
+        side.dangerAfterDefensiveRecoveryCount += 1;
+        lastDefensiveRecoveryTeamId = null;
+      }
       if (lastScoringTeamId !== null && lastScoringTeamId !== event.teamId) {
         side.responseAfterConcedingCount += 1;
       }
@@ -438,6 +448,7 @@ export function auditFullMatchTeamOpportunityBalance(report: MatchReport): FullM
     }
     if (isDefensiveRecovery(event)) {
       side.defensiveRecoveryCount += 1;
+      lastDefensiveRecoveryTeamId = event.teamId;
     }
     if (event.eventType === "turnover" || event.tags.some((tag) => tag.includes("turnover") || tag.includes("lost_forward"))) {
       side.turnoverCount += 1;
@@ -468,6 +479,7 @@ export function auditFullMatchTeamOpportunityBalance(report: MatchReport): FullM
   const totalResets = home.resetPhaseCount + away.resetPhaseCount;
   const totalDangerAfterReset = home.dangerAfterResetCount + away.dangerAfterResetCount;
   const totalRecoveries = home.defensiveRecoveryCount + away.defensiveRecoveryCount;
+  const totalDangerAfterDefensiveRecovery = home.dangerAfterDefensiveRecoveryCount + away.dangerAfterDefensiveRecoveryCount;
 
   return {
     rows,
@@ -484,7 +496,7 @@ export function auditFullMatchTeamOpportunityBalance(report: MatchReport): FullM
     dominantTeamOpportunityChainMax: Math.max(home.dominanceChainMax, away.dominanceChainMax),
     trailingTeamResponseRate: percent(totalResponses, totalScoringEvents),
     resetToResponseRate: percent(totalDangerAfterReset, totalResets),
-    defensiveRecoveryToDangerRate: percent(totalDangerAfterReset, totalRecoveries),
+    defensiveRecoveryToDangerRate: percent(totalDangerAfterDefensiveRecovery, totalRecoveries),
     possessionAfterConcedingDangerRate: percent(totalResponses, totalScoringEvents),
     warningCounts: [...warnings.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
