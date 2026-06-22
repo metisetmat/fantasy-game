@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
+- current sprint: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -26,34 +26,39 @@ Status: PASS
 - PASS: validation.share-pack.md copied - 
 - PASS: README.md copied - 
 - PASS: manifest.md copied - 
-- PASS: current sprint is Sprint 6C - Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
+- PASS: current sprint is Sprint 6D - Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
 - PASS: missing expected files are none - none
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6C oriented - README current
-- PASS: 6C report included - 6C doc included
-- PASS: 6C validation is PASS - 6C validation current
-- PASS: official full-match score is visible - official score visible
-- PASS: official scoring event counts are visible - official event counts visible
-- PASS: historical calibration references are visible - historical references visible
-- PASS: carryover gaps are visible - carryover gaps visible
-- PASS: warning surface is visible - warnings visible
-- PASS: coach export contains calibration reconciliation section - export 6C visible
+- PASS: README is Sprint 6D oriented - README current
+- PASS: 6D report included - 6D doc included
+- PASS: 6D validation is PASS - 6D validation current
+- PASS: before and after score visible - score before/after visible
+- PASS: before and after event counts visible - event counts visible
+- PASS: SHOT_GOAL before and after counts visible - SHOT_GOAL counts visible
+- PASS: official scoring path connected warning visible - path connected
+- PASS: shot difficulty calibration applied after - shot difficulty after true
+- PASS: scoring choice balance applied after - choice balance after true
+- PASS: affordance volume constraints applied after - affordance after true
+- PASS: goalkeeper/rebound/fatigue calibrations applied after - gk/rebound/fatigue after true
+- PASS: route mix defensive resistance and danger gate applied after - route/defense/danger after true
+- PASS: score remains from official score_change - score_change source
+- PASS: no score cap - cap false
+- PASS: no post-hoc rewrite - rewrite false
+- PASS: no scoring event deletion after generation - deletion false
+- PASS: no forced opponent score - forced score false
 - PASS: scoring constants unchanged - scoring constants visible
-- PASS: score cap is not applied - score cap false
-- PASS: post-hoc score rewrite is not applied - rewrite false
-- PASS: scoring events are not deleted or rewritten - event mutation false
-- PASS: forced opponent score is not applied - forced score false
-- PASS: mutation counts are 0 - mutation counts 0
-- PASS: batch/live separation preserved - batch/live PASS
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
-- PASS: persistence and SQLite are not calibration sources - persistence/SQLite false
-- PASS: no invented global or trend claims - claim counts 0
+- PASS: batch/live separation preserved - batch/live PASS
+- PASS: persistence and SQLite not used for scoring - persistence/SQLite false
 - PASS: 50-match economy remains global reference - 50-match reference visible
-- PASS: single-run limitation is explicit - single-run limitation visible
-- PASS: bundle includes 6C source files - 6C source bundled
-- PASS: bundle includes 6C executable tests - 6C tests bundled
+- PASS: single-run limitation explicit - single-run limitation visible
+- PASS: coach export contains official calibrated scoring section - export 6D visible
+- PASS: coach export avoids forbidden score correction wording - forbidden wording absent
+- PASS: bundle includes 6D source files - 6D source bundled
+- PASS: bundle includes 6D executable tests - 6D tests bundled
+- PASS: runFullMatch uses official scoring path - runFullMatch connected
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6C recommendation visible
+- PASS: recommendation visible - 6D recommendation visible
 
 ## Files
 
@@ -67,7 +72,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-calibration-carryover-reconciliation-6c.md
+- fullmatch-official-scoring-connection-6d.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -75,5 +80,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-calibration-carryover-reconciliation-6c.md
+- validation.fullmatch-official-scoring-connection-6d.md
 - validation.share-pack.md

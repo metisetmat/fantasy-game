@@ -71,6 +71,8 @@ import {
   renderFullMatchWorkbenchChainReplay5GValidation,
   renderFullMatchWorkbenchChainReplay5HDoc,
   renderFullMatchWorkbenchChainReplay5HValidation,
+  renderFullMatchOfficialScoringConnection6DDoc,
+  renderFullMatchOfficialScoringConnection6DValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -83,9 +85,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-calibration-carryover-reconciliation-6c.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-calibration-carryover-reconciliation-6c.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-official-scoring-connection-6d.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-official-scoring-connection-6d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -1994,6 +1996,31 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchCalibrationCarryoverReconciliation.ts",
         required: true,
         reason: "Sprint 6C diagnostic model comparing historical calibrations with the current official full-match scoring path",
+      },
+      {
+        source: "src/reports/fullMatchOfficialScoringConnectionWarnings.ts",
+        required: true,
+        reason: "Sprint 6D warning-code registry for official scoring calibration connection diagnostics",
+      },
+      {
+        source: "src/reports/fullMatchOfficialScoringConnection.ts",
+        required: true,
+        reason: "Sprint 6D report model proving the official full-match score_change path uses validated calibrations before event emission",
+      },
+      {
+        source: "src/reports/fullMatchOfficialScoringConnection.test.ts",
+        required: true,
+        reason: "Sprint 6D executable test proving the connected path reduces official score_change events while preserving score-from-consequence semantics",
+      },
+      {
+        source: "src/reports/fullMatchOfficialScoringConnectionRenderer.test.ts",
+        required: true,
+        reason: "Sprint 6D executable renderer test proving the coach export shows the official calibrated scoring connection without forbidden correction wording",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchOfficialScoringPath.ts",
+        required: true,
+        reason: "Sprint 6D official full-match scoring resolver gating score_change events before official timeline emission",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4152,6 +4179,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6D")) {
+    return renderFullMatchOfficialScoringConnection6DDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6C")) {
     return renderFullMatchCalibrationCarryoverReconciliation6CDoc(fullMatchTraceValidationModel());
   }
@@ -6369,6 +6399,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6D")) {
+    return renderFullMatchOfficialScoringConnection6DValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6C")) {
     return renderFullMatchCalibrationCarryoverReconciliation6CValidation(fullMatchTraceValidationModel());
   }
@@ -8532,6 +8565,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6D")) {
+    return [
+      "# Sprint 6D Share Pack",
+      "",
+      "Current sprint: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path",
+      "",
+      "Included files:",
+      "- package.json",
+      "- tsconfig.json",
+      "- coach-report.latest.html",
+      "- coach-report.default.html",
+      "- coach-report.experimental.html",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- sequence-1-action-1.html",
+      "- sequence-1-action-2.html",
+      "- sequence-1-action-3.html",
+      "- fullmatch-official-scoring-connection-6d.md",
+      "- validation.fullmatch-official-scoring-connection-6d.md",
+      "- validation.share-pack.md",
+      "- README.md",
+      "- manifest.md",
+      "- 00-share-manifest.txt",
+      "- bundle__contracts.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "Start with validation.share-pack.md, then fullmatch-official-scoring-connection-6d.md and validation.fullmatch-official-scoring-connection-6d.md.",
+      "",
+      "Sprint 6D connects official full-match score_change creation to the validated calibration path before event emission. It keeps scoring constants, MatchBonusEvent, batch/live separation, persistence boundaries, and single-run warning scope unchanged.",
+      "",
+      "Upload every file in this reports/share directory.",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6C")) {
     return [
       "# Sprint 6C Share Pack",

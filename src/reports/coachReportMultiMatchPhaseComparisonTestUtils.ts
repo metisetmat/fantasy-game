@@ -13,6 +13,7 @@ import { buildCoachReportRealSQLiteReadOnlyIOSmokeTest } from "./buildCoachRepor
 import { buildFullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import { buildScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { buildFullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
+import { buildFullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
 import { buildCoachReportPersistentHistoryAdapter } from "./buildCoachReportPersistentHistoryAdapter";
 import { buildCoachReportRealMatchHistoryIntegration } from "./buildCoachReportRealMatchHistoryIntegration";
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
@@ -32,6 +33,7 @@ import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachRepor
 import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import type { FullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
+import type { FullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
 import type { CoachReportRealMatchHistoryIntegrationModel } from "./coachReportRealMatchHistoryIntegration";
 import type { CoachReportMultiMatchPhaseComparisonModel } from "./coachReportMultiMatchPhaseComparison";
 import type { CoachReportMultiMatchHistoryViewModel } from "./coachReportMultiMatchHistoryView";
@@ -69,6 +71,7 @@ export interface CoachReportMultiMatchPhaseComparisonTestContext {
   readonly fullMatchScoreEconomyCalibration: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation: FullMatchCalibrationCarryoverReconciliationModel;
+  readonly fullMatchOfficialScoringConnection: FullMatchOfficialScoringCalibrationConnectionModel;
 }
 
 export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachReportMultiMatchPhaseComparisonTestContext {
@@ -229,6 +232,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     report,
     scoringFamilyAttributionAudit,
   );
+  const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(report);
   const exportHtml = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     phaseReadability,
@@ -246,6 +250,7 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     fullMatchScoreEconomyCalibration,
     scoringFamilyAttributionAudit,
     fullMatchCalibrationCarryoverReconciliation,
+    fullMatchOfficialScoringConnection,
   });
 
   return {
@@ -268,5 +273,6 @@ export function buildCoachReportMultiMatchPhaseComparisonTestContext(): CoachRep
     fullMatchScoreEconomyCalibration,
     scoringFamilyAttributionAudit,
     fullMatchCalibrationCarryoverReconciliation,
+    fullMatchOfficialScoringConnection,
   };
 }

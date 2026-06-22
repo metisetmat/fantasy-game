@@ -26,6 +26,7 @@ import type { CoachReportControlledLocalReadOnlyDbModeModel } from "./coachRepor
 import type { CoachReportRealSQLiteReadOnlyIOSmokeTestModel } from "./coachReportRealSQLiteReadOnlyIOSmokeTest";
 import type { FullMatchScoreEconomyCalibrationModel } from "./fullMatchScoreEconomyCalibration";
 import type { FullMatchCalibrationCarryoverReconciliationModel } from "./fullMatchCalibrationCarryoverReconciliation";
+import type { FullMatchOfficialScoringCalibrationConnectionModel } from "./fullMatchOfficialScoringConnection";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2264,6 +2265,86 @@ function renderFullMatchCalibrationCarryoverReconciliation(
     </section>`;
 }
 
+function renderFullMatchOfficialScoringConnection(
+  model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Chemin officiel de scoring calibre">
+      <div>
+        <h3>Chemin officiel de scoring calibr&eacute;</h3>
+        <p>Connexion single-run : les opportunit&eacute;s de score passent maintenant par les calibrations valid&eacute;es avant l&rsquo;&eacute;mission des <code>score_change</code> officiels. Ce bloc reste limit&eacute; &agrave; ce run et demande une confirmation batch.</p>
+      </div>
+      <div class="durable-storage-decision-grid">
+        <article class="durable-storage-decision-card">
+          <h4>Avant / apr&egrave;s connexion</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Score avant</span><strong>${escapeHtml(model.officialScoreBeforeConnection)}</strong></div>
+            <div><span>Score apr&egrave;s</span><strong>${escapeHtml(model.officialScoreAfterConnection)}</strong></div>
+            <div><span>Score events avant</span><strong>${model.officialScoringEventsBeforeConnection}</strong></div>
+            <div><span>Score events apr&egrave;s</span><strong>${model.officialScoringEventsAfterConnection}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Famille SHOT_GOAL</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Events avant</span><strong>${model.officialShotGoalEventsBeforeConnection}</strong></div>
+            <div><span>Events apr&egrave;s</span><strong>${model.officialShotGoalEventsAfterConnection}</strong></div>
+            <div><span>Points avant</span><strong>${model.officialShotGoalPointsBeforeConnection}</strong></div>
+            <div><span>Points apr&egrave;s</span><strong>${model.officialShotGoalPointsAfterConnection}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Calibrations actives</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Shot difficulty</span><strong>${model.usesShotDifficultyCalibrationAfter ? "oui" : "non"}</strong></div>
+            <div><span>Choix route</span><strong>${model.usesScoringChoiceBalanceAfter ? "oui" : "non"}</strong></div>
+            <div><span>Volume affordances</span><strong>${model.usesAffordanceVolumeConstraintsAfter ? "oui" : "non"}</strong></div>
+            <div><span>GK / rebond / fatigue</span><strong>${model.usesGoalkeeperCalibrationAfter && model.usesReboundCalibrationAfter && model.usesFatigueCalibrationAfter ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+        <article class="durable-storage-decision-card">
+          <h4>Garde-fous</h4>
+          <div class="durable-storage-decision-kpi">
+            <div><span>Score issu des score_change</span><strong>${model.officialScoreComesFromScoreChangeEvents ? "oui" : "non"}</strong></div>
+            <div><span>Cap score</span><strong>${model.scoreCapApplied ? "oui" : "non"}</strong></div>
+            <div><span>R&eacute;&eacute;criture post-run</span><strong>${model.postHocScoreRewriteApplied ? "oui" : "non"}</strong></div>
+            <div><span>R&eacute;f&eacute;rence globale</span><strong>${model.canClaimGlobalEconomyAfter ? "oui" : "non"}</strong></div>
+          </div>
+        </article>
+      </div>
+      <p class="durable-storage-decision-boundary">${escapeHtml(model.evidenceSummary)}</p>
+      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es : SHOT_GOAL = 3, TRY_TOUCHDOWN = 5, CONVERSION_GOAL = 2, DROP_GOAL = 2, PENALTY_SHOT inactif. Aucun score adverse forc&eacute;, aucune suppression apr&egrave;s g&eacute;n&eacute;ration.</p>
+      <p class="durable-storage-decision-warning">${escapeHtml(model.recommendation)}</p>
+    </section>`;
+}
+
+function renderFullMatchOfficialScoringConnectionAppendix(
+  model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <article class="premium-appendix-card">
+      <h3>Connexion scoring officiel 6D</h3>
+      <ul>
+        <li>status: ${escapeHtml(model.status)}</li>
+        <li>scope: ${escapeHtml(model.scope)}</li>
+        <li>version: ${escapeHtml(model.version)}</li>
+        <li>parallel path after: ${model.fullMatchUsesParallelScoringPathAfter}</li>
+        <li>legacy shot path after: ${model.fullMatchUsesLegacyShotPathAfter}</li>
+        <li>fallback route path after: ${model.fullMatchUsesFallbackRoutePathAfter}</li>
+        <li>segment amplification after: ${escapeHtml(model.segmentAmplificationAfter)}</li>
+        <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
+      </ul>
+    </article>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -3142,6 +3223,7 @@ function renderAppendices(input: {
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
+  readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3185,6 +3267,7 @@ function renderAppendices(input: {
     ${renderFullMatchScoreEconomyCalibrationAppendix(input.fullMatchScoreEconomyCalibration)}
     ${renderScoringFamilyAttributionAuditAppendix(input.scoringFamilyAttributionAudit)}
     ${renderFullMatchCalibrationCarryoverReconciliationAppendix(input.fullMatchCalibrationCarryoverReconciliation)}
+    ${renderFullMatchOfficialScoringConnectionAppendix(input.fullMatchOfficialScoringConnection)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -3219,6 +3302,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchScoreEconomyCalibration?: FullMatchScoreEconomyCalibrationModel;
   readonly scoringFamilyAttributionAudit?: ScoringFamilyAttributionAuditModel;
   readonly fullMatchCalibrationCarryoverReconciliation?: FullMatchCalibrationCarryoverReconciliationModel;
+  readonly fullMatchOfficialScoringConnection?: FullMatchOfficialScoringCalibrationConnectionModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3327,6 +3411,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchScoreEconomyCalibration(input.fullMatchScoreEconomyCalibration),
     renderScoringFamilyAttributionAudit(input.scoringFamilyAttributionAudit),
     renderFullMatchCalibrationCarryoverReconciliation(input.fullMatchCalibrationCarryoverReconciliation),
+    renderFullMatchOfficialScoringConnection(input.fullMatchOfficialScoringConnection),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -3377,6 +3462,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchCalibrationCarryoverReconciliation === undefined
       ? {}
       : { fullMatchCalibrationCarryoverReconciliation: input.fullMatchCalibrationCarryoverReconciliation }),
+    ...(input.fullMatchOfficialScoringConnection === undefined
+      ? {}
+      : { fullMatchOfficialScoringConnection: input.fullMatchOfficialScoringConnection }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

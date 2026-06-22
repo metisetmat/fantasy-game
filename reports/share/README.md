@@ -1,6 +1,6 @@
-# Sprint 6C Share Pack
+# Sprint 6D Share Pack
 
-Current sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
+Current sprint: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
 
 Included files:
 - package.json
@@ -14,8 +14,8 @@ Included files:
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
-- fullmatch-calibration-carryover-reconciliation-6c.md
-- validation.fullmatch-calibration-carryover-reconciliation-6c.md
+- fullmatch-official-scoring-connection-6d.md
+- validation.fullmatch-official-scoring-connection-6d.md
 - validation.share-pack.md
 - README.md
 - manifest.md
@@ -24,8 +24,8 @@ Included files:
 - bundle__simulation.md
 - bundle__reports.md
 
-Start with validation.share-pack.md, then fullmatch-calibration-carryover-reconciliation-6c.md and validation.fullmatch-calibration-carryover-reconciliation-6c.md.
+Start with validation.share-pack.md, then fullmatch-official-scoring-connection-6d.md and validation.fullmatch-official-scoring-connection-6d.md.
 
-Sprint 6C is diagnostic only. It reconciles prior batch/live calibration work with the current official full-match scoring path, explains the SHOT_GOAL-only regression surface, and keeps scoring constants, official scoring events, MatchBonusEvent, batch/live separation, and persistence boundaries unchanged.
+Sprint 6D connects official full-match score_change creation to the validated calibration path before event emission. It keeps scoring constants, MatchBonusEvent, batch/live separation, persistence boundaries, and single-run warning scope unchanged.
 
 Upload every file in this reports/share directory.

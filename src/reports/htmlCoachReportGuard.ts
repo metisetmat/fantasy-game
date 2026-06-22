@@ -2,7 +2,7 @@ import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.
 import { runFullMatch } from "../simulation/runFullMatch";
 import { containsMojibake } from "./coachCopyQuality";
 import { assertNoTechnicalContextLeak } from "./coachFacingSummary";
-import { renderHtmlCoachReport } from "./htmlCoachReport";
+import { escapeHtml, renderHtmlCoachReport } from "./htmlCoachReport";
 
 function assertGuard(condition: boolean, message: string): void {
   if (!condition) {
@@ -78,11 +78,11 @@ export function validateHtmlCoachReportRenderer(): readonly string[] {
   );
 
   if (firstInsight !== undefined) {
-    assertGuard(html.includes(firstInsight.title), `rendered coach report must include insight title ${firstInsight.title}.`);
+    assertGuard(html.includes(escapeHtml(firstInsight.title)), `rendered coach report must include insight title ${firstInsight.title}.`);
   }
 
   if (firstKeyMoment !== undefined) {
-    assertGuard(html.includes(firstKeyMoment.title), `rendered coach report must include key moment title ${firstKeyMoment.title}.`);
+    assertGuard(html.includes(escapeHtml(firstKeyMoment.title)), `rendered coach report must include key moment title ${firstKeyMoment.title}.`);
   }
 
   assertGuard(!html.includes("[object Object]"), "rendered coach report must not leak object stringification.");

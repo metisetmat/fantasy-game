@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-22T06:50:04.564Z
-Task/sprint: Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation
+Generated: 2026-06-22T08:02:18.070Z
+Task/sprint: Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-calibration-carryover-reconciliation-6c.md
-- validation.fullmatch-calibration-carryover-reconciliation-6c.md
+- fullmatch-official-scoring-connection-6d.md
+- validation.fullmatch-official-scoring-connection-6d.md
 - README.md
 
 ## Bundle Files

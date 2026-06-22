@@ -317,6 +317,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchScoringFamilyAttribution6BValidation = readIfExists(join(shareDirectory, "validation.fullmatch-scoring-family-attribution-6b.md"));
   const fullMatchCalibrationCarryoverReconciliation6C = readIfExists(join(shareDirectory, "fullmatch-calibration-carryover-reconciliation-6c.md"));
   const fullMatchCalibrationCarryoverReconciliation6CValidation = readIfExists(join(shareDirectory, "validation.fullmatch-calibration-carryover-reconciliation-6c.md"));
+  const fullMatchOfficialScoringConnection6D = readIfExists(join(shareDirectory, "fullmatch-official-scoring-connection-6d.md"));
+  const fullMatchOfficialScoringConnection6DValidation = readIfExists(join(shareDirectory, "validation.fullmatch-official-scoring-connection-6d.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2874,6 +2876,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-scoring-family-attribution-6b.md",
     ...sprint6BForbiddenLeftovers,
   ];
+  const sprint6DExpectedFiles = sprint6CExpectedFiles.map((file) =>
+    file === "fullmatch-calibration-carryover-reconciliation-6c.md"
+      ? "fullmatch-official-scoring-connection-6d.md"
+      : file === "validation.fullmatch-calibration-carryover-reconciliation-6c.md"
+        ? "validation.fullmatch-official-scoring-connection-6d.md"
+        : file
+  );
+  const sprint6DForbiddenLeftovers = [
+    "fullmatch-calibration-carryover-reconciliation-6c.md",
+    "validation.fullmatch-calibration-carryover-reconciliation-6c.md",
+    ...sprint6CForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3554,6 +3568,53 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
   ];
+  const sprint6DChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6DExpectedFiles.every((file) => requiredCopied(file)), sprint6DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6DExpectedFiles.every((file) => manifest.includes(file)), sprint6DExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("package.json copied", requiredCopied("package.json"), ""),
+    check("tsconfig.json copied", requiredCopied("tsconfig.json"), ""),
+    check("coach-report.export.html copied", requiredCopied("coach-report.export.html"), ""),
+    check("validation.share-pack.md copied", requiredCopied("validation.share-pack.md"), ""),
+    check("README.md copied", requiredCopied("README.md"), ""),
+    check("manifest.md copied", requiredCopied("manifest.md"), ""),
+    check("current sprint is Sprint 6D", activeConfig.sprintName === "Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path", activeConfig.sprintName),
+    check("missing expected files are none", sprint6DExpectedFiles.every((file) => requiredCopied(file)), sprint6DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "none"),
+    check("previous sprint leftovers are 0", sprint6DForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6DForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6D oriented", readme.includes("# Sprint 6D Share Pack") && readme.includes("fullmatch-official-scoring-connection-6d.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6D report included", fullMatchOfficialScoringConnection6D.includes("# Full-Match Official Scoring Connection 6D") && fullMatchOfficialScoringConnection6D.includes("Applied Calibration Path") && fullMatchOfficialScoringConnection6D.includes("Route Family Mix After Connection"), "6D doc included"),
+    check("6D validation is PASS", fullMatchOfficialScoringConnection6DValidation.includes("Status: PASS") && fullMatchOfficialScoringConnection6DValidation.includes("official scoring connection model is PASS") && fullMatchOfficialScoringConnection6DValidation.includes("explicit exhaustive test command is available"), "6D validation current"),
+    check("before and after score visible", fullMatchOfficialScoringConnection6D.includes("official score before connection: 45 - 0") && fullMatchOfficialScoringConnection6D.includes("official score after connection:"), "score before/after visible"),
+    check("before and after event counts visible", fullMatchOfficialScoringConnection6D.includes("official scoring events before connection: 15") && fullMatchOfficialScoringConnection6D.includes("official scoring events after connection:"), "event counts visible"),
+    check("SHOT_GOAL before and after counts visible", fullMatchOfficialScoringConnection6D.includes("official SHOT_GOAL events before connection: 15") && fullMatchOfficialScoringConnection6D.includes("official SHOT_GOAL events after connection:"), "SHOT_GOAL counts visible"),
+    check("official scoring path connected warning visible", fullMatchOfficialScoringConnection6D.includes("OFFICIAL_SCORING_PATH_CONNECTED") && fullMatchOfficialScoringConnection6DValidation.includes("fullMatchUsesParallelScoringPath false after"), "path connected"),
+    check("shot difficulty calibration applied after", fullMatchOfficialScoringConnection6D.includes("uses shot difficulty calibration after: true") && fullMatchOfficialScoringConnection6DValidation.includes("usesShotDifficultyCalibration true after"), "shot difficulty after true"),
+    check("scoring choice balance applied after", fullMatchOfficialScoringConnection6D.includes("uses scoring choice balance after: true") && fullMatchOfficialScoringConnection6DValidation.includes("usesScoringChoiceBalance true after"), "choice balance after true"),
+    check("affordance volume constraints applied after", fullMatchOfficialScoringConnection6D.includes("uses affordance volume constraints after: true") && fullMatchOfficialScoringConnection6DValidation.includes("usesAffordanceVolumeConstraints true after"), "affordance after true"),
+    check("goalkeeper/rebound/fatigue calibrations applied after", fullMatchOfficialScoringConnection6D.includes("uses goalkeeper calibration after: true") && fullMatchOfficialScoringConnection6D.includes("uses rebound calibration after: true") && fullMatchOfficialScoringConnection6D.includes("uses fatigue calibration after: true"), "gk/rebound/fatigue after true"),
+    check("route mix defensive resistance and danger gate applied after", fullMatchOfficialScoringConnection6D.includes("uses route family mix after: true") && fullMatchOfficialScoringConnection6D.includes("uses defensive resistance after: true") && fullMatchOfficialScoringConnection6D.includes("uses danger phase gate after: true"), "route/defense/danger after true"),
+    check("score remains from official score_change", fullMatchOfficialScoringConnection6D.includes("official score comes from score_change events: true") && fullMatchOfficialScoringConnection6DValidation.includes("score remains derived from score_change"), "score_change source"),
+    check("no score cap", fullMatchOfficialScoringConnection6D.includes("score cap applied: false") && fullMatchOfficialScoringConnection6DValidation.includes("no score cap"), "cap false"),
+    check("no post-hoc rewrite", fullMatchOfficialScoringConnection6D.includes("post-hoc score rewrite applied: false") && fullMatchOfficialScoringConnection6DValidation.includes("no post-hoc score rewrite"), "rewrite false"),
+    check("no scoring event deletion after generation", fullMatchOfficialScoringConnection6D.includes("scoring events deleted: false") && fullMatchOfficialScoringConnection6DValidation.includes("no scoring event deletion after generation"), "deletion false"),
+    check("no forced opponent score", fullMatchOfficialScoringConnection6D.includes("forced opponent score applied: false") && fullMatchOfficialScoringConnection6DValidation.includes("no forced opponent score"), "forced score false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchOfficialScoringConnection6DValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && scoringEvents.includes("not part of this live ScoringEvent stream") && fullMatchOfficialScoringConnection6DValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchOfficialScoringConnection6DValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchOfficialScoringConnection6D.includes("persistence used for scoring: false") && fullMatchOfficialScoringConnection6D.includes("SQLite used for scoring: false") && fullMatchOfficialScoringConnection6DValidation.includes("persistence not used for scoring") && fullMatchOfficialScoringConnection6DValidation.includes("SQLite not used for scoring"), "persistence/SQLite false"),
+    check("50-match economy remains global reference", fullMatchOfficialScoringConnection6D.includes("full-match batch required: true") && bundleSimulation.includes("VALIDATED_FULL_MATCH_ECONOMY_ANCHOR"), "50-match reference visible"),
+    check("single-run limitation explicit", fullMatchOfficialScoringConnection6D.includes("single-run only: true") && fullMatchOfficialScoringConnection6D.includes("does not claim global economy proof"), "single-run limitation visible"),
+    check("coach export contains official calibrated scoring section", coachExportHtml.includes("Chemin officiel de scoring calibr") && coachExportHtml.includes("Score issu des score_change") && coachExportHtml.includes("CONFIRM_OFFICIAL_SCORING_PATH_CONNECTED_AND_RUN_FULL_MATCH_BATCH_NEXT"), "export 6D visible"),
+    check("coach export avoids forbidden score correction wording", !coachExportHtml.includes("score corrig") && !coachExportHtml.includes("score ajust") && !coachExportHtml.includes("preuve globale"), "forbidden wording absent"),
+    check("bundle includes 6D source files", bundleReports.includes("src/reports/fullMatchOfficialScoringConnectionWarnings.ts") && bundleReports.includes("src/reports/fullMatchOfficialScoringConnection.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchOfficialScoringPath.ts") && bundleSimulation.includes("resolveFullMatchOfficialScoringEventsForSegment"), "6D source bundled"),
+    check("bundle includes 6D executable tests", bundleReports.includes("fullMatchOfficialScoringConnection.test.ts") && bundleReports.includes("fullMatchOfficialScoringConnectionRenderer.test.ts"), "6D tests bundled"),
+    check("runFullMatch uses official scoring path", bundleSimulation.includes("createFullMatchOfficialScoringPathState") && bundleSimulation.includes("officialScoringPathResolution"), "runFullMatch connected"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchOfficialScoringConnection6DValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchOfficialScoringConnection6D.includes("CONFIRM_OFFICIAL_SCORING_PATH_CONNECTED_AND_RUN_FULL_MATCH_BATCH_NEXT"), "6D recommendation visible"),
+  ];
+
   const sprint6CChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
@@ -7191,6 +7252,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6D - Connect Full-Match Official Scoring to Validated Calibration Path")
+      ? sprint6DChecks
     : activeConfig.sprintName.includes("Sprint 6C - Calibration Carryover & Full-Match Regression Reconciliation")
       ? sprint6CChecks
     : activeConfig.sprintName.includes("Sprint 6B - Scoring Family Attribution & Event Taxonomy Cleanup")
