@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-22T23:47:20.539Z
+Generated timestamp: 2026-06-23T06:40:21.338Z
 Task/sprint name: Sprint 6J - Team Response And Dominance Chain Follow-up
 Final file count: 20
 
@@ -817,13 +817,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
+ M src/reports/fullMatchDominanceChainCalibration.test.ts
+ M src/reports/fullMatchDominanceChainCalibration.ts
+ M src/simulation/fullMatch/fullMatchDominanceChainAudit.ts
  M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchDominanceChainCalibration.test.ts
-?? src/reports/fullMatchDominanceChainCalibration.ts
-?? src/simulation/fullMatch/dominanceChainWarnings.ts
-?? src/simulation/fullMatch/fullMatchDominanceChainAudit.ts

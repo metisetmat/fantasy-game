@@ -5,10 +5,10 @@ Status: PASS
 ## Counts
 - matchCount: 50
 - dominance audits: 50
-- dominantTeamOpportunityChainMax before/after: 16/1
-- sameTeamConsecutiveOpportunityRate before/after: 74/0
-- sameFamilyConsecutiveOpportunityRate before/after: 54/0
-- dominanceDecayAppliedCount: 627
+- dominantTeamOpportunityChainMax before/after: 16/3
+- sameTeamConsecutiveOpportunityRate before/after: 74/8.2
+- sameFamilyConsecutiveOpportunityRate before/after: 54/0.8
+- dominanceDecayAppliedCount: 0
 - recommendation: IMPROVE_BREAK_EVENTS
 
 ## Checks
@@ -16,15 +16,15 @@ Status: PASS
 - PASS: baseline 6I metrics visible - TEAM_OPPORTUNITY_BALANCE_6I
 - PASS: batch 50 matches after calibration exists - matchCount: 50
 - PASS: dominance chain audit exists - 50
-- PASS: dominantTeamOpportunityChainMax measured - 1
-- PASS: sameTeamConsecutiveOpportunityRate measured - 0%
-- PASS: sameFamilyConsecutiveOpportunityRate measured - 0%
-- PASS: dominance chains decrease versus 6I or failure justified - 16->1
-- PASS: same team consecutive opportunity rate decreases versus 6I or failure justified - 74->0
-- PASS: same family repeat decreases versus 6I or failure justified - 54->0
+- PASS: dominantTeamOpportunityChainMax measured - 3
+- PASS: sameTeamConsecutiveOpportunityRate measured - 8.2%
+- PASS: sameFamilyConsecutiveOpportunityRate measured - 0.8%
+- PASS: dominance chains decrease versus 6I or failure justified - 16->3
+- PASS: same team consecutive opportunity rate decreases versus 6I or failure justified - 74->8.2
+- PASS: same family repeat decreases versus 6I or failure justified - 54->0.8
 - PASS: reset breaks dominance measured - 100%
-- PASS: defensive recovery breaks dominance measured - 86%
-- PASS: goalkeeper secure breaks dominance measured - 80%
+- PASS: defensive recovery breaks dominance measured - 34%
+- PASS: goalkeeper secure breaks dominance measured - 0%
 - PASS: team opportunity balance preserved - 76/81
 - PASS: density calibration preserved - 15.8/21.8
 - PASS: route family diversity preserved - 5
@@ -44,7 +44,7 @@ Status: PASS
 - PASS: no UNKNOWN - 0
 - PASS: no PENALTY_SHOT leakage - 0
 - PASS: no persistence/SQLite scoring
-- PASS: no contradictory healthy warning when dominance still weak - DOMINANCE_CHAIN_CALIBRATED,DOMINANCE_CHAIN_REDUCED,SAME_TEAM_OPPORTUNITY_CHAIN_REDUCED,SAME_FAMILY_REPEAT_REDUCED,RESET_BREAKS_DOMINANCE_IMPROVED,DEFENSIVE_RECOVERY_BREAKS_DOMINANCE_IMPROVED,GOALKEEPER_SECURE_BREAKS_DOMINANCE_IMPROVED,TEAM_OPPORTUNITY_BALANCE_PRESERVED,DENSITY_CALIBRATION_PRESERVED,ROUTE_FAMILY_DIVERSITY_PRESERVED,BLOWOUT_RATE_STILL_TOO_HIGH,FULL_MATCH_BATCH_ECONOMY_PARTIAL
+- PASS: no contradictory healthy warning when dominance still weak - DOMINANCE_CHAIN_CALIBRATED,DOMINANCE_CHAIN_REDUCED,SAME_TEAM_OPPORTUNITY_CHAIN_REDUCED,SAME_FAMILY_REPEAT_REDUCED,RESET_BREAKS_DOMINANCE_IMPROVED,GOALKEEPER_SECURE_BREAKS_DOMINANCE_IMPROVED,TEAM_OPPORTUNITY_BALANCE_PRESERVED,DENSITY_CALIBRATION_PRESERVED,ROUTE_FAMILY_DIVERSITY_PRESERVED,BLOWOUT_RATE_STILL_TOO_HIGH,FULL_MATCH_BATCH_ECONOMY_PARTIAL
 - PASS: PASS/PARTIAL/FAIL justified - PARTIAL
 
 ## Explicit Exhaustive Test Command

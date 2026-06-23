@@ -1,11 +1,126 @@
 import { buildFullMatchDominanceChainCalibrationModel } from "./fullMatchDominanceChainCalibration";
 import { scoringRegistryEntry } from "../systems/scoring/scoringActionRegistry";
+import { auditFullMatchDominanceChains } from "../simulation/fullMatch/fullMatchDominanceChainAudit";
+import { runFullMatch } from "../simulation/runFullMatch";
+import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import type { MatchEvent, MatchReport } from "../contracts/engineToCoach";
+import { MatchPhase, PressureLevel } from "../models/match";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(message);
   }
 }
+
+function event(input: {
+  readonly eventId: string;
+  readonly tick: number;
+  readonly teamId: string;
+  readonly tags: readonly string[];
+  readonly pressure?: PressureLevel;
+  readonly eventType?: MatchEvent["eventType"];
+  readonly outcome?: MatchEvent["outcome"];
+}): MatchEvent {
+  const pressure = input.pressure ?? PressureLevel.Medium;
+  return {
+    eventId: input.eventId,
+    matchId: "dominance-review-test",
+    timestamp: { tick: input.tick, minute: input.tick, period: "first_half" },
+    phase: MatchPhase.InProgress,
+    sequenceId: `seq-${input.tick}`,
+    teamId: input.teamId,
+    opponentTeamId: input.teamId === "CONTROL" ? "BLITZ" : "CONTROL",
+    eventType: input.eventType ?? "progression",
+    zone: "Z5-C",
+    tacticalContext: {
+      pressureLevel: pressure,
+      ballZone: "Z5-C",
+      targetZone: "Z5-C",
+      moveType: "TRY_TOUCHDOWN",
+      attackingDirection: input.teamId === "CONTROL" ? "left_to_right" : "right_to_left",
+      reason: "review regression fixture",
+    },
+    fatigueContext: {
+      teamCondition: 72,
+      primaryPlayerCondition: 72,
+    },
+    outcome: input.outcome ?? "success",
+    consequences: [],
+    tags: input.tags,
+    narrativeWeight: 70,
+  };
+}
+
+function reportWithTimeline(timeline: readonly MatchEvent[]): MatchReport {
+  return {
+    matchId: "dominance-review-test",
+    score: { home: 0, away: 0 },
+    evidenceFacts: [],
+    warnings: [],
+    reportMeta: {
+      reportScope: "FULL_MATCH_HARNESS_SINGLE_RUN",
+      generatorVersion: "dominance-review-test",
+      generatedFrom: "runFullMatch",
+      sourceOfTruthNote: "review regression fixture",
+      limitations: [],
+    },
+    timeline,
+    teamStats: [],
+    playerStats: [],
+    zoneStats: [],
+    fatigueReport: {
+      teamSummaries: [],
+      playerSummaries: [],
+    },
+    tacticalReport: {
+      diagnoses: [],
+    },
+    keyMoments: [],
+    coachInsights: [],
+    suggestedFocus: [],
+  };
+}
+
+const highPressureAudit = auditFullMatchDominanceChains(reportWithTimeline([
+  event({
+    eventId: "high-pressure-try-1",
+    tick: 1,
+    teamId: "CONTROL",
+    pressure: PressureLevel.High,
+    tags: ["official_route_family_candidate", "official_route_family_TRY_TOUCHDOWN"],
+  }),
+  event({
+    eventId: "high-pressure-try-2",
+    tick: 2,
+    teamId: "CONTROL",
+    pressure: PressureLevel.High,
+    tags: ["official_route_family_candidate", "official_route_family_TRY_TOUCHDOWN"],
+  }),
+]));
+
+assertTest(
+  highPressureAudit.dominantTeamOpportunityChainMax === 2,
+  "high-pressure scoring opportunities must extend dominance chains instead of being pressure breaks.",
+);
+assertTest(
+  highPressureAudit.pressureBreaksDominanceCount === 0,
+  "high-pressure opportunity events must not be counted as pressure break events.",
+);
+
+const generatedReport = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture);
+const nonDominanceContinuationTags = generatedReport.timeline.filter((item) =>
+  item.tags.includes("official_route_family_CONTINUATION") &&
+  !(item.tacticalContext.reason ?? "").includes("Dominance chain calibration")
+);
+
+assertTest(
+  nonDominanceContinuationTags.length > 0,
+  "fixture must include non-dominance continuations for 6J tag regression coverage.",
+);
+assertTest(
+  nonDominanceContinuationTags.every((item) => !item.tags.includes("dominance_chain_calibration_6j") && !item.tags.includes("dominance_decay_applied")),
+  "non-dominance continuations must not be tagged as 6J dominance decay.",
+);
 
 const model = buildFullMatchDominanceChainCalibrationModel();
 

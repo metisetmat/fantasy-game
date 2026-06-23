@@ -752,8 +752,8 @@ function eventForResolvedCandidate(input: {
     ? input.matchInput.awayTeam
     : input.matchInput.homeTeam;
   const familyLabel = routeFamilyCoachLabel(input.candidate.family);
-  const dominanceChainDecayApplied = input.candidate.reason.includes("Dominance chain calibration") ||
-    (input.candidate.family === "CONTINUATION" && input.candidate.selected);
+  const dominanceChainDecayApplied = input.candidate.family === "CONTINUATION" &&
+    input.candidate.reason.includes("Dominance chain calibration");
   const scoreDescription = shouldScore
     ? `${team.name} marque ${points} points via ${familyLabel}.`
     : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;

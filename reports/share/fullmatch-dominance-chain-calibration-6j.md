@@ -21,11 +21,11 @@ Sprint 6J reduces sticky same-team opportunity chains without forcing scores, ca
 - opportunityBalanceIndex: 76
 
 ## After Calibration Summary
-- dominantTeamOpportunityChainMax: 1
+- dominantTeamOpportunityChainMax: 3
 - dominantTeamDangerPhaseChainMax: 9
 - dominantTeamScoringEventChainMax: 7
-- sameTeamConsecutiveOpportunityRate: 0%
-- sameFamilyConsecutiveOpportunityRate: 0%
+- sameTeamConsecutiveOpportunityRate: 8.2%
+- sameFamilyConsecutiveOpportunityRate: 0.8%
 - postScoreImmediateReattackRate: 78.4%
 - average total points: 21.8
 - average score difference: 12.2
@@ -35,28 +35,28 @@ Sprint 6J reduces sticky same-team opportunity chains without forcing scores, ca
 ## Before / After Table
 | Metric | 6I baseline | 6J after | Direction |
 | --- | ---: | ---: | --- |
-| dominant team opportunity chain | 16 | 1 | reduced |
-| same-team consecutive opportunity rate | 74% | 0% | reduced |
-| same-family consecutive opportunity rate | 54% | 0% | reduced |
+| dominant team opportunity chain | 16 | 3 | reduced |
+| same-team consecutive opportunity rate | 74% | 8.2% | reduced |
+| same-family consecutive opportunity rate | 54% | 0.8% | reduced |
 | post-score immediate reattack rate | 38% | 78.4% | not reduced |
 | average score difference | 11.1 | 12.2 | regressed |
 | blowout rate | 48% | 58% | not reduced |
 
 ## Dominance Chain Metrics
-- dominantTeamOpportunityChainMax: 1
+- dominantTeamOpportunityChainMax: 3
 - dominantTeamDangerPhaseChainMax: 9
 - dominantTeamScoringEventChainMax: 7
 - dominantTeamPointRunMax: 27
-- sameZoneConsecutiveOpportunityRate: 0%
-- dominanceDecayAppliedCount: 627
+- sameZoneConsecutiveOpportunityRate: 8.3%
+- dominanceDecayAppliedCount: 0
 
 ## Break Dominance Metrics
 - resetBreaksDominanceRate: 45% -> 100%
-- defensiveRecoveryBreaksDominanceRate: 74% -> 86%
-- goalkeeperSecureBreaksDominanceRate: 0% -> 80%
+- defensiveRecoveryBreaksDominanceRate: 74% -> 34%
+- goalkeeperSecureBreaksDominanceRate: 0% -> 0%
 - turnoverBreaksDominanceRate: 0% -> 34%
-- neutralPhaseBreaksDominanceRate: 45% -> 88%
-- trailingTeamResponseAfterDominanceRate: 14.7%
+- neutralPhaseBreaksDominanceRate: 45% -> 82%
+- trailingTeamResponseAfterDominanceRate: 14.5%
 
 ## Team Opportunity Balance Preservation
 - teamOpportunityBalancePreserved: true
@@ -127,7 +127,6 @@ Sprint 6J reduces sticky same-team opportunity chains without forcing scores, ca
 - SAME_TEAM_OPPORTUNITY_CHAIN_REDUCED
 - SAME_FAMILY_REPEAT_REDUCED
 - RESET_BREAKS_DOMINANCE_IMPROVED
-- DEFENSIVE_RECOVERY_BREAKS_DOMINANCE_IMPROVED
 - GOALKEEPER_SECURE_BREAKS_DOMINANCE_IMPROVED
 - TEAM_OPPORTUNITY_BALANCE_PRESERVED
 - DENSITY_CALIBRATION_PRESERVED

@@ -342,7 +342,17 @@ export function auditFullMatchDominanceChains(report: MatchReport): FullMatchDom
     const turnover = isTurnover(event);
     const neutral = event.outcome === "neutral" || family === "CONTINUATION";
     const scorePoints = scoreChangePoints(event);
-    const breakCandidate = reset || defensiveRecovery || goalkeeperSecure || turnover || neutral || isFatigueBreak(event) || isPressureBreak(event);
+    const fatigueBreak = !opportunity && !danger && isFatigueBreak(event);
+    const pressureBreak = !opportunity && !danger && isPressureBreak(event);
+    const breakCandidate = !opportunity && (
+      reset ||
+      defensiveRecovery ||
+      goalkeeperSecure ||
+      turnover ||
+      neutral ||
+      fatigueBreak ||
+      pressureBreak
+    );
 
     if (breakCandidate && previousOpportunityTeamId !== null) {
       previousDominantTeamBeforeBreak = previousOpportunityTeamId;
@@ -371,11 +381,11 @@ export function auditFullMatchDominanceChains(report: MatchReport): FullMatchDom
         segment.neutralBreaks += 1;
         neutralBreaks += 1;
       }
-      if (isFatigueBreak(event)) {
+      if (fatigueBreak) {
         segment.fatigueBreaks += 1;
         fatigueBreaks += 1;
       }
-      if (isPressureBreak(event)) {
+      if (pressureBreak) {
         segment.pressureBreaks += 1;
         pressureBreaks += 1;
       }

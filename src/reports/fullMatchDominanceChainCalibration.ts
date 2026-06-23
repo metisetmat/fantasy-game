@@ -142,7 +142,7 @@ export interface FullMatchDominanceChainCalibrationModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "dominance-chain-6j-v2";
+const CACHE_VERSION = "dominance-chain-6j-v3";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-dominance-chain-calibration-6j.json");
 
 const BASELINE_6I = {
