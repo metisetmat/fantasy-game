@@ -539,6 +539,27 @@ function previousScoringRouteEvent(input: {
     .reverse()[0];
 }
 
+function previousResetRouteEvent(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly segmentIndex: number;
+}): MatchEvent | undefined {
+  const currentSegmentTick = input.segmentIndex * 100;
+  return [...input.state.routeEvents]
+    .filter((event) =>
+      event.timestamp.tick < currentSegmentTick &&
+      (
+        event.tags.some((tag) =>
+          tag === "official_route_family_CONTINUATION" ||
+          tag.includes("reset") ||
+          tag.includes("restart")
+        ) ||
+        event.outcome === "neutral"
+      )
+    )
+    .sort((a, b) => a.timestamp.minute - b.timestamp.minute || a.timestamp.tick - b.timestamp.tick)
+    .reverse()[0];
+}
+
 function hasGoalkeeperSecureSource(event: MatchEvent): boolean {
   const tags = event.tags.map((tag) => tag.toLowerCase());
   return event.eventType === "goalkeeper_action" ||
@@ -571,6 +592,10 @@ function densitySelectedCandidate(input: {
     segmentIndex: input.segmentIndex,
   });
   const lastScoringRouteEvent = previousScoringRouteEvent({
+    state: input.state,
+    segmentIndex: input.segmentIndex,
+  });
+  const lastResetRouteEvent = previousResetRouteEvent({
     state: input.state,
     segmentIndex: input.segmentIndex,
   });
@@ -691,6 +716,25 @@ function densitySelectedCandidate(input: {
     (consecutiveSameTeamOpportunities >= 1 && scoreDelta > 0) ||
     (recentTeamOpportunities >= 1 && pressureFatigueLoad + deterministicBreak >= 78);
   const routeRepeatDecay = sameFamilyRepeatTooHigh || sameZoneRepeatTooHigh;
+  const recentResetToDangerWindow = lastResetRouteEvent !== undefined &&
+    input.segmentIndex * 100 - lastResetRouteEvent.timestamp.tick <= 160;
+  const resetBreakBlowoutEconomyEnabled = input.seed.includes("reset-break-blowout-economy-6m");
+  const earnedDangerAfterReset = selected.candidateScore >= 88 ||
+    scoreDelta <= 0 ||
+    pressureFatigueLoad + deterministicBreak >= 96 ||
+    selected.family === "CONVERSION_GOAL";
+  const automaticDangerAfterReset = recentResetToDangerWindow &&
+    resetBreakBlowoutEconomyEnabled &&
+    scoreDelta > 0 &&
+    !earnedDangerAfterReset;
+
+  if (automaticDangerAfterReset) {
+    return {
+      ...continuation,
+      candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
+      reason: "Reset break blowout economy calibration selects a safe possession beat: the leading team cannot turn a recent reset into immediate danger without enough support, spacing, fatigue edge, or tactical justification.",
+    };
+  }
 
   if (
     possessionResetWindow ||
@@ -890,6 +934,8 @@ function eventForResolvedCandidate(input: {
     input.candidate.reason.includes("Post-score reset calibration");
   const goalkeeperSecureResetApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Goalkeeper secure reset calibration");
+  const resetBreakBlowoutEconomyApplied = input.candidate.family === "CONTINUATION" &&
+    input.candidate.reason.includes("Reset break blowout economy calibration");
   const scoreDescription = shouldScore
     ? `${team.name} marque ${points} points via ${familyLabel}.`
     : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;
@@ -995,6 +1041,16 @@ function eventForResolvedCandidate(input: {
             "goalkeeper_secure_breaks_dominance",
             "goalkeeper_secure_possession_reset",
             "goalkeeper_secure_safe_restart",
+            "neutral_phase_breaks_momentum",
+            "reset_breaks_dominance",
+          ]
+        : []),
+      ...(resetBreakBlowoutEconomyApplied
+        ? [
+            "reset_break_blowout_economy_6m",
+            "automatic_danger_dampened",
+            "post_break_safe_possession",
+            "reset_to_danger_quality_gate",
             "neutral_phase_breaks_momentum",
             "reset_breaks_dominance",
           ]

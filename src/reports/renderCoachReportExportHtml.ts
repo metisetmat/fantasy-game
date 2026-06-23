@@ -37,6 +37,9 @@ import type { FullMatchBreakEventPostScoreResetCalibrationModel } from "./fullMa
 import type {
   FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel,
 } from "./fullMatchGoalkeeperSecureResetBreakSpecificityCalibration";
+import type {
+  FullMatchResetBreakBlowoutEconomyCalibrationModel,
+} from "./fullMatchResetBreakBlowoutEconomyCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2866,6 +2869,75 @@ export function renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(
     </section>`;
 }
 
+export function renderFullMatchResetBreakBlowoutEconomySection(
+  model: FullMatchResetBreakBlowoutEconomyCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Economie competitive">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6M</p>
+        <h3>Economie competitive</h3>
+        <p>
+          6M surveille les dangers apres reset et les causes restantes de blowout. La calibration agit sur la
+          continuite, la recuperation defensive et la justification tactique du danger, sans score force, sans cap,
+          sans suppression d'evenements et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Scoreline health</h4>
+          <ul>
+            <li>Blowout rate: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Match serre: ${model.closeGameRateBefore}% -> ${model.closeGameRateAfter}%</li>
+            <li>Match competitif: ${model.competitiveGameRateBefore}% -> ${model.competitiveGameRateAfter}%</li>
+            <li>Ecart moyen: ${model.averageScoreDifferenceBefore} -> ${model.averageScoreDifferenceAfter}</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Danger apres reset</h4>
+          <ul>
+            <li>Reset vers danger immediat: ${model.resetToImmediateDangerRateBefore}% -> ${model.resetToImmediateDangerRateAfter}%</li>
+            <li>Danger automatique suspecte: ${model.automaticDangerSuspicionRateBefore}% -> ${model.automaticDangerSuspicionRateAfter}%</li>
+            <li>Danger merite: ${model.earnedDangerRateBefore}% -> ${model.earnedDangerRateAfter}%</li>
+            <li>Gardien secure preserve: ${model.goalkeeperSecureResetPreserved ? "oui" : "non"}</li>
+            <li>Reset post-score preserve: ${model.resetSpecificityPreserved ? "oui" : "non"}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Preservation</h4>
+          <ul>
+            <li>Densite preservee: ${model.densityCalibrationPreserved ? "oui" : "non"}</li>
+            <li>Equilibre equipe preserve: ${model.teamOpportunityBalancePreserved ? "oui" : "non"}</li>
+            <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
+            <li>Chaines dominance preservees: ${model.dominanceChainsPreservedOrImproved ? "oui" : "non"}</li>
+            <li>Batch: ${model.matchCount} matchs</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Score officiel score_change: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
+            <li>Score cap: ${model.scoreCapApplied ? "oui" : "non"}</li>
+            <li>Score force: ${model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied ? "oui" : "non"}</li>
+            <li>Rewrite apres coup: ${model.postHocRewriteApplied ? "oui" : "non"}</li>
+            <li>Recommendation: ${model.recommendation}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Lecture prudente: ${model.nextSprintRecommendation}. Le statut PARTIAL peut rester acceptable si les garde-fous
+        sont propres et si les dangers automatiques sont classes plutot que transformes en points gratuits.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -3928,6 +4000,7 @@ function renderAppendices(input: {
   readonly fullMatchDominanceChainCalibration?: FullMatchDominanceChainCalibrationModel;
   readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
   readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
+  readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4020,6 +4093,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchDominanceChainCalibration?: FullMatchDominanceChainCalibrationModel;
   readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
   readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
+  readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4137,6 +4211,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchDominanceChainCalibrationSection(input.fullMatchDominanceChainCalibration),
     renderFullMatchBreakEventPostScoreResetCalibrationSection(input.fullMatchBreakEventPostScoreResetCalibration),
     renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(input.fullMatchGoalkeeperSecureResetBreakSpecificity),
+    renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

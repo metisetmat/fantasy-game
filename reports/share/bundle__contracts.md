@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6L - Goalkeeper Secure & Reset Break Specificity. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6M - Reset Break Blowout Economy. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

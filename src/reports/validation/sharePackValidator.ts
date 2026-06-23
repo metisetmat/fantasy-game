@@ -335,6 +335,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchBreakEventPostScoreResetCalibration6KValidation = readIfExists(join(shareDirectory, "validation.fullmatch-break-event-post-score-reset-calibration-6k.md"));
   const fullMatchGoalkeeperSecureResetBreakSpecificity6L = readIfExists(join(shareDirectory, "fullmatch-goalkeeper-secure-reset-break-specificity-6l.md"));
   const fullMatchGoalkeeperSecureResetBreakSpecificity6LValidation = readIfExists(join(shareDirectory, "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md"));
+  const fullMatchResetBreakBlowoutEconomy6M = readIfExists(join(shareDirectory, "fullmatch-reset-break-blowout-economy-6m.md"));
+  const fullMatchResetBreakBlowoutEconomy6MValidation = readIfExists(join(shareDirectory, "validation.fullmatch-reset-break-blowout-economy-6m.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3000,6 +3002,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-break-event-post-score-reset-calibration-6k.md",
     ...sprint6KForbiddenLeftovers,
   ];
+  const sprint6MExpectedFiles = sprint6LExpectedFiles.map((file) =>
+    file === "fullmatch-goalkeeper-secure-reset-break-specificity-6l.md"
+      ? "fullmatch-reset-break-blowout-economy-6m.md"
+      : file === "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md"
+        ? "validation.fullmatch-reset-break-blowout-economy-6m.md"
+        : file
+  );
+  const sprint6MForbiddenLeftovers = [
+    "fullmatch-goalkeeper-secure-reset-break-specificity-6l.md",
+    "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md",
+    ...sprint6LForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3762,6 +3776,61 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 6L source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchGoalkeeperSecureBreakAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchResetBreakSpecificityAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/goalkeeperSecureResetBreakWarnings.ts") && bundleReports.includes("src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.ts") && bundleReports.includes("src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.test.ts"), "6L source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchGoalkeeperSecureResetBreakSpecificity6LValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
     check("recommendation visible", fullMatchGoalkeeperSecureResetBreakSpecificity6L.includes("## Recommendation") && fullMatchGoalkeeperSecureResetBreakSpecificity6L.includes("Sprint 6M"), "6L recommendation visible"),
+  ];
+  const sprint6MBlockingWarnings = [
+    "BLOWOUT_RATE_STILL_TOO_HIGH",
+    "SEVERE_BLOWOUT_RATE_STILL_TOO_HIGH",
+    "RESET_TO_IMMEDIATE_DANGER_STILL_TOO_HIGH",
+    "AUTOMATIC_DANGER_STILL_TOO_HIGH",
+    "TEAM_BALANCE_REGRESSED",
+    "DENSITY_CALIBRATION_REGRESSED",
+    "POST_SCORE_RESET_GAINS_REGRESSED",
+    "GOALKEEPER_SECURE_RESET_GAINS_REGRESSED",
+    "DOMINANCE_CHAIN_GAINS_REGRESSED",
+    "ROUTE_FAMILY_DIVERSITY_REGRESSED",
+  ] as const;
+  const sprint6MChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6MExpectedFiles.every((file) => requiredCopied(file)), sprint6MExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6MExpectedFiles.every((file) => manifest.includes(file)), sprint6MExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6M", activeConfig.sprintName === "Sprint 6M - Reset Break Blowout Economy", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6MForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6MForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6M oriented", readme.includes("# Sprint 6M Share Pack") && readme.includes("fullmatch-reset-break-blowout-economy-6m.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6M report included", fullMatchResetBreakBlowoutEconomy6M.includes("# Full-Match Reset Break Blowout Economy 6M") && fullMatchResetBreakBlowoutEconomy6M.includes("Blowout Root Cause Audit Summary") && fullMatchResetBreakBlowoutEconomy6M.includes("Reset-To-Danger Quality Audit Summary"), "6M doc included"),
+    check("6M validation is PASS", fullMatchResetBreakBlowoutEconomy6MValidation.includes("Status: PASS") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("reset-to-danger quality audit exists") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("Explicit Exhaustive Test Command"), "6M validation current"),
+    check("batch match count visible", fullMatchResetBreakBlowoutEconomy6M.includes("matchCount: 50") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6L metrics are visible", fullMatchResetBreakBlowoutEconomy6M.includes("Baseline 6L Summary") && fullMatchResetBreakBlowoutEconomy6M.includes("blowoutRate: 48%") && fullMatchResetBreakBlowoutEconomy6M.includes("resetToImmediateDangerRate: 60.5%"), "6L baseline visible"),
+    check("blowout economy metrics measured", fullMatchResetBreakBlowoutEconomy6M.includes("blowoutRateAfter") && fullMatchResetBreakBlowoutEconomy6M.includes("competitiveGameRateAfter") && fullMatchResetBreakBlowoutEconomy6M.includes("averageScoreDifferenceAfter"), "blowout metrics visible"),
+    check("reset-to-danger quality measured", fullMatchResetBreakBlowoutEconomy6M.includes("resetToImmediateDangerRateAfter") && fullMatchResetBreakBlowoutEconomy6M.includes("automaticDangerSuspicionRateAfter") && fullMatchResetBreakBlowoutEconomy6M.includes("earnedDangerRateAfter"), "reset-to-danger visible"),
+    check("root cause audit visible", fullMatchResetBreakBlowoutEconomy6M.includes("Blowout Root Cause Audit Summary") && fullMatchResetBreakBlowoutEconomy6M.includes("RESET_TO_DANGER"), "root causes visible"),
+    check("reset-to-danger audit visible", fullMatchResetBreakBlowoutEconomy6M.includes("Reset-To-Danger Quality Audit Summary") && fullMatchResetBreakBlowoutEconomy6M.includes("AUTOMATIC"), "reset quality visible"),
+    check("goalkeeper secure gains preserved", fullMatchResetBreakBlowoutEconomy6M.includes("goalkeeperSecureResetPreserved: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("goalkeeper secure gains preserved"), "goalkeeper secure preserved"),
+    check("post-score reset gains preserved", fullMatchResetBreakBlowoutEconomy6M.includes("postScoreResetPreserved: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("post-score reset gains preserved"), "post-score reset preserved"),
+    check("dominance chain gains preserved", fullMatchResetBreakBlowoutEconomy6M.includes("dominanceChainsPreservedOrImproved: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("dominance chain gains preserved"), "dominance preserved"),
+    check("density calibration preserved", fullMatchResetBreakBlowoutEconomy6M.includes("densityCalibrationPreserved: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("density calibration preserved"), "density preserved"),
+    check("team opportunity balance preserved", fullMatchResetBreakBlowoutEconomy6M.includes("teamOpportunityBalancePreserved: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("team opportunity balance preserved"), "team balance preserved"),
+    check("route family diversity preserved", fullMatchResetBreakBlowoutEconomy6M.includes("routeFamilyMixPreserved: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("route family diversity preserved"), "route diversity preserved"),
+    check("TRY/DROP/CONVERSION remain available", fullMatchResetBreakBlowoutEconomy6MValidation.includes("TRY route remains available") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("DROP route remains available") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("CONVERSION only after TRY"), "non-shot preserved"),
+    check("CONTINUATION remains available", fullMatchResetBreakBlowoutEconomy6MValidation.includes("CONTINUATION remains available"), "continuation preserved"),
+    check("score from score_change all runs", fullMatchResetBreakBlowoutEconomy6M.includes("scoreFromScoreChangeAllRuns: true") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchResetBreakBlowoutEconomy6M.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchResetBreakBlowoutEconomy6M.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score rewrite/deletion/forced score", fullMatchResetBreakBlowoutEconomy6M.includes("scoreCapApplied: false") && fullMatchResetBreakBlowoutEconomy6M.includes("postHocRewriteApplied: false") && fullMatchResetBreakBlowoutEconomy6M.includes("scoringEventsDeleted: false") && fullMatchResetBreakBlowoutEconomy6M.includes("forcedOpponentScoreApplied: false") && fullMatchResetBreakBlowoutEconomy6M.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchResetBreakBlowoutEconomy6M.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchResetBreakBlowoutEconomy6M.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchResetBreakBlowoutEconomy6M.includes("persistenceUsedForScoring: false") && fullMatchResetBreakBlowoutEconomy6M.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchResetBreakBlowoutEconomy6M.includes("unknownScoringFamilyCount: 0") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchResetBreakBlowoutEconomy6M.includes("penaltyShotActiveLeakageCount: 0") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("no contradictory healthy warning", fullMatchResetBreakBlowoutEconomy6MValidation.includes("no contradictory healthy warning") && !(fullMatchResetBreakBlowoutEconomy6M.includes("FULL_MATCH_BATCH_ECONOMY_HEALTHY") && containsAny(fullMatchResetBreakBlowoutEconomy6M, sprint6MBlockingWarnings)), "healthy warning guarded"),
+    check("coach product contains competitive economy section", coachProductHtml.includes("Economie competitive") && coachProductHtml.includes("Sprint 6M"), "product 6M visible"),
+    check("coach export contains competitive economy section", coachExportHtml.includes("Economie competitive") && coachExportHtml.includes("Sprint 6M"), "export 6M visible"),
+    check("coach export avoids forbidden 6M wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6M source files", bundleSimulation.includes("src/simulation/fullMatch/resetBreakBlowoutEconomyWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchResetToDangerQualityAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchBlowoutEconomyAudit.ts") && bundleReports.includes("src/reports/fullMatchResetBreakBlowoutEconomyCalibration.ts") && bundleReports.includes("src/reports/fullMatchResetBreakBlowoutEconomyCalibration.test.ts"), "6M source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchResetBreakBlowoutEconomy6M.includes("## Recommendation") && fullMatchResetBreakBlowoutEconomy6M.includes("Sprint 6N"), "6M recommendation visible"),
   ];
   const sprint6JChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7689,6 +7758,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6M - Reset Break Blowout Economy")
+      ? sprint6MChecks
     : activeConfig.sprintName.includes("Sprint 6L - Goalkeeper Secure & Reset Break Specificity")
       ? sprint6LChecks
     : activeConfig.sprintName.includes("Sprint 6K - Break Event And Post-Score Reset Calibration")

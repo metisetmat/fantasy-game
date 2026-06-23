@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6L - Goalkeeper Secure & Reset Break Specificity
+- current sprint: Sprint 6M - Reset Break Blowout Economy
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,21 +20,22 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 6L - Sprint 6L - Goalkeeper Secure & Reset Break Specificity
+- PASS: current sprint is Sprint 6M - Sprint 6M - Reset Break Blowout Economy
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6L oriented - README current
-- PASS: 6L report included - 6L doc included
-- PASS: 6L validation is PASS - 6L validation current
+- PASS: README is Sprint 6M oriented - README current
+- PASS: 6M report included - 6M doc included
+- PASS: 6M validation is PASS - 6M validation current
 - PASS: batch match count visible - 50 matches visible
-- PASS: baseline 6K metrics are visible - 6K baseline visible
-- PASS: goalkeeper secure break metrics measured - goalkeeper secure metrics visible
-- PASS: goalkeeper safe possession measured - safe possession visible
-- PASS: post-score reset specificity measured - reset specificity visible
-- PASS: dominance decay metrics clarified - dominance decay clarified
-- PASS: no misleading dominanceDecayApplicationRate wording - uses ratio/coverage wording
-- PASS: dominance chain gains preserved - dominance preservation visible
+- PASS: baseline 6L metrics are visible - 6L baseline visible
+- PASS: blowout economy metrics measured - blowout metrics visible
+- PASS: reset-to-danger quality measured - reset-to-danger visible
+- PASS: root cause audit visible - root causes visible
+- PASS: reset-to-danger audit visible - reset quality visible
+- PASS: goalkeeper secure gains preserved - goalkeeper secure preserved
+- PASS: post-score reset gains preserved - post-score reset preserved
+- PASS: dominance chain gains preserved - dominance preserved
 - PASS: density calibration preserved - density preserved
-- PASS: team opportunity balance preserved or surfaced - team balance visible
+- PASS: team opportunity balance preserved - team balance preserved
 - PASS: route family diversity preserved - route diversity preserved
 - PASS: TRY/DROP/CONVERSION remain available - non-shot preserved
 - PASS: CONTINUATION remains available - continuation preserved
@@ -49,12 +50,12 @@ Status: PASS
 - PASS: no UNKNOWN scoring family - UNKNOWN blocked
 - PASS: no PENALTY_SHOT leakage - PENALTY blocked
 - PASS: no contradictory healthy warning - healthy warning guarded
-- PASS: coach product contains goalkeeper secure reset section - product 6L visible
-- PASS: coach export contains goalkeeper secure reset section - export 6L visible
-- PASS: coach export avoids forbidden 6L wording - forbidden wording absent
-- PASS: bundle includes 6L source files - 6L source bundled
+- PASS: coach product contains competitive economy section - product 6M visible
+- PASS: coach export contains competitive economy section - export 6M visible
+- PASS: coach export avoids forbidden 6M wording - forbidden wording absent
+- PASS: bundle includes 6M source files - 6M source bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6L recommendation visible
+- PASS: recommendation visible - 6M recommendation visible
 
 ## Files
 
@@ -68,7 +69,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-goalkeeper-secure-reset-break-specificity-6l.md
+- fullmatch-reset-break-blowout-economy-6m.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -76,5 +77,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md
+- validation.fullmatch-reset-break-blowout-economy-6m.md
 - validation.share-pack.md

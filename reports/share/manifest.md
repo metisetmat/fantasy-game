@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-23T11:12:59.738Z
-Task/sprint: Sprint 6L - Goalkeeper Secure & Reset Break Specificity
+Generated: 2026-06-23T13:10:23.943Z
+Task/sprint: Sprint 6M - Reset Break Blowout Economy
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-goalkeeper-secure-reset-break-specificity-6l.md
-- validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md
+- fullmatch-reset-break-blowout-economy-6m.md
+- validation.fullmatch-reset-break-blowout-economy-6m.md
 - README.md
 
 ## Bundle Files
