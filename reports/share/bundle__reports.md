@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6J - Team Response And Dominance Chain Follow-up. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6K - Break Event And Post-Score Reset Calibration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -92,6 +92,8 @@ import {
   renderFullMatchTeamOpportunityBalanceCalibration6IValidation,
   renderFullMatchDominanceChainCalibration6JDoc,
   renderFullMatchDominanceChainCalibration6JValidation,
+  renderFullMatchBreakEventPostScoreResetCalibration6KDoc,
+  renderFullMatchBreakEventPostScoreResetCalibration6KValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -104,9 +106,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6J - Team Response And Dominance Chain Follow-up";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-dominance-chain-calibration-6j.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-dominance-chain-calibration-6j.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6K - Break Event And Post-Score Reset Calibration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-break-event-post-score-reset-calibration-6k.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-break-event-post-score-reset-calibration-6k.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2155,6 +2157,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchDominanceChainCalibration.test.ts",
         required: true,
         reason: "Sprint 6J executable test proving dominance-chain reduction, density preservation, route diversity, and scoring guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/breakEventPostScoreResetWarnings.ts",
+        required: true,
+        reason: "Sprint 6K warning-code registry for post-score reset, dominance decay, break events, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchPostScoreResetAudit.ts",
+        required: true,
+        reason: "Sprint 6K official timeline audit for post-score immediate reattack, protected reset windows, conceding-team possession, and dominance decay",
+      },
+      {
+        source: "src/reports/fullMatchBreakEventPostScoreResetCalibration.ts",
+        required: true,
+        reason: "Sprint 6K full-match break-event post-score reset calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchBreakEventPostScoreResetCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6K executable test proving post-score reset protection, density preservation, route diversity, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4313,6 +4335,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6K")) {
+    return renderFullMatchBreakEventPostScoreResetCalibration6KDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6J")) {
     return renderFullMatchDominanceChainCalibration6JDoc(fullMatchTraceValidationModel());
   }
@@ -6553,6 +6579,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6K")) {
+    return renderFullMatchBreakEventPostScoreResetCalibration6KValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6J")) {
     return renderFullMatchDominanceChainCalibration6JValidation(fullMatchTraceValidationModel());
   }
@@ -8739,6 +8769,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6K")) {
+    return [
+      "# Sprint 6K Share Pack",
+      "",
+      "Current sprint: Sprint 6K - Break Event And Post-Score Reset Calibration",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-break-event-post-score-reset-calibration-6k.md",
+      "- validation.fullmatch-break-event-post-score-reset-calibration-6k.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 6K adds post-score reset and break-event evidence after Sprint 6J reduced dominance chains but left immediate reattack too high. It preserves 6H density, 6I opportunity balance, 6J chain gains, SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, rewrite scores, delete scoring events, force opponent or trailing-team scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.",
+      "",
+      "## Review steps",
+      "",
+      "1. Confirm validation.share-pack.md is PASS.",
+      "2. Read the 6K calibration report for post-score reset and break-event metrics.",
+      "3. Inspect the 6K validation checklist for guardrails.",
+      "4. Use coach-report.export.html to verify the coach-facing reset section.",
+      "5. Use bundle__simulation.md and bundle__reports.md for source excerpts.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6J")) {
     return [
       "# Sprint 6J Share Pack",
@@ -25908,7 +25969,10 @@ export function validateFullMatchScoreEconomyCalibrationRenderer(): readonly str
   assertTest(html.includes("Projection apr&egrave;s calibration"), "export must show projected score after calibration.");
   assertTest(text.includes("signal single-run"), "visible copy must frame the signal as single-run.");
   assertTest(text.includes("constantes inchang"), "visible copy must say scoring constants are unchanged.");
-  assertTest(text.includes("aucun cap de score"), "visible copy must say no score cap.");
+  assertTest(
+    text.includes("aucun plafond artificiel") || text.includes("aucun cap de score"),
+    "visible copy must say no score ceiling.",
+  );
   assertTest(text.includes("score reste issu des"), "visible copy must say score comes from official events.");
   assertTest(!text.includes("preuve globale"), "visible copy must not claim global proof.");
   assertTest(!text.includes("tendance prouv"), "visible copy must not claim proved trend.");
@@ -25918,7 +25982,7 @@ export function validateFullMatchScoreEconomyCalibrationRenderer(): readonly str
 
   return [
     "export contains full-match score economy calibration section",
-    "visible copy states single-run, unchanged constants, no score cap, and official-event score source",
+    "visible copy states single-run, unchanged constants, no score ceiling, and official-event score source",
     "visible copy avoids global proof, proved trend, manual correction, and automatic selection wording",
   ];
 }
@@ -26232,6 +26296,7 @@ import { currentFullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMa
 import { currentFullMatchSegmentScoringDensityCalibrationModel } from "./fullMatchSegmentScoringDensityCalibration";
 import { currentFullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMatchTeamOpportunityBalanceCalibration";
 import { currentFullMatchDominanceChainCalibrationModel } from "./fullMatchDominanceChainCalibration";
+import { currentFullMatchBreakEventPostScoreResetCalibrationModel } from "./fullMatchBreakEventPostScoreResetCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26258,6 +26323,7 @@ import {
   renderFullMatchSegmentScoringDensityCalibrationSection,
   renderFullMatchTeamOpportunityBalanceCalibrationSection,
   renderFullMatchDominanceChainCalibrationSection,
+  renderFullMatchBreakEventPostScoreResetCalibrationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26281,12 +26347,14 @@ export function writeLatestCoachReport(): void {
   const fullMatchSegmentScoringDensityCalibration = currentFullMatchSegmentScoringDensityCalibrationModel();
   const fullMatchTeamOpportunityBalanceCalibration = currentFullMatchTeamOpportunityBalanceCalibrationModel();
   const fullMatchDominanceChainCalibration = currentFullMatchDominanceChainCalibrationModel();
+  const fullMatchBreakEventPostScoreResetCalibration = currentFullMatchBreakEventPostScoreResetCalibrationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
     renderFullMatchTeamOpportunityBalanceCalibrationSection(fullMatchTeamOpportunityBalanceCalibration),
     renderFullMatchDominanceChainCalibrationSection(fullMatchDominanceChainCalibration),
+    renderFullMatchBreakEventPostScoreResetCalibrationSection(fullMatchBreakEventPostScoreResetCalibration),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26300,6 +26368,7 @@ export function writeLatestCoachReport(): void {
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
     fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -26481,6 +26550,7 @@ export function writeLatestCoachReport(): void {
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
     fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

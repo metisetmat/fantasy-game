@@ -33,6 +33,7 @@ import type { FullMatchRouteFamilyScoringRateCalibrationModel } from "./fullMatc
 import type { FullMatchSegmentScoringDensityCalibrationModel } from "./fullMatchSegmentScoringDensityCalibration";
 import type { FullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMatchTeamOpportunityBalanceCalibration";
 import type { FullMatchDominanceChainCalibrationModel } from "./fullMatchDominanceChainCalibration";
+import type { FullMatchBreakEventPostScoreResetCalibrationModel } from "./fullMatchBreakEventPostScoreResetCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2111,14 +2112,14 @@ function renderFullMatchScoreEconomyCalibration(
           <h4>Garde-fous</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Constantes inchang&eacute;es</span><strong>${model.scoringConstantsChanged ? "non" : "oui"}</strong></div>
-            <div><span>Aucun cap de score</span><strong>${model.scoreCapApplied ? "non" : "oui"}</strong></div>
+            <div><span>Aucun plafond artificiel</span><strong>${model.scoreCapApplied ? "non" : "oui"}</strong></div>
             <div><span>Aucune r&eacute;&eacute;criture</span><strong>${model.postHocScoreRewriteApplied ? "non" : "oui"}</strong></div>
             <div><span>Batch/live s&eacute;par&eacute;s</span><strong>${model.batchLiveSeparationPreserved ? "oui" : "non"}</strong></div>
           </div>
         </article>
       </div>
       <p class="durable-storage-decision-boundary">${escapeHtml(model.rootCause.evidenceSummary)}</p>
-      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun cap de score, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
+      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun plafond artificiel, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
       <p class="durable-storage-decision-warning">${escapeHtml(model.recommendation)}</p>
     </section>`;
 }
@@ -2182,7 +2183,7 @@ function renderScoringFamilyAttributionAudit(
         <tbody>${familyRows}</tbody>
       </table>
       <p class="durable-storage-decision-guard">${unknownCopy}</p>
-      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
+      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun plafond artificiel, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
     </section>`;
 }
 
@@ -2489,7 +2490,7 @@ export function renderFullMatchRouteFamilyScoringRateCalibrationSection(
         <p>
           Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
           Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
-          sans cap, et avec un score issu des evenements officiels <code>score_change</code>.
+          sans plafond artificiel, et avec un score issu des evenements officiels <code>score_change</code>.
         </p>
       </div>
       <div class="product-grid two">
@@ -2511,7 +2512,7 @@ export function renderFullMatchRouteFamilyScoringRateCalibrationSection(
             <li>Conversion seulement apres TRY: ${model.conversionGoalsAfter <= model.triesScoredAfter ? "oui" : "non"}</li>
             <li>Score issu des evenements officiels: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
             <li>Version calibration: <code>${escapeHtml(model.calibrationVersion)}</code></li>
-            <li>Cap / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied ? "alerte" : "non"}</li>
+            <li>Plafond artificiel / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied ? "alerte" : "non"}</li>
           </ul>
         </article>
       </div>
@@ -2554,7 +2555,7 @@ export function renderFullMatchSegmentScoringDensityCalibrationSection(
         <h3>Densit&eacute; des occasions</h3>
         <p>
           Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
-          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans cap de score
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans plafond artificiel
           et sans r&eacute;&eacute;criture post-run.
         </p>
       </div>
@@ -2602,7 +2603,7 @@ export function renderFullMatchTeamOpportunityBalanceCalibrationSection(
         <p>
           Apres 6H, la densite est plus saine mais les blowouts restent hauts. Cette lecture mesure la repartition
           des opportunites, des phases dangereuses, des reponses apres avoir encaisse et des chaines de domination,
-          sans score force, sans cap, et avec un score issu des evenements officiels.
+          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
         </p>
       </div>
       <div class="product-grid two">
@@ -2643,7 +2644,7 @@ export function renderFullMatchTeamOpportunityBalanceCalibrationSection(
             <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
             <li>Densite 6H preservee: ${model.densityCalibrationPreserved ? "oui" : "non"}</li>
             <li>Score issu des evenements officiels: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
-            <li>Cap / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied ? "alerte" : "non"}</li>
+            <li>Plafond artificiel / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied ? "alerte" : "non"}</li>
             <li>Statut: ${model.status}</li>
           </ul>
         </article>
@@ -2670,7 +2671,7 @@ export function renderFullMatchDominanceChainCalibrationSection(
         <p>
           6I a ameliore la reponse des equipes menees, mais certaines chaines de domination restaient trop longues.
           6J mesure les ruptures de momentum par reset, recuperation defensive, arret gardien securise et phase neutre,
-          sans score force, sans cap, et avec un score issu des evenements officiels.
+          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
         </p>
       </div>
       <div class="product-grid two">
@@ -2713,7 +2714,7 @@ export function renderFullMatchDominanceChainCalibrationSection(
             <li>Densite preservee: ${model.densityCalibrationPreserved ? "oui" : "non"}</li>
             <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
             <li>Score issu des evenements officiels: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
-            <li>Cap / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied ? "alerte" : "non"}</li>
+            <li>Plafond artificiel / score force: ${model.scoreCapApplied || model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied ? "alerte" : "non"}</li>
             <li>Statut: ${model.status}</li>
           </ul>
         </article>
@@ -2721,6 +2722,74 @@ export function renderFullMatchDominanceChainCalibrationSection(
       <p class="muted">
         Recommendation: ${model.recommendation}. Le statut reste prudent si les chaines baissent mais que le blowout
         rate ou la stabilite globale demandent encore un suivi.
+      </p>
+    </section>`;
+}
+
+export function renderFullMatchBreakEventPostScoreResetCalibrationSection(
+  model: FullMatchBreakEventPostScoreResetCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Reset apres score et ruptures de momentum">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6K</p>
+        <h3>Reset apres score et ruptures de momentum</h3>
+        <p>
+          6K verifie que l'equipe qui vient de marquer ne recree pas automatiquement la prochaine opportunite.
+          Le reset passe par une phase neutre observable, sans plafond artificiel, sans score force et sans reecriture.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Fenetre post-score</h4>
+          <ul>
+            <li>Reattaque immediate: ${model.postScoreImmediateReattackRateBefore}% -> ${model.postScoreImmediateReattackRateAfter}%</li>
+            <li>Reset protege: ${model.postScoreResetProtectedRateBefore}% -> ${model.postScoreResetProtectedRateAfter}%</li>
+            <li>Possession suivante concedante: ${model.concedingTeamFirstPossessionRateAfter}%</li>
+            <li>Fenetrage audite: ${model.postScoreAuditSummary.postScoreWindowsChecked}</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Ruptures et decay</h4>
+          <ul>
+            <li>Decay eligible: ${model.dominanceDecayEligibleCount}</li>
+            <li>Decay applique: ${model.dominanceDecayAppliedCount}</li>
+            <li>Application decay: ${model.dominanceDecayApplicationRate}%</li>
+            <li>Reset neutres: ${model.neutralResetBreakCount}</li>
+            <li>Recuperations defensives: ${model.defensiveRecoveryBreakCount}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Sante batch</h4>
+          <ul>
+            <li>Score moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Ecart moyen: ${model.averageScoreDifferenceBefore} -> ${model.averageScoreDifferenceAfter}</li>
+            <li>Blowout rate: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout rate: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Batch: ${model.matchCount} matchs</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous preserves</h4>
+          <ul>
+            <li>Densite preservee: ${model.densityCalibrationPreserved ? "oui" : "non"}</li>
+            <li>Equilibre opportunites preserve: ${model.teamOpportunityBalancePreserved ? "oui" : "non"}</li>
+            <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
+            <li>Score issu des evenements officiels: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
+            <li>Constantes score intactes: ${!model.scoringConstantsChanged ? "oui" : "non"}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${model.recommendation}. Si le statut reste partiel, le prochain travail doit cibler les ruptures de momentum
+        et non une modification des valeurs de score.
       </p>
     </section>`;
 }
@@ -2837,6 +2906,34 @@ function renderFullMatchDominanceChainCalibrationAppendix(
         <li>density preserved: ${model.densityCalibrationPreserved}</li>
         <li>route family diversity preserved: ${model.routeFamilyDiversityPreserved}</li>
         <li>forced trailing team score: ${model.forcedTrailingTeamScoreApplied}</li>
+        <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
+      </ul>
+    </article>`;
+}
+
+function renderFullMatchBreakEventPostScoreResetCalibrationAppendix(
+  model: FullMatchBreakEventPostScoreResetCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <article class="premium-appendix-card">
+      <h3>Reset post-score 6K</h3>
+      <ul>
+        <li>status: ${escapeHtml(model.status)}</li>
+        <li>scope: ${escapeHtml(model.scope)}</li>
+        <li>version: ${escapeHtml(model.version)}</li>
+        <li>match count: ${model.matchCount}</li>
+        <li>post-score immediate reattack: ${model.postScoreImmediateReattackRateBefore}% -> ${model.postScoreImmediateReattackRateAfter}%</li>
+        <li>post-score protected reset: ${model.postScoreResetProtectedRateBefore}% -> ${model.postScoreResetProtectedRateAfter}%</li>
+        <li>dominance decay applied: ${model.dominanceDecayAppliedCount}</li>
+        <li>defensive recovery break rate: ${model.defensiveRecoveryBreaksDominanceRateBefore}% -> ${model.defensiveRecoveryBreaksDominanceRateAfter}%</li>
+        <li>goalkeeper secure break rate: ${model.goalkeeperSecureBreaksDominanceRateBefore}% -> ${model.goalkeeperSecureBreaksDominanceRateAfter}%</li>
+        <li>density preserved: ${model.densityCalibrationPreserved}</li>
+        <li>team balance preserved: ${model.teamOpportunityBalancePreserved}</li>
+        <li>route family diversity preserved: ${model.routeFamilyMixPreserved}</li>
         <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
       </ul>
     </article>`;
@@ -3727,6 +3824,7 @@ function renderAppendices(input: {
   readonly fullMatchSegmentScoringDensityCalibration?: FullMatchSegmentScoringDensityCalibrationModel;
   readonly fullMatchTeamOpportunityBalanceCalibration?: FullMatchTeamOpportunityBalanceCalibrationModel;
   readonly fullMatchDominanceChainCalibration?: FullMatchDominanceChainCalibrationModel;
+  readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3774,6 +3872,7 @@ function renderAppendices(input: {
     ${renderFullMatchBatchEconomyProofAppendix(input.fullMatchBatchEconomyProof)}
     ${renderFullMatchTeamOpportunityBalanceCalibrationAppendix(input.fullMatchTeamOpportunityBalanceCalibration)}
     ${renderFullMatchDominanceChainCalibrationAppendix(input.fullMatchDominanceChainCalibration)}
+    ${renderFullMatchBreakEventPostScoreResetCalibrationAppendix(input.fullMatchBreakEventPostScoreResetCalibration)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -3815,6 +3914,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchSegmentScoringDensityCalibration?: FullMatchSegmentScoringDensityCalibrationModel;
   readonly fullMatchTeamOpportunityBalanceCalibration?: FullMatchTeamOpportunityBalanceCalibrationModel;
   readonly fullMatchDominanceChainCalibration?: FullMatchDominanceChainCalibrationModel;
+  readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -3930,6 +4030,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchSegmentScoringDensityCalibrationSection(input.fullMatchSegmentScoringDensityCalibration),
     renderFullMatchTeamOpportunityBalanceCalibrationSection(input.fullMatchTeamOpportunityBalanceCalibration),
     renderFullMatchDominanceChainCalibrationSection(input.fullMatchDominanceChainCalibration),
+    renderFullMatchBreakEventPostScoreResetCalibrationSection(input.fullMatchBreakEventPostScoreResetCalibration),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -4001,6 +4102,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchDominanceChainCalibration === undefined
       ? {}
       : { fullMatchDominanceChainCalibration: input.fullMatchDominanceChainCalibration }),
+    ...(input.fullMatchBreakEventPostScoreResetCalibration === undefined
+      ? {}
+      : { fullMatchBreakEventPostScoreResetCalibration: input.fullMatchBreakEventPostScoreResetCalibration }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

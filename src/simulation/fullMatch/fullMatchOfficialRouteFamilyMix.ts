@@ -491,6 +491,54 @@ function recentSameZoneOpportunityCount(input: {
     .length;
 }
 
+function previousSelectedCandidates(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly segmentIndex: number;
+}): readonly OfficialRouteFamilyCandidate[] {
+  return input.state.candidates
+    .filter((candidate) => candidate.selected && candidate.segmentIndex < input.segmentIndex)
+    .sort((a, b) => a.segmentIndex - b.segmentIndex);
+}
+
+function previousSelectedScoringCandidate(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly segmentIndex: number;
+}): OfficialRouteFamilyCandidate | undefined {
+  return [...previousSelectedCandidates(input)]
+    .reverse()
+    .find((candidate) => candidate.scoring && candidate.family !== "CONTINUATION");
+}
+
+function opposingRestartAfterScore(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly scoringCandidate: OfficialRouteFamilyCandidate;
+  readonly segmentIndex: number;
+}): boolean {
+  return input.state.candidates.some((candidate) =>
+    candidate.selected &&
+    candidate.segmentIndex > input.scoringCandidate.segmentIndex &&
+    candidate.segmentIndex < input.segmentIndex &&
+    candidate.teamId !== input.scoringCandidate.teamId
+  );
+}
+
+function scoreChangePoints(event: MatchEvent): number {
+  return event.consequences
+    .filter((consequence) => consequence.type === "score_change")
+    .reduce((sum, consequence) => sum + (consequence.value ?? 0), 0);
+}
+
+function previousScoringRouteEvent(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly segmentIndex: number;
+}): MatchEvent | undefined {
+  const currentSegmentTick = input.segmentIndex * 100;
+  return [...input.state.routeEvents]
+    .filter((event) => event.timestamp.tick < currentSegmentTick && scoreChangePoints(event) > 0)
+    .sort((a, b) => a.timestamp.minute - b.timestamp.minute || a.timestamp.tick - b.timestamp.tick)
+    .reverse()[0];
+}
+
 function densitySelectedCandidate(input: {
   readonly candidates: readonly OfficialRouteFamilyCandidate[];
   readonly state: FullMatchOfficialRouteFamilyMixState;
@@ -507,6 +555,14 @@ function densitySelectedCandidate(input: {
   const opponentPoints = input.teamId === input.homeTeamId ? input.scoreBefore.away : input.scoreBefore.home;
   const scoreDelta = teamPoints - opponentPoints;
   const bestScoringCandidate = selectCandidate(input.candidates.filter((candidate) => candidate.family !== "CONTINUATION"));
+  const lastScoringCandidate = previousSelectedScoringCandidate({
+    state: input.state,
+    segmentIndex: input.segmentIndex,
+  });
+  const lastScoringRouteEvent = previousScoringRouteEvent({
+    state: input.state,
+    segmentIndex: input.segmentIndex,
+  });
 
   if (
     scoreDelta < -5 &&
@@ -521,8 +577,48 @@ function densitySelectedCandidate(input: {
     };
   }
 
-  if (continuation === undefined || selected.family === "CONTINUATION") {
+  const postScoreSameTeamReattackWindow =
+    (
+      lastScoringCandidate !== undefined &&
+      lastScoringCandidate.teamId === input.teamId &&
+      input.segmentIndex - lastScoringCandidate.segmentIndex <= 2 &&
+      !opposingRestartAfterScore({
+        state: input.state,
+        scoringCandidate: lastScoringCandidate,
+        segmentIndex: input.segmentIndex,
+      })
+    ) ||
+    (
+      lastScoringCandidate === undefined &&
+      lastScoringRouteEvent?.teamId === input.teamId &&
+      input.segmentIndex * 100 - lastScoringRouteEvent.timestamp.tick <= 250
+    ) ||
+    (
+      lastScoringCandidate === undefined &&
+      lastScoringRouteEvent === undefined &&
+      teamPoints > opponentPoints &&
+      input.segmentIndex > 0
+    );
+
+  if (continuation === undefined) {
     return selected;
+  }
+
+  if (selected.family === "CONTINUATION") {
+    return postScoreSameTeamReattackWindow
+      ? {
+          ...selected,
+          reason: "Post-score reset calibration protects restart: the scoring team must pass through a neutral reset before another dangerous opportunity, without forcing opponent scores.",
+        }
+      : selected;
+  }
+
+  if (postScoreSameTeamReattackWindow) {
+    return {
+      ...continuation,
+      candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
+      reason: "Post-score reset calibration protects restart: the scoring team must pass through a neutral reset before another dangerous opportunity, without forcing opponent scores.",
+    };
   }
 
   const previousTeamSelections = input.state.candidates.filter((candidate) =>
@@ -698,13 +794,16 @@ function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed:
   }
 
   if (candidate.family === "CONTINUATION") {
+    const calibratedReason = candidate.reason.includes("calibration")
+      ? candidate.reason
+      : "Continuation is selected to preserve the possession rather than force a low-upside score attempt.";
     return {
       ...candidate,
       selected: true,
       resolved: true,
       scoring: false,
       outcome: "SAFE_CONTINUATION",
-      reason: "Continuation is selected to preserve the possession rather than force a low-upside score attempt.",
+      reason: calibratedReason,
     };
   }
 
@@ -754,6 +853,8 @@ function eventForResolvedCandidate(input: {
   const familyLabel = routeFamilyCoachLabel(input.candidate.family);
   const dominanceChainDecayApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Dominance chain calibration");
+  const postScoreResetApplied = input.candidate.family === "CONTINUATION" &&
+    input.candidate.reason.includes("Post-score reset calibration");
   const scoreDescription = shouldScore
     ? `${team.name} marque ${points} points via ${familyLabel}.`
     : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;
@@ -838,6 +939,15 @@ function eventForResolvedCandidate(input: {
             input.candidate.reason.includes("repeated route family or zone")
               ? "route_family_repeat_dampened"
               : "reset_breaks_dominance",
+          ]
+        : []),
+      ...(postScoreResetApplied
+        ? [
+            "break_event_post_score_reset_6k",
+            "post_score_reset_protected",
+            "neutral_phase_breaks_momentum",
+            "reset_breaks_dominance",
+            "post_score_dominance_decay_applied",
           ]
         : []),
     ],

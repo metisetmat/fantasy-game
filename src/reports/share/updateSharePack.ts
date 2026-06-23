@@ -85,6 +85,8 @@ import {
   renderFullMatchTeamOpportunityBalanceCalibration6IValidation,
   renderFullMatchDominanceChainCalibration6JDoc,
   renderFullMatchDominanceChainCalibration6JValidation,
+  renderFullMatchBreakEventPostScoreResetCalibration6KDoc,
+  renderFullMatchBreakEventPostScoreResetCalibration6KValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -97,9 +99,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6J - Team Response And Dominance Chain Follow-up";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-dominance-chain-calibration-6j.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-dominance-chain-calibration-6j.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6K - Break Event And Post-Score Reset Calibration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-break-event-post-score-reset-calibration-6k.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-break-event-post-score-reset-calibration-6k.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2148,6 +2150,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchDominanceChainCalibration.test.ts",
         required: true,
         reason: "Sprint 6J executable test proving dominance-chain reduction, density preservation, route diversity, and scoring guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/breakEventPostScoreResetWarnings.ts",
+        required: true,
+        reason: "Sprint 6K warning-code registry for post-score reset, dominance decay, break events, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchPostScoreResetAudit.ts",
+        required: true,
+        reason: "Sprint 6K official timeline audit for post-score immediate reattack, protected reset windows, conceding-team possession, and dominance decay",
+      },
+      {
+        source: "src/reports/fullMatchBreakEventPostScoreResetCalibration.ts",
+        required: true,
+        reason: "Sprint 6K full-match break-event post-score reset calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchBreakEventPostScoreResetCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6K executable test proving post-score reset protection, density preservation, route diversity, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4306,6 +4328,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6K")) {
+    return renderFullMatchBreakEventPostScoreResetCalibration6KDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6J")) {
     return renderFullMatchDominanceChainCalibration6JDoc(fullMatchTraceValidationModel());
   }
@@ -6546,6 +6572,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6K")) {
+    return renderFullMatchBreakEventPostScoreResetCalibration6KValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6J")) {
     return renderFullMatchDominanceChainCalibration6JValidation(fullMatchTraceValidationModel());
   }
@@ -8732,6 +8762,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6K")) {
+    return [
+      "# Sprint 6K Share Pack",
+      "",
+      "Current sprint: Sprint 6K - Break Event And Post-Score Reset Calibration",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-break-event-post-score-reset-calibration-6k.md",
+      "- validation.fullmatch-break-event-post-score-reset-calibration-6k.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 6K adds post-score reset and break-event evidence after Sprint 6J reduced dominance chains but left immediate reattack too high. It preserves 6H density, 6I opportunity balance, 6J chain gains, SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, rewrite scores, delete scoring events, force opponent or trailing-team scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.",
+      "",
+      "## Review steps",
+      "",
+      "1. Confirm validation.share-pack.md is PASS.",
+      "2. Read the 6K calibration report for post-score reset and break-event metrics.",
+      "3. Inspect the 6K validation checklist for guardrails.",
+      "4. Use coach-report.export.html to verify the coach-facing reset section.",
+      "5. Use bundle__simulation.md and bundle__reports.md for source excerpts.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6J")) {
     return [
       "# Sprint 6J Share Pack",

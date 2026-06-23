@@ -331,6 +331,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchTeamOpportunityBalanceCalibration6IValidation = readIfExists(join(shareDirectory, "validation.fullmatch-team-opportunity-balance-calibration-6i.md"));
   const fullMatchDominanceChainCalibration6J = readIfExists(join(shareDirectory, "fullmatch-dominance-chain-calibration-6j.md"));
   const fullMatchDominanceChainCalibration6JValidation = readIfExists(join(shareDirectory, "validation.fullmatch-dominance-chain-calibration-6j.md"));
+  const fullMatchBreakEventPostScoreResetCalibration6K = readIfExists(join(shareDirectory, "fullmatch-break-event-post-score-reset-calibration-6k.md"));
+  const fullMatchBreakEventPostScoreResetCalibration6KValidation = readIfExists(join(shareDirectory, "validation.fullmatch-break-event-post-score-reset-calibration-6k.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -2972,6 +2974,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-team-opportunity-balance-calibration-6i.md",
     ...sprint6IForbiddenLeftovers,
   ];
+  const sprint6KExpectedFiles = sprint6JExpectedFiles.map((file) =>
+    file === "fullmatch-dominance-chain-calibration-6j.md"
+      ? "fullmatch-break-event-post-score-reset-calibration-6k.md"
+      : file === "validation.fullmatch-dominance-chain-calibration-6j.md"
+        ? "validation.fullmatch-break-event-post-score-reset-calibration-6k.md"
+        : file
+  );
+  const sprint6KForbiddenLeftovers = [
+    "fullmatch-dominance-chain-calibration-6j.md",
+    "validation.fullmatch-dominance-chain-calibration-6j.md",
+    ...sprint6JForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3651,6 +3665,47 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     fullMatchWorkbenchChainReplay5C,
     fullMatchWorkbenchChainReplay5CValidation,
     coachExportHtml,
+  ];
+  const sprint6KChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6KExpectedFiles.every((file) => requiredCopied(file)), sprint6KExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6KExpectedFiles.every((file) => manifest.includes(file)), sprint6KExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6K", activeConfig.sprintName === "Sprint 6K - Break Event And Post-Score Reset Calibration", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6KForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6KForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6K oriented", readme.includes("# Sprint 6K Share Pack") && readme.includes("fullmatch-break-event-post-score-reset-calibration-6k.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6K report included", fullMatchBreakEventPostScoreResetCalibration6K.includes("# Full-Match Break Event Post-Score Reset Calibration 6K") && fullMatchBreakEventPostScoreResetCalibration6K.includes("Post-Score Reset Audit Summary") && fullMatchBreakEventPostScoreResetCalibration6K.includes("Break Event Metrics") && fullMatchBreakEventPostScoreResetCalibration6K.includes("Dominance Decay Metrics"), "6K doc included"),
+    check("6K validation is PASS", fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("Status: PASS") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("post-score reset audit exists") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("Explicit Exhaustive Test Command"), "6K validation current"),
+    check("batch match count visible", fullMatchBreakEventPostScoreResetCalibration6K.includes("matchCount: 50") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6J metrics are visible", fullMatchBreakEventPostScoreResetCalibration6K.includes("Baseline 6J Summary") && fullMatchBreakEventPostScoreResetCalibration6K.includes("postScoreImmediateReattackRate: 78.4%") && fullMatchBreakEventPostScoreResetCalibration6K.includes("dominanceDecayAppliedCount: 0"), "6J baseline visible"),
+    check("post-score immediate reattack measured", fullMatchBreakEventPostScoreResetCalibration6K.includes("postScoreImmediateReattackRate") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("postScoreImmediateReattackRate measured"), "post-score measured"),
+    check("post-score reset protection measured", fullMatchBreakEventPostScoreResetCalibration6K.includes("postScoreResetProtectedCount") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("postScoreResetProtectedCount measured"), "protected reset measured"),
+    check("dominance decay measured", fullMatchBreakEventPostScoreResetCalibration6K.includes("dominanceDecayEligibleCount") && fullMatchBreakEventPostScoreResetCalibration6K.includes("dominanceDecayAppliedCount") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("dominance decay applied count active"), "dominance decay visible"),
+    check("break event metrics measured", fullMatchBreakEventPostScoreResetCalibration6K.includes("defensiveRecoveryBreaksDominanceRate") && fullMatchBreakEventPostScoreResetCalibration6K.includes("goalkeeperSecureBreaksDominanceRate") && fullMatchBreakEventPostScoreResetCalibration6K.includes("neutralResetBreakCount"), "break metrics visible"),
+    check("dominance chain gains preserved", fullMatchBreakEventPostScoreResetCalibration6K.includes("dominanceChainsPreservedOrImproved: true") || fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("dominance chains preserved or improved"), "dominance preservation visible"),
+    check("density calibration preserved", fullMatchBreakEventPostScoreResetCalibration6K.includes("densityCalibrationPreserved: true") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("density calibration preserved"), "density preserved"),
+    check("team opportunity balance preserved or surfaced", fullMatchBreakEventPostScoreResetCalibration6K.includes("teamOpportunityBalancePreserved") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("team opportunity balance preserved"), "team balance visible"),
+    check("route family diversity preserved", fullMatchBreakEventPostScoreResetCalibration6K.includes("routeFamilyMixPreserved: true") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("route family diversity preserved"), "route diversity preserved"),
+    check("TRY/DROP/CONVERSION remain available", fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("TRY route remains available") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("DROP route remains available") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("CONVERSION-after-TRY route remains available"), "non-shot preserved"),
+    check("CONTINUATION remains available", fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("CONTINUATION route remains available"), "continuation preserved"),
+    check("score from score_change all runs", fullMatchBreakEventPostScoreResetCalibration6K.includes("scoreFromScoreChangeAllRuns: true") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchBreakEventPostScoreResetCalibration6K.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchBreakEventPostScoreResetCalibration6K.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score rewrite/deletion/forced score", fullMatchBreakEventPostScoreResetCalibration6K.includes("scoreCapApplied: false") && fullMatchBreakEventPostScoreResetCalibration6K.includes("postHocRewriteApplied: false") && fullMatchBreakEventPostScoreResetCalibration6K.includes("scoringEventsDeleted: false") && fullMatchBreakEventPostScoreResetCalibration6K.includes("forcedOpponentScoreApplied: false") && fullMatchBreakEventPostScoreResetCalibration6K.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchBreakEventPostScoreResetCalibration6K.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchBreakEventPostScoreResetCalibration6K.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchBreakEventPostScoreResetCalibration6K.includes("persistenceUsedForScoring: false") && fullMatchBreakEventPostScoreResetCalibration6K.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchBreakEventPostScoreResetCalibration6K.includes("unknownScoringFamilyCount: 0") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("no UNKNOWN scoring family"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchBreakEventPostScoreResetCalibration6K.includes("penaltyShotActiveLeakageCount: 0") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("no contradictory healthy warning", fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("warning status is not contradictory") && !(fullMatchBreakEventPostScoreResetCalibration6K.includes("SCORING_GUARDRAIL_REGRESSED") && fullMatchBreakEventPostScoreResetCalibration6K.includes("FULL_MATCH_BATCH_ECONOMY_HEALTHY")), "healthy warning guarded"),
+    check("coach product contains post-score reset section", coachProductHtml.includes("Reset apres score et ruptures de momentum") && coachProductHtml.includes("Sprint 6K"), "product 6K visible"),
+    check("coach export contains post-score reset section", coachExportHtml.includes("Reset apres score et ruptures de momentum") && coachExportHtml.includes("Sprint 6K"), "export 6K visible"),
+    check("coach export avoids forbidden 6K wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6K source files", bundleSimulation.includes("src/simulation/fullMatch/breakEventPostScoreResetWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchPostScoreResetAudit.ts") && bundleReports.includes("src/reports/fullMatchBreakEventPostScoreResetCalibration.ts") && bundleReports.includes("src/reports/fullMatchBreakEventPostScoreResetCalibration.test.ts"), "6K source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchBreakEventPostScoreResetCalibration6KValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchBreakEventPostScoreResetCalibration6K.includes("## Recommendation") && fullMatchBreakEventPostScoreResetCalibration6K.includes("Sprint 6L"), "6K recommendation visible"),
   ];
   const sprint6JChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7578,6 +7633,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6K - Break Event And Post-Score Reset Calibration")
+      ? sprint6KChecks
     : activeConfig.sprintName.includes("Sprint 6J - Team Response And Dominance Chain Follow-up")
       ? sprint6JChecks
     : activeConfig.sprintName.includes("Sprint 6I - Team Opportunity Balance Calibration")

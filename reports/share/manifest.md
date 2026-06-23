@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-23T06:40:21.338Z
-Task/sprint: Sprint 6J - Team Response And Dominance Chain Follow-up
+Generated: 2026-06-23T08:18:39.522Z
+Task/sprint: Sprint 6K - Break Event And Post-Score Reset Calibration
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-dominance-chain-calibration-6j.md
-- validation.fullmatch-dominance-chain-calibration-6j.md
+- fullmatch-break-event-post-score-reset-calibration-6k.md
+- validation.fullmatch-break-event-post-score-reset-calibration-6k.md
 - README.md
 
 ## Bundle Files
