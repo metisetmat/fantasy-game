@@ -43,6 +43,9 @@ import type {
 import type {
   FullMatchEarnedDangerGateCalibrationModel,
 } from "./fullMatchEarnedDangerGateCalibration";
+import type {
+  FullMatchEarnedDangerGateTuningModel,
+} from "./fullMatchEarnedDangerGateTuningCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3012,6 +3015,76 @@ export function renderFullMatchEarnedDangerGateSection(
     </section>`;
 }
 
+export function renderFullMatchEarnedDangerGateTuningSection(
+  model: FullMatchEarnedDangerGateTuningModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Gate selectif du danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6O</p>
+        <h3>Gate selectif du danger</h3>
+        <p>
+          6O transforme le gate 6N en filtre selectif: le danger revient uniquement quand il est gagne par support,
+          espace, edge tactique, attributs, fatigue, pression ou erreur adverse. Les scores restent issus des
+          score_change officiels, sans cap, sans rewrite et sans point ajoute hors modele.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger reintroduit</h4>
+          <ul>
+            <li>Danger merite: ${model.earnedDangerRateBefore}% -> ${model.earnedDangerRateAfter}%</li>
+            <li>Danger borderline: ${model.borderlineDangerRateBefore}% -> ${model.borderlineDangerRateAfter}%</li>
+            <li>Danger automatique suspecte: ${model.automaticDangerSuspicionRateBefore}% -> ${model.automaticDangerSuspicionRateAfter}%</li>
+            <li>Earned autorises: ${model.gateAllowedEarnedDangerCountAfter}</li>
+            <li>Borderline autorises: ${model.gateAllowedBorderlineDangerCountAfter}</li>
+            <li>Automatiques bloques: ${model.gateBlockedAutomaticDangerCountAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Filtre et garde-fous</h4>
+          <ul>
+            <li>Suspicion trop strict: ${model.gateTooStrictSuspicionCountAfter}</li>
+            <li>Suspicion trop permissif: ${model.gateTooLooseSuspicionCountAfter}</li>
+            <li>Root cause contradiction: ${model.rootCauseContradictionCount}</li>
+            <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
+            <li>Score officiel score_change: ${model.scoreFromScoreChangeAllRuns ? "oui" : "non"}</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du batch</h4>
+          <ul>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Evenements scoring/match: ${model.scoringEventsPerMatchBefore} -> ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunites/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Densite: ${model.densityCalibrationPreserved ? "preservee" : "a surveiller"}</li>
+            <li>Equilibre equipes: ${model.teamOpportunityBalancePreserved ? "preserve" : "a surveiller"}</li>
+            <li>Reset gardien secure: ${model.goalkeeperSecureResetPreserved ? "preserve" : "a surveiller"}</li>
+            <li>Reset post-score: ${model.postScoreResetPreserved ? "preserve" : "a surveiller"}</li>
+            <li>Dominance chain: ${model.dominanceChainsPreservedOrImproved ? "preserve" : "a surveiller"}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${model.recommendation}. Le statut PARTIAL reste acceptable seulement si les garde-fous scoring
+        sont propres et si la prochaine lecture surveille volume, blowouts et mix de routes.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4076,6 +4149,7 @@ function renderAppendices(input: {
   readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
   readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
   readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
+  readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4170,6 +4244,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
   readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
   readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
+  readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4289,6 +4364,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(input.fullMatchGoalkeeperSecureResetBreakSpecificity),
     renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy),
     renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate),
+    renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

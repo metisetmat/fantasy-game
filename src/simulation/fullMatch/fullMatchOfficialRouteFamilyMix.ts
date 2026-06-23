@@ -64,6 +64,7 @@ export interface OfficialRouteFamilyCandidate {
   readonly outcome: OfficialRouteFamilyOutcome;
   readonly unavailableReasonCodes: readonly OfficialRouteFamilyUnavailableReasonCode[];
   readonly suppressionReasonCodes: readonly OfficialRouteFamilyUnavailableReasonCode[];
+  readonly calibrationTags: readonly string[];
   readonly reason: string;
 }
 
@@ -430,6 +431,7 @@ function buildCandidate(input: {
     outcome: "POSSESSION_CONTINUES",
     unavailableReasonCodes,
     suppressionReasonCodes: [],
+    calibrationTags: [],
     reason: eligible
       ? `${input.family} is available in the official route family mix with score ${score}.`
       : `${input.family} is unavailable or below gate: ${unavailableReasonCodes.join(", ") || "score below threshold"}.`,
@@ -673,6 +675,7 @@ function densitySelectedCandidate(input: {
       lastScoringRouteEvent.teamId !== input.teamId &&
       input.segmentIndex * 100 - lastScoringRouteEvent.timestamp.tick <= 250
     );
+  const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o");
 
   if (continuation === undefined) {
     return selected;
@@ -682,20 +685,23 @@ function densitySelectedCandidate(input: {
     return postScoreSameTeamReattackWindow
       ? {
           ...selected,
+          calibrationTags: [...selected.calibrationTags, "post_score_reset_protected"],
           reason: "Post-score reset calibration protects restart: the scoring team must pass through a neutral reset before another dangerous opportunity, without forcing opponent scores.",
         }
       : postScoreConcedingRestartWindow
         ? {
             ...selected,
+            calibrationTags: [...selected.calibrationTags, "post_score_conceding_restart_protected"],
             reason: "Post-score conceding restart calibration gives the conceding team a safe restart possession after the score: the restart breaks momentum without forcing a reply score.",
           }
         : selected;
   }
 
-  if (postScoreSameTeamReattackWindow) {
+  if (postScoreSameTeamReattackWindow && !earnedDangerGateTuning6OEnabled) {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
+      calibrationTags: [...continuation.calibrationTags, "post_score_reset_protected"],
       reason: "Post-score reset calibration protects restart: the scoring team must pass through a neutral reset before another dangerous opportunity, without forcing opponent scores.",
     };
   }
@@ -755,8 +761,19 @@ function densitySelectedCandidate(input: {
     resetBreakBlowoutEconomyEnabled &&
     scoreDelta > 0 &&
     !earnedDangerAfterReset;
-  const earnedDangerGateEnabled = input.seed.includes("earned-danger-gate-6n");
-  const earnedDangerGateResult = earnedDangerGateEnabled && recentResetToDangerWindow
+  const earnedDangerGateEnabled = input.seed.includes("earned-danger-gate-6n") || earnedDangerGateTuning6OEnabled;
+  const earnedDangerGateWindow = recentResetToDangerWindow ||
+    (
+      earnedDangerGateTuning6OEnabled &&
+      (
+        postScoreSameTeamReattackWindow ||
+        postScoreConcedingRestartWindow ||
+        goalkeeperOrDefensiveResetWindow ||
+        possessionResetWindow ||
+        (input.segmentIndex > 0 && selected.family !== "CONVERSION_GOAL")
+      )
+    );
+  const earnedDangerGateResult = earnedDangerGateEnabled && earnedDangerGateWindow
     ? computeEarnedDangerGate({
         candidate: selected,
         teamState: input.teamState,
@@ -764,11 +781,15 @@ function densitySelectedCandidate(input: {
         scoreDelta,
         pressureFatigueLoad,
         deterministicBreak,
-        recentResetToDangerWindow,
+        recentResetToDangerWindow: earnedDangerGateWindow,
         goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
+        calibrationVersion: earnedDangerGateTuning6OEnabled ? "EARNED_DANGER_GATE_TUNING_6O" : "EARNED_DANGER_GATE_6N",
       })
     : undefined;
+  const earnedDangerGateLabel = earnedDangerGateTuning6OEnabled
+    ? "Earned danger gate calibration 6N tuning 6O"
+    : "Earned danger gate calibration 6N";
 
   if (
     earnedDangerGateResult !== undefined &&
@@ -777,21 +798,21 @@ function densitySelectedCandidate(input: {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
-      reason: `Earned danger gate calibration 6N downgrades reset-to-danger to ${earnedDangerGateResult.gateDecision}: score ${earnedDangerGateResult.earnedDangerScore}, classification ${earnedDangerGateResult.earnedDangerClassification}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+      reason: `${earnedDangerGateLabel} downgrades reset-to-danger from ${selected.family} to ${earnedDangerGateResult.gateDecision}: score ${earnedDangerGateResult.earnedDangerScore}, classification ${earnedDangerGateResult.earnedDangerClassification}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
     };
   }
 
   if (earnedDangerGateResult?.gateDecision === "ALLOW_BORDERLINE_DANGER") {
     return {
       ...selected,
-      reason: `${selected.reason} Earned danger gate calibration 6N allows borderline danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+      reason: `${selected.reason} ${earnedDangerGateLabel} allows borderline danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
     };
   }
 
   if (earnedDangerGateResult?.gateDecision === "ALLOW_DANGER") {
     return {
       ...selected,
-      reason: `${selected.reason} Earned danger gate calibration 6N confirms earned danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+      reason: `${selected.reason} ${earnedDangerGateLabel} confirms earned danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
     };
   }
 
@@ -825,6 +846,11 @@ function densitySelectedCandidate(input: {
         : routeRepeatDecay
           ? "Dominance chain calibration dampens repeated route family or zone access before another scoring opportunity without changing score values."
           : "Segment density calibration selects continuation/reset before another scoring opportunity: recent danger, pressure, fatigue, or route repetition interrupts the chain.",
+      calibrationTags: [
+        ...continuation.calibrationTags,
+        ...(goalkeeperSecureResetWindow ? ["goalkeeper_secure_reset_break_6l"] : []),
+        ...(dominanceChainDecay || dominantTeamNeedsReset || routeRepeatDecay ? ["dominance_chain_calibration_6j", "dominance_decay_applied"] : []),
+      ],
     };
   }
 
@@ -877,6 +903,22 @@ function routeFamilyCoachLabel(family: OfficialRouteFamily): string {
   }
 }
 
+function calibrationReason(candidate: OfficialRouteFamilyCandidate): string {
+  return candidate.calibrationTags.length > 0 ||
+    candidate.reason.includes("Earned danger gate calibration") ||
+    candidate.reason.includes("Post-score reset calibration") ||
+    candidate.reason.includes("Post-score conceding restart calibration") ||
+    candidate.reason.includes("Dominance chain calibration") ||
+    candidate.reason.includes("Goalkeeper secure reset calibration")
+    ? candidate.reason
+    : "";
+}
+
+function resolvedReason(candidate: OfficialRouteFamilyCandidate, reason: string): string {
+  const contextReason = calibrationReason(candidate);
+  return contextReason.length > 0 ? `${reason} ${contextReason}` : reason;
+}
+
 function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed: string): OfficialRouteFamilyCandidate {
   const noise = deterministicNoise(`${seed}:${candidate.candidateId}:resolve`);
   const successScore = candidate.candidateScore + noise - 10;
@@ -910,9 +952,9 @@ function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed:
             ? "LOST_FORWARD"
             : "CONTACT_STOPPED",
       suppressionReasonCodes: scoring ? [] : [successScore >= 66 ? "TRY_CONTACT_CONTEST_FAILED" : "TRY_GROUNDING_WINDOW_MISSING"],
-      reason: scoring
+      reason: resolvedReason(candidate, scoring
         ? "Legal try access, support, and grounding control clear the official try gate."
-        : "Try route is selected and attempted, but grounding pressure, ball control, or contact resistance stops the score.",
+        : "Try route is selected and attempted, but grounding pressure, ball control, or contact resistance stops the score."),
     };
   }
 
@@ -931,9 +973,9 @@ function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed:
             ? "DROP_BLOCKED"
             : "DROP_INVALID",
       suppressionReasonCodes: scoring ? [] : [successScore >= 66 ? "DROP_BALANCE_NOT_AVAILABLE" : "DROP_PRESSURE_TOO_HIGH"],
-      reason: scoring
+      reason: resolvedReason(candidate, scoring
         ? "Open-play drop timing, kicker profile, and balance clear the official drop gate."
-        : "Drop route is selected and attempted, but timing, balance, or block pressure prevents scoring.",
+        : "Drop route is selected and attempted, but timing, balance, or block pressure prevents scoring."),
     };
   }
 
@@ -957,7 +999,7 @@ function resolveSelectedCandidate(candidate: OfficialRouteFamilyCandidate, seed:
     resolved: true,
     scoring: candidate.family === "SHOT_GOAL",
     outcome: "SHOT_RETAINED",
-    reason: "Shot route remains the selected official scoring family for this danger phase.",
+    reason: resolvedReason(candidate, "Shot route remains the selected official scoring family for this danger phase."),
   };
 }
 
@@ -1076,17 +1118,16 @@ function eventForResolvedCandidate(input: {
     ? input.matchInput.awayTeam
     : input.matchInput.homeTeam;
   const familyLabel = routeFamilyCoachLabel(input.candidate.family);
+  const calibrationTags = new Set(input.candidate.calibrationTags);
   const dominanceChainDecayApplied = input.candidate.family === "CONTINUATION" &&
-    input.candidate.reason.includes("Dominance chain calibration") &&
-    (
-      input.candidate.reason.includes("repeated same-team danger") ||
-      input.candidate.reason.includes("momentum decay") ||
-      input.candidate.reason.includes("repeated route family or zone")
-    );
+    calibrationTags.has("dominance_decay_applied");
   const postScoreResetApplied = input.candidate.family === "CONTINUATION" &&
-    input.candidate.reason.includes("Post-score reset calibration");
+    (
+      calibrationTags.has("post_score_reset_protected") ||
+      calibrationTags.has("post_score_conceding_restart_protected")
+    );
   const goalkeeperSecureResetApplied = input.candidate.family === "CONTINUATION" &&
-    input.candidate.reason.includes("Goalkeeper secure reset calibration");
+    calibrationTags.has("goalkeeper_secure_reset_break_6l");
   const resetBreakBlowoutEconomyApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Reset break blowout economy calibration");
   const earnedDangerGateApplied = input.candidate.reason.includes("Earned danger gate calibration 6N");
@@ -1210,6 +1251,15 @@ function eventForResolvedCandidate(input: {
           ]
         : []),
       ...(earnedDangerGateApplied ? earnedDangerGateTagsForCandidate(input.candidate) : []),
+      ...input.candidate.calibrationTags.filter((tag) =>
+        ![
+          "dominance_chain_calibration_6j",
+          "dominance_decay_applied",
+          "post_score_reset_protected",
+          "post_score_conceding_restart_protected",
+          "goalkeeper_secure_reset_break_6l",
+        ].includes(tag)
+      ),
     ],
     narrativeWeight: shouldScore ? 82 : 48,
   };

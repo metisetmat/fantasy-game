@@ -68,6 +68,10 @@ import {
   renderFullMatchEarnedDangerGate6NDoc as renderEarnedDangerGate6NDoc,
   renderFullMatchEarnedDangerGate6NValidation as renderEarnedDangerGate6NValidation,
 } from "../../reports/fullMatchEarnedDangerGateCalibration";
+import {
+  renderFullMatchEarnedDangerGateTuning6ODoc as renderEarnedDangerGateTuning6ODoc,
+  renderFullMatchEarnedDangerGateTuning6OValidation as renderEarnedDangerGateTuning6OValidation,
+} from "../../reports/fullMatchEarnedDangerGateTuningCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6381,6 +6385,14 @@ export function renderFullMatchEarnedDangerGate6NDoc(_model: FullMatchTraceValid
 
 export function renderFullMatchEarnedDangerGate6NValidation(_model: FullMatchTraceValidationModel): string {
   return renderEarnedDangerGate6NValidation();
+}
+
+export function renderFullMatchEarnedDangerGateTuning6ODoc(_model: FullMatchTraceValidationModel): string {
+  return renderEarnedDangerGateTuning6ODoc();
+}
+
+export function renderFullMatchEarnedDangerGateTuning6OValidation(_model: FullMatchTraceValidationModel): string {
+  return renderEarnedDangerGateTuning6OValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

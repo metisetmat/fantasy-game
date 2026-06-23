@@ -25,6 +25,7 @@ import { currentFullMatchBreakEventPostScoreResetCalibrationModel } from "./full
 import { currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel } from "./fullMatchGoalkeeperSecureResetBreakSpecificityCalibration";
 import { currentFullMatchResetBreakBlowoutEconomyCalibrationModel } from "./fullMatchResetBreakBlowoutEconomyCalibration";
 import { currentFullMatchEarnedDangerGateCalibrationModel } from "./fullMatchEarnedDangerGateCalibration";
+import { currentFullMatchEarnedDangerGateTuningModel } from "./fullMatchEarnedDangerGateTuningCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -55,6 +56,7 @@ import {
   renderFullMatchGoalkeeperSecureResetBreakSpecificitySection,
   renderFullMatchResetBreakBlowoutEconomySection,
   renderFullMatchEarnedDangerGateSection,
+  renderFullMatchEarnedDangerGateTuningSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -82,6 +84,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchGoalkeeperSecureResetBreakSpecificity = currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel();
   const fullMatchResetBreakBlowoutEconomy = currentFullMatchResetBreakBlowoutEconomyCalibrationModel();
   const fullMatchEarnedDangerGate = currentFullMatchEarnedDangerGateCalibrationModel();
+  const fullMatchEarnedDangerGateTuning = currentFullMatchEarnedDangerGateTuningModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -92,6 +95,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(fullMatchGoalkeeperSecureResetBreakSpecificity),
     renderFullMatchResetBreakBlowoutEconomySection(fullMatchResetBreakBlowoutEconomy),
     renderFullMatchEarnedDangerGateSection(fullMatchEarnedDangerGate),
+    renderFullMatchEarnedDangerGateTuningSection(fullMatchEarnedDangerGateTuning),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -109,6 +113,7 @@ export function writeLatestCoachReport(): void {
     fullMatchGoalkeeperSecureResetBreakSpecificity,
     fullMatchResetBreakBlowoutEconomy,
     fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -294,6 +299,7 @@ export function writeLatestCoachReport(): void {
     fullMatchGoalkeeperSecureResetBreakSpecificity,
     fullMatchResetBreakBlowoutEconomy,
     fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

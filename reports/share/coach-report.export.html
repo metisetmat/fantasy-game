@@ -2085,7 +2085,7 @@
           <div><span>Location visible</span><strong>oui</strong></div>
           <div><span>Lecture report read-only</span><strong class="persistent-history-readonly">oui</strong></div>
         </div>
-        <p><strong>Stockage local :</strong> <code>C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\8f88f14a8887f11b\reports\history\coach-match-history-store.json</code></p>
+        <p><strong>Stockage local :</strong> <code>C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</code></p>
       </article>
       <article class="persistent-history-card">
         <h3>Comptes de persistance</h3>
@@ -3215,6 +3215,67 @@
       </p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Gate selectif du danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6O</p>
+        <h3>Gate selectif du danger</h3>
+        <p>
+          6O transforme le gate 6N en filtre selectif: le danger revient uniquement quand il est gagne par support,
+          espace, edge tactique, attributs, fatigue, pression ou erreur adverse. Les scores restent issus des
+          score_change officiels, sans cap, sans rewrite et sans point ajoute hors modele.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger reintroduit</h4>
+          <ul>
+            <li>Danger merite: 0% -> 99.8%</li>
+            <li>Danger borderline: 0% -> 0.2%</li>
+            <li>Danger automatique suspecte: 0% -> 0%</li>
+            <li>Earned autorises: 549</li>
+            <li>Borderline autorises: 1</li>
+            <li>Automatiques bloques: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Filtre et garde-fous</h4>
+          <ul>
+            <li>Suspicion trop strict: 0</li>
+            <li>Suspicion trop permissif: 0</li>
+            <li>Root cause contradiction: 0</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Score officiel score_change: oui</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du batch</h4>
+          <ul>
+            <li>Total points moyen: 30.6 -> 39.5</li>
+            <li>Evenements scoring/match: 9.7 -> 12.6</li>
+            <li>Opportunites/match: 20.5 -> 28.1</li>
+            <li>Severe blowout: 14% -> 28%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Densite: a surveiller</li>
+            <li>Equilibre equipes: preserve</li>
+            <li>Reset gardien secure: preserve</li>
+            <li>Reset post-score: a surveiller</li>
+            <li>Dominance chain: a surveiller</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: REVIEW_VOLUME_WITHOUT_SCORE_REWRITE. Le statut PARTIAL reste acceptable seulement si les garde-fous scoring
+        sont propres et si la prochaine lecture surveille volume, blowouts et mix de routes.
+      </p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -4057,7 +4118,7 @@
         <li>store kind file_backed</li>
         <li>durable true</li>
         <li>storage location visible true</li>
-        <li>storage location C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\8f88f14a8887f11b\reports\history\coach-match-history-store.json</li>
+        <li>storage location C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</li>
         <li>records before save count 6</li>
         <li>records after save count 6</li>
         <li>queried record count 6</li>
@@ -4301,7 +4362,7 @@
         <li>default real DB read count: 0</li>
         <li>controlled real DB read count: 3</li>
         <li>real DB write count: 0</li>
-        <li>fixture path: C:\Users\CodexSandboxOffline\.codex\.sandbox\cwd\8f88f14a8887f11b\test-fixtures\sqlite\coach-match-history-v1.sqlite</li>
+        <li>fixture path: C:\Users\mbess\Documents\fantasy-game-engine\test-fixtures\sqlite\coach-match-history-v1.sqlite</li>
         <li>fixture record count: 6</li>
         <li>read-only adapter record count: 6</li>
         <li>query by team pass: true</li>

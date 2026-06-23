@@ -78,6 +78,15 @@ function isTurnover(event: MatchEvent): boolean {
   return event.eventType === "turnover" || hasTag(event, "turnover") || hasTag(event, "lost_forward");
 }
 
+function isPossessionEvent(event: MatchEvent): boolean {
+  return isReset(event) ||
+    isOpportunity(event) ||
+    isTurnover(event) ||
+    event.eventType === "progression" ||
+    event.eventType === "scoring" ||
+    event.outcome === "neutral";
+}
+
 function opposingTeamId(report: MatchReport, teamId: TeamId): TeamId {
   const homeTeamId = report.teamStats[0]?.teamId;
   const awayTeamId = report.teamStats[1]?.teamId;
@@ -118,7 +127,8 @@ export function auditFullMatchResetBreakSpecificity(report: MatchReport): FullMa
     const firstReset = later.find(isReset);
     const firstOpportunity = later.find(isOpportunity);
     const firstTeamEvent = later.find((event) =>
-      event.teamId === scoringTeamId || event.teamId === concedingTeamId
+      isPossessionEvent(event) &&
+      (event.teamId === scoringTeamId || event.teamId === concedingTeamId)
     );
     const concedingHasFirstPossession = firstTeamEvent?.teamId === concedingTeamId;
     const protectedReset = firstReset !== undefined &&

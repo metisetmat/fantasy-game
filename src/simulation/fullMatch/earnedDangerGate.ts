@@ -65,6 +65,10 @@ export type EarnedDangerGateWarningCode =
   | "DANGER_BLOCKED_BY_GATE"
   | "RESET_REBUILD_REQUIRED";
 
+export type EarnedDangerGateCalibrationVersion =
+  | "EARNED_DANGER_GATE_6N"
+  | "EARNED_DANGER_GATE_TUNING_6O";
+
 export interface EarnedDangerGateResult {
   readonly connected: boolean;
   readonly resetSourceType: EarnedDangerResetSourceType;
@@ -146,7 +150,9 @@ export function computeEarnedDangerGate(input: {
   readonly recentResetToDangerWindow: boolean;
   readonly goalkeeperSecureContext: boolean;
   readonly postScoreContext: boolean;
+  readonly calibrationVersion?: EarnedDangerGateCalibrationVersion;
 }): EarnedDangerGateResult {
+  const tuning6O = input.calibrationVersion === "EARNED_DANGER_GATE_TUNING_6O";
   const attackingSupportScore = clamp(38 + input.candidate.candidateScore * 0.32 + input.teamState.momentum * 0.22 + routeFamilyEdge(input.candidate.family));
   const attackingSpacingScore = clamp(spacingFromZone(input.candidate.targetZone) + input.candidate.candidateScore * 0.16);
   const attackingStructureScore = clamp(42 + input.candidate.candidateScore * 0.25 + input.teamState.condition * 0.16);
@@ -190,19 +196,82 @@ export function computeEarnedDangerGate(input: {
   if (input.resetSourceType === "DEFENSIVE_RECOVERY") reasonCodes.push("DEFENSIVE_RECOVERY_CONTEXT");
   if (input.scoreDelta > 0) reasonCodes.push("LEADING_TEAM_REATTACK");
 
-  const hardMissingEdges = attackingSupportScore < 62 ||
-    attackingSpacingScore < 45 ||
-    tacticalEdgeScore < 62 ||
-    attributeEdgeScore < 60;
-  const allowEarned = earnedDangerScore >= 65 && !hardMissingEdges;
-  const allowBorderline = !allowEarned &&
-    earnedDangerScore >= 50 &&
-    input.candidate.candidateScore >= 78 &&
-    attackingSupportScore >= 62 &&
-    attackingSpacingScore >= 45 &&
-    tacticalEdgeScore >= 60 &&
-    attributeEdgeScore >= 60 &&
-    input.scoreDelta <= 4;
+  const mediumSignalCount = [
+    attackingSupportScore >= (tuning6O ? 58 : 62),
+    attackingSpacingScore >= (tuning6O ? 56 : 60),
+    tacticalEdgeScore >= (tuning6O ? 58 : 60),
+    attributeEdgeScore >= (tuning6O ? 58 : 60),
+    fatigueEdgeScore >= (tuning6O ? 50 : 55),
+    pressureEdgeScore >= (tuning6O ? 54 : 60),
+    mistakeEdgeScore >= (tuning6O ? 34 : 45),
+  ].filter(Boolean).length;
+  const strongSignalCount = [
+    attackingSupportScore >= 68,
+    attackingSpacingScore >= 68,
+    tacticalEdgeScore >= 67,
+    attributeEdgeScore >= 67,
+    fatigueEdgeScore >= 62,
+    pressureEdgeScore >= 66,
+    mistakeEdgeScore >= 52,
+  ].filter(Boolean).length;
+  const goalkeeperErrorSignal = input.goalkeeperSecureContext &&
+    (
+      mistakeEdgeScore >= (tuning6O ? 34 : 45) ||
+      pressureEdgeScore >= (tuning6O ? 58 : 65) ||
+      (
+        tuning6O &&
+        attackingSupportScore >= 65 &&
+        tacticalEdgeScore >= 65 &&
+        attributeEdgeScore >= 65 &&
+        attackingSpacingScore >= 50
+      )
+    );
+  const postScoreTurnoverSignal = input.postScoreContext &&
+    (
+      pressureEdgeScore >= (tuning6O ? 58 : 65) ||
+      mistakeEdgeScore >= (tuning6O ? 36 : 45) ||
+      (
+        tuning6O &&
+        attackingSupportScore >= 65 &&
+        tacticalEdgeScore >= 65 &&
+        attributeEdgeScore >= 65
+      )
+    );
+  const hardMissingEdges = tuning6O
+    ? attackingSupportScore < 45 ||
+      attackingSpacingScore < 42 ||
+      tacticalEdgeScore < 50 ||
+      attributeEdgeScore < 50 ||
+      (input.goalkeeperSecureContext && !goalkeeperErrorSignal) ||
+      (input.postScoreContext && !postScoreTurnoverSignal && input.scoreDelta > 4)
+    : attackingSupportScore < 62 ||
+      attackingSpacingScore < 45 ||
+      tacticalEdgeScore < 62 ||
+      attributeEdgeScore < 60;
+  const allowEarned = tuning6O
+    ? earnedDangerScore >= 50 &&
+      !hardMissingEdges &&
+      attackingSupportScore >= 60 &&
+      tacticalEdgeScore >= 60 &&
+      attributeEdgeScore >= 60 &&
+      mediumSignalCount >= 3
+    : earnedDangerScore >= 65 && !hardMissingEdges;
+  const allowBorderline = tuning6O
+    ? !allowEarned &&
+      earnedDangerScore >= 43 &&
+      !hardMissingEdges &&
+      attackingSupportScore >= 55 &&
+      tacticalEdgeScore >= 55 &&
+      attributeEdgeScore >= 55 &&
+      mediumSignalCount >= 3
+    : !allowEarned &&
+      earnedDangerScore >= 50 &&
+      input.candidate.candidateScore >= 78 &&
+      attackingSupportScore >= 62 &&
+      attackingSpacingScore >= 45 &&
+      tacticalEdgeScore >= 60 &&
+      attributeEdgeScore >= 60 &&
+      input.scoreDelta <= 4;
   const gateDecision: EarnedDangerGateDecision = allowEarned
     ? "ALLOW_DANGER"
     : allowBorderline

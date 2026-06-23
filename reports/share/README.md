@@ -1,13 +1,13 @@
-# Sprint 6N Share Pack
+# Sprint 6O Share Pack
 
-Current sprint: Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix
+Current sprint: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
 
 ## Purpose
-This minimal review pack proves that reset-to-danger now passes through an earned danger gate before becoming a scoring opportunity. It keeps scoring constants, official route diversity, score_change authority, and the 6M baseline visible.
+This minimal review pack proves that the 6N earned-danger gate is tuned from a hard barrier into a selective filter. It reintroduces earned and borderline danger only when support, spacing, tactical edge, attributes, fatigue, pressure, or mistake context justify it.
 
 ## Primary files
-- fullmatch-earned-danger-gate-6n.md
-- validation.fullmatch-earned-danger-gate-6n.md
+- fullmatch-earned-danger-gate-tuning-6o.md
+- validation.fullmatch-earned-danger-gate-tuning-6o.md
 - coach-report.export.html
 - coach-report.product.html
 - scoring-events-summary.md
@@ -22,6 +22,7 @@ This minimal review pack proves that reset-to-danger now passes through an earne
 - No scoring-event deletion.
 - No MatchBonusEvent mutation.
 - Score remains derived from score_change consequences.
+- 6N remains the baseline; 6O only tunes the gate.
 
 ## Next Sprint
-Review 6N output before Sprint 6O focuses on increasing truly earned danger rather than restoring automatic reset-to-danger.
+Review whether route economy remains healthy after selective earned danger returns.
