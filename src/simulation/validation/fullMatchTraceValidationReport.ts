@@ -60,6 +60,10 @@ import {
   renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc as renderGoalkeeperSecureResetBreakSpecificity6LDoc,
   renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation as renderGoalkeeperSecureResetBreakSpecificity6LValidation,
 } from "../../reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration";
+import {
+  renderFullMatchResetBreakBlowoutEconomy6MDoc as renderResetBreakBlowoutEconomy6MDoc,
+  renderFullMatchResetBreakBlowoutEconomy6MValidation as renderResetBreakBlowoutEconomy6MValidation,
+} from "../../reports/fullMatchResetBreakBlowoutEconomyCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6357,6 +6361,14 @@ export function renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc(_model
 
 export function renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation(_model: FullMatchTraceValidationModel): string {
   return renderGoalkeeperSecureResetBreakSpecificity6LValidation();
+}
+
+export function renderFullMatchResetBreakBlowoutEconomy6MDoc(_model: FullMatchTraceValidationModel): string {
+  return renderResetBreakBlowoutEconomy6MDoc();
+}
+
+export function renderFullMatchResetBreakBlowoutEconomy6MValidation(_model: FullMatchTraceValidationModel): string {
+  return renderResetBreakBlowoutEconomy6MValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6L - Goalkeeper Secure & Reset Break Specificity. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6M - Reset Break Blowout Economy. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -96,6 +96,8 @@ import {
   renderFullMatchBreakEventPostScoreResetCalibration6KValidation,
   renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc,
   renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation,
+  renderFullMatchResetBreakBlowoutEconomy6MDoc,
+  renderFullMatchResetBreakBlowoutEconomy6MValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -108,9 +110,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6L - Goalkeeper Secure & Reset Break Specificity";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-goalkeeper-secure-reset-break-specificity-6l.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6M - Reset Break Blowout Economy";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-reset-break-blowout-economy-6m.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-reset-break-blowout-economy-6m.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2204,6 +2206,31 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.test.ts",
         required: true,
         reason: "Sprint 6L executable test proving goalkeeper secure resets, post-score specificity, dominance decay wording, and scoring guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/resetBreakBlowoutEconomyWarnings.ts",
+        required: true,
+        reason: "Sprint 6M warning-code registry for reset-break blowout economy, earned danger, automatic danger, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchResetToDangerQualityAudit.ts",
+        required: true,
+        reason: "Sprint 6M audit classifying reset-to-danger follow-ups as earned or automatic-suspicion without mutating score",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchBlowoutEconomyAudit.ts",
+        required: true,
+        reason: "Sprint 6M blowout root-cause audit for winner/loser opportunity balance, response windows, and danger sources",
+      },
+      {
+        source: "src/reports/fullMatchResetBreakBlowoutEconomyCalibration.ts",
+        required: true,
+        reason: "Sprint 6M full-match reset-break blowout economy calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchResetBreakBlowoutEconomyCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6M executable test proving reset-to-danger quality, blowout root causes, score-path guardrails, and scoring constants",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4362,6 +4389,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6M")) {
+    return renderFullMatchResetBreakBlowoutEconomy6MDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6L")) {
     return renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc(fullMatchTraceValidationModel());
   }
@@ -6610,6 +6641,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6M")) {
+    return renderFullMatchResetBreakBlowoutEconomy6MValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6L")) {
     return renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation(fullMatchTraceValidationModel());
   }
@@ -8804,6 +8839,33 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6M")) {
+    return [
+      "# Sprint 6M Share Pack",
+      "",
+      "Current sprint: Sprint 6M - Reset Break Blowout Economy",
+      "",
+      "## Purpose",
+      "This minimal review pack proves that reset-break follow-up and blowout economy are monitored without changing scoring constants, deleting events, forcing scores, or weakening the official score_change path.",
+      "",
+      "## Primary files",
+      "- fullmatch-reset-break-blowout-economy-6m.md",
+      "- validation.fullmatch-reset-break-blowout-economy-6m.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Review guidance",
+      "1. Start with validation.share-pack.md for current-sprint completeness.",
+      "2. Read the 6M calibration report for blowout, close-game, reset-to-danger, earned-danger, and automatic-danger metrics.",
+      "3. Inspect the 6M validation checklist for score-path and no-forced-score guardrails.",
+      "4. Use the bundles only when implementation details are needed.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6L")) {
     return [
       "# Sprint 6L Share Pack",
@@ -26364,6 +26426,7 @@ import { currentFullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMa
 import { currentFullMatchDominanceChainCalibrationModel } from "./fullMatchDominanceChainCalibration";
 import { currentFullMatchBreakEventPostScoreResetCalibrationModel } from "./fullMatchBreakEventPostScoreResetCalibration";
 import { currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel } from "./fullMatchGoalkeeperSecureResetBreakSpecificityCalibration";
+import { currentFullMatchResetBreakBlowoutEconomyCalibrationModel } from "./fullMatchResetBreakBlowoutEconomyCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26392,6 +26455,7 @@ import {
   renderFullMatchDominanceChainCalibrationSection,
   renderFullMatchBreakEventPostScoreResetCalibrationSection,
   renderFullMatchGoalkeeperSecureResetBreakSpecificitySection,
+  renderFullMatchResetBreakBlowoutEconomySection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26417,6 +26481,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchDominanceChainCalibration = currentFullMatchDominanceChainCalibrationModel();
   const fullMatchBreakEventPostScoreResetCalibration = currentFullMatchBreakEventPostScoreResetCalibrationModel();
   const fullMatchGoalkeeperSecureResetBreakSpecificity = currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel();
+  const fullMatchResetBreakBlowoutEconomy = currentFullMatchResetBreakBlowoutEconomyCalibrationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -26425,6 +26490,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchDominanceChainCalibrationSection(fullMatchDominanceChainCalibration),
     renderFullMatchBreakEventPostScoreResetCalibrationSection(fullMatchBreakEventPostScoreResetCalibration),
     renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(fullMatchGoalkeeperSecureResetBreakSpecificity),
+    renderFullMatchResetBreakBlowoutEconomySection(fullMatchResetBreakBlowoutEconomy),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26440,6 +26506,7 @@ export function writeLatestCoachReport(): void {
     fullMatchDominanceChainCalibration,
     fullMatchBreakEventPostScoreResetCalibration,
     fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -26623,6 +26690,7 @@ export function writeLatestCoachReport(): void {
     fullMatchDominanceChainCalibration,
     fullMatchBreakEventPostScoreResetCalibration,
     fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
