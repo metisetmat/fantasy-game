@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-23T17:47:25.982Z
+Generated timestamp: 2026-06-23T18:43:38.849Z
 Task/sprint name: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
 Final file count: 20
 
@@ -840,14 +840,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/earnedDangerGate.ts
+ M src/reports/fullMatchEarnedDangerGateTuningCalibration.test.ts
+ M src/reports/fullMatchEarnedDangerGateTuningCalibration.ts
  M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchEarnedDangerGateTuningCalibration.test.ts
-?? src/reports/fullMatchEarnedDangerGateTuningCalibration.ts
-?? src/simulation/fullMatch/earnedDangerGateTuningWarnings.ts
-?? src/simulation/fullMatch/fullMatchEarnedDangerGateTuningAudit.ts
+ M src/simulation/fullMatch/fullMatchResetBreakSpecificityAudit.ts

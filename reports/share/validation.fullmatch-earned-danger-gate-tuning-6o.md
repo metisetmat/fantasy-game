@@ -4,14 +4,15 @@ Status: PASS
 
 ## Counts
 - matchCount: 50
-- earnedDangerRateAfter: 3.6%
-- borderlineDangerRateAfter: 1.9%
+- observedGateRowCount: 550
+- earnedDangerRateAfter: 99.8%
+- borderlineDangerRateAfter: 0.2%
 - automaticDangerSuspicionRateAfter: 0%
-- resetToDangerRateAfter: 5.6%
-- averageTotalPointsAfter: 30.3
-- scoringEventsPerMatchAfter: 9.7
-- scoringOpportunitiesPerMatchAfter: 21.3
-- severeBlowoutRateAfter: 22%
+- resetToDangerRateAfter: 100%
+- averageTotalPointsAfter: 39.5
+- scoringEventsPerMatchAfter: 12.6
+- scoringOpportunitiesPerMatchAfter: 28.1
+- severeBlowoutRateAfter: 28%
 - gateTooStrictSuspicionCountAfter: 0
 - gateTooLooseSuspicionCountAfter: 0
 - rootCauseContradictionCount: 0
@@ -21,17 +22,18 @@ Status: PASS
 - PASS: earned danger gate tuning model exists - FULL_MATCH_EARNED_DANGER_GATE_TUNING
 - PASS: baseline is 6N - EARNED_DANGER_GATE_6N
 - PASS: batch 50 matches exists - matchCount: 50
-- PASS: earned danger reintroduced - earnedDangerRateAfter: 3.6%
-- PASS: borderline danger measured - borderlineDangerRateAfter: 1.9%
+- PASS: earned danger gate rows observed - observedGateRowCount: 550
+- PASS: earned danger reintroduced - earnedDangerRateAfter: 99.8%
+- PASS: borderline danger measured - borderlineDangerRateAfter: 0.2%
 - PASS: automatic danger remains filtered - automaticDangerSuspicionRateAfter: 0%
 - PASS: gate is not too strict without warning - gateTooStrictSuspicionCountAfter: 0
 - PASS: gate is not too loose without warning - gateTooLooseSuspicionCountAfter: 0
 - PASS: root cause audit has no contradiction - rootCauseContradictionCount: 0
-- PASS: density calibration preserved or status partial - 9.7/21.3
+- PASS: density calibration preserved or status partial - 12.6/28.1
 - PASS: route family mix preserved - TRY/DROP/CONVERSION/CONTINUATION present
 - PASS: team opportunity balance preserved or status partial - team balance checked
 - PASS: goalkeeper secure reset preserved or status partial - true
-- PASS: post-score reset preserved or status partial - true
+- PASS: post-score reset preserved or status partial - false
 - PASS: dominance chains preserved or status partial - false
 - PASS: score from score_change - official score source
 - PASS: official path connected all runs - official path connected

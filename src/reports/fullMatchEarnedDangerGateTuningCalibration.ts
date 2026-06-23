@@ -89,6 +89,7 @@ export interface FullMatchEarnedDangerGateTuningModel {
   readonly gateAllowedBorderlineDangerCountAfter: number;
   readonly gateBlockedAutomaticDangerCountBefore: number;
   readonly gateBlockedAutomaticDangerCountAfter: number;
+  readonly observedGateRowCount: number;
   readonly gateTooStrictSuspicionCountAfter: number;
   readonly gateTooLooseSuspicionCountAfter: number;
   readonly earnedDangerLostByTooStrictGateCountAfter: number;
@@ -139,7 +140,7 @@ export interface FullMatchEarnedDangerGateTuningModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "earned-danger-gate-tuning-6o-v1";
+const CACHE_VERSION = "earned-danger-gate-tuning-6o-v2";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-earned-danger-gate-tuning-6o.json");
 
 let cachedModel: FullMatchEarnedDangerGateTuningModel | null = null;
@@ -206,9 +207,6 @@ function hasOfficialPath(report: MatchReport): boolean {
 }
 
 function hasCalibration(report: MatchReport): boolean {
-  if (report.matchId.includes("earned-danger-gate-tuning-6o")) {
-    return true;
-  }
   return report.timeline.some((event) =>
     event.tags.includes("earned_danger_gate_6n") ||
     event.tacticalContext.reason?.includes("Earned danger gate calibration 6N tuning 6O")
@@ -304,10 +302,6 @@ function flattenClassificationDistribution(audits: readonly FullMatchEarnedDange
 
 function baselineRebuildRate(model: FullMatchEarnedDangerGateCalibrationModel): number {
   return model.dangerBlockedByGateRateAfter;
-}
-
-function reasonRow(reasonCode: EarnedDangerGateReasonCode, count: number): { readonly reasonCode: EarnedDangerGateReasonCode; readonly count: number } {
-  return { reasonCode, count };
 }
 
 function buildWarnings(input: {
@@ -420,22 +414,15 @@ export function buildFullMatchEarnedDangerGateTuningModel(): FullMatchEarnedDang
   const tuningAudit = summarizeFullMatchEarnedDangerGateTuningAudit(earnedDangerGateAudits);
   const gateRows = earnedDangerGateAudits.flatMap((audit) => audit.rows);
   const observedGateRowCount = earnedDangerGateAudits.reduce((sum, audit) => sum + audit.resetToDangerGateRowCount, 0);
-  const fallbackEarnedDangerCount = Math.max(1, Math.round(scoringEventCount * 0.03));
-  const fallbackBorderlineDangerCount = Math.max(1, Math.round(continuationCount * 0.02));
-  const gateAllowedEarnedDangerCountAfter = observedGateRowCount > 0
-    ? tuningAudit.gateAllowedEarnedDangerCount
-    : fallbackEarnedDangerCount;
-  const gateAllowedBorderlineDangerCountAfter = observedGateRowCount > 0
-    ? tuningAudit.gateAllowedBorderlineDangerCount
-    : fallbackBorderlineDangerCount;
-  const gateBlockedAutomaticDangerCountAfter = observedGateRowCount > 0
-    ? tuningAudit.gateBlockedAutomaticDangerCount
-    : continuationCount;
+  const gateInstrumentationConnected = observedGateRowCount > 0;
+  const gateAllowedEarnedDangerCountAfter = tuningAudit.gateAllowedEarnedDangerCount;
+  const gateAllowedBorderlineDangerCountAfter = tuningAudit.gateAllowedBorderlineDangerCount;
+  const gateBlockedAutomaticDangerCountAfter = tuningAudit.gateBlockedAutomaticDangerCount;
   const generatedDangerCount = observedGateRowCount > 0
     ? earnedDangerGateAudits.reduce((sum, audit) =>
         sum + audit.earnedDangerCount + audit.borderlineDangerCount + audit.automaticDangerSuspicionCount, 0)
-    : gateAllowedEarnedDangerCountAfter + gateAllowedBorderlineDangerCountAfter;
-  const rowCount = Math.max(1, observedGateRowCount > 0 ? observedGateRowCount : generatedDangerCount + gateBlockedAutomaticDangerCountAfter);
+    : 0;
+  const rowCount = Math.max(1, observedGateRowCount);
   const teamBalance = summarizeTeamOpportunityBalanceAudit(teamAudits);
   const routeFamilyDiversityByTeamAfter = Math.min(
     uniqueFamilyCount(teamBalance.home.routeFamilyMix),
@@ -537,6 +524,7 @@ export function buildFullMatchEarnedDangerGateTuningModel(): FullMatchEarnedDang
     gateAllowedBorderlineDangerCountAfter,
     gateBlockedAutomaticDangerCountBefore: baseline.earnedDangerGateAudits.reduce((sum, audit) => sum + audit.dangerBlockedByGateCount, 0),
     gateBlockedAutomaticDangerCountAfter,
+    observedGateRowCount,
     gateTooStrictSuspicionCountAfter: tuningAudit.gateTooStrictSuspicionCount,
     gateTooLooseSuspicionCountAfter: tuningAudit.gateTooLooseSuspicionCount,
     earnedDangerLostByTooStrictGateCountAfter: tuningAudit.earnedDangerLostByTooStrictGateCount,
@@ -572,33 +560,10 @@ export function buildFullMatchEarnedDangerGateTuningModel(): FullMatchEarnedDang
     },
     routeFamilyMixDistribution: distribution(routeMixes, "routeFamilyMix") as readonly { readonly routeFamilyMix: string; readonly matches: number }[],
     scorelineDistribution: distribution(scorelines, "scoreline") as readonly { readonly scoreline: string; readonly matches: number }[],
-    gateDecisionDistribution: observedGateRowCount > 0
-      ? flattenDecisionDistribution(earnedDangerGateAudits)
-      : [
-          { decision: "ALLOW_DANGER", count: gateAllowedEarnedDangerCountAfter },
-          { decision: "ALLOW_BORDERLINE_DANGER", count: gateAllowedBorderlineDangerCountAfter },
-          { decision: "FORCE_REBUILD_PHASE", count: gateBlockedAutomaticDangerCountAfter },
-        ],
-    gateClassificationDistribution: observedGateRowCount > 0
-      ? flattenClassificationDistribution(earnedDangerGateAudits)
-      : [
-          { classification: "EARNED", count: gateAllowedEarnedDangerCountAfter },
-          { classification: "BORDERLINE", count: gateAllowedBorderlineDangerCountAfter },
-          { classification: "BLOCKED_BY_GATE", count: gateBlockedAutomaticDangerCountAfter },
-        ],
-    allowedReasonDistribution: observedGateRowCount > 0
-      ? tuningAudit.allowedReasonDistribution
-      : [
-          reasonRow("SUPPORT_EDGE", gateAllowedEarnedDangerCountAfter + gateAllowedBorderlineDangerCountAfter),
-          reasonRow("TACTICAL_EDGE", gateAllowedEarnedDangerCountAfter + gateAllowedBorderlineDangerCountAfter),
-          reasonRow("ATTRIBUTE_EDGE", gateAllowedEarnedDangerCountAfter + gateAllowedBorderlineDangerCountAfter),
-        ],
-    deniedReasonDistribution: observedGateRowCount > 0
-      ? tuningAudit.deniedReasonDistribution
-      : [
-          reasonRow("NEUTRAL_REBUILD_REQUIRED", gateBlockedAutomaticDangerCountAfter),
-          reasonRow("SAFE_POSSESSION_REQUIRED", Math.round(gateBlockedAutomaticDangerCountAfter / 2)),
-        ],
+    gateDecisionDistribution: flattenDecisionDistribution(earnedDangerGateAudits),
+    gateClassificationDistribution: flattenClassificationDistribution(earnedDangerGateAudits),
+    allowedReasonDistribution: tuningAudit.allowedReasonDistribution,
+    deniedReasonDistribution: tuningAudit.deniedReasonDistribution,
     baselineRootCauseDistribution: [
       { rootCause: "RESET_TO_DANGER_TOO_FAST", count: 50 },
       { rootCause: "DANGER_NOT_TACTICALLY_EARNED", count: 50 },
@@ -617,6 +582,7 @@ export function buildFullMatchEarnedDangerGateTuningModel(): FullMatchEarnedDang
   const warnings = buildWarnings({ model: modelBase });
   const hasBlocking = warnings.some((warning) => EARNED_DANGER_GATE_TUNING_BLOCKING_WARNINGS.includes(warning));
   const status: FullMatchEarnedDangerGateTuningStatus = !guardrailsPass ||
+    !gateInstrumentationConnected ||
     earnedDangerRateAfter === 0 ||
     rootCauseContradictionCount > 0 ||
     !routeFamilyMixPreserved
@@ -624,7 +590,7 @@ export function buildFullMatchEarnedDangerGateTuningModel(): FullMatchEarnedDang
     : hasBlocking || averageTotalPointsAfter > 32 || severeBlowoutRateAfter > 12
       ? "PARTIAL"
       : "PASS";
-  const recommendation: FullMatchEarnedDangerGateTuningRecommendation = !guardrailsPass
+  const recommendation: FullMatchEarnedDangerGateTuningRecommendation = !guardrailsPass || !gateInstrumentationConnected
     ? "FIX_SCORING_GUARDRAILS"
     : earnedDangerRateAfter === 0 || tuningAudit.gateTooStrictSuspicionCount > 0
       ? "LOOSEN_BORDERLINE_DANGER_SELECTIVELY"
@@ -743,6 +709,7 @@ export function renderFullMatchEarnedDangerGateTuning6ODoc(
     metricRow("rebuild phase insertion", model.rebuildPhaseInsertionRateBefore, model.rebuildPhaseInsertionRateAfter, "%"),
     "",
     "## Gate Tuning Audit Summary",
+    `- observedGateRowCount: ${model.observedGateRowCount}`,
     `- gateAllowedEarnedDangerCountBefore: ${model.gateAllowedEarnedDangerCountBefore}`,
     `- gateAllowedEarnedDangerCountAfter: ${model.gateAllowedEarnedDangerCountAfter}`,
     `- gateAllowedBorderlineDangerCountBefore: ${model.gateAllowedBorderlineDangerCountBefore}`,
@@ -838,6 +805,7 @@ export function renderFullMatchEarnedDangerGateTuning6OValidation(
     checkLine("earned danger gate tuning model exists", model.scope === "FULL_MATCH_EARNED_DANGER_GATE_TUNING", model.scope),
     checkLine("baseline is 6N", model.baselineVersion === "EARNED_DANGER_GATE_6N", model.baselineVersion),
     checkLine("batch 50 matches exists", model.matchCount >= 50, `matchCount: ${model.matchCount}`),
+    checkLine("earned danger gate rows observed", model.observedGateRowCount > 0, `observedGateRowCount: ${model.observedGateRowCount}`),
     checkLine("earned danger reintroduced", model.earnedDangerRateAfter > 0, `earnedDangerRateAfter: ${model.earnedDangerRateAfter}%`),
     checkLine("borderline danger measured", model.borderlineDangerRateAfter >= 0, `borderlineDangerRateAfter: ${model.borderlineDangerRateAfter}%`),
     checkLine("automatic danger remains filtered", model.automaticDangerSuspicionRateAfter <= 5, `automaticDangerSuspicionRateAfter: ${model.automaticDangerSuspicionRateAfter}%`),
@@ -872,6 +840,7 @@ export function renderFullMatchEarnedDangerGateTuning6OValidation(
     "",
     "## Counts",
     `- matchCount: ${model.matchCount}`,
+    `- observedGateRowCount: ${model.observedGateRowCount}`,
     `- earnedDangerRateAfter: ${model.earnedDangerRateAfter}%`,
     `- borderlineDangerRateAfter: ${model.borderlineDangerRateAfter}%`,
     `- automaticDangerSuspicionRateAfter: ${model.automaticDangerSuspicionRateAfter}%`,

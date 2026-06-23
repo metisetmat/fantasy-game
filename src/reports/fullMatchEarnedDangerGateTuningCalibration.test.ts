@@ -19,6 +19,7 @@ assertTest(model.scope === "FULL_MATCH_EARNED_DANGER_GATE_TUNING", "6O model sco
 assertTest(model.version === "EARNED_DANGER_GATE_TUNING_6O", "6O model version must be stable.");
 assertTest(model.baselineVersion === "EARNED_DANGER_GATE_6N", "6O must use 6N as the baseline.");
 assertTest(model.matchCount >= 50, "6O calibration must run at least 50 matches.");
+assertTest(model.observedGateRowCount > 0, "6O must observe real earned-danger gate rows.");
 assertTest(model.earnedDangerRateAfter > 0, "6O must reintroduce some earned danger.");
 assertTest(model.automaticDangerSuspicionRateAfter <= 5, "6O must not reopen automatic danger.");
 assertTest(model.scoreFromScoreChangeAllRuns, "6O official score must come from score_change consequences.");

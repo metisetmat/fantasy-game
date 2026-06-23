@@ -22,37 +22,38 @@
 - automaticDangerSuspicionRate: 0%
 
 ## After Gate Tuning Summary
-- averageTotalPointsAfter: 30.3
-- scoringEventsPerMatchAfter: 9.7
-- scoringOpportunitiesPerMatchAfter: 21.3
-- blowoutRateAfter: 56%
-- severeBlowoutRateAfter: 22%
-- closeGameRateAfter: 28%
-- resetToDangerRateAfter: 5.6%
-- earnedDangerRateAfter: 3.6%
-- borderlineDangerRateAfter: 1.9%
+- averageTotalPointsAfter: 39.5
+- scoringEventsPerMatchAfter: 12.6
+- scoringOpportunitiesPerMatchAfter: 28.1
+- blowoutRateAfter: 50%
+- severeBlowoutRateAfter: 28%
+- closeGameRateAfter: 32%
+- resetToDangerRateAfter: 100%
+- earnedDangerRateAfter: 99.8%
+- borderlineDangerRateAfter: 0.2%
 - automaticDangerSuspicionRateAfter: 0%
 
 ## Before / After Table
 | metric | before | after | movement |
 | --- | ---: | ---: | --- |
-| average total points | 30.6 | 30.3 | down |
-| scoring events per match | 9.7 | 9.7 | flat |
-| scoring opportunities per match | 20.5 | 21.3 | up |
-| blowout rate | 42% | 56% | up |
-| severe blowout rate | 14% | 22% | up |
-| earned danger | 0% | 3.6% | up |
-| borderline danger | 0% | 1.9% | up |
+| average total points | 30.6 | 39.5 | up |
+| scoring events per match | 9.7 | 12.6 | up |
+| scoring opportunities per match | 20.5 | 28.1 | up |
+| blowout rate | 42% | 50% | up |
+| severe blowout rate | 14% | 28% | up |
+| earned danger | 0% | 99.8% | up |
+| borderline danger | 0% | 0.2% | up |
 | automatic danger suspicion | 0% | 0% | flat |
 | rebuild phase insertion | 2% | 0% | down |
 
 ## Gate Tuning Audit Summary
+- observedGateRowCount: 550
 - gateAllowedEarnedDangerCountBefore: 0
-- gateAllowedEarnedDangerCountAfter: 15
+- gateAllowedEarnedDangerCountAfter: 549
 - gateAllowedBorderlineDangerCountBefore: 0
-- gateAllowedBorderlineDangerCountAfter: 8
+- gateAllowedBorderlineDangerCountAfter: 1
 - gateBlockedAutomaticDangerCountBefore: 1
-- gateBlockedAutomaticDangerCountAfter: 390
+- gateBlockedAutomaticDangerCountAfter: 0
 - gateTooStrictSuspicionCountAfter: 0
 - gateTooLooseSuspicionCountAfter: 0
 - earnedDangerLostByTooStrictGateCountAfter: 0
@@ -62,35 +63,41 @@
 ## Gate Decision Distribution
 | decision | count |
 | --- | ---: |
-| ALLOW_DANGER | 15 |
-| ALLOW_BORDERLINE_DANGER | 8 |
-| FORCE_REBUILD_PHASE | 390 |
+| ALLOW_DANGER | 549 |
+| ALLOW_BORDERLINE_DANGER | 1 |
 
 ## Earned Danger Classification Distribution
 | classification | count |
 | --- | ---: |
-| EARNED | 15 |
-| BORDERLINE | 8 |
-| BLOCKED_BY_GATE | 390 |
+| EARNED | 549 |
+| BORDERLINE | 1 |
 
 ## Allowed Danger Reason Code Distribution
 | reason code | count |
 | --- | ---: |
-| SUPPORT_EDGE | 23 |
-| TACTICAL_EDGE | 23 |
-| ATTRIBUTE_EDGE | 23 |
+| ATTRIBUTE_EDGE | 550 |
+| IMMEDIATE_AFTER_RESET | 550 |
+| LOW_SPACING | 550 |
+| SUPPORT_EDGE | 550 |
+| TACTICAL_EDGE | 550 |
+| POST_SCORE_CONTEXT | 543 |
+| PRESSURE_EDGE | 478 |
+| FATIGUE_EDGE | 373 |
+| LEADING_TEAM_REATTACK | 277 |
+| MISTAKE_EDGE | 256 |
+| LOW_FATIGUE_EDGE | 177 |
 
 ## Denied Danger Reason Code Distribution
 | reason code | count |
 | --- | ---: |
-| NEUTRAL_REBUILD_REQUIRED | 390 |
-| SAFE_POSSESSION_REQUIRED | 195 |
+| none | 0 |
 
 ## Root Cause Audit Consistency
 - rootCauseContradictionCount: 0
 | root cause | count |
 | --- | ---: |
-| none | 0 |
+| EARNED_DANGER_REINTRODUCED | 549 |
+| BORDERLINE_DANGER_REINTRODUCED | 1 |
 
 ## Preservation Checks
 - densityCalibrationPreserved: false
@@ -98,12 +105,12 @@
 - teamOpportunityBalancePreserved: true
 - dominanceChainsPreservedOrImproved: false
 - goalkeeperSecureResetPreserved: true
-- postScoreResetPreserved: true
-- resetSpecificityPreserved: true
+- postScoreResetPreserved: false
+- resetSpecificityPreserved: false
 
 ## Route Family Mix By Team
-- home: {"SHOT_GOAL":406,"TRY_TOUCHDOWN":85,"CONVERSION_GOAL":83,"DROP_GOAL":73,"PENALTY_SHOT":0,"UNKNOWN":0,"CONTINUATION":193}
-- away: {"SHOT_GOAL":188,"TRY_TOUCHDOWN":79,"CONVERSION_GOAL":78,"DROP_GOAL":72,"PENALTY_SHOT":0,"UNKNOWN":0,"CONTINUATION":197}
+- home: {"SHOT_GOAL":423,"TRY_TOUCHDOWN":129,"CONVERSION_GOAL":128,"DROP_GOAL":119,"PENALTY_SHOT":0,"UNKNOWN":0,"CONTINUATION":75}
+- away: {"SHOT_GOAL":191,"TRY_TOUCHDOWN":141,"CONVERSION_GOAL":139,"DROP_GOAL":133,"PENALTY_SHOT":0,"UNKNOWN":0,"CONTINUATION":38}
 
 ## Route Family Mix Distribution
 | route family mix | matches |
@@ -113,18 +120,18 @@
 ## Scoreline Distribution
 | scoreline | matches |
 | --- | ---: |
-| 12 - 14 | 2 |
-| 12 - 2 | 2 |
-| 14 - 14 | 2 |
-| 14 - 26 | 2 |
-| 16 - 14 | 2 |
-| 19 - 21 | 2 |
-| 29 - 2 | 2 |
-| 33 - 7 | 2 |
-| 4 - 29 | 2 |
-| 11 - 0 | 1 |
-| 12 - 21 | 1 |
-| 12 - 4 | 1 |
+| 26 - 28 | 3 |
+| 14 - 15 | 2 |
+| 26 - 16 | 2 |
+| 33 - 6 | 2 |
+| 12 - 18 | 1 |
+| 12 - 28 | 1 |
+| 14 - 16 | 1 |
+| 14 - 24 | 1 |
+| 14 - 26 | 1 |
+| 14 - 4 | 1 |
+| 15 - 4 | 1 |
+| 15 - 7 | 1 |
 
 ## Guardrails
 - scoreFromScoreChangeAllRuns: true
@@ -147,12 +154,13 @@
 - EARNED_DANGER_REINTRODUCED
 - BORDERLINE_DANGER_REINTRODUCED
 - AUTOMATIC_DANGER_STILL_BLOCKED
+- VOLUME_STILL_HOT
 - SEVERE_BLOWOUT_STILL_HIGH
 - ROOT_CAUSE_AUDIT_CONSISTENT
 - DENSITY_REGRESSED
 - TEAM_BALANCE_PRESERVED
 - ROUTE_FAMILY_MIX_PRESERVED
-- POST_SCORE_RESET_PRESERVED
+- POST_SCORE_RESET_REGRESSED
 - GOALKEEPER_SECURE_RESET_PRESERVED
 - DOMINANCE_CHAIN_REGRESSED
 - SCORING_GUARDRAILS_CLEAN
