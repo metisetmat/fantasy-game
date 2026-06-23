@@ -337,6 +337,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchGoalkeeperSecureResetBreakSpecificity6LValidation = readIfExists(join(shareDirectory, "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md"));
   const fullMatchResetBreakBlowoutEconomy6M = readIfExists(join(shareDirectory, "fullmatch-reset-break-blowout-economy-6m.md"));
   const fullMatchResetBreakBlowoutEconomy6MValidation = readIfExists(join(shareDirectory, "validation.fullmatch-reset-break-blowout-economy-6m.md"));
+  const fullMatchEarnedDangerGate6N = readIfExists(join(shareDirectory, "fullmatch-earned-danger-gate-6n.md"));
+  const fullMatchEarnedDangerGate6NValidation = readIfExists(join(shareDirectory, "validation.fullmatch-earned-danger-gate-6n.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3014,6 +3016,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md",
     ...sprint6LForbiddenLeftovers,
   ];
+  const sprint6NExpectedFiles = sprint6MExpectedFiles.map((file) =>
+    file === "fullmatch-reset-break-blowout-economy-6m.md"
+      ? "fullmatch-earned-danger-gate-6n.md"
+      : file === "validation.fullmatch-reset-break-blowout-economy-6m.md"
+        ? "validation.fullmatch-earned-danger-gate-6n.md"
+        : file
+  );
+  const sprint6NForbiddenLeftovers = [
+    "fullmatch-reset-break-blowout-economy-6m.md",
+    "validation.fullmatch-reset-break-blowout-economy-6m.md",
+    ...sprint6MForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3831,6 +3845,53 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 6M source files", bundleSimulation.includes("src/simulation/fullMatch/resetBreakBlowoutEconomyWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchResetToDangerQualityAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchBlowoutEconomyAudit.ts") && bundleReports.includes("src/reports/fullMatchResetBreakBlowoutEconomyCalibration.ts") && bundleReports.includes("src/reports/fullMatchResetBreakBlowoutEconomyCalibration.test.ts"), "6M source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchResetBreakBlowoutEconomy6MValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
     check("recommendation visible", fullMatchResetBreakBlowoutEconomy6M.includes("## Recommendation") && fullMatchResetBreakBlowoutEconomy6M.includes("Sprint 6N"), "6M recommendation visible"),
+  ];
+  const sprint6NBlockingWarnings = [
+    "RESET_TO_IMMEDIATE_DANGER_STILL_TOO_HIGH",
+    "AUTOMATIC_DANGER_STILL_TOO_HIGH",
+    "EARNED_DANGER_STILL_TOO_LOW",
+    "DENSITY_CALIBRATION_REGRESSED",
+    "TEAM_BALANCE_REGRESSED",
+    "ROUTE_FAMILY_DIVERSITY_REGRESSED",
+  ] as const;
+  const sprint6NChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6NExpectedFiles.every((file) => requiredCopied(file)), sprint6NExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6NExpectedFiles.every((file) => manifest.includes(file)), sprint6NExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6N", activeConfig.sprintName === "Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6NForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6NForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6N oriented", readme.includes("# Sprint 6N Share Pack") && readme.includes("fullmatch-earned-danger-gate-6n.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6N report included", fullMatchEarnedDangerGate6N.includes("# Full-Match Earned Danger Gate 6N") && fullMatchEarnedDangerGate6N.includes("Earned Danger Gate Audit Summary") && fullMatchEarnedDangerGate6N.includes("Gate Decision Distribution"), "6N doc included"),
+    check("6N validation is current", (fullMatchEarnedDangerGate6NValidation.includes("Status: PASS") || fullMatchEarnedDangerGate6NValidation.includes("Status: PARTIAL")) && fullMatchEarnedDangerGate6NValidation.includes("earned danger gate audit exists") && fullMatchEarnedDangerGate6NValidation.includes("Explicit Exhaustive Test Command"), "6N validation current"),
+    check("batch match count visible", fullMatchEarnedDangerGate6N.includes("matchCount: 50") && fullMatchEarnedDangerGate6NValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6M metrics are visible", fullMatchEarnedDangerGate6N.includes("Baseline 6M Summary") && fullMatchEarnedDangerGate6N.includes("blowoutRate: 46%") && fullMatchEarnedDangerGate6N.includes("resetToImmediateDangerRate: 87.4%"), "6M baseline visible"),
+    check("earned danger gate metrics measured", fullMatchEarnedDangerGate6N.includes("resetToImmediateDangerRateAfter") && fullMatchEarnedDangerGate6N.includes("automaticDangerSuspicionRateAfter") && fullMatchEarnedDangerGate6N.includes("earnedDangerRateAfter") && fullMatchEarnedDangerGate6N.includes("dangerBlockedByGateRateAfter"), "gate metrics visible"),
+    check("gate decision distribution measured", fullMatchEarnedDangerGate6N.includes("Gate Decision Distribution") && fullMatchEarnedDangerGate6N.includes("DOWNGRADE_TO"), "gate decisions visible"),
+    check("gate reason distribution measured", fullMatchEarnedDangerGate6N.includes("Gate Reason Code Distribution") && fullMatchEarnedDangerGate6N.includes("| reason code | count |"), "gate reasons visible"),
+    check("reset danger reductions are visible or explained", fullMatchEarnedDangerGate6NValidation.includes("resetToImmediateDangerRate reduced or explained") && fullMatchEarnedDangerGate6NValidation.includes("automaticDangerSuspicionRate reduced or explained"), "reduction checks visible"),
+    check("density calibration preserved", fullMatchEarnedDangerGate6N.includes("densityCalibrationPreserved: true") && fullMatchEarnedDangerGate6NValidation.includes("density calibration preserved"), "density preserved"),
+    check("team opportunity balance preserved", fullMatchEarnedDangerGate6N.includes("teamOpportunityBalancePreserved: true") && fullMatchEarnedDangerGate6NValidation.includes("team opportunity balance preserved"), "team balance preserved"),
+    check("route family diversity preserved", fullMatchEarnedDangerGate6N.includes("routeFamilyMixPreserved: true") && fullMatchEarnedDangerGate6NValidation.includes("route family diversity preserved"), "route diversity preserved"),
+    check("TRY/DROP/CONVERSION remain available", fullMatchEarnedDangerGate6NValidation.includes("TRY route remains available") && fullMatchEarnedDangerGate6NValidation.includes("DROP route remains available") && fullMatchEarnedDangerGate6NValidation.includes("CONVERSION only after TRY"), "non-shot preserved"),
+    check("score from score_change all runs", fullMatchEarnedDangerGate6N.includes("scoreFromScoreChangeAllRuns: true") && fullMatchEarnedDangerGate6NValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchEarnedDangerGate6N.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchEarnedDangerGate6N.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score rewrite/deletion/forced score", fullMatchEarnedDangerGate6N.includes("scoreCapApplied: false") && fullMatchEarnedDangerGate6N.includes("postHocRewriteApplied: false") && fullMatchEarnedDangerGate6N.includes("scoringEventsDeleted: false") && fullMatchEarnedDangerGate6N.includes("forcedOpponentScoreApplied: false") && fullMatchEarnedDangerGate6N.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchEarnedDangerGate6NValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchEarnedDangerGate6N.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchEarnedDangerGate6N.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchEarnedDangerGate6N.includes("persistenceUsedForScoring: false") && fullMatchEarnedDangerGate6N.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchEarnedDangerGate6N.includes("unknownScoringFamilyCount: 0") && fullMatchEarnedDangerGate6NValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchEarnedDangerGate6N.includes("penaltyShotActiveLeakageCount: 0") && fullMatchEarnedDangerGate6NValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("no contradictory healthy warning", fullMatchEarnedDangerGate6NValidation.includes("no contradictory healthy warning") && !(fullMatchEarnedDangerGate6N.includes("FULL_MATCH_BATCH_ECONOMY_HEALTHY") && containsAny(fullMatchEarnedDangerGate6N, sprint6NBlockingWarnings)), "healthy warning guarded"),
+    check("coach product contains earned danger section", coachProductHtml.includes("Danger merite apres reset") && coachProductHtml.includes("Sprint 6N"), "product 6N visible"),
+    check("coach export contains earned danger section", coachExportHtml.includes("Danger merite apres reset") && coachExportHtml.includes("Sprint 6N"), "export 6N visible"),
+    check("coach export avoids forbidden 6N wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6N source files", bundleSimulation.includes("src/simulation/fullMatch/earnedDangerGate.ts") && bundleSimulation.includes("src/simulation/fullMatch/earnedDangerGateWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchEarnedDangerGateAudit.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateCalibration.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateCalibration.test.ts"), "6N source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEarnedDangerGate6NValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchEarnedDangerGate6N.includes("## Recommendation") && fullMatchEarnedDangerGate6N.includes("Sprint 6O"), "6N recommendation visible"),
   ];
   const sprint6JChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7758,6 +7819,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6N - Earned Danger Gate")
+      ? sprint6NChecks
     : activeConfig.sprintName.includes("Sprint 6M - Reset Break Blowout Economy")
       ? sprint6MChecks
     : activeConfig.sprintName.includes("Sprint 6L - Goalkeeper Secure & Reset Break Specificity")

@@ -5,6 +5,7 @@ import type { Rating } from "../../core/ratings";
 import type { ZoneId } from "../../core/zones";
 import { MatchPhase, PressureLevel, type ScoreState } from "../../models/match";
 import { scoringRegistryEntry } from "../../systems/scoring/scoringActionRegistry";
+import { computeEarnedDangerGate, type EarnedDangerResetSourceType } from "./earnedDangerGate";
 import type { FullMatchSegmentState, FullMatchTeamSegmentState } from "./fullMatchSegmentState";
 import { teamStateForId } from "./fullMatchSegmentState";
 
@@ -570,6 +571,32 @@ function hasGoalkeeperSecureSource(event: MatchEvent): boolean {
     );
 }
 
+function earnedDangerResetSourceType(event: MatchEvent | undefined): EarnedDangerResetSourceType {
+  if (event === undefined) {
+    return "SAFE_POSSESSION";
+  }
+  const tags = event.tags.map((tag) => tag.toLowerCase());
+  if (event.eventType === "goalkeeper_action" || tags.some((tag) => tag.includes("goalkeeper") || tag.includes("keeper") || tag.includes("gk"))) {
+    return "GOALKEEPER_SECURE";
+  }
+  if (tags.some((tag) => tag.includes("post_score") || tag.includes("restart"))) {
+    return "POST_SCORE_RESET";
+  }
+  if (event.eventType === "turnover" || tags.some((tag) => tag.includes("turnover"))) {
+    return "TURNOVER";
+  }
+  if (tags.some((tag) => tag.includes("recovery"))) {
+    return "DEFENSIVE_RECOVERY";
+  }
+  if (tags.some((tag) => tag.includes("out_of_play"))) {
+    return "OUT_OF_PLAY";
+  }
+  if (event.outcome === "neutral") {
+    return "NEUTRAL_PHASE";
+  }
+  return "SAFE_POSSESSION";
+}
+
 function densitySelectedCandidate(input: {
   readonly candidates: readonly OfficialRouteFamilyCandidate[];
   readonly state: FullMatchOfficialRouteFamilyMixState;
@@ -694,7 +721,8 @@ function densitySelectedCandidate(input: {
     lastTeamSelection.family !== "CONTINUATION" &&
     input.segmentIndex - lastTeamSelection.segmentIndex <= 1;
   const goalkeeperSecureResetWindow = goalkeeperOrDefensiveResetWindow &&
-    input.events.some(hasGoalkeeperSecureSource);
+    lastResetRouteEvent !== undefined &&
+    hasGoalkeeperSecureSource(lastResetRouteEvent);
   const sameTeamChainTooLong = recentTeamOpportunities >= 2;
   const sameFamilyRepeatTooHigh = recentSameFamily >= 1 && selected.family !== "CONVERSION_GOAL";
   const sameZoneRepeatTooHigh = recentSameZoneOpportunityCount({
@@ -727,6 +755,45 @@ function densitySelectedCandidate(input: {
     resetBreakBlowoutEconomyEnabled &&
     scoreDelta > 0 &&
     !earnedDangerAfterReset;
+  const earnedDangerGateEnabled = input.seed.includes("earned-danger-gate-6n");
+  const earnedDangerGateResult = earnedDangerGateEnabled && recentResetToDangerWindow
+    ? computeEarnedDangerGate({
+        candidate: selected,
+        teamState: input.teamState,
+        resetSourceType: earnedDangerResetSourceType(lastResetRouteEvent),
+        scoreDelta,
+        pressureFatigueLoad,
+        deterministicBreak,
+        recentResetToDangerWindow,
+        goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
+        postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
+      })
+    : undefined;
+
+  if (
+    earnedDangerGateResult !== undefined &&
+    !["ALLOW_DANGER", "ALLOW_BORDERLINE_DANGER"].includes(earnedDangerGateResult.gateDecision)
+  ) {
+    return {
+      ...continuation,
+      candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
+      reason: `Earned danger gate calibration 6N downgrades reset-to-danger to ${earnedDangerGateResult.gateDecision}: score ${earnedDangerGateResult.earnedDangerScore}, classification ${earnedDangerGateResult.earnedDangerClassification}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+    };
+  }
+
+  if (earnedDangerGateResult?.gateDecision === "ALLOW_BORDERLINE_DANGER") {
+    return {
+      ...selected,
+      reason: `${selected.reason} Earned danger gate calibration 6N allows borderline danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+    };
+  }
+
+  if (earnedDangerGateResult?.gateDecision === "ALLOW_DANGER") {
+    return {
+      ...selected,
+      reason: `${selected.reason} Earned danger gate calibration 6N confirms earned danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+    };
+  }
 
   if (automaticDangerAfterReset) {
     return {
@@ -900,6 +967,87 @@ function scoreAfter(scoreBefore: ScoreState, teamId: TeamId, homeTeamId: TeamId,
   return `${home} - ${away}`;
 }
 
+function earnedDangerGateTagsForCandidate(candidate: OfficialRouteFamilyCandidate): readonly string[] {
+  if (!candidate.reason.includes("Earned danger gate calibration 6N")) {
+    return [];
+  }
+
+  const downgradeApplied = candidate.family === "CONTINUATION";
+  const allowed = candidate.family !== "CONTINUATION";
+  return [
+    "earned_danger_gate_6n",
+    "earned_danger_gate_connected",
+    ...(downgradeApplied
+      ? [
+          "danger_downgraded_by_gate",
+          candidate.reason.includes("DOWNGRADE_TO_SAFE_POSSESSION")
+            ? "danger_downgraded_to_safe_possession"
+            : candidate.reason.includes("DOWNGRADE_TO_NEUTRAL")
+              ? "danger_downgraded_to_neutral"
+              : "reset_rebuild_required",
+          "automatic_reset_to_danger_blocked",
+          "neutral_phase_breaks_momentum",
+          "reset_breaks_dominance",
+        ]
+      : []),
+    ...(allowed
+      ? [
+          candidate.reason.includes("borderline")
+            ? "borderline_danger_allowed"
+            : "earned_danger_confirmed",
+        ]
+      : []),
+  ];
+}
+
+function annotateShotGateEvent(
+  events: readonly MatchEvent[],
+  candidate: OfficialRouteFamilyCandidate,
+): readonly MatchEvent[] {
+  if (
+    candidate.family !== "SHOT_GOAL" ||
+    !candidate.reason.includes("Earned danger gate calibration 6N")
+  ) {
+    return events;
+  }
+
+  const eventIndex = events.findIndex((event) =>
+    event.teamId === candidate.teamId &&
+    (
+      scoreChangePoints(event) > 0 ||
+      event.eventType === "scoring" ||
+      event.tacticalContext.moveType === "SHOT_GOAL" ||
+      event.tacticalContext.moveType === "SHOT" ||
+      event.zone === candidate.targetZone
+    )
+  );
+  if (eventIndex < 0) {
+    return events;
+  }
+
+  const event = events[eventIndex];
+  if (event === undefined) {
+    return events;
+  }
+  const gateTags = earnedDangerGateTagsForCandidate(candidate);
+  const nextTags = [
+    ...event.tags,
+    "official_route_family_SHOT_GOAL",
+    `official_route_family_outcome_${candidate.outcome}`,
+    ...gateTags,
+  ];
+  const annotatedEvent: MatchEvent = {
+    ...event,
+    tacticalContext: {
+      ...event.tacticalContext,
+      reason: `${event.tacticalContext.reason} ${candidate.reason}`.trim(),
+    },
+    tags: [...new Set(nextTags)],
+  };
+
+  return events.map((item, index) => index === eventIndex ? annotatedEvent : item);
+}
+
 function eventForResolvedCandidate(input: {
   readonly candidate: OfficialRouteFamilyCandidate;
   readonly matchInput: MatchInput;
@@ -929,13 +1077,19 @@ function eventForResolvedCandidate(input: {
     : input.matchInput.homeTeam;
   const familyLabel = routeFamilyCoachLabel(input.candidate.family);
   const dominanceChainDecayApplied = input.candidate.family === "CONTINUATION" &&
-    input.candidate.reason.includes("Dominance chain calibration");
+    input.candidate.reason.includes("Dominance chain calibration") &&
+    (
+      input.candidate.reason.includes("repeated same-team danger") ||
+      input.candidate.reason.includes("momentum decay") ||
+      input.candidate.reason.includes("repeated route family or zone")
+    );
   const postScoreResetApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Post-score reset calibration");
   const goalkeeperSecureResetApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Goalkeeper secure reset calibration");
   const resetBreakBlowoutEconomyApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Reset break blowout economy calibration");
+  const earnedDangerGateApplied = input.candidate.reason.includes("Earned danger gate calibration 6N");
   const scoreDescription = shouldScore
     ? `${team.name} marque ${points} points via ${familyLabel}.`
     : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;
@@ -1055,6 +1209,7 @@ function eventForResolvedCandidate(input: {
             "reset_breaks_dominance",
           ]
         : []),
+      ...(earnedDangerGateApplied ? earnedDangerGateTagsForCandidate(input.candidate) : []),
     ],
     narrativeWeight: shouldScore ? 82 : 48,
   };
@@ -1123,6 +1278,7 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
   const selectedCandidates: OfficialRouteFamilyCandidate[] = [];
   const allCandidates: OfficialRouteFamilyCandidate[] = [];
   const generatedEvents: MatchEvent[] = [];
+  let segmentEvents: readonly MatchEvent[] = input.events;
 
   for (const teamInput of teams) {
     const candidates = (["SHOT_GOAL", "TRY_TOUCHDOWN", "DROP_GOAL", "CONTINUATION"] as const).map((family) =>
@@ -1167,6 +1323,8 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
 
     if (event !== null) {
       generatedEvents.push(event);
+    } else {
+      segmentEvents = annotateShotGateEvent(segmentEvents, selected);
     }
 
     if (selected.family === "TRY_TOUCHDOWN" && selected.scoring) {
@@ -1214,7 +1372,7 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
   }
 
   return {
-    events: [...input.events, ...generatedEvents],
+    events: [...segmentEvents, ...generatedEvents],
     selectedCandidates,
     state: {
       candidates: [...input.state.candidates, ...allCandidates],

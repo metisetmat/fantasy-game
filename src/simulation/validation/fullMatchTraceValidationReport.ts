@@ -64,6 +64,10 @@ import {
   renderFullMatchResetBreakBlowoutEconomy6MDoc as renderResetBreakBlowoutEconomy6MDoc,
   renderFullMatchResetBreakBlowoutEconomy6MValidation as renderResetBreakBlowoutEconomy6MValidation,
 } from "../../reports/fullMatchResetBreakBlowoutEconomyCalibration";
+import {
+  renderFullMatchEarnedDangerGate6NDoc as renderEarnedDangerGate6NDoc,
+  renderFullMatchEarnedDangerGate6NValidation as renderEarnedDangerGate6NValidation,
+} from "../../reports/fullMatchEarnedDangerGateCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6369,6 +6373,14 @@ export function renderFullMatchResetBreakBlowoutEconomy6MDoc(_model: FullMatchTr
 
 export function renderFullMatchResetBreakBlowoutEconomy6MValidation(_model: FullMatchTraceValidationModel): string {
   return renderResetBreakBlowoutEconomy6MValidation();
+}
+
+export function renderFullMatchEarnedDangerGate6NDoc(_model: FullMatchTraceValidationModel): string {
+  return renderEarnedDangerGate6NDoc();
+}
+
+export function renderFullMatchEarnedDangerGate6NValidation(_model: FullMatchTraceValidationModel): string {
+  return renderEarnedDangerGate6NValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
