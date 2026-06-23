@@ -1172,6 +1172,66 @@
         et non une modification des valeurs de score.
       </p>
     </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Arret gardien securise et reset">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6L</p>
+        <h3>Arret gardien securise et reset</h3>
+        <p>
+          6L relie l'arret gardien securise, le reset post-score et la rupture de momentum a des evenements
+          officiels non scoring. Le score reste issu des evenements officiels, sans score force, sans plafond artificiel,
+          sans suppression d'evenements et sans reecriture apres coup.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gardien secure</h4>
+          <ul>
+            <li>Break count: 769 -> 801</li>
+            <li>Break dominance: 0% -> 7.2%</li>
+            <li>Possession securisee: 0% -> 100%</li>
+            <li>Reattaque contre: 100% -> 18.8%</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Reset post-score</h4>
+          <ul>
+            <li>Reattaque immediate: 57.8% -> 17.1%</li>
+            <li>Reset protege: 22.8% -> 74%</li>
+            <li>Premiere possession concedante: 23.7% -> 97.7%</li>
+            <li>Reset vers neutre: 100%</li>
+            <li>Reset vers possession securisee: 0.6%</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Dominance decay clarifie</h4>
+          <ul>
+            <li>Fenêtres eligibles: 350</li>
+            <li>Fenêtres avec decay: 350</li>
+            <li>Applications totales: 458</li>
+            <li>Couverture fenêtres: 100%</li>
+            <li>Applications / fenêtre eligible: 1.3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservation</h4>
+          <ul>
+            <li>Densite preservee: oui</li>
+            <li>Equilibre equipe preserve: oui</li>
+            <li>Chaines 6J/6K preservees: oui</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Garde-fous score propres: oui</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_GOALKEEPER_SECURE_RESET_BREAK_MONITORING. La lecture reste une preuve batch 50 matchs: elle surveille les resets et
+        les possessions securisees sans promettre un ecart artificiellement serre.
+      </p>
+    </section>
 </main>
 </body>
 </html>

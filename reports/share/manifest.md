@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-23T08:18:39.522Z
-Task/sprint: Sprint 6K - Break Event And Post-Score Reset Calibration
+Generated: 2026-06-23T11:12:59.738Z
+Task/sprint: Sprint 6L - Goalkeeper Secure & Reset Break Specificity
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-break-event-post-score-reset-calibration-6k.md
-- validation.fullmatch-break-event-post-score-reset-calibration-6k.md
+- fullmatch-goalkeeper-secure-reset-break-specificity-6l.md
+- validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md
 - README.md
 
 ## Bundle Files

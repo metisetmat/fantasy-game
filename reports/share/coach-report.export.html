@@ -3033,6 +3033,66 @@
       </p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Arret gardien securise et reset">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6L</p>
+        <h3>Arret gardien securise et reset</h3>
+        <p>
+          6L relie l'arret gardien securise, le reset post-score et la rupture de momentum a des evenements
+          officiels non scoring. Le score reste issu des evenements officiels, sans score force, sans plafond artificiel,
+          sans suppression d'evenements et sans reecriture apres coup.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gardien secure</h4>
+          <ul>
+            <li>Break count: 769 -> 801</li>
+            <li>Break dominance: 0% -> 7.2%</li>
+            <li>Possession securisee: 0% -> 100%</li>
+            <li>Reattaque contre: 100% -> 18.8%</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Reset post-score</h4>
+          <ul>
+            <li>Reattaque immediate: 57.8% -> 17.1%</li>
+            <li>Reset protege: 22.8% -> 74%</li>
+            <li>Premiere possession concedante: 23.7% -> 97.7%</li>
+            <li>Reset vers neutre: 100%</li>
+            <li>Reset vers possession securisee: 0.6%</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Dominance decay clarifie</h4>
+          <ul>
+            <li>Fenêtres eligibles: 350</li>
+            <li>Fenêtres avec decay: 350</li>
+            <li>Applications totales: 458</li>
+            <li>Couverture fenêtres: 100%</li>
+            <li>Applications / fenêtre eligible: 1.3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservation</h4>
+          <ul>
+            <li>Densite preservee: oui</li>
+            <li>Equilibre equipe preserve: oui</li>
+            <li>Chaines 6J/6K preservees: oui</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Garde-fous score propres: oui</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_GOALKEEPER_SECURE_RESET_BREAK_MONITORING. La lecture reste une preuve batch 50 matchs: elle surveille les resets et
+        les possessions securisees sans promettre un ecart artificiellement serre.
+      </p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -4179,8 +4239,8 @@
         <li>selected route mix after: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
         <li>route success rates before: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
         <li>route success rates after: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>goalkeeper impact before: 79</li>
-        <li>goalkeeper impact after: 94</li>
+        <li>goalkeeper impact before: 81</li>
+        <li>goalkeeper impact after: 96</li>
         <li>fatigue impact before: 71</li>
         <li>fatigue impact after: 47</li>
         <li>segment amplification risk: MEDIUM</li>
@@ -4356,6 +4416,27 @@
         <li>team balance preserved: true</li>
         <li>route family diversity preserved: true</li>
         <li>warnings: POST_SCORE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_RESET_PROTECTED, DEFENSIVE_RECOVERY_BREAKS_IMPROVED, GOALKEEPER_SECURE_BREAKS_MISSING, DOMINANCE_DECAY_APPLIED, DENSITY_CALIBRATION_PRESERVED, TEAM_OPPORTUNITY_BALANCE_PRESERVED, ROUTE_FAMILY_DIVERSITY_PRESERVED, BLOWOUT_RATE_STILL_TOO_HIGH, FULL_MATCH_BATCH_ECONOMY_PARTIAL</li>
+      </ul>
+    </article>
+
+    <article class="premium-appendix-card">
+      <h3>Gardien secure et reset 6L</h3>
+      <ul>
+        <li>status: PARTIAL</li>
+        <li>scope: FULL_MATCH_GOALKEEPER_SECURE_RESET_BREAK_SPECIFICITY_CALIBRATION</li>
+        <li>version: GOALKEEPER_SECURE_RESET_BREAK_6L</li>
+        <li>match count: 50</li>
+        <li>goalkeeper secure break rate: 0% -> 7.2%</li>
+        <li>goalkeeper safe possession rate: 0% -> 100%</li>
+        <li>post-score immediate reattack: 57.8% -> 17.1%</li>
+        <li>post-score protected reset: 22.8% -> 74%</li>
+        <li>conceding first possession: 23.7% -> 97.7%</li>
+        <li>dominance decay applications per eligible window: 1.3</li>
+        <li>dominance decay window coverage: 100%</li>
+        <li>density preserved: true</li>
+        <li>team balance preserved: true</li>
+        <li>route family mix preserved: true</li>
+        <li>warnings: GOALKEEPER_SECURE_RESET_BREAK_CALIBRATED, DOMINANCE_DECAY_METRICS_CLARIFIED, GOALKEEPER_SECURE_BREAK_EFFECTIVE, GOALKEEPER_SECURE_BREAK_CONNECTED, GOALKEEPER_SECURE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_RESET_PROTECTED_IMPROVED, CONCEDING_TEAM_FIRST_POSSESSION_IMPROVED, DEFENSIVE_RECOVERY_BREAKS_DOMINANCE_IMPROVED, DOMINANCE_CHAIN_GAINS_PRESERVED, TEAM_OPPORTUNITY_BALANCE_PRESERVED, DENSITY_CALIBRATION_PRESERVED, ROUTE_FAMILY_DIVERSITY_PRESERVED, BLOWOUT_RATE_REDUCED, FULL_MATCH_BATCH_ECONOMY_HEALTHY</li>
       </ul>
     </article>
     <details class="appendix">
