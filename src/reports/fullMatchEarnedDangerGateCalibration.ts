@@ -214,7 +214,7 @@ export interface FullMatchEarnedDangerGateCalibrationModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "earned-danger-gate-6n-v6";
+const CACHE_VERSION = "earned-danger-gate-6n-v7";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-earned-danger-gate-6n.json");
 
 const BASELINE_6M = {
