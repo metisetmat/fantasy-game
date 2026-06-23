@@ -1354,6 +1354,67 @@
         Le gate intervient avant danger, scoring opportunity et score_change; les diagnostics ne remplacent jamais le score officiel.
       </p>
     </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Gate selectif du danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6O</p>
+        <h3>Gate selectif du danger</h3>
+        <p>
+          6O transforme le gate 6N en filtre selectif: le danger revient uniquement quand il est gagne par support,
+          espace, edge tactique, attributs, fatigue, pression ou erreur adverse. Les scores restent issus des
+          score_change officiels, sans cap, sans rewrite et sans point ajoute hors modele.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger reintroduit</h4>
+          <ul>
+            <li>Danger merite: 0% -> 3.6%</li>
+            <li>Danger borderline: 0% -> 1.9%</li>
+            <li>Danger automatique suspecte: 0% -> 0%</li>
+            <li>Earned autorises: 15</li>
+            <li>Borderline autorises: 8</li>
+            <li>Automatiques bloques: 390</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Filtre et garde-fous</h4>
+          <ul>
+            <li>Suspicion trop strict: 0</li>
+            <li>Suspicion trop permissif: 0</li>
+            <li>Root cause contradiction: 0</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Score officiel score_change: oui</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du batch</h4>
+          <ul>
+            <li>Total points moyen: 30.6 -> 30.3</li>
+            <li>Evenements scoring/match: 9.7 -> 9.7</li>
+            <li>Opportunites/match: 20.5 -> 21.3</li>
+            <li>Severe blowout: 14% -> 22%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Densite: a surveiller</li>
+            <li>Equilibre equipes: preserve</li>
+            <li>Reset gardien secure: preserve</li>
+            <li>Reset post-score: preserve</li>
+            <li>Dominance chain: a surveiller</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: REVIEW_VOLUME_WITHOUT_SCORE_REWRITE. Le statut PARTIAL reste acceptable seulement si les garde-fous scoring
+        sont propres et si la prochaine lecture surveille volume, blowouts et mix de routes.
+      </p>
+    </section>
 </main>
 </body>
 </html>

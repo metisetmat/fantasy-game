@@ -755,8 +755,20 @@ function densitySelectedCandidate(input: {
     resetBreakBlowoutEconomyEnabled &&
     scoreDelta > 0 &&
     !earnedDangerAfterReset;
-  const earnedDangerGateEnabled = input.seed.includes("earned-danger-gate-6n");
-  const earnedDangerGateResult = earnedDangerGateEnabled && recentResetToDangerWindow
+  const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o");
+  const earnedDangerGateEnabled = input.seed.includes("earned-danger-gate-6n") || earnedDangerGateTuning6OEnabled;
+  const earnedDangerGateWindow = recentResetToDangerWindow ||
+    (
+      earnedDangerGateTuning6OEnabled &&
+      (
+        postScoreSameTeamReattackWindow ||
+        postScoreConcedingRestartWindow ||
+        goalkeeperOrDefensiveResetWindow ||
+        possessionResetWindow ||
+        (input.segmentIndex > 0 && selected.family !== "CONVERSION_GOAL")
+      )
+    );
+  const earnedDangerGateResult = earnedDangerGateEnabled && earnedDangerGateWindow
     ? computeEarnedDangerGate({
         candidate: selected,
         teamState: input.teamState,
@@ -764,11 +776,15 @@ function densitySelectedCandidate(input: {
         scoreDelta,
         pressureFatigueLoad,
         deterministicBreak,
-        recentResetToDangerWindow,
+        recentResetToDangerWindow: earnedDangerGateWindow,
         goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
+        calibrationVersion: earnedDangerGateTuning6OEnabled ? "EARNED_DANGER_GATE_TUNING_6O" : "EARNED_DANGER_GATE_6N",
       })
     : undefined;
+  const earnedDangerGateLabel = earnedDangerGateTuning6OEnabled
+    ? "Earned danger gate calibration 6N tuning 6O"
+    : "Earned danger gate calibration 6N";
 
   if (
     earnedDangerGateResult !== undefined &&
@@ -777,21 +793,21 @@ function densitySelectedCandidate(input: {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
-      reason: `Earned danger gate calibration 6N downgrades reset-to-danger to ${earnedDangerGateResult.gateDecision}: score ${earnedDangerGateResult.earnedDangerScore}, classification ${earnedDangerGateResult.earnedDangerClassification}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+      reason: `${earnedDangerGateLabel} downgrades reset-to-danger from ${selected.family} to ${earnedDangerGateResult.gateDecision}: score ${earnedDangerGateResult.earnedDangerScore}, classification ${earnedDangerGateResult.earnedDangerClassification}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
     };
   }
 
   if (earnedDangerGateResult?.gateDecision === "ALLOW_BORDERLINE_DANGER") {
     return {
       ...selected,
-      reason: `${selected.reason} Earned danger gate calibration 6N allows borderline danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+      reason: `${selected.reason} ${earnedDangerGateLabel} allows borderline danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
     };
   }
 
   if (earnedDangerGateResult?.gateDecision === "ALLOW_DANGER") {
     return {
       ...selected,
-      reason: `${selected.reason} Earned danger gate calibration 6N confirms earned danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+      reason: `${selected.reason} ${earnedDangerGateLabel} confirms earned danger: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
     };
   }
 

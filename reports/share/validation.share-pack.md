@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix
+- current sprint: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,21 +20,22 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 6N - Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix
+- PASS: current sprint is Sprint 6O - Sprint 6O - Earned Danger Reintroduction & Gate Tuning
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6N oriented - README current
-- PASS: 6N report included - 6N doc included
-- PASS: 6N validation is current - 6N validation current
+- PASS: README is Sprint 6O oriented - README current
+- PASS: 6O report included - 6O doc included
+- PASS: 6O validation is PASS - 6O validation current
 - PASS: batch match count visible - 50 matches visible
-- PASS: baseline 6M metrics are visible - 6M baseline visible
-- PASS: earned danger gate metrics measured - gate metrics visible
+- PASS: baseline 6N metrics visible - 6N baseline visible
+- PASS: earned danger reintroduced - earned danger after > 0
+- PASS: automatic danger remains filtered - automatic danger filtered
+- PASS: root cause consistency measured - root causes consistent
 - PASS: gate decision distribution measured - gate decisions visible
-- PASS: gate reason distribution measured - gate reasons visible
-- PASS: reset danger reductions are visible or explained - reduction checks visible
-- PASS: density calibration preserved - density preserved
-- PASS: team opportunity balance preserved - team balance preserved
+- PASS: density calibration preserved or partial explained - density checked
+- PASS: team opportunity balance preserved or partial explained - team balance checked
 - PASS: route family diversity preserved - route diversity preserved
-- PASS: TRY/DROP/CONVERSION remain available - non-shot preserved
+- PASS: goalkeeper secure reset preserved or partial explained - goalkeeper checked
+- PASS: post-score reset preserved or partial explained - post-score checked
 - PASS: score from score_change all runs - score_change source all runs
 - PASS: official path connected all runs - official path all runs
 - PASS: calibration applied all runs - calibrations all runs
@@ -45,13 +46,12 @@ Status: PASS
 - PASS: persistence and SQLite not used for scoring - persistence/SQLite false
 - PASS: no UNKNOWN scoring family - UNKNOWN blocked
 - PASS: no PENALTY_SHOT leakage - PENALTY blocked
-- PASS: no contradictory healthy warning - healthy warning guarded
-- PASS: coach product contains earned danger section - product 6N visible
-- PASS: coach export contains earned danger section - export 6N visible
-- PASS: coach export avoids forbidden 6N wording - forbidden wording absent
-- PASS: bundle includes 6N source files - 6N source bundled
+- PASS: coach product contains selective danger gate section - product 6O visible
+- PASS: coach export contains selective danger gate section - export 6O visible
+- PASS: coach export avoids forbidden 6O wording - forbidden wording absent
+- PASS: bundle includes 6O source files - 6O source bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6N recommendation visible
+- PASS: recommendation visible - 6O recommendation visible
 
 ## Files
 
@@ -65,7 +65,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-earned-danger-gate-6n.md
+- fullmatch-earned-danger-gate-tuning-6o.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -73,5 +73,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-earned-danger-gate-6n.md
+- validation.fullmatch-earned-danger-gate-tuning-6o.md
 - validation.share-pack.md

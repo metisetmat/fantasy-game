@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6O - Earned Danger Reintroduction & Gate Tuning. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
