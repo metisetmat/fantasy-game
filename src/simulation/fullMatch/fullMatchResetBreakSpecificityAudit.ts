@@ -117,9 +117,10 @@ export function auditFullMatchResetBreakSpecificity(report: MatchReport): FullMa
     const concedingTeamId = opposingTeamId(report, scoringTeamId);
     const firstReset = later.find(isReset);
     const firstOpportunity = later.find(isOpportunity);
-    const firstConcedingEvent = later.find((event) => event.teamId === concedingTeamId);
-    const firstConcedingOpportunity = later.find((event) => event.teamId === concedingTeamId && isOpportunity(event));
-    const firstConcedingTurnover = later.find((event) => event.teamId === concedingTeamId && isTurnover(event));
+    const firstTeamEvent = later.find((event) =>
+      event.teamId === scoringTeamId || event.teamId === concedingTeamId
+    );
+    const concedingHasFirstPossession = firstTeamEvent?.teamId === concedingTeamId;
     const protectedReset = firstReset !== undefined &&
       (
         firstOpportunity === undefined ||
@@ -152,20 +153,18 @@ export function auditFullMatchResetBreakSpecificity(report: MatchReport): FullMa
       }
     }
 
-    if (firstConcedingEvent !== undefined) {
+    if (concedingHasFirstPossession && firstTeamEvent !== undefined) {
       concedingFirst += 1;
-      if (firstConcedingEvent.outcome === "neutral" || isReset(firstConcedingEvent)) {
+      if (firstTeamEvent.outcome === "neutral" || isReset(firstTeamEvent)) {
         concedingNeutral += 1;
       }
-    }
-    if (firstConcedingOpportunity !== undefined) {
-      concedingDanger += 1;
-    }
-    if (firstConcedingTurnover !== undefined) {
-      concedingTurnover += 1;
-    }
-    if (firstConcedingEvent !== undefined && firstConcedingEvent.teamId === concedingTeamId && isTurnover(firstConcedingEvent)) {
-      concedingLostImmediately += 1;
+      if (isOpportunity(firstTeamEvent)) {
+        concedingDanger += 1;
+      }
+      if (isTurnover(firstTeamEvent)) {
+        concedingTurnover += 1;
+        concedingLostImmediately += 1;
+      }
     }
     if (firstOpportunity?.teamId === scoringTeamId && !protectedReset) {
       scoringReattack += 1;

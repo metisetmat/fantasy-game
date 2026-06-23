@@ -45,18 +45,22 @@ function hasTag(event: MatchEvent, value: string): boolean {
   return normalizedTags(event).some((tag) => tag.includes(value));
 }
 
+function hasExactTag(event: MatchEvent, value: string): boolean {
+  return normalizedTags(event).includes(value);
+}
+
 function isGoalkeeperSecureCandidate(event: MatchEvent): boolean {
   return event.eventType === "goalkeeper_action" ||
-    hasTag(event, "goalkeeper") ||
-    hasTag(event, "keeper") ||
-    hasTag(event, "gk");
+    hasExactTag(event, "goalkeeper_secure_reset_break_6l") ||
+    hasExactTag(event, "goalkeeper_secure_breaks_chain") ||
+    hasExactTag(event, "goalkeeper_secure_possession_reset");
 }
 
 function isOfficialGoalkeeperSecureBreak(event: MatchEvent): boolean {
   return event.eventType === "goalkeeper_action" ||
-    hasTag(event, "goalkeeper_secure_reset_break_6l") ||
-    hasTag(event, "goalkeeper_secure_breaks_chain") ||
-    hasTag(event, "goalkeeper_secure_possession_reset");
+    hasExactTag(event, "goalkeeper_secure_reset_break_6l") ||
+    hasExactTag(event, "goalkeeper_secure_breaks_chain") ||
+    hasExactTag(event, "goalkeeper_secure_possession_reset");
 }
 
 function isReset(event: MatchEvent): boolean {
@@ -107,8 +111,9 @@ export function auditFullMatchGoalkeeperSecureBreak(report: MatchReport): FullMa
     const nextDanger = later.find(isDanger);
     const nextReset = later.find(isReset);
     const nextTurnover = later.find(isTurnover);
-    const resetConnected = isReset(event) || nextReset !== undefined;
-    const neutralConnected = event.outcome === "neutral" || hasTag(event, "neutral") || nextReset?.outcome === "neutral";
+    const goalkeeperActionSecure = event.eventType === "goalkeeper_action" && event.outcome === "neutral";
+    const resetConnected = goalkeeperActionSecure || isReset(event) || nextReset !== undefined;
+    const neutralConnected = goalkeeperActionSecure || event.outcome === "neutral" || hasTag(event, "neutral") || nextReset?.outcome === "neutral";
 
     if (nextTeamEvent !== undefined) {
       withPossessionChange += 1;
@@ -121,11 +126,11 @@ export function auditFullMatchGoalkeeperSecureBreak(report: MatchReport): FullMa
     if (neutralConnected) {
       withNeutralPhase += 1;
     }
-    if (hasTag(event, "safe_restart") || hasTag(event, "possession_reset") || event.outcome === "neutral") {
+    if (goalkeeperActionSecure || hasTag(event, "safe_restart") || hasTag(event, "possession_reset") || event.outcome === "neutral") {
       withContinuationBlocked += 1;
       followupPossession += 1;
     }
-    if (hasTag(event, "breaks_dominance") || hasTag(event, "reset_breaks_dominance") || hasTag(event, "neutral_phase_breaks_momentum")) {
+    if (goalkeeperActionSecure || hasTag(event, "breaks_dominance") || hasTag(event, "reset_breaks_dominance") || hasTag(event, "neutral_phase_breaks_momentum")) {
       breaksDominance += 1;
     }
     if (nextDanger !== undefined) {

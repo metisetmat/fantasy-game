@@ -130,6 +130,65 @@ assertTest(resetAudit.protectedResetCount === 1, "6L reset must protect the post
 assertTest(resetAudit.concedingTeamFirstPossessionCount === 1, "6L reset must give the conceding team first possession in fixture.");
 assertTest(resetAudit.scoringTeamImmediateReattackCount === 0, "6L reset must block immediate scoring-team reattack in fixture.");
 
+const genericPostScoreRestartReport = reportWithTimeline([
+  event({
+    eventId: "score-generic-1",
+    tick: 1,
+    teamId: "CONTROL",
+    scoreValue: 3,
+    tags: ["official_route_family_SHOT_GOAL"],
+  }),
+  event({
+    eventId: "generic-restart-1",
+    tick: 2,
+    teamId: "BLITZ",
+    tags: [
+      "official_route_family_CONTINUATION",
+      "post_score_conceding_restart",
+      "safe_restart",
+      "neutral_phase_breaks_momentum",
+    ],
+  }),
+]);
+const genericGoalkeeperAudit = auditFullMatchGoalkeeperSecureBreak(genericPostScoreRestartReport);
+assertTest(
+  genericGoalkeeperAudit.goalkeeperSecureOfficialEventCount === 0,
+  "generic post-score restarts must not be counted as goalkeeper-secure resets.",
+);
+
+const delayedConcedingPossessionReport = reportWithTimeline([
+  event({
+    eventId: "score-delayed-1",
+    tick: 1,
+    teamId: "CONTROL",
+    scoreValue: 3,
+    tags: ["official_route_family_SHOT_GOAL"],
+  }),
+  event({
+    eventId: "control-reattack-1",
+    tick: 2,
+    teamId: "CONTROL",
+    tags: ["official_route_family_TRY_TOUCHDOWN"],
+    eventType: "scoring",
+    outcome: "success",
+  }),
+  event({
+    eventId: "blitz-later-1",
+    tick: 3,
+    teamId: "BLITZ",
+    tags: ["official_route_family_CONTINUATION"],
+  }),
+]);
+const delayedResetAudit = auditFullMatchResetBreakSpecificity(delayedConcedingPossessionReport);
+assertTest(
+  delayedResetAudit.concedingTeamFirstPossessionCount === 0,
+  "conceding-team first possession must only count the actual first post-score team event.",
+);
+assertTest(
+  delayedResetAudit.scoringTeamImmediateReattackCount === 1,
+  "scoring-team immediate reattack must be detected when it precedes conceding-team possession.",
+);
+
 const model = buildFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel();
 const doc = renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc(model);
 const validation = renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation(model);

@@ -28,9 +28,9 @@ Sprint 6L connects secure goalkeeper/restart moments to official non-scoring res
 - scoringOpportunitiesPerMatchAfter: 15.5
 - postScoreImmediateReattackRateAfter: 17.1%
 - postScoreResetProtectedRateAfter: 74%
-- concedingTeamFirstPossessionRateAfter: 97.7%
-- goalkeeperSecureBreakCountAfter: 801
-- goalkeeperSecureBreaksDominanceRateAfter: 7.2%
+- concedingTeamFirstPossessionRateAfter: 72.3%
+- goalkeeperSecureBreakCountAfter: 385
+- goalkeeperSecureBreaksDominanceRateAfter: 100%
 - goalkeeperSecureToSafePossessionRateAfter: 100%
 - blowoutRateAfter: 48%
 
@@ -45,24 +45,24 @@ Sprint 6L connects secure goalkeeper/restart moments to official non-scoring res
 | severe blowout rate | 4% | 6% |
 | post-score immediate reattack rate | 57.8% | 17.1% |
 | post-score reset protected rate | 22.8% | 74% |
-| conceding team first possession rate | 23.7% | 97.7% |
-| goalkeeper secure breaks dominance rate | 0% | 7.2% |
+| conceding team first possession rate | 23.7% | 72.3% |
+| goalkeeper secure breaks dominance rate | 0% | 100% |
 
 ## Goalkeeper Secure Audit Summary
-- goalkeeperSecureEventCount: 801
-- goalkeeperSecureCandidateCount: 801
-- goalkeeperSecureOfficialEventCount: 415
-- goalkeeperSecureDiagnosticOnlyCount: 386
-- goalkeeperSecureWithPossessionChangeCount: 412
-- goalkeeperSecureWithResetCount: 415
-- goalkeeperSecureWithNeutralPhaseCount: 415
-- goalkeeperSecureWithContinuationBlockedCount: 415
-- goalkeeperSecureBreaksDominanceCount: 30
-- goalkeeperSecureBreaksDominanceRate: 7.2%
-- goalkeeperSecureImmediateReattackAgainstRate: 18.8%
+- goalkeeperSecureEventCount: 385
+- goalkeeperSecureCandidateCount: 385
+- goalkeeperSecureOfficialEventCount: 385
+- goalkeeperSecureDiagnosticOnlyCount: 0
+- goalkeeperSecureWithPossessionChangeCount: 385
+- goalkeeperSecureWithResetCount: 385
+- goalkeeperSecureWithNeutralPhaseCount: 385
+- goalkeeperSecureWithContinuationBlockedCount: 385
+- goalkeeperSecureBreaksDominanceCount: 385
+- goalkeeperSecureBreaksDominanceRate: 100%
+- goalkeeperSecureImmediateReattackAgainstRate: 19.2%
 - goalkeeperSecureToRestartRate: 100%
 - goalkeeperSecureToSafePossessionRate: 100%
-- goalkeeperSecureToDangerAgainstRate: 18.8%
+- goalkeeperSecureToDangerAgainstRate: 19.2%
 
 ## Reset Break Specificity Audit Summary
 - postScoreWindowsChecked: 350
@@ -71,14 +71,14 @@ Sprint 6L connects secure goalkeeper/restart moments to official non-scoring res
 - protectedResetRate: 74%
 - unprotectedResetCount: 83
 - missingResetCount: 8
-- concedingTeamFirstPossessionCount: 342
-- concedingTeamFirstPossessionRate: 97.7%
+- concedingTeamFirstPossessionCount: 253
+- concedingTeamFirstPossessionRate: 72.3%
 - scoringTeamImmediateReattackCount: 60
 - scoringTeamImmediateReattackRate: 17.1%
-- resetBreaksDominanceCount: 52
-- resetBreaksDominanceRate: 15.2%
+- resetBreaksDominanceCount: 50
+- resetBreaksDominanceRate: 14.6%
 - resetToNeutralRate: 100%
-- resetToSafePossessionRate: 0.6%
+- resetToSafePossessionRate: 0%
 - resetToImmediateDangerRate: 60.5%
 
 ## Dominance Decay Clarified Metrics

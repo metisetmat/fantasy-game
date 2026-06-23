@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-23T10:53:07.924Z
+Generated timestamp: 2026-06-23T11:12:59.738Z
 Task/sprint name: Sprint 6L - Goalkeeper Secure & Reset Break Specificity
 Final file count: 20
 
@@ -826,15 +826,8 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/fullMatchDominanceChainAudit.ts
+ M src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.test.ts
+ M src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.ts
+ M src/simulation/fullMatch/fullMatchGoalkeeperSecureBreakAudit.ts
  M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.test.ts
-?? src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.ts
-?? src/simulation/fullMatch/fullMatchGoalkeeperSecureBreakAudit.ts
-?? src/simulation/fullMatch/fullMatchResetBreakSpecificityAudit.ts
-?? src/simulation/fullMatch/goalkeeperSecureResetBreakWarnings.ts
+ M src/simulation/fullMatch/fullMatchResetBreakSpecificityAudit.ts

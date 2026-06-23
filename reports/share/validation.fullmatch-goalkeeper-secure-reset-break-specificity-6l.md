@@ -7,17 +7,17 @@ Status: PASS
 - PASS: batch 50 matches after calibration exists (matchCount: 50)
 - PASS: goalkeeper secure audit exists (audits: 50)
 - PASS: reset break specificity audit exists (audits: 50)
-- PASS: goalkeeperSecureBreakCount measured (after: 801)
-- PASS: goalkeeperSecureBreaksDominanceRate measured (7.2%)
-- PASS: goalkeeperSecureBreaksDominanceRate improves or zero is justified (0% -> 7.2%)
+- PASS: goalkeeperSecureBreakCount measured (after: 385)
+- PASS: goalkeeperSecureBreaksDominanceRate measured (100%)
+- PASS: goalkeeperSecureBreaksDominanceRate improves or zero is justified (0% -> 100%)
 - PASS: goalkeeperSecureToSafePossessionRate measured (100%)
-- PASS: goalkeeperSecureImmediateReattackAgainstRate measured (18.8%)
+- PASS: goalkeeperSecureImmediateReattackAgainstRate measured (19.2%)
 - PASS: postScoreImmediateReattackRate measured (17.1%)
 - PASS: postScoreImmediateReattackRate decreases versus 6K or failure justified (57.8% -> 17.1%)
 - PASS: postScoreResetProtectedRate measured (74%)
 - PASS: postScoreResetProtectedRate increases versus 6K or failure justified (22.8% -> 74%)
-- PASS: concedingTeamFirstPossessionRate measured (97.7%)
-- PASS: concedingTeamFirstPossessionRate increases versus 6K or failure justified (23.7% -> 97.7%)
+- PASS: concedingTeamFirstPossessionRate measured (72.3%)
+- PASS: concedingTeamFirstPossessionRate increases versus 6K or failure justified (23.7% -> 72.3%)
 - PASS: dominance decay metrics clarified (ratio and coverage split)
 - PASS: no misleading >100% rate wording remains (uses dominanceDecayApplicationRatio plus bounded dominanceDecayWindowCoverage)
 - PASS: dominance chain gains from 6J/6K preserved (max chain: 2)
@@ -46,11 +46,11 @@ Status: PASS
 ## Counts
 - matchCount: 50
 - goalkeeperSecureBreakCountBefore: 769
-- goalkeeperSecureBreakCountAfter: 801
-- goalkeeperSecureBreaksDominanceRateAfter: 7.2%
+- goalkeeperSecureBreakCountAfter: 385
+- goalkeeperSecureBreaksDominanceRateAfter: 100%
 - postScoreImmediateReattackRateAfter: 17.1%
 - postScoreResetProtectedRateAfter: 74%
-- concedingTeamFirstPossessionRateAfter: 97.7%
+- concedingTeamFirstPossessionRateAfter: 72.3%
 - dominanceDecayWindowCoverage: 100%
 - dominanceDecayApplicationsPerEligibleWindow: 1.3
 - validation failure count: 0

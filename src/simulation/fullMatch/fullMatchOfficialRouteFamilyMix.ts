@@ -539,6 +539,16 @@ function previousScoringRouteEvent(input: {
     .reverse()[0];
 }
 
+function hasGoalkeeperSecureSource(event: MatchEvent): boolean {
+  const tags = event.tags.map((tag) => tag.toLowerCase());
+  return event.eventType === "goalkeeper_action" ||
+    tags.some((tag) =>
+      tag.includes("goalkeeper") ||
+      tag.includes("keeper") ||
+      tag.includes("gk")
+    );
+}
+
 function densitySelectedCandidate(input: {
   readonly candidates: readonly OfficialRouteFamilyCandidate[];
   readonly state: FullMatchOfficialRouteFamilyMixState;
@@ -546,6 +556,7 @@ function densitySelectedCandidate(input: {
   readonly segmentIndex: number;
   readonly teamState: FullMatchTeamSegmentState;
   readonly seed: string;
+  readonly events: readonly MatchEvent[];
   readonly scoreBefore: ScoreState;
   readonly homeTeamId: TeamId;
 }): OfficialRouteFamilyCandidate {
@@ -624,7 +635,7 @@ function densitySelectedCandidate(input: {
       : postScoreConcedingRestartWindow
         ? {
             ...selected,
-            reason: "Goalkeeper secure reset calibration gives the conceding team a safe restart possession after the score: the restart breaks momentum without forcing a reply score.",
+            reason: "Post-score conceding restart calibration gives the conceding team a safe restart possession after the score: the restart breaks momentum without forcing a reply score.",
           }
         : selected;
   }
@@ -657,6 +668,8 @@ function densitySelectedCandidate(input: {
     !lastTeamSelection.scoring &&
     lastTeamSelection.family !== "CONTINUATION" &&
     input.segmentIndex - lastTeamSelection.segmentIndex <= 1;
+  const goalkeeperSecureResetWindow = goalkeeperOrDefensiveResetWindow &&
+    input.events.some(hasGoalkeeperSecureSource);
   const sameTeamChainTooLong = recentTeamOpportunities >= 2;
   const sameFamilyRepeatTooHigh = recentSameFamily >= 1 && selected.family !== "CONVERSION_GOAL";
   const sameZoneRepeatTooHigh = recentSameZoneOpportunityCount({
@@ -692,8 +705,10 @@ function densitySelectedCandidate(input: {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
-      reason: goalkeeperOrDefensiveResetWindow
+      reason: goalkeeperSecureResetWindow
         ? "Goalkeeper secure reset calibration converts the secured ball into a possession reset: the goalkeeper team restarts safely and the previous danger chain is broken."
+        : goalkeeperOrDefensiveResetWindow
+          ? "Defensive secure reset calibration converts the stopped route into a possession reset: the defensive team restarts safely and the previous danger chain is broken."
         : dominanceChainDecay || dominantTeamNeedsReset
         ? "Dominance chain calibration selects a continuation/reset beat: repeated same-team danger now creates fatigue, defensive adaptation, and momentum decay without forcing opponent scores."
         : routeRepeatDecay
@@ -1075,6 +1090,7 @@ export function resolveFullMatchOfficialRouteFamilyMixForSegment(input: {
       segmentIndex: input.segmentIndex,
       teamState: teamStateForId(input.segmentState, teamInput.team.teamId),
       seed: input.matchInput.seed,
+      events: input.events,
       scoreBefore: input.scoreBefore,
       homeTeamId: input.matchInput.homeTeam.teamId,
     }), input.matchInput.seed);

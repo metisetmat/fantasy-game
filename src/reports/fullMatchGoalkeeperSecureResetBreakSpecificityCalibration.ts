@@ -160,7 +160,7 @@ export interface FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel 
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "goalkeeper-secure-reset-break-6l-v3";
+const CACHE_VERSION = "goalkeeper-secure-reset-break-6l-v4";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-goalkeeper-secure-reset-break-specificity-6l.json");
 
 const BASELINE_6K = {
