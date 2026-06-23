@@ -30,7 +30,10 @@ export function validateFullMatchScoreEconomyCalibrationRenderer(): readonly str
   assertTest(html.includes("Projection apr&egrave;s calibration"), "export must show projected score after calibration.");
   assertTest(text.includes("signal single-run"), "visible copy must frame the signal as single-run.");
   assertTest(text.includes("constantes inchang"), "visible copy must say scoring constants are unchanged.");
-  assertTest(text.includes("aucun cap de score"), "visible copy must say no score cap.");
+  assertTest(
+    text.includes("aucun plafond artificiel") || text.includes("aucun cap de score"),
+    "visible copy must say no score ceiling.",
+  );
   assertTest(text.includes("score reste issu des"), "visible copy must say score comes from official events.");
   assertTest(!text.includes("preuve globale"), "visible copy must not claim global proof.");
   assertTest(!text.includes("tendance prouv"), "visible copy must not claim proved trend.");
@@ -40,7 +43,7 @@ export function validateFullMatchScoreEconomyCalibrationRenderer(): readonly str
 
   return [
     "export contains full-match score economy calibration section",
-    "visible copy states single-run, unchanged constants, no score cap, and official-event score source",
+    "visible copy states single-run, unchanged constants, no score ceiling, and official-event score source",
     "visible copy avoids global proof, proved trend, manual correction, and automatic selection wording",
   ];
 }

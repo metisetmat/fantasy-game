@@ -1068,7 +1068,7 @@
       <div class="report-scoreboard">
         <div>
           <span class="score-label">Score du rapport full-match</span>
-          <span class="score">16 - 0</span>
+          <span class="score">12 - 7</span>
         </div>
         <p class="muted">Les diagnostics batch et les échantillons live restent séparés de ce score.</p>
         <p class="muted">Contexte : export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
@@ -1085,7 +1085,7 @@
       </div>
     </div>
     <ul class="report-summary-list">
-      <li>Score final : 16 - 0.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li>
+      <li>Score final : 12 - 7.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li>
     </ul>
   </section>
 
@@ -1269,25 +1269,25 @@
     <g>
       <rect class="phase-zone phase-zone--danger phase-zone--primary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
       <text class="phase-zone-label" x="160" y="106" text-anchor="middle">Z3-C</text>
-      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">5</text>
+      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">4</text>
     </g>
-    <g>
-      <rect class="phase-zone phase-zone--danger phase-zone--secondary" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      <text class="phase-zone-label" x="256" y="106" text-anchor="middle">Z5-HSR</text>
-      <text class="phase-zone-value" x="256" y="124" text-anchor="middle">4</text>
-    </g>
+      <g>
+        <rect class="phase-zone phase-zone--muted" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
+      </g>
       <g>
         <rect class="phase-zone phase-zone--muted" x="16" y="144" width="84" height="52" rx="10" ry="10"></rect>
       </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
+    <g>
+      <rect class="phase-zone phase-zone--danger phase-zone--secondary" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
+      <text class="phase-zone-label" x="160" y="170" text-anchor="middle">Z2-C</text>
+      <text class="phase-zone-value" x="160" y="188" text-anchor="middle">2</text>
+    </g>
       <g>
         <rect class="phase-zone phase-zone--muted" x="208" y="144" width="84" height="52" rx="10" ry="10"></rect>
       </g>
     </svg>
       <ul class="report-phase-bullet-list">
-        <li><strong>Zone principale :</strong> Z3-C - Danger officiel (5)</li><li><strong>Zones secondaires :</strong> Z5-C, Z5-HSR</li>
+        <li><strong>Zone principale :</strong> Z3-C - Danger officiel (4)</li><li><strong>Zones secondaires :</strong> Z2-C, Z5-C</li>
       </ul>
       <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Le danger offensif se concentre d'abord dans Z3-C. Les zones secondaires donnent le contexte, pas une consigne de jeu.</p>
       <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> Cela aide &agrave; rep&eacute;rer o&ugrave; l'&eacute;quipe arrive &agrave; cr&eacute;er un signal stable, sans conclure que cette zone doit &ecirc;tre forc&eacute;e.</p>
@@ -1306,9 +1306,9 @@
 
         <article class="report-table-card">
           <h3>Hi&eacute;rarchie des zones</h3>
-          <p>Z3-C porte le signal principal ; Z5-C, Z5-HSR donnent le contexte secondaire.</p>
+          <p>Z3-C porte le signal principal ; Z2-C, Z5-C donnent le contexte secondaire.</p>
           <ul class="report-phase-bullet-list">
-            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-HSR</strong> - Z5-HSR ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li>
+            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z2-C</strong> - Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li>
           </ul>
         </article>
 
@@ -1467,9 +1467,9 @@
           </div>
         </div>
         <div class="phase-stability-meta">
-          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 3</span>
-          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 1</span>
-          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 0</span>
+          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 2</span>
+          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 0</span>
+          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 2</span>
           <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: 0</span>
         </div>
       </div>
@@ -1489,16 +1489,16 @@
             Z5-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
           </li>
           <li>
-            <strong>Z5-HSR</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
+            <strong>Z2-C</strong>
+            <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable</span>
             <br />
-            Z5-HSR revient dans 3 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
+            Z2-C revient de manière irrégulière selon les runs disponibles; le signal reste instable.
           </li>
           <li>
-            <strong>Z2-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run</span>
+            <strong>Z5-HSR</strong>
+            <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable</span>
             <br />
-            Z2-C est visible une seule fois dans les runs comparés; le signal reste ponctuel à ce stade.
+            Z5-HSR revient de manière irrégulière selon les runs disponibles; le signal reste instable.
           </li>
       </ul>
       <div class="phase-stability-reading">
@@ -1725,80 +1725,30 @@
     <article class="phase-history-card">
       <div class="report-section-header">
         <div>
-          <h3>Z5-HSR</h3>
-          <p>with ball · zone principale Z5-HSR</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 3 · <strong>Absent:</strong> 1 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z5-HSR.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z5-HSR.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 2: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z5-HSR.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
           <h3>Z2-C</h3>
           <p>with ball · zone principale Z2-C</p>
         </div>
-        <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
+        <span class="phase-history-strength phase-history-strength--unstable">Signal encore instable</span>
       </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 1 · <strong>Absent:</strong> 3 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 2 · <strong>Absent:</strong> 2 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
       <div>
         <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : le signal apparaît dans un seul échantillon.</p>
+        <p>Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.</p>
       </div>
       <div>
         <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.</p>
+        <p>Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.</p>
       </div>
       <div>
         <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.</p>
+        <p>À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.</p>
       </div>
       <div class="phase-history-table">
 
           <div class="phase-history-row">
             <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Run actuel: signal non visible dans cette zone.</span>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Run actuel: signal visible autour de Z2-C.</span>
           </div>
 
           <div class="phase-history-row">
@@ -1817,6 +1767,56 @@
             <strong>Échantillon 3</strong>
             <span class="phase-history-presence phase-history-presence--absent">Absent</span>
             <span>Échantillon 3: signal non visible dans cette zone.</span>
+          </div>
+
+      </div>
+    </article>
+
+    <article class="phase-history-card">
+      <div class="report-section-header">
+        <div>
+          <h3>Z5-HSR</h3>
+          <p>with ball · zone principale Z5-HSR</p>
+        </div>
+        <span class="phase-history-strength phase-history-strength--unstable">Signal encore instable</span>
+      </div>
+      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 2 · <strong>Absent:</strong> 2 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
+      <div>
+        <h4>Ce que l&rsquo;historique montre</h4>
+        <p>Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.</p>
+      </div>
+      <div>
+        <h4>Pourquoi on reste prudent</h4>
+        <p>Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.</p>
+      </div>
+      <div>
+        <h4>&Agrave; v&eacute;rifier ensuite</h4>
+        <p>À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.</p>
+      </div>
+      <div class="phase-history-table">
+
+          <div class="phase-history-row">
+            <strong>Run actuel</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Run actuel: signal non visible dans cette zone.</span>
+          </div>
+
+          <div class="phase-history-row">
+            <strong>Échantillon 1</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 1: signal visible autour de Z5-HSR.</span>
+          </div>
+
+          <div class="phase-history-row">
+            <strong>Échantillon 2</strong>
+            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
+            <span>Échantillon 2: signal non visible dans cette zone.</span>
+          </div>
+
+          <div class="phase-history-row">
+            <strong>Échantillon 3</strong>
+            <span class="phase-history-presence phase-history-presence--present">Présent</span>
+            <span>Échantillon 3: signal visible autour de Z5-HSR.</span>
           </div>
 
       </div>
@@ -2451,10 +2451,10 @@
         <article class="durable-storage-decision-card">
           <h4>Avant / apr&egrave;s projet&eacute;</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Score full-match avant calibration</span><strong>16 - 0</strong></div>
-            <div><span>Projection apr&egrave;s calibration</span><strong>13 - 0</strong></div>
-            <div><span>Scoring events avant</span><strong>5</strong></div>
-            <div><span>Scoring events apr&egrave;s</span><strong>4</strong></div>
+            <div><span>Score full-match avant calibration</span><strong>12 - 7</strong></div>
+            <div><span>Projection apr&egrave;s calibration</span><strong>9 - 7</strong></div>
+            <div><span>Scoring events avant</span><strong>6</strong></div>
+            <div><span>Scoring events apr&egrave;s</span><strong>5</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2462,15 +2462,15 @@
           <div class="durable-storage-decision-kpi">
             <div><span>Cause principale</span><strong>MIXED_CAUSES</strong></div>
             <div><span>Confiance</span><strong>medium</strong></div>
-            <div><span>SHOT_GOAL share</span><strong>56%</strong></div>
-            <div><span>Dominance &eacute;quipe</span><strong>100%</strong></div>
+            <div><span>SHOT_GOAL share</span><strong>63%</strong></div>
+            <div><span>Dominance &eacute;quipe</span><strong>63%</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Sanity warnings</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Segments</span><strong>8</strong></div>
-            <div><span>Occasions danger</span><strong>80</strong></div>
+            <div><span>Occasions danger</span><strong>78</strong></div>
             <div><span>Risque amplification</span><strong>MEDIUM</strong></div>
             <div><span>Volatilit&eacute; single-run</span><strong>MEDIUM</strong></div>
           </div>
@@ -2479,14 +2479,14 @@
           <h4>Garde-fous</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Constantes inchang&eacute;es</span><strong>oui</strong></div>
-            <div><span>Aucun cap de score</span><strong>oui</strong></div>
+            <div><span>Aucun plafond artificiel</span><strong>oui</strong></div>
             <div><span>Aucune r&eacute;&eacute;criture</span><strong>oui</strong></div>
             <div><span>Batch/live s&eacute;par&eacute;s</span><strong>oui</strong></div>
           </div>
         </article>
       </div>
-      <p class="durable-storage-decision-boundary">Single-run score economy shows 5 scoring events, 56% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</p>
-      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun cap de score, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
+      <p class="durable-storage-decision-boundary">Single-run score economy shows 6 scoring events, 63% SHOT_GOAL point share, 63% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</p>
+      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun plafond artificiel, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
       <p class="durable-storage-decision-warning">KEEP_SCORING_CONSTANTS_AND_CONFIRM_ON_FULL_MATCH_BATCH_BEFORE_GLOBAL_ECONOMY_DECISION</p>
     </section>
 
@@ -2499,38 +2499,38 @@
         <article class="durable-storage-decision-card">
           <h4>Score officiel</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Points traces</span><strong>16</strong></div>
-            <div><span>Evenements officiels</span><strong>5</strong></div>
+            <div><span>Points traces</span><strong>19</strong></div>
+            <div><span>Evenements officiels</span><strong>6</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Couverture</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Attribution</span><strong>100%</strong></div>
-            <div><span>Attribues</span><strong>5/5</strong></div>
+            <div><span>Attribues</span><strong>6/6</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>UNKNOWN</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Apres 6B</span><strong>0</strong></div>
-            <div><span>Legacy 6A</span><strong>5</strong></div>
+            <div><span>Legacy 6A</span><strong>6</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Confiance</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Haute</span><strong>5</strong></div>
+            <div><span>Haute</span><strong>6</strong></div>
             <div><span>Moyenne / basse</span><strong>0 / 0</strong></div>
           </div>
         </article>
       </div>
       <table class="premium-table">
         <thead><tr><th>Famille de score</th><th>Evenements</th><th>Points</th></tr></thead>
-        <tbody><tr><td>SHOT_GOAL</td><td>3</td><td>9</td></tr><tr><td>TRY_TOUCHDOWN</td><td>1</td><td>5</td></tr><tr><td>CONVERSION_GOAL</td><td>1</td><td>2</td></tr><tr><td>DROP_GOAL</td><td>0</td><td>0</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0</td></tr></tbody>
+        <tbody><tr><td>SHOT_GOAL</td><td>4</td><td>12</td></tr><tr><td>TRY_TOUCHDOWN</td><td>1</td><td>5</td></tr><tr><td>CONVERSION_GOAL</td><td>1</td><td>2</td></tr><tr><td>DROP_GOAL</td><td>0</td><td>0</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0</td></tr></tbody>
       </table>
       <p class="durable-storage-decision-guard">Aucun evenement de score officiel ne reste sans famille.</p>
-      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun cap de score, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
+      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun plafond artificiel, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
     </section>
 
     <section class="controlled-local-readonly-db-section" aria-label="Reconciliation des calibrations">
@@ -2542,10 +2542,10 @@
         <article class="durable-storage-decision-card">
           <h4>Score observ&eacute;</h4>
           <div class="durable-storage-decision-kpi">
-            <div><span>Score officiel</span><strong>16 - 0</strong></div>
-            <div><span>Score events</span><strong>5</strong></div>
-            <div><span>SHOT_GOAL</span><strong>3</strong></div>
-            <div><span>Points SHOT_GOAL</span><strong>9</strong></div>
+            <div><span>Score officiel</span><strong>12 - 7</strong></div>
+            <div><span>Score events</span><strong>6</strong></div>
+            <div><span>SHOT_GOAL</span><strong>4</strong></div>
+            <div><span>Points SHOT_GOAL</span><strong>12</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2650,7 +2650,7 @@
         <td>non</td>
       </tr></tbody>
       </table>
-      <p class="durable-storage-decision-boundary">Official full-match output is 16 - 0 with 3 SHOT_GOAL events; historical calibration references exist, but the official full-match score path has not yet carried them over.</p>
+      <p class="durable-storage-decision-boundary">Official full-match output is 12 - 7 with 4 SHOT_GOAL events; historical calibration references exist, but the official full-match score path has not yet carried them over.</p>
       <p class="durable-storage-decision-guard">6C est diagnostic only : constantes inchang&eacute;es, aucun cap, aucune suppression ou r&eacute;&eacute;criture d&rsquo;&eacute;v&eacute;nements, aucun score adverse forc&eacute;. FULL_MATCH_BATCH_ECONOMY reste la seule r&eacute;f&eacute;rence globale.</p>
       <p class="durable-storage-decision-warning">PREPARE_6D_CONNECT_FULLMATCH_TO_VALIDATED_SCORING_CALIBRATIONS</p>
     </section>
@@ -2665,18 +2665,18 @@
           <h4>Avant / apr&egrave;s connexion</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Score avant</span><strong>45 - 0</strong></div>
-            <div><span>Score apr&egrave;s</span><strong>16 - 0</strong></div>
+            <div><span>Score apr&egrave;s</span><strong>12 - 7</strong></div>
             <div><span>Score events avant</span><strong>15</strong></div>
-            <div><span>Score events apr&egrave;s</span><strong>5</strong></div>
+            <div><span>Score events apr&egrave;s</span><strong>6</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
           <h4>Famille SHOT_GOAL</h4>
           <div class="durable-storage-decision-kpi">
             <div><span>Events avant</span><strong>15</strong></div>
-            <div><span>Events apr&egrave;s</span><strong>3</strong></div>
+            <div><span>Events apr&egrave;s</span><strong>4</strong></div>
             <div><span>Points avant</span><strong>45</strong></div>
-            <div><span>Points apr&egrave;s</span><strong>9</strong></div>
+            <div><span>Points apr&egrave;s</span><strong>12</strong></div>
           </div>
         </article>
         <article class="durable-storage-decision-card">
@@ -2698,7 +2698,7 @@
           </div>
         </article>
       </div>
-      <p class="durable-storage-decision-boundary">Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has 3 SHOT_GOAL events for 9 points plus 2 official non-shot scoring events, and keeps the score derived from official score_change consequences.</p>
+      <p class="durable-storage-decision-boundary">Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has 4 SHOT_GOAL events for 12 points plus 2 official non-shot scoring events, and keeps the score derived from official score_change consequences.</p>
       <p class="durable-storage-decision-guard">Constantes inchang&eacute;es : SHOT_GOAL = 3, TRY_TOUCHDOWN = 5, CONVERSION_GOAL = 2, DROP_GOAL = 2, PENALTY_SHOT inactif. Aucun score adverse forc&eacute;, aucune suppression apr&egrave;s g&eacute;n&eacute;ration.</p>
       <p class="durable-storage-decision-warning">CONFIRM_OFFICIAL_SCORING_PATH_CONNECTED_AND_RUN_FULL_MATCH_BATCH_NEXT</p>
     </section>
@@ -2766,7 +2766,7 @@
         <p>
           Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
           Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
-          sans cap, et avec un score issu des evenements officiels <code>score_change</code>.
+          sans plafond artificiel, et avec un score issu des evenements officiels <code>score_change</code>.
         </p>
       </div>
       <div class="product-grid two">
@@ -2788,7 +2788,7 @@
             <li>Conversion seulement apres TRY: oui</li>
             <li>Score issu des evenements officiels: oui</li>
             <li>Version calibration: <code>SCORING_RATE_CALIBRATION_6G</code></li>
-            <li>Cap / score force: non</li>
+            <li>Plafond artificiel / score force: non</li>
           </ul>
         </article>
       </div>
@@ -2822,7 +2822,7 @@
         <h3>Densit&eacute; des occasions</h3>
         <p>
           Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
-          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans cap de score
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans plafond artificiel
           et sans r&eacute;&eacute;criture post-run.
         </p>
       </div>
@@ -2861,7 +2861,7 @@
         <p>
           Apres 6H, la densite est plus saine mais les blowouts restent hauts. Cette lecture mesure la repartition
           des opportunites, des phases dangereuses, des reponses apres avoir encaisse et des chaines de domination,
-          sans score force, sans cap, et avec un score issu des evenements officiels.
+          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
         </p>
       </div>
       <div class="product-grid two">
@@ -2902,7 +2902,7 @@
             <li>Mix familles preserve: oui</li>
             <li>Densite 6H preservee: oui</li>
             <li>Score issu des evenements officiels: oui</li>
-            <li>Cap / score force: non</li>
+            <li>Plafond artificiel / score force: non</li>
             <li>Statut: PARTIAL</li>
           </ul>
         </article>
@@ -2920,7 +2920,7 @@
         <p>
           6I a ameliore la reponse des equipes menees, mais certaines chaines de domination restaient trop longues.
           6J mesure les ruptures de momentum par reset, recuperation defensive, arret gardien securise et phase neutre,
-          sans score force, sans cap, et avec un score issu des evenements officiels.
+          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
         </p>
       </div>
       <div class="product-grid two">
@@ -2963,7 +2963,7 @@
             <li>Densite preservee: oui</li>
             <li>Mix familles preserve: oui</li>
             <li>Score issu des evenements officiels: oui</li>
-            <li>Cap / score force: non</li>
+            <li>Plafond artificiel / score force: non</li>
             <li>Statut: PARTIAL</li>
           </ul>
         </article>
@@ -2971,6 +2971,65 @@
       <p class="muted">
         Recommendation: IMPROVE_BREAK_EVENTS. Le statut reste prudent si les chaines baissent mais que le blowout
         rate ou la stabilite globale demandent encore un suivi.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Reset apres score et ruptures de momentum">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6K</p>
+        <h3>Reset apres score et ruptures de momentum</h3>
+        <p>
+          6K verifie que l'equipe qui vient de marquer ne recree pas automatiquement la prochaine opportunite.
+          Le reset passe par une phase neutre observable, sans plafond artificiel, sans score force et sans reecriture.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Fenetre post-score</h4>
+          <ul>
+            <li>Reattaque immediate: 78.4% -> 57.8%</li>
+            <li>Reset protege: 0% -> 22.8%</li>
+            <li>Possession suivante concedante: 23.7%</li>
+            <li>Fenetrage audite: 346</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Ruptures et decay</h4>
+          <ul>
+            <li>Decay eligible: 346</li>
+            <li>Decay applique: 454</li>
+            <li>Application decay: 131.2%</li>
+            <li>Reset neutres: 1709</li>
+            <li>Recuperations defensives: 3207</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Sante batch</h4>
+          <ul>
+            <li>Score moyen: 21.8 -> 21.1</li>
+            <li>Ecart moyen: 12.2 -> 11.3</li>
+            <li>Blowout rate: 58% -> 50%</li>
+            <li>Severe blowout rate: 4% -> 4%</li>
+            <li>Batch: 50 matchs</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous preserves</h4>
+          <ul>
+            <li>Densite preservee: oui</li>
+            <li>Equilibre opportunites preserve: oui</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Score issu des evenements officiels: oui</li>
+            <li>Constantes score intactes: oui</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: IMPROVE_GOALKEEPER_SECURE_BREAKS. Si le statut reste partiel, le prochain travail doit cibler les ruptures de momentum
+        et non une modification des valeurs de score.
       </p>
     </section>
 
@@ -3718,9 +3777,9 @@
         <li>sample count 4</li>
         <li>panel count 3</li>
         <li>compared signal count 8</li>
-        <li>repeated signal count 6</li>
-        <li>visible-once signal count 2</li>
-        <li>unstable signal count 0</li>
+        <li>repeated signal count 5</li>
+        <li>visible-once signal count 1</li>
+        <li>unstable signal count 2</li>
         <li>insufficient data count 1</li>
         <li>local comparison only true</li>
         <li>global proof claim count 0</li>
@@ -3750,9 +3809,9 @@
         <li>sample count 4</li>
         <li>drilldown count 8</li>
         <li>history sample row count 32</li>
-        <li>local repeated drilldown count 6</li>
-        <li>local visible-once drilldown count 2</li>
-        <li>local unstable drilldown count 0</li>
+        <li>local repeated drilldown count 5</li>
+        <li>local visible-once drilldown count 1</li>
+        <li>local unstable drilldown count 2</li>
         <li>insufficient data drilldown count 0</li>
         <li>trend proof claim count 0</li>
         <li>global proof claim count 0</li>
@@ -4095,8 +4154,8 @@
         <li>status: available</li>
         <li>scope: FULL_MATCH_SCORE_ECONOMY_SINGLE_RUN</li>
         <li>calibration version: SCORE_ECONOMY_6A</li>
-        <li>official score before calibration: 16 - 0</li>
-        <li>official score after calibration: 13 - 0</li>
+        <li>official score before calibration: 12 - 7</li>
+        <li>official score after calibration: 9 - 7</li>
         <li>score delta home: -3</li>
         <li>score delta away: 0</li>
         <li>scoring constants changed: false</li>
@@ -4106,24 +4165,24 @@
         <li>scoring events rewritten: false</li>
         <li>forced opponent score applied: false</li>
         <li>root-cause primary cause: MIXED_CAUSES</li>
-        <li>root-cause secondary causes: TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, SEGMENT_AGGREGATION_AMPLIFIES_SCORE, FATIGUE_ERRORS_TOO_PUNITIVE, DEFENSIVE_RESISTANCE_TOO_LOW, SINGLE_RUN_VOLATILITY</li>
+        <li>root-cause secondary causes: TOO_MANY_SHOT_ATTEMPTS, ROUTE_SELECTION_TOO_SHOT_HEAVY, GOALKEEPER_UNDERWEIGHTED, SEGMENT_AGGREGATION_AMPLIFIES_SCORE, FATIGUE_ERRORS_TOO_PUNITIVE, SINGLE_RUN_VOLATILITY</li>
         <li>root-cause confidence: medium</li>
-        <li>root-cause evidence: Single-run score economy shows 5 scoring events, 56% SHOT_GOAL point share, 100% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</li>
+        <li>root-cause evidence: Single-run score economy shows 6 scoring events, 63% SHOT_GOAL point share, 63% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</li>
         <li>segment count: 8</li>
         <li>sequence count: 56</li>
-        <li>scoring event count: 5</li>
-        <li>scoring events by family before: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring events by family after: {&quot;SHOT_GOAL&quot;:2,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring points by family before: {&quot;SHOT_GOAL&quot;:9,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:2,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring points by family after: {&quot;SHOT_GOAL&quot;:6,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:2,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>selected route mix before: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>selected route mix after: {&quot;SHOT_GOAL&quot;:2,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>route success rates before: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>route success rates after: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>goalkeeper impact before: 84</li>
-        <li>goalkeeper impact after: 99</li>
-        <li>fatigue impact before: 74</li>
-        <li>fatigue impact after: 49</li>
+        <li>scoring event count: 6</li>
+        <li>scoring events by family before: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring events by family after: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family before: {&quot;SHOT_GOAL&quot;:12,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:2,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family after: {&quot;SHOT_GOAL&quot;:9,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:2,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>selected route mix before: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>selected route mix after: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>route success rates before: {&quot;SHOT_GOAL&quot;:5,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>route success rates after: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:100,&quot;CONVERSION_GOAL&quot;:100,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>goalkeeper impact before: 79</li>
+        <li>goalkeeper impact after: 94</li>
+        <li>fatigue impact before: 71</li>
+        <li>fatigue impact after: 47</li>
         <li>segment amplification risk: MEDIUM</li>
         <li>single-run limitation: true</li>
         <li>batch/live separation preserved: true</li>
@@ -4146,16 +4205,16 @@
         <li>status: PASS</li>
         <li>scope: FULL_MATCH_SCORING_FAMILY_SINGLE_RUN</li>
         <li>attribution version: SCORING_FAMILY_ATTRIBUTION_6B</li>
-        <li>total scoring event count: 5</li>
-        <li>attributed scoring event count: 5</li>
+        <li>total scoring event count: 6</li>
+        <li>attributed scoring event count: 6</li>
         <li>unknown scoring event count: 0</li>
-        <li>legacy unknown scoring event count: 5</li>
+        <li>legacy unknown scoring event count: 6</li>
         <li>unknown scoring point total: 0</li>
         <li>attribution coverage rate: 100</li>
-        <li>scoring events by family: {&quot;SHOT_GOAL&quot;:3,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
-        <li>scoring points by family: {&quot;SHOT_GOAL&quot;:9,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:2,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring events by family: {&quot;SHOT_GOAL&quot;:4,&quot;TRY_TOUCHDOWN&quot;:1,&quot;CONVERSION_GOAL&quot;:1,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
+        <li>scoring points by family: {&quot;SHOT_GOAL&quot;:12,&quot;TRY_TOUCHDOWN&quot;:5,&quot;CONVERSION_GOAL&quot;:2,&quot;DROP_GOAL&quot;:0,&quot;PENALTY_SHOT&quot;:0,&quot;UNKNOWN&quot;:0}</li>
         <li>unknown reasons: none</li>
-        <li>high confidence count: 5</li>
+        <li>high confidence count: 6</li>
         <li>medium confidence count: 0</li>
         <li>low confidence count: 0</li>
         <li>family attribution warnings: none</li>
@@ -4182,10 +4241,10 @@
         <li>status: available</li>
         <li>scope: FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN</li>
         <li>version: CALIBRATION_CARRYOVER_6C</li>
-        <li>official full-match score: 16 - 0</li>
-        <li>official full-match scoring events: 5</li>
-        <li>official full-match SHOT_GOAL events: 3</li>
-        <li>official full-match SHOT_GOAL points: 9</li>
+        <li>official full-match score: 12 - 7</li>
+        <li>official full-match scoring events: 6</li>
+        <li>official full-match SHOT_GOAL events: 4</li>
+        <li>official full-match SHOT_GOAL points: 12</li>
         <li>batch calibration known SHOT_GOAL per match: 2</li>
         <li>batch calibration known conversion rate: 35%</li>
         <li>primary regression cause: FULLMATCH_PARALLEL_SCORING_PATH</li>
@@ -4278,6 +4337,25 @@
         <li>route family diversity preserved: true</li>
         <li>forced trailing team score: false</li>
         <li>warnings: DOMINANCE_CHAIN_CALIBRATED, DOMINANCE_CHAIN_REDUCED, SAME_TEAM_OPPORTUNITY_CHAIN_REDUCED, SAME_FAMILY_REPEAT_REDUCED, RESET_BREAKS_DOMINANCE_IMPROVED, GOALKEEPER_SECURE_BREAKS_DOMINANCE_IMPROVED, TEAM_OPPORTUNITY_BALANCE_PRESERVED, DENSITY_CALIBRATION_PRESERVED, ROUTE_FAMILY_DIVERSITY_PRESERVED, BLOWOUT_RATE_STILL_TOO_HIGH, FULL_MATCH_BATCH_ECONOMY_PARTIAL</li>
+      </ul>
+    </article>
+
+    <article class="premium-appendix-card">
+      <h3>Reset post-score 6K</h3>
+      <ul>
+        <li>status: PARTIAL</li>
+        <li>scope: FULL_MATCH_BREAK_EVENT_POST_SCORE_RESET_CALIBRATION</li>
+        <li>version: BREAK_EVENT_POST_SCORE_RESET_6K</li>
+        <li>match count: 50</li>
+        <li>post-score immediate reattack: 78.4% -> 57.8%</li>
+        <li>post-score protected reset: 0% -> 22.8%</li>
+        <li>dominance decay applied: 454</li>
+        <li>defensive recovery break rate: 34% -> 34%</li>
+        <li>goalkeeper secure break rate: 0% -> 0%</li>
+        <li>density preserved: true</li>
+        <li>team balance preserved: true</li>
+        <li>route family diversity preserved: true</li>
+        <li>warnings: POST_SCORE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_RESET_PROTECTED, DEFENSIVE_RECOVERY_BREAKS_IMPROVED, GOALKEEPER_SECURE_BREAKS_MISSING, DOMINANCE_DECAY_APPLIED, DENSITY_CALIBRATION_PRESERVED, TEAM_OPPORTUNITY_BALANCE_PRESERVED, ROUTE_FAMILY_DIVERSITY_PRESERVED, BLOWOUT_RATE_STILL_TOO_HIGH, FULL_MATCH_BATCH_ECONOMY_PARTIAL</li>
       </ul>
     </article>
     <details class="appendix">

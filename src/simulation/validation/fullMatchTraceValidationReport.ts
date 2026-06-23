@@ -52,6 +52,10 @@ import {
   renderFullMatchDominanceChainCalibration6JDoc as renderDominanceChainCalibration6JDoc,
   renderFullMatchDominanceChainCalibration6JValidation as renderDominanceChainCalibration6JValidation,
 } from "../../reports/fullMatchDominanceChainCalibration";
+import {
+  renderFullMatchBreakEventPostScoreResetCalibration6KDoc as renderBreakEventPostScoreResetCalibration6KDoc,
+  renderFullMatchBreakEventPostScoreResetCalibration6KValidation as renderBreakEventPostScoreResetCalibration6KValidation,
+} from "../../reports/fullMatchBreakEventPostScoreResetCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6333,6 +6337,14 @@ export function renderFullMatchDominanceChainCalibration6JDoc(_model: FullMatchT
 
 export function renderFullMatchDominanceChainCalibration6JValidation(_model: FullMatchTraceValidationModel): string {
   return renderDominanceChainCalibration6JValidation();
+}
+
+export function renderFullMatchBreakEventPostScoreResetCalibration6KDoc(_model: FullMatchTraceValidationModel): string {
+  return renderBreakEventPostScoreResetCalibration6KDoc();
+}
+
+export function renderFullMatchBreakEventPostScoreResetCalibration6KValidation(_model: FullMatchTraceValidationModel): string {
+  return renderBreakEventPostScoreResetCalibration6KValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

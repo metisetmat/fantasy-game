@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 6J - Team Response And Dominance Chain Follow-up
+- current sprint: Sprint 6K - Break Event And Post-Score Reset Calibration
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,24 +20,27 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 6J - Sprint 6J - Team Response And Dominance Chain Follow-up
+- PASS: current sprint is Sprint 6K - Sprint 6K - Break Event And Post-Score Reset Calibration
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 6J oriented - README current
-- PASS: 6J report included - 6J doc included
-- PASS: 6J validation is PASS - 6J validation current
+- PASS: README is Sprint 6K oriented - README current
+- PASS: 6K report included - 6K doc included
+- PASS: 6K validation is PASS - 6K validation current
 - PASS: batch match count visible - 50 matches visible
-- PASS: baseline 6I metrics are visible - 6I baseline visible
-- PASS: dominance chain metrics measured - dominance metrics visible
-- PASS: break dominance metrics measured - break metrics visible
+- PASS: baseline 6J metrics are visible - 6J baseline visible
+- PASS: post-score immediate reattack measured - post-score measured
+- PASS: post-score reset protection measured - protected reset measured
+- PASS: dominance decay measured - dominance decay visible
+- PASS: break event metrics measured - break metrics visible
+- PASS: dominance chain gains preserved - dominance preservation visible
 - PASS: density calibration preserved - density preserved
-- PASS: team opportunity balance preserved - team balance preserved
+- PASS: team opportunity balance preserved or surfaced - team balance visible
 - PASS: route family diversity preserved - route diversity preserved
 - PASS: TRY/DROP/CONVERSION remain available - non-shot preserved
 - PASS: CONTINUATION remains available - continuation preserved
 - PASS: score from score_change all runs - score_change source all runs
 - PASS: official path connected all runs - official path all runs
 - PASS: calibration applied all runs - calibrations all runs
-- PASS: no score cap/rewrite/deletion/forced score - guardrails false
+- PASS: no score rewrite/deletion/forced score - guardrails false
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
@@ -45,12 +48,12 @@ Status: PASS
 - PASS: no UNKNOWN scoring family - UNKNOWN blocked
 - PASS: no PENALTY_SHOT leakage - PENALTY blocked
 - PASS: no contradictory healthy warning - healthy warning guarded
-- PASS: coach product contains dominance-chain section - product 6J visible
-- PASS: coach export contains dominance-chain section - export 6J visible
-- PASS: coach export avoids forbidden dominance wording - forbidden wording absent
-- PASS: bundle includes 6J source files - 6J source bundled
+- PASS: coach product contains post-score reset section - product 6K visible
+- PASS: coach export contains post-score reset section - export 6K visible
+- PASS: coach export avoids forbidden 6K wording - forbidden wording absent
+- PASS: bundle includes 6K source files - 6K source bundled
 - PASS: explicit exhaustive test command available - test:all visible
-- PASS: recommendation visible - 6J recommendation visible
+- PASS: recommendation visible - 6K recommendation visible
 
 ## Files
 
@@ -64,7 +67,7 @@ Status: PASS
 - coach-report.export.html
 - coach-report.latest.html
 - coach-report.product.html
-- fullmatch-dominance-chain-calibration-6j.md
+- fullmatch-break-event-post-score-reset-calibration-6k.md
 - manifest.md
 - package.json
 - scoring-events-summary.md
@@ -72,5 +75,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.fullmatch-dominance-chain-calibration-6j.md
+- validation.fullmatch-break-event-post-score-reset-calibration-6k.md
 - validation.share-pack.md

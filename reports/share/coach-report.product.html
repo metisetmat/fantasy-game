@@ -77,14 +77,14 @@
       </div>
       <div class="score-box">
         <span class="score-label">Score du rapport full-match</span>
-        <span class="score">16 - 0</span>
+        <span class="score">12 - 7</span>
       </div>
     </div>
   </header>
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>
-    <div class="summary-list"><ul><li>Score final : 16 - 0.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
+    <div class="summary-list"><ul><li>Score final : 12 - 7.</li><li>Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.</li><li>Point de vigilance : sécuriser la première sortie après récupération.</li><li>La première sortie après récupération devient-elle plus propre ?</li></ul></div>
   </section>
 
   <section id="official-match-reading" class="product-section">
@@ -841,7 +841,7 @@
   </section>
   
   <script type="application/json" id="coach-report-phase-visuals-data">
-{"withBall":{"phase":"with_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Danger officiel","value":5,"kind":"danger_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-C","label":"Progression utile","value":16,"kind":"progression_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-HSR","label":"Progression utile","value":4,"kind":"progression_zone","source":"official_aggregates","confidence":"medium","explanation":"Z5-HSR ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."}]},"withoutBall":{"phase":"without_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Pression / instabilit&eacute;","value":24,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-C","label":"Pression / instabilit&eacute;","value":16,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-HSR","label":"Pression / instabilit&eacute;","value":4,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"medium","explanation":"Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."}]},"goalkeeper":{"phase":"goalkeeper","source":"controlled_empty_state","signals":[],"emptyStateReason":"Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart."}}
+{"withBall":{"phase":"with_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Danger officiel","value":4,"kind":"danger_zone","source":"official_aggregates","confidence":"medium","explanation":"Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z2-C","label":"Danger officiel","value":2,"kind":"danger_zone","source":"official_aggregates","confidence":"medium","explanation":"Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."},{"zone":"Z5-C","label":"Progression utile","value":16,"kind":"progression_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger."}]},"withoutBall":{"phase":"without_ball","source":"official_aggregates","signals":[{"zone":"Z3-C","label":"Pression / instabilit&eacute;","value":24,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-C","label":"Pression / instabilit&eacute;","value":16,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"high","explanation":"Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."},{"zone":"Z5-HSR","label":"Pression / instabilit&eacute;","value":4,"kind":"pressure_instability_zone","source":"official_aggregates","confidence":"medium","explanation":"Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression."}]},"goalkeeper":{"phase":"goalkeeper","source":"controlled_empty_state","signals":[],"emptyStateReason":"Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart."}}
   </script>
 
     <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
@@ -906,7 +906,7 @@
         <p>
           Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
           Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
-          sans cap, et avec un score issu des evenements officiels <code>score_change</code>.
+          sans plafond artificiel, et avec un score issu des evenements officiels <code>score_change</code>.
         </p>
       </div>
       <div class="product-grid two">
@@ -928,7 +928,7 @@
             <li>Conversion seulement apres TRY: oui</li>
             <li>Score issu des evenements officiels: oui</li>
             <li>Version calibration: <code>SCORING_RATE_CALIBRATION_6G</code></li>
-            <li>Cap / score force: non</li>
+            <li>Plafond artificiel / score force: non</li>
           </ul>
         </article>
       </div>
@@ -962,7 +962,7 @@
         <h3>Densit&eacute; des occasions</h3>
         <p>
           Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
-          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans cap de score
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans plafond artificiel
           et sans r&eacute;&eacute;criture post-run.
         </p>
       </div>
@@ -1001,7 +1001,7 @@
         <p>
           Apres 6H, la densite est plus saine mais les blowouts restent hauts. Cette lecture mesure la repartition
           des opportunites, des phases dangereuses, des reponses apres avoir encaisse et des chaines de domination,
-          sans score force, sans cap, et avec un score issu des evenements officiels.
+          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
         </p>
       </div>
       <div class="product-grid two">
@@ -1042,7 +1042,7 @@
             <li>Mix familles preserve: oui</li>
             <li>Densite 6H preservee: oui</li>
             <li>Score issu des evenements officiels: oui</li>
-            <li>Cap / score force: non</li>
+            <li>Plafond artificiel / score force: non</li>
             <li>Statut: PARTIAL</li>
           </ul>
         </article>
@@ -1060,7 +1060,7 @@
         <p>
           6I a ameliore la reponse des equipes menees, mais certaines chaines de domination restaient trop longues.
           6J mesure les ruptures de momentum par reset, recuperation defensive, arret gardien securise et phase neutre,
-          sans score force, sans cap, et avec un score issu des evenements officiels.
+          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
         </p>
       </div>
       <div class="product-grid two">
@@ -1103,7 +1103,7 @@
             <li>Densite preservee: oui</li>
             <li>Mix familles preserve: oui</li>
             <li>Score issu des evenements officiels: oui</li>
-            <li>Cap / score force: non</li>
+            <li>Plafond artificiel / score force: non</li>
             <li>Statut: PARTIAL</li>
           </ul>
         </article>
@@ -1111,6 +1111,65 @@
       <p class="muted">
         Recommendation: IMPROVE_BREAK_EVENTS. Le statut reste prudent si les chaines baissent mais que le blowout
         rate ou la stabilite globale demandent encore un suivi.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Reset apres score et ruptures de momentum">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6K</p>
+        <h3>Reset apres score et ruptures de momentum</h3>
+        <p>
+          6K verifie que l'equipe qui vient de marquer ne recree pas automatiquement la prochaine opportunite.
+          Le reset passe par une phase neutre observable, sans plafond artificiel, sans score force et sans reecriture.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Fenetre post-score</h4>
+          <ul>
+            <li>Reattaque immediate: 78.4% -> 57.8%</li>
+            <li>Reset protege: 0% -> 22.8%</li>
+            <li>Possession suivante concedante: 23.7%</li>
+            <li>Fenetrage audite: 346</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Ruptures et decay</h4>
+          <ul>
+            <li>Decay eligible: 346</li>
+            <li>Decay applique: 454</li>
+            <li>Application decay: 131.2%</li>
+            <li>Reset neutres: 1709</li>
+            <li>Recuperations defensives: 3207</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Sante batch</h4>
+          <ul>
+            <li>Score moyen: 21.8 -> 21.1</li>
+            <li>Ecart moyen: 12.2 -> 11.3</li>
+            <li>Blowout rate: 58% -> 50%</li>
+            <li>Severe blowout rate: 4% -> 4%</li>
+            <li>Batch: 50 matchs</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous preserves</h4>
+          <ul>
+            <li>Densite preservee: oui</li>
+            <li>Equilibre opportunites preserve: oui</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Score issu des evenements officiels: oui</li>
+            <li>Constantes score intactes: oui</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: IMPROVE_GOALKEEPER_SECURE_BREAKS. Si le statut reste partiel, le prochain travail doit cibler les ruptures de momentum
+        et non une modification des valeurs de score.
       </p>
     </section>
 </main>
