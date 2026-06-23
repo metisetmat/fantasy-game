@@ -675,7 +675,8 @@ function densitySelectedCandidate(input: {
       lastScoringRouteEvent.teamId !== input.teamId &&
       input.segmentIndex * 100 - lastScoringRouteEvent.timestamp.tick <= 250
     );
-  const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o");
+  const gateSelectivityVolume6PEnabled = input.seed.includes("gate-selectivity-volume-6p");
+  const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o") || gateSelectivityVolume6PEnabled;
 
   if (continuation === undefined) {
     return selected;
@@ -784,10 +785,16 @@ function densitySelectedCandidate(input: {
         recentResetToDangerWindow: earnedDangerGateWindow,
         goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
-        calibrationVersion: earnedDangerGateTuning6OEnabled ? "EARNED_DANGER_GATE_TUNING_6O" : "EARNED_DANGER_GATE_6N",
+        calibrationVersion: gateSelectivityVolume6PEnabled
+          ? "GATE_SELECTIVITY_VOLUME_6P"
+          : earnedDangerGateTuning6OEnabled
+            ? "EARNED_DANGER_GATE_TUNING_6O"
+            : "EARNED_DANGER_GATE_6N",
       })
     : undefined;
-  const earnedDangerGateLabel = earnedDangerGateTuning6OEnabled
+  const earnedDangerGateLabel = gateSelectivityVolume6PEnabled
+    ? "Earned danger gate calibration 6N selectivity 6P"
+    : earnedDangerGateTuning6OEnabled
     ? "Earned danger gate calibration 6N tuning 6O"
     : "Earned danger gate calibration 6N";
 

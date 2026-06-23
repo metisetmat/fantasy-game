@@ -72,6 +72,10 @@ import {
   renderFullMatchEarnedDangerGateTuning6ODoc as renderEarnedDangerGateTuning6ODoc,
   renderFullMatchEarnedDangerGateTuning6OValidation as renderEarnedDangerGateTuning6OValidation,
 } from "../../reports/fullMatchEarnedDangerGateTuningCalibration";
+import {
+  renderFullMatchGateSelectivityVolumeRegressionFix6PDoc as renderGateSelectivityVolumeRegressionFix6PDoc,
+  renderFullMatchGateSelectivityVolumeRegressionFix6PValidation as renderGateSelectivityVolumeRegressionFix6PValidation,
+} from "../../reports/fullMatchGateSelectivityVolumeRegressionFix";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6393,6 +6397,14 @@ export function renderFullMatchEarnedDangerGateTuning6ODoc(_model: FullMatchTrac
 
 export function renderFullMatchEarnedDangerGateTuning6OValidation(_model: FullMatchTraceValidationModel): string {
   return renderEarnedDangerGateTuning6OValidation();
+}
+
+export function renderFullMatchGateSelectivityVolumeRegressionFix6PDoc(_model: FullMatchTraceValidationModel): string {
+  return renderGateSelectivityVolumeRegressionFix6PDoc();
+}
+
+export function renderFullMatchGateSelectivityVolumeRegressionFix6PValidation(_model: FullMatchTraceValidationModel): string {
+  return renderGateSelectivityVolumeRegressionFix6PValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

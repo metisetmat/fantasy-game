@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-23T18:43:38.849Z
-Task/sprint: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
+Generated: 2026-06-23T20:15:25.611Z
+Task/sprint: Sprint 6P - Gate Selectivity & Volume Regression Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-earned-danger-gate-tuning-6o.md
-- validation.fullmatch-earned-danger-gate-tuning-6o.md
+- fullmatch-gate-selectivity-volume-regression-fix-6p.md
+- validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md
 - README.md
 
 ## Bundle Files

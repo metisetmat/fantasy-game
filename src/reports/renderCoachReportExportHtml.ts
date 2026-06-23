@@ -46,6 +46,9 @@ import type {
 import type {
   FullMatchEarnedDangerGateTuningModel,
 } from "./fullMatchEarnedDangerGateTuningCalibration";
+import type {
+  FullMatchGateSelectivityVolumeRegressionFixModel,
+} from "./fullMatchGateSelectivityVolumeRegressionFix";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3085,6 +3088,55 @@ export function renderFullMatchEarnedDangerGateTuningSection(
     </section>`;
 }
 
+export function renderFullMatchGateSelectivityVolumeRegressionFixSection(
+  model: FullMatchGateSelectivityVolumeRegressionFixModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Selectivite du danger et volume">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6P</p>
+        <h3>S&eacute;lectivit&eacute; du danger et volume</h3>
+        <p>
+          6P corrige la gate 6O trop permissive: les contextes n&eacute;gatifs comme spacing faible,
+          re-attaque imm&eacute;diate apr&egrave;s reset, post-score ou gardien secure ne comptent plus comme
+          raisons positives. Le score reste d&eacute;riv&eacute; uniquement des score_change officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate plus s&eacute;lective</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute;: ${model.earnedDangerRateBefore}% -> ${model.earnedDangerRateAfter}%</li>
+            <li>Danger borderline: ${model.borderlineDangerRateBefore}% -> ${model.borderlineDangerRateAfter}%</li>
+            <li>Reset vers danger: ${model.resetToDangerRateBefore}% -> ${model.resetToDangerRateAfter}%</li>
+            <li>Danger avec contexte n&eacute;gatif: ${model.allowedDangerWithNegativeContextCountBefore} -> ${model.allowedDangerWithNegativeContextCountAfter}</li>
+            <li>Danger avec seulement contexte n&eacute;gatif: ${model.gateSelectivityAudit.allowedDangerWithOnlyNegativeContextCount}</li>
+            <li>Signaux positifs insuffisants: ${model.gateSelectivityAudit.allowedDangerWithoutEnoughPositiveSignalsCount}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume de scoring</h4>
+          <ul>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Evenements scoring/match: ${model.scoringEventsPerMatchBefore} -> ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunites/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Blowout: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${model.recommendation}. Aucun cap, rewrite, score forc&eacute;, suppression d'events ou mutation
+        MatchBonusEvent n'est utilis&eacute; pour obtenir cette baisse de volume.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4150,6 +4202,7 @@ function renderAppendices(input: {
   readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
   readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
   readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
+  readonly fullMatchGateSelectivityVolumeRegressionFix?: FullMatchGateSelectivityVolumeRegressionFixModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4245,6 +4298,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
   readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
   readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
+  readonly fullMatchGateSelectivityVolumeRegressionFix?: FullMatchGateSelectivityVolumeRegressionFixModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4365,6 +4419,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy),
     renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate),
     renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning),
+    renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

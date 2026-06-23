@@ -67,7 +67,8 @@ export type EarnedDangerGateWarningCode =
 
 export type EarnedDangerGateCalibrationVersion =
   | "EARNED_DANGER_GATE_6N"
-  | "EARNED_DANGER_GATE_TUNING_6O";
+  | "EARNED_DANGER_GATE_TUNING_6O"
+  | "GATE_SELECTIVITY_VOLUME_6P";
 
 export interface EarnedDangerGateResult {
   readonly connected: boolean;
@@ -153,6 +154,7 @@ export function computeEarnedDangerGate(input: {
   readonly calibrationVersion?: EarnedDangerGateCalibrationVersion;
 }): EarnedDangerGateResult {
   const tuning6O = input.calibrationVersion === "EARNED_DANGER_GATE_TUNING_6O";
+  const selectivity6P = input.calibrationVersion === "GATE_SELECTIVITY_VOLUME_6P";
   const attackingSupportScore = clamp(38 + input.candidate.candidateScore * 0.32 + input.teamState.momentum * 0.22 + routeFamilyEdge(input.candidate.family));
   const attackingSpacingScore = clamp(spacingFromZone(input.candidate.targetZone) + input.candidate.candidateScore * 0.16);
   const attackingStructureScore = clamp(42 + input.candidate.candidateScore * 0.25 + input.teamState.condition * 0.16);
@@ -197,13 +199,13 @@ export function computeEarnedDangerGate(input: {
   if (input.scoreDelta > 0) reasonCodes.push("LEADING_TEAM_REATTACK");
 
   const mediumSignalCount = [
-    attackingSupportScore >= (tuning6O ? 58 : 62),
-    attackingSpacingScore >= (tuning6O ? 56 : 60),
-    tacticalEdgeScore >= (tuning6O ? 58 : 60),
-    attributeEdgeScore >= (tuning6O ? 58 : 60),
-    fatigueEdgeScore >= (tuning6O ? 50 : 55),
-    pressureEdgeScore >= (tuning6O ? 54 : 60),
-    mistakeEdgeScore >= (tuning6O ? 34 : 45),
+    attackingSupportScore >= (tuning6O || selectivity6P ? 58 : 62),
+    attackingSpacingScore >= (tuning6O || selectivity6P ? 56 : 60),
+    tacticalEdgeScore >= (tuning6O || selectivity6P ? 58 : 60),
+    attributeEdgeScore >= (tuning6O || selectivity6P ? 58 : 60),
+    fatigueEdgeScore >= (tuning6O || selectivity6P ? 50 : 55),
+    pressureEdgeScore >= (tuning6O || selectivity6P ? 54 : 60),
+    mistakeEdgeScore >= (tuning6O || selectivity6P ? 34 : 45),
   ].filter(Boolean).length;
   const strongSignalCount = [
     attackingSupportScore >= 68,
@@ -216,10 +218,10 @@ export function computeEarnedDangerGate(input: {
   ].filter(Boolean).length;
   const goalkeeperErrorSignal = input.goalkeeperSecureContext &&
     (
-      mistakeEdgeScore >= (tuning6O ? 34 : 45) ||
-      pressureEdgeScore >= (tuning6O ? 58 : 65) ||
+      mistakeEdgeScore >= (tuning6O || selectivity6P ? 34 : 45) ||
+      pressureEdgeScore >= (tuning6O || selectivity6P ? 58 : 65) ||
       (
-        tuning6O &&
+        (tuning6O || selectivity6P) &&
         attackingSupportScore >= 65 &&
         tacticalEdgeScore >= 65 &&
         attributeEdgeScore >= 65 &&
@@ -228,16 +230,76 @@ export function computeEarnedDangerGate(input: {
     );
   const postScoreTurnoverSignal = input.postScoreContext &&
     (
-      pressureEdgeScore >= (tuning6O ? 58 : 65) ||
-      mistakeEdgeScore >= (tuning6O ? 36 : 45) ||
+      pressureEdgeScore >= (tuning6O || selectivity6P ? 58 : 65) ||
+      mistakeEdgeScore >= (tuning6O || selectivity6P ? 36 : 45) ||
       (
-        tuning6O &&
+        (tuning6O || selectivity6P) &&
         attackingSupportScore >= 65 &&
         tacticalEdgeScore >= 65 &&
         attributeEdgeScore >= 65
       )
     );
-  const hardMissingEdges = tuning6O
+  const negativeContextCount = [
+    attackingSpacingScore < 65,
+    input.recentResetToDangerWindow,
+    input.postScoreContext,
+    input.scoreDelta > 0,
+    fatigueEdgeScore < 55,
+    input.goalkeeperSecureContext,
+  ].filter(Boolean).length;
+  const structuralPositiveCount = [
+    attackingSupportScore >= 65,
+    attackingSpacingScore >= 65,
+    tacticalEdgeScore >= 65,
+    attributeEdgeScore >= 65,
+  ].filter(Boolean).length;
+  const strongOpportunitySignalCount = [
+    pressureEdgeScore >= 66,
+    mistakeEdgeScore >= 52,
+    fatigueEdgeScore >= 62,
+    strongSignalCount >= 4,
+  ].filter(Boolean).length;
+  const selectivityPositiveScore =
+    (attackingSupportScore >= 65 ? 18 : attackingSupportScore >= 58 ? 10 : 0) +
+    (attackingSpacingScore >= 65 ? 18 : attackingSpacingScore >= 56 ? 8 : 0) +
+    (tacticalEdgeScore >= 65 ? 18 : tacticalEdgeScore >= 58 ? 10 : 0) +
+    (attributeEdgeScore >= 65 ? 16 : attributeEdgeScore >= 58 ? 9 : 0) +
+    (fatigueEdgeScore >= 62 ? 10 : fatigueEdgeScore >= 50 ? 5 : 0) +
+    (pressureEdgeScore >= 66 ? 10 : pressureEdgeScore >= 54 ? 5 : 0) +
+    (mistakeEdgeScore >= 52 ? 12 : mistakeEdgeScore >= 34 ? 6 : 0);
+  const selectivityNegativeScore =
+    (attackingSpacingScore < 65 ? 18 : 0) +
+    (input.recentResetToDangerWindow ? 14 : 0) +
+    (input.postScoreContext ? 12 : 0) +
+    (input.scoreDelta > 0 ? Math.min(16, 8 + input.scoreDelta * 0.5) : 0) +
+    (fatigueEdgeScore < 55 ? 8 : 0) +
+    (input.goalkeeperSecureContext ? 14 : 0);
+  const selectivityScore = round(Math.max(0, Math.min(100, 42 + selectivityPositiveScore - selectivityNegativeScore)));
+  const immediateDangerEarnedException = strongOpportunitySignalCount >= 2 &&
+    structuralPositiveCount >= 2 &&
+    !input.goalkeeperSecureContext &&
+    (!input.postScoreContext || mistakeEdgeScore >= 52 || pressureEdgeScore >= 66) &&
+    !(input.scoreDelta > 6 && mistakeEdgeScore < 52);
+  const selectivityEarnedRoute = pressureEdgeScore >= 66 &&
+    mistakeEdgeScore >= 52 &&
+    input.scoreDelta <= 0 &&
+    !input.goalkeeperSecureContext &&
+    structuralPositiveCount >= 3;
+  const selectivityBorderlineRoute = !selectivityEarnedRoute &&
+    pressureEdgeScore >= 66 &&
+    fatigueEdgeScore >= 62 &&
+    input.scoreDelta <= 0 &&
+    !input.goalkeeperSecureContext &&
+    structuralPositiveCount >= 3 &&
+    (!input.postScoreContext || mistakeEdgeScore >= 45);
+  const hardMissingEdges = selectivity6P
+    ? attackingSupportScore < 58 ||
+      tacticalEdgeScore < 58 ||
+      attributeEdgeScore < 58 ||
+      (attackingSpacingScore < 50 && mistakeEdgeScore < 52) ||
+      (input.goalkeeperSecureContext && !goalkeeperErrorSignal) ||
+      (input.postScoreContext && !postScoreTurnoverSignal)
+    : tuning6O
     ? attackingSupportScore < 45 ||
       attackingSpacingScore < 42 ||
       tacticalEdgeScore < 50 ||
@@ -248,7 +310,12 @@ export function computeEarnedDangerGate(input: {
       attackingSpacingScore < 45 ||
       tacticalEdgeScore < 62 ||
       attributeEdgeScore < 60;
-  const allowEarned = tuning6O
+  const allowEarned = selectivity6P
+    ? selectivityScore >= 70 &&
+      !hardMissingEdges &&
+      selectivityEarnedRoute &&
+      (!input.recentResetToDangerWindow || immediateDangerEarnedException)
+    : tuning6O
     ? earnedDangerScore >= 50 &&
       !hardMissingEdges &&
       attackingSupportScore >= 60 &&
@@ -256,7 +323,15 @@ export function computeEarnedDangerGate(input: {
       attributeEdgeScore >= 60 &&
       mediumSignalCount >= 3
     : earnedDangerScore >= 65 && !hardMissingEdges;
-  const allowBorderline = tuning6O
+  const allowBorderline = selectivity6P
+    ? !allowEarned &&
+      selectivityScore >= 64 &&
+      !hardMissingEdges &&
+      mediumSignalCount >= 3 &&
+      selectivityBorderlineRoute &&
+      negativeContextCount <= 3 &&
+      (!input.recentResetToDangerWindow || strongOpportunitySignalCount >= 1)
+    : tuning6O
     ? !allowEarned &&
       earnedDangerScore >= 43 &&
       !hardMissingEdges &&
@@ -338,7 +413,7 @@ export function computeEarnedDangerGate(input: {
     fatigueEdgeScore,
     pressureEdgeScore,
     mistakeEdgeScore,
-    earnedDangerScore,
+    earnedDangerScore: selectivity6P ? selectivityScore : earnedDangerScore,
     earnedDangerClassification: classification,
     gateDecision,
     gateReasonCodes: [...new Set(reasonCodes)],

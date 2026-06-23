@@ -341,6 +341,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchEarnedDangerGate6NValidation = readIfExists(join(shareDirectory, "validation.fullmatch-earned-danger-gate-6n.md"));
   const fullMatchEarnedDangerGateTuning6O = readIfExists(join(shareDirectory, "fullmatch-earned-danger-gate-tuning-6o.md"));
   const fullMatchEarnedDangerGateTuning6OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-earned-danger-gate-tuning-6o.md"));
+  const fullMatchGateSelectivityVolumeRegressionFix6P = readIfExists(join(shareDirectory, "fullmatch-gate-selectivity-volume-regression-fix-6p.md"));
+  const fullMatchGateSelectivityVolumeRegressionFix6PValidation = readIfExists(join(shareDirectory, "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3042,6 +3044,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-earned-danger-gate-6n.md",
     ...sprint6NForbiddenLeftovers,
   ];
+  const sprint6PExpectedFiles = sprint6OExpectedFiles.map((file) =>
+    file === "fullmatch-earned-danger-gate-tuning-6o.md"
+      ? "fullmatch-gate-selectivity-volume-regression-fix-6p.md"
+      : file === "validation.fullmatch-earned-danger-gate-tuning-6o.md"
+        ? "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md"
+        : file
+  );
+  const sprint6PForbiddenLeftovers = [
+    "fullmatch-earned-danger-gate-tuning-6o.md",
+    "validation.fullmatch-earned-danger-gate-tuning-6o.md",
+    ...sprint6OForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3945,6 +3959,45 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 6O source files", bundleSimulation.includes("src/simulation/fullMatch/earnedDangerGateTuningWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchEarnedDangerGateTuningAudit.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateTuningCalibration.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateTuningCalibration.test.ts"), "6O source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEarnedDangerGateTuning6OValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
     check("recommendation visible", fullMatchEarnedDangerGateTuning6O.includes("## Recommendation") && fullMatchEarnedDangerGateTuning6O.includes("Sprint 6P"), "6O recommendation visible"),
+  ];
+  const sprint6PChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6PExpectedFiles.every((file) => requiredCopied(file)), sprint6PExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6PExpectedFiles.every((file) => manifest.includes(file)), sprint6PExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6P", activeConfig.sprintName === "Sprint 6P - Gate Selectivity & Volume Regression Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6PForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6PForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6P oriented", readme.includes("# Sprint 6P Share Pack") && readme.includes("fullmatch-gate-selectivity-volume-regression-fix-6p.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6P report included", fullMatchGateSelectivityVolumeRegressionFix6P.includes("# Full-Match Gate Selectivity Volume Regression Fix 6P") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("Before / After Table") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("Positive vs Negative Gate Reason Separation"), "6P doc included"),
+    check("6P validation is PASS", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("Status: PASS") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("gate selectivity volume regression fix model exists") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("Explicit Exhaustive Test Command"), "6P validation current"),
+    check("batch match count visible", fullMatchGateSelectivityVolumeRegressionFix6P.includes("matchCount: 50") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6O metrics visible", fullMatchGateSelectivityVolumeRegressionFix6P.includes("Baseline 6O Summary") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("resetToDangerRateBefore: 100") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("earnedDangerRateBefore: 99.8"), "6O baseline visible"),
+    check("earned danger rate reduced but alive", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("earnedDangerRate reduced from 99.8 and remains above 0") && !fullMatchGateSelectivityVolumeRegressionFix6P.includes("earnedDangerRateAfter: 0%"), "earned danger reduced"),
+    check("reset to danger reduced", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("resetToDangerRate reduced from 100") && !fullMatchGateSelectivityVolumeRegressionFix6P.includes("resetToDangerRateAfter: 100%"), "reset danger reduced"),
+    check("volume reduced", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("scoring opportunities per match reduced") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("scoring events per match reduced") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("average total points reduced"), "volume reduced"),
+    check("severe blowout reduced", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("severe blowout rate reduced") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("blowout rate reduced"), "blowouts reduced"),
+    check("negative contexts not positive", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("LOW_SPACING is not positive") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("IMMEDIATE_AFTER_RESET is not positive") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("LEADING_TEAM_REATTACK is not positive") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("POST_SCORE_CONTEXT is not positive"), "negative contexts separated"),
+    check("positive and negative reason distributions visible", fullMatchGateSelectivityVolumeRegressionFix6P.includes("Positive Gate Reason Distribution") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("Negative Gate Context Distribution"), "reason distributions visible"),
+    check("density calibration preserved", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("density calibration preserved"), "density checked"),
+    check("goalkeeper secure gains preserved", fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("goalkeeper secure gains preserved"), "goalkeeper checked"),
+    check("route family diversity preserved", fullMatchGateSelectivityVolumeRegressionFix6P.includes("routeFamilyDiversityPreserved: true") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("route family diversity preserved"), "route diversity preserved"),
+    check("score from score_change all runs", fullMatchGateSelectivityVolumeRegressionFix6P.includes("scoreFromScoreChangeAllRuns: true") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchGateSelectivityVolumeRegressionFix6P.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchGateSelectivityVolumeRegressionFix6P.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score rewrite/deletion/forced score", fullMatchGateSelectivityVolumeRegressionFix6P.includes("scoreCapApplied: false") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("postHocRewriteApplied: false") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("scoringEventsDeleted: false") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("forcedOpponentScoreApplied: false") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchGateSelectivityVolumeRegressionFix6P.includes("persistenceUsedForScoring: false") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchGateSelectivityVolumeRegressionFix6P.includes("unknownScoringFamilyCount: 0") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchGateSelectivityVolumeRegressionFix6P.includes("penaltyShotActiveLeakageCount: 0") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("coach product contains selectivity volume section", coachProductHtml.includes("Selectivite du danger et volume") && coachProductHtml.includes("Sprint 6P"), "product 6P visible"),
+    check("coach export contains selectivity volume section", coachExportHtml.includes("Selectivite du danger et volume") && coachExportHtml.includes("Sprint 6P"), "export 6P visible"),
+    check("coach export avoids forbidden 6P wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score (applique|detecte|actif)|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6P source files", bundleSimulation.includes("src/simulation/fullMatch/gateSelectivityVolumeWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchGateSelectivityAudit.ts") && bundleReports.includes("src/reports/fullMatchGateSelectivityVolumeRegressionFix.ts") && bundleReports.includes("src/reports/fullMatchGateSelectivityVolumeRegressionFix.test.ts"), "6P source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchGateSelectivityVolumeRegressionFix6PValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchGateSelectivityVolumeRegressionFix6P.includes("## Recommendation") && fullMatchGateSelectivityVolumeRegressionFix6P.includes("Sprint 6Q"), "6P recommendation visible"),
   ];
   const sprint6JChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7872,6 +7925,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6P - Gate Selectivity")
+      ? sprint6PChecks
     : activeConfig.sprintName.includes("Sprint 6O - Earned Danger Reintroduction")
       ? sprint6OChecks
     : activeConfig.sprintName.includes("Sprint 6N - Earned Danger Gate")

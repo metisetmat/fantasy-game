@@ -1,28 +1,29 @@
-# Sprint 6O Share Pack
+# Sprint 6P Share Pack
 
-Current sprint: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
+Current sprint: Sprint 6P - Gate Selectivity & Volume Regression Fix
 
 ## Purpose
-This minimal review pack proves that the 6N earned-danger gate is tuned from a hard barrier into a selective filter. It reintroduces earned and borderline danger only when support, spacing, tactical edge, attributes, fatigue, pressure, or mistake context justify it.
+This minimal review pack proves that the 6O earned-danger gate no longer treats negative contexts as positive reasons, and that scoring volume is reduced without changing scoring values or rewriting score events.
 
-## Primary files
-- fullmatch-earned-danger-gate-tuning-6o.md
-- validation.fullmatch-earned-danger-gate-tuning-6o.md
+## Primary Files
+- fullmatch-gate-selectivity-volume-regression-fix-6p.md
+- validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md
 - coach-report.export.html
-- coach-report.product.html
 - scoring-events-summary.md
-- bundle__simulation.md
-- bundle__reports.md
-- bundle__contracts.md
+- validation.share-pack.md
 
-## Guardrails
-- No score cap.
-- No post-hoc score rewrite.
-- No forced opponent score.
-- No scoring-event deletion.
-- No MatchBonusEvent mutation.
-- Score remains derived from score_change consequences.
-- 6N remains the baseline; 6O only tunes the gate.
+## What To Check
+- earnedDangerRate is reduced from the 6O permissive baseline but remains above zero.
+- resetToDangerRate and scoring opportunity volume are reduced.
+- LOW_SPACING, IMMEDIATE_AFTER_RESET, POST_SCORE_CONTEXT, and LEADING_TEAM_REATTACK are negative contexts, not positive gate reasons.
+- score_change remains the official score source.
+- no score caps, post-hoc rewrites, forced scores, event deletions, or MatchBonusEvent changes are used.
+- the coach report includes the Selectivite du danger et volume section.
 
-## Next Sprint
-Review whether route economy remains healthy after selective earned danger returns.
+## Commands
+- npm run build
+- npm run typecheck
+- npm run test:contracts
+- npm run test:all
+- npm run reports:coach
+- npm run reports:share
