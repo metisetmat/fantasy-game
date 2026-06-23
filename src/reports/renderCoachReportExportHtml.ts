@@ -34,6 +34,9 @@ import type { FullMatchSegmentScoringDensityCalibrationModel } from "./fullMatch
 import type { FullMatchTeamOpportunityBalanceCalibrationModel } from "./fullMatchTeamOpportunityBalanceCalibration";
 import type { FullMatchDominanceChainCalibrationModel } from "./fullMatchDominanceChainCalibration";
 import type { FullMatchBreakEventPostScoreResetCalibrationModel } from "./fullMatchBreakEventPostScoreResetCalibration";
+import type {
+  FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel,
+} from "./fullMatchGoalkeeperSecureResetBreakSpecificityCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2794,6 +2797,75 @@ export function renderFullMatchBreakEventPostScoreResetCalibrationSection(
     </section>`;
 }
 
+export function renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(
+  model: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Arret gardien securise et reset">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6L</p>
+        <h3>Arret gardien securise et reset</h3>
+        <p>
+          6L relie l'arret gardien securise, le reset post-score et la rupture de momentum a des evenements
+          officiels non scoring. Le score reste issu des evenements officiels, sans score force, sans plafond artificiel,
+          sans suppression d'evenements et sans reecriture apres coup.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gardien secure</h4>
+          <ul>
+            <li>Break count: ${model.goalkeeperSecureBreakCountBefore} -> ${model.goalkeeperSecureBreakCountAfter}</li>
+            <li>Break dominance: ${model.goalkeeperSecureBreaksDominanceRateBefore}% -> ${model.goalkeeperSecureBreaksDominanceRateAfter}%</li>
+            <li>Possession securisee: ${model.goalkeeperSecureToSafePossessionRateBefore}% -> ${model.goalkeeperSecureToSafePossessionRateAfter}%</li>
+            <li>Reattaque contre: ${model.goalkeeperSecureImmediateReattackAgainstRateBefore}% -> ${model.goalkeeperSecureImmediateReattackAgainstRateAfter}%</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Reset post-score</h4>
+          <ul>
+            <li>Reattaque immediate: ${model.postScoreImmediateReattackRateBefore}% -> ${model.postScoreImmediateReattackRateAfter}%</li>
+            <li>Reset protege: ${model.postScoreResetProtectedRateBefore}% -> ${model.postScoreResetProtectedRateAfter}%</li>
+            <li>Premiere possession concedante: ${model.concedingTeamFirstPossessionRateBefore}% -> ${model.concedingTeamFirstPossessionRateAfter}%</li>
+            <li>Reset vers neutre: ${model.resetBreakSpecificityAuditSummary.resetToNeutralRate}%</li>
+            <li>Reset vers possession securisee: ${model.resetBreakSpecificityAuditSummary.resetToSafePossessionRate}%</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Dominance decay clarifie</h4>
+          <ul>
+            <li>Fenêtres eligibles: ${model.dominanceDecayEligibleCountAfter}</li>
+            <li>Fenêtres avec decay: ${model.dominanceDecayAppliedWindowCount}</li>
+            <li>Applications totales: ${model.dominanceDecayApplicationsTotal}</li>
+            <li>Couverture fenêtres: ${model.dominanceDecayWindowCoverageAfter}%</li>
+            <li>Applications / fenêtre eligible: ${model.dominanceDecayApplicationsPerEligibleWindow}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservation</h4>
+          <ul>
+            <li>Densite preservee: ${model.densityCalibrationPreserved ? "oui" : "non"}</li>
+            <li>Equilibre equipe preserve: ${model.teamOpportunityBalancePreserved ? "oui" : "non"}</li>
+            <li>Chaines 6J/6K preservees: ${model.dominanceChainsPreservedOrImproved ? "oui" : "non"}</li>
+            <li>Mix familles preserve: ${model.routeFamilyMixPreserved ? "oui" : "non"}</li>
+            <li>Garde-fous score propres: ${model.scoreFromScoreChangeAllRuns && !model.scoreCapApplied && !model.forcedOpponentScoreApplied && !model.forcedTrailingTeamScoreApplied ? "oui" : "non"}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${model.recommendation}. La lecture reste une preuve batch 50 matchs: elle surveille les resets et
+        les possessions securisees sans promettre un ecart artificiellement serre.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -2934,6 +3006,36 @@ function renderFullMatchBreakEventPostScoreResetCalibrationAppendix(
         <li>density preserved: ${model.densityCalibrationPreserved}</li>
         <li>team balance preserved: ${model.teamOpportunityBalancePreserved}</li>
         <li>route family diversity preserved: ${model.routeFamilyMixPreserved}</li>
+        <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
+      </ul>
+    </article>`;
+}
+
+function renderFullMatchGoalkeeperSecureResetBreakSpecificityAppendix(
+  model: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <article class="premium-appendix-card">
+      <h3>Gardien secure et reset 6L</h3>
+      <ul>
+        <li>status: ${escapeHtml(model.status)}</li>
+        <li>scope: ${escapeHtml(model.scope)}</li>
+        <li>version: ${escapeHtml(model.version)}</li>
+        <li>match count: ${model.matchCount}</li>
+        <li>goalkeeper secure break rate: ${model.goalkeeperSecureBreaksDominanceRateBefore}% -> ${model.goalkeeperSecureBreaksDominanceRateAfter}%</li>
+        <li>goalkeeper safe possession rate: ${model.goalkeeperSecureToSafePossessionRateBefore}% -> ${model.goalkeeperSecureToSafePossessionRateAfter}%</li>
+        <li>post-score immediate reattack: ${model.postScoreImmediateReattackRateBefore}% -> ${model.postScoreImmediateReattackRateAfter}%</li>
+        <li>post-score protected reset: ${model.postScoreResetProtectedRateBefore}% -> ${model.postScoreResetProtectedRateAfter}%</li>
+        <li>conceding first possession: ${model.concedingTeamFirstPossessionRateBefore}% -> ${model.concedingTeamFirstPossessionRateAfter}%</li>
+        <li>dominance decay applications per eligible window: ${model.dominanceDecayApplicationsPerEligibleWindow}</li>
+        <li>dominance decay window coverage: ${model.dominanceDecayWindowCoverageAfter}%</li>
+        <li>density preserved: ${model.densityCalibrationPreserved}</li>
+        <li>team balance preserved: ${model.teamOpportunityBalancePreserved}</li>
+        <li>route family mix preserved: ${model.routeFamilyMixPreserved}</li>
         <li>warnings: ${model.warnings.map(escapeHtml).join(", ")}</li>
       </ul>
     </article>`;
@@ -3825,6 +3927,7 @@ function renderAppendices(input: {
   readonly fullMatchTeamOpportunityBalanceCalibration?: FullMatchTeamOpportunityBalanceCalibrationModel;
   readonly fullMatchDominanceChainCalibration?: FullMatchDominanceChainCalibrationModel;
   readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
+  readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -3873,6 +3976,7 @@ function renderAppendices(input: {
     ${renderFullMatchTeamOpportunityBalanceCalibrationAppendix(input.fullMatchTeamOpportunityBalanceCalibration)}
     ${renderFullMatchDominanceChainCalibrationAppendix(input.fullMatchDominanceChainCalibration)}
     ${renderFullMatchBreakEventPostScoreResetCalibrationAppendix(input.fullMatchBreakEventPostScoreResetCalibration)}
+    ${renderFullMatchGoalkeeperSecureResetBreakSpecificityAppendix(input.fullMatchGoalkeeperSecureResetBreakSpecificity)}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -3915,6 +4019,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchTeamOpportunityBalanceCalibration?: FullMatchTeamOpportunityBalanceCalibrationModel;
   readonly fullMatchDominanceChainCalibration?: FullMatchDominanceChainCalibrationModel;
   readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
+  readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4031,6 +4136,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchTeamOpportunityBalanceCalibrationSection(input.fullMatchTeamOpportunityBalanceCalibration),
     renderFullMatchDominanceChainCalibrationSection(input.fullMatchDominanceChainCalibration),
     renderFullMatchBreakEventPostScoreResetCalibrationSection(input.fullMatchBreakEventPostScoreResetCalibration),
+    renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(input.fullMatchGoalkeeperSecureResetBreakSpecificity),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -4105,6 +4211,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchBreakEventPostScoreResetCalibration === undefined
       ? {}
       : { fullMatchBreakEventPostScoreResetCalibration: input.fullMatchBreakEventPostScoreResetCalibration }),
+    ...(input.fullMatchGoalkeeperSecureResetBreakSpecificity === undefined
+      ? {}
+      : { fullMatchGoalkeeperSecureResetBreakSpecificity: input.fullMatchGoalkeeperSecureResetBreakSpecificity }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

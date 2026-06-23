@@ -194,12 +194,18 @@ function isReset(event: MatchEvent): boolean {
 function isDefensiveRecovery(event: MatchEvent): boolean {
   return event.eventType === "goalkeeper_action" ||
     event.eventType === "turnover" ||
-    event.tags.some((tag) => tag.includes("recovery") || tag.includes("blocked") || tag.includes("goalkeeper"));
+    event.tags.some((tag) => {
+      const normalized = tag.toLowerCase();
+      return normalized.includes("recovery") || normalized.includes("blocked") || normalized.includes("goalkeeper");
+    });
 }
 
 function isGoalkeeperSecure(event: MatchEvent): boolean {
   return event.eventType === "goalkeeper_action" ||
-    event.tags.some((tag) => tag.includes("goalkeeper") || tag.includes("gk") || tag.includes("keeper"));
+    event.tags.some((tag) => {
+      const normalized = tag.toLowerCase();
+      return normalized.includes("goalkeeper") || normalized.includes("gk") || normalized.includes("keeper");
+    });
 }
 
 function isTurnover(event: MatchEvent): boolean {

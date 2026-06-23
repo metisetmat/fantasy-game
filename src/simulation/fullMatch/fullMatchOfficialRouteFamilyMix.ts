@@ -599,6 +599,17 @@ function densitySelectedCandidate(input: {
       teamPoints > opponentPoints &&
       input.segmentIndex > 0
     );
+  const postScoreConcedingRestartWindow =
+    (
+      lastScoringCandidate !== undefined &&
+      lastScoringCandidate.teamId !== input.teamId &&
+      input.segmentIndex - lastScoringCandidate.segmentIndex <= 2
+    ) ||
+    (
+      lastScoringRouteEvent !== undefined &&
+      lastScoringRouteEvent.teamId !== input.teamId &&
+      input.segmentIndex * 100 - lastScoringRouteEvent.timestamp.tick <= 250
+    );
 
   if (continuation === undefined) {
     return selected;
@@ -610,7 +621,12 @@ function densitySelectedCandidate(input: {
           ...selected,
           reason: "Post-score reset calibration protects restart: the scoring team must pass through a neutral reset before another dangerous opportunity, without forcing opponent scores.",
         }
-      : selected;
+      : postScoreConcedingRestartWindow
+        ? {
+            ...selected,
+            reason: "Goalkeeper secure reset calibration gives the conceding team a safe restart possession after the score: the restart breaks momentum without forcing a reply score.",
+          }
+        : selected;
   }
 
   if (postScoreSameTeamReattackWindow) {
@@ -676,7 +692,9 @@ function densitySelectedCandidate(input: {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
-      reason: dominanceChainDecay || dominantTeamNeedsReset
+      reason: goalkeeperOrDefensiveResetWindow
+        ? "Goalkeeper secure reset calibration converts the secured ball into a possession reset: the goalkeeper team restarts safely and the previous danger chain is broken."
+        : dominanceChainDecay || dominantTeamNeedsReset
         ? "Dominance chain calibration selects a continuation/reset beat: repeated same-team danger now creates fatigue, defensive adaptation, and momentum decay without forcing opponent scores."
         : routeRepeatDecay
           ? "Dominance chain calibration dampens repeated route family or zone access before another scoring opportunity without changing score values."
@@ -855,6 +873,8 @@ function eventForResolvedCandidate(input: {
     input.candidate.reason.includes("Dominance chain calibration");
   const postScoreResetApplied = input.candidate.family === "CONTINUATION" &&
     input.candidate.reason.includes("Post-score reset calibration");
+  const goalkeeperSecureResetApplied = input.candidate.family === "CONTINUATION" &&
+    input.candidate.reason.includes("Goalkeeper secure reset calibration");
   const scoreDescription = shouldScore
     ? `${team.name} marque ${points} points via ${familyLabel}.`
     : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;
@@ -948,6 +968,20 @@ function eventForResolvedCandidate(input: {
             "neutral_phase_breaks_momentum",
             "reset_breaks_dominance",
             "post_score_dominance_decay_applied",
+          ]
+        : []),
+      ...(goalkeeperSecureResetApplied
+        ? [
+            "goalkeeper_secure_reset_break_6l",
+            "GOALKEEPER_SECURE_BREAKS_CHAIN",
+            "GOALKEEPER_SECURE_POSSESSION_RESET",
+            "GOALKEEPER_SECURE_SAFE_RESTART",
+            "GOALKEEPER_SECURE_NEUTRAL_RESTART",
+            "goalkeeper_secure_breaks_dominance",
+            "goalkeeper_secure_possession_reset",
+            "goalkeeper_secure_safe_restart",
+            "neutral_phase_breaks_momentum",
+            "reset_breaks_dominance",
           ]
         : []),
     ],

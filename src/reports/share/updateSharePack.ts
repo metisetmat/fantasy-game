@@ -87,6 +87,8 @@ import {
   renderFullMatchDominanceChainCalibration6JValidation,
   renderFullMatchBreakEventPostScoreResetCalibration6KDoc,
   renderFullMatchBreakEventPostScoreResetCalibration6KValidation,
+  renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc,
+  renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -99,9 +101,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6K - Break Event And Post-Score Reset Calibration";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-break-event-post-score-reset-calibration-6k.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-break-event-post-score-reset-calibration-6k.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6L - Goalkeeper Secure & Reset Break Specificity";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-goalkeeper-secure-reset-break-specificity-6l.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2170,6 +2172,31 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchBreakEventPostScoreResetCalibration.test.ts",
         required: true,
         reason: "Sprint 6K executable test proving post-score reset protection, density preservation, route diversity, and scoring guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/goalkeeperSecureResetBreakWarnings.ts",
+        required: true,
+        reason: "Sprint 6L warning-code registry for goalkeeper secure reset, post-score restart specificity, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchGoalkeeperSecureBreakAudit.ts",
+        required: true,
+        reason: "Sprint 6L audit distinguishing observed goalkeeper secure events from official break events with reset and possession evidence",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchResetBreakSpecificityAudit.ts",
+        required: true,
+        reason: "Sprint 6L audit for protected resets, conceding-team restart possession, and scoring-team immediate reattack windows",
+      },
+      {
+        source: "src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.ts",
+        required: true,
+        reason: "Sprint 6L full-match goalkeeper secure/reset specificity calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchGoalkeeperSecureResetBreakSpecificityCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6L executable test proving goalkeeper secure resets, post-score specificity, dominance decay wording, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4328,6 +4355,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6L")) {
+    return renderFullMatchGoalkeeperSecureResetBreakSpecificity6LDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6K")) {
     return renderFullMatchBreakEventPostScoreResetCalibration6KDoc(fullMatchTraceValidationModel());
   }
@@ -6572,6 +6603,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6L")) {
+    return renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6K")) {
     return renderFullMatchBreakEventPostScoreResetCalibration6KValidation(fullMatchTraceValidationModel());
   }
@@ -8762,6 +8797,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6L")) {
+    return [
+      "# Sprint 6L Share Pack",
+      "",
+      "Current sprint: Sprint 6L - Goalkeeper Secure & Reset Break Specificity",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-goalkeeper-secure-reset-break-specificity-6l.md",
+      "- validation.fullmatch-goalkeeper-secure-reset-break-specificity-6l.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 6L connects goalkeeper secure events, post-score restarts, and reset break specificity to official non-scoring reset markers. It preserves scoring values, score_change as the official score source, batch/live separation, density, team opportunity balance, dominance-chain gains, and SHOT/TRY/DROP/CONVERSION/CONTINUATION route diversity.",
+      "",
+      "## Review steps",
+      "",
+      "1. Confirm validation.share-pack.md is PASS.",
+      "2. Read the 6L calibration report for goalkeeper secure and reset specificity metrics.",
+      "3. Inspect the 6L validation checklist for score-path and guardrail evidence.",
+      "4. Use coach-report.export.html to verify the coach-facing goalkeeper secure/reset section.",
+      "5. Use bundle__simulation.md and bundle__reports.md for source excerpts.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6K")) {
     return [
       "# Sprint 6K Share Pack",
