@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6M - Reset Break Blowout Economy",
+  name: "Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-reset-break-blowout-economy-6m.md",
-    "validation.fullmatch-reset-break-blowout-economy-6m.md",
+    "fullmatch-earned-danger-gate-6n.md",
+    "validation.fullmatch-earned-danger-gate-6n.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6M share pack is current, complete, and below 20 files",
-    "fullmatch-reset-break-blowout-economy-6m.md": "proves reset-to-danger quality, blowout root causes, close/competitive game metrics, and scoring guardrails without forced scores",
-    "validation.fullmatch-reset-break-blowout-economy-6m.md": "validates the 6M blowout economy audit, reset-to-danger quality audit, route diversity, density preservation, team balance, and no forced-score guardrails",
-    "README.md": "compact reviewer orientation for the 6M share pack",
-    "manifest.md": "compatibility manifest listing the 6M share pack files",
+    "validation.share-pack.md": "proves the 6N share pack is current, complete, and below 20 files",
+    "fullmatch-earned-danger-gate-6n.md": "proves reset-to-danger now passes through an earned danger gate before becoming danger, with downgrade and preservation evidence",
+    "validation.fullmatch-earned-danger-gate-6n.md": "validates the 6N earned danger gate audit, 6M baseline comparison, route diversity, density preservation, and no forced-score guardrails",
+    "README.md": "compact reviewer orientation for the 6N share pack",
+    "manifest.md": "compatibility manifest listing the 6N share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

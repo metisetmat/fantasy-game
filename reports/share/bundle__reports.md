@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6M - Reset Break Blowout Economy. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -98,6 +98,8 @@ import {
   renderFullMatchGoalkeeperSecureResetBreakSpecificity6LValidation,
   renderFullMatchResetBreakBlowoutEconomy6MDoc,
   renderFullMatchResetBreakBlowoutEconomy6MValidation,
+  renderFullMatchEarnedDangerGate6NDoc,
+  renderFullMatchEarnedDangerGate6NValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -110,9 +112,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6M - Reset Break Blowout Economy";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-reset-break-blowout-economy-6m.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-reset-break-blowout-economy-6m.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-earned-danger-gate-6n.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-earned-danger-gate-6n.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2231,6 +2233,31 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchResetBreakBlowoutEconomyCalibration.test.ts",
         required: true,
         reason: "Sprint 6M executable test proving reset-to-danger quality, blowout root causes, score-path guardrails, and scoring constants",
+      },
+      {
+        source: "src/simulation/fullMatch/earnedDangerGateWarnings.ts",
+        required: true,
+        reason: "Sprint 6N warning-code registry for earned danger gating, reset-to-danger downgrades, and preservation guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/earnedDangerGate.ts",
+        required: true,
+        reason: "Sprint 6N earned danger gate model that classifies reset follow-ups before allowing danger after a reset",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchEarnedDangerGateAudit.ts",
+        required: true,
+        reason: "Sprint 6N audit proving reset-to-danger outcomes are earned, borderline, downgraded, or blocked with reason-code evidence",
+      },
+      {
+        source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
+        required: true,
+        reason: "Sprint 6N full-match earned danger gate calibration model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchEarnedDangerGateCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6N executable test proving earned danger gate counters, preservation guardrails, and scoring constants",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4389,6 +4416,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6N")) {
+    return renderFullMatchEarnedDangerGate6NDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6M")) {
     return renderFullMatchResetBreakBlowoutEconomy6MDoc(fullMatchTraceValidationModel());
   }
@@ -6641,6 +6672,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6N")) {
+    return renderFullMatchEarnedDangerGate6NValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6M")) {
     return renderFullMatchResetBreakBlowoutEconomy6MValidation(fullMatchTraceValidationModel());
   }
@@ -8839,6 +8874,39 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6N")) {
+    return [
+      "# Sprint 6N Share Pack",
+      "",
+      "Current sprint: Sprint 6N - Earned Danger Gate & Reset-to-Danger Root Fix",
+      "",
+      "## Purpose",
+      "This minimal review pack proves that reset-to-danger now passes through an earned danger gate before becoming a scoring opportunity. It keeps scoring constants, official route diversity, score_change authority, and the 6M baseline visible.",
+      "",
+      "## Primary files",
+      "- fullmatch-earned-danger-gate-6n.md",
+      "- validation.fullmatch-earned-danger-gate-6n.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "- bundle__contracts.md",
+      "",
+      "## Guardrails",
+      "- No score cap.",
+      "- No post-hoc score rewrite.",
+      "- No forced opponent score.",
+      "- No scoring-event deletion.",
+      "- No MatchBonusEvent mutation.",
+      "- Score remains derived from score_change consequences.",
+      "",
+      "## Next Sprint",
+      "Review 6N output before Sprint 6O focuses on increasing truly earned danger rather than restoring automatic reset-to-danger.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6M")) {
     return [
       "# Sprint 6M Share Pack",
@@ -26427,6 +26495,7 @@ import { currentFullMatchDominanceChainCalibrationModel } from "./fullMatchDomin
 import { currentFullMatchBreakEventPostScoreResetCalibrationModel } from "./fullMatchBreakEventPostScoreResetCalibration";
 import { currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel } from "./fullMatchGoalkeeperSecureResetBreakSpecificityCalibration";
 import { currentFullMatchResetBreakBlowoutEconomyCalibrationModel } from "./fullMatchResetBreakBlowoutEconomyCalibration";
+import { currentFullMatchEarnedDangerGateCalibrationModel } from "./fullMatchEarnedDangerGateCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26456,6 +26525,7 @@ import {
   renderFullMatchBreakEventPostScoreResetCalibrationSection,
   renderFullMatchGoalkeeperSecureResetBreakSpecificitySection,
   renderFullMatchResetBreakBlowoutEconomySection,
+  renderFullMatchEarnedDangerGateSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26482,6 +26552,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchBreakEventPostScoreResetCalibration = currentFullMatchBreakEventPostScoreResetCalibrationModel();
   const fullMatchGoalkeeperSecureResetBreakSpecificity = currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel();
   const fullMatchResetBreakBlowoutEconomy = currentFullMatchResetBreakBlowoutEconomyCalibrationModel();
+  const fullMatchEarnedDangerGate = currentFullMatchEarnedDangerGateCalibrationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -26491,6 +26562,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchBreakEventPostScoreResetCalibrationSection(fullMatchBreakEventPostScoreResetCalibration),
     renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(fullMatchGoalkeeperSecureResetBreakSpecificity),
     renderFullMatchResetBreakBlowoutEconomySection(fullMatchResetBreakBlowoutEconomy),
+    renderFullMatchEarnedDangerGateSection(fullMatchEarnedDangerGate),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26507,6 +26579,7 @@ export function writeLatestCoachReport(): void {
     fullMatchBreakEventPostScoreResetCalibration,
     fullMatchGoalkeeperSecureResetBreakSpecificity,
     fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -26691,6 +26764,7 @@ export function writeLatestCoachReport(): void {
     fullMatchBreakEventPostScoreResetCalibration,
     fullMatchGoalkeeperSecureResetBreakSpecificity,
     fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

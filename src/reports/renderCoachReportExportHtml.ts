@@ -40,6 +40,9 @@ import type {
 import type {
   FullMatchResetBreakBlowoutEconomyCalibrationModel,
 } from "./fullMatchResetBreakBlowoutEconomyCalibration";
+import type {
+  FullMatchEarnedDangerGateCalibrationModel,
+} from "./fullMatchEarnedDangerGateCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -2938,6 +2941,77 @@ export function renderFullMatchResetBreakBlowoutEconomySection(
     </section>`;
 }
 
+export function renderFullMatchEarnedDangerGateSection(
+  model: FullMatchEarnedDangerGateCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Danger merite apres reset">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6N</p>
+        <h3>Danger merite apres reset</h3>
+        <p>
+          6N ajoute un gate de danger avant toute transformation reset -> situation dangereuse. Il distingue danger merite,
+          danger borderline et danger automatique suspecte, sans score force, sans cap, sans suppression d'evenements
+          et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate de danger</h4>
+          <ul>
+            <li>Reset vers danger immediat: ${model.resetToImmediateDangerRateBefore}% -> ${model.resetToImmediateDangerRateAfter}%</li>
+            <li>Danger automatique suspecte: ${model.automaticDangerSuspicionRateBefore}% -> ${model.automaticDangerSuspicionRateAfter}%</li>
+            <li>Danger merite: ${model.earnedDangerRateBefore}% -> ${model.earnedDangerRateAfter}%</li>
+            <li>Danger bloque par gate: ${model.dangerBlockedByGateRateAfter}%</li>
+            <li>Phase neutre: ${model.dangerDowngradedToNeutralRateAfter}%</li>
+            <li>Possession securisee: ${model.dangerDowngradedToSafePossessionRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Qualite du danger</h4>
+          <ul>
+            <li>Sans support: ${model.resetToDangerWithoutSupportCountBefore} -> ${model.resetToDangerWithoutSupportCountAfter}</li>
+            <li>Sans edge tactique: ${model.resetToDangerWithoutTacticalEdgeCountBefore} -> ${model.resetToDangerWithoutTacticalEdgeCountAfter}</li>
+            <li>Sans edge attribut: ${model.resetToDangerWithoutAttributeEdgeCountBefore} -> ${model.resetToDangerWithoutAttributeEdgeCountAfter}</li>
+            <li>Malgre gardien secure: ${model.resetToDangerDespiteGoalkeeperSecureCountBefore} -> ${model.resetToDangerDespiteGoalkeeperSecureCountAfter}</li>
+            <li>Gate connecte: ${model.earnedDangerGateConnected ? "oui" : "non"}</li>
+            <li>Gate effectif: ${model.earnedDangerGateEffective ? "oui" : "non"}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du match</h4>
+          <ul>
+            <li>Blowout rate: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Match serre: ${model.closeGameRateBefore}% -> ${model.closeGameRateAfter}%</li>
+            <li>Match competitif: ${model.competitiveGameRateBefore}% -> ${model.competitiveGameRateAfter}%</li>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Statut: ${model.status}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Gardien secure: ${model.goalkeeperSecureResetPreserved ? "preserve" : "a surveiller"}</li>
+            <li>Reset post-score: ${model.postScoreResetPreserved ? "preserve" : "a surveiller"}</li>
+            <li>Dominance chain: ${model.dominanceChainsPreservedOrImproved ? "preserve" : "a surveiller"}</li>
+            <li>Densite: ${model.densityCalibrationPreserved ? "preservee" : "a surveiller"}</li>
+            <li>Mix familles: ${model.routeFamilyMixPreserved ? "preserve" : "a surveiller"}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${model.recommendation}. Prochaine lecture: ${model.nextSprintRecommendation}.
+        Le gate intervient avant danger, scoring opportunity et score_change; les diagnostics ne remplacent jamais le score officiel.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4001,6 +4075,7 @@ function renderAppendices(input: {
   readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
   readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
   readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
+  readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4094,6 +4169,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchBreakEventPostScoreResetCalibration?: FullMatchBreakEventPostScoreResetCalibrationModel;
   readonly fullMatchGoalkeeperSecureResetBreakSpecificity?: FullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel;
   readonly fullMatchResetBreakBlowoutEconomy?: FullMatchResetBreakBlowoutEconomyCalibrationModel;
+  readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4212,6 +4288,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchBreakEventPostScoreResetCalibrationSection(input.fullMatchBreakEventPostScoreResetCalibration),
     renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(input.fullMatchGoalkeeperSecureResetBreakSpecificity),
     renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy),
+    renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -4289,6 +4366,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchGoalkeeperSecureResetBreakSpecificity === undefined
       ? {}
       : { fullMatchGoalkeeperSecureResetBreakSpecificity: input.fullMatchGoalkeeperSecureResetBreakSpecificity }),
+    ...(input.fullMatchEarnedDangerGate === undefined
+      ? {}
+      : { fullMatchEarnedDangerGate: input.fullMatchEarnedDangerGate }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
