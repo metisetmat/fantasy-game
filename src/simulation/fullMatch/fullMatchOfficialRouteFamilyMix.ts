@@ -449,6 +449,48 @@ function selectCandidate(candidates: readonly OfficialRouteFamilyCandidate[]): O
   return sorted[0] ?? (candidates[0] as OfficialRouteFamilyCandidate);
 }
 
+function previousSelectedOpportunities(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly segmentIndex: number;
+}): readonly OfficialRouteFamilyCandidate[] {
+  return input.state.candidates
+    .filter((candidate) =>
+      candidate.selected &&
+      candidate.family !== "CONTINUATION" &&
+      candidate.segmentIndex < input.segmentIndex
+    )
+    .sort((a, b) => a.segmentIndex - b.segmentIndex);
+}
+
+function consecutiveSameTeamOpportunityCount(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly teamId: TeamId;
+  readonly segmentIndex: number;
+}): number {
+  let count = 0;
+  for (const candidate of [...previousSelectedOpportunities(input)].reverse()) {
+    if (candidate.teamId !== input.teamId) {
+      break;
+    }
+    count += 1;
+  }
+  return count;
+}
+
+function recentSameZoneOpportunityCount(input: {
+  readonly state: FullMatchOfficialRouteFamilyMixState;
+  readonly selected: OfficialRouteFamilyCandidate;
+  readonly segmentIndex: number;
+}): number {
+  return previousSelectedOpportunities(input)
+    .filter((candidate) =>
+      candidate.teamId === input.selected.teamId &&
+      candidate.targetZone === input.selected.targetZone &&
+      input.segmentIndex - candidate.segmentIndex <= 4
+    )
+    .length;
+}
+
 function densitySelectedCandidate(input: {
   readonly candidates: readonly OfficialRouteFamilyCandidate[];
   readonly state: FullMatchOfficialRouteFamilyMixState;
@@ -505,26 +547,44 @@ function densitySelectedCandidate(input: {
     input.segmentIndex - lastTeamSelection.segmentIndex <= 1;
   const sameTeamChainTooLong = recentTeamOpportunities >= 2;
   const sameFamilyRepeatTooHigh = recentSameFamily >= 1 && selected.family !== "CONVERSION_GOAL";
+  const sameZoneRepeatTooHigh = recentSameZoneOpportunityCount({
+    state: input.state,
+    selected,
+    segmentIndex: input.segmentIndex,
+  }) >= 2 && selected.family !== "CONVERSION_GOAL";
+  const consecutiveSameTeamOpportunities = consecutiveSameTeamOpportunityCount({
+    state: input.state,
+    teamId: input.teamId,
+    segmentIndex: input.segmentIndex,
+  });
   const pressureForcesNeutralPhase = pressureFatigueLoad + deterministicBreak >= 92;
   const plannedNeutralBeat = (input.segmentIndex + deterministicNoise(`${input.seed}:${input.teamId}:neutral-offset`)) % 4 === 0;
   const dominantTeamNeedsReset = scoreDelta > 8 &&
     deterministicNoise(`${input.seed}:${input.teamId}:${input.segmentIndex}:dominance-dampening`) >= 9;
+  const dominanceChainDecay =
+    consecutiveSameTeamOpportunities >= 2 ||
+    (consecutiveSameTeamOpportunities >= 1 && scoreDelta > 0) ||
+    (recentTeamOpportunities >= 1 && pressureFatigueLoad + deterministicBreak >= 78);
+  const routeRepeatDecay = sameFamilyRepeatTooHigh || sameZoneRepeatTooHigh;
 
   if (
     possessionResetWindow ||
     goalkeeperOrDefensiveResetWindow ||
     sameTeamChainTooLong ||
-    sameFamilyRepeatTooHigh ||
+    routeRepeatDecay ||
     pressureForcesNeutralPhase ||
     plannedNeutralBeat ||
-    dominantTeamNeedsReset
+    dominantTeamNeedsReset ||
+    dominanceChainDecay
   ) {
     return {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
-      reason: dominantTeamNeedsReset
-        ? "Team opportunity balance calibration dampens a dominant-team chain through a continuation/reset beat without deleting events or changing score values."
-        : "Segment density calibration selects continuation/reset before another scoring opportunity: recent danger, pressure, fatigue, or route repetition interrupts the chain.",
+      reason: dominanceChainDecay || dominantTeamNeedsReset
+        ? "Dominance chain calibration selects a continuation/reset beat: repeated same-team danger now creates fatigue, defensive adaptation, and momentum decay without forcing opponent scores."
+        : routeRepeatDecay
+          ? "Dominance chain calibration dampens repeated route family or zone access before another scoring opportunity without changing score values."
+          : "Segment density calibration selects continuation/reset before another scoring opportunity: recent danger, pressure, fatigue, or route repetition interrupts the chain.",
     };
   }
 
@@ -692,6 +752,8 @@ function eventForResolvedCandidate(input: {
     ? input.matchInput.awayTeam
     : input.matchInput.homeTeam;
   const familyLabel = routeFamilyCoachLabel(input.candidate.family);
+  const dominanceChainDecayApplied = input.candidate.family === "CONTINUATION" &&
+    input.candidate.reason.includes("Dominance chain calibration");
   const scoreDescription = shouldScore
     ? `${team.name} marque ${points} points via ${familyLabel}.`
     : `${team.name} poursuit l'action via ${familyLabel} sans modifier le score.`;
@@ -768,6 +830,16 @@ function eventForResolvedCandidate(input: {
       `official_route_family_${input.candidate.family}`,
       `official_route_family_outcome_${input.candidate.outcome}`,
       ...(shouldScore ? ["official_route_family_non_shot_score_change"] : ["official_route_family_non_scoring_outcome"]),
+      ...(dominanceChainDecayApplied
+        ? [
+            "dominance_chain_calibration_6j",
+            "dominance_decay_applied",
+            "neutral_phase_breaks_momentum",
+            input.candidate.reason.includes("repeated route family or zone")
+              ? "route_family_repeat_dampened"
+              : "reset_breaks_dominance",
+          ]
+        : []),
     ],
     narrativeWeight: shouldScore ? 82 : 48,
   };

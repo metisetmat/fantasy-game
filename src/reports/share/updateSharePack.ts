@@ -83,6 +83,8 @@ import {
   renderFullMatchSegmentScoringDensityCalibration6HValidation,
   renderFullMatchTeamOpportunityBalanceCalibration6IDoc,
   renderFullMatchTeamOpportunityBalanceCalibration6IValidation,
+  renderFullMatchDominanceChainCalibration6JDoc,
+  renderFullMatchDominanceChainCalibration6JValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -95,9 +97,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6I - Team Opportunity Balance Calibration";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-team-opportunity-balance-calibration-6i.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-team-opportunity-balance-calibration-6i.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6J - Team Response And Dominance Chain Follow-up";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-dominance-chain-calibration-6j.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-dominance-chain-calibration-6j.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2126,6 +2128,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchTeamOpportunityBalanceCalibration.test.ts",
         required: true,
         reason: "Sprint 6I executable test proving team balance metrics, density preservation, route diversity, and scoring guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/dominanceChainWarnings.ts",
+        required: true,
+        reason: "Sprint 6J warning-code registry for dominance-chain decay, break events, and guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchDominanceChainAudit.ts",
+        required: true,
+        reason: "Sprint 6J official timeline audit for same-team chains, same-family repeats, reset breaks, recovery breaks, and dominance warnings",
+      },
+      {
+        source: "src/reports/fullMatchDominanceChainCalibration.ts",
+        required: true,
+        reason: "Sprint 6J full-match dominance-chain calibration model, batch proof, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchDominanceChainCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6J executable test proving dominance-chain reduction, density preservation, route diversity, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4284,6 +4306,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6J")) {
+    return renderFullMatchDominanceChainCalibration6JDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6I")) {
     return renderFullMatchTeamOpportunityBalanceCalibration6IDoc(fullMatchTraceValidationModel());
   }
@@ -6520,6 +6546,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6J")) {
+    return renderFullMatchDominanceChainCalibration6JValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6I")) {
     return renderFullMatchTeamOpportunityBalanceCalibration6IValidation(fullMatchTraceValidationModel());
   }
@@ -8702,6 +8732,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6J")) {
+    return [
+      "# Sprint 6J Share Pack",
+      "",
+      "Current sprint: Sprint 6J - Team Response And Dominance Chain Follow-up",
+      "",
+      "Mode: MINIMAL_REVIEW",
+      "",
+      "## What to read first",
+      "",
+      "- validation.share-pack.md",
+      "- fullmatch-dominance-chain-calibration-6j.md",
+      "- validation.fullmatch-dominance-chain-calibration-6j.md",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "",
+      "## Sprint boundary",
+      "",
+      "Sprint 6J adds dominance-chain decay and break-event evidence after Sprint 6I improved opportunity balance. It preserves 6H density, 6I route diversity, SHOT, TRY, CONVERSION-after-TRY, DROP, and CONTINUATION routes. It does not change scoring values, cap scores, rewrite scores, delete scoring events, force opponent or trailing-team scores, mutate MatchBonusEvent, or use persistence/SQLite as a scoring source.",
+      "",
+      "## Review steps",
+      "",
+      "1. Confirm validation.share-pack.md is PASS.",
+      "2. Read the 6J calibration report for before/after dominance-chain metrics.",
+      "3. Inspect the 6J validation checklist for guardrails.",
+      "4. Use coach-report.export.html to verify coach-facing wording.",
+      "5. Use bundle__simulation.md and bundle__reports.md for source excerpts.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6I")) {
     return [
       "# Sprint 6I Share Pack",

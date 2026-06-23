@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-22T22:02:54.449Z
-Task/sprint: Sprint 6I - Team Opportunity Balance Calibration
+Generated: 2026-06-23T06:40:21.338Z
+Task/sprint: Sprint 6J - Team Response And Dominance Chain Follow-up
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-team-opportunity-balance-calibration-6i.md
-- validation.fullmatch-team-opportunity-balance-calibration-6i.md
+- fullmatch-dominance-chain-calibration-6j.md
+- validation.fullmatch-dominance-chain-calibration-6j.md
 - README.md
 
 ## Bundle Files

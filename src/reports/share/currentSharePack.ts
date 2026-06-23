@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6I - Team Opportunity Balance Calibration",
+  name: "Sprint 6J - Team Response And Dominance Chain Follow-up",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-team-opportunity-balance-calibration-6i.md",
-    "validation.fullmatch-team-opportunity-balance-calibration-6i.md",
+    "fullmatch-dominance-chain-calibration-6j.md",
+    "validation.fullmatch-dominance-chain-calibration-6j.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6I share pack is current, complete, and below 20 files",
-    "fullmatch-team-opportunity-balance-calibration-6i.md": "proves home/away opportunity balance improves without forced scoring while preserving 6H density and route diversity",
-    "validation.fullmatch-team-opportunity-balance-calibration-6i.md": "validates the 6I team balance audit, trailing response metrics, dominance chains, density preservation, route diversity, and scoring guardrails",
-    "README.md": "compact reviewer orientation for the 6I share pack",
-    "manifest.md": "compatibility manifest listing the 6I share pack files",
+    "validation.share-pack.md": "proves the 6J share pack is current, complete, and below 20 files",
+    "fullmatch-dominance-chain-calibration-6j.md": "proves dominance-chain decay improves same-team opportunity runs while preserving 6H density, 6I balance, route diversity, and scoring guardrails",
+    "validation.fullmatch-dominance-chain-calibration-6j.md": "validates the 6J dominance-chain audit, break-event metrics, density preservation, route diversity, and no forced-score guardrails",
+    "README.md": "compact reviewer orientation for the 6J share pack",
+    "manifest.md": "compatibility manifest listing the 6J share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",
