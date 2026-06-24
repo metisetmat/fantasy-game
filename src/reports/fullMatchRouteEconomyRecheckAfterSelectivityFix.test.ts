@@ -26,6 +26,9 @@ assertTest(model.earnedDangerRateAfter > 0, "6Q must keep earned danger alive.")
 assertTest(model.automaticDangerSuspicionRateAfter <= 10, "6Q must not restore automatic danger.");
 assertTest(model.borderlineDangerToScoringOpportunityRateAfter < model.borderlineDangerToScoringOpportunityRateBefore, "6Q must reduce borderline danger auto-opportunities.");
 assertTest(model.continuationToScoringOpportunityRateAfter < model.continuationToScoringOpportunityRateBefore, "6Q must reduce continuation auto-opportunities.");
+assertTest(model.highQualityDangerToOpportunityRateAfter <= 100, "6Q high-quality danger opportunity rate must use a high-quality numerator.");
+assertTest(model.mediumQualityDangerToOpportunityRateAfter <= 100, "6Q medium-quality danger opportunity rate must use a medium-quality numerator.");
+assertTest(model.lowQualityDangerToOpportunityRateAfter <= 100, "6Q low-quality danger opportunity rate must use a low-quality numerator.");
 assertTest(model.halfChanceRateAfter > 0, "6Q must add a half-chance layer.");
 assertTest(model.forcedDefensiveActionRateAfter > 0, "6Q must add a forced-defensive-action layer.");
 assertTest(model.territorialGainRateAfter > 0, "6Q must add a territorial-gain layer.");

@@ -228,7 +228,7 @@ export interface FullMatchCloseGameDistributionCalibrationModel {
 }
 
 const MATCH_COUNT = 50;
-const CACHE_VERSION = "close-game-distribution-6t-v1";
+const CACHE_VERSION = "close-game-distribution-6t-v2";
 const CACHE_PATH = join(process.cwd(), "reports", ".cache", "fullmatch-close-game-distribution-calibration-6t.json");
 let cachedModel: FullMatchCloseGameDistributionCalibrationModel | null = null;
 
@@ -445,7 +445,6 @@ export function buildFullMatchCloseGameDistributionCalibrationModel(): FullMatch
   const scoreGapCauseAudit = auditFullMatchScoreGapCauses(reports);
   const dominanceChainAudit = aggregateDominanceAudits(reports.map(auditFullMatchDominanceChainPost6R));
   const coverageAudit = auditFullMatchCalibrationCoverage(reports);
-  const routeAudit = auditFullMatchRouteEconomyRecheck({ ...reports[0] } as MatchReport);
   const routeAudits = reports.map(auditFullMatchRouteEconomyRecheck);
   const outcomeAudits = reports.map(auditFullMatchEarnedDangerOutcomeDistribution);
   const teamSummary = summarizeTeamOpportunityBalanceAudit(reports.map(auditFullMatchTeamOpportunityBalance));
@@ -454,6 +453,7 @@ export function buildFullMatchCloseGameDistributionCalibrationModel(): FullMatch
   const totalSegments = reports.map(auditFullMatchTeamOpportunityBalance).reduce((sum, audit) => sum + audit.rows.length, 0);
   const routeWindowCount = routeAudits.reduce((sum, audit) => sum + audit.earnedDangerWindowCount, 0);
   const earnedToOpportunity = routeAudits.reduce((sum, audit) => sum + audit.earnedDangerToOpportunityCount, 0);
+  const lowQualityDangerConvertedToOpportunityCount = routeAudits.reduce((sum, audit) => sum + audit.lowQualityDangerConvertedToOpportunityCount, 0);
   const highQualityCount = outcomeAudits.reduce((sum, audit) => sum + audit.highQualityDangerCount, 0);
   const highQualityToOpportunity = outcomeAudits.reduce((sum, audit) => sum + audit.highQualityToScoringOpportunityCount, 0);
   const dangerWindows = outcomeAudits.reduce((sum, audit) => sum + audit.earnedDangerWindowCount + audit.borderlineDangerWindowCount, 0);
@@ -583,9 +583,9 @@ export function buildFullMatchCloseGameDistributionCalibrationModel(): FullMatch
     fatigueMismatchImpactAfter: scoreGapCauseAudit.fatigueMismatchSignalCount,
     routeFamilyDiversityPreserved: pointShare(reports, "TRY_TOUCHDOWN") > 0 && pointShare(reports, "DROP_GOAL") > 0 && (teamSummary.home.routeFamilyMix.CONTINUATION + teamSummary.away.routeFamilyMix.CONTINUATION) > 0,
     routeFamilyMixPreserved: true,
-    gateSelectivityPreserved: routeAudit.lowQualityDangerConvertedToOpportunityCount === 0,
+    gateSelectivityPreserved: lowQualityDangerConvertedToOpportunityCount === 0,
     earnedDangerPreserved: routeWindowCount > 0,
-    automaticDangerStillBlocked: routeAudit.lowQualityDangerConvertedToOpportunityCount === 0,
+    automaticDangerStillBlocked: lowQualityDangerConvertedToOpportunityCount === 0,
     densityCalibrationPreserved: average(points) >= 18 && round(scoringEvents / reports.length) >= 5.5 && round(scoringOpportunities / reports.length) >= 13,
     teamOpportunityBalancePreserved: teamSummary.opportunityBalanceIndex >= 70,
     dominanceChainsPreservedOrImproved: correctedMaxAfter <= 4,

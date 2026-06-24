@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-24T16:01:09.430Z
+Generated timestamp: 2026-06-24T16:22:12.609Z
 Task/sprint name: Sprint 6T - Close Game Distribution Calibration
 Final file count: 20
 
@@ -862,14 +862,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchCloseGameDistributionCalibration.test.ts
-?? src/reports/fullMatchCloseGameDistributionCalibration.ts
-?? src/simulation/fullMatch/closeGameDistributionWarnings.ts
-?? src/simulation/fullMatch/fullMatchCloseGameDistributionAudit.ts
-?? src/simulation/fullMatch/fullMatchScoreGapCauseAudit.ts
+ M src/reports/fullMatchCloseGameDistributionCalibration.ts
+ M src/reports/fullMatchRouteEconomyRecheckAfterSelectivityFix.test.ts
+ M src/reports/fullMatchRouteEconomyRecheckAfterSelectivityFix.ts
