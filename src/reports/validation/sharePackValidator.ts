@@ -349,6 +349,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchEarnedDangerOutcomeDistribution6RValidation = readIfExists(join(shareDirectory, "validation.fullmatch-earned-danger-outcome-distribution-6r.md"));
   const fullMatchDominanceChainCalibrationCoverageFix6S = readIfExists(join(shareDirectory, "fullmatch-dominance-chain-calibration-coverage-fix-6s.md"));
   const fullMatchDominanceChainCalibrationCoverageFix6SValidation = readIfExists(join(shareDirectory, "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md"));
+  const fullMatchCloseGameDistributionCalibration6T = readIfExists(join(shareDirectory, "fullmatch-close-game-distribution-calibration-6t.md"));
+  const fullMatchCloseGameDistributionCalibration6TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-close-game-distribution-calibration-6t.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3098,6 +3100,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-earned-danger-outcome-distribution-6r.md",
     ...sprint6RForbiddenLeftovers,
   ];
+  const sprint6TExpectedFiles = sprint6SExpectedFiles.map((file) =>
+    file === "fullmatch-dominance-chain-calibration-coverage-fix-6s.md"
+      ? "fullmatch-close-game-distribution-calibration-6t.md"
+      : file === "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md"
+        ? "validation.fullmatch-close-game-distribution-calibration-6t.md"
+        : file
+  );
+  const sprint6TForbiddenLeftovers = [
+    "fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+    "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+    ...sprint6SForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4002,6 +4016,42 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEarnedDangerGateTuning6OValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
     check("recommendation visible", fullMatchEarnedDangerGateTuning6O.includes("## Recommendation") && fullMatchEarnedDangerGateTuning6O.includes("Sprint 6P"), "6O recommendation visible"),
   ];
+  const sprint6TChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, `${filesOnDisk.length}`),
+    check("final file count is 20", filesOnDisk.length === 20, `${filesOnDisk.length}`),
+    check("all expected files are copied", sprint6TExpectedFiles.every((file) => requiredCopied(file)), sprint6TExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6TExpectedFiles.every((file) => manifest.includes(file)), sprint6TExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6T", activeConfig.sprintName === "Sprint 6T - Close Game Distribution Calibration", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6TForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6TForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6T oriented", readme.includes("# Sprint 6T Share Pack") && readme.includes("fullmatch-close-game-distribution-calibration-6t.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6T report included", fullMatchCloseGameDistributionCalibration6T.includes("# Full-Match Close Game Distribution Calibration 6T") && fullMatchCloseGameDistributionCalibration6T.includes("Close Game Distribution Audit") && fullMatchCloseGameDistributionCalibration6T.includes("Score Gap Cause Audit"), "6T doc included"),
+    check("6T validation is PASS", fullMatchCloseGameDistributionCalibration6TValidation.includes("Status: PASS") && fullMatchCloseGameDistributionCalibration6TValidation.includes("close game distribution calibration model exists"), "6T validation current"),
+    check("batch match count visible", fullMatchCloseGameDistributionCalibration6T.includes("- matchCount: 50") && fullMatchCloseGameDistributionCalibration6TValidation.includes("batch 50 matches after calibration exists"), "50 matches visible"),
+    check("baseline 6S visible", fullMatchCloseGameDistributionCalibration6T.includes("DOMINANCE_CHAIN_CALIBRATION_COVERAGE_6S") && fullMatchCloseGameDistributionCalibration6TValidation.includes("baseline 6S metrics visible"), "6S baseline visible"),
+    check("close game metrics visible", fullMatchCloseGameDistributionCalibration6T.includes("closeGameRate") && fullMatchCloseGameDistributionCalibration6T.includes("competitiveGameRate") && fullMatchCloseGameDistributionCalibration6T.includes("blowoutRate") && fullMatchCloseGameDistributionCalibration6T.includes("severeBlowoutRate"), "distribution metrics visible"),
+    check("score gap causes visible", fullMatchCloseGameDistributionCalibration6T.includes("trueSkillGapSignalCount") && fullMatchCloseGameDistributionCalibration6T.includes("artificialGapSuspicionCount") && fullMatchCloseGameDistributionCalibration6T.includes("Competitive Failure Causes"), "gap causes visible"),
+    check("margin and scoreline distributions visible", fullMatchCloseGameDistributionCalibration6T.includes("Margin Bucket Distribution") && fullMatchCloseGameDistributionCalibration6T.includes("Scoreline Distribution"), "distributions visible"),
+    check("chain metric consistency fixed or documented", fullMatchCloseGameDistributionCalibration6T.includes("chainMetricConsistencyAfter: true") && fullMatchCloseGameDistributionCalibration6T.includes("dominanceChainAverageDefinition"), "chain consistency visible"),
+    check("longitudinal close/competitive/blowout visible", fullMatchCloseGameDistributionCalibration6T.includes("Longitudinal Close / Competitive / Blowout Validation") && fullMatchCloseGameDistributionCalibration6T.includes("longitudinalCloseGameStableWindows") && fullMatchCloseGameDistributionCalibration6T.includes("longitudinalCompetitiveStableWindows") && fullMatchCloseGameDistributionCalibration6T.includes("longitudinalBlowoutStableWindows"), "longitudinal metrics visible"),
+    check("score from score_change all runs", fullMatchCloseGameDistributionCalibration6T.includes("scoreFromScoreChangeAllRuns: true") && fullMatchCloseGameDistributionCalibration6TValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchCloseGameDistributionCalibration6T.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("no cap/rewrite/delete/forced score", fullMatchCloseGameDistributionCalibration6T.includes("scoreCapApplied: false") && fullMatchCloseGameDistributionCalibration6T.includes("postHocRewriteApplied: false") && fullMatchCloseGameDistributionCalibration6T.includes("scoringEventsDeleted: false") && fullMatchCloseGameDistributionCalibration6T.includes("forcedOpponentScoreApplied: false") && fullMatchCloseGameDistributionCalibration6T.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("no rubber-banding or forced comeback", fullMatchCloseGameDistributionCalibration6T.includes("rubberBandingApplied: false") && fullMatchCloseGameDistributionCalibration6T.includes("comebackForced: false") && fullMatchCloseGameDistributionCalibration6T.includes("leadingTeamScoreSuppressed: false"), "no forced comeback"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchCloseGameDistributionCalibration6TValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchCloseGameDistributionCalibration6TValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchCloseGameDistributionCalibration6T.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchCloseGameDistributionCalibration6TValidation.includes("no persistence/SQLite scoring"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchCloseGameDistributionCalibration6TValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchCloseGameDistributionCalibration6TValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("coach product contains close-game section", coachProductHtml.includes("Matchs serr&eacute;s et comp&eacute;titivit&eacute;") && coachProductHtml.includes("Sprint 6T"), "product 6T visible"),
+    check("coach export contains close-game section", coachExportHtml.includes("Matchs serr&eacute;s et comp&eacute;titivit&eacute;") && coachExportHtml.includes("Sprint 6T"), "export 6T visible"),
+    check("coach export avoids forbidden 6T wording", !/score equilibre manuellement|score ajuste|but de compensation|essai de compensation|equilibre garanti|preuve definitive|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6T source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchCloseGameDistributionAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchScoreGapCauseAudit.ts") && bundleReports.includes("src/reports/fullMatchCloseGameDistributionCalibration.ts") && bundleReports.includes("src/reports/fullMatchCloseGameDistributionCalibration.test.ts"), "6T source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchCloseGameDistributionCalibration6TValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchCloseGameDistributionCalibration6T.includes("nextSprintRecommendation") && fullMatchCloseGameDistributionCalibration6T.includes("Sprint 6U"), "6T recommendation visible"),
+  ];
+
   const sprint6SChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
@@ -8070,6 +8120,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6T - Close Game")
+      ? sprint6TChecks
     : activeConfig.sprintName.includes("Sprint 6S - Dominance Chain")
       ? sprint6SChecks
     : activeConfig.sprintName.includes("Sprint 6R - Earned Danger")

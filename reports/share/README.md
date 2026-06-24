@@ -1,27 +1,26 @@
-# Sprint 6S Share Pack
+# Sprint 6T Share Pack
 
-Current sprint: Sprint 6S - Dominance Chain Calibration Coverage Fix
+Current sprint: Sprint 6T - Close Game Distribution Calibration
 
 ## Purpose
-Review the post-6R dominance-chain limiter and calibration coverage proof: repeated opportunity dampening, chain breaks, coverage windows, non-scoring layers, and score_change guardrails.
+Review the post-6S close-game and competitive-game distribution proof: margin buckets, score-gap causes, trailing-team response, leading-team runaway control, chain metric consistency, and no-score-manipulation guardrails.
 
 ## Primary Files
-- fullmatch-dominance-chain-calibration-coverage-fix-6s.md
-- validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md
+- fullmatch-close-game-distribution-calibration-6t.md
+- validation.fullmatch-close-game-distribution-calibration-6t.md
 - coach-report.export.html
 - scoring-events-summary.md
 - validation.share-pack.md
 
 ## Expected Reading Order
 1. validation.share-pack.md
-2. validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md
-3. fullmatch-dominance-chain-calibration-coverage-fix-6s.md
+2. validation.fullmatch-close-game-distribution-calibration-6t.md
+3. fullmatch-close-game-distribution-calibration-6t.md
 4. coach-report.export.html
-5. scoring-events-summary.md
+5. bundle__simulation.md and bundle__reports.md for implementation proof
 
 ## Guardrails
-- No scoring values changed.
-- No score caps, rewrites, forced opponent scores, or event deletion.
-- Final score remains derived from official score_change consequences.
-- Batch diagnostics remain separate from live scoring.
-- Share pack remains under 20 files.
+- No scoring constants changed.
+- No score cap, rewrite, deleted event, forced score, forced comeback, or rubber-banding.
+- Official score remains derived from score_change events.
+- Route family diversity, gate selectivity, goalkeeper secure reset, and post-score reset remain visible.
