@@ -347,6 +347,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md"));
   const fullMatchEarnedDangerOutcomeDistribution6R = readIfExists(join(shareDirectory, "fullmatch-earned-danger-outcome-distribution-6r.md"));
   const fullMatchEarnedDangerOutcomeDistribution6RValidation = readIfExists(join(shareDirectory, "validation.fullmatch-earned-danger-outcome-distribution-6r.md"));
+  const fullMatchDominanceChainCalibrationCoverageFix6S = readIfExists(join(shareDirectory, "fullmatch-dominance-chain-calibration-coverage-fix-6s.md"));
+  const fullMatchDominanceChainCalibrationCoverageFix6SValidation = readIfExists(join(shareDirectory, "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3084,6 +3086,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
     ...sprint6QForbiddenLeftovers,
   ];
+  const sprint6SExpectedFiles = sprint6RExpectedFiles.map((file) =>
+    file === "fullmatch-earned-danger-outcome-distribution-6r.md"
+      ? "fullmatch-dominance-chain-calibration-coverage-fix-6s.md"
+      : file === "validation.fullmatch-earned-danger-outcome-distribution-6r.md"
+        ? "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md"
+        : file
+  );
+  const sprint6SForbiddenLeftovers = [
+    "fullmatch-earned-danger-outcome-distribution-6r.md",
+    "validation.fullmatch-earned-danger-outcome-distribution-6r.md",
+    ...sprint6RForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3987,6 +4001,39 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 6O source files", bundleSimulation.includes("src/simulation/fullMatch/earnedDangerGateTuningWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchEarnedDangerGateTuningAudit.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateTuningCalibration.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateTuningCalibration.test.ts"), "6O source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEarnedDangerGateTuning6OValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
     check("recommendation visible", fullMatchEarnedDangerGateTuning6O.includes("## Recommendation") && fullMatchEarnedDangerGateTuning6O.includes("Sprint 6P"), "6O recommendation visible"),
+  ];
+  const sprint6SChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6SExpectedFiles.every((file) => requiredCopied(file)), sprint6SExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6SExpectedFiles.every((file) => manifest.includes(file)), sprint6SExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6S", activeConfig.sprintName === "Sprint 6S - Dominance Chain Calibration Coverage Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6SForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6SForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6S oriented", readme.includes("# Sprint 6S Share Pack") && readme.includes("fullmatch-dominance-chain-calibration-coverage-fix-6s.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6S report included", fullMatchDominanceChainCalibrationCoverageFix6S.includes("# Full-Match Dominance Chain Calibration Coverage Fix 6S") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("Dominance Chain Audit") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("Calibration Coverage Audit"), "6S doc included"),
+    check("6S validation is PASS", fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("Status: PASS") && fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("dominance chain calibration coverage fix model exists"), "6S validation current"),
+    check("batch match count visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("matchCount: 50") && fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("batch 50 matches after calibration exists"), "50 matches visible"),
+    check("baseline 6R visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("Baseline 6R Summary") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("EARNED_DANGER_OUTCOME_DISTRIBUTION_6R"), "6R baseline visible"),
+    check("dominance metrics visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("dominantTeamOpportunityChainMaxAfter") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("sameTeamConsecutiveOpportunityRate"), "dominance metrics visible"),
+    check("calibration coverage metrics visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("calibrationCoverageAppliedWindowCount") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("calibrationCoverageMissingWindowCount") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("calibrationCoverageMismatchCount"), "coverage metrics visible"),
+    check("non-scoring outcome layers visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("halfChanceRate") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("territorialGainRate") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("forcedDefensiveActionRate"), "layers visible"),
+    check("longitudinal dominance visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("Longitudinal Dominance Validation") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("longitudinalDominanceStableWindows"), "longitudinal metrics visible"),
+    check("score from score_change all runs", fullMatchDominanceChainCalibrationCoverageFix6S.includes("scoreFromScoreChangeAllRuns: true") && fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchDominanceChainCalibrationCoverageFix6S.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("no score rewrite/deletion/forced score", fullMatchDominanceChainCalibrationCoverageFix6S.includes("scoreCapApplied: false") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("postHocRewriteApplied: false") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("scoringEventsDeleted: false") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("forcedOpponentScoreApplied: false") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("no persistence/SQLite scoring"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("coach product contains dominance coverage section", coachProductHtml.includes("Cha&icirc;nes de domination et couverture de calibration") && coachProductHtml.includes("Sprint 6S"), "product 6S visible"),
+    check("coach export contains dominance coverage section", coachExportHtml.includes("Cha&icirc;nes de domination et couverture de calibration") && coachExportHtml.includes("Sprint 6S"), "export 6S visible"),
+    check("coach export avoids forbidden 6S wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score (applique|detecte|actif)|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6S source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchDominanceChainPost6RAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchCalibrationCoverageAudit.ts") && bundleReports.includes("src/reports/fullMatchDominanceChainCalibrationCoverageFix.ts") && bundleReports.includes("src/reports/fullMatchDominanceChainCalibrationCoverageFix.test.ts"), "6S source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchDominanceChainCalibrationCoverageFix6SValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchDominanceChainCalibrationCoverageFix6S.includes("nextSprintRecommendation") && fullMatchDominanceChainCalibrationCoverageFix6S.includes("Sprint 6T"), "6S recommendation visible"),
   ];
   const sprint6RChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -8023,6 +8070,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6S - Dominance Chain")
+      ? sprint6SChecks
     : activeConfig.sprintName.includes("Sprint 6R - Earned Danger")
       ? sprint6RChecks
     : activeConfig.sprintName.includes("Sprint 6Q - Route Economy")

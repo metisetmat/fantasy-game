@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-24T12:57:27.108Z
-Task/sprint: Sprint 6R - Earned Danger Outcome Distribution
+Generated: 2026-06-24T14:14:58.047Z
+Task/sprint: Sprint 6S - Dominance Chain Calibration Coverage Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-earned-danger-outcome-distribution-6r.md
-- validation.fullmatch-earned-danger-outcome-distribution-6r.md
+- fullmatch-dominance-chain-calibration-coverage-fix-6s.md
+- validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md
 - README.md
 
 ## Bundle Files

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6R - Earned Danger Outcome Distribution. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6S - Dominance Chain Calibration Coverage Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -108,6 +108,8 @@ import {
   renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation,
   renderFullMatchEarnedDangerOutcomeDistribution6RDoc,
   renderFullMatchEarnedDangerOutcomeDistribution6RValidation,
+  renderFullMatchDominanceChainCalibrationCoverageFix6SDoc,
+  renderFullMatchDominanceChainCalibrationCoverageFix6SValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -120,9 +122,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6R - Earned Danger Outcome Distribution";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-earned-danger-outcome-distribution-6r.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-earned-danger-outcome-distribution-6r.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6S - Dominance Chain Calibration Coverage Fix";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-dominance-chain-calibration-coverage-fix-6s.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2268,6 +2270,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6R warning-code registry for earned danger outcome distribution and longitudinal route economy guardrails",
       },
       {
+        source: "src/simulation/fullMatch/dominanceChainCalibrationCoverageWarnings.ts",
+        required: true,
+        reason: "Sprint 6S warning-code registry for dominance-chain reduction and calibration coverage guardrails",
+      },
+      {
         source: "src/simulation/fullMatch/earnedDangerGate.ts",
         required: true,
         reason: "Sprint 6N earned danger gate model that classifies reset follow-ups before allowing danger after a reset",
@@ -2296,6 +2303,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/fullMatchEarnedDangerOutcomeDistributionAudit.ts",
         required: true,
         reason: "Sprint 6R audit measuring earned danger quality and outcome distribution across scoring and non-scoring layers",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchDominanceChainPost6RAudit.ts",
+        required: true,
+        reason: "Sprint 6S audit measuring post-6R dominance chains, repeat opportunities, chain breaks, and dampeners",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchCalibrationCoverageAudit.ts",
+        required: true,
+        reason: "Sprint 6S audit proving calibration windows carry the 6S coverage tags or are explicitly explained",
       },
       {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
@@ -2346,6 +2363,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchEarnedDangerOutcomeDistribution.test.ts",
         required: true,
         reason: "Sprint 6R executable test proving outcome distribution, longitudinal stability, and score_change guardrails",
+      },
+      {
+        source: "src/reports/fullMatchDominanceChainCalibrationCoverageFix.ts",
+        required: true,
+        reason: "Sprint 6S full-match dominance chain calibration coverage model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchDominanceChainCalibrationCoverageFix.test.ts",
+        required: true,
+        reason: "Sprint 6S executable test proving dominance-chain reduction, calibration coverage, and score_change guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4504,6 +4531,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6S")) {
+    return renderFullMatchDominanceChainCalibrationCoverageFix6SDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6R")) {
     return renderFullMatchEarnedDangerOutcomeDistribution6RDoc(fullMatchTraceValidationModel());
   }
@@ -6776,6 +6806,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6S")) {
+    return renderFullMatchDominanceChainCalibrationCoverageFix6SValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6R")) {
     return renderFullMatchEarnedDangerOutcomeDistribution6RValidation(fullMatchTraceValidationModel());
   }
@@ -8994,6 +9027,39 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6S")) {
+    return [
+      "# Sprint 6S Share Pack",
+      "",
+      "Current sprint: Sprint 6S - Dominance Chain Calibration Coverage Fix",
+      "",
+      "## Purpose",
+      "Review the post-6R dominance-chain limiter and calibration coverage proof: repeated opportunity dampening, chain breaks, coverage windows, non-scoring layers, and score_change guardrails.",
+      "",
+      "## Primary Files",
+      "- fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+      "- validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- validation.share-pack.md",
+      "",
+      "## Expected Reading Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+      "3. fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+      "4. coach-report.export.html",
+      "5. scoring-events-summary.md",
+      "",
+      "## Guardrails",
+      "- No scoring values changed.",
+      "- No score caps, rewrites, forced opponent scores, or event deletion.",
+      "- Final score remains derived from official score_change consequences.",
+      "- Batch diagnostics remain separate from live scoring.",
+      "- Share pack remains under 20 files.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6R")) {
     return [
       "# Sprint 6R Share Pack",
@@ -26755,6 +26821,7 @@ import { currentFullMatchEarnedDangerGateTuningModel } from "./fullMatchEarnedDa
 import { currentFullMatchGateSelectivityVolumeRegressionFixModel } from "./fullMatchGateSelectivityVolumeRegressionFix";
 import { currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel } from "./fullMatchRouteEconomyRecheckAfterSelectivityFix";
 import { currentFullMatchEarnedDangerOutcomeDistributionModel } from "./fullMatchEarnedDangerOutcomeDistribution";
+import { currentFullMatchDominanceChainCalibrationCoverageFixModel } from "./fullMatchDominanceChainCalibrationCoverageFix";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26789,6 +26856,7 @@ import {
   renderFullMatchGateSelectivityVolumeRegressionFixSection,
   renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection,
   renderFullMatchEarnedDangerOutcomeDistributionSection,
+  renderFullMatchDominanceChainCalibrationCoverageFixSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26820,6 +26888,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchGateSelectivityVolumeRegressionFix = currentFullMatchGateSelectivityVolumeRegressionFixModel();
   const fullMatchRouteEconomyRecheckAfterSelectivityFix = currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel();
   const fullMatchEarnedDangerOutcomeDistribution = currentFullMatchEarnedDangerOutcomeDistributionModel();
+  const fullMatchDominanceChainCalibrationCoverageFix = currentFullMatchDominanceChainCalibrationCoverageFixModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -26833,7 +26902,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchEarnedDangerGateTuningSection(fullMatchEarnedDangerGateTuning),
     renderFullMatchGateSelectivityVolumeRegressionFixSection(fullMatchGateSelectivityVolumeRegressionFix),
     renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(fullMatchRouteEconomyRecheckAfterSelectivityFix),
-    renderFullMatchEarnedDangerOutcomeDistributionSection(fullMatchEarnedDangerOutcomeDistribution),
+    renderFullMatchDominanceChainCalibrationCoverageFixSection(fullMatchDominanceChainCalibrationCoverageFix),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26855,6 +26924,7 @@ export function writeLatestCoachReport(): void {
     fullMatchGateSelectivityVolumeRegressionFix,
     fullMatchRouteEconomyRecheckAfterSelectivityFix,
     fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -27044,6 +27114,7 @@ export function writeLatestCoachReport(): void {
     fullMatchGateSelectivityVolumeRegressionFix,
     fullMatchRouteEconomyRecheckAfterSelectivityFix,
     fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

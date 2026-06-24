@@ -84,6 +84,10 @@ import {
   renderFullMatchEarnedDangerOutcomeDistribution6RDoc as renderEarnedDangerOutcomeDistribution6RDoc,
   renderFullMatchEarnedDangerOutcomeDistribution6RValidation as renderEarnedDangerOutcomeDistribution6RValidation,
 } from "../../reports/fullMatchEarnedDangerOutcomeDistribution";
+import {
+  renderFullMatchDominanceChainCalibrationCoverageFix6SDoc as renderDominanceChainCalibrationCoverageFix6SDoc,
+  renderFullMatchDominanceChainCalibrationCoverageFix6SValidation as renderDominanceChainCalibrationCoverageFix6SValidation,
+} from "../../reports/fullMatchDominanceChainCalibrationCoverageFix";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6429,6 +6433,14 @@ export function renderFullMatchEarnedDangerOutcomeDistribution6RDoc(_model: Full
 
 export function renderFullMatchEarnedDangerOutcomeDistribution6RValidation(_model: FullMatchTraceValidationModel): string {
   return renderEarnedDangerOutcomeDistribution6RValidation();
+}
+
+export function renderFullMatchDominanceChainCalibrationCoverageFix6SDoc(_model: FullMatchTraceValidationModel): string {
+  return renderDominanceChainCalibrationCoverageFix6SDoc();
+}
+
+export function renderFullMatchDominanceChainCalibrationCoverageFix6SValidation(_model: FullMatchTraceValidationModel): string {
+  return renderDominanceChainCalibrationCoverageFix6SValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

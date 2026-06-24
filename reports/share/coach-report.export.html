@@ -3348,40 +3348,59 @@
       </p>
     </section>
 
-    <section class="controlled-local-readonly-db-section" aria-label="Issues apres danger merite">
+    <section class="controlled-local-readonly-db-section" aria-label="Chaines de domination et couverture de calibration">
       <div class="section-heading">
-        <p class="eyebrow">Sprint 6R</p>
-        <h3>Issues apr&egrave;s danger m&eacute;rit&eacute;</h3>
-        <p>Les issues apres danger merite sont mesurees, avec une reserve explicite a surveiller.</p>
+        <p class="eyebrow">Sprint 6S</p>
+        <h3>Cha&icirc;nes de domination et couverture de calibration</h3>
+        <p>La calibration 6S reduit les chaines de domination tout en gardant le score officiel issu des evenements.</p>
       </div>
       <div class="product-grid two">
         <article class="product-card">
-          <h4>Distribution des issues</h4>
+          <h4>Cha&icirc;nes et breaks</h4>
           <ul>
-            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 84.8%</li>
-            <li>High quality vers opportunit&eacute;: 88.8% -> 93.8%</li>
-            <li>Medium quality: 1 -> 36</li>
-            <li>Low quality: 0 -> 7</li>
-            <li>Half chances: 27</li>
-            <li>Forced defensive actions: 6</li>
-            <li>Territorial gains: 10</li>
+            <li>Cha&icirc;ne max: 14 -> 2</li>
+            <li>Same-team opportunities: 9.8% -> 7.9%</li>
+            <li>Same-family opportunities: 1.3% -> 1.3%</li>
+            <li>Chain breaks: 0 -> 40</li>
+            <li>Defensive recovery after repeated danger: 0 -> 40</li>
           </ul>
         </article>
         <article class="product-card">
-          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <h4>Danger m&eacute;rit&eacute; et volume</h4>
           <ul>
-            <li>Total points moyen: 22.7 -> 22.4</li>
-            <li>Scoring events/match: 7.3 -> 7.3</li>
-            <li>Opportunit&eacute;s/match: 15.9 -> 16</li>
-            <li>Severe blowout: 0% -> 0%</li>
-            <li>Fen&ecirc;tres longitudinales stables: 3/3</li>
-            <li>Statut: PARTIAL</li>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 84.8% -> 80%</li>
+            <li>High quality vers opportunit&eacute;: 93.8% -> 86%</li>
+            <li>Demi-occasion: 19.3% -> 22%</li>
+            <li>Gain territorial: 7.1% -> 4.3%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 4.3% -> 7.8%</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie et longitudinal</h4>
+          <ul>
+            <li>Total points moyen: 22.4 -> 21</li>
+            <li>Scoring events/match: 7.3 -> 6.9</li>
+            <li>Opportunit&eacute;s/match: 16 -> 15.5</li>
+            <li>Severe blowout: 0% -> 2%</li>
+            <li>Validation longitudinale: 3/3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Couverture de calibration</h4>
+          <ul>
+            <li>calibrationsAppliedAllRuns: true</li>
+            <li>Fen&ecirc;tres appliqu&eacute;es: 141/141</li>
+            <li>Fen&ecirc;tres manquantes: 0</li>
+            <li>Mismatches: 0</li>
+            <li>Familles routes pr&eacute;serv&eacute;es: true</li>
           </ul>
         </article>
       </div>
       <p class="muted">
-        Recommendation: MONITOR_EARNED_DANGER_OUTCOME_DISTRIBUTION. Aucun cap, aucun score force, aucun rewrite post-hoc:
-        le score reste issu des score_change officiels.
+        Recommendation: KEEP_DOMINANCE_CHAIN_CALIBRATION_COVERAGE. Sans cap, sans score forc&eacute;:
+        le score reste issu des &eacute;v&eacute;nements officiels score_change.
       </p>
     </section>
 
