@@ -33,6 +33,8 @@ assertTest(model.scoringEventsPerMatchAfter >= 6 && model.scoringEventsPerMatchA
 assertTest(model.averageTotalPointsAfter >= 22 && model.averageTotalPointsAfter <= 28, "6R must preserve score economy.");
 assertTest(model.severeBlowoutRateAfter <= 8, "6R must keep severe blowouts low.");
 assertTest(model.routeEconomyLongitudinallyStable, "6R must validate longitudinal route economy stability.");
+assertTest(model.status !== "PASS" || model.calibrationsAppliedAllRuns, "6R PASS must require full calibration coverage.");
+assertTest(model.dominanceChainsPreservedOrImproved || model.status === "PARTIAL", "6R dominance-chain regression must downgrade status to PARTIAL.");
 assertTest(model.gateSelectivityPreserved, "6R must preserve gate selectivity.");
 assertTest(model.earnedDangerPreserved, "6R must keep earned danger alive.");
 assertTest(model.automaticDangerStillBlocked, "6R must keep automatic danger blocked.");

@@ -1,12 +1,12 @@
 # Full-Match Earned Danger Outcome Distribution 6R
 
-- status: PASS
+- status: PARTIAL
 - scope: FULL_MATCH_EARNED_DANGER_OUTCOME_DISTRIBUTION_LONGITUDINAL_ROUTE_ECONOMY
 - version: EARNED_DANGER_OUTCOME_DISTRIBUTION_6R
 - baselineVersion: ROUTE_ECONOMY_RECHECK_6Q
 - calibrationVersion: EARNED_DANGER_OUTCOME_DISTRIBUTION_6R
 - matchCount: 50
-- recommendation: KEEP_EARNED_DANGER_OUTCOME_DISTRIBUTION
+- recommendation: MONITOR_EARNED_DANGER_OUTCOME_DISTRIBUTION
 - nextSprintRecommendation: Sprint 6S - Earned Danger Outcome Tuning Review
 
 ## Baseline 6Q Summary
@@ -167,7 +167,7 @@
 ## Guardrails
 - scoreFromScoreChangeAllRuns: true
 - officialPathConnectedAllRuns: true
-- calibrationsAppliedAllRuns: false
+- calibrationsAppliedAllRuns: true
 - scoringConstantsChanged: false
 - scoreCapApplied: false
 - postHocRewriteApplied: false
@@ -198,8 +198,9 @@
 - SEVERE_BLOWOUT_STILL_LOW
 - ROUTE_FAMILY_DIVERSITY_PRESERVED
 - TEAM_BALANCE_PRESERVED
-- FULL_MATCH_BATCH_ECONOMY_HEALTHY
+- DOMINANCE_CHAIN_REGRESSED
+- FULL_MATCH_BATCH_ECONOMY_PARTIAL
 
 ## Recommendation
-- recommendation: KEEP_EARNED_DANGER_OUTCOME_DISTRIBUTION
+- recommendation: MONITOR_EARNED_DANGER_OUTCOME_DISTRIBUTION
 - nextSprintRecommendation: Sprint 6S - Earned Danger Outcome Tuning Review

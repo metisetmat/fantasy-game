@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-24T12:04:04.030Z
+Generated timestamp: 2026-06-24T12:57:27.108Z
 Task/sprint name: Sprint 6R - Earned Danger Outcome Distribution
 Final file count: 20
 
@@ -852,13 +852,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchEarnedDangerOutcomeDistribution.test.ts
-?? src/reports/fullMatchEarnedDangerOutcomeDistribution.ts
-?? src/simulation/fullMatch/earnedDangerOutcomeDistributionWarnings.ts
-?? src/simulation/fullMatch/fullMatchEarnedDangerOutcomeDistributionAudit.ts
+ M src/reports/fullMatchEarnedDangerOutcomeDistribution.test.ts
+ M src/reports/fullMatchEarnedDangerOutcomeDistribution.ts
+ M src/simulation/fullMatch/earnedDangerOutcomeDistributionWarnings.ts

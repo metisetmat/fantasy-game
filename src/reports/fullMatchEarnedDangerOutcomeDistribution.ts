@@ -467,6 +467,8 @@ function buildWarnings(model: Omit<FullMatchEarnedDangerOutcomeDistributionLongi
     model.routeFamilyDiversityPreserved ? "ROUTE_FAMILY_DIVERSITY_PRESERVED" : "NON_SHOT_ROUTES_DISAPPEARED",
     model.teamOpportunityBalancePreserved ? "TEAM_BALANCE_PRESERVED" : "SCORING_OPPORTUNITY_VOLUME_REGRESSED",
   ];
+  if (!model.calibrationsAppliedAllRuns) warnings.push("EARNED_DANGER_OUTCOME_COVERAGE_INCOMPLETE");
+  if (!model.dominanceChainsPreservedOrImproved) warnings.push("DOMINANCE_CHAIN_REGRESSED");
   if (model.scoreCapApplied) warnings.push("SCORE_CAP_DETECTED");
   if (model.postHocRewriteApplied) warnings.push("POST_HOC_REWRITE_DETECTED");
   if (model.forcedOpponentScoreApplied || model.forcedTrailingTeamScoreApplied) warnings.push("FORCED_SCORE_DETECTED");
@@ -935,7 +937,8 @@ export function renderFullMatchEarnedDangerOutcomeDistribution6RValidation(
     checkLine("automatic danger remains low", model.automaticDangerStillBlocked, `${model.automaticDangerStillBlocked}`),
     checkLine("goalkeeper secure gains preserved", model.goalkeeperSecureResetPreserved, `${model.goalkeeperSecureResetPreserved}`),
     checkLine("post-score reset preserved", model.postScoreResetPreserved, `${model.postScoreResetPreserved}`),
-    checkLine("dominance chain measured and monitored", model.dominantTeamOpportunityChainMaxAfter >= 0, `dominantTeamOpportunityChainMaxAfter: ${model.dominantTeamOpportunityChainMaxAfter}`),
+    checkLine("PASS status requires full calibration coverage", model.status !== "PASS" || model.calibrationsAppliedAllRuns, `status: ${model.status}, calibrationsAppliedAllRuns: ${model.calibrationsAppliedAllRuns}`),
+    checkLine("dominance chain preserved or status is partial", model.dominanceChainsPreservedOrImproved || model.status === "PARTIAL", `dominantTeamOpportunityChainMaxAfter: ${model.dominantTeamOpportunityChainMaxAfter}`),
     checkLine("team opportunity balance preserved", model.teamOpportunityBalancePreserved, `${model.teamOpportunityBalancePreserved}`),
     checkLine("route family diversity preserved", model.routeFamilyDiversityPreserved, `${model.routeFamilyDiversityPreserved}`),
     checkLine("TRY route remains available", model.tryPointShareAfter > 0, `${model.tryPointShareAfter}%`),

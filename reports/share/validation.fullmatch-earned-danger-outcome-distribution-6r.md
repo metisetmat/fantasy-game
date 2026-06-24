@@ -16,7 +16,7 @@ Status: PASS
 - scoringOpportunitiesPerMatchAfter: 16
 - longitudinalWindowCount: 3
 - longitudinalStableWindows: 3
-- recommendation: KEEP_EARNED_DANGER_OUTCOME_DISTRIBUTION
+- recommendation: MONITOR_EARNED_DANGER_OUTCOME_DISTRIBUTION
 
 ## Checks
 - PASS: earned danger outcome distribution model exists - FULL_MATCH_EARNED_DANGER_OUTCOME_DISTRIBUTION_LONGITUDINAL_ROUTE_ECONOMY
@@ -40,7 +40,8 @@ Status: PASS
 - PASS: automatic danger remains low - true
 - PASS: goalkeeper secure gains preserved - true
 - PASS: post-score reset preserved - true
-- PASS: dominance chain measured and monitored - dominantTeamOpportunityChainMaxAfter: 14
+- PASS: PASS status requires full calibration coverage - status: PARTIAL, calibrationsAppliedAllRuns: true
+- PASS: dominance chain preserved or status is partial - dominantTeamOpportunityChainMaxAfter: 14
 - PASS: team opportunity balance preserved - true
 - PASS: route family diversity preserved - true
 - PASS: TRY route remains available - 27.6%
