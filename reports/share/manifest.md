@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-23T20:15:25.611Z
-Task/sprint: Sprint 6P - Gate Selectivity & Volume Regression Fix
+Generated: 2026-06-24T07:43:40.261Z
+Task/sprint: Sprint 6Q - Route Economy Recheck After Selectivity Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-gate-selectivity-volume-regression-fix-6p.md
-- validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md
+- fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+- validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
 - README.md
 
 ## Bundle Files

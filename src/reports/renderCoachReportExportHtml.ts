@@ -49,6 +49,9 @@ import type {
 import type {
   FullMatchGateSelectivityVolumeRegressionFixModel,
 } from "./fullMatchGateSelectivityVolumeRegressionFix";
+import type {
+  FullMatchRouteEconomyRecheckAfterSelectivityFixModel,
+} from "./fullMatchRouteEconomyRecheckAfterSelectivityFix";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3137,6 +3140,51 @@ export function renderFullMatchGateSelectivityVolumeRegressionFixSection(
     </section>`;
 }
 
+export function renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(
+  model: FullMatchRouteEconomyRecheckAfterSelectivityFixModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "L'economie des routes reste saine apres le gate selectif."
+    : "L'economie des routes reste lisible, avec une reserve explicite a surveiller.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Economie des routes apres danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6Q</p>
+        <h3>&Eacute;conomie des routes apr&egrave;s danger</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger vers opportunit&eacute;</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: ${model.earnedDangerToScoringOpportunityRateBefore}% -> ${model.earnedDangerToScoringOpportunityRateAfter}%</li>
+            <li>Danger borderline vers opportunit&eacute;: ${model.borderlineDangerToScoringOpportunityRateBefore}% -> ${model.borderlineDangerToScoringOpportunityRateAfter}%</li>
+            <li>Continuation vers opportunit&eacute;: ${model.continuationToScoringOpportunityRateBefore}% -> ${model.continuationToScoringOpportunityRateAfter}%</li>
+            <li>Gardien secure vers danger adverse: ${model.goalkeeperSecureToDangerAgainstRateBefore}% -> ${model.goalkeeperSecureToDangerAgainstRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume et couches non-score</h4>
+          <ul>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Half chance: ${model.halfChanceRateAfter}%</li>
+            <li>Territory gain: ${model.territorialGainRateAfter}%</li>
+            <li>Forced defensive action: ${model.forcedDefensiveActionRateAfter}%</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${escapeHtml(model.recommendation)}. Score officiel toujours issu des score_change events.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4203,6 +4251,7 @@ function renderAppendices(input: {
   readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
   readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
   readonly fullMatchGateSelectivityVolumeRegressionFix?: FullMatchGateSelectivityVolumeRegressionFixModel;
+  readonly fullMatchRouteEconomyRecheckAfterSelectivityFix?: FullMatchRouteEconomyRecheckAfterSelectivityFixModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4299,6 +4348,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchEarnedDangerGate?: FullMatchEarnedDangerGateCalibrationModel;
   readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
   readonly fullMatchGateSelectivityVolumeRegressionFix?: FullMatchGateSelectivityVolumeRegressionFixModel;
+  readonly fullMatchRouteEconomyRecheckAfterSelectivityFix?: FullMatchRouteEconomyRecheckAfterSelectivityFixModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4420,6 +4470,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate),
     renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning),
     renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix),
+    renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

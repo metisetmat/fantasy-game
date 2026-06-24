@@ -1,29 +1,27 @@
-# Sprint 6P Share Pack
+# Sprint 6Q Share Pack
 
-Current sprint: Sprint 6P - Gate Selectivity & Volume Regression Fix
+Current sprint: Sprint 6Q - Route Economy Recheck After Selectivity Fix
 
 ## Purpose
-This minimal review pack proves that the 6O earned-danger gate no longer treats negative contexts as positive reasons, and that scoring volume is reduced without changing scoring values or rewriting score events.
+Review the post-6P route economy recheck: danger-to-opportunity conversion, half-chance and territorial layers, goalkeeper secure follow-up, and score_change guardrails.
 
 ## Primary Files
-- fullmatch-gate-selectivity-volume-regression-fix-6p.md
-- validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md
+- fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+- validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
 - coach-report.export.html
 - scoring-events-summary.md
 - validation.share-pack.md
 
-## What To Check
-- earnedDangerRate is reduced from the 6O permissive baseline but remains above zero.
-- resetToDangerRate and scoring opportunity volume are reduced.
-- LOW_SPACING, IMMEDIATE_AFTER_RESET, POST_SCORE_CONTEXT, and LEADING_TEAM_REATTACK are negative contexts, not positive gate reasons.
-- score_change remains the official score source.
-- no score caps, post-hoc rewrites, forced scores, event deletions, or MatchBonusEvent changes are used.
-- the coach report includes the Selectivite du danger et volume section.
+## Expected Reading Order
+1. validation.share-pack.md
+2. validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+3. fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+4. coach-report.export.html
+5. scoring-events-summary.md
 
-## Commands
-- npm run build
-- npm run typecheck
-- npm run test:contracts
-- npm run test:all
-- npm run reports:coach
-- npm run reports:share
+## Guardrails
+- No scoring values changed.
+- No score caps, rewrites, forced opponent scores, or event deletion.
+- Final score remains derived from official score_change consequences.
+- Batch diagnostics remain separate from live scoring.
+- Share pack remains under 20 files.

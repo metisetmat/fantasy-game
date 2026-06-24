@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6P - Gate Selectivity & Volume Regression Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6Q - Route Economy Recheck After Selectivity Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -104,6 +104,8 @@ import {
   renderFullMatchEarnedDangerGateTuning6OValidation,
   renderFullMatchGateSelectivityVolumeRegressionFix6PDoc,
   renderFullMatchGateSelectivityVolumeRegressionFix6PValidation,
+  renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QDoc,
+  renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -116,9 +118,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6P - Gate Selectivity & Volume Regression Fix";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-gate-selectivity-volume-regression-fix-6p.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6Q - Route Economy Recheck After Selectivity Fix";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-route-economy-recheck-after-selectivity-fix-6q.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2254,6 +2256,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6P warning-code registry for gate selectivity and scoring-volume regression guardrails",
       },
       {
+        source: "src/simulation/fullMatch/routeEconomyRecheckWarnings.ts",
+        required: true,
+        reason: "Sprint 6Q warning-code registry for route economy recheck, danger-to-opportunity decoupling, and no-rewrite guardrails",
+      },
+      {
         source: "src/simulation/fullMatch/earnedDangerGate.ts",
         required: true,
         reason: "Sprint 6N earned danger gate model that classifies reset follow-ups before allowing danger after a reset",
@@ -2272,6 +2279,11 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/fullMatchGateSelectivityAudit.ts",
         required: true,
         reason: "Sprint 6P audit separating positive earned-danger reasons from negative volume contexts",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchRouteEconomyRecheckAudit.ts",
+        required: true,
+        reason: "Sprint 6Q audit measuring danger quality, danger outcome layers, continuation follow-up, and goalkeeper secure follow-up",
       },
       {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
@@ -2302,6 +2314,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchGateSelectivityVolumeRegressionFix.test.ts",
         required: true,
         reason: "Sprint 6P executable test proving gate selectivity, volume reduction, and scoring guardrails",
+      },
+      {
+        source: "src/reports/fullMatchRouteEconomyRecheckAfterSelectivityFix.ts",
+        required: true,
+        reason: "Sprint 6Q full-match route economy recheck model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchRouteEconomyRecheckAfterSelectivityFix.test.ts",
+        required: true,
+        reason: "Sprint 6Q executable test proving route economy layers, scoring-volume preservation, and score_change guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4460,6 +4482,10 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6Q")) {
+    return renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QDoc(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6P")) {
     return renderFullMatchGateSelectivityVolumeRegressionFix6PDoc(fullMatchTraceValidationModel());
   }
@@ -6724,6 +6750,10 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6Q")) {
+    return renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation(fullMatchTraceValidationModel());
+  }
+
   if (TASK_NAME.includes("Sprint 6P")) {
     return renderFullMatchGateSelectivityVolumeRegressionFix6PValidation(fullMatchTraceValidationModel());
   }
@@ -8934,6 +8964,39 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6Q")) {
+    return [
+      "# Sprint 6Q Share Pack",
+      "",
+      "Current sprint: Sprint 6Q - Route Economy Recheck After Selectivity Fix",
+      "",
+      "## Purpose",
+      "Review the post-6P route economy recheck: danger-to-opportunity conversion, half-chance and territorial layers, goalkeeper secure follow-up, and score_change guardrails.",
+      "",
+      "## Primary Files",
+      "- fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
+      "- validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- validation.share-pack.md",
+      "",
+      "## Expected Reading Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
+      "3. fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
+      "4. coach-report.export.html",
+      "5. scoring-events-summary.md",
+      "",
+      "## Guardrails",
+      "- No scoring values changed.",
+      "- No score caps, rewrites, forced opponent scores, or event deletion.",
+      "- Final score remains derived from official score_change consequences.",
+      "- Batch diagnostics remain separate from live scoring.",
+      "- Share pack remains under 20 files.",
+      "",
+    ].join("\n");
+  }
+
   if (TASK_NAME.includes("Sprint 6P")) {
     return [
       "# Sprint 6P Share Pack",
@@ -26627,6 +26690,7 @@ import { currentFullMatchResetBreakBlowoutEconomyCalibrationModel } from "./full
 import { currentFullMatchEarnedDangerGateCalibrationModel } from "./fullMatchEarnedDangerGateCalibration";
 import { currentFullMatchEarnedDangerGateTuningModel } from "./fullMatchEarnedDangerGateTuningCalibration";
 import { currentFullMatchGateSelectivityVolumeRegressionFixModel } from "./fullMatchGateSelectivityVolumeRegressionFix";
+import { currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel } from "./fullMatchRouteEconomyRecheckAfterSelectivityFix";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26659,6 +26723,7 @@ import {
   renderFullMatchEarnedDangerGateSection,
   renderFullMatchEarnedDangerGateTuningSection,
   renderFullMatchGateSelectivityVolumeRegressionFixSection,
+  renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26688,6 +26753,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchEarnedDangerGate = currentFullMatchEarnedDangerGateCalibrationModel();
   const fullMatchEarnedDangerGateTuning = currentFullMatchEarnedDangerGateTuningModel();
   const fullMatchGateSelectivityVolumeRegressionFix = currentFullMatchGateSelectivityVolumeRegressionFixModel();
+  const fullMatchRouteEconomyRecheckAfterSelectivityFix = currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -26700,6 +26766,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchEarnedDangerGateSection(fullMatchEarnedDangerGate),
     renderFullMatchEarnedDangerGateTuningSection(fullMatchEarnedDangerGateTuning),
     renderFullMatchGateSelectivityVolumeRegressionFixSection(fullMatchGateSelectivityVolumeRegressionFix),
+    renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(fullMatchRouteEconomyRecheckAfterSelectivityFix),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26719,6 +26786,7 @@ export function writeLatestCoachReport(): void {
     fullMatchEarnedDangerGate,
     fullMatchEarnedDangerGateTuning,
     fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -26906,6 +26974,7 @@ export function writeLatestCoachReport(): void {
     fullMatchEarnedDangerGate,
     fullMatchEarnedDangerGateTuning,
     fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

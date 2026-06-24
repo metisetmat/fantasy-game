@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6P - Gate Selectivity & Volume Regression Fix",
+  name: "Sprint 6Q - Route Economy Recheck After Selectivity Fix",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-gate-selectivity-volume-regression-fix-6p.md",
-    "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md",
+    "fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
+    "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6P share pack is current, complete, and below 20 files",
-    "fullmatch-gate-selectivity-volume-regression-fix-6p.md": "compares the permissive 6O gate baseline with 6P selectivity, scoring-volume reduction, and no-rewrite guardrails",
-    "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md": "validates 6P gate selectivity, positive/negative reason separation, volume reduction, and scoring guardrails",
-    "README.md": "compact reviewer orientation for the 6P share pack",
-    "manifest.md": "compatibility manifest listing the 6P share pack files",
+    "validation.share-pack.md": "proves the 6Q share pack is current, complete, and below 20 files",
+    "fullmatch-route-economy-recheck-after-selectivity-fix-6q.md": "rechecks route economy after 6P, including danger-to-opportunity decoupling, half-chance layers, goalkeeper secure follow-up, and scoring guardrails",
+    "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md": "validates 6Q route economy metrics, volume preservation, score_change authority, and no-rewrite guardrails",
+    "README.md": "compact reviewer orientation for the 6Q share pack",
+    "manifest.md": "compatibility manifest listing the 6Q share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

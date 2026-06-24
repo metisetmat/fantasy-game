@@ -76,6 +76,10 @@ import {
   renderFullMatchGateSelectivityVolumeRegressionFix6PDoc as renderGateSelectivityVolumeRegressionFix6PDoc,
   renderFullMatchGateSelectivityVolumeRegressionFix6PValidation as renderGateSelectivityVolumeRegressionFix6PValidation,
 } from "../../reports/fullMatchGateSelectivityVolumeRegressionFix";
+import {
+  renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QDoc as renderRouteEconomyRecheckAfterSelectivityFix6QDoc,
+  renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation as renderRouteEconomyRecheckAfterSelectivityFix6QValidation,
+} from "../../reports/fullMatchRouteEconomyRecheckAfterSelectivityFix";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6405,6 +6409,14 @@ export function renderFullMatchGateSelectivityVolumeRegressionFix6PDoc(_model: F
 
 export function renderFullMatchGateSelectivityVolumeRegressionFix6PValidation(_model: FullMatchTraceValidationModel): string {
   return renderGateSelectivityVolumeRegressionFix6PValidation();
+}
+
+export function renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QDoc(_model: FullMatchTraceValidationModel): string {
+  return renderRouteEconomyRecheckAfterSelectivityFix6QDoc();
+}
+
+export function renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation(_model: FullMatchTraceValidationModel): string {
+  return renderRouteEconomyRecheckAfterSelectivityFix6QValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

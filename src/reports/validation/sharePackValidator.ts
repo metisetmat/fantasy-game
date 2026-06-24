@@ -343,6 +343,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchEarnedDangerGateTuning6OValidation = readIfExists(join(shareDirectory, "validation.fullmatch-earned-danger-gate-tuning-6o.md"));
   const fullMatchGateSelectivityVolumeRegressionFix6P = readIfExists(join(shareDirectory, "fullmatch-gate-selectivity-volume-regression-fix-6p.md"));
   const fullMatchGateSelectivityVolumeRegressionFix6PValidation = readIfExists(join(shareDirectory, "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md"));
+  const fullMatchRouteEconomyRecheckAfterSelectivityFix6Q = readIfExists(join(shareDirectory, "fullmatch-route-economy-recheck-after-selectivity-fix-6q.md"));
+  const fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation = readIfExists(join(shareDirectory, "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3056,6 +3058,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-earned-danger-gate-tuning-6o.md",
     ...sprint6OForbiddenLeftovers,
   ];
+  const sprint6QExpectedFiles = sprint6PExpectedFiles.map((file) =>
+    file === "fullmatch-gate-selectivity-volume-regression-fix-6p.md"
+      ? "fullmatch-route-economy-recheck-after-selectivity-fix-6q.md"
+      : file === "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md"
+        ? "validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md"
+        : file
+  );
+  const sprint6QForbiddenLeftovers = [
+    "fullmatch-gate-selectivity-volume-regression-fix-6p.md",
+    "validation.fullmatch-gate-selectivity-volume-regression-fix-6p.md",
+    ...sprint6PForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -3959,6 +3973,41 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 6O source files", bundleSimulation.includes("src/simulation/fullMatch/earnedDangerGateTuningWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchEarnedDangerGateTuningAudit.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateTuningCalibration.ts") && bundleReports.includes("src/reports/fullMatchEarnedDangerGateTuningCalibration.test.ts"), "6O source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEarnedDangerGateTuning6OValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
     check("recommendation visible", fullMatchEarnedDangerGateTuning6O.includes("## Recommendation") && fullMatchEarnedDangerGateTuning6O.includes("Sprint 6P"), "6O recommendation visible"),
+  ];
+  const sprint6QChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6QExpectedFiles.every((file) => requiredCopied(file)), sprint6QExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6QExpectedFiles.every((file) => manifest.includes(file)), sprint6QExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6Q", activeConfig.sprintName === "Sprint 6Q - Route Economy Recheck After Selectivity Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6QForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6QForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6Q oriented", readme.includes("# Sprint 6Q Share Pack") && readme.includes("fullmatch-route-economy-recheck-after-selectivity-fix-6q.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6Q report included", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("# Full-Match Route Economy Recheck After Selectivity Fix 6Q") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("Route Economy Audit Summary") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("Danger-To-Opportunity Metrics"), "6Q doc included"),
+    check("6Q validation is PASS", fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("Status: PASS") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("route economy recheck model exists") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("Explicit Exhaustive Test Command"), "6Q validation current"),
+    check("batch match count visible", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("matchCount: 50") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("matchCount: 50"), "50 matches visible"),
+    check("baseline 6P visible", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("Baseline 6P Summary") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("GATE_SELECTIVITY_VOLUME_6P"), "6P baseline visible"),
+    check("danger quality and outcome distributions visible", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("Danger Quality Distribution") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("Danger Outcome Distribution"), "distributions visible"),
+    check("danger-to-opportunity metrics visible", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("earnedDangerToScoringOpportunityRate") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("borderlineDangerToScoringOpportunityRate"), "danger metrics visible"),
+    check("non-scoring layers visible", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("halfChanceRateAfter") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("territorialGainRateAfter") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("forcedDefensiveActionRateAfter"), "layers visible"),
+    check("route quality gates connected", fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("route quality gate connected") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("opportunity quality gate connected"), "quality gates checked"),
+    check("volume preserved", fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("scoringOpportunitiesPerMatch preserved") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("averageTotalPoints preserved"), "volume checked"),
+    check("score from score_change all runs", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("scoreFromScoreChangeAllRuns: true") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("calibration applied all runs", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("calibrationsAppliedAllRuns: true"), "calibrations all runs"),
+    check("no score rewrite/deletion/forced score", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("scoreCapApplied: false") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("postHocRewriteApplied: false") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("scoringEventsDeleted: false") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("forcedOpponentScoreApplied: false") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("persistence and SQLite not used for scoring", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("persistenceUsedForScoring: false") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("sqliteUsedForScoring: false"), "persistence/SQLite false"),
+    check("no UNKNOWN scoring family", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("unknownScoringFamilyCount: 0") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("penaltyShotActiveLeakageCount: 0") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("no PENALTY_SHOT leakage"), "PENALTY blocked"),
+    check("coach product contains route economy section", coachProductHtml.includes("Economie des routes apres danger") && coachProductHtml.includes("Sprint 6Q"), "product 6Q visible"),
+    check("coach export contains route economy section", coachExportHtml.includes("Economie des routes apres danger") && coachExportHtml.includes("Sprint 6Q"), "export 6Q visible"),
+    check("coach export avoids forbidden 6Q wording", !/score corrige|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|cap de score (applique|detecte|actif)|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6Q source files", bundleSimulation.includes("src/simulation/fullMatch/routeEconomyRecheckWarnings.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchRouteEconomyRecheckAudit.ts") && bundleReports.includes("src/reports/fullMatchRouteEconomyRecheckAfterSelectivityFix.ts") && bundleReports.includes("src/reports/fullMatchRouteEconomyRecheckAfterSelectivityFix.test.ts"), "6Q source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+    check("recommendation visible", fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("## Recommendation") && fullMatchRouteEconomyRecheckAfterSelectivityFix6Q.includes("Sprint 6R"), "6Q recommendation visible"),
   ];
   const sprint6PChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -7925,6 +7974,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6Q - Route Economy")
+      ? sprint6QChecks
     : activeConfig.sprintName.includes("Sprint 6P - Gate Selectivity")
       ? sprint6PChecks
     : activeConfig.sprintName.includes("Sprint 6O - Earned Danger Reintroduction")
