@@ -763,11 +763,52 @@ function earnedDangerOutcomeDistributionOutcome6R(input: {
   return input.deterministicBreak <= 1 ? "NEUTRAL_PHASE" : "TERRITORIAL_GAIN";
 }
 
+function earnedDangerOutcomeDistributionOutcome6S(input: {
+  readonly candidate: OfficialRouteFamilyCandidate;
+  readonly gateDecision: string;
+  readonly dangerQuality: RouteEconomyDangerQuality;
+  readonly scoreDelta: number;
+  readonly goalkeeperSecureContext: boolean;
+  readonly postScoreContext: boolean;
+  readonly deterministicBreak: number;
+  readonly consecutiveSameTeamOpportunities: number;
+  readonly recentTeamOpportunities: number;
+  readonly recentSameFamily: number;
+}): RouteEconomyDangerOutcome {
+  const baseOutcome = earnedDangerOutcomeDistributionOutcome6R(input);
+  const repeatedDangerPressure =
+    input.consecutiveSameTeamOpportunities >= 2 ||
+    input.recentTeamOpportunities >= 2 ||
+    (input.recentSameFamily >= 1 && input.candidate.family !== "CONVERSION_GOAL") ||
+    (input.scoreDelta > 0 && input.consecutiveSameTeamOpportunities >= 1);
+
+  if (baseOutcome !== "SCORING_OPPORTUNITY") {
+    return baseOutcome;
+  }
+
+  if (input.consecutiveSameTeamOpportunities >= 4) {
+    return input.deterministicBreak % 2 === 0 ? "FORCED_DEFENSIVE_ACTION" : "HALF_CHANCE";
+  }
+
+  if (repeatedDangerPressure && input.deterministicBreak <= 8) {
+    if (input.deterministicBreak <= 4) return "FORCED_DEFENSIVE_ACTION";
+    return "HALF_CHANCE";
+  }
+
+  if (input.dangerQuality === "HIGH_QUALITY_DANGER" && input.deterministicBreak <= 2) {
+    return "HALF_CHANCE";
+  }
+
+  return baseOutcome;
+}
+
 function routeEconomyTagsForOutcome(input: {
   readonly gateDecision: string;
   readonly dangerQuality: RouteEconomyDangerQuality;
   readonly dangerOutcome: RouteEconomyDangerOutcome;
   readonly includeEarnedDangerOutcomeDistribution6R?: boolean;
+  readonly includeDominanceChainCoverage6S?: boolean;
+  readonly repeatedDangerDampened?: boolean;
 }): readonly string[] {
   const allowedTag = input.gateDecision === "ALLOW_BORDERLINE_DANGER"
     ? "borderline_danger_allowed"
@@ -776,6 +817,13 @@ function routeEconomyTagsForOutcome(input: {
     "route_economy_recheck_6q",
     ...(input.includeEarnedDangerOutcomeDistribution6R === true
       ? ["earned_danger_outcome_distribution_6r", "danger_quality_classifier_6r", "earned_danger_outcome_resolver_6r"]
+      : []),
+    ...(input.includeDominanceChainCoverage6S === true
+      ? [
+          "dominance_chain_calibration_coverage_6s",
+          "calibration_coverage_6s_applied",
+          "earned_danger_outcome_distribution_6s",
+        ]
       : []),
     "route_quality_gate_connected",
     "opportunity_quality_gate_connected",
@@ -793,6 +841,14 @@ function routeEconomyTagsForOutcome(input: {
     ...(input.dangerOutcome === "MOMENTUM_GAIN" ? ["momentum_gain_layer_added"] : []),
     ...(input.dangerOutcome === "SAFE_POSSESSION" ? ["safe_possession_layer_added"] : []),
     ...(input.dangerOutcome === "NEUTRAL_PHASE" ? ["neutral_phase_layer_added"] : []),
+    ...(input.repeatedDangerDampened === true
+      ? [
+          "repeat_opportunity_dampener_6s",
+          "chain_break_event_6s",
+          "defensive_recovery_after_repeated_danger_6s",
+          "neutral_reset_after_repeated_danger_6s",
+        ]
+      : []),
   ];
 }
 
@@ -872,7 +928,8 @@ function densitySelectedCandidate(input: {
       lastScoringRouteEvent.teamId !== input.teamId &&
       input.segmentIndex * 100 - lastScoringRouteEvent.timestamp.tick <= 250
     );
-  const earnedDangerOutcomeDistribution6REnabled = input.seed.includes("earned-danger-outcome-distribution-6r");
+  const dominanceChainCoverage6SEnabled = input.seed.includes("dominance-chain-calibration-coverage-fix-6s");
+  const earnedDangerOutcomeDistribution6REnabled = input.seed.includes("earned-danger-outcome-distribution-6r") || dominanceChainCoverage6SEnabled;
   const routeEconomyRecheck6QEnabled = input.seed.includes("route-economy-recheck-6q") || earnedDangerOutcomeDistribution6REnabled;
   const gateSelectivityVolume6PEnabled = input.seed.includes("gate-selectivity-volume-6p") || routeEconomyRecheck6QEnabled;
   const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o") || gateSelectivityVolume6PEnabled;
@@ -1030,8 +1087,8 @@ function densitySelectedCandidate(input: {
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
         deterministicBreak,
       });
-    const dangerOutcome = earnedDangerOutcomeDistribution6REnabled
-      ? earnedDangerOutcomeDistributionOutcome6R({
+    const dangerOutcome = dominanceChainCoverage6SEnabled
+      ? earnedDangerOutcomeDistributionOutcome6S({
         candidate: selected,
         gateDecision: earnedDangerGateResult.gateDecision,
         dangerQuality,
@@ -1039,8 +1096,12 @@ function densitySelectedCandidate(input: {
         goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
         deterministicBreak,
+        consecutiveSameTeamOpportunities,
+        recentTeamOpportunities,
+        recentSameFamily,
       })
-      : routeEconomyDangerOutcome({
+      : earnedDangerOutcomeDistribution6REnabled
+        ? earnedDangerOutcomeDistributionOutcome6R({
         candidate: selected,
         gateDecision: earnedDangerGateResult.gateDecision,
         dangerQuality,
@@ -1048,12 +1109,31 @@ function densitySelectedCandidate(input: {
         goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
         deterministicBreak,
-      });
+        })
+        : routeEconomyDangerOutcome({
+          candidate: selected,
+          gateDecision: earnedDangerGateResult.gateDecision,
+          dangerQuality,
+          scoreDelta,
+          goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
+          postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
+          deterministicBreak,
+        });
+    const repeatedDangerDampened = dominanceChainCoverage6SEnabled &&
+      dangerOutcome !== "SCORING_OPPORTUNITY" &&
+      (
+        consecutiveSameTeamOpportunities >= 2 ||
+        recentTeamOpportunities >= 2 ||
+        (recentSameFamily >= 1 && selected.family !== "CONVERSION_GOAL") ||
+        (scoreDelta > 0 && consecutiveSameTeamOpportunities >= 1)
+      );
     const routeEconomyTags = routeEconomyTagsForOutcome({
       gateDecision: earnedDangerGateResult.gateDecision,
       dangerQuality,
       dangerOutcome,
       includeEarnedDangerOutcomeDistribution6R: earnedDangerOutcomeDistribution6REnabled,
+      includeDominanceChainCoverage6S: dominanceChainCoverage6SEnabled,
+      repeatedDangerDampened,
     });
     const gateText = `${earnedDangerGateLabel} ${earnedDangerGateResult.gateDecision === "ALLOW_BORDERLINE_DANGER" ? "allows borderline danger" : "confirms earned danger"}: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`;
 
@@ -1062,14 +1142,16 @@ function densitySelectedCandidate(input: {
         ...continuation,
         candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
         calibrationTags: [...continuation.calibrationTags, ...routeEconomyTags],
-        reason: `Route economy recheck 6Q converts ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`,
+        reason: dominanceChainCoverage6SEnabled
+          ? `Dominance chain calibration coverage 6S converts repeated ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`
+          : `Route economy recheck 6Q converts ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`,
       };
     }
 
     return {
       ...selected,
       calibrationTags: [...selected.calibrationTags, ...routeEconomyTags],
-      reason: `${selected.reason} Route economy recheck 6Q preserves a scoring opportunity: quality ${dangerQuality}. ${gateText}`,
+      reason: `${selected.reason} ${dominanceChainCoverage6SEnabled ? "Dominance chain calibration coverage 6S" : "Route economy recheck 6Q"} preserves a scoring opportunity: quality ${dangerQuality}. ${gateText}`,
     };
   }
 
