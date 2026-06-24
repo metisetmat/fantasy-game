@@ -1,28 +1,27 @@
-# Sprint 6O Share Pack
+# Sprint 6Q Share Pack
 
-Current sprint: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
+Current sprint: Sprint 6Q - Route Economy Recheck After Selectivity Fix
 
 ## Purpose
-This minimal review pack proves that the 6N earned-danger gate is tuned from a hard barrier into a selective filter. It reintroduces earned and borderline danger only when support, spacing, tactical edge, attributes, fatigue, pressure, or mistake context justify it.
+Review the post-6P route economy recheck: danger-to-opportunity conversion, half-chance and territorial layers, goalkeeper secure follow-up, and score_change guardrails.
 
-## Primary files
-- fullmatch-earned-danger-gate-tuning-6o.md
-- validation.fullmatch-earned-danger-gate-tuning-6o.md
+## Primary Files
+- fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+- validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
 - coach-report.export.html
-- coach-report.product.html
 - scoring-events-summary.md
-- bundle__simulation.md
-- bundle__reports.md
-- bundle__contracts.md
+- validation.share-pack.md
+
+## Expected Reading Order
+1. validation.share-pack.md
+2. validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+3. fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+4. coach-report.export.html
+5. scoring-events-summary.md
 
 ## Guardrails
-- No score cap.
-- No post-hoc score rewrite.
-- No forced opponent score.
-- No scoring-event deletion.
-- No MatchBonusEvent mutation.
-- Score remains derived from score_change consequences.
-- 6N remains the baseline; 6O only tunes the gate.
-
-## Next Sprint
-Review whether route economy remains healthy after selective earned danger returns.
+- No scoring values changed.
+- No score caps, rewrites, forced opponent scores, or event deletion.
+- Final score remains derived from official score_change consequences.
+- Batch diagnostics remain separate from live scoring.
+- Share pack remains under 20 files.

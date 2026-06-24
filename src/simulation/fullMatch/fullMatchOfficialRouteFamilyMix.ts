@@ -599,6 +599,112 @@ function earnedDangerResetSourceType(event: MatchEvent | undefined): EarnedDange
   return "SAFE_POSSESSION";
 }
 
+type RouteEconomyDangerQuality = "HIGH_QUALITY_DANGER" | "MEDIUM_QUALITY_DANGER" | "LOW_QUALITY_DANGER";
+type RouteEconomyDangerOutcome =
+  | "SCORING_OPPORTUNITY"
+  | "HALF_CHANCE"
+  | "FORCED_DEFENSIVE_ACTION"
+  | "TERRITORIAL_GAIN"
+  | "MOMENTUM_GAIN"
+  | "SAFE_POSSESSION";
+
+function routeEconomyDangerQuality(input: {
+  readonly candidate: OfficialRouteFamilyCandidate;
+  readonly earnedDangerScore: number;
+  readonly scoreDelta: number;
+  readonly goalkeeperSecureContext: boolean;
+  readonly postScoreContext: boolean;
+  readonly deterministicBreak: number;
+}): RouteEconomyDangerQuality {
+  const qualityScore = Math.round(
+    input.earnedDangerScore * 0.52 +
+    input.candidate.candidateScore * 0.38 +
+    input.deterministicBreak * 0.5 -
+    (input.scoreDelta > 0 ? 5 : 0) -
+    (input.goalkeeperSecureContext ? 10 : 0) -
+    (input.postScoreContext ? 5 : 0),
+  );
+
+  if (qualityScore >= 74) {
+    return "HIGH_QUALITY_DANGER";
+  }
+
+  if (qualityScore >= 64) {
+    return "MEDIUM_QUALITY_DANGER";
+  }
+
+  return "LOW_QUALITY_DANGER";
+}
+
+function routeEconomyDangerOutcome(input: {
+  readonly candidate: OfficialRouteFamilyCandidate;
+  readonly gateDecision: string;
+  readonly dangerQuality: RouteEconomyDangerQuality;
+  readonly scoreDelta: number;
+  readonly goalkeeperSecureContext: boolean;
+  readonly postScoreContext: boolean;
+  readonly deterministicBreak: number;
+}): RouteEconomyDangerOutcome {
+  const highQuality = input.dangerQuality === "HIGH_QUALITY_DANGER";
+  const mediumQuality = input.dangerQuality === "MEDIUM_QUALITY_DANGER";
+  const borderline = input.gateDecision === "ALLOW_BORDERLINE_DANGER";
+  const protectedContext = input.goalkeeperSecureContext || input.postScoreContext || input.scoreDelta > 0;
+  const strongRoute = input.candidate.candidateScore >= 90 && !protectedContext;
+
+  if (highQuality && !borderline && (input.deterministicBreak >= 8 || (strongRoute && input.deterministicBreak >= 2))) {
+    return "SCORING_OPPORTUNITY";
+  }
+
+  if (highQuality && !borderline && input.deterministicBreak >= 3) {
+    return "HALF_CHANCE";
+  }
+
+  if (highQuality && borderline && strongRoute && input.deterministicBreak >= 8) {
+    return "SCORING_OPPORTUNITY";
+  }
+
+  if ((highQuality || mediumQuality) && !protectedContext && input.deterministicBreak >= 6) {
+    return "HALF_CHANCE";
+  }
+
+  if (mediumQuality) {
+    return input.deterministicBreak >= 4 ? "FORCED_DEFENSIVE_ACTION" : "TERRITORIAL_GAIN";
+  }
+
+  if (input.deterministicBreak >= 8 && !input.goalkeeperSecureContext) {
+    return "MOMENTUM_GAIN";
+  }
+
+  return input.goalkeeperSecureContext ? "SAFE_POSSESSION" : "TERRITORIAL_GAIN";
+}
+
+function routeEconomyTagsForOutcome(input: {
+  readonly gateDecision: string;
+  readonly dangerQuality: RouteEconomyDangerQuality;
+  readonly dangerOutcome: RouteEconomyDangerOutcome;
+}): readonly string[] {
+  const allowedTag = input.gateDecision === "ALLOW_BORDERLINE_DANGER"
+    ? "borderline_danger_allowed"
+    : "earned_danger_confirmed";
+  return [
+    "route_economy_recheck_6q",
+    "route_quality_gate_connected",
+    "opportunity_quality_gate_connected",
+    `danger_quality_${input.dangerQuality}`,
+    `danger_outcome_${input.dangerOutcome}`,
+    "earned_danger_gate_6n",
+    "earned_danger_gate_connected",
+    allowedTag,
+    ...(input.dangerOutcome === "SCORING_OPPORTUNITY"
+      ? ["route_economy_scoring_opportunity_preserved"]
+      : ["danger_to_opportunity_decoupled", "official_route_family_non_scoring_outcome"]),
+    ...(input.dangerOutcome === "HALF_CHANCE" ? ["half_chance_layer_added"] : []),
+    ...(input.dangerOutcome === "FORCED_DEFENSIVE_ACTION" ? ["forced_defensive_action_layer_added"] : []),
+    ...(input.dangerOutcome === "TERRITORIAL_GAIN" ? ["territorial_gain_layer_added"] : []),
+    ...(input.dangerOutcome === "MOMENTUM_GAIN" ? ["momentum_gain_layer_added"] : []),
+  ];
+}
+
 function densitySelectedCandidate(input: {
   readonly candidates: readonly OfficialRouteFamilyCandidate[];
   readonly state: FullMatchOfficialRouteFamilyMixState;
@@ -675,7 +781,9 @@ function densitySelectedCandidate(input: {
       lastScoringRouteEvent.teamId !== input.teamId &&
       input.segmentIndex * 100 - lastScoringRouteEvent.timestamp.tick <= 250
     );
-  const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o");
+  const routeEconomyRecheck6QEnabled = input.seed.includes("route-economy-recheck-6q");
+  const gateSelectivityVolume6PEnabled = input.seed.includes("gate-selectivity-volume-6p") || routeEconomyRecheck6QEnabled;
+  const earnedDangerGateTuning6OEnabled = input.seed.includes("earned-danger-gate-tuning-6o") || gateSelectivityVolume6PEnabled;
 
   if (continuation === undefined) {
     return selected;
@@ -784,10 +892,16 @@ function densitySelectedCandidate(input: {
         recentResetToDangerWindow: earnedDangerGateWindow,
         goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
-        calibrationVersion: earnedDangerGateTuning6OEnabled ? "EARNED_DANGER_GATE_TUNING_6O" : "EARNED_DANGER_GATE_6N",
+        calibrationVersion: gateSelectivityVolume6PEnabled
+          ? "GATE_SELECTIVITY_VOLUME_6P"
+          : earnedDangerGateTuning6OEnabled
+            ? "EARNED_DANGER_GATE_TUNING_6O"
+            : "EARNED_DANGER_GATE_6N",
       })
     : undefined;
-  const earnedDangerGateLabel = earnedDangerGateTuning6OEnabled
+  const earnedDangerGateLabel = gateSelectivityVolume6PEnabled
+    ? "Earned danger gate calibration 6N selectivity 6P"
+    : earnedDangerGateTuning6OEnabled
     ? "Earned danger gate calibration 6N tuning 6O"
     : "Earned danger gate calibration 6N";
 
@@ -799,6 +913,51 @@ function densitySelectedCandidate(input: {
       ...continuation,
       candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
       reason: `${earnedDangerGateLabel} downgrades reset-to-danger from ${selected.family} to ${earnedDangerGateResult.gateDecision}: score ${earnedDangerGateResult.earnedDangerScore}, classification ${earnedDangerGateResult.earnedDangerClassification}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`,
+    };
+  }
+
+  if (
+    routeEconomyRecheck6QEnabled &&
+    earnedDangerGateResult !== undefined &&
+    (earnedDangerGateResult.gateDecision === "ALLOW_DANGER" || earnedDangerGateResult.gateDecision === "ALLOW_BORDERLINE_DANGER")
+  ) {
+    const dangerQuality = routeEconomyDangerQuality({
+      candidate: selected,
+      earnedDangerScore: earnedDangerGateResult.earnedDangerScore,
+      scoreDelta,
+      goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
+      postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
+      deterministicBreak,
+    });
+    const dangerOutcome = routeEconomyDangerOutcome({
+      candidate: selected,
+      gateDecision: earnedDangerGateResult.gateDecision,
+      dangerQuality,
+      scoreDelta,
+      goalkeeperSecureContext: lastResetRouteEvent !== undefined && hasGoalkeeperSecureSource(lastResetRouteEvent),
+      postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
+      deterministicBreak,
+    });
+    const routeEconomyTags = routeEconomyTagsForOutcome({
+      gateDecision: earnedDangerGateResult.gateDecision,
+      dangerQuality,
+      dangerOutcome,
+    });
+    const gateText = `${earnedDangerGateLabel} ${earnedDangerGateResult.gateDecision === "ALLOW_BORDERLINE_DANGER" ? "allows borderline danger" : "confirms earned danger"}: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`;
+
+    if (dangerOutcome !== "SCORING_OPPORTUNITY") {
+      return {
+        ...continuation,
+        candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
+        calibrationTags: [...continuation.calibrationTags, ...routeEconomyTags],
+        reason: `Route economy recheck 6Q converts ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`,
+      };
+    }
+
+    return {
+      ...selected,
+      calibrationTags: [...selected.calibrationTags, ...routeEconomyTags],
+      reason: `${selected.reason} Route economy recheck 6Q preserves a scoring opportunity: quality ${dangerQuality}. ${gateText}`,
     };
   }
 
@@ -1077,6 +1236,7 @@ function annotateShotGateEvent(
     "official_route_family_SHOT_GOAL",
     `official_route_family_outcome_${candidate.outcome}`,
     ...gateTags,
+    ...candidate.calibrationTags,
   ];
   const annotatedEvent: MatchEvent = {
     ...event,

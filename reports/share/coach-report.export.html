@@ -3276,6 +3276,78 @@
       </p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Selectivite du danger et volume">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6P</p>
+        <h3>S&eacute;lectivit&eacute; du danger et volume</h3>
+        <p>
+          6P corrige la gate 6O trop permissive: les contextes n&eacute;gatifs comme spacing faible,
+          re-attaque imm&eacute;diate apr&egrave;s reset, post-score ou gardien secure ne comptent plus comme
+          raisons positives. Le score reste d&eacute;riv&eacute; uniquement des score_change officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate plus s&eacute;lective</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute;: 99.8% -> 18.7%</li>
+            <li>Danger borderline: 0.2% -> 2.9%</li>
+            <li>Reset vers danger: 100% -> 21.6%</li>
+            <li>Danger avec contexte n&eacute;gatif: 550 -> 126</li>
+            <li>Danger avec seulement contexte n&eacute;gatif: 0</li>
+            <li>Signaux positifs insuffisants: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume de scoring</h4>
+          <ul>
+            <li>Total points moyen: 39.5 -> 24.6</li>
+            <li>Evenements scoring/match: 12.6 -> 7.9</li>
+            <li>Opportunites/match: 28.1 -> 17.2</li>
+            <li>Severe blowout: 28% -> 0%</li>
+            <li>Blowout: 50% -> 22%</li>
+            <li>Statut: PASS</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_GATE_SELECTIVITY_VOLUME_FIX. Aucun cap, rewrite, score forc&eacute;, suppression d'events ou mutation
+        MatchBonusEvent n'est utilis&eacute; pour obtenir cette baisse de volume.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Economie des routes apres danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6Q</p>
+        <h3>&Eacute;conomie des routes apr&egrave;s danger</h3>
+        <p>L'economie des routes reste lisible, avec une reserve explicite a surveiller.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger vers opportunit&eacute;</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 100%</li>
+            <li>Danger borderline vers opportunit&eacute;: 100% -> 26.3%</li>
+            <li>Continuation vers opportunit&eacute;: 60.4% -> 0.8%</li>
+            <li>Gardien secure vers danger adverse: 68.3% -> 3.5%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume et couches non-score</h4>
+          <ul>
+            <li>Total points moyen: 24.6 -> 22.7</li>
+            <li>Opportunit&eacute;s/match: 17.2 -> 15.9</li>
+            <li>Half chance: 3.4%</li>
+            <li>Territory gain: 6%</li>
+            <li>Forced defensive action: 0.9%</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: MONITOR_ROUTE_ECONOMY_PARTIAL. Score officiel toujours issu des score_change events.
+      </p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">

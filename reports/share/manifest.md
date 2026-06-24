@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-23T18:43:38.849Z
-Task/sprint: Sprint 6O - Earned Danger Reintroduction & Gate Tuning
+Generated: 2026-06-24T07:59:52.131Z
+Task/sprint: Sprint 6Q - Route Economy Recheck After Selectivity Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-earned-danger-gate-tuning-6o.md
-- validation.fullmatch-earned-danger-gate-tuning-6o.md
+- fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+- validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
 - README.md
 
 ## Bundle Files

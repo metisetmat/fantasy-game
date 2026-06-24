@@ -26,6 +26,8 @@ import { currentFullMatchGoalkeeperSecureResetBreakSpecificityCalibrationModel }
 import { currentFullMatchResetBreakBlowoutEconomyCalibrationModel } from "./fullMatchResetBreakBlowoutEconomyCalibration";
 import { currentFullMatchEarnedDangerGateCalibrationModel } from "./fullMatchEarnedDangerGateCalibration";
 import { currentFullMatchEarnedDangerGateTuningModel } from "./fullMatchEarnedDangerGateTuningCalibration";
+import { currentFullMatchGateSelectivityVolumeRegressionFixModel } from "./fullMatchGateSelectivityVolumeRegressionFix";
+import { currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel } from "./fullMatchRouteEconomyRecheckAfterSelectivityFix";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -57,6 +59,8 @@ import {
   renderFullMatchResetBreakBlowoutEconomySection,
   renderFullMatchEarnedDangerGateSection,
   renderFullMatchEarnedDangerGateTuningSection,
+  renderFullMatchGateSelectivityVolumeRegressionFixSection,
+  renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -85,6 +89,8 @@ export function writeLatestCoachReport(): void {
   const fullMatchResetBreakBlowoutEconomy = currentFullMatchResetBreakBlowoutEconomyCalibrationModel();
   const fullMatchEarnedDangerGate = currentFullMatchEarnedDangerGateCalibrationModel();
   const fullMatchEarnedDangerGateTuning = currentFullMatchEarnedDangerGateTuningModel();
+  const fullMatchGateSelectivityVolumeRegressionFix = currentFullMatchGateSelectivityVolumeRegressionFixModel();
+  const fullMatchRouteEconomyRecheckAfterSelectivityFix = currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -96,6 +102,8 @@ export function writeLatestCoachReport(): void {
     renderFullMatchResetBreakBlowoutEconomySection(fullMatchResetBreakBlowoutEconomy),
     renderFullMatchEarnedDangerGateSection(fullMatchEarnedDangerGate),
     renderFullMatchEarnedDangerGateTuningSection(fullMatchEarnedDangerGateTuning),
+    renderFullMatchGateSelectivityVolumeRegressionFixSection(fullMatchGateSelectivityVolumeRegressionFix),
+    renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(fullMatchRouteEconomyRecheckAfterSelectivityFix),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -114,6 +122,8 @@ export function writeLatestCoachReport(): void {
     fullMatchResetBreakBlowoutEconomy,
     fullMatchEarnedDangerGate,
     fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -300,6 +310,8 @@ export function writeLatestCoachReport(): void {
     fullMatchResetBreakBlowoutEconomy,
     fullMatchEarnedDangerGate,
     fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
