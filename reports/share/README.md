@@ -1,26 +1,24 @@
-# Sprint 6T Share Pack
+# Sprint 6V Share Pack
 
-Current sprint: Sprint 6T - Close Game Distribution Calibration
+Current sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up
 
 ## Purpose
-Review the post-6S close-game and competitive-game distribution proof: margin buckets, score-gap causes, trailing-team response, leading-team runaway control, chain metric consistency, and no-score-manipulation guardrails.
+Review the post-6U late-game threat-quality proof: trailing responses now separate safe possession, territorial gain, forced defensive action, half chance, earned danger, and natural score_change conversion without forced comebacks.
 
-## Primary Files
-- fullmatch-close-game-distribution-calibration-6t.md
-- validation.fullmatch-close-game-distribution-calibration-6t.md
+## Required Review Files
 - coach-report.export.html
-- scoring-events-summary.md
+- fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
 - validation.share-pack.md
+- scoring-events-summary.md
+- bundle__simulation.md
+- bundle__reports.md
 
-## Expected Reading Order
+## Validation Order
 1. validation.share-pack.md
-2. validation.fullmatch-close-game-distribution-calibration-6t.md
-3. fullmatch-close-game-distribution-calibration-6t.md
+2. validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+3. fullmatch-late-game-threat-quality-trailing-conversion-6v.md
 4. coach-report.export.html
-5. bundle__simulation.md and bundle__reports.md for implementation proof
 
-## Guardrails
-- No scoring constants changed.
-- No score cap, rewrite, deleted event, forced score, forced comeback, or rubber-banding.
-- Official score remains derived from score_change events.
-- Route family diversity, gate selectivity, goalkeeper secure reset, and post-score reset remain visible.
+## Guardrail Reminder
+6V must not force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.

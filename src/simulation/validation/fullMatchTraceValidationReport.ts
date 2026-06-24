@@ -92,6 +92,14 @@ import {
   renderFullMatchCloseGameDistributionCalibration6TDoc as renderCloseGameDistributionCalibration6TDoc,
   renderFullMatchCloseGameDistributionCalibration6TValidation as renderCloseGameDistributionCalibration6TValidation,
 } from "../../reports/fullMatchCloseGameDistributionCalibration";
+import {
+  renderFullMatchTrailingTeamResponseLateGamePressure6UDoc as renderTrailingTeamResponseLateGamePressure6UDoc,
+  renderFullMatchTrailingTeamResponseLateGamePressure6UValidation as renderTrailingTeamResponseLateGamePressure6UValidation,
+} from "../../reports/fullMatchTrailingTeamResponseLateGamePressure";
+import {
+  renderFullMatchLateGameThreatQualityTrailingConversion6VDoc as renderLateGameThreatQualityTrailingConversion6VDoc,
+  renderFullMatchLateGameThreatQualityTrailingConversion6VValidation as renderLateGameThreatQualityTrailingConversion6VValidation,
+} from "../../reports/fullMatchLateGameThreatQualityTrailingConversion";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6453,6 +6461,22 @@ export function renderFullMatchCloseGameDistributionCalibration6TDoc(_model: Ful
 
 export function renderFullMatchCloseGameDistributionCalibration6TValidation(_model: FullMatchTraceValidationModel): string {
   return renderCloseGameDistributionCalibration6TValidation();
+}
+
+export function renderFullMatchTrailingTeamResponseLateGamePressure6UDoc(_model: FullMatchTraceValidationModel): string {
+  return renderTrailingTeamResponseLateGamePressure6UDoc();
+}
+
+export function renderFullMatchTrailingTeamResponseLateGamePressure6UValidation(_model: FullMatchTraceValidationModel): string {
+  return renderTrailingTeamResponseLateGamePressure6UValidation();
+}
+
+export function renderFullMatchLateGameThreatQualityTrailingConversion6VDoc(_model: FullMatchTraceValidationModel): string {
+  return renderLateGameThreatQualityTrailingConversion6VDoc();
+}
+
+export function renderFullMatchLateGameThreatQualityTrailingConversion6VValidation(_model: FullMatchTraceValidationModel): string {
+  return renderLateGameThreatQualityTrailingConversion6VValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

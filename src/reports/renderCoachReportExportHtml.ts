@@ -61,6 +61,12 @@ import type {
 import type {
   FullMatchCloseGameDistributionCalibrationModel,
 } from "./fullMatchCloseGameDistributionCalibration";
+import type {
+  FullMatchTrailingTeamResponseLateGamePressureModel,
+} from "./fullMatchTrailingTeamResponseLateGamePressure";
+import type {
+  FullMatchLateGameThreatQualityTrailingConversionModel,
+} from "./fullMatchLateGameThreatQualityTrailingConversion";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3386,6 +3392,153 @@ export function renderFullMatchCloseGameDistributionCalibrationSection(
     </section>`;
 }
 
+export function renderFullMatchTrailingTeamResponseLateGamePressureSection(
+  model: FullMatchTrailingTeamResponseLateGamePressureModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "La calibration 6U restaure une r&eacute;ponse tactique de l'&eacute;quipe men&eacute;e sans score forc&eacute;, sans comeback forc&eacute; et sans cap."
+    : "La calibration 6U mesure la r&eacute;ponse de l'&eacute;quipe men&eacute;e et isole ce qui reste &agrave; suivre sans manipuler le score.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Reponse de l'equipe menee">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6U</p>
+        <h3>R&eacute;ponse de l'&eacute;quipe men&eacute;e</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>R&eacute;ponse tactique</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: ${model.trailingTeamResponseRateBefore}% -> ${model.trailingTeamResponseRateAfter}%</li>
+            <li>Part opportunit&eacute;s: ${model.trailingTeamOpportunityShareBefore}% -> ${model.trailingTeamOpportunityShareAfter}%</li>
+            <li>Part scoring: ${model.trailingTeamScoringShareBefore}% -> ${model.trailingTeamScoringShareAfter}%</li>
+            <li>R&eacute;cup&eacute;ration: ${model.trailingTeamRecoveryShareBefore}% -> ${model.trailingTeamRecoveryShareAfter}%</li>
+            <li>Relief pression: ${model.trailingTeamPressureReliefRateBefore}% -> ${model.trailingTeamPressureReliefRateAfter}%</li>
+            <li>Risque tactique: ${model.trailingTeamRiskIncreaseRateBefore}% -> ${model.trailingTeamRiskIncreaseRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Fin de match et qualit&eacute;</h4>
+          <ul>
+            <li>Pression fin de match: ${model.trailingTeamLateGamePressureRateBefore}% -> ${model.trailingTeamLateGamePressureRateAfter}%</li>
+            <li>Danger gagn&eacute;: ${model.trailingTeamEarnedDangerRateBefore}% -> ${model.trailingTeamEarnedDangerRateAfter}%</li>
+            <li>Demi-occasion: ${model.trailingTeamHalfChanceRateBefore}% -> ${model.trailingTeamHalfChanceRateAfter}%</li>
+            <li>Gain territorial: ${model.trailingTeamTerritorialGainRateBefore}% -> ${model.trailingTeamTerritorialGainRateAfter}%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: ${model.trailingTeamForcedDefensiveActionRateBefore}% -> ${model.trailingTeamForcedDefensiveActionRateAfter}%</li>
+            <li>Causes mesur&eacute;es: ${model.trailingTeamResponseCauseDistribution.length}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: ${model.closeGameRateBefore}% -> ${model.closeGameRateAfter}%</li>
+            <li>Match comp&eacute;titif: ${model.competitiveGameRateBefore}% -> ${model.competitiveGameRateAfter}%</li>
+            <li>Blowout: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Cha&icirc;ne max: ${model.dominantTeamOpportunityChainMaxBefore} -> ${model.dominantTeamOpportunityChainMaxAfter}</li>
+            <li>Consistance cha&icirc;nes: ${model.chainMetricConsistencyAfter}</li>
+            <li>Diversit&eacute; route-family: ${model.routeFamilyDiversityPreserved}</li>
+            <li>Gate s&eacute;lectif: ${model.gateSelectivityPreserved}</li>
+            <li>Reset post-score: ${model.postScoreResetPreserved}</li>
+            <li>Score officiel: ${model.scoreFromScoreChangeAllRuns}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Batch 50 matchs; sans score forc&eacute;, sans comeback forc&eacute;, sans cap, sans rubber-banding;
+        le score reste issu des &eacute;v&eacute;nements officiels score_change.
+      </p>
+    </section>`;
+}
+
+export function renderFullMatchLateGameThreatQualityTrailingConversionSection(
+  model: FullMatchLateGameThreatQualityTrailingConversionModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "La calibration 6V transforme une partie des r&eacute;ponses de l'&eacute;quipe men&eacute;e en vraie menace sans forcer le score."
+    : "La calibration 6V mesure la qualit&eacute; de menace de l'&eacute;quipe men&eacute;e et garde les conversions naturelles explicitement s&eacute;par&eacute;es des garde-fous.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Qualite de menace de l'equipe menee">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6V</p>
+        <h3>Qualit&eacute; de menace de l'&eacute;quipe men&eacute;e</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace tactique</h4>
+          <ul>
+            <li>Qualit&eacute; menace: ${model.trailingThreatQualityRateAfter}%</li>
+            <li>Conversion naturelle menace: ${model.trailingThreatConversionRateAfter}%</li>
+            <li>Gain territorial: ${model.trailingTeamTerritorialGainRateBefore}% -> ${model.trailingTeamTerritorialGainRateAfter}%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: ${model.trailingTeamForcedDefensiveActionRateBefore}% -> ${model.trailingTeamForcedDefensiveActionRateAfter}%</li>
+            <li>Demi-occasion: ${model.trailingTeamHalfChanceRateBefore}% -> ${model.trailingTeamHalfChanceRateAfter}%</li>
+            <li>Danger gagn&eacute;: ${model.trailingTeamEarnedDangerRateBefore}% -> ${model.trailingTeamEarnedDangerRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Fin de match</h4>
+          <ul>
+            <li>Pression fin de match: ${model.trailingTeamLateGamePressureRateBefore}% -> ${model.trailingTeamLateGamePressureRateAfter}%</li>
+            <li>Menaces fin de match: ${model.lateGameThreatQualityAudit.trailingLateGameThreatCount}</li>
+            <li>Part scoring naturel &eacute;quipe men&eacute;e: ${model.trailingTeamScoringShareBefore}% -> ${model.trailingTeamScoringShareAfter}%</li>
+            <li>Fen&ecirc;tres menace: ${model.trailingThreatQualityAudit.trailingThreatWindowCount}</li>
+            <li>Scores naturels: ${model.naturalTrailingConversionAudit.naturalTrailingScoringEventCount}</li>
+            <li>Score inject&eacute;: ${model.trailingTeamScoreChangeInjected}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: ${model.closeGameRateBefore}% -> ${model.closeGameRateAfter}%</li>
+            <li>Match comp&eacute;titif: ${model.competitiveGameRateBefore}% -> ${model.competitiveGameRateAfter}%</li>
+            <li>Blowout: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Score officiel: ${model.scoreFromScoreChangeAllRuns}</li>
+            <li>Diversit&eacute; route-family: ${model.routeFamilyDiversityPreserved}</li>
+            <li>Gate s&eacute;lectif: ${model.gateSelectivityPreserved}</li>
+            <li>Danger automatique bloqu&eacute;: ${model.automaticDangerStillBlocked}</li>
+            <li>Rubber-banding: ${model.rubberBandingApplied}</li>
+            <li>Comeback forc&eacute;: ${model.comebackForced}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Batch 50 matchs; les scores restent issus des &eacute;v&eacute;nements officiels score_change, sans cap, sans injection et sans comeback forc&eacute;.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4456,6 +4609,8 @@ function renderAppendices(input: {
   readonly fullMatchEarnedDangerOutcomeDistribution?: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel;
   readonly fullMatchDominanceChainCalibrationCoverageFix?: FullMatchDominanceChainCalibrationCoverageFixModel;
   readonly fullMatchCloseGameDistributionCalibration?: FullMatchCloseGameDistributionCalibrationModel;
+  readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
+  readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4556,6 +4711,8 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchEarnedDangerOutcomeDistribution?: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel;
   readonly fullMatchDominanceChainCalibrationCoverageFix?: FullMatchDominanceChainCalibrationCoverageFixModel;
   readonly fullMatchCloseGameDistributionCalibration?: FullMatchCloseGameDistributionCalibrationModel;
+  readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
+  readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4680,6 +4837,8 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix),
     renderFullMatchDominanceChainCalibrationCoverageFixSection(input.fullMatchDominanceChainCalibrationCoverageFix),
     renderFullMatchCloseGameDistributionCalibrationSection(input.fullMatchCloseGameDistributionCalibration),
+    renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure),
+    renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -4766,6 +4925,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchCloseGameDistributionCalibration === undefined
       ? {}
       : { fullMatchCloseGameDistributionCalibration: input.fullMatchCloseGameDistributionCalibration }),
+    ...(input.fullMatchTrailingTeamResponseLateGamePressure === undefined
+      ? {}
+      : { fullMatchTrailingTeamResponseLateGamePressure: input.fullMatchTrailingTeamResponseLateGamePressure }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

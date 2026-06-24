@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-24T16:22:12.609Z
-Task/sprint: Sprint 6T - Close Game Distribution Calibration
+Generated: 2026-06-24T19:43:27.200Z
+Task/sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-close-game-distribution-calibration-6t.md
-- validation.fullmatch-close-game-distribution-calibration-6t.md
+- fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
 - README.md
 
 ## Bundle Files

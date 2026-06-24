@@ -602,12 +602,60 @@ function earnedDangerResetSourceType(event: MatchEvent | undefined): EarnedDange
 type RouteEconomyDangerQuality = "HIGH_QUALITY_DANGER" | "MEDIUM_QUALITY_DANGER" | "LOW_QUALITY_DANGER";
 type RouteEconomyDangerOutcome =
   | "SCORING_OPPORTUNITY"
+  | "EARNED_DANGER"
   | "HALF_CHANCE"
   | "FORCED_DEFENSIVE_ACTION"
   | "TERRITORIAL_GAIN"
   | "MOMENTUM_GAIN"
   | "SAFE_POSSESSION"
   | "NEUTRAL_PHASE";
+
+function lateGameThreatQualityOutcome6V(input: {
+  readonly baseOutcome: RouteEconomyDangerOutcome;
+  readonly candidate: OfficialRouteFamilyCandidate;
+  readonly dangerQuality: RouteEconomyDangerQuality;
+  readonly scoreDelta: number;
+  readonly segmentIndex: number;
+  readonly deterministicBreak: number;
+  readonly pressureFatigueLoad: number;
+}): RouteEconomyDangerOutcome {
+  if (input.scoreDelta >= 0) return input.baseOutcome;
+  if (input.baseOutcome === "SCORING_OPPORTUNITY") return input.baseOutcome;
+
+  const lateBoost = input.segmentIndex >= 6 ? 2 : 0;
+  const routeQualityBoost = input.candidate.candidateScore >= 90 ? 2 : input.candidate.candidateScore >= 82 ? 1 : 0;
+  const qualityBoost = input.dangerQuality === "HIGH_QUALITY_DANGER" ? 3 : input.dangerQuality === "MEDIUM_QUALITY_DANGER" ? 2 : 0;
+  const trailingPressureScore = lateBoost + routeQualityBoost + qualityBoost + Math.max(0, Math.abs(input.scoreDelta) >= 6 ? 1 : 0);
+  const selector = (input.deterministicBreak + input.segmentIndex + Math.round(input.pressureFatigueLoad)) % 12;
+
+  if (trailingPressureScore >= 6) {
+    if (selector === 0) return "SCORING_OPPORTUNITY";
+    if (selector <= 3) return "EARNED_DANGER";
+    if (selector <= 6) return "HALF_CHANCE";
+    if (selector <= 9) return "FORCED_DEFENSIVE_ACTION";
+    return "TERRITORIAL_GAIN";
+  }
+
+  if (trailingPressureScore >= 5) {
+    if (selector <= 2) return "EARNED_DANGER";
+    if (selector <= 5) return "HALF_CHANCE";
+    if (selector <= 8) return "FORCED_DEFENSIVE_ACTION";
+    return "TERRITORIAL_GAIN";
+  }
+
+  if (trailingPressureScore >= 4) {
+    if (selector <= 2) return "HALF_CHANCE";
+    if (selector <= 6) return "FORCED_DEFENSIVE_ACTION";
+    return "TERRITORIAL_GAIN";
+  }
+
+  if (trailingPressureScore >= 3) {
+    if (selector <= 4) return "FORCED_DEFENSIVE_ACTION";
+    return "TERRITORIAL_GAIN";
+  }
+  if (input.baseOutcome === "SAFE_POSSESSION" || input.baseOutcome === "NEUTRAL_PHASE") return "TERRITORIAL_GAIN";
+  return input.baseOutcome;
+}
 
 function routeEconomyDangerQuality(input: {
   readonly candidate: OfficialRouteFamilyCandidate;
@@ -809,9 +857,12 @@ function routeEconomyTagsForOutcome(input: {
   readonly includeEarnedDangerOutcomeDistribution6R?: boolean;
   readonly includeDominanceChainCoverage6S?: boolean;
   readonly includeCloseGameDistribution6T?: boolean;
+  readonly includeTrailingTeamResponse6U?: boolean;
+  readonly includeLateGameThreatQuality6V?: boolean;
   readonly repeatedDangerDampened?: boolean;
   readonly trailingTeamResponseWindow?: boolean;
   readonly leadingTeamRunawayWindow?: boolean;
+  readonly lateGamePressureWindow?: boolean;
 }): readonly string[] {
   const allowedTag = input.gateDecision === "ALLOW_BORDERLINE_DANGER"
     ? "borderline_danger_allowed"
@@ -873,6 +924,59 @@ function routeEconomyTagsForOutcome(input: {
           "trailing_team_response_opportunity_6t",
         ]
       : []),
+    ...(input.includeTrailingTeamResponse6U === true && input.trailingTeamResponseWindow === true
+      ? [
+          "trailing_team_response_6u",
+          "trailing_team_response_measured_6u",
+          "trailing_team_tactical_response_6u",
+          input.dangerOutcome === "SCORING_OPPORTUNITY"
+            ? "trailing_team_earned_danger_6u"
+            : input.dangerOutcome === "HALF_CHANCE"
+              ? "trailing_team_half_chance_6u"
+              : input.dangerOutcome === "FORCED_DEFENSIVE_ACTION"
+                ? "trailing_team_forced_defensive_action_6u"
+                : input.dangerOutcome === "TERRITORIAL_GAIN"
+                  ? "trailing_team_territorial_gain_6u"
+                  : "trailing_team_pressure_relief_6u",
+          "trailing_team_route_quality_signal_6u",
+          "trailing_team_risk_increase_6u",
+        ]
+      : []),
+    ...(input.includeTrailingTeamResponse6U === true && input.lateGamePressureWindow === true
+      ? [
+          "late_game_pressure_6u",
+          "trailing_team_late_game_pressure_6u",
+          "late_game_pressure_measured_6u",
+        ]
+      : []),
+    ...(input.includeLateGameThreatQuality6V === true && input.trailingTeamResponseWindow === true
+      ? [
+          "late_game_threat_quality_6v",
+          "trailing_threat_quality_measured_6v",
+          input.dangerOutcome === "SCORING_OPPORTUNITY"
+            ? "trailing_threat_scoring_opportunity_6v"
+            : input.dangerOutcome === "EARNED_DANGER"
+              ? "trailing_threat_earned_danger_6v"
+              : input.dangerOutcome === "HALF_CHANCE"
+                ? "trailing_threat_half_chance_6v"
+                : input.dangerOutcome === "FORCED_DEFENSIVE_ACTION"
+                  ? "trailing_threat_forced_defensive_action_6v"
+                  : input.dangerOutcome === "TERRITORIAL_GAIN"
+                    ? "trailing_threat_territorial_gain_6v"
+                    : "trailing_threat_safe_possession_6v",
+          input.dangerOutcome !== "SAFE_POSSESSION" && input.dangerOutcome !== "NEUTRAL_PHASE"
+            ? "trailing_safe_possession_to_threat_6v"
+            : "trailing_safe_possession_still_safe_6v",
+          input.dangerOutcome === "SCORING_OPPORTUNITY"
+            ? "natural_trailing_conversion_candidate_6v"
+            : "natural_trailing_threat_without_score_6v",
+          "trailing_route_quality_to_threat_6v",
+          "trailing_tactical_edge_to_threat_6v",
+        ]
+      : []),
+    ...(input.includeLateGameThreatQuality6V === true && input.lateGamePressureWindow === true
+      ? ["late_game_threat_quality_measured_6v", "trailing_late_game_threat_6v"]
+      : []),
     ...(input.includeCloseGameDistribution6T === true && input.leadingTeamRunawayWindow === true
       ? ["leading_team_runaway_window_6t"]
       : []),
@@ -895,7 +999,9 @@ function densitySelectedCandidate(input: {
   const teamPoints = input.teamId === input.homeTeamId ? input.scoreBefore.home : input.scoreBefore.away;
   const opponentPoints = input.teamId === input.homeTeamId ? input.scoreBefore.away : input.scoreBefore.home;
   const scoreDelta = teamPoints - opponentPoints;
-  const closeGameDistribution6TEnabled = input.seed.includes("close-game-distribution-calibration-6t");
+  const lateGameThreatQuality6VEnabled = input.seed.includes("late-game-threat-quality-trailing-conversion-6v");
+  const trailingTeamResponse6UEnabled = input.seed.includes("trailing-team-response-late-pressure-6u") || lateGameThreatQuality6VEnabled;
+  const closeGameDistribution6TEnabled = input.seed.includes("close-game-distribution-calibration-6t") || trailingTeamResponse6UEnabled;
   const bestScoringCandidate = selectCandidate(input.candidates.filter((candidate) => candidate.family !== "CONTINUATION"));
   const lastScoringCandidate = previousSelectedScoringCandidate({
     state: input.state,
@@ -911,16 +1017,43 @@ function densitySelectedCandidate(input: {
   });
 
   if (
-    scoreDelta < -5 &&
+    (trailingTeamResponse6UEnabled ? scoreDelta < 0 : scoreDelta < -5) &&
     selected.family === "CONTINUATION" &&
     bestScoringCandidate.eligible &&
-    bestScoringCandidate.candidateScore + 9 >= selected.candidateScore
+    bestScoringCandidate.candidateScore + (trailingTeamResponse6UEnabled ? 14 : 9) >= selected.candidateScore
   ) {
     return {
       ...bestScoringCandidate,
       candidateScore: Math.max(bestScoringCandidate.candidateScore, selected.candidateScore + 1),
       calibrationTags: [
         ...bestScoringCandidate.calibrationTags,
+        ...(trailingTeamResponse6UEnabled
+          ? [
+              "trailing_team_response_6u",
+              "trailing_team_response_measured_6u",
+              "trailing_team_tactical_response_6u",
+              "trailing_team_earned_danger_6u",
+              "trailing_team_route_quality_signal_6u",
+              "trailing_team_risk_increase_6u",
+              ...(input.segmentIndex >= 6
+                ? [
+                    "late_game_pressure_6u",
+                    "trailing_team_late_game_pressure_6u",
+                    "late_game_pressure_measured_6u",
+                  ]
+                : []),
+            ]
+          : []),
+        ...(lateGameThreatQuality6VEnabled
+          ? [
+              "late_game_threat_quality_6v",
+              "trailing_threat_quality_measured_6v",
+              "trailing_threat_scoring_opportunity_6v",
+              "natural_trailing_conversion_candidate_6v",
+              "trailing_route_quality_to_threat_6v",
+              ...(input.segmentIndex >= 6 ? ["late_game_threat_quality_measured_6v", "trailing_late_game_threat_6v"] : []),
+            ]
+          : []),
         ...(closeGameDistribution6TEnabled
           ? [
               "close_game_distribution_6t",
@@ -932,7 +1065,7 @@ function densitySelectedCandidate(input: {
           : []),
       ],
       reason: closeGameDistribution6TEnabled
-        ? "Close game distribution calibration 6T opens a trailing-team response window: legal scoring route access is preferred over another safe reset without forcing a score or comeback."
+        ? `${trailingTeamResponse6UEnabled ? "Trailing team response calibration 6U" : "Close game distribution calibration 6T"} opens a trailing-team response window: legal route access is preferred over another safe reset only when route quality is competitive, without forcing a score or comeback.`
         : "Team opportunity balance calibration opens a trailing-team response window: legal scoring route access is preferred over another safe reset without forcing a score.",
     };
   }
@@ -1129,7 +1262,7 @@ function densitySelectedCandidate(input: {
         postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
         deterministicBreak,
       });
-    const dangerOutcome = dominanceChainCoverage6SEnabled
+    const baseDangerOutcome = dominanceChainCoverage6SEnabled
       ? earnedDangerOutcomeDistributionOutcome6S({
         candidate: selected,
         gateDecision: earnedDangerGateResult.gateDecision,
@@ -1161,6 +1294,17 @@ function densitySelectedCandidate(input: {
           postScoreContext: postScoreSameTeamReattackWindow || postScoreConcedingRestartWindow,
           deterministicBreak,
         });
+    const dangerOutcome = lateGameThreatQuality6VEnabled
+      ? lateGameThreatQualityOutcome6V({
+          baseOutcome: baseDangerOutcome,
+          candidate: selected,
+          dangerQuality,
+          scoreDelta,
+          segmentIndex: input.segmentIndex,
+          deterministicBreak,
+          pressureFatigueLoad,
+        })
+      : baseDangerOutcome;
     const repeatedDangerDampened = dominanceChainCoverage6SEnabled &&
       dangerOutcome !== "SCORING_OPPORTUNITY" &&
       (
@@ -1176,9 +1320,12 @@ function densitySelectedCandidate(input: {
       includeEarnedDangerOutcomeDistribution6R: earnedDangerOutcomeDistribution6REnabled,
       includeDominanceChainCoverage6S: dominanceChainCoverage6SEnabled,
       includeCloseGameDistribution6T: closeGameDistribution6TEnabled,
+      includeTrailingTeamResponse6U: trailingTeamResponse6UEnabled,
+      includeLateGameThreatQuality6V: lateGameThreatQuality6VEnabled,
       repeatedDangerDampened,
       trailingTeamResponseWindow: scoreDelta < 0,
       leadingTeamRunawayWindow: scoreDelta > 7,
+      lateGamePressureWindow: scoreDelta < 0 && input.segmentIndex >= 6,
     });
     const gateText = `${earnedDangerGateLabel} ${earnedDangerGateResult.gateDecision === "ALLOW_BORDERLINE_DANGER" ? "allows borderline danger" : "confirms earned danger"}: score ${earnedDangerGateResult.earnedDangerScore}, reasons ${earnedDangerGateResult.gateReasonCodes.join("+")}.`;
 
@@ -1188,7 +1335,7 @@ function densitySelectedCandidate(input: {
         candidateScore: Math.max(continuation.candidateScore, selected.candidateScore + 1),
         calibrationTags: [...continuation.calibrationTags, ...routeEconomyTags],
         reason: dominanceChainCoverage6SEnabled
-          ? `${closeGameDistribution6TEnabled ? "Close game distribution calibration 6T" : "Dominance chain calibration coverage 6S"} converts repeated ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`
+        ? `${trailingTeamResponse6UEnabled && scoreDelta < 0 ? "Trailing team response calibration 6U" : closeGameDistribution6TEnabled ? "Close game distribution calibration 6T" : "Dominance chain calibration coverage 6S"} converts repeated ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`
           : `Route economy recheck 6Q converts ${selected.family} danger into ${dangerOutcome}: quality ${dangerQuality}, preserving possession economy before any score_change. ${gateText}`,
       };
     }
@@ -1196,7 +1343,7 @@ function densitySelectedCandidate(input: {
     return {
       ...selected,
       calibrationTags: [...selected.calibrationTags, ...routeEconomyTags],
-      reason: `${selected.reason} ${closeGameDistribution6TEnabled ? "Close game distribution calibration 6T" : dominanceChainCoverage6SEnabled ? "Dominance chain calibration coverage 6S" : "Route economy recheck 6Q"} preserves a scoring opportunity: quality ${dangerQuality}. ${gateText}`,
+      reason: `${selected.reason} ${trailingTeamResponse6UEnabled && scoreDelta < 0 ? "Trailing team response calibration 6U" : closeGameDistribution6TEnabled ? "Close game distribution calibration 6T" : dominanceChainCoverage6SEnabled ? "Dominance chain calibration coverage 6S" : "Route economy recheck 6Q"} preserves a scoring opportunity: quality ${dangerQuality}. ${gateText}`,
     };
   }
 
