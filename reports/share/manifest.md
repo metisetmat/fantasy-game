@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-24T18:20:00.093Z
-Task/sprint: Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up
+Generated: 2026-06-24T19:43:27.200Z
+Task/sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-trailing-team-response-late-pressure-6u.md
-- validation.fullmatch-trailing-team-response-late-pressure-6u.md
+- fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
 - README.md
 
 ## Bundle Files

@@ -107,6 +107,8 @@ import {
   renderFullMatchCloseGameDistributionCalibration6TValidation,
   renderFullMatchTrailingTeamResponseLateGamePressure6UDoc,
   renderFullMatchTrailingTeamResponseLateGamePressure6UValidation,
+  renderFullMatchLateGameThreatQualityTrailingConversion6VDoc,
+  renderFullMatchLateGameThreatQualityTrailingConversion6VValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -119,9 +121,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-trailing-team-response-late-pressure-6u.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-trailing-team-response-late-pressure-6u.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-late-game-threat-quality-trailing-conversion-6v.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2332,6 +2334,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6U warning-code registry for trailing-team response, late-game pressure, and no-score-manipulation guardrails",
       },
       {
+        source: "src/simulation/fullMatch/lateGameThreatQualityTrailingConversionWarnings.ts",
+        required: true,
+        reason: "Sprint 6V warning-code registry for trailing threat quality, natural conversion, and no-score-manipulation guardrails",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2340,6 +2347,21 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/fullMatchLateGamePressureAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring final-quarter pressure, trailing-team late-game possessions, recoveries, opportunities, and scoring events",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchTrailingThreatQualityAudit.ts",
+        required: true,
+        reason: "Sprint 6V audit measuring trailing-team threat windows, territorial gain, forced defensive action, half chances, earned danger, and natural scores",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchNaturalTrailingConversionAudit.ts",
+        required: true,
+        reason: "Sprint 6V audit proving trailing scores are natural score_change events rather than injected comeback events",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchLateGameThreatQualityAudit.ts",
+        required: true,
+        reason: "Sprint 6V audit measuring final-quarter threat quality and late-game trailing pressure",
       },
       {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
@@ -2420,6 +2442,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchTrailingTeamResponseLateGamePressure.test.ts",
         required: true,
         reason: "Sprint 6U executable test proving response restoration, late-game pressure measurement, and no-score-manipulation guardrails",
+      },
+      {
+        source: "src/reports/fullMatchLateGameThreatQualityTrailingConversion.ts",
+        required: true,
+        reason: "Sprint 6V full-match late-game threat quality and trailing conversion model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchLateGameThreatQualityTrailingConversion.test.ts",
+        required: true,
+        reason: "Sprint 6V executable test proving threat-quality measurement, natural conversion, and no-score-manipulation guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4578,6 +4610,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6V")) {
+    return renderFullMatchLateGameThreatQualityTrailingConversion6VDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6U")) {
     return renderFullMatchTrailingTeamResponseLateGamePressure6UDoc(fullMatchTraceValidationModel());
   }
@@ -6859,6 +6894,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6V")) {
+    return renderFullMatchLateGameThreatQualityTrailingConversion6VValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6U")) {
     return renderFullMatchTrailingTeamResponseLateGamePressure6UValidation(fullMatchTraceValidationModel());
   }
@@ -9086,6 +9124,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6V")) {
+    return [
+      "# Sprint 6V Share Pack",
+      "",
+      "Current sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up",
+      "",
+      "## Purpose",
+      "Review the post-6U late-game threat-quality proof: trailing responses now separate safe possession, territorial gain, forced defensive action, half chance, earned danger, and natural score_change conversion without forced comebacks.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+      "- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+      "3. fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+      "4. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "6V must not force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6U")) {
     return [
       "# Sprint 6U Share Pack",

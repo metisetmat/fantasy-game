@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up",
+  name: "Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-trailing-team-response-late-pressure-6u.md",
-    "validation.fullmatch-trailing-team-response-late-pressure-6u.md",
+    "fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+    "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6U share pack is current, complete, and below 20 files",
-    "fullmatch-trailing-team-response-late-pressure-6u.md": "validates trailing-team response, late-game pressure, close-game preservation, and no-score-manipulation guardrails after 6T",
-    "validation.fullmatch-trailing-team-response-late-pressure-6u.md": "validates 6U trailing-team response, late-game pressure, route diversity, score-change source, and no-rubber-banding guardrails",
-    "README.md": "compact reviewer orientation for the 6U share pack",
-    "manifest.md": "compatibility manifest listing the 6U share pack files",
+    "validation.share-pack.md": "proves the 6V share pack is current, complete, and below 20 files",
+    "fullmatch-late-game-threat-quality-trailing-conversion-6v.md": "validates late-game threat quality, trailing-team natural conversion, and no-score-manipulation guardrails after 6U",
+    "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md": "validates 6V trailing threat quality, natural conversion, route diversity, score-change source, and no-rubber-banding guardrails",
+    "README.md": "compact reviewer orientation for the 6V share pack",
+    "manifest.md": "compatibility manifest listing the 6V share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

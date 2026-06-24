@@ -52,7 +52,8 @@ function has6S(event: MatchEvent): boolean {
     event.tags.includes("earned_danger_outcome_distribution_6s") ||
     event.tags.includes("calibration_coverage_6t_applied") ||
     event.tags.includes("close_game_distribution_6t") ||
-    event.tags.includes("trailing_team_response_measured_6u");
+    event.tags.includes("trailing_team_response_measured_6u") ||
+    event.tags.includes("trailing_threat_quality_measured_6v");
 }
 
 function windowEvents(report: MatchReport): readonly MatchEvent[] {

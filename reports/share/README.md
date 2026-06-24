@@ -1,27 +1,24 @@
-# Sprint 6U Share Pack
+# Sprint 6V Share Pack
 
-Current sprint: Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up
+Current sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up
 
 ## Purpose
-Review the post-6T trailing-team response and late-game pressure proof: response causes, tactical pressure, recovery/territorial layers, close-game preservation, route-family diversity, and no-score-manipulation guardrails.
+Review the post-6U late-game threat-quality proof: trailing responses now separate safe possession, territorial gain, forced defensive action, half chance, earned danger, and natural score_change conversion without forced comebacks.
 
-## Primary Files
-- fullmatch-trailing-team-response-late-pressure-6u.md
-- validation.fullmatch-trailing-team-response-late-pressure-6u.md
+## Required Review Files
 - coach-report.export.html
-- scoring-events-summary.md
+- fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
 - validation.share-pack.md
+- scoring-events-summary.md
+- bundle__simulation.md
+- bundle__reports.md
 
-## Expected Reading Order
+## Validation Order
 1. validation.share-pack.md
-2. validation.fullmatch-trailing-team-response-late-pressure-6u.md
-3. fullmatch-trailing-team-response-late-pressure-6u.md
+2. validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+3. fullmatch-late-game-threat-quality-trailing-conversion-6v.md
 4. coach-report.export.html
-5. bundle__simulation.md and bundle__reports.md for implementation proof
 
-## Guardrails
-- No scoring constants changed.
-- No score cap, rewrite, deleted event, forced score, forced trailing-team score, forced comeback, or rubber-banding.
-- Official score remains derived from score_change events.
-- Trailing-team response is measured through tactical signals, not score manipulation.
-- Close/competitive distribution, route-family diversity, gate selectivity, goalkeeper secure reset, and post-score reset remain visible.
+## Guardrail Reminder
+6V must not force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.
