@@ -88,6 +88,10 @@ import {
   renderFullMatchDominanceChainCalibrationCoverageFix6SDoc as renderDominanceChainCalibrationCoverageFix6SDoc,
   renderFullMatchDominanceChainCalibrationCoverageFix6SValidation as renderDominanceChainCalibrationCoverageFix6SValidation,
 } from "../../reports/fullMatchDominanceChainCalibrationCoverageFix";
+import {
+  renderFullMatchCloseGameDistributionCalibration6TDoc as renderCloseGameDistributionCalibration6TDoc,
+  renderFullMatchCloseGameDistributionCalibration6TValidation as renderCloseGameDistributionCalibration6TValidation,
+} from "../../reports/fullMatchCloseGameDistributionCalibration";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6441,6 +6445,14 @@ export function renderFullMatchDominanceChainCalibrationCoverageFix6SDoc(_model:
 
 export function renderFullMatchDominanceChainCalibrationCoverageFix6SValidation(_model: FullMatchTraceValidationModel): string {
   return renderDominanceChainCalibrationCoverageFix6SValidation();
+}
+
+export function renderFullMatchCloseGameDistributionCalibration6TDoc(_model: FullMatchTraceValidationModel): string {
+  return renderCloseGameDistributionCalibration6TDoc();
+}
+
+export function renderFullMatchCloseGameDistributionCalibration6TValidation(_model: FullMatchTraceValidationModel): string {
+  return renderCloseGameDistributionCalibration6TValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

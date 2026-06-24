@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6S - Dominance Chain Calibration Coverage Fix",
+  name: "Sprint 6T - Close Game Distribution Calibration",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
-    "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md",
+    "fullmatch-close-game-distribution-calibration-6t.md",
+    "validation.fullmatch-close-game-distribution-calibration-6t.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6S share pack is current, complete, and below 20 files",
-    "fullmatch-dominance-chain-calibration-coverage-fix-6s.md": "validates dominance-chain reduction, calibration coverage, non-scoring layers, and score_change guardrails after 6R",
-    "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md": "validates 6S dominance chain metrics, calibration coverage, route diversity, and no-rewrite guardrails",
-    "README.md": "compact reviewer orientation for the 6S share pack",
-    "manifest.md": "compatibility manifest listing the 6S share pack files",
+    "validation.share-pack.md": "proves the 6T share pack is current, complete, and below 20 files",
+    "fullmatch-close-game-distribution-calibration-6t.md": "validates close-game, competitive-game, margin bucket, score-gap cause, and guardrail metrics after 6S",
+    "validation.fullmatch-close-game-distribution-calibration-6t.md": "validates 6T close-game distribution, chain metric consistency, score-gap causes, route diversity, and no-rubber-banding guardrails",
+    "README.md": "compact reviewer orientation for the 6T share pack",
+    "manifest.md": "compatibility manifest listing the 6T share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

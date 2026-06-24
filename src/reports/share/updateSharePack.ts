@@ -103,6 +103,8 @@ import {
   renderFullMatchEarnedDangerOutcomeDistribution6RValidation,
   renderFullMatchDominanceChainCalibrationCoverageFix6SDoc,
   renderFullMatchDominanceChainCalibrationCoverageFix6SValidation,
+  renderFullMatchCloseGameDistributionCalibration6TDoc,
+  renderFullMatchCloseGameDistributionCalibration6TValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -115,9 +117,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6S - Dominance Chain Calibration Coverage Fix";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-dominance-chain-calibration-coverage-fix-6s.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-dominance-chain-calibration-coverage-fix-6s.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6T - Close Game Distribution Calibration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-close-game-distribution-calibration-6t.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-close-game-distribution-calibration-6t.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2308,6 +2310,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6S audit proving calibration windows carry the 6S coverage tags or are explicitly explained",
       },
       {
+        source: "src/simulation/fullMatch/closeGameDistributionWarnings.ts",
+        required: true,
+        reason: "Sprint 6T warning-code registry for close-game distribution, no-rubber-banding, and score-gap guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchCloseGameDistributionAudit.ts",
+        required: true,
+        reason: "Sprint 6T audit measuring margins, close games, competitive games, blowouts, trailing response, and leading-team runaways",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchScoreGapCauseAudit.ts",
+        required: true,
+        reason: "Sprint 6T audit distinguishing true tactical gaps from volume, efficiency, recovery, goalkeeper, fatigue, and artificial gap suspicions",
+      },
+      {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
         required: true,
         reason: "Sprint 6N full-match earned danger gate calibration model, report renderer, and validation renderer",
@@ -2366,6 +2383,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchDominanceChainCalibrationCoverageFix.test.ts",
         required: true,
         reason: "Sprint 6S executable test proving dominance-chain reduction, calibration coverage, and score_change guardrails",
+      },
+      {
+        source: "src/reports/fullMatchCloseGameDistributionCalibration.ts",
+        required: true,
+        reason: "Sprint 6T full-match close game distribution calibration model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchCloseGameDistributionCalibration.test.ts",
+        required: true,
+        reason: "Sprint 6T executable test proving close-game distribution metrics, chain consistency, and no-rubber-banding guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4524,6 +4551,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6T")) {
+    return renderFullMatchCloseGameDistributionCalibration6TDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6S")) {
     return renderFullMatchDominanceChainCalibrationCoverageFix6SDoc(fullMatchTraceValidationModel());
   }
@@ -6799,6 +6829,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6T")) {
+    return renderFullMatchCloseGameDistributionCalibration6TValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6S")) {
     return renderFullMatchDominanceChainCalibrationCoverageFix6SValidation(fullMatchTraceValidationModel());
   }
@@ -9020,6 +9053,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6T")) {
+    return [
+      "# Sprint 6T Share Pack",
+      "",
+      "Current sprint: Sprint 6T - Close Game Distribution Calibration",
+      "",
+      "## Purpose",
+      "Review the post-6S close-game and competitive-game distribution proof: margin buckets, score-gap causes, trailing-team response, leading-team runaway control, chain metric consistency, and no-score-manipulation guardrails.",
+      "",
+      "## Primary Files",
+      "- fullmatch-close-game-distribution-calibration-6t.md",
+      "- validation.fullmatch-close-game-distribution-calibration-6t.md",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- validation.share-pack.md",
+      "",
+      "## Expected Reading Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-close-game-distribution-calibration-6t.md",
+      "3. fullmatch-close-game-distribution-calibration-6t.md",
+      "4. coach-report.export.html",
+      "5. bundle__simulation.md and bundle__reports.md for implementation proof",
+      "",
+      "## Guardrails",
+      "- No scoring constants changed.",
+      "- No score cap, rewrite, deleted event, forced score, forced comeback, or rubber-banding.",
+      "- Official score remains derived from score_change events.",
+      "- Route family diversity, gate selectivity, goalkeeper secure reset, and post-score reset remain visible.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6S")) {
     return [
       "# Sprint 6S Share Pack",

@@ -30,6 +30,7 @@ import { currentFullMatchGateSelectivityVolumeRegressionFixModel } from "./fullM
 import { currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel } from "./fullMatchRouteEconomyRecheckAfterSelectivityFix";
 import { currentFullMatchEarnedDangerOutcomeDistributionModel } from "./fullMatchEarnedDangerOutcomeDistribution";
 import { currentFullMatchDominanceChainCalibrationCoverageFixModel } from "./fullMatchDominanceChainCalibrationCoverageFix";
+import { currentFullMatchCloseGameDistributionCalibrationModel } from "./fullMatchCloseGameDistributionCalibration";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -65,6 +66,7 @@ import {
   renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection,
   renderFullMatchEarnedDangerOutcomeDistributionSection,
   renderFullMatchDominanceChainCalibrationCoverageFixSection,
+  renderFullMatchCloseGameDistributionCalibrationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -97,6 +99,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchRouteEconomyRecheckAfterSelectivityFix = currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel();
   const fullMatchEarnedDangerOutcomeDistribution = currentFullMatchEarnedDangerOutcomeDistributionModel();
   const fullMatchDominanceChainCalibrationCoverageFix = currentFullMatchDominanceChainCalibrationCoverageFixModel();
+  const fullMatchCloseGameDistributionCalibration = currentFullMatchCloseGameDistributionCalibrationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -111,6 +114,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchGateSelectivityVolumeRegressionFixSection(fullMatchGateSelectivityVolumeRegressionFix),
     renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(fullMatchRouteEconomyRecheckAfterSelectivityFix),
     renderFullMatchDominanceChainCalibrationCoverageFixSection(fullMatchDominanceChainCalibrationCoverageFix),
+    renderFullMatchCloseGameDistributionCalibrationSection(fullMatchCloseGameDistributionCalibration),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -133,6 +137,7 @@ export function writeLatestCoachReport(): void {
     fullMatchRouteEconomyRecheckAfterSelectivityFix,
     fullMatchEarnedDangerOutcomeDistribution,
     fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -323,6 +328,7 @@ export function writeLatestCoachReport(): void {
     fullMatchRouteEconomyRecheckAfterSelectivityFix,
     fullMatchEarnedDangerOutcomeDistribution,
     fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

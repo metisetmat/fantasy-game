@@ -58,6 +58,9 @@ import type {
 import type {
   FullMatchDominanceChainCalibrationCoverageFixModel,
 } from "./fullMatchDominanceChainCalibrationCoverageFix";
+import type {
+  FullMatchCloseGameDistributionCalibrationModel,
+} from "./fullMatchCloseGameDistributionCalibration";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3310,6 +3313,79 @@ export function renderFullMatchDominanceChainCalibrationCoverageFixSection(
     </section>`;
 }
 
+export function renderFullMatchCloseGameDistributionCalibrationSection(
+  model: FullMatchCloseGameDistributionCalibrationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "La calibration 6T mesure les matchs serres et competitifs sans score force, sans comeback force et sans cap."
+    : "La calibration 6T expose les causes d'ecart et garde les garde-fous visibles avant une suite eventuelle.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Matchs serres et competitivite">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6T</p>
+        <h3>Matchs serr&eacute;s et comp&eacute;titivit&eacute;</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution des &eacute;carts</h4>
+          <ul>
+            <li>Match serr&eacute;: ${model.closeGameRateBefore}% -> ${model.closeGameRateAfter}%</li>
+            <li>Match comp&eacute;titif: ${model.competitiveGameRateBefore}% -> ${model.competitiveGameRateAfter}%</li>
+            <li>&Eacute;cart moyen: ${model.averageScoreDifferenceBefore} -> ${model.averageScoreDifferenceAfter}</li>
+            <li>&Eacute;cart m&eacute;dian: ${model.medianScoreDifferenceBefore} -> ${model.medianScoreDifferenceAfter}</li>
+            <li>One-score game: ${model.oneScoreGameRateBefore}% -> ${model.oneScoreGameRateAfter}%</li>
+            <li>Two-score game: ${model.twoScoreGameRateBefore}% -> ${model.twoScoreGameRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Runaway et r&eacute;ponse</h4>
+          <ul>
+            <li>Blowout: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>R&eacute;ponse de l'&eacute;quipe men&eacute;e: ${model.trailingTeamResponseRateBefore}% -> ${model.trailingTeamResponseRateAfter}%</li>
+            <li>Repeat opportunity du leader: ${model.leadingTeamRepeatOpportunityRateBefore}% -> ${model.leadingTeamRepeatOpportunityRateAfter}%</li>
+            <li>Cha&icirc;ne max corrig&eacute;e: ${model.dominantTeamOpportunityChainMaxBefore} -> ${model.dominantTeamOpportunityChainMaxAfter}</li>
+            <li>Consistance max/moyenne: ${model.chainMetricConsistencyAfter}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Volume et familles de routes</h4>
+          <ul>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Scoring events/match: ${model.scoringEventsPerMatchBefore} -> ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>SHOT point share: ${model.shotPointShare}%</li>
+            <li>TRY/DROP point share: ${model.tryPointShare}% / ${model.dropPointShare}%</li>
+            <li>Diversit&eacute; route-family: ${model.routeFamilyDiversityPreserved}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Causes d'&eacute;cart et garde-fous</h4>
+          <ul>
+            <li>Cause volume opportunit&eacute;s: ${model.scoreGapCauseAudit.opportunityVolumeGapSignalCount}</li>
+            <li>Cause efficacit&eacute; scoring: ${model.scoreGapCauseAudit.scoringEfficiencyGapSignalCount}</li>
+            <li>Cause mismatch tactique: ${model.scoreGapCauseAudit.tacticalMismatchSignalCount}</li>
+            <li>Couverture calibration manquante: ${model.calibrationCoverageAudit.calibrationCoverageMissingWindowCount}</li>
+            <li>Score issu des &eacute;v&eacute;nements officiels: ${model.scoreFromScoreChangeAllRuns}</li>
+            <li>Sans cap / score forc&eacute; / comeback forc&eacute;: ${!model.scoreCapApplied && !model.forcedOpponentScoreApplied && !model.comebackForced}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Batch 50 matchs, sans score force, sans comeback force, sans rubber-banding, et avec score issu des evenements officiels.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4379,6 +4455,7 @@ function renderAppendices(input: {
   readonly fullMatchRouteEconomyRecheckAfterSelectivityFix?: FullMatchRouteEconomyRecheckAfterSelectivityFixModel;
   readonly fullMatchEarnedDangerOutcomeDistribution?: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel;
   readonly fullMatchDominanceChainCalibrationCoverageFix?: FullMatchDominanceChainCalibrationCoverageFixModel;
+  readonly fullMatchCloseGameDistributionCalibration?: FullMatchCloseGameDistributionCalibrationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4478,6 +4555,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchRouteEconomyRecheckAfterSelectivityFix?: FullMatchRouteEconomyRecheckAfterSelectivityFixModel;
   readonly fullMatchEarnedDangerOutcomeDistribution?: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel;
   readonly fullMatchDominanceChainCalibrationCoverageFix?: FullMatchDominanceChainCalibrationCoverageFixModel;
+  readonly fullMatchCloseGameDistributionCalibration?: FullMatchCloseGameDistributionCalibrationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4601,6 +4679,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix),
     renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix),
     renderFullMatchDominanceChainCalibrationCoverageFixSection(input.fullMatchDominanceChainCalibrationCoverageFix),
+    renderFullMatchCloseGameDistributionCalibrationSection(input.fullMatchCloseGameDistributionCalibration),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
@@ -4684,6 +4763,9 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchDominanceChainCalibrationCoverageFix === undefined
       ? {}
       : { fullMatchDominanceChainCalibrationCoverageFix: input.fullMatchDominanceChainCalibrationCoverageFix }),
+    ...(input.fullMatchCloseGameDistributionCalibration === undefined
+      ? {}
+      : { fullMatchCloseGameDistributionCalibration: input.fullMatchCloseGameDistributionCalibration }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);
