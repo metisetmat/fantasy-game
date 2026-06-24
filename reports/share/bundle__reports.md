@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6T - Close Game Distribution Calibration. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -112,6 +112,8 @@ import {
   renderFullMatchDominanceChainCalibrationCoverageFix6SValidation,
   renderFullMatchCloseGameDistributionCalibration6TDoc,
   renderFullMatchCloseGameDistributionCalibration6TValidation,
+  renderFullMatchTrailingTeamResponseLateGamePressure6UDoc,
+  renderFullMatchTrailingTeamResponseLateGamePressure6UValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -124,9 +126,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6T - Close Game Distribution Calibration";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-close-game-distribution-calibration-6t.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-close-game-distribution-calibration-6t.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-trailing-team-response-late-pressure-6u.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-trailing-team-response-late-pressure-6u.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2332,6 +2334,21 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6T audit distinguishing true tactical gaps from volume, efficiency, recovery, goalkeeper, fatigue, and artificial gap suspicions",
       },
       {
+        source: "src/simulation/fullMatch/trailingTeamResponseLateGamePressureWarnings.ts",
+        required: true,
+        reason: "Sprint 6U warning-code registry for trailing-team response, late-game pressure, and no-score-manipulation guardrails",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
+        required: true,
+        reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchLateGamePressureAudit.ts",
+        required: true,
+        reason: "Sprint 6U audit measuring final-quarter pressure, trailing-team late-game possessions, recoveries, opportunities, and scoring events",
+      },
+      {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
         required: true,
         reason: "Sprint 6N full-match earned danger gate calibration model, report renderer, and validation renderer",
@@ -2400,6 +2417,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchCloseGameDistributionCalibration.test.ts",
         required: true,
         reason: "Sprint 6T executable test proving close-game distribution metrics, chain consistency, and no-rubber-banding guardrails",
+      },
+      {
+        source: "src/reports/fullMatchTrailingTeamResponseLateGamePressure.ts",
+        required: true,
+        reason: "Sprint 6U full-match trailing-team response and late-game pressure model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchTrailingTeamResponseLateGamePressure.test.ts",
+        required: true,
+        reason: "Sprint 6U executable test proving response restoration, late-game pressure measurement, and no-score-manipulation guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4558,6 +4585,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6U")) {
+    return renderFullMatchTrailingTeamResponseLateGamePressure6UDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6T")) {
     return renderFullMatchCloseGameDistributionCalibration6TDoc(fullMatchTraceValidationModel());
   }
@@ -6836,6 +6866,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6U")) {
+    return renderFullMatchTrailingTeamResponseLateGamePressure6UValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6T")) {
     return renderFullMatchCloseGameDistributionCalibration6TValidation(fullMatchTraceValidationModel());
   }
@@ -9060,6 +9093,38 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6U")) {
+    return [
+      "# Sprint 6U Share Pack",
+      "",
+      "Current sprint: Sprint 6U - Trailing Team Response & Late Game Pressure Follow-up",
+      "",
+      "## Purpose",
+      "Review the post-6T trailing-team response and late-game pressure proof: response causes, tactical pressure, recovery/territorial layers, close-game preservation, route-family diversity, and no-score-manipulation guardrails.",
+      "",
+      "## Primary Files",
+      "- fullmatch-trailing-team-response-late-pressure-6u.md",
+      "- validation.fullmatch-trailing-team-response-late-pressure-6u.md",
+      "- coach-report.export.html",
+      "- scoring-events-summary.md",
+      "- validation.share-pack.md",
+      "",
+      "## Expected Reading Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-trailing-team-response-late-pressure-6u.md",
+      "3. fullmatch-trailing-team-response-late-pressure-6u.md",
+      "4. coach-report.export.html",
+      "5. bundle__simulation.md and bundle__reports.md for implementation proof",
+      "",
+      "## Guardrails",
+      "- No scoring constants changed.",
+      "- No score cap, rewrite, deleted event, forced score, forced trailing-team score, forced comeback, or rubber-banding.",
+      "- Official score remains derived from score_change events.",
+      "- Trailing-team response is measured through tactical signals, not score manipulation.",
+      "- Close/competitive distribution, route-family diversity, gate selectivity, goalkeeper secure reset, and post-score reset remain visible.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6T")) {
     return [
       "# Sprint 6T Share Pack",
@@ -26887,6 +26952,7 @@ import { currentFullMatchRouteEconomyRecheckAfterSelectivityFixModel } from "./f
 import { currentFullMatchEarnedDangerOutcomeDistributionModel } from "./fullMatchEarnedDangerOutcomeDistribution";
 import { currentFullMatchDominanceChainCalibrationCoverageFixModel } from "./fullMatchDominanceChainCalibrationCoverageFix";
 import { currentFullMatchCloseGameDistributionCalibrationModel } from "./fullMatchCloseGameDistributionCalibration";
+import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./fullMatchTrailingTeamResponseLateGamePressure";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -26923,6 +26989,7 @@ import {
   renderFullMatchEarnedDangerOutcomeDistributionSection,
   renderFullMatchDominanceChainCalibrationCoverageFixSection,
   renderFullMatchCloseGameDistributionCalibrationSection,
+  renderFullMatchTrailingTeamResponseLateGamePressureSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -26956,6 +27023,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchEarnedDangerOutcomeDistribution = currentFullMatchEarnedDangerOutcomeDistributionModel();
   const fullMatchDominanceChainCalibrationCoverageFix = currentFullMatchDominanceChainCalibrationCoverageFixModel();
   const fullMatchCloseGameDistributionCalibration = currentFullMatchCloseGameDistributionCalibrationModel();
+  const fullMatchTrailingTeamResponseLateGamePressure = currentFullMatchTrailingTeamResponseLateGamePressureModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -26971,6 +27039,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(fullMatchRouteEconomyRecheckAfterSelectivityFix),
     renderFullMatchDominanceChainCalibrationCoverageFixSection(fullMatchDominanceChainCalibrationCoverageFix),
     renderFullMatchCloseGameDistributionCalibrationSection(fullMatchCloseGameDistributionCalibration),
+    renderFullMatchTrailingTeamResponseLateGamePressureSection(fullMatchTrailingTeamResponseLateGamePressure),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -26994,6 +27063,7 @@ export function writeLatestCoachReport(): void {
     fullMatchEarnedDangerOutcomeDistribution,
     fullMatchDominanceChainCalibrationCoverageFix,
     fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -27185,6 +27255,7 @@ export function writeLatestCoachReport(): void {
     fullMatchEarnedDangerOutcomeDistribution,
     fullMatchDominanceChainCalibrationCoverageFix,
     fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
