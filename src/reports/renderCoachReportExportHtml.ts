@@ -52,6 +52,9 @@ import type {
 import type {
   FullMatchRouteEconomyRecheckAfterSelectivityFixModel,
 } from "./fullMatchRouteEconomyRecheckAfterSelectivityFix";
+import type {
+  FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel,
+} from "./fullMatchEarnedDangerOutcomeDistribution";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3185,6 +3188,56 @@ export function renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(
     </section>`;
 }
 
+export function renderFullMatchEarnedDangerOutcomeDistributionSection(
+  model: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "Les dangers merites produisent maintenant plusieurs issues tactiques sans casser le score officiel."
+    : "Les issues apres danger merite sont mesurees, avec une reserve explicite a surveiller.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Issues apres danger merite">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6R</p>
+        <h3>Issues apr&egrave;s danger m&eacute;rit&eacute;</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution des issues</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: ${model.earnedDangerToScoringOpportunityRateBefore}% -> ${model.earnedDangerToScoringOpportunityRateAfter}%</li>
+            <li>High quality vers opportunit&eacute;: ${model.highQualityDangerToOpportunityRateBefore}% -> ${model.highQualityDangerToOpportunityRateAfter}%</li>
+            <li>Medium quality: ${model.mediumQualityDangerCountBefore} -> ${model.mediumQualityDangerCountAfter}</li>
+            <li>Low quality: ${model.lowQualityDangerCountBefore} -> ${model.lowQualityDangerCountAfter}</li>
+            <li>Half chances: ${model.halfChanceOutcomeCountAfter}</li>
+            <li>Forced defensive actions: ${model.forcedDefensiveActionOutcomeCountAfter}</li>
+            <li>Territorial gains: ${model.territorialGainOutcomeCountAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>Scoring events/match: ${model.scoringEventsPerMatchBefore} -> ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchBefore} -> ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Fen&ecirc;tres longitudinales stables: ${model.longitudinalStableWindows}/${model.longitudinalWindowCount}</li>
+            <li>Statut: ${escapeHtml(model.status)}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: ${escapeHtml(model.recommendation)}. Aucun cap, aucun score force, aucun rewrite post-hoc:
+        le score reste issu des score_change officiels.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4252,6 +4305,7 @@ function renderAppendices(input: {
   readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
   readonly fullMatchGateSelectivityVolumeRegressionFix?: FullMatchGateSelectivityVolumeRegressionFixModel;
   readonly fullMatchRouteEconomyRecheckAfterSelectivityFix?: FullMatchRouteEconomyRecheckAfterSelectivityFixModel;
+  readonly fullMatchEarnedDangerOutcomeDistribution?: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4349,6 +4403,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchEarnedDangerGateTuning?: FullMatchEarnedDangerGateTuningModel;
   readonly fullMatchGateSelectivityVolumeRegressionFix?: FullMatchGateSelectivityVolumeRegressionFixModel;
   readonly fullMatchRouteEconomyRecheckAfterSelectivityFix?: FullMatchRouteEconomyRecheckAfterSelectivityFixModel;
+  readonly fullMatchEarnedDangerOutcomeDistribution?: FullMatchEarnedDangerOutcomeDistributionLongitudinalRouteEconomyModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4471,6 +4526,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning),
     renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix),
     renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix),
+    renderFullMatchEarnedDangerOutcomeDistributionSection(input.fullMatchEarnedDangerOutcomeDistribution),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

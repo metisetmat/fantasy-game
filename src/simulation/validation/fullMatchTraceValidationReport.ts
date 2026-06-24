@@ -80,6 +80,10 @@ import {
   renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QDoc as renderRouteEconomyRecheckAfterSelectivityFix6QDoc,
   renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation as renderRouteEconomyRecheckAfterSelectivityFix6QValidation,
 } from "../../reports/fullMatchRouteEconomyRecheckAfterSelectivityFix";
+import {
+  renderFullMatchEarnedDangerOutcomeDistribution6RDoc as renderEarnedDangerOutcomeDistribution6RDoc,
+  renderFullMatchEarnedDangerOutcomeDistribution6RValidation as renderEarnedDangerOutcomeDistribution6RValidation,
+} from "../../reports/fullMatchEarnedDangerOutcomeDistribution";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6417,6 +6421,14 @@ export function renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QDoc(_mode
 
 export function renderFullMatchRouteEconomyRecheckAfterSelectivityFix6QValidation(_model: FullMatchTraceValidationModel): string {
   return renderRouteEconomyRecheckAfterSelectivityFix6QValidation();
+}
+
+export function renderFullMatchEarnedDangerOutcomeDistribution6RDoc(_model: FullMatchTraceValidationModel): string {
+  return renderEarnedDangerOutcomeDistribution6RDoc();
+}
+
+export function renderFullMatchEarnedDangerOutcomeDistribution6RValidation(_model: FullMatchTraceValidationModel): string {
+  return renderEarnedDangerOutcomeDistribution6RValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

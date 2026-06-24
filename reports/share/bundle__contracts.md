@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6Q - Route Economy Recheck After Selectivity Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6R - Earned Danger Outcome Distribution. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-24T07:59:52.131Z
-Task/sprint: Sprint 6Q - Route Economy Recheck After Selectivity Fix
+Generated: 2026-06-24T12:57:27.108Z
+Task/sprint: Sprint 6R - Earned Danger Outcome Distribution
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
-- validation.fullmatch-route-economy-recheck-after-selectivity-fix-6q.md
+- fullmatch-earned-danger-outcome-distribution-6r.md
+- validation.fullmatch-earned-danger-outcome-distribution-6r.md
 - README.md
 
 ## Bundle Files
