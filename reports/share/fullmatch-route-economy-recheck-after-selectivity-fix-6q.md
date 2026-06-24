@@ -66,7 +66,7 @@
 | earnedDangerToScoringOpportunityRate | 100% | 100% |
 | borderlineDangerToScoringOpportunityRate | 100% | 26.3% |
 | highQualityDangerToOpportunityRate | 100% | 88.8% |
-| mediumQualityDangerToOpportunityRate | 100% | 10300% |
+| mediumQualityDangerToOpportunityRate | 100% | 0% |
 | lowQualityDangerToOpportunityRate | 100% | 0% |
 
 ## Continuation-To-Opportunity Metrics

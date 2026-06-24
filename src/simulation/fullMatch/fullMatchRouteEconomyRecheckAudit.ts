@@ -55,6 +55,8 @@ export interface FullMatchRouteEconomyRecheckAudit {
   readonly opportunityQualityGateFailCount: number;
   readonly lowQualityDangerBlockedFromOpportunityCount: number;
   readonly mediumQualityDangerConvertedToHalfChanceCount: number;
+  readonly mediumQualityDangerConvertedToOpportunityCount: number;
+  readonly lowQualityDangerConvertedToOpportunityCount: number;
   readonly highQualityDangerConvertedToOpportunityCount: number;
   readonly dangerQualityDistribution: readonly RouteEconomyDistributionRow[];
   readonly dangerOutcomeDistribution: readonly RouteEconomyDistributionRow[];
@@ -233,6 +235,8 @@ export function auditFullMatchRouteEconomyRecheck(report: MatchReport): FullMatc
     mediumQualityDangerConvertedToHalfChanceCount: routeEconomyEvents.filter((event) =>
       hasTag(event, "danger_quality_MEDIUM_QUALITY_DANGER") && hasTag(event, "danger_outcome_HALF_CHANCE")
     ).length,
+    mediumQualityDangerConvertedToOpportunityCount: mediumQualityOpportunityCount,
+    lowQualityDangerConvertedToOpportunityCount: lowQualityOpportunityCount,
     highQualityDangerConvertedToOpportunityCount: routeEconomyEvents.filter((event) =>
       hasTag(event, "danger_quality_HIGH_QUALITY_DANGER") && hasTag(event, "danger_outcome_SCORING_OPPORTUNITY")
     ).length,
