@@ -618,6 +618,7 @@ function lateGameThreatQualityOutcome6V(input: {
   readonly segmentIndex: number;
   readonly deterministicBreak: number;
   readonly pressureFatigueLoad: number;
+  readonly monitorAutomaticity6W?: boolean;
 }): RouteEconomyDangerOutcome {
   if (input.scoreDelta >= 0) return input.baseOutcome;
   if (input.baseOutcome === "SCORING_OPPORTUNITY") return input.baseOutcome;
@@ -653,6 +654,7 @@ function lateGameThreatQualityOutcome6V(input: {
     if (selector <= 4) return "FORCED_DEFENSIVE_ACTION";
     return "TERRITORIAL_GAIN";
   }
+  if (input.monitorAutomaticity6W === true) return input.baseOutcome;
   if (input.baseOutcome === "SAFE_POSSESSION" || input.baseOutcome === "NEUTRAL_PHASE") return "TERRITORIAL_GAIN";
   return input.baseOutcome;
 }
@@ -859,6 +861,7 @@ function routeEconomyTagsForOutcome(input: {
   readonly includeCloseGameDistribution6T?: boolean;
   readonly includeTrailingTeamResponse6U?: boolean;
   readonly includeLateGameThreatQuality6V?: boolean;
+  readonly includeLateGameThreatMonitoring6W?: boolean;
   readonly repeatedDangerDampened?: boolean;
   readonly trailingTeamResponseWindow?: boolean;
   readonly leadingTeamRunawayWindow?: boolean;
@@ -977,6 +980,22 @@ function routeEconomyTagsForOutcome(input: {
     ...(input.includeLateGameThreatQuality6V === true && input.lateGamePressureWindow === true
       ? ["late_game_threat_quality_measured_6v", "trailing_late_game_threat_6v"]
       : []),
+    ...(input.includeLateGameThreatMonitoring6W === true && input.trailingTeamResponseWindow === true
+      ? [
+          "late_game_threat_monitoring_6w",
+          "late_game_threat_automaticity_measured_6w",
+          input.dangerOutcome === "SCORING_OPPORTUNITY" ||
+          input.dangerOutcome === "EARNED_DANGER" ||
+          input.dangerOutcome === "HALF_CHANCE" ||
+          input.dangerOutcome === "FORCED_DEFENSIVE_ACTION" ||
+          input.dangerOutcome === "TERRITORIAL_GAIN"
+            ? "late_game_threat_from_real_signal_6w"
+            : "late_game_threat_denied_6w",
+          input.dangerOutcome === "SAFE_POSSESSION" || input.dangerOutcome === "NEUTRAL_PHASE"
+            ? "late_game_threat_downgraded_6w"
+            : "late_game_threat_supported_6w",
+        ]
+      : []),
     ...(input.includeCloseGameDistribution6T === true && input.leadingTeamRunawayWindow === true
       ? ["leading_team_runaway_window_6t"]
       : []),
@@ -999,7 +1018,8 @@ function densitySelectedCandidate(input: {
   const teamPoints = input.teamId === input.homeTeamId ? input.scoreBefore.home : input.scoreBefore.away;
   const opponentPoints = input.teamId === input.homeTeamId ? input.scoreBefore.away : input.scoreBefore.home;
   const scoreDelta = teamPoints - opponentPoints;
-  const lateGameThreatQuality6VEnabled = input.seed.includes("late-game-threat-quality-trailing-conversion-6v");
+  const lateGameThreatMonitoring6WEnabled = input.seed.includes("late-game-threat-quality-monitoring-6w");
+  const lateGameThreatQuality6VEnabled = input.seed.includes("late-game-threat-quality-trailing-conversion-6v") || lateGameThreatMonitoring6WEnabled;
   const trailingTeamResponse6UEnabled = input.seed.includes("trailing-team-response-late-pressure-6u") || lateGameThreatQuality6VEnabled;
   const closeGameDistribution6TEnabled = input.seed.includes("close-game-distribution-calibration-6t") || trailingTeamResponse6UEnabled;
   const bestScoringCandidate = selectCandidate(input.candidates.filter((candidate) => candidate.family !== "CONTINUATION"));
@@ -1052,6 +1072,15 @@ function densitySelectedCandidate(input: {
               "natural_trailing_conversion_candidate_6v",
               "trailing_route_quality_to_threat_6v",
               ...(input.segmentIndex >= 6 ? ["late_game_threat_quality_measured_6v", "trailing_late_game_threat_6v"] : []),
+              ...(lateGameThreatMonitoring6WEnabled
+                ? [
+                    "late_game_threat_monitoring_6w",
+                    "late_game_threat_automaticity_measured_6w",
+                    "late_game_threat_from_real_signal_6w",
+                    "late_game_threat_supported_6w",
+                    "natural_trailing_conversion_path_6w",
+                  ]
+                : []),
             ]
           : []),
         ...(closeGameDistribution6TEnabled
@@ -1303,6 +1332,7 @@ function densitySelectedCandidate(input: {
           segmentIndex: input.segmentIndex,
           deterministicBreak,
           pressureFatigueLoad,
+          monitorAutomaticity6W: lateGameThreatMonitoring6WEnabled,
         })
       : baseDangerOutcome;
     const repeatedDangerDampened = dominanceChainCoverage6SEnabled &&
@@ -1322,6 +1352,7 @@ function densitySelectedCandidate(input: {
       includeCloseGameDistribution6T: closeGameDistribution6TEnabled,
       includeTrailingTeamResponse6U: trailingTeamResponse6UEnabled,
       includeLateGameThreatQuality6V: lateGameThreatQuality6VEnabled,
+      includeLateGameThreatMonitoring6W: lateGameThreatMonitoring6WEnabled,
       repeatedDangerDampened,
       trailingTeamResponseWindow: scoreDelta < 0,
       leadingTeamRunawayWindow: scoreDelta > 7,

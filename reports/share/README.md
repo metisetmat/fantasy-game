@@ -1,14 +1,14 @@
-# Sprint 6V Share Pack
+# Sprint 6W Share Pack
 
-Current sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up
+Current sprint: Sprint 6W - Late Game Threat Quality Monitoring
 
 ## Purpose
-Review the post-6U late-game threat-quality proof: trailing responses now separate safe possession, territorial gain, forced defensive action, half chance, earned danger, and natural score_change conversion without forced comebacks.
+Review whether the late-game threat restored in 6V remains natural, signal-driven, and non-automatic without forcing scores, opportunities, possession, or comeback behavior.
 
 ## Required Review Files
 - coach-report.export.html
-- fullmatch-late-game-threat-quality-trailing-conversion-6v.md
-- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+- fullmatch-late-game-threat-quality-monitoring-6w.md
+- validation.fullmatch-late-game-threat-quality-monitoring-6w.md
 - validation.share-pack.md
 - scoring-events-summary.md
 - bundle__simulation.md
@@ -16,9 +16,10 @@ Review the post-6U late-game threat-quality proof: trailing responses now separa
 
 ## Validation Order
 1. validation.share-pack.md
-2. validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
-3. fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+2. validation.fullmatch-late-game-threat-quality-monitoring-6w.md
+3. fullmatch-late-game-threat-quality-monitoring-6w.md
 4. coach-report.export.html
+5. scoring-events-summary.md
 
 ## Guardrail Reminder
-6V must not force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.
+6W must not increase offensive volume, force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.

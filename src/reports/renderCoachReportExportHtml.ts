@@ -67,6 +67,9 @@ import type {
 import type {
   FullMatchLateGameThreatQualityTrailingConversionModel,
 } from "./fullMatchLateGameThreatQualityTrailingConversion";
+import type {
+  FullMatchLateGameThreatQualityMonitoringModel,
+} from "./fullMatchLateGameThreatQualityMonitoring";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3539,6 +3542,80 @@ export function renderFullMatchLateGameThreatQualityTrailingConversionSection(
     </section>`;
 }
 
+export function renderFullMatchLateGameThreatQualityMonitoringSection(
+  model: FullMatchLateGameThreatQualityMonitoringModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "Le monitoring 6W confirme que la menace de fin de match reste issue de signaux tactiques, sans comeback forc&eacute;."
+    : "Le monitoring 6W rend visible l'automaticit&eacute; potentielle de la menace de fin de match et s&eacute;pare les signaux naturels des alertes de comeback.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Monitoring de la menace de fin de match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6W</p>
+        <h3>Monitoring de la menace de fin de match</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Automaticit&eacute; de la menace</h4>
+          <ul>
+            <li>Qualit&eacute; menace fin de match: ${model.lateGameThreatQualityRateBefore}% -> ${model.lateGameThreatQualityRateAfter}%</li>
+            <li>Menace automatique: ${model.lateGameAutomaticThreatRateAfter}%</li>
+            <li>Menace sans signal: ${model.lateGameThreatWithoutSignalRateAfter}%</li>
+            <li>Menace avec signal r&eacute;el: ${model.lateGameThreatFromRealSignalRateAfter}%</li>
+            <li>Menaces refus&eacute;es: ${model.lateGameThreatDeniedCountAfter}</li>
+            <li>Menaces downgrad&eacute;es: ${model.lateGameThreatDowngradedCountAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Suspicion comeback</h4>
+          <ul>
+            <li>Suspicion avant/apr&egrave;s: ${model.forcedComebackSuspicionCountBefore} -> ${model.forcedComebackSuspicionCountAfter}</li>
+            <li>Expliqu&eacute;e: ${model.forcedComebackSuspicionExplainedCountAfter}</li>
+            <li>Non expliqu&eacute;e: ${model.forcedComebackSuspicionUnexplainedCountAfter}</li>
+            <li>Comeback forc&eacute; d&eacute;tect&eacute;: ${model.actualForcedComebackDetectedCountAfter}</li>
+            <li>Scores naturels &eacute;quipe men&eacute;e: ${model.naturalTrailingScoringEventCountAfter}</li>
+            <li>Chemins scoring complets: ${model.trailingScoringPathCompleteCountAfter}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: ${model.closeGameRateBefore}% -> ${model.closeGameRateAfter}%</li>
+            <li>Match comp&eacute;titif: ${model.competitiveGameRateBefore}% -> ${model.competitiveGameRateAfter}%</li>
+            <li>Blowout: ${model.blowoutRateBefore}% -> ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout: ${model.severeBlowoutRateBefore}% -> ${model.severeBlowoutRateAfter}%</li>
+            <li>Total points moyen: ${model.averageTotalPointsBefore} -> ${model.averageTotalPointsAfter}</li>
+            <li>&Eacute;v&eacute;nements scoring/match: ${model.scoringEventsPerMatchBefore} -> ${model.scoringEventsPerMatchAfter}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous officiels</h4>
+          <ul>
+            <li>Score issu de score_change: ${model.scoreFromScoreChangeAllRuns}</li>
+            <li>Chemin officiel connect&eacute;: ${model.officialPathConnectedAllRuns}</li>
+            <li>Gate s&eacute;lectif: ${model.gateSelectivityPreserved}</li>
+            <li>Danger automatique bloqu&eacute;: ${model.automaticDangerStillBlocked}</li>
+            <li>Cha&icirc;ne max: ${model.dominantTeamOpportunityChainMaxAfter}</li>
+            <li>Score inject&eacute; &eacute;quipe men&eacute;e: ${model.trailingTeamScoreChangeInjected}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Sprint suivant: ${escapeHtml(model.nextSprintRecommendation)}. Le monitoring ne modifie ni les constantes de scoring,
+        ni les score_change officiels, ni la possession dangereuse de mani&egrave;re automatique.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4611,6 +4688,7 @@ function renderAppendices(input: {
   readonly fullMatchCloseGameDistributionCalibration?: FullMatchCloseGameDistributionCalibrationModel;
   readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
+  readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4713,6 +4791,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchCloseGameDistributionCalibration?: FullMatchCloseGameDistributionCalibrationModel;
   readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
+  readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4839,6 +4918,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchCloseGameDistributionCalibrationSection(input.fullMatchCloseGameDistributionCalibration),
     renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion),
+    renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

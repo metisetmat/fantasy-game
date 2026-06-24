@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-24T19:43:27.200Z
-Task/sprint: Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up
+Generated: 2026-06-24T21:22:34.556Z
+Task/sprint: Sprint 6W - Late Game Threat Quality Monitoring
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-late-game-threat-quality-trailing-conversion-6v.md
-- validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md
+- fullmatch-late-game-threat-quality-monitoring-6w.md
+- validation.fullmatch-late-game-threat-quality-monitoring-6w.md
 - README.md
 
 ## Bundle Files

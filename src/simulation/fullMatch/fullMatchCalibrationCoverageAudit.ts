@@ -53,7 +53,8 @@ function has6S(event: MatchEvent): boolean {
     event.tags.includes("calibration_coverage_6t_applied") ||
     event.tags.includes("close_game_distribution_6t") ||
     event.tags.includes("trailing_team_response_measured_6u") ||
-    event.tags.includes("trailing_threat_quality_measured_6v");
+    event.tags.includes("trailing_threat_quality_measured_6v") ||
+    event.tags.includes("late_game_threat_monitoring_6w");
 }
 
 function windowEvents(report: MatchReport): readonly MatchEvent[] {

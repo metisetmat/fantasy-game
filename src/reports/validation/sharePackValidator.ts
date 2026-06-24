@@ -355,6 +355,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchTrailingTeamResponseLateGamePressure6UValidation = readIfExists(join(shareDirectory, "validation.fullmatch-trailing-team-response-late-pressure-6u.md"));
   const fullMatchLateGameThreatQualityTrailingConversion6V = readIfExists(join(shareDirectory, "fullmatch-late-game-threat-quality-trailing-conversion-6v.md"));
   const fullMatchLateGameThreatQualityTrailingConversion6VValidation = readIfExists(join(shareDirectory, "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md"));
+  const fullMatchLateGameThreatQualityMonitoring6W = readIfExists(join(shareDirectory, "fullmatch-late-game-threat-quality-monitoring-6w.md"));
+  const fullMatchLateGameThreatQualityMonitoring6WValidation = readIfExists(join(shareDirectory, "validation.fullmatch-late-game-threat-quality-monitoring-6w.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3140,6 +3142,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-trailing-team-response-late-pressure-6u.md",
     ...sprint6UForbiddenLeftovers,
   ];
+  const sprint6WExpectedFiles = sprint6VExpectedFiles.map((file) =>
+    file === "fullmatch-late-game-threat-quality-trailing-conversion-6v.md"
+      ? "fullmatch-late-game-threat-quality-monitoring-6w.md"
+      : file === "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md"
+        ? "validation.fullmatch-late-game-threat-quality-monitoring-6w.md"
+        : file
+  );
+  const sprint6WForbiddenLeftovers = [
+    "fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+    "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
+    ...sprint6VForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4147,6 +4161,39 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("coach export avoids forbidden 6V wording", !/score equilibre manuellement|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
     check("bundle includes 6V source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchTrailingThreatQualityAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchNaturalTrailingConversionAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchLateGameThreatQualityAudit.ts") && bundleReports.includes("src/reports/fullMatchLateGameThreatQualityTrailingConversion.ts") && bundleReports.includes("src/reports/fullMatchLateGameThreatQualityTrailingConversion.test.ts"), "6V source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchLateGameThreatQualityTrailingConversion6VValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint6WChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6WExpectedFiles.every((file) => requiredCopied(file)), sprint6WExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6WExpectedFiles.every((file) => manifest.includes(file)), sprint6WExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6W", activeConfig.sprintName === "Sprint 6W - Late Game Threat Quality Monitoring", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6WForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6WForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6W oriented", readme.includes("# Sprint 6W Share Pack") && readme.includes("fullmatch-late-game-threat-quality-monitoring-6w.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6W report included", fullMatchLateGameThreatQualityMonitoring6W.includes("# Full-Match Late Game Threat Quality Monitoring 6W") && fullMatchLateGameThreatQualityMonitoring6W.includes("Late Game Threat Automaticity") && fullMatchLateGameThreatQualityMonitoring6W.includes("Forced Comeback Suspicion") && fullMatchLateGameThreatQualityMonitoring6W.includes("Natural Trailing Conversion Path"), "6W doc included"),
+    check("6W validation is PASS or justified PARTIAL", (fullMatchLateGameThreatQualityMonitoring6WValidation.includes("Status: PASS") || fullMatchLateGameThreatQualityMonitoring6WValidation.includes("Status: PARTIAL")) && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("late game threat quality monitoring model exists"), "6W validation current"),
+    check("batch match count visible", fullMatchLateGameThreatQualityMonitoring6W.includes("- matchCount: 50") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("batch 50 matches after monitoring exists"), "50 matches visible"),
+    check("baseline 6V visible", fullMatchLateGameThreatQualityMonitoring6W.includes("LATE_GAME_THREAT_QUALITY_6V") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("baseline 6V metrics visible"), "6V baseline visible"),
+    check("automaticity metrics visible", fullMatchLateGameThreatQualityMonitoring6W.includes("lateGameThreatQualityRate") && fullMatchLateGameThreatQualityMonitoring6W.includes("lateGameAutomaticThreatRate") && fullMatchLateGameThreatQualityMonitoring6W.includes("lateGameThreatWithoutSignalRate") && fullMatchLateGameThreatQualityMonitoring6W.includes("lateGameThreatFromRealSignalRate"), "automaticity visible"),
+    check("forced comeback suspicion metrics visible", fullMatchLateGameThreatQualityMonitoring6W.includes("forcedComebackSuspicionCount") && fullMatchLateGameThreatQualityMonitoring6W.includes("forcedComebackSuspicionUnexplainedCount") && fullMatchLateGameThreatQualityMonitoring6W.includes("actualForcedComebackDetectedCount"), "forced comeback visible"),
+    check("natural trailing conversion path visible", fullMatchLateGameThreatQualityMonitoring6W.includes("trailingScoringPathCompleteCount") && fullMatchLateGameThreatQualityMonitoring6W.includes("trailingScoringPathIncompleteCount") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("natural trailing conversion path audit exists"), "natural path visible"),
+    check("score from score_change all runs", fullMatchLateGameThreatQualityMonitoring6W.includes("scoreFromScoreChangeAllRuns: true") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchLateGameThreatQualityMonitoring6W.includes("officialPathConnectedAllRuns: true"), "official path all runs"),
+    check("no cap/rewrite/delete/forced score", fullMatchLateGameThreatQualityMonitoring6W.includes("scoreCapApplied: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("postHocRewriteApplied: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("scoringEventsDeleted: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("forcedOpponentScoreApplied: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("no trailing opportunity or score forcing", fullMatchLateGameThreatQualityMonitoring6W.includes("trailingTeamOpportunityForced: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("trailingTeamScoreChangeInjected: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("trailingTeamScoringEventInjected: false"), "trailing forcing false"),
+    check("no rubber-banding or forced comeback", fullMatchLateGameThreatQualityMonitoring6W.includes("rubberBandingApplied: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("comebackForced: false") && fullMatchLateGameThreatQualityMonitoring6W.includes("leadingTeamScoreSuppressed: false"), "no forced comeback"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchLateGameThreatQualityMonitoring6W.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("no UNKNOWN scoring family", fullMatchLateGameThreatQualityMonitoring6WValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("no PENALTY_SHOT leakage", fullMatchLateGameThreatQualityMonitoring6WValidation.includes("PENALTY_SHOT inactive"), "PENALTY blocked"),
+    check("coach product contains 6W section", coachProductHtml.includes("Monitoring de la menace de fin de match") && coachProductHtml.includes("Sprint 6W"), "product 6W visible"),
+    check("coach export contains 6W section", coachExportHtml.includes("Monitoring de la menace de fin de match") && coachExportHtml.includes("Sprint 6W"), "export 6W visible"),
+    check("coach export avoids forbidden 6W wording", !/score equilibre manuellement|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6W source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchLateGameThreatAutomaticityAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchForcedComebackSuspicionAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchNaturalTrailingConversionPathAudit.ts") && bundleReports.includes("src/reports/fullMatchLateGameThreatQualityMonitoring.ts") && bundleReports.includes("src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts"), "6W source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8217,6 +8264,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 6W - Late Game Threat Quality")
+      ? sprint6WChecks
     : activeConfig.sprintName.includes("Sprint 6V - Late Game Threat Quality")
       ? sprint6VChecks
     : activeConfig.sprintName.includes("Sprint 6U - Trailing Team Response")

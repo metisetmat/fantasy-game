@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6W - Late Game Threat Quality Monitoring. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -116,6 +116,8 @@ import {
   renderFullMatchTrailingTeamResponseLateGamePressure6UValidation,
   renderFullMatchLateGameThreatQualityTrailingConversion6VDoc,
   renderFullMatchLateGameThreatQualityTrailingConversion6VValidation,
+  renderFullMatchLateGameThreatQualityMonitoring6WDoc,
+  renderFullMatchLateGameThreatQualityMonitoring6WValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -128,9 +130,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-late-game-threat-quality-trailing-conversion-6v.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6W - Late Game Threat Quality Monitoring";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-late-game-threat-quality-monitoring-6w.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-late-game-threat-quality-monitoring-6w.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2346,6 +2348,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6V warning-code registry for trailing threat quality, natural conversion, and no-score-manipulation guardrails",
       },
       {
+        source: "src/simulation/fullMatch/lateGameThreatQualityMonitoringWarnings.ts",
+        required: true,
+        reason: "Sprint 6W warning-code registry for late-game threat automaticity, forced-comeback suspicion, natural trailing paths, and strict no-score-manipulation guardrails",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2369,6 +2376,21 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/fullMatchLateGameThreatQualityAudit.ts",
         required: true,
         reason: "Sprint 6V audit measuring final-quarter threat quality and late-game trailing pressure",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchLateGameThreatAutomaticityAudit.ts",
+        required: true,
+        reason: "Sprint 6W audit separating real-signal late-game threats from automatic or unsupported threat creation",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchForcedComebackSuspicionAudit.ts",
+        required: true,
+        reason: "Sprint 6W audit explaining forced-comeback suspicion rows without treating natural trailing pressure as hidden rubber-banding",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchNaturalTrailingConversionPathAudit.ts",
+        required: true,
+        reason: "Sprint 6W audit proving trailing scoring events keep an official route, tactical signal, and score_change path",
       },
       {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
@@ -2459,6 +2481,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchLateGameThreatQualityTrailingConversion.test.ts",
         required: true,
         reason: "Sprint 6V executable test proving threat-quality measurement, natural conversion, and no-score-manipulation guardrails",
+      },
+      {
+        source: "src/reports/fullMatchLateGameThreatQualityMonitoring.ts",
+        required: true,
+        reason: "Sprint 6W full-match late-game threat monitoring model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts",
+        required: true,
+        reason: "Sprint 6W executable test proving automaticity monitoring, forced-comeback suspicion explanation, natural trailing paths, and scoring guardrails",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4617,6 +4649,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6W")) {
+    return renderFullMatchLateGameThreatQualityMonitoring6WDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6V")) {
     return renderFullMatchLateGameThreatQualityTrailingConversion6VDoc(fullMatchTraceValidationModel());
   }
@@ -6901,6 +6936,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6W")) {
+    return renderFullMatchLateGameThreatQualityMonitoring6WValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6V")) {
     return renderFullMatchLateGameThreatQualityTrailingConversion6VValidation(fullMatchTraceValidationModel());
   }
@@ -9131,6 +9169,36 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6W")) {
+    return [
+      "# Sprint 6W Share Pack",
+      "",
+      "Current sprint: Sprint 6W - Late Game Threat Quality Monitoring",
+      "",
+      "## Purpose",
+      "Review whether the late-game threat restored in 6V remains natural, signal-driven, and non-automatic without forcing scores, opportunities, possession, or comeback behavior.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- fullmatch-late-game-threat-quality-monitoring-6w.md",
+      "- validation.fullmatch-late-game-threat-quality-monitoring-6w.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-late-game-threat-quality-monitoring-6w.md",
+      "3. fullmatch-late-game-threat-quality-monitoring-6w.md",
+      "4. coach-report.export.html",
+      "5. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "6W must not increase offensive volume, force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6V")) {
     return [
       "# Sprint 6V Share Pack",
@@ -27021,6 +27089,7 @@ import { currentFullMatchDominanceChainCalibrationCoverageFixModel } from "./ful
 import { currentFullMatchCloseGameDistributionCalibrationModel } from "./fullMatchCloseGameDistributionCalibration";
 import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./fullMatchTrailingTeamResponseLateGamePressure";
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
+import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -27059,6 +27128,7 @@ import {
   renderFullMatchCloseGameDistributionCalibrationSection,
   renderFullMatchTrailingTeamResponseLateGamePressureSection,
   renderFullMatchLateGameThreatQualityTrailingConversionSection,
+  renderFullMatchLateGameThreatQualityMonitoringSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -27094,6 +27164,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchCloseGameDistributionCalibration = currentFullMatchCloseGameDistributionCalibrationModel();
   const fullMatchTrailingTeamResponseLateGamePressure = currentFullMatchTrailingTeamResponseLateGamePressureModel();
   const fullMatchLateGameThreatQualityTrailingConversion = currentFullMatchLateGameThreatQualityTrailingConversionModel();
+  const fullMatchLateGameThreatQualityMonitoring = currentFullMatchLateGameThreatQualityMonitoringModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -27111,6 +27182,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchCloseGameDistributionCalibrationSection(fullMatchCloseGameDistributionCalibration),
     renderFullMatchTrailingTeamResponseLateGamePressureSection(fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(fullMatchLateGameThreatQualityTrailingConversion),
+    renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -27136,6 +27208,7 @@ export function writeLatestCoachReport(): void {
     fullMatchCloseGameDistributionCalibration,
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -27329,6 +27402,7 @@ export function writeLatestCoachReport(): void {
     fullMatchCloseGameDistributionCalibration,
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
