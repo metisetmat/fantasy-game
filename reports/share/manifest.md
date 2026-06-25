@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-25T12:41:35.023Z
-Task/sprint: Sprint 7B - Coach Insight Depth & Next-Match Recommendations
+Generated: 2026-06-25T14:13:00.231Z
+Task/sprint: Sprint 7C - Coach Action Plan Cards & Training Focus Packaging
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-insight-depth-next-match-recommendations-7b.md
-- validation.coach-insight-depth-next-match-recommendations-7b.md
+- coach-action-plan-cards-training-focus-packaging-7c.md
+- validation.coach-action-plan-cards-training-focus-packaging-7c.md
 - README.md
 
 ## Bundle Files

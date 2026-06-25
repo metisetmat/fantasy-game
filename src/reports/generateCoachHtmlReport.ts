@@ -35,6 +35,10 @@ import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./ful
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
 import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
+import {
+  buildCoachActionPlanCardsTrainingFocusPackagingModel,
+  renderCoachActionPlanCardsTrainingFocusPackagingSection,
+} from "./coachActionPlanCardsTrainingFocusPackaging";
 import { buildCoachInsightDepthNextMatchRecommendationsModel } from "./coachInsightDepthNextMatchRecommendations";
 import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
@@ -202,11 +206,7 @@ export function writeLatestCoachReport(): void {
     productHtml,
     renderCoachInsightDepthNextMatchRecommendationsSection(coachInsightDepthNextMatchRecommendations),
   );
-  const exportSnapshot = buildCoachReportExportSnapshot({
-    productReportHtml: productHtmlWith7B,
-    productReportPath: "reports/coach-report.product.html",
-  });
-  const baselineExportHtml = renderCoachReportExportHtml({
+  const productExportHtmlFor7C = renderCoachReportExportHtml({
     productReportHtml: productHtmlWith7B,
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
@@ -228,30 +228,69 @@ export function writeLatestCoachReport(): void {
     productBaselineCoachReportReadiness,
     coachInsightDepthNextMatchRecommendations,
   });
+  const coachActionPlanCardsTrainingFocusPackaging = buildCoachActionPlanCardsTrainingFocusPackagingModel({
+    productReport: productReportView,
+    productReportHtml: productHtmlWith7B,
+    exportReportHtml: productExportHtmlFor7C,
+    baseline7B: coachInsightDepthNextMatchRecommendations,
+    baseline7A: productBaselineCoachReportReadiness,
+    matchEconomyBaseline: fullMatchEconomyFinalStabilization,
+  });
+  const productHtmlWith7C = appendProductSection(
+    productHtmlWith7B,
+    renderCoachActionPlanCardsTrainingFocusPackagingSection(coachActionPlanCardsTrainingFocusPackaging),
+  );
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtmlWith7C,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWith7C,
+    fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
+    fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
+    fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
+    fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
+    coachInsightDepthNextMatchRecommendations,
+    coachActionPlanCardsTrainingFocusPackaging,
+  });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const phaseVisuals = buildCoachReportPhaseVisuals({
     premiumLayout,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const phaseReadability = buildCoachReportPhaseVisualReadability({
     phaseVisuals,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const multiMatchPhaseComparison = buildCoachReportMultiMatchPhaseComparison({
     phaseReadability,
     comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const multiMatchHistoryView = buildCoachReportMultiMatchHistoryView({
     multiMatchComparison: multiMatchPhaseComparison,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const historyStore = createFileBackedCoachMatchHistoryStore({
@@ -260,7 +299,7 @@ export function writeLatestCoachReport(): void {
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
     matchReport: experimentalReport,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
     historyStore,
@@ -269,7 +308,7 @@ export function writeLatestCoachReport(): void {
   });
   const currentPersistentRecord = buildCoachMatchHistoryRecord({
     matchReport: experimentalReport,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
     source: "product_history_store",
@@ -301,7 +340,7 @@ export function writeLatestCoachReport(): void {
           includeControlledSamples: true,
           includeProductHistory: true,
         },
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const persistenceEvidenceSnapshot = historyStoreConsistency === undefined || persistentHistoryAdapter.saveResult === undefined
@@ -311,7 +350,7 @@ export function writeLatestCoachReport(): void {
         saveResult: persistentHistoryAdapter.saveResult,
         queriedRecordCount: historyStoreConsistency.queriedRecordCount,
         queriedSignalCount: historyStoreConsistency.queriedSignalCount,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const migrationDryRun = buildCoachMatchHistoryMigrationDryRun({
@@ -323,7 +362,7 @@ export function writeLatestCoachReport(): void {
     : buildCoachReportDatabaseMigrationPreparation({
         persistenceEvidenceSnapshot,
         migrationDryRun,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const databaseFeatureFlag = resolveDatabaseHistoryAdapterFeatureFlag();
@@ -338,7 +377,7 @@ export function writeLatestCoachReport(): void {
         sourceRecords: historyStore.listAll(),
         experimentalAdapter: experimentalDatabaseAdapter,
         featureFlag: databaseFeatureFlag,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const durableStorageDecision = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined || databaseAdapterSpike === undefined
@@ -352,7 +391,7 @@ export function writeLatestCoachReport(): void {
           featureFlag: databaseFeatureFlag,
         }),
         featureFlag: databaseFeatureFlag,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const controlledLocalReadOnlyDbMode = durableStorageDecision === undefined
@@ -364,7 +403,7 @@ export function writeLatestCoachReport(): void {
           initialRecords: historyStore.listAll(),
           featureFlagEnabled: false,
         }),
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const realSQLiteReadOnlyIOSmokeTest = controlledLocalReadOnlyDbMode === undefined
@@ -375,7 +414,7 @@ export function writeLatestCoachReport(): void {
           fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
           explicitControlledMode: true,
         }),
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
@@ -386,7 +425,7 @@ export function writeLatestCoachReport(): void {
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     phaseReadability,
     multiMatchPhaseComparison,
     multiMatchHistoryView,
@@ -424,6 +463,7 @@ export function writeLatestCoachReport(): void {
     fullMatchEconomyFinalStabilization,
     productBaselineCoachReportReadiness,
     coachInsightDepthNextMatchRecommendations,
+    coachActionPlanCardsTrainingFocusPackaging,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
@@ -449,7 +489,7 @@ export function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    productHtmlWith7B,
+    productHtmlWith7C,
     "utf8",
   );
   writeFileSync(

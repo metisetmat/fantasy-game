@@ -79,6 +79,10 @@ import type {
 import type {
   CoachInsightDepthNextMatchRecommendationsModel,
 } from "./coachInsightDepthNextMatchRecommendations";
+import {
+  renderCoachActionPlanCardsTrainingFocusPackagingSection,
+  type CoachActionPlanCardsTrainingFocusPackagingModel,
+} from "./coachActionPlanCardsTrainingFocusPackaging";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -1390,6 +1394,46 @@ function renderCoachDeepInsightsExport(html: string): string {
       <div>
         <h2>Insights coach approfondis</h2>
         <p>Chaque carte relie observation, cause probable, consequence, risque et signal prochain match.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderCoachActionPlanExport(html: string): string {
+  const body = extractSectionInner(html, "coach-action-plan");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="coach-action-plan" class="premium-section" data-source-product-sections="coach-action-plan">
+    <div class="report-section-divider">Coach action plan</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Plan d'action coach</h2>
+        <p>Cartes courtes: observation, travail, signal observable, critere de reussite et risque.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderTrainingFocusPackageExport(html: string): string {
+  const body = extractSectionInner(html, "training-focus-package");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="training-focus-package" class="premium-section" data-source-product-sections="training-focus-package">
+    <div class="report-section-divider">Training focus</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Focus entrainement</h2>
+        <p>Le travail est presente comme un axe d'observation, sans imposer composition ni plan tactique.</p>
       </div>
     </div>
     ${body}
@@ -4930,6 +4974,7 @@ function renderAppendices(input: {
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
   readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
   readonly coachInsightDepthNextMatchRecommendations?: CoachInsightDepthNextMatchRecommendationsModel;
+  readonly coachActionPlanCardsTrainingFocusPackaging?: CoachActionPlanCardsTrainingFocusPackagingModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -5036,6 +5081,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
   readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
   readonly coachInsightDepthNextMatchRecommendations?: CoachInsightDepthNextMatchRecommendationsModel;
+  readonly coachActionPlanCardsTrainingFocusPackaging?: CoachActionPlanCardsTrainingFocusPackagingModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -5126,6 +5172,8 @@ export function renderCoachReportExportHtml(input: {
     renderExecutiveSummary(input.productReportHtml),
     renderMatchStory(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
+    renderCoachActionPlanExport(input.productReportHtml),
+    renderTrainingFocusPackageExport(input.productReportHtml),
     renderCoachDeepInsightsExport(input.productReportHtml),
     renderNextMatchPlanExport(input.productReportHtml),
     renderPhaseLegend(readabilityPresentation.legendItems),
@@ -5168,6 +5216,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
     renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
     renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations),
+    renderCoachActionPlanCardsTrainingFocusPackagingSection(input.coachActionPlanCardsTrainingFocusPackaging),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

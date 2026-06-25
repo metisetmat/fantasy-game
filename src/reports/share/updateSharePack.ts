@@ -117,6 +117,8 @@ import {
   renderProductBaselineCoachReportReadiness7AValidation,
   renderCoachInsightDepthNextMatchRecommendations7BDoc,
   renderCoachInsightDepthNextMatchRecommendations7BValidation,
+  renderCoachActionPlanCardsTrainingFocusPackaging7CDoc,
+  renderCoachActionPlanCardsTrainingFocusPackaging7CValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -130,10 +132,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7B - Coach Insight Depth & Next-Match Recommendations";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-insight-depth-next-match-recommendations-7b.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7C - Coach Action Plan Cards & Training Focus Packaging";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-action-plan-cards-training-focus-packaging-7c.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-insight-depth-next-match-recommendations-7b.md";
+  "validation.coach-action-plan-cards-training-focus-packaging-7c.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2604,6 +2606,46 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7B executable test proving product/export sections, insight depth, recommendation safety, and baseline preservation",
       },
       {
+        source: "src/reports/coachActionPlanCards.ts",
+        required: true,
+        reason: "Sprint 7C action-plan card and training-focus builders plus product render helpers",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving coach action cards are short, sourced, observable, non-forced, and evidence-backed",
+      },
+      {
+        source: "src/reports/trainingFocusPackagingAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving training focus packaging has why, cue, observable signal, risk, and evidence",
+      },
+      {
+        source: "src/reports/nextMatchPlanPackagingAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving next-match priorities stay compact, concrete, sourced, and observable",
+      },
+      {
+        source: "src/reports/coachReportWordingPolishAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving duplicated labels, mechanical wording, jargon, and forbidden wording are absent",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsTrainingFocusPackagingWarnings.ts",
+        required: true,
+        reason: "Sprint 7C warning-code registry for action-plan cards, training focus packaging, wording polish, and guardrails",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsTrainingFocusPackaging.ts",
+        required: true,
+        reason: "Sprint 7C model, report renderer, and validation renderer for coach action-plan packaging",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsTrainingFocusPackaging.test.ts",
+        required: true,
+        reason: "Sprint 7C executable test proving product/export sections, action cards, training focus, wording polish, and baseline preservation",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4760,6 +4802,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7C")) {
+    return renderCoachActionPlanCardsTrainingFocusPackaging7CDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7B")) {
     return renderCoachInsightDepthNextMatchRecommendations7BDoc(fullMatchTraceValidationModel());
   }
@@ -7056,6 +7101,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7C")) {
+    return renderCoachActionPlanCardsTrainingFocusPackaging7CValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7B")) {
     return renderCoachInsightDepthNextMatchRecommendations7BValidation(fullMatchTraceValidationModel());
   }
@@ -9298,6 +9346,38 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7C")) {
+    return [
+      "# Sprint 7C Share Pack",
+      "",
+      "Current sprint: Sprint 7C - Coach Action Plan Cards & Training Focus Packaging",
+      "",
+      "## Purpose",
+      "Review whether the 7B insight layer is now packaged into short coach action-plan cards, training focus blocks, observable next-match signals, and polished wording without changing scoring, route selection, or match mechanics.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-action-plan-cards-training-focus-packaging-7c.md",
+      "- validation.coach-action-plan-cards-training-focus-packaging-7c.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-action-plan-cards-training-focus-packaging-7c.md",
+      "3. coach-action-plan-cards-training-focus-packaging-7c.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7C must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7B")) {
     return [
       "# Sprint 7B Share Pack",

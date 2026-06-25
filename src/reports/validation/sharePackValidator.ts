@@ -363,6 +363,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const productBaselineCoachReportReadiness7AValidation = readIfExists(join(shareDirectory, "validation.product-baseline-coach-report-readiness-7a.md"));
   const coachInsightDepthNextMatchRecommendations7B = readIfExists(join(shareDirectory, "coach-insight-depth-next-match-recommendations-7b.md"));
   const coachInsightDepthNextMatchRecommendations7BValidation = readIfExists(join(shareDirectory, "validation.coach-insight-depth-next-match-recommendations-7b.md"));
+  const coachActionPlanCardsTrainingFocusPackaging7C = readIfExists(join(shareDirectory, "coach-action-plan-cards-training-focus-packaging-7c.md"));
+  const coachActionPlanCardsTrainingFocusPackaging7CValidation = readIfExists(join(shareDirectory, "validation.coach-action-plan-cards-training-focus-packaging-7c.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3196,6 +3198,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.product-baseline-coach-report-readiness-7a.md",
     ...sprint7AForbiddenLeftovers,
   ];
+  const sprint7CExpectedFiles = sprint7BExpectedFiles.map((file) =>
+    file === "coach-insight-depth-next-match-recommendations-7b.md"
+      ? "coach-action-plan-cards-training-focus-packaging-7c.md"
+      : file === "validation.coach-insight-depth-next-match-recommendations-7b.md"
+        ? "validation.coach-action-plan-cards-training-focus-packaging-7c.md"
+        : file
+  );
+  const sprint7CForbiddenLeftovers = [
+    "coach-insight-depth-next-match-recommendations-7b.md",
+    "validation.coach-insight-depth-next-match-recommendations-7b.md",
+    ...sprint7BForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4328,6 +4342,38 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachInsightDepthNextMatchRecommendations7BValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 7B source files", bundleReports.includes("src/reports/coachInsightDepthNextMatchRecommendations.ts") && bundleReports.includes("src/reports/coachDeepInsights.ts") && bundleReports.includes("src/reports/coachInsightDepthAudit.ts") && bundleReports.includes("src/reports/nextMatchRecommendationAudit.ts") && bundleReports.includes("src/reports/coachInsightCausalityEvidenceAudit.ts") && bundleReports.includes("src/reports/coachLanguageReadabilityAudit.ts") && bundleReports.includes("src/reports/coachInsightDepthNextMatchRecommendations.test.ts"), "7B source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachInsightDepthNextMatchRecommendations7BValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7CChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7CExpectedFiles.every((file) => requiredCopied(file)), sprint7CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7CExpectedFiles.every((file) => manifest.includes(file)), sprint7CExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7C", activeConfig.sprintName === "Sprint 7C - Coach Action Plan Cards & Training Focus Packaging", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7CForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7CForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7C oriented", readme.includes("# Sprint 7C Share Pack") && readme.includes("coach-action-plan-cards-training-focus-packaging-7c.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("7C report included", coachActionPlanCardsTrainingFocusPackaging7C.includes("# Coach Action Plan Cards & Training Focus Packaging 7C") && coachActionPlanCardsTrainingFocusPackaging7C.includes("Action Plan Cards") && coachActionPlanCardsTrainingFocusPackaging7C.includes("Training Focus Packaging") && coachActionPlanCardsTrainingFocusPackaging7C.includes("Wording Polish Audit"), "7C doc included"),
+    check("7C validation is PASS", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("Status: PASS") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("CoachActionPlanCardsTrainingFocusPackagingModel exists"), "7C validation current"),
+    check("baseline 7B visible", coachActionPlanCardsTrainingFocusPackaging7C.includes("baselineVersion: COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS_7B") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("baseline 7B visible"), "7B baseline visible"),
+    check("baseline 7A visible", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("baseline 7A visible"), "7A baseline visible"),
+    check("baseline 6X preserved", coachActionPlanCardsTrainingFocusPackaging7C.includes("matchEconomyBaselinePreserved: true") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("baseline 6X preserved"), "6X baseline visible"),
+    check("product and export ready", coachActionPlanCardsTrainingFocusPackaging7C.includes("productReportReady: true") && coachActionPlanCardsTrainingFocusPackaging7C.includes("coachExportReady: true") && coachActionPlanCardsTrainingFocusPackaging7C.includes("productBaselineReady: true"), "readiness true"),
+    check("action plan sections visible in product and export", coachProductHtml.includes("id=\"coach-action-plan\"") && coachProductHtml.includes("id=\"training-focus-package\"") && coachExportHtml.includes("id=\"coach-action-plan\"") && coachExportHtml.includes("id=\"training-focus-package\""), "7C sections visible"),
+    check("deep insights and next-match plan preserved", coachProductHtml.includes("id=\"coach-deep-insights\"") && coachProductHtml.includes("id=\"next-match-plan\"") && coachExportHtml.includes("id=\"coach-deep-insights\"") && coachExportHtml.includes("id=\"next-match-plan\""), "7B sections preserved"),
+    check("action cards concrete", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("action plan cards visible") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("exactly one primary action card") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("cards have success indicator"), "action cards concrete"),
+    check("training focus packaged", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("training focus packaged") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("trainingFocusCount: 2"), "training focus current"),
+    check("next-match plan packaged", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("next-match plan packaged") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("nextMatchPriorityCount: 3"), "next-match packaged"),
+    check("no forced selection or forced tactical plan", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("forcedSelectionCardCount: 0") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("forcedTacticalPlanCardCount: 0"), "forced counts 0"),
+    check("coach language polished", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("coach language polished") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("mechanicalPhraseCount: 0") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("duplicatedLabelCount: 0"), "wording polished"),
+    check("mechanical duplicated wording absent", !/Action coach prudente:\s*Action coach prudente|Tradeoff:\s*Tradeoff|Cause probable:\s*Cause probable|Consequence tactique:\s*Consequence tactique|Risque si on insiste:\s*Risque si on insiste/i.test(`${coachProductHtml}\n${coachExportHtml}`), "mechanical wording absent"),
+    check("forbidden wording absent", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("forbiddenWordingCount: 0") && !/score equilibre manuellement|score ajuste|but de compensation|essai de compensation|comeback garanti|equilibre garanti|preuve definitive|selection imposee|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/i.test(`${coachProductHtml}\n${coachExportHtml}`), "forbidden wording absent"),
+    check("guardrails preserved", coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("guardrails preserved") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("score constants unchanged") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("batch/live separation preserved"), "guardrails preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("score constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 7C source files", bundleReports.includes("src/reports/coachActionPlanCardsTrainingFocusPackaging.ts") && bundleReports.includes("src/reports/coachActionPlanCards.ts") && bundleReports.includes("src/reports/coachActionPlanCardsAudit.ts") && bundleReports.includes("src/reports/trainingFocusPackagingAudit.ts") && bundleReports.includes("src/reports/nextMatchPlanPackagingAudit.ts") && bundleReports.includes("src/reports/coachReportWordingPolishAudit.ts") && bundleReports.includes("src/reports/coachActionPlanCardsTrainingFocusPackaging.test.ts"), "7C source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8398,6 +8444,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7C - Coach Action Plan")
+      ? sprint7CChecks
     : activeConfig.sprintName.includes("Sprint 7B - Coach Insight")
       ? sprint7BChecks
     : activeConfig.sprintName.includes("Sprint 7A - Product Baseline")

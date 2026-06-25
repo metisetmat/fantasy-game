@@ -15,6 +15,12 @@ import {
   renderCoachDeepInsights,
   renderNextMatchPlan,
 } from "./coachDeepInsights";
+import {
+  buildCoachActionPlanCards,
+  buildTrainingFocusPackages,
+  renderCoachActionPlanCards,
+  renderTrainingFocusPackage,
+} from "./coachActionPlanCards";
 import { escapeHtml } from "./htmlCoachReport";
 import {
   candidateDisplayPriorityLabel,
@@ -293,6 +299,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   const technicalTags = [...model.tags, ...polish.tags];
   const deepInsights = buildCoachDeepInsights(model);
   const nextMatchRecommendations = buildNextMatchRecommendations(deepInsights);
+  const actionPlanCards = buildCoachActionPlanCards(deepInsights);
+  const trainingFocuses = buildTrainingFocusPackages(actionPlanCards);
 
   return `<!doctype html>
 <html lang="fr">
@@ -393,6 +401,10 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <h2>3 signaux clés</h2>
     <div class="cards">${model.keyCoachSignals.map(renderSignal).join("")}</div>
   </section>
+
+  ${renderCoachActionPlanCards(actionPlanCards)}
+
+  ${renderTrainingFocusPackage(trainingFocuses)}
 
   ${renderCoachDeepInsights(deepInsights)}
 
