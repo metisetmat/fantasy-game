@@ -361,6 +361,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchEconomyFinalStabilization6XValidation = readIfExists(join(shareDirectory, "validation.fullmatch-match-economy-final-stabilization-6x.md"));
   const productBaselineCoachReportReadiness7A = readIfExists(join(shareDirectory, "product-baseline-coach-report-readiness-7a.md"));
   const productBaselineCoachReportReadiness7AValidation = readIfExists(join(shareDirectory, "validation.product-baseline-coach-report-readiness-7a.md"));
+  const coachInsightDepthNextMatchRecommendations7B = readIfExists(join(shareDirectory, "coach-insight-depth-next-match-recommendations-7b.md"));
+  const coachInsightDepthNextMatchRecommendations7BValidation = readIfExists(join(shareDirectory, "validation.coach-insight-depth-next-match-recommendations-7b.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3182,6 +3184,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-match-economy-final-stabilization-6x.md",
     ...sprint6XForbiddenLeftovers,
   ];
+  const sprint7BExpectedFiles = sprint7AExpectedFiles.map((file) =>
+    file === "product-baseline-coach-report-readiness-7a.md"
+      ? "coach-insight-depth-next-match-recommendations-7b.md"
+      : file === "validation.product-baseline-coach-report-readiness-7a.md"
+        ? "validation.coach-insight-depth-next-match-recommendations-7b.md"
+        : file
+  );
+  const sprint7BForbiddenLeftovers = [
+    "product-baseline-coach-report-readiness-7a.md",
+    "validation.product-baseline-coach-report-readiness-7a.md",
+    ...sprint7AForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4284,6 +4298,36 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && productBaselineCoachReportReadiness7AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 7A source files", bundleReports.includes("src/reports/productBaselineCoachReportReadiness.ts") && bundleReports.includes("src/reports/coachReportSourceOfTruthAudit.ts") && bundleReports.includes("src/reports/coachReportActionabilityAudit.ts") && bundleReports.includes("src/reports/coachReportProductClarityAudit.ts") && bundleReports.includes("src/reports/coachReportAppendixBoundaryAudit.ts") && bundleReports.includes("src/reports/productBaselineCoachReportReadiness.test.ts"), "7A source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && productBaselineCoachReportReadiness7AValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7BChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7BExpectedFiles.every((file) => requiredCopied(file)), sprint7BExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7BExpectedFiles.every((file) => manifest.includes(file)), sprint7BExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7B", activeConfig.sprintName === "Sprint 7B - Coach Insight Depth & Next-Match Recommendations", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7BForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7BForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7B oriented", readme.includes("# Sprint 7B Share Pack") && readme.includes("coach-insight-depth-next-match-recommendations-7b.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("7B report included", coachInsightDepthNextMatchRecommendations7B.includes("# Coach Insight Depth & Next-Match Recommendations 7B") && coachInsightDepthNextMatchRecommendations7B.includes("Insight Depth Audit") && coachInsightDepthNextMatchRecommendations7B.includes("Next-Match Recommendations") && coachInsightDepthNextMatchRecommendations7B.includes("Causality / Evidence Audit") && coachInsightDepthNextMatchRecommendations7B.includes("Coach Language Audit"), "7B doc included"),
+    check("7B validation is PASS", coachInsightDepthNextMatchRecommendations7BValidation.includes("Status: PASS") && coachInsightDepthNextMatchRecommendations7BValidation.includes("CoachInsightDepthNextMatchRecommendationsModel exists"), "7B validation current"),
+    check("7A baseline preserved", coachInsightDepthNextMatchRecommendations7B.includes("baselineVersion: PRODUCT_BASELINE_COACH_REPORT_READINESS_7A") && coachInsightDepthNextMatchRecommendations7B.includes("7A productBaselineReady") && coachInsightDepthNextMatchRecommendations7BValidation.includes("baseline 7A visible"), "7A baseline visible"),
+    check("6X economy baseline preserved", coachInsightDepthNextMatchRecommendations7B.includes("matchEconomyBaselinePreserved: true") && coachInsightDepthNextMatchRecommendations7BValidation.includes("baseline 6X preserved"), "6X baseline visible"),
+    check("product and export ready", coachInsightDepthNextMatchRecommendations7B.includes("productReportReady: true") && coachInsightDepthNextMatchRecommendations7B.includes("coachExportReady: true") && coachInsightDepthNextMatchRecommendations7B.includes("productBaselineReady: true"), "readiness true"),
+    check("deep insight sections visible in product and export", coachProductHtml.includes("id=\"coach-deep-insights\"") && coachProductHtml.includes("id=\"next-match-plan\"") && coachExportHtml.includes("id=\"coach-deep-insights\"") && coachExportHtml.includes("id=\"next-match-plan\""), "7B sections visible"),
+    check("deep insight copy includes cause and risk", coachProductHtml.includes("Cause probable") && coachProductHtml.includes("Risque") && coachExportHtml.includes("Cause probable") && coachExportHtml.includes("Risque"), "cause/risk visible"),
+    check("next-match recommendations concrete", coachInsightDepthNextMatchRecommendations7BValidation.includes("next-match recommendations concrete") && coachInsightDepthNextMatchRecommendations7BValidation.includes("recommendations have observable signal") && coachInsightDepthNextMatchRecommendations7BValidation.includes("recommendations have tradeoff"), "recommendations concrete"),
+    check("no unsupported recommendations", coachInsightDepthNextMatchRecommendations7BValidation.includes("no unsupported recommendations") && coachInsightDepthNextMatchRecommendations7BValidation.includes("unsupportedRecommendationCount: 0"), "unsupported recommendations 0"),
+    check("no forced selection", coachInsightDepthNextMatchRecommendations7BValidation.includes("no forced selection") && coachInsightDepthNextMatchRecommendations7BValidation.includes("forcedSelectionRecommendationCount: 0"), "forced selection 0"),
+    check("technical appendices collapsed", coachInsightDepthNextMatchRecommendations7BValidation.includes("technical details collapsed") && coachProductHtml.includes("<details class=\"appendix\""), "appendices collapsed"),
+    check("coach language ready", coachInsightDepthNextMatchRecommendations7B.includes("coachLanguageReady") && coachInsightDepthNextMatchRecommendations7B.includes("| true |") && coachInsightDepthNextMatchRecommendations7BValidation.includes("forbidden wording absent") && coachInsightDepthNextMatchRecommendations7BValidation.includes("technical details collapsed"), "coach language ready"),
+    check("forbidden wording absent", coachInsightDepthNextMatchRecommendations7BValidation.includes("forbidden wording absent") && !/score equilibre manuellement|score ajuste|but de compensation|essai de compensation|comeback garanti|equilibre garanti|preuve definitive|selection imposee|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/i.test(`${coachProductHtml}\n${coachExportHtml}`), "forbidden wording absent"),
+    check("guardrails preserved", coachInsightDepthNextMatchRecommendations7BValidation.includes("guardrails preserved") && coachInsightDepthNextMatchRecommendations7BValidation.includes("guardrailsPreserved: true") && coachInsightDepthNextMatchRecommendations7BValidation.includes("no score manipulation") && coachInsightDepthNextMatchRecommendations7BValidation.includes("no PENALTY leak") && coachInsightDepthNextMatchRecommendations7BValidation.includes("no UNKNOWN scoring family"), "guardrails preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && coachInsightDepthNextMatchRecommendations7BValidation.includes("score constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && coachInsightDepthNextMatchRecommendations7BValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachInsightDepthNextMatchRecommendations7BValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 7B source files", bundleReports.includes("src/reports/coachInsightDepthNextMatchRecommendations.ts") && bundleReports.includes("src/reports/coachDeepInsights.ts") && bundleReports.includes("src/reports/coachInsightDepthAudit.ts") && bundleReports.includes("src/reports/nextMatchRecommendationAudit.ts") && bundleReports.includes("src/reports/coachInsightCausalityEvidenceAudit.ts") && bundleReports.includes("src/reports/coachLanguageReadabilityAudit.ts") && bundleReports.includes("src/reports/coachInsightDepthNextMatchRecommendations.test.ts"), "7B source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachInsightDepthNextMatchRecommendations7BValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8354,6 +8398,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7B - Coach Insight")
+      ? sprint7BChecks
     : activeConfig.sprintName.includes("Sprint 7A - Product Baseline")
       ? sprint7AChecks
     : activeConfig.sprintName.includes("Sprint 6X - Match Economy")
