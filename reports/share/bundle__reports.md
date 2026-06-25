@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 7C - Coach Action Plan Cards & Training Focus Packaging. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7D - Coach Report Premium Layout & Visual Hierarchy. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -126,6 +126,8 @@ import {
   renderCoachInsightDepthNextMatchRecommendations7BValidation,
   renderCoachActionPlanCardsTrainingFocusPackaging7CDoc,
   renderCoachActionPlanCardsTrainingFocusPackaging7CValidation,
+  renderCoachReportPremiumLayoutVisualHierarchy7DDoc,
+  renderCoachReportPremiumLayoutVisualHierarchy7DValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -139,10 +141,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7C - Coach Action Plan Cards & Training Focus Packaging";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-action-plan-cards-training-focus-packaging-7c.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-premium-layout-visual-hierarchy-7d.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-action-plan-cards-training-focus-packaging-7c.md";
+  "validation.coach-report-premium-layout-visual-hierarchy-7d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2653,6 +2655,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7C executable test proving product/export sections, action cards, training focus, wording polish, and baseline preservation",
       },
       {
+        source: "src/reports/coachReportHtmlAuditUtils.ts",
+        required: true,
+        reason: "Sprint 7D shared HTML audit utilities for section ordering, visible text, read time, and forbidden wording checks",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutVisualHierarchyWarnings.ts",
+        required: true,
+        reason: "Sprint 7D warning-code registry for premium layout, visual hierarchy, mobile/export readiness, and baseline metadata",
+      },
+      {
+        source: "src/reports/coachReportVisualHierarchyAudit.ts",
+        required: true,
+        reason: "Sprint 7D visual hierarchy audit proving express read, score/source prominence, action-plan ordering, and collapsed appendices",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutAudit.ts",
+        required: true,
+        reason: "Sprint 7D premium layout audit proving cover, cards, badges, ordering, duplication, and layout noise",
+      },
+      {
+        source: "src/reports/coachReportMobileReadabilityAudit.ts",
+        required: true,
+        reason: "Sprint 7D mobile readability audit proving breakpoint, stacked cards, no horizontal overflow, and usable details",
+      },
+      {
+        source: "src/reports/coachReportExportPrintAudit.ts",
+        required: true,
+        reason: "Sprint 7D export/print audit proving printable cover, action cards, page-break guards, and separated appendices",
+      },
+      {
+        source: "src/reports/coachReportBaselineMetadataConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 7D baseline metadata audit reconciling 7A/7B/7C status and productBaselineReady values against validation outputs",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutVisualHierarchy.ts",
+        required: true,
+        reason: "Sprint 7D model, report renderer, and validation renderer for coach report premium layout and visual hierarchy",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutVisualHierarchy.test.ts",
+        required: true,
+        reason: "Sprint 7D executable test proving premium layout readiness, baseline metadata consistency, and export/mobile checks",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4809,6 +4856,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7D")) {
+    return renderCoachReportPremiumLayoutVisualHierarchy7DDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7C")) {
     return renderCoachActionPlanCardsTrainingFocusPackaging7CDoc(fullMatchTraceValidationModel());
   }
@@ -7108,6 +7158,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7D")) {
+    return renderCoachReportPremiumLayoutVisualHierarchy7DValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7C")) {
     return renderCoachActionPlanCardsTrainingFocusPackaging7CValidation(fullMatchTraceValidationModel());
   }
@@ -9353,6 +9406,38 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7D")) {
+    return [
+      "# Sprint 7D Share Pack",
+      "",
+      "Current sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy",
+      "",
+      "## Purpose",
+      "Review whether the coach report now reads like a premium product artifact: official score and source first, express read, prominent action-plan cards, compact next-match plan, readable mobile/export layout, and reconciled 7A/7B/7C baseline metadata.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-report-premium-layout-visual-hierarchy-7d.md",
+      "- validation.coach-report-premium-layout-visual-hierarchy-7d.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-premium-layout-visual-hierarchy-7d.md",
+      "3. coach-report-premium-layout-visual-hierarchy-7d.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7D is presentation-only: no scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score changes.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7C")) {
     return [
       "# Sprint 7C Share Pack",

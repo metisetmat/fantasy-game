@@ -365,6 +365,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachInsightDepthNextMatchRecommendations7BValidation = readIfExists(join(shareDirectory, "validation.coach-insight-depth-next-match-recommendations-7b.md"));
   const coachActionPlanCardsTrainingFocusPackaging7C = readIfExists(join(shareDirectory, "coach-action-plan-cards-training-focus-packaging-7c.md"));
   const coachActionPlanCardsTrainingFocusPackaging7CValidation = readIfExists(join(shareDirectory, "validation.coach-action-plan-cards-training-focus-packaging-7c.md"));
+  const coachReportPremiumLayoutVisualHierarchy7D = readIfExists(join(shareDirectory, "coach-report-premium-layout-visual-hierarchy-7d.md"));
+  const coachReportPremiumLayoutVisualHierarchy7DValidation = readIfExists(join(shareDirectory, "validation.coach-report-premium-layout-visual-hierarchy-7d.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3210,6 +3212,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-insight-depth-next-match-recommendations-7b.md",
     ...sprint7BForbiddenLeftovers,
   ];
+  const sprint7DExpectedFiles = sprint7CExpectedFiles.map((file) =>
+    file === "coach-action-plan-cards-training-focus-packaging-7c.md"
+      ? "coach-report-premium-layout-visual-hierarchy-7d.md"
+      : file === "validation.coach-action-plan-cards-training-focus-packaging-7c.md"
+        ? "validation.coach-report-premium-layout-visual-hierarchy-7d.md"
+        : file
+  );
+  const sprint7DForbiddenLeftovers = [
+    "coach-action-plan-cards-training-focus-packaging-7c.md",
+    "validation.coach-action-plan-cards-training-focus-packaging-7c.md",
+    ...sprint7CForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4374,6 +4388,42 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 7C source files", bundleReports.includes("src/reports/coachActionPlanCardsTrainingFocusPackaging.ts") && bundleReports.includes("src/reports/coachActionPlanCards.ts") && bundleReports.includes("src/reports/coachActionPlanCardsAudit.ts") && bundleReports.includes("src/reports/trainingFocusPackagingAudit.ts") && bundleReports.includes("src/reports/nextMatchPlanPackagingAudit.ts") && bundleReports.includes("src/reports/coachReportWordingPolishAudit.ts") && bundleReports.includes("src/reports/coachActionPlanCardsTrainingFocusPackaging.test.ts"), "7C source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachActionPlanCardsTrainingFocusPackaging7CValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7DChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7DExpectedFiles.every((file) => requiredCopied(file)), sprint7DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7DExpectedFiles.every((file) => manifest.includes(file)), sprint7DExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7D", activeConfig.sprintName === "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7DForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7DForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7D oriented", readme.includes("# Sprint 7D Share Pack") && readme.includes("coach-report-premium-layout-visual-hierarchy-7d.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("7D report included", coachReportPremiumLayoutVisualHierarchy7D.includes("# Coach Report Premium Layout & Visual Hierarchy 7D") && coachReportPremiumLayoutVisualHierarchy7D.includes("Premium Layout Audit") && coachReportPremiumLayoutVisualHierarchy7D.includes("Baseline Metadata Consistency"), "7D doc included"),
+    check("7D validation is PASS", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("Status: PASS") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("CoachReportPremiumLayoutVisualHierarchyModel exists"), "7D validation current"),
+    check("baseline 7C visible", coachReportPremiumLayoutVisualHierarchy7D.includes("baselineVersion: COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING_7C") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("baseline 7C visible"), "7C baseline visible"),
+    check("baseline 7B visible and consistent", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("baseline 7B visible and consistent") && coachReportPremiumLayoutVisualHierarchy7D.includes("| 7B validation | PASS |"), "7B metadata PASS"),
+    check("baseline 7A visible and consistent", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("baseline 7A visible and consistent") && coachReportPremiumLayoutVisualHierarchy7D.includes("| 7A validation | PASS |"), "7A metadata PASS"),
+    check("baseline metadata contradiction resolved", coachReportPremiumLayoutVisualHierarchy7D.includes("| baselineStatusMismatchCount | 0 |") && coachReportPremiumLayoutVisualHierarchy7D.includes("| baselineProductReadyMismatchCount | 0 |") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("7A/7B metadata contradiction resolved or explained"), "metadata clean"),
+    check("baseline 6X preserved", (coachReportPremiumLayoutVisualHierarchy7D.includes("matchEconomyBaselinePreserved: true") || coachReportPremiumLayoutVisualHierarchy7D.includes("| matchEconomyBaselinePreserved | true |")) && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("baseline 6X preserved"), "6X baseline visible"),
+    check("product and export ready", coachReportPremiumLayoutVisualHierarchy7D.includes("productReportReady: true") && coachReportPremiumLayoutVisualHierarchy7D.includes("coachExportReady: true") && coachReportPremiumLayoutVisualHierarchy7D.includes("productBaselineReady: true"), "readiness true"),
+    check("premium cover and express read visible", coachProductHtml.includes("id=\"premium-cover\"") && coachProductHtml.includes("id=\"express-read\"") && coachExportHtml.includes("id=\"cover\"") && coachExportHtml.includes("id=\"express-read\""), "cover/express visible"),
+    check("score source visible above fold", coachProductHtml.indexOf("Score officiel") >= 0 && coachProductHtml.indexOf("Score officiel") < coachProductHtml.indexOf("id=\"coach-action-plan\"") && coachProductHtml.includes("Diagnostics separes") && coachProductHtml.includes("Sandbox non applique"), "score/source above fold"),
+    check("action plan cards visually prominent", coachProductHtml.includes("action-plan-card--primary") && coachProductHtml.indexOf("id=\"coach-action-plan\"") < coachProductHtml.indexOf("id=\"key-coach-signals\"") && coachExportHtml.includes("action-plan-card--primary"), "action plan prominent"),
+    check("next-match plan visible", coachProductHtml.includes("id=\"next-match-plan\"") && coachExportHtml.includes("id=\"next-match-plan\""), "next-match visible"),
+    check("key signals visible", coachProductHtml.includes("id=\"key-coach-signals\"") && coachExportHtml.includes("id=\"key-statistics\""), "signals visible"),
+    check("profiles to observe non-forced", coachProductHtml.includes("id=\"profiles-to-observe\"") && (coachProductHtml.includes("Prévisualisation non appliquée") || coachProductHtml.includes("PrÃ©visualisation non appliquÃ©e")) && !/selection imposee|sélection imposée|composition recommandee automatiquement|composition recommandée automatiquement/iu.test(coachProductHtml), "profiles non-forced"),
+    check("technical appendices collapsed", coachProductHtml.includes("<details class=\"appendix\"") && coachExportHtml.includes("report-appendix-stack"), "appendices collapsed"),
+    check("mobile readability pass", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("mobile readability pass") && coachReportPremiumLayoutVisualHierarchy7D.includes("mobileNoHorizontalOverflow"), "mobile checked"),
+    check("export print readiness pass", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("export print readiness pass") && coachExportHtml.includes("@media print") && coachExportHtml.includes("break-inside: avoid"), "print checked"),
+    check("no duplicated sections", coachReportPremiumLayoutVisualHierarchy7D.includes("| repeatedSectionCount | 0 |") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("no duplicated sections"), "duplicate count 0"),
+    check("no forbidden wording", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("no forbidden wording") && !/score equilibre manuellement|score ajuste|but de compensation|essai de compensation|comeback garanti|equilibre garanti|preuve definitive|selection imposee|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/i.test(`${coachProductHtml}\n${coachExportHtml}`), "forbidden wording absent"),
+    check("guardrails preserved", coachReportPremiumLayoutVisualHierarchy7DValidation.includes("guardrails preserved") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("score constants unchanged") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("batch/live separation preserved"), "guardrails preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("score constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 7D source files", bundleReports.includes("src/reports/coachReportPremiumLayoutVisualHierarchy.ts") && bundleReports.includes("src/reports/coachReportVisualHierarchyAudit.ts") && bundleReports.includes("src/reports/coachReportPremiumLayoutAudit.ts") && bundleReports.includes("src/reports/coachReportMobileReadabilityAudit.ts") && bundleReports.includes("src/reports/coachReportExportPrintAudit.ts") && bundleReports.includes("src/reports/coachReportBaselineMetadataConsistencyAudit.ts") && bundleReports.includes("src/reports/coachReportPremiumLayoutVisualHierarchy.test.ts"), "7D source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportPremiumLayoutVisualHierarchy7DValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8444,6 +8494,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7D - Coach Report Premium Layout")
+      ? sprint7DChecks
     : activeConfig.sprintName.includes("Sprint 7C - Coach Action Plan")
       ? sprint7CChecks
     : activeConfig.sprintName.includes("Sprint 7B - Coach Insight")

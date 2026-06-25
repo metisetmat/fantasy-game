@@ -265,6 +265,33 @@ function renderComparisonBlock(block: PlayerCandidateComparisonProfileBlock): st
     </article>`;
 }
 
+function renderExpressRead(input: {
+  readonly model: CoachProductReportViewModel;
+  readonly primaryActionTitle: string;
+  readonly primarySignal: string;
+  readonly primaryRisk: string;
+}): string {
+  return `
+  <section id="express-read" class="product-section express-read" aria-label="Lecture express">
+    <div class="express-head">
+      <div>
+        <p class="card-kicker">Lecture express</p>
+        <h2>En 30 secondes</h2>
+      </div>
+      <div class="express-score">
+        <span class="score-label">Score officiel</span>
+        <strong>${escapeHtml(input.model.scoreLabel)}</strong>
+      </div>
+    </div>
+    <div class="express-grid">
+      <article><h3>Priorite principale</h3><p>${escapeHtml(input.primaryActionTitle)}</p></article>
+      <article><h3>Signal terrain a verifier</h3><p>${escapeHtml(input.primarySignal)}</p></article>
+      <article><h3>Risque principal</h3><p>${escapeHtml(input.primaryRisk)}</p></article>
+      <article><h3>Garde-fou source de verite</h3><p>Score issu des evenements officiels; diagnostics et sandbox restent separes.</p></article>
+    </div>
+  </section>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
   const detail = appendix.details !== undefined
     ? appendix.details
@@ -301,6 +328,9 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   const nextMatchRecommendations = buildNextMatchRecommendations(deepInsights);
   const actionPlanCards = buildCoachActionPlanCards(deepInsights);
   const trainingFocuses = buildTrainingFocusPackages(actionPlanCards);
+  const primaryActionCard = actionPlanCards[0];
+  const primarySignal = model.nextMatchSignals[0] ?? model.keyCoachSignals[0]?.summary ?? "Signal a confirmer au prochain match.";
+  const primaryRisk = primaryActionCard?.riskOrTradeoff ?? "Risque a surveiller: ne pas transformer un signal en consigne automatique.";
 
   return `<!doctype html>
 <html lang="fr">
@@ -309,10 +339,12 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rapport coach produit</title>
   <style>
-    :root { color-scheme: light; --ink: #172033; --muted: #5f6c7b; --line: #d9e2ec; --soft: #f6f8fb; --accent: #1f6f8b; --accent-soft: #e8f4f7; --paper: #ffffff; }
-    body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: #eef3f7; line-height: 1.5; }
+    :root { color-scheme: light; --ink: #172033; --muted: #5f6c7b; --line: #d9e2ec; --soft: #f6f8fb; --accent: #1f6f8b; --accent-strong: #15495e; --accent-soft: #e8f4f7; --paper: #ffffff; --success: #1d7a50; --watch: #8a5a13; }
+    body { margin: 0; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: #eef3f7; line-height: 1.5; overflow-x: hidden; }
     main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 56px; }
     header { background: linear-gradient(135deg, #ffffff 0%, #edf7fa 100%); border: 1px solid var(--line); border-radius: 14px; padding: 26px; margin-bottom: 26px; box-shadow: 0 14px 40px rgba(23, 32, 51, .08); }
+    .premium-cover { position: relative; overflow: hidden; }
+    .premium-cover::after { content: ""; position: absolute; inset: auto 0 0 0; height: 5px; background: linear-gradient(90deg, var(--accent), var(--success), var(--watch)); }
     h1 { margin: 0 0 12px; font-size: 2.2rem; line-height: 1.1; }
     h2 { margin: 34px 0 12px; font-size: 1.35rem; }
     h3 { margin: 0 0 10px; font-size: 1.05rem; }
@@ -329,6 +361,12 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .muted { color: var(--muted); }
     .product-section { margin-top: 24px; }
     .product-card { border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 12px 0; background: var(--paper); box-shadow: 0 8px 26px rgba(23, 32, 51, .05); }
+    .express-read { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px rgba(23, 32, 51, .06); }
+    .express-head { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 12px; }
+    .express-score { min-width: 150px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; text-align: right; background: var(--soft); }
+    .express-score strong { display: block; font-size: 1.25rem; }
+    .express-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .express-grid article { border: 1px solid var(--line); border-radius: 9px; padding: 12px; background: #fbfdff; }
     .summary-list { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
     .signal-grid, .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
@@ -350,6 +388,10 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .attributes .badge { color: #515f6f; background: #fbfcfd; }
     .card-kicker { color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .08em; margin-bottom: 4px; text-transform: uppercase; }
     .guard { border-left: 3px solid var(--accent); padding: 10px 0 10px 12px; color: var(--muted); background: var(--accent-soft); border-radius: 0 8px 8px 0; }
+    .action-plan-card--primary { border-color: var(--accent); box-shadow: 0 14px 34px rgba(31, 111, 139, .13); }
+    .action-plan-card--primary h3 { font-size: 1.2rem; color: var(--accent-strong); }
+    .action-plan-card--primary .badge:first-child { color: #fff; background: var(--accent); border-color: var(--accent); }
+    .action-plan-card-grid { align-items: stretch; }
     .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
     .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
     .appendix summary { cursor: pointer; font-weight: 700; }
@@ -357,6 +399,11 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     @media (max-width: 720px) {
       .header-grid { grid-template-columns: 1fr; }
       .score-box { text-align: left; }
+      .express-head { display: block; }
+      .express-score { text-align: left; margin-top: 10px; }
+      .express-grid { grid-template-columns: 1fr; }
+      .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
+      .product-card, .express-read { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
@@ -369,13 +416,16 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
 </head>
 <body>
 <main id="product-main">
-  <header>
+  <header id="premium-cover" class="premium-cover">
     <div class="header-grid">
       <div>
         <h1>Rapport coach — lecture produit</h1>
         <div class="header-meta">
           ${renderBadge(`Match : ${model.matchId}`)}
           ${renderBadge("Type : rapport produit")}
+          ${renderBadge("Score officiel")}
+          ${renderBadge("Diagnostics separes")}
+          ${renderBadge("Sandbox non applique")}
         </div>
         <p class="muted">${escapeHtml(model.scoreSourceNote)}</p>
       </div>
@@ -386,29 +436,28 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     </div>
   </header>
 
+  ${renderExpressRead({
+    model,
+    primaryActionTitle: primaryActionCard?.title ?? "Priorite principale a confirmer.",
+    primarySignal,
+    primaryRisk,
+  })}
+
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>
     <div class="summary-list">${renderList(model.executiveSummary.slice(0, 4))}</div>
-  </section>
-
-  <section id="official-match-reading" class="product-section">
-    <h2>Ce que le match dit</h2>
-    <div class="badge-row">${renderBadge("Source : Officiel")}</div>
-    ${renderList(model.officialMatchReading)}
-  </section>
-
-  <section id="key-coach-signals" class="product-section">
-    <h2>3 signaux clés</h2>
-    <div class="cards">${model.keyCoachSignals.map(renderSignal).join("")}</div>
   </section>
 
   ${renderCoachActionPlanCards(actionPlanCards)}
 
   ${renderTrainingFocusPackage(trainingFocuses)}
 
-  ${renderCoachDeepInsights(deepInsights)}
-
   ${renderNextMatchPlan(nextMatchRecommendations)}
+
+  <section id="key-coach-signals" class="product-section">
+    <h2>3 signaux clés</h2>
+    <div class="cards">${model.keyCoachSignals.map(renderSignal).join("")}</div>
+  </section>
 
   <section id="profiles-to-observe" class="product-section">
     <h2>Profils à observer</h2>
@@ -431,6 +480,14 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <h2>À vérifier au prochain match</h2>
     ${renderList(model.nextMatchSignals.slice(0, 5))}
   </section>
+
+  <section id="official-match-reading" class="product-section">
+    <h2>Ce que le match dit</h2>
+    <div class="badge-row">${renderBadge("Source : Officiel")}</div>
+    ${renderList(model.officialMatchReading)}
+  </section>
+
+  ${renderCoachDeepInsights(deepInsights)}
 
   <section id="training-focus" class="product-section">
     <h2>&Agrave; travailler</h2>
@@ -461,7 +518,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <h2>À ne pas sur-interpréter</h2>
     <div class="interpretation-guard">
       <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
-      <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
+      <p>Les associations profil-joueur restent des pistes d'observation multi-match, sans effet sur la composition.</p>
       <p>Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
     </div>
   </section>

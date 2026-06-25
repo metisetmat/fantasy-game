@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 7C - Coach Action Plan Cards & Training Focus Packaging",
+  name: "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "coach-action-plan-cards-training-focus-packaging-7c.md",
-    "validation.coach-action-plan-cards-training-focus-packaging-7c.md",
+    "coach-report-premium-layout-visual-hierarchy-7d.md",
+    "validation.coach-report-premium-layout-visual-hierarchy-7d.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 7C share pack is current, complete, and below 20 files",
-    "coach-action-plan-cards-training-focus-packaging-7c.md": "validates coach action-plan cards, training focus packaging, next-match packaging, language polish, and preserved 7B/7A/6X guardrails",
-    "validation.coach-action-plan-cards-training-focus-packaging-7c.md": "proves the 7C model is PASS with 2-3 coach action cards, training focus packaging, no forced selection, no mechanical wording, and preserved baselines",
-    "README.md": "compact reviewer orientation for the 7C share pack",
-    "manifest.md": "compatibility manifest listing the 7C share pack files",
+    "validation.share-pack.md": "proves the 7D share pack is current, complete, and below 20 files",
+    "coach-report-premium-layout-visual-hierarchy-7d.md": "validates the premium coach report layout, visual hierarchy, mobile/export readability, and baseline metadata reconciliation",
+    "validation.coach-report-premium-layout-visual-hierarchy-7d.md": "proves the 7D model is PASS with premium cover, express read, action-plan prominence, print/mobile readiness, and preserved baselines",
+    "README.md": "compact reviewer orientation for the 7D share pack",
+    "manifest.md": "compatibility manifest listing the 7D share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

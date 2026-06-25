@@ -172,7 +172,7 @@ export function renderCoachActionPlanCards(cards: readonly CoachActionPlanCard[]
     <p class="guard">Cartes d'observation et de travail: elles n'imposent ni composition, ni plan tactique automatique.</p>
     <div class="cards action-plan-card-grid">
       ${cards.slice(0, 3).map((card) => `
-        <article class="product-card action-plan-card" data-source-type="${escapeHtml(card.sourceType)}">
+        <article class="product-card action-plan-card action-plan-card--${escapeHtml(card.priority)}" data-source-type="${escapeHtml(card.sourceType)}">
           <div class="badge-row">
             <span class="badge">${priorityLabel(card.priority)}</span>
             <span class="badge">${sourceLabel(card.sourceType)}</span>

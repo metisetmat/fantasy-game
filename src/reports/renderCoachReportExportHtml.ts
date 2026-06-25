@@ -1346,6 +1346,26 @@ function renderExecutiveSummary(html: string): string {
   </section>`;
 }
 
+function renderExpressReadExport(html: string): string {
+  const body = extractSectionInner(html, "express-read");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="express-read" class="premium-section" data-source-product-sections="express-read">
+    <div class="report-section-divider">Lecture express</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Lecture express</h2>
+        <p>Score, priorite principale, signal terrain et garde-fou source de verite en lecture rapide.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
 function renderMatchStory(html: string): string {
   const body = extractSectionInner(html, "official-match-reading");
 
@@ -5169,13 +5189,17 @@ export function renderCoachReportExportHtml(input: {
   });
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
+    renderExpressReadExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
-    renderMatchStory(input.productReportHtml),
-    renderKeyStatistics(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTrainingFocusPackageExport(input.productReportHtml),
-    renderCoachDeepInsightsExport(input.productReportHtml),
     renderNextMatchPlanExport(input.productReportHtml),
+    renderKeyStatistics(input.productReportHtml),
+    renderProfilesAndPlayers(input.productReportHtml),
+    renderNextMatch(input.productReportHtml),
+    renderMatchStory(input.productReportHtml),
+    renderCoachDeepInsightsExport(input.productReportHtml),
+    renderInterpretationGuard(input.productReportHtml),
     renderPhaseLegend(readabilityPresentation.legendItems),
     ...phasePanels.map((panel) =>
       renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
@@ -5217,9 +5241,6 @@ export function renderCoachReportExportHtml(input: {
     renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
     renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations),
     renderCoachActionPlanCardsTrainingFocusPackagingSection(input.coachActionPlanCardsTrainingFocusPackaging),
-    renderProfilesAndPlayers(input.productReportHtml),
-    renderNextMatch(input.productReportHtml),
-    renderInterpretationGuard(input.productReportHtml),
   ].join("\n");
   const appendices = renderAppendices({
     html: input.productReportHtml,
