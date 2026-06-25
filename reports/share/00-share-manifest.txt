@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-24T21:22:34.556Z
+Generated timestamp: 2026-06-25T06:41:38.630Z
 Task/sprint name: Sprint 6W - Late Game Threat Quality Monitoring
 Final file count: 20
 
@@ -879,16 +879,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/fullMatch/fullMatchCalibrationCoverageAudit.ts
- M src/simulation/fullMatch/fullMatchOfficialRouteFamilyMix.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts
-?? src/reports/fullMatchLateGameThreatQualityMonitoring.ts
-?? src/simulation/fullMatch/fullMatchForcedComebackSuspicionAudit.ts
-?? src/simulation/fullMatch/fullMatchLateGameThreatAutomaticityAudit.ts
-?? src/simulation/fullMatch/fullMatchNaturalTrailingConversionPathAudit.ts
-?? src/simulation/fullMatch/lateGameThreatQualityMonitoringWarnings.ts
+ M src/reports/fullMatchLateGameThreatQualityMonitoring.ts
+ M src/simulation/fullMatch/fullMatchForcedComebackSuspicionAudit.ts
+ M src/simulation/fullMatch/fullMatchLateGameThreatAutomaticityAudit.ts

@@ -29,9 +29,9 @@ Status: PASS
 - PASS: dominance chain max stays <= 4 - 2
 - PASS: chain metric consistency stays true - true
 - PASS: calibration coverage complete - true
-- PASS: lateGameThreatQualityRate explained or reduced from 100% - 107.8%
-- PASS: lateGameAutomaticThreatRate low - 1.8%
-- PASS: lateGameThreatWithoutSignalRate low - 1.8%
+- PASS: lateGameThreatQualityRate explained or reduced from 100% - 100%
+- PASS: lateGameAutomaticThreatRate low - 0%
+- PASS: lateGameThreatWithoutSignalRate low - 0%
 - PASS: forced comeback suspicion explained or reduced - 230/230
 - PASS: forced comeback unexplained count low - 0
 - PASS: natural trailing conversion path audit exists - 127
@@ -45,10 +45,12 @@ Status: PASS
 - PASS: no contradictory healthy warning if automaticity remains high - FULL_MATCH_BATCH_ECONOMY_HEALTHY, LATE_GAME_THREAT_MONITORING_COMPLETE, LATE_GAME_THREAT_AUTOMATICITY_MEASURED, LATE_GAME_THREAT_AUTOMATICITY_REDUCED, LATE_GAME_THREAT_AUTOMATICITY_EXPLAINED, LATE_GAME_THREAT_FROM_REAL_SIGNAL_CONFIRMED, FORCED_COMEBACK_SUSPICION_MEASURED, FORCED_COMEBACK_SUSPICION_EXPLAINED, FORCED_COMEBACK_FALSE_POSITIVES_CLASSIFIED, NATURAL_TRAILING_CONVERSION_PATH_MEASURED, NATURAL_TRAILING_CONVERSION_PATH_COMPLETE, NO_ACTUAL_FORCED_COMEBACK_CONFIRMED, NO_RUBBER_BANDING_CONFIRMED, NO_FORCED_COMEBACK_CONFIRMED, NO_TRAILING_SCORE_INJECTION_CONFIRMED, NO_TRAILING_OPPORTUNITY_FORCING_CONFIRMED, NO_TRAILING_SCORING_EVENT_INJECTION_CONFIRMED, CLOSE_GAME_RATE_PRESERVED, COMPETITIVE_GAME_RATE_PRESERVED, BLOWOUT_RATE_PRESERVED, SEVERE_BLOWOUT_STILL_LOW, ROUTE_FAMILY_DIVERSITY_PRESERVED, GATE_SELECTIVITY_PRESERVED, CALIBRATION_COVERAGE_COMPLETE
 
 ## Counts
-- lateGameThreatQualityRateAfter: 107.8
-- lateGameAutomaticThreatRateAfter: 1.8
-- lateGameThreatWithoutSignalRateAfter: 1.8
-- lateGameThreatFromRealSignalRateAfter: 98.2
+- lateGamePressureCountAfter: 51
+- lateGameThreatCountAfter: 51
+- lateGameThreatQualityRateAfter: 100
+- lateGameAutomaticThreatRateAfter: 0
+- lateGameThreatWithoutSignalRateAfter: 0
+- lateGameThreatFromRealSignalRateAfter: 100
 - forcedComebackSuspicionCountAfter: 230
 - forcedComebackSuspicionExplainedCountAfter: 230
 - forcedComebackSuspicionUnexplainedCountAfter: 0

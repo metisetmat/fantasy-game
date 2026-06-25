@@ -98,7 +98,7 @@ export function auditFullMatchLateGameThreatAutomaticity(reports: readonly Match
       if (event.timestamp.minute < 60) continue;
       windows += 1;
       const latePressure = isLatePressure(event);
-      const eventThreat = isThreat(event);
+      const eventThreat = latePressure && isThreat(event);
       const real = hasRealSignal(event);
       if (latePressure) pressure += 1;
       if (eventThreat) threat += 1;
@@ -109,7 +109,7 @@ export function auditFullMatchLateGameThreatAutomaticity(reports: readonly Match
       }
       if (latePressure && !eventThreat) denied += 1;
       if (event.tags.includes("late_game_threat_downgraded_6w")) downgraded += 1;
-      if (latePressure || eventThreat) {
+      if (latePressure) {
         eligibility.push(eventThreat ? (real ? "THREAT_WITH_REAL_SIGNAL" : "AUTOMATIC_THREAT") : "PRESSURE_DENIED");
         causes.push(causeForEvent(event));
       }

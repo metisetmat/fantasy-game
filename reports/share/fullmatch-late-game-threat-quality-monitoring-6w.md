@@ -25,16 +25,16 @@
 | trailingTeamScoringShare | 36% | 35.3% |
 | trailingThreatQualityRate | 52.5% | 53.6% |
 | trailingThreatConversionRate | 63.4% | 63.2% |
-| lateGameThreatQualityRate | 100% | 107.8% |
+| lateGameThreatQualityRate | 100% | 100% |
 | forcedComebackSuspicionCount | 171 | 230 |
 
 ## Late Game Threat Automaticity
 - lateGamePressureCount: 51
-- lateGameThreatCount: 55
-- lateGameThreatQualityRate: 107.8%
-- lateGameAutomaticThreatRate: 1.8%
-- lateGameThreatWithoutSignalRate: 1.8%
-- lateGameThreatFromRealSignalRate: 98.2%
+- lateGameThreatCount: 51
+- lateGameThreatQualityRate: 100%
+- lateGameAutomaticThreatRate: 0%
+- lateGameThreatWithoutSignalRate: 0%
+- lateGameThreatFromRealSignalRate: 100%
 - lateGameThreatDeniedCount: 0
 - lateGameThreatDowngradedCount: 0
 
@@ -42,7 +42,6 @@
 | Cause | Count |
 | --- | ---: |
 | ROUTE_QUALITY_EDGE | 51 |
-| LATE_GAME_STATE_ONLY | 4 |
 
 ## Forced Comeback Suspicion
 - forcedComebackSuspicionCount: 230
@@ -73,9 +72,9 @@
 ## Longitudinal Monitoring
 | Window | Matches | Avg points | Events | Opportunities | Avg margin | Close | Competitive | Blowout | Severe | Trail response | Threat quality | Trail score share | Late threat | Automatic threat | Suspicion rate | Unexplained | Path complete | Chain max | Coverage | Diversity | Guardrails |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
-| window-1 | 17 | 22.7 | 7.4 | 16.3 | 6.5 | 58.8% | 88.2% | 5.9% | 0% | 54.7% | 53.8% | 38.4% | 114.3% | 0% | 5.5% | 0 | 100% | 2 | COMPLETE | true | PASS |
+| window-1 | 17 | 22.7 | 7.4 | 16.3 | 6.5 | 58.8% | 88.2% | 5.9% | 0% | 54.7% | 53.8% | 38.4% | 100% | 0% | 5.5% | 0 | 100% | 2 | COMPLETE | true | PASS |
 | window-2 | 17 | 21.3 | 6.9 | 16.3 | 9.2 | 41.2% | 52.9% | 29.4% | 0% | 54.4% | 52.6% | 31.4% | 100% | 0% | 6.2% | 0 | 100% | 2 | COMPLETE | true | PASS |
-| window-3 | 16 | 22.6 | 7.3 | 16.4 | 7.1 | 50% | 93.8% | 6.3% | 0% | 55.3% | 54.4% | 35.9% | 111.1% | 5% | 6.3% | 0 | 100% | 2 | COMPLETE | true | PASS |
+| window-3 | 16 | 22.6 | 7.3 | 16.4 | 7.1 | 50% | 93.8% | 6.3% | 0% | 55.3% | 54.4% | 35.9% | 100% | 0% | 6.3% | 0 | 100% | 2 | COMPLETE | true | PASS |
 
 ## Route Family Mix
 - routeFamilyDiversityPreserved: true

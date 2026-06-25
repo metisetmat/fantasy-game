@@ -106,7 +106,7 @@ export function auditFullMatchForcedComebackSuspicion(reports: readonly MatchRep
       if (event.tags.some((tag) => tag.includes("injected"))) injected += 1;
       if (event.tags.some((tag) => tag.includes("opportunity_forced"))) opportunityForced += 1;
       if (event.tags.some((tag) => tag.includes("leading_team_score_suppressed"))) leadingSuppressed += 1;
-      if (event.tags.some((tag) => tag.includes("rubber"))) rubber += 1;
+      if (event.tags.some((tag) => tag === "rubber_banding_detected" || tag === "rubber_banding_applied")) rubber += 1;
       if (suspicious) {
         suspicion += 1;
         const eventCause = cause(event);

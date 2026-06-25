@@ -194,18 +194,18 @@ export interface FullMatchLateGameThreatQualityMonitoringModel {
   readonly officialPathConnectedAllRuns: boolean;
   readonly calibrationsAppliedAllRuns: boolean;
   readonly scoringConstantsChanged: boolean;
-  readonly scoreCapApplied: false;
-  readonly postHocRewriteApplied: false;
-  readonly scoringEventsDeleted: false;
-  readonly forcedOpponentScoreApplied: false;
-  readonly forcedTrailingTeamScoreApplied: false;
-  readonly rubberBandingApplied: false;
-  readonly comebackForced: false;
-  readonly forcedComebackDetected: false;
-  readonly leadingTeamScoreSuppressed: false;
-  readonly trailingTeamOpportunityForced: false;
-  readonly trailingTeamScoreChangeInjected: false;
-  readonly trailingTeamScoringEventInjected: false;
+  readonly scoreCapApplied: boolean;
+  readonly postHocRewriteApplied: boolean;
+  readonly scoringEventsDeleted: boolean;
+  readonly forcedOpponentScoreApplied: boolean;
+  readonly forcedTrailingTeamScoreApplied: boolean;
+  readonly rubberBandingApplied: boolean;
+  readonly comebackForced: boolean;
+  readonly forcedComebackDetected: boolean;
+  readonly leadingTeamScoreSuppressed: boolean;
+  readonly trailingTeamOpportunityForced: boolean;
+  readonly trailingTeamScoreChangeInjected: boolean;
+  readonly trailingTeamScoringEventInjected: boolean;
   readonly MatchBonusEventChanged: false;
   readonly batchLiveSeparationPreserved: true;
   readonly persistenceUsedForScoring: false;
@@ -604,18 +604,18 @@ export function buildFullMatchLateGameThreatQualityMonitoringModel(): FullMatchL
     officialPathConnectedAllRuns: reports.every((report) => report.timeline.some((event) => event.tags.some((tag) => tag.startsWith("official_route_family_")))),
     calibrationsAppliedAllRuns: coverage.calibrationCoverageMissingWindowCount === 0 && coverage.calibrationCoverageMismatchCount === 0,
     scoringConstantsChanged: scoringConstantsChanged(),
-    scoreCapApplied: false as const,
-    postHocRewriteApplied: false as const,
-    scoringEventsDeleted: false as const,
-    forcedOpponentScoreApplied: false as const,
-    forcedTrailingTeamScoreApplied: false as const,
-    rubberBandingApplied: false as const,
-    comebackForced: false as const,
-    forcedComebackDetected: false as const,
-    leadingTeamScoreSuppressed: false as const,
-    trailingTeamOpportunityForced: false as const,
-    trailingTeamScoreChangeInjected: false as const,
-    trailingTeamScoringEventInjected: false as const,
+    scoreCapApplied: false,
+    postHocRewriteApplied: false,
+    scoringEventsDeleted: false,
+    forcedOpponentScoreApplied: false,
+    forcedTrailingTeamScoreApplied: suspicion.forcedTrailingScoreChangeCount > 0 || path.forcedTrailingScoreChangeCount > 0,
+    rubberBandingApplied: suspicion.rubberBandingDetectedCount > 0,
+    comebackForced: suspicion.actualForcedComebackDetectedCount > 0,
+    forcedComebackDetected: suspicion.actualForcedComebackDetectedCount > 0,
+    leadingTeamScoreSuppressed: suspicion.leadingTeamScoreSuppressionDetectedCount > 0,
+    trailingTeamOpportunityForced: suspicion.trailingOpportunityForcedCount > 0,
+    trailingTeamScoreChangeInjected: suspicion.injectedTrailingScoringEventCount > 0 || path.injectedTrailingScoringEventCount > 0,
+    trailingTeamScoringEventInjected: suspicion.injectedTrailingScoringEventCount > 0 || path.injectedTrailingScoringEventCount > 0,
     MatchBonusEventChanged: false as const,
     batchLiveSeparationPreserved: true as const,
     persistenceUsedForScoring: false as const,
@@ -856,6 +856,8 @@ export function renderFullMatchLateGameThreatQualityMonitoring6WValidation(
     ...checks,
     "",
     "## Counts",
+    `- lateGamePressureCountAfter: ${model.lateGamePressureCountAfter}`,
+    `- lateGameThreatCountAfter: ${model.lateGameThreatCountAfter}`,
     `- lateGameThreatQualityRateAfter: ${model.lateGameThreatQualityRateAfter}`,
     `- lateGameAutomaticThreatRateAfter: ${model.lateGameAutomaticThreatRateAfter}`,
     `- lateGameThreatWithoutSignalRateAfter: ${model.lateGameThreatWithoutSignalRateAfter}`,
