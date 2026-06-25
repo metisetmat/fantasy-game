@@ -138,10 +138,30 @@ export function writeLatestCoachReport(): void {
     renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
     renderFullMatchEconomyFinalStabilizationSection(fullMatchEconomyFinalStabilization),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(productReportView));
+  const productExportHtmlFor7A = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWithout7A,
+    fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
+    fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
+    fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
+    fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+  });
   const productBaselineCoachReportReadiness = buildProductBaselineCoachReportReadinessModel({
     productReport: productReportView,
     productReportHtml: productHtmlWithout7A,
-    exportReportHtml: productHtmlWithout7A,
+    exportReportHtml: productExportHtmlFor7A,
     matchEconomyBaseline: fullMatchEconomyFinalStabilization,
   });
   const productHtml = appendProductSection(

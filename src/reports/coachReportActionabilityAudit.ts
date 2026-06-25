@@ -34,6 +34,46 @@ function countForcedSelection(text: string): number {
   ].reduce((count, pattern) => count + [...text.matchAll(pattern)].length, 0);
 }
 
+function countUnsupportedRecommendations(text: string): number {
+  const normalized = text
+    .replace(/<[^>]+>/gu, " ")
+    .replaceAll("&agrave;", "a")
+    .replaceAll("&Agrave;", "a")
+    .replaceAll("&eacute;", "e")
+    .replaceAll("&Eacute;", "e")
+    .replaceAll("&ecirc;", "e")
+    .replaceAll("&Ecirc;", "e")
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&rsquo;", "'")
+    .replaceAll("&apos;", "'")
+    .replaceAll("&mdash;", "-")
+    .replaceAll("&ndash;", "-")
+    .replaceAll("&amp;", "and")
+    .replace(/\s+/gu, " ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr-FR");
+  let unsupported = 0;
+
+  for (const match of normalized.matchAll(/recommand\p{L}*/gu)) {
+    const index = match.index ?? 0;
+    const context = normalized.slice(Math.max(0, index - 90), index + 120);
+    const explicitlyNonApplied = context.includes("non confir") ||
+      context.includes("pas des choix") ||
+      context.includes("pas un choix") ||
+      context.includes("pas a recommander") ||
+      context.includes("ne sont pas des choix") ||
+      context.includes("ne change ni la composition") ||
+      context.includes("sans prescription automatique");
+
+    if (!explicitlyNonApplied) {
+      unsupported += 1;
+    }
+  }
+
+  return unsupported;
+}
+
 export function auditCoachReportActionability(input: {
   readonly productReport: CoachProductReportViewModel;
   readonly productReportHtml: string;
@@ -54,9 +94,7 @@ export function auditCoachReportActionability(input: {
   const vagueInsightRate = coachInsightCount === 0 ? 0 : Math.round((vagueInsightCount / coachInsightCount) * 1000) / 10;
   const trainingFocusCount = input.productReport.keyCoachSignals.length > 0 ? 1 : 0;
   const recommendationCount = [...combined.matchAll(/recommand/giu)].length;
-  const unsupportedRecommendationCount = [...combined.matchAll(/recommandation officielle|non confirm/giu)].length === 0
-    ? recommendationCount
-    : 0;
+  const unsupportedRecommendationCount = countUnsupportedRecommendations(combined);
   const selectionPreviewAsRecommendationCount = countForcedSelection(combined);
   const profileObservationCount = input.productReport.profilesToObserve.length;
   const profileObservationForcedCount = input.productReport.profileAppliedCount + input.productReport.officiallyConfirmedCount + selectionPreviewAsRecommendationCount;
@@ -89,4 +127,3 @@ export function auditCoachReportActionability(input: {
     recommendation: actionabilityWarningCodes.length === 0 ? "KEEP_ACTIONABLE_INSIGHT_STRUCTURE" : "REMOVE_UNSUPPORTED_RECOMMENDATIONS",
   };
 }
-

@@ -4040,6 +4040,7 @@ function renderNextMatch(html: string): string {
 
 function renderInterpretationGuard(html: string): string {
   const body = extractSectionInner(html, "interpretation-guard");
+  const guardrailSummary = extractSectionInner(html, "guardrail-summary");
 
   return `
   <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard|guardrail-summary">
@@ -4052,6 +4053,7 @@ function renderInterpretationGuard(html: string): string {
     </div>
     <div class="interpretation-guard">
       ${body}
+      ${guardrailSummary.length > 0 ? `<div class="guardrail-summary">${guardrailSummary}</div>` : ""}
       <p>Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.</p>
     </div>
   </section>`;

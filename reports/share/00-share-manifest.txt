@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-25T09:32:41.563Z
+Generated timestamp: 2026-06-25T10:25:37.915Z
 Task/sprint name: Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness
 Final file count: 20
 
@@ -893,17 +893,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/buildCoachProductReportView.ts
+ M src/reports/coachReportActionabilityAudit.ts
+ M src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts
  M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachProductReport.ts
  M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachReportActionabilityAudit.ts
-?? src/reports/coachReportAppendixBoundaryAudit.ts
-?? src/reports/coachReportProductClarityAudit.ts
-?? src/reports/coachReportSourceOfTruthAudit.ts
-?? src/reports/productBaselineCoachReportReadiness.test.ts
-?? src/reports/productBaselineCoachReportReadiness.ts
-?? src/reports/productBaselineCoachReportReadinessWarnings.ts
