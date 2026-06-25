@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
+import { buildCoachActionPlanCards } from "./coachActionPlanCards";
+import type { CoachDeepInsight, CoachDeepInsightSourceType } from "./coachDeepInsights";
 import {
   buildCoachActionPlanCardsTrainingFocusPackagingModel,
   renderCoachActionPlanCardsTrainingFocusPackaging7CDoc,
@@ -22,6 +24,28 @@ function appendProductSection(html: string, section: string): string {
   return html.includes("</main>")
     ? html.replace("</main>", `${section}\n</main>`)
     : `${html}\n${section}`;
+}
+
+function testInsight(insightId: string, sourceType: CoachDeepInsightSourceType): CoachDeepInsight {
+  return {
+    insightId,
+    title: `Insight ${insightId}`,
+    sourceType,
+    confidence: "medium",
+    observation: "Observation coach lisible.",
+    whyItMatters: "Le signal aide a choisir une priorite prudente.",
+    probableCause: "Le contexte tactique repete ce comportement.",
+    tacticalConsequence: "La sequence devient plus lisible pour le coach.",
+    riskIfRepeated: "Le risque doit rester surveille.",
+    nextMatchCheck: "Verifier si le signal revient au prochain match.",
+    trainingFocus: "Travailler la connexion entre porteur et soutien.",
+    evidenceSummary: ["Signal de test avec source explicite."],
+    evidenceEventIds: [`event-${insightId}`],
+    affectedZones: ["Z2-C"],
+    affectedPlayersOrProfiles: ["porteur"],
+    coachAction: "Observer avant d'en faire une consigne.",
+    tradeoff: "Le gain de securite peut reduire la vitesse.",
+  };
 }
 
 const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
@@ -83,6 +107,11 @@ const exportHtml = renderCoachReportExportHtml({
 });
 const doc = renderCoachActionPlanCardsTrainingFocusPackaging7CDoc(model);
 const validation = renderCoachActionPlanCardsTrainingFocusPackaging7CValidation(model);
+const sourcePreservationCards = buildCoachActionPlanCards([
+  testInsight("diagnostic-linked", "diagnostic"),
+  testInsight("sandbox-linked", "sandbox"),
+  testInsight("mixed-linked", "mixed"),
+]);
 
 assert.equal(model.scope, "COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING");
 assert.equal(model.version, "COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING_7C");
@@ -93,6 +122,9 @@ assert.equal(model.actionPlanCardsAudit.actionPlanCardCount, 3);
 assert.equal(model.actionPlanCardsAudit.primaryActionCardCount, 1);
 assert.equal(model.actionPlanCardsAudit.forcedSelectionCardCount, 0);
 assert.equal(model.actionPlanCardsAudit.forcedTacticalPlanCardCount, 0);
+assert.equal(sourcePreservationCards[0]?.sourceType, "diagnostic");
+assert.equal(sourcePreservationCards[1]?.sourceType, "sandbox");
+assert.equal(sourcePreservationCards[2]?.sourceType, "mixed");
 assert.equal(model.wordingPolishAudit.mechanicalPhraseCount, 0);
 assert.equal(model.wordingPolishAudit.duplicatedLabelCount, 0);
 assert.equal(model.wordingPolishAudit.forbiddenWordingCount, 0);

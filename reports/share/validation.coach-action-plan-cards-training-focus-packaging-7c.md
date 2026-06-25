@@ -8,7 +8,8 @@ Status: PASS
 ## Checks
 - PASS: CoachActionPlanCardsTrainingFocusPackagingModel exists - COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING
 - PASS: baseline 7B visible - COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS_7B
-- PASS: baseline 7B guardrails preserved - PARTIAL/true
+- PASS: baseline 7B still PASS - PASS/true
+- PASS: baseline 7B guardrails preserved - PASS/true
 - PASS: baseline 7A visible - PRODUCT_BASELINE_COACH_REPORT_READINESS_7A
 - PASS: baseline 6X preserved - true
 - PASS: product report ready - true

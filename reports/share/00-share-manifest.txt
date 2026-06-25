@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-25T14:13:00.231Z
+Generated timestamp: 2026-06-25T15:11:46.024Z
 Task/sprint name: Sprint 7C - Coach Action Plan Cards & Training Focus Packaging
 Final file count: 20
 
@@ -910,19 +910,6 @@ Test/build commands run:
 
 Git status summary:
  M reports/validation.share-pack.md
- M src/reports/coachDeepInsights.ts
- M src/reports/coachInsightDepthNextMatchRecommendations.test.ts
- M src/reports/coachReportProductClarityAudit.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachProductReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachActionPlanCards.ts
-?? src/reports/coachActionPlanCardsAudit.ts
-?? src/reports/coachActionPlanCardsTrainingFocusPackaging.test.ts
-?? src/reports/coachActionPlanCardsTrainingFocusPackaging.ts
-?? src/reports/coachActionPlanCardsTrainingFocusPackagingWarnings.ts
-?? src/reports/coachReportWordingPolishAudit.ts
-?? src/reports/nextMatchPlanPackagingAudit.ts
-?? src/reports/trainingFocusPackagingAudit.ts
+ M src/reports/coachActionPlanCards.ts
+ M src/reports/coachActionPlanCardsTrainingFocusPackaging.test.ts
+ M src/reports/coachActionPlanCardsTrainingFocusPackaging.ts

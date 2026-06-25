@@ -21,9 +21,9 @@
 ## Baseline Preservation
 | Baseline | Value |
 | --- | --- |
-| 7B status | PARTIAL |
-| 7B productBaselineReady | false |
-| 7A status | PARTIAL |
+| 7B status | PASS |
+| 7B productBaselineReady | true |
+| 7A status | PASS |
 | 6X averageTotalPoints | 22.2 |
 | 6X closeGameRate | 50% |
 | guardrailsPreserved | true |
@@ -111,3 +111,4 @@
 - PRODUCT_REPORT_READY
 - COACH_EXPORT_READY
 - MATCH_ECONOMY_BASELINE_PRESERVED
+- PRODUCT_BASELINE_READY

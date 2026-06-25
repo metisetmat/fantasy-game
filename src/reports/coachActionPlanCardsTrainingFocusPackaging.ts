@@ -1,5 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
 import { runFullMatch } from "../simulation/runFullMatch";
 import {
@@ -25,12 +23,18 @@ import {
 } from "./fullMatchMatchEconomyFinalStabilization";
 import { auditNextMatchPlanPackaging, type NextMatchPlanPackagingAudit } from "./nextMatchPlanPackagingAudit";
 import {
+  buildProductBaselineCoachReportReadinessModel,
   currentProductBaselineCoachReportReadinessModel,
   type ProductBaselineCoachReportReadinessModel,
 } from "./productBaselineCoachReportReadiness";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import type { CoachProductReportViewModel } from "./coachProductReportView";
 import { renderCoachProductReport } from "./renderCoachProductReport";
+import {
+  renderCoachInsightDepthNextMatchRecommendationsSection,
+  renderCoachReportExportHtml,
+  renderProductBaselineCoachReportReadinessSection,
+} from "./renderCoachReportExportHtml";
 import { auditTrainingFocusPackaging, type TrainingFocusPackagingAudit } from "./trainingFocusPackagingAudit";
 import { escapeHtml } from "./htmlCoachReport";
 
@@ -89,13 +93,14 @@ function checkLine(label: string, passed: boolean, detail: string): string {
   return `- ${passed ? "PASS" : "FAIL"}: ${label} - ${detail}`;
 }
 
-function readReport(fileName: string): string {
-  const path = join(process.cwd(), "reports", fileName);
-  return existsSync(path) ? readFileSync(path, "utf8") : "";
-}
-
 function includesBlocking(warnings: readonly CoachActionPlanCardsTrainingFocusPackagingWarningCode[]): boolean {
   return warnings.some((warning) => COACH_ACTION_PLAN_PACKAGING_BLOCKING_WARNINGS.includes(warning));
+}
+
+function appendProductSection(html: string, section: string): string {
+  return html.includes("</main>")
+    ? html.replace("</main>", `${section}\n</main>`)
+    : `${html}\n${section}`;
 }
 
 export function buildCoachActionPlanCardsTrainingFocusPackagingModel(input: {
@@ -192,6 +197,8 @@ export function buildCoachActionPlanCardsTrainingFocusPackagingModel(input: {
   const productBaselineReady = productReportReady &&
     coachExportReady &&
     sourceOfTruthSeparationPreserved &&
+    baseline7B.status === "PASS" &&
+    baseline7B.productBaselineReady &&
     baseline7B.matchEconomyBaselinePreserved &&
     baseline7B.guardrailsPreserved &&
     actionPlanCardsReady &&
@@ -252,12 +259,51 @@ export function currentGeneratedCoachActionPlanCardsTrainingFocusPackagingModel(
     routeSelectionMode: "workbench_chain_replay_experimental",
   });
   const productReport = buildCoachProductReportViewFromMatchReport(report, rosterCoverageFixturePlayers);
-  const productReportHtml = readReport("coach-report.product.html") || renderCoachProductReport(productReport);
-  const exportReportHtml = readReport("coach-report.export.html") || productReportHtml;
+  const matchEconomyBaseline = currentFullMatchEconomyFinalStabilizationModel();
+  const baseProductReportHtml = renderCoachProductReport(productReport);
+  const exportHtmlFor7A = renderCoachReportExportHtml({
+    productReportHtml: baseProductReportHtml,
+    fullMatchEconomyFinalStabilization: matchEconomyBaseline,
+  });
+  const baseline7A = buildProductBaselineCoachReportReadinessModel({
+    productReport,
+    productReportHtml: baseProductReportHtml,
+    exportReportHtml: exportHtmlFor7A,
+    matchEconomyBaseline,
+  });
+  const productHtmlWith7A = appendProductSection(
+    baseProductReportHtml,
+    renderProductBaselineCoachReportReadinessSection(baseline7A),
+  );
+  const exportHtmlFor7B = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWith7A,
+    fullMatchEconomyFinalStabilization: matchEconomyBaseline,
+    productBaselineCoachReportReadiness: baseline7A,
+  });
+  const baseline7B = buildCoachInsightDepthNextMatchRecommendationsModel({
+    productReport,
+    productReportHtml: productHtmlWith7A,
+    exportReportHtml: exportHtmlFor7B,
+    baseline7A,
+    matchEconomyBaseline,
+  });
+  const productHtmlWith7B = appendProductSection(
+    productHtmlWith7A,
+    renderCoachInsightDepthNextMatchRecommendationsSection(baseline7B),
+  );
+  const exportReportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWith7B,
+    fullMatchEconomyFinalStabilization: matchEconomyBaseline,
+    productBaselineCoachReportReadiness: baseline7A,
+    coachInsightDepthNextMatchRecommendations: baseline7B,
+  });
   return buildCoachActionPlanCardsTrainingFocusPackagingModel({
     productReport,
-    productReportHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml,
+    baseline7B,
+    baseline7A,
+    matchEconomyBaseline,
   });
 }
 
@@ -400,6 +446,7 @@ export function renderCoachActionPlanCardsTrainingFocusPackaging7CValidation(
   const checks = [
     checkLine("CoachActionPlanCardsTrainingFocusPackagingModel exists", model.scope === "COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING", model.scope),
     checkLine("baseline 7B visible", model.baselineVersion === "COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS_7B", model.baselineVersion),
+    checkLine("baseline 7B still PASS", model.baseline7B.status === "PASS" && model.baseline7B.productBaselineReady, `${model.baseline7B.status}/${bool(model.baseline7B.productBaselineReady)}`),
     checkLine("baseline 7B guardrails preserved", model.baseline7B.guardrailsPreserved && model.baseline7B.matchEconomyBaselinePreserved, `${model.baseline7B.status}/${bool(model.baseline7B.guardrailsPreserved)}`),
     checkLine("baseline 7A visible", model.baseline7A.version === "PRODUCT_BASELINE_COACH_REPORT_READINESS_7A", model.baseline7A.version),
     checkLine("baseline 6X preserved", model.matchEconomyBaselinePreserved, bool(model.matchEconomyBaselinePreserved)),
