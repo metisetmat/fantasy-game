@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 7B - Coach Insight Depth & Next-Match Recommendations. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7D - Coach Report Premium Layout & Visual Hierarchy. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -124,6 +124,10 @@ import {
   renderProductBaselineCoachReportReadiness7AValidation,
   renderCoachInsightDepthNextMatchRecommendations7BDoc,
   renderCoachInsightDepthNextMatchRecommendations7BValidation,
+  renderCoachActionPlanCardsTrainingFocusPackaging7CDoc,
+  renderCoachActionPlanCardsTrainingFocusPackaging7CValidation,
+  renderCoachReportPremiumLayoutVisualHierarchy7DDoc,
+  renderCoachReportPremiumLayoutVisualHierarchy7DValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -137,10 +141,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7B - Coach Insight Depth & Next-Match Recommendations";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-insight-depth-next-match-recommendations-7b.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-premium-layout-visual-hierarchy-7d.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-insight-depth-next-match-recommendations-7b.md";
+  "validation.coach-report-premium-layout-visual-hierarchy-7d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2611,6 +2615,91 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7B executable test proving product/export sections, insight depth, recommendation safety, and baseline preservation",
       },
       {
+        source: "src/reports/coachActionPlanCards.ts",
+        required: true,
+        reason: "Sprint 7C action-plan card and training-focus builders plus product render helpers",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving coach action cards are short, sourced, observable, non-forced, and evidence-backed",
+      },
+      {
+        source: "src/reports/trainingFocusPackagingAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving training focus packaging has why, cue, observable signal, risk, and evidence",
+      },
+      {
+        source: "src/reports/nextMatchPlanPackagingAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving next-match priorities stay compact, concrete, sourced, and observable",
+      },
+      {
+        source: "src/reports/coachReportWordingPolishAudit.ts",
+        required: true,
+        reason: "Sprint 7C audit proving duplicated labels, mechanical wording, jargon, and forbidden wording are absent",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsTrainingFocusPackagingWarnings.ts",
+        required: true,
+        reason: "Sprint 7C warning-code registry for action-plan cards, training focus packaging, wording polish, and guardrails",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsTrainingFocusPackaging.ts",
+        required: true,
+        reason: "Sprint 7C model, report renderer, and validation renderer for coach action-plan packaging",
+      },
+      {
+        source: "src/reports/coachActionPlanCardsTrainingFocusPackaging.test.ts",
+        required: true,
+        reason: "Sprint 7C executable test proving product/export sections, action cards, training focus, wording polish, and baseline preservation",
+      },
+      {
+        source: "src/reports/coachReportHtmlAuditUtils.ts",
+        required: true,
+        reason: "Sprint 7D shared HTML audit utilities for section ordering, visible text, read time, and forbidden wording checks",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutVisualHierarchyWarnings.ts",
+        required: true,
+        reason: "Sprint 7D warning-code registry for premium layout, visual hierarchy, mobile/export readiness, and baseline metadata",
+      },
+      {
+        source: "src/reports/coachReportVisualHierarchyAudit.ts",
+        required: true,
+        reason: "Sprint 7D visual hierarchy audit proving express read, score/source prominence, action-plan ordering, and collapsed appendices",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutAudit.ts",
+        required: true,
+        reason: "Sprint 7D premium layout audit proving cover, cards, badges, ordering, duplication, and layout noise",
+      },
+      {
+        source: "src/reports/coachReportMobileReadabilityAudit.ts",
+        required: true,
+        reason: "Sprint 7D mobile readability audit proving breakpoint, stacked cards, no horizontal overflow, and usable details",
+      },
+      {
+        source: "src/reports/coachReportExportPrintAudit.ts",
+        required: true,
+        reason: "Sprint 7D export/print audit proving printable cover, action cards, page-break guards, and separated appendices",
+      },
+      {
+        source: "src/reports/coachReportBaselineMetadataConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 7D baseline metadata audit reconciling 7A/7B/7C status and productBaselineReady values against validation outputs",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutVisualHierarchy.ts",
+        required: true,
+        reason: "Sprint 7D model, report renderer, and validation renderer for coach report premium layout and visual hierarchy",
+      },
+      {
+        source: "src/reports/coachReportPremiumLayoutVisualHierarchy.test.ts",
+        required: true,
+        reason: "Sprint 7D executable test proving premium layout readiness, baseline metadata consistency, and export/mobile checks",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4767,6 +4856,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7D")) {
+    return renderCoachReportPremiumLayoutVisualHierarchy7DDoc(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 7C")) {
+    return renderCoachActionPlanCardsTrainingFocusPackaging7CDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7B")) {
     return renderCoachInsightDepthNextMatchRecommendations7BDoc(fullMatchTraceValidationModel());
   }
@@ -7063,6 +7158,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7D")) {
+    return renderCoachReportPremiumLayoutVisualHierarchy7DValidation(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 7C")) {
+    return renderCoachActionPlanCardsTrainingFocusPackaging7CValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7B")) {
     return renderCoachInsightDepthNextMatchRecommendations7BValidation(fullMatchTraceValidationModel());
   }
@@ -9305,6 +9406,70 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7D")) {
+    return [
+      "# Sprint 7D Share Pack",
+      "",
+      "Current sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy",
+      "",
+      "## Purpose",
+      "Review whether the coach report now reads like a premium product artifact: official score and source first, express read, prominent action-plan cards, compact next-match plan, readable mobile/export layout, and reconciled 7A/7B/7C baseline metadata.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-report-premium-layout-visual-hierarchy-7d.md",
+      "- validation.coach-report-premium-layout-visual-hierarchy-7d.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-premium-layout-visual-hierarchy-7d.md",
+      "3. coach-report-premium-layout-visual-hierarchy-7d.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7D is presentation-only: no scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score changes.",
+      "",
+    ].join("\n");
+  }
+  if (TASK_NAME.includes("Sprint 7C")) {
+    return [
+      "# Sprint 7C Share Pack",
+      "",
+      "Current sprint: Sprint 7C - Coach Action Plan Cards & Training Focus Packaging",
+      "",
+      "## Purpose",
+      "Review whether the 7B insight layer is now packaged into short coach action-plan cards, training focus blocks, observable next-match signals, and polished wording without changing scoring, route selection, or match mechanics.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-action-plan-cards-training-focus-packaging-7c.md",
+      "- validation.coach-action-plan-cards-training-focus-packaging-7c.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-action-plan-cards-training-focus-packaging-7c.md",
+      "3. coach-action-plan-cards-training-focus-packaging-7c.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7C must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7B")) {
     return [
       "# Sprint 7B Share Pack",
@@ -27321,6 +27486,10 @@ import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./ful
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
 import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
+import {
+  buildCoachActionPlanCardsTrainingFocusPackagingModel,
+  renderCoachActionPlanCardsTrainingFocusPackagingSection,
+} from "./coachActionPlanCardsTrainingFocusPackaging";
 import { buildCoachInsightDepthNextMatchRecommendationsModel } from "./coachInsightDepthNextMatchRecommendations";
 import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
@@ -27488,11 +27657,7 @@ export function writeLatestCoachReport(): void {
     productHtml,
     renderCoachInsightDepthNextMatchRecommendationsSection(coachInsightDepthNextMatchRecommendations),
   );
-  const exportSnapshot = buildCoachReportExportSnapshot({
-    productReportHtml: productHtmlWith7B,
-    productReportPath: "reports/coach-report.product.html",
-  });
-  const baselineExportHtml = renderCoachReportExportHtml({
+  const productExportHtmlFor7C = renderCoachReportExportHtml({
     productReportHtml: productHtmlWith7B,
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
@@ -27514,30 +27679,69 @@ export function writeLatestCoachReport(): void {
     productBaselineCoachReportReadiness,
     coachInsightDepthNextMatchRecommendations,
   });
+  const coachActionPlanCardsTrainingFocusPackaging = buildCoachActionPlanCardsTrainingFocusPackagingModel({
+    productReport: productReportView,
+    productReportHtml: productHtmlWith7B,
+    exportReportHtml: productExportHtmlFor7C,
+    baseline7B: coachInsightDepthNextMatchRecommendations,
+    baseline7A: productBaselineCoachReportReadiness,
+    matchEconomyBaseline: fullMatchEconomyFinalStabilization,
+  });
+  const productHtmlWith7C = appendProductSection(
+    productHtmlWith7B,
+    renderCoachActionPlanCardsTrainingFocusPackagingSection(coachActionPlanCardsTrainingFocusPackaging),
+  );
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtmlWith7C,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWith7C,
+    fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
+    fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
+    fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
+    fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
+    coachInsightDepthNextMatchRecommendations,
+    coachActionPlanCardsTrainingFocusPackaging,
+  });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const phaseVisuals = buildCoachReportPhaseVisuals({
     premiumLayout,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const phaseReadability = buildCoachReportPhaseVisualReadability({
     phaseVisuals,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const multiMatchPhaseComparison = buildCoachReportMultiMatchPhaseComparison({
     phaseReadability,
     comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const multiMatchHistoryView = buildCoachReportMultiMatchHistoryView({
     multiMatchComparison: multiMatchPhaseComparison,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
   });
   const historyStore = createFileBackedCoachMatchHistoryStore({
@@ -27546,7 +27750,7 @@ export function writeLatestCoachReport(): void {
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
     matchReport: experimentalReport,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
     historyStore,
@@ -27555,7 +27759,7 @@ export function writeLatestCoachReport(): void {
   });
   const currentPersistentRecord = buildCoachMatchHistoryRecord({
     matchReport: experimentalReport,
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
     source: "product_history_store",
@@ -27587,7 +27791,7 @@ export function writeLatestCoachReport(): void {
           includeControlledSamples: true,
           includeProductHistory: true,
         },
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const persistenceEvidenceSnapshot = historyStoreConsistency === undefined || persistentHistoryAdapter.saveResult === undefined
@@ -27597,7 +27801,7 @@ export function writeLatestCoachReport(): void {
         saveResult: persistentHistoryAdapter.saveResult,
         queriedRecordCount: historyStoreConsistency.queriedRecordCount,
         queriedSignalCount: historyStoreConsistency.queriedSignalCount,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const migrationDryRun = buildCoachMatchHistoryMigrationDryRun({
@@ -27609,7 +27813,7 @@ export function writeLatestCoachReport(): void {
     : buildCoachReportDatabaseMigrationPreparation({
         persistenceEvidenceSnapshot,
         migrationDryRun,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const databaseFeatureFlag = resolveDatabaseHistoryAdapterFeatureFlag();
@@ -27624,7 +27828,7 @@ export function writeLatestCoachReport(): void {
         sourceRecords: historyStore.listAll(),
         experimentalAdapter: experimentalDatabaseAdapter,
         featureFlag: databaseFeatureFlag,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const durableStorageDecision = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined || databaseAdapterSpike === undefined
@@ -27638,7 +27842,7 @@ export function writeLatestCoachReport(): void {
           featureFlag: databaseFeatureFlag,
         }),
         featureFlag: databaseFeatureFlag,
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const controlledLocalReadOnlyDbMode = durableStorageDecision === undefined
@@ -27650,7 +27854,7 @@ export function writeLatestCoachReport(): void {
           initialRecords: historyStore.listAll(),
           featureFlagEnabled: false,
         }),
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const realSQLiteReadOnlyIOSmokeTest = controlledLocalReadOnlyDbMode === undefined
@@ -27661,7 +27865,7 @@ export function writeLatestCoachReport(): void {
           fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
           explicitControlledMode: true,
         }),
-        productReportHtml: productHtmlWith7B,
+        productReportHtml: productHtmlWith7C,
         exportReportHtml: baselineExportHtml,
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
@@ -27672,7 +27876,7 @@ export function writeLatestCoachReport(): void {
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
-    productReportHtml: productHtmlWith7B,
+    productReportHtml: productHtmlWith7C,
     phaseReadability,
     multiMatchPhaseComparison,
     multiMatchHistoryView,
@@ -27710,6 +27914,7 @@ export function writeLatestCoachReport(): void {
     fullMatchEconomyFinalStabilization,
     productBaselineCoachReportReadiness,
     coachInsightDepthNextMatchRecommendations,
+    coachActionPlanCardsTrainingFocusPackaging,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
@@ -27735,7 +27940,7 @@ export function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    productHtmlWith7B,
+    productHtmlWith7C,
     "utf8",
   );
   writeFileSync(

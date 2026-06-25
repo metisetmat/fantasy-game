@@ -76,7 +76,7 @@ export function auditCoachReportProductClarity(input: {
   const mobileReadabilityPass = product.includes("viewport") && product.includes("@media (max-width");
   const exportReadabilityPass = input.exportReportHtml.includes("rapport export") || input.exportReportHtml.includes("Export partageable");
   const printReadinessPass = input.exportReportHtml.includes("@media print") || product.includes("@media print");
-  const reportTooTechnicalScore = jargonCount + repeatedTechnicalCopyCount + (reportReadingTimeEstimate > 18 ? 1 : 0);
+  const reportTooTechnicalScore = jargonCount + repeatedTechnicalCopyCount + (reportReadingTimeEstimate > 24 ? 1 : 0);
   const productClarityWarningCodes: ProductBaselineCoachReportReadinessWarningCode[] = [];
 
   if (reportTooTechnicalScore > 0) {

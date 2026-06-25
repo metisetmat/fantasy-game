@@ -61,48 +61,48 @@ function deepInsightTemplate(signal: CoachProductReportSignal, index: number): O
   if (index === 0) {
     return {
       sourceType: "official",
-      observation: `Le signal principal montre ${signal.summary}`,
+      observation: `Le rapport officiel fait ressortir ${signal.summary}`,
       whyItMatters: "C'est important parce que la progression propre donne au coach un repere sur la premiere structure offensive utile.",
-      probableCause: "Cause probable: le porteur trouve une solution proche avant que la pression ne ferme la zone.",
-      tacticalConsequence: "Consequence tactique: l'equipe peut avancer sans transformer chaque recuperation en action forcee.",
-      riskIfRepeated: "Risque si on insiste: trop de soutien proche peut ralentir la sortie et exposer la rest-defense si la perte arrive au mauvais moment.",
+      probableCause: "Le porteur trouve une solution proche avant que la pression ne ferme la zone.",
+      tacticalConsequence: "L'equipe peut avancer sans transformer chaque recuperation en action forcee.",
+      riskIfRepeated: "Trop de soutien proche peut ralentir la sortie et exposer la rest-defense si la perte arrive au mauvais moment.",
       nextMatchCheck: "A verifier au prochain match: la premiere sortie apres recuperation reste-t-elle propre sous pression ?",
       trainingFocus: "A travailler: offrir une solution proche au porteur apres recuperation, puis liberer une deuxieme ligne.",
       evidenceEventIds: [signal.signalId],
       affectedPlayersOrProfiles: ["soutien proche", "porteur", "rest-defense"],
-      coachAction: "Action coach prudente: observer la qualite de la premiere passe avant de transformer ce signal en consigne.",
-      tradeoff: "Tradeoff: securiser la sortie aide la conservation, mais peut reduire la vitesse de projection.",
+      coachAction: "Observer la qualite de la premiere passe avant de transformer ce signal en consigne.",
+      tradeoff: "Securiser la sortie aide la conservation, mais peut reduire la vitesse de projection.",
     };
   }
   if (index === 1) {
     return {
       sourceType: "official",
-      observation: `Le deuxieme signal indique ${signal.summary}`,
+      observation: `La deuxieme lecture met en avant ${signal.summary}`,
       whyItMatters: "C'est important parce que la deuxieme action decide si le gain initial devient une sequence stable ou une perte rapide.",
-      probableCause: "Cause probable: l'equipe cherche le second ballon ou le relais avant que le bloc adverse ne se replace.",
-      tacticalConsequence: "Consequence tactique: une bonne deuxieme action peut maintenir la pression sans forcer une finition precoce.",
-      riskIfRepeated: "Risque si on insiste: chercher trop vite le second ballon peut ouvrir une transition adverse dans l'axe.",
+      probableCause: "L'equipe cherche le second ballon ou le relais avant que le bloc adverse ne se replace.",
+      tacticalConsequence: "Une bonne deuxieme action peut maintenir la pression sans forcer une finition precoce.",
+      riskIfRepeated: "Chercher trop vite le second ballon peut ouvrir une transition adverse dans l'axe.",
       nextMatchCheck: "A verifier au prochain match: les secondes actions augmentent-elles sans exposer l'axe central ?",
       trainingFocus: "A travailler: coordonner le relais de soutien et le joueur de couverture derriere l'action.",
       evidenceEventIds: [signal.signalId],
       affectedPlayersOrProfiles: ["second ballon", "relayeur", "couverture"],
-      coachAction: "Action coach prudente: comparer le nombre de secondes actions utiles avec les pertes immediates.",
-      tradeoff: "Tradeoff: attaquer le second ballon augmente le danger, mais demande une couverture plus rigoureuse.",
+      coachAction: "Comparer le nombre de secondes actions utiles avec les pertes immediates.",
+      tradeoff: "Attaquer le second ballon augmente le danger, mais demande une couverture plus rigoureuse.",
     };
   }
   return {
     sourceType: "official",
-    observation: `Le troisieme signal montre ${signal.summary}`,
+    observation: `La suite du rapport signale ${signal.summary}`,
     whyItMatters: "C'est important parce que la reponse a la pression et au gardien stabilise la fin de sequence.",
-    probableCause: "Cause probable: la ligne de soutien reste disponible quand la premiere option est neutralisee.",
-    tacticalConsequence: "Consequence tactique: l'equipe peut conserver une menace sans confondre continuation et score automatique.",
-    riskIfRepeated: "Risque si on insiste: multiplier les continuations peut user le bloc et laisser des rebonds centraux a defendre.",
+    probableCause: "La ligne de soutien reste disponible quand la premiere option est neutralisee.",
+    tacticalConsequence: "L'equipe peut conserver une menace sans confondre continuation et score automatique.",
+    riskIfRepeated: "Multiplier les continuations peut user le bloc et laisser des rebonds centraux a defendre.",
     nextMatchCheck: "A verifier au prochain match: la continuite reste-t-elle lisible apres arret, pression ou rebond ?",
     trainingFocus: "A travailler: replacer vite le soutien autour du gardien ou du porteur apres action neutralisee.",
     evidenceEventIds: [signal.signalId],
     affectedPlayersOrProfiles: ["gardien", "soutien", "continuite"],
-    coachAction: "Action coach prudente: surveiller si la continuite vient d'un vrai soutien ou d'une lecture opportuniste.",
-    tradeoff: "Tradeoff: prolonger l'action garde la pression, mais peut masquer une fatigue ou une organisation defensive fragile.",
+    coachAction: "Surveiller si la continuite vient d'un vrai soutien ou d'une lecture opportuniste.",
+    tradeoff: "Prolonger l'action garde la pression, mais peut masquer une fatigue ou une organisation defensive fragile.",
   };
 }
 
@@ -183,8 +183,8 @@ export function renderCoachDeepInsights(insights: readonly CoachDeepInsight[]): 
             <section><h4>Risque si repete</h4><p>${escapeHtml(insight.riskIfRepeated)}</p></section>
             <section><h4>A verifier au prochain match</h4><p>${escapeHtml(insight.nextMatchCheck)}</p></section>
           </div>
-          <p class="guard">Action coach prudente: ${escapeHtml(insight.coachAction)}</p>
-          <p class="muted">Tradeoff: ${escapeHtml(insight.tradeoff)}</p>
+          <p class="guard">Action coach : ${escapeHtml(insight.coachAction)}</p>
+          <p class="muted">Risque / tradeoff : ${escapeHtml(insight.tradeoff)}</p>
           ${renderInsightConfidenceLabels(insight)}
         </article>`).join("")}
     </div>

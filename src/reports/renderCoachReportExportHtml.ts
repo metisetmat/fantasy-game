@@ -79,6 +79,10 @@ import type {
 import type {
   CoachInsightDepthNextMatchRecommendationsModel,
 } from "./coachInsightDepthNextMatchRecommendations";
+import {
+  renderCoachActionPlanCardsTrainingFocusPackagingSection,
+  type CoachActionPlanCardsTrainingFocusPackagingModel,
+} from "./coachActionPlanCardsTrainingFocusPackaging";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -1342,6 +1346,26 @@ function renderExecutiveSummary(html: string): string {
   </section>`;
 }
 
+function renderExpressReadExport(html: string): string {
+  const body = extractSectionInner(html, "express-read");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="express-read" class="premium-section" data-source-product-sections="express-read">
+    <div class="report-section-divider">Lecture express</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Lecture express</h2>
+        <p>Score, priorite principale, signal terrain et garde-fou source de verite en lecture rapide.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
 function renderMatchStory(html: string): string {
   const body = extractSectionInner(html, "official-match-reading");
 
@@ -1390,6 +1414,46 @@ function renderCoachDeepInsightsExport(html: string): string {
       <div>
         <h2>Insights coach approfondis</h2>
         <p>Chaque carte relie observation, cause probable, consequence, risque et signal prochain match.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderCoachActionPlanExport(html: string): string {
+  const body = extractSectionInner(html, "coach-action-plan");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="coach-action-plan" class="premium-section" data-source-product-sections="coach-action-plan">
+    <div class="report-section-divider">Coach action plan</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Plan d'action coach</h2>
+        <p>Cartes courtes: observation, travail, signal observable, critere de reussite et risque.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderTrainingFocusPackageExport(html: string): string {
+  const body = extractSectionInner(html, "training-focus-package");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="training-focus-package" class="premium-section" data-source-product-sections="training-focus-package">
+    <div class="report-section-divider">Training focus</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Focus entrainement</h2>
+        <p>Le travail est presente comme un axe d'observation, sans imposer composition ni plan tactique.</p>
       </div>
     </div>
     ${body}
@@ -4930,6 +4994,7 @@ function renderAppendices(input: {
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
   readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
   readonly coachInsightDepthNextMatchRecommendations?: CoachInsightDepthNextMatchRecommendationsModel;
+  readonly coachActionPlanCardsTrainingFocusPackaging?: CoachActionPlanCardsTrainingFocusPackagingModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -5036,6 +5101,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
   readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
   readonly coachInsightDepthNextMatchRecommendations?: CoachInsightDepthNextMatchRecommendationsModel;
+  readonly coachActionPlanCardsTrainingFocusPackaging?: CoachActionPlanCardsTrainingFocusPackagingModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -5123,11 +5189,17 @@ export function renderCoachReportExportHtml(input: {
   });
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
+    renderExpressReadExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
-    renderMatchStory(input.productReportHtml),
-    renderKeyStatistics(input.productReportHtml),
-    renderCoachDeepInsightsExport(input.productReportHtml),
+    renderCoachActionPlanExport(input.productReportHtml),
+    renderTrainingFocusPackageExport(input.productReportHtml),
     renderNextMatchPlanExport(input.productReportHtml),
+    renderKeyStatistics(input.productReportHtml),
+    renderProfilesAndPlayers(input.productReportHtml),
+    renderNextMatch(input.productReportHtml),
+    renderMatchStory(input.productReportHtml),
+    renderCoachDeepInsightsExport(input.productReportHtml),
+    renderInterpretationGuard(input.productReportHtml),
     renderPhaseLegend(readabilityPresentation.legendItems),
     ...phasePanels.map((panel) =>
       renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
@@ -5168,9 +5240,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
     renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
     renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations),
-    renderProfilesAndPlayers(input.productReportHtml),
-    renderNextMatch(input.productReportHtml),
-    renderInterpretationGuard(input.productReportHtml),
+    renderCoachActionPlanCardsTrainingFocusPackagingSection(input.coachActionPlanCardsTrainingFocusPackaging),
   ].join("\n");
   const appendices = renderAppendices({
     html: input.productReportHtml,

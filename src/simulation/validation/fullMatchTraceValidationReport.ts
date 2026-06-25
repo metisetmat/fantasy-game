@@ -116,6 +116,14 @@ import {
   renderCoachInsightDepthNextMatchRecommendations7BDoc as renderCoachInsightDepthNextMatchRecommendations7BDocBase,
   renderCoachInsightDepthNextMatchRecommendations7BValidation as renderCoachInsightDepthNextMatchRecommendations7BValidationBase,
 } from "../../reports/coachInsightDepthNextMatchRecommendations";
+import {
+  renderCoachActionPlanCardsTrainingFocusPackaging7CDoc as renderCoachActionPlanCardsTrainingFocusPackaging7CDocBase,
+  renderCoachActionPlanCardsTrainingFocusPackaging7CValidation as renderCoachActionPlanCardsTrainingFocusPackaging7CValidationBase,
+} from "../../reports/coachActionPlanCardsTrainingFocusPackaging";
+import {
+  renderCoachReportPremiumLayoutVisualHierarchy7DDoc as renderCoachReportPremiumLayoutVisualHierarchy7DDocBase,
+  renderCoachReportPremiumLayoutVisualHierarchy7DValidation as renderCoachReportPremiumLayoutVisualHierarchy7DValidationBase,
+} from "../../reports/coachReportPremiumLayoutVisualHierarchy";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6529,6 +6537,30 @@ export function renderCoachInsightDepthNextMatchRecommendations7BValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachInsightDepthNextMatchRecommendations7BValidationBase();
+}
+
+export function renderCoachActionPlanCardsTrainingFocusPackaging7CDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachActionPlanCardsTrainingFocusPackaging7CDocBase();
+}
+
+export function renderCoachActionPlanCardsTrainingFocusPackaging7CValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachActionPlanCardsTrainingFocusPackaging7CValidationBase();
+}
+
+export function renderCoachReportPremiumLayoutVisualHierarchy7DDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportPremiumLayoutVisualHierarchy7DDocBase();
+}
+
+export function renderCoachReportPremiumLayoutVisualHierarchy7DValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportPremiumLayoutVisualHierarchy7DValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

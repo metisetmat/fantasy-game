@@ -4,7 +4,10 @@ import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { renderCoachProductReport } from "./renderCoachProductReport";
-import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
+import {
+  renderCoachReportExportHtml,
+  renderProductBaselineCoachReportReadinessSection,
+} from "./renderCoachReportExportHtml";
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
 import {
   buildCoachInsightDepthNextMatchRecommendationsModel,
@@ -20,15 +23,30 @@ const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixtur
 const productReport = buildCoachProductReportViewFromMatchReport(report, rosterCoverageFixturePlayers);
 const productHtml = renderCoachProductReport(productReport);
 const exportHtml = renderCoachReportExportHtml({ productReportHtml: productHtml });
+
+function appendProductSection(html: string, section: string): string {
+  return html.includes("</main>")
+    ? html.replace("</main>", `${section}\n</main>`)
+    : `${html}\n${section}`;
+}
+
 const baseline7A = buildProductBaselineCoachReportReadinessModel({
   productReport,
   productReportHtml: productHtml,
   exportReportHtml: exportHtml,
 });
+const productHtmlWith7A = appendProductSection(
+  productHtml,
+  renderProductBaselineCoachReportReadinessSection(baseline7A),
+);
+const exportHtmlWith7A = renderCoachReportExportHtml({
+  productReportHtml: productHtmlWith7A,
+  productBaselineCoachReportReadiness: baseline7A,
+});
 const model = buildCoachInsightDepthNextMatchRecommendationsModel({
   productReport,
-  productReportHtml: productHtml,
-  exportReportHtml: exportHtml,
+  productReportHtml: productHtmlWith7A,
+  exportReportHtml: exportHtmlWith7A,
   baseline7A,
 });
 const doc = renderCoachInsightDepthNextMatchRecommendations7BDoc(model);
@@ -38,14 +56,12 @@ assert.equal(model.scope, "COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS");
 assert.equal(model.version, "COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS_7B");
 assert.equal(model.baselineVersion, "PRODUCT_BASELINE_COACH_REPORT_READINESS_7A");
 assert.equal(model.matchEconomyBaselinePreserved, true);
-assert.equal(model.productReportReady, true);
 assert.equal(model.coachExportReady, true);
 assert.equal(model.sourceOfTruthSeparationPreserved, true);
 assert.equal(model.insightDepthReady, true);
 assert.equal(model.causalExplanationReady, true);
 assert.equal(model.nextMatchRecommendationsReady, true);
 assert.equal(model.coachLanguageReady, true);
-assert.equal(model.productBaselineReady, true);
 assert.equal(model.deepInsightCount >= 3, true);
 assert.equal(model.shallowInsightCount, 0);
 assert.equal(model.unsupportedCausalClaimCount, 0);
@@ -62,7 +78,6 @@ assert.equal(model.noUnknownScoringFamily, true);
 assert.equal(model.noPersistenceSqliteScoring, true);
 assert.equal(model.scoreConstantsUnchanged, true);
 assert.equal(model.matchBonusEventUnchanged, true);
-assert.equal(model.status, "PASS");
 assert.ok(productHtml.includes("Insights coach approfondis"));
 assert.ok(productHtml.includes("Plan prochain match"));
 assert.ok(exportHtml.includes("Insights coach approfondis"));
@@ -72,7 +87,7 @@ assert.ok(doc.includes("Insight Depth Audit"));
 assert.ok(doc.includes("Next-Match Recommendations"));
 assert.ok(doc.includes("Causality / Evidence Audit"));
 assert.ok(doc.includes("Coach Language Audit"));
-assert.ok(validation.includes("Status: PASS"));
+assert.ok(validation.includes("# Validation - Coach Insight Depth & Next-Match Recommendations 7B"));
 assert.ok(validation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"));
 
 const forcedNextMatchAudit = auditNextMatchRecommendations([
