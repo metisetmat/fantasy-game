@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-25T10:25:37.915Z
-Task/sprint: Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness
+Generated: 2026-06-25T12:41:35.023Z
+Task/sprint: Sprint 7B - Coach Insight Depth & Next-Match Recommendations
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- product-baseline-coach-report-readiness-7a.md
-- validation.product-baseline-coach-report-readiness-7a.md
+- coach-insight-depth-next-match-recommendations-7b.md
+- validation.coach-insight-depth-next-match-recommendations-7b.md
 - README.md
 
 ## Bundle Files

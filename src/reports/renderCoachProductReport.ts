@@ -9,6 +9,12 @@ import {
   serializeCoachReportPhaseVisualSeed,
 } from "./coachReportPhaseVisuals";
 import { buildCoachProductReportPolish } from "./buildCoachProductReportPolish";
+import {
+  buildCoachDeepInsights,
+  buildNextMatchRecommendations,
+  renderCoachDeepInsights,
+  renderNextMatchPlan,
+} from "./coachDeepInsights";
 import { escapeHtml } from "./htmlCoachReport";
 import {
   candidateDisplayPriorityLabel,
@@ -285,6 +291,8 @@ ${serializeCoachReportPhaseVisualSeed(model.phaseVisualSeed)}
 export function renderCoachProductReport(model: CoachProductReportViewModel): string {
   const polish = buildCoachProductReportPolish({ productReportView: model });
   const technicalTags = [...model.tags, ...polish.tags];
+  const deepInsights = buildCoachDeepInsights(model);
+  const nextMatchRecommendations = buildNextMatchRecommendations(deepInsights);
 
   return `<!doctype html>
 <html lang="fr">
@@ -385,6 +393,10 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     <h2>3 signaux clés</h2>
     <div class="cards">${model.keyCoachSignals.map(renderSignal).join("")}</div>
   </section>
+
+  ${renderCoachDeepInsights(deepInsights)}
+
+  ${renderNextMatchPlan(nextMatchRecommendations)}
 
   <section id="profiles-to-observe" class="product-section">
     <h2>Profils à observer</h2>

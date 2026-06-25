@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7B - Coach Insight Depth & Next-Match Recommendations. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -122,6 +122,8 @@ import {
   renderFullMatchEconomyFinalStabilization6XValidation,
   renderProductBaselineCoachReportReadiness7ADoc,
   renderProductBaselineCoachReportReadiness7AValidation,
+  renderCoachInsightDepthNextMatchRecommendations7BDoc,
+  renderCoachInsightDepthNextMatchRecommendations7BValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -134,9 +136,11 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "product-baseline-coach-report-readiness-7a.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.product-baseline-coach-report-readiness-7a.md";
+const TASK_NAME =
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7B - Coach Insight Depth & Next-Match Recommendations";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-insight-depth-next-match-recommendations-7b.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
+  "validation.coach-insight-depth-next-match-recommendations-7b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2367,6 +2371,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7A warning-code registry for product baseline coach report readiness, source separation, actionability, clarity, and appendix boundaries",
       },
       {
+        source: "src/reports/coachInsightDepthNextMatchRecommendationsWarnings.ts",
+        required: true,
+        reason: "Sprint 7B warning-code registry for coach insight depth, causal evidence, next-match recommendations, and wording safety",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2565,6 +2574,41 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/productBaselineCoachReportReadiness.test.ts",
         required: true,
         reason: "Sprint 7A executable test proving coach report readiness, source separation, actionability, clarity, appendix boundaries, and 6X preservation",
+      },
+      {
+        source: "src/reports/coachDeepInsights.ts",
+        required: true,
+        reason: "Sprint 7B deep coach insight and next-match recommendation builder plus product/export render helpers",
+      },
+      {
+        source: "src/reports/coachInsightDepthAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving insights include cause, consequence, tradeoff, confidence, evidence, and next-match checks",
+      },
+      {
+        source: "src/reports/nextMatchRecommendationAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving next-match recommendations are concrete, observable, non-forced, and training-oriented",
+      },
+      {
+        source: "src/reports/coachInsightCausalityEvidenceAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving causal explanations are tied to match evidence instead of unsupported claims",
+      },
+      {
+        source: "src/reports/coachLanguageReadabilityAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving coach language is readable, avoids jargon leakage, and keeps technical details out of main reading",
+      },
+      {
+        source: "src/reports/coachInsightDepthNextMatchRecommendations.ts",
+        required: true,
+        reason: "Sprint 7B model, report renderer, and validation renderer for coach insight depth and next-match recommendations",
+      },
+      {
+        source: "src/reports/coachInsightDepthNextMatchRecommendations.test.ts",
+        required: true,
+        reason: "Sprint 7B executable test proving product/export sections, insight depth, recommendation safety, and baseline preservation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4723,6 +4767,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7B")) {
+    return renderCoachInsightDepthNextMatchRecommendations7BDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7A")) {
     return renderProductBaselineCoachReportReadiness7ADoc(fullMatchTraceValidationModel());
   }
@@ -7016,6 +7063,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7B")) {
+    return renderCoachInsightDepthNextMatchRecommendations7BValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7A")) {
     return renderProductBaselineCoachReportReadiness7AValidation(fullMatchTraceValidationModel());
   }
@@ -9255,6 +9305,38 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7B")) {
+    return [
+      "# Sprint 7B Share Pack",
+      "",
+      "Current sprint: Sprint 7B - Coach Insight Depth & Next-Match Recommendations",
+      "",
+      "## Purpose",
+      "Review whether the 7A coach product baseline now gives deeper causal insight, clear tradeoffs, and concrete next-match recommendations without changing scoring, route selection, or match mechanics.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-insight-depth-next-match-recommendations-7b.md",
+      "- validation.coach-insight-depth-next-match-recommendations-7b.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-insight-depth-next-match-recommendations-7b.md",
+      "3. coach-insight-depth-next-match-recommendations-7b.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7B must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7A")) {
     return [
       "# Sprint 7A Share Pack",
@@ -27239,6 +27321,7 @@ import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./ful
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
 import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
+import { buildCoachInsightDepthNextMatchRecommendationsModel } from "./coachInsightDepthNextMatchRecommendations";
 import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
@@ -27281,6 +27364,7 @@ import {
   renderFullMatchLateGameThreatQualityMonitoringSection,
   renderFullMatchEconomyFinalStabilizationSection,
   renderProductBaselineCoachReportReadinessSection,
+  renderCoachInsightDepthNextMatchRecommendationsSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -27372,11 +27456,7 @@ export function writeLatestCoachReport(): void {
     productHtmlWithout7A,
     renderProductBaselineCoachReportReadinessSection(productBaselineCoachReportReadiness),
   );
-  const exportSnapshot = buildCoachReportExportSnapshot({
-    productReportHtml: productHtml,
-    productReportPath: "reports/coach-report.product.html",
-  });
-  const baselineExportHtml = renderCoachReportExportHtml({
+  const productExportHtmlFor7B = renderCoachReportExportHtml({
     productReportHtml: productHtml,
     fullMatchSegmentScoringDensityCalibration,
     fullMatchTeamOpportunityBalanceCalibration,
@@ -27397,30 +27477,67 @@ export function writeLatestCoachReport(): void {
     fullMatchEconomyFinalStabilization,
     productBaselineCoachReportReadiness,
   });
+  const coachInsightDepthNextMatchRecommendations = buildCoachInsightDepthNextMatchRecommendationsModel({
+    productReport: productReportView,
+    productReportHtml: productHtml,
+    exportReportHtml: productExportHtmlFor7B,
+    baseline7A: productBaselineCoachReportReadiness,
+    matchEconomyBaseline: fullMatchEconomyFinalStabilization,
+  });
+  const productHtmlWith7B = appendProductSection(
+    productHtml,
+    renderCoachInsightDepthNextMatchRecommendationsSection(coachInsightDepthNextMatchRecommendations),
+  );
+  const exportSnapshot = buildCoachReportExportSnapshot({
+    productReportHtml: productHtmlWith7B,
+    productReportPath: "reports/coach-report.product.html",
+  });
+  const baselineExportHtml = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWith7B,
+    fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
+    fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
+    fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
+    fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
+    coachInsightDepthNextMatchRecommendations,
+  });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
   });
   const phaseVisuals = buildCoachReportPhaseVisuals({
     premiumLayout,
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
   });
   const phaseReadability = buildCoachReportPhaseVisualReadability({
     phaseVisuals,
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
   });
   const multiMatchPhaseComparison = buildCoachReportMultiMatchPhaseComparison({
     phaseReadability,
     comparisonSamples: buildCoachReportMultiMatchPhaseComparisonSamples(),
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
   });
   const multiMatchHistoryView = buildCoachReportMultiMatchHistoryView({
     multiMatchComparison: multiMatchPhaseComparison,
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
   });
   const historyStore = createFileBackedCoachMatchHistoryStore({
@@ -27429,7 +27546,7 @@ export function writeLatestCoachReport(): void {
   });
   const realMatchHistoryIntegration = buildCoachReportRealMatchHistoryIntegration({
     matchReport: experimentalReport,
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
     historyStore,
@@ -27438,7 +27555,7 @@ export function writeLatestCoachReport(): void {
   });
   const currentPersistentRecord = buildCoachMatchHistoryRecord({
     matchReport: experimentalReport,
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
     multiMatchHistoryView,
     source: "product_history_store",
@@ -27455,7 +27572,7 @@ export function writeLatestCoachReport(): void {
       includeControlledSamples: true,
       includeProductHistory: true,
     },
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     exportReportHtml: baselineExportHtml,
   });
   const historyStoreConsistency = persistentHistoryAdapter.saveResult === undefined
@@ -27470,7 +27587,7 @@ export function writeLatestCoachReport(): void {
           includeControlledSamples: true,
           includeProductHistory: true,
         },
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const persistenceEvidenceSnapshot = historyStoreConsistency === undefined || persistentHistoryAdapter.saveResult === undefined
@@ -27480,7 +27597,7 @@ export function writeLatestCoachReport(): void {
         saveResult: persistentHistoryAdapter.saveResult,
         queriedRecordCount: historyStoreConsistency.queriedRecordCount,
         queriedSignalCount: historyStoreConsistency.queriedSignalCount,
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const migrationDryRun = buildCoachMatchHistoryMigrationDryRun({
@@ -27492,7 +27609,7 @@ export function writeLatestCoachReport(): void {
     : buildCoachReportDatabaseMigrationPreparation({
         persistenceEvidenceSnapshot,
         migrationDryRun,
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const databaseFeatureFlag = resolveDatabaseHistoryAdapterFeatureFlag();
@@ -27507,7 +27624,7 @@ export function writeLatestCoachReport(): void {
         sourceRecords: historyStore.listAll(),
         experimentalAdapter: experimentalDatabaseAdapter,
         featureFlag: databaseFeatureFlag,
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const durableStorageDecision = persistenceEvidenceSnapshot === undefined || databaseMigrationPreparation === undefined || databaseAdapterSpike === undefined
@@ -27521,7 +27638,7 @@ export function writeLatestCoachReport(): void {
           featureFlag: databaseFeatureFlag,
         }),
         featureFlag: databaseFeatureFlag,
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const controlledLocalReadOnlyDbMode = durableStorageDecision === undefined
@@ -27533,7 +27650,7 @@ export function writeLatestCoachReport(): void {
           initialRecords: historyStore.listAll(),
           featureFlagEnabled: false,
         }),
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const realSQLiteReadOnlyIOSmokeTest = controlledLocalReadOnlyDbMode === undefined
@@ -27544,7 +27661,7 @@ export function writeLatestCoachReport(): void {
           fixturePath: join(process.cwd(), "test-fixtures", "sqlite", "coach-match-history-v1.sqlite"),
           explicitControlledMode: true,
         }),
-        productReportHtml: productHtml,
+        productReportHtml: productHtmlWith7B,
         exportReportHtml: baselineExportHtml,
       });
   const fullMatchScoreEconomyCalibration = buildFullMatchScoreEconomyCalibrationModel(experimentalReport);
@@ -27555,7 +27672,7 @@ export function writeLatestCoachReport(): void {
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
-    productReportHtml: productHtml,
+    productReportHtml: productHtmlWith7B,
     phaseReadability,
     multiMatchPhaseComparison,
     multiMatchHistoryView,
@@ -27592,6 +27709,7 @@ export function writeLatestCoachReport(): void {
     fullMatchLateGameThreatQualityMonitoring,
     fullMatchEconomyFinalStabilization,
     productBaselineCoachReportReadiness,
+    coachInsightDepthNextMatchRecommendations,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
@@ -27617,7 +27735,7 @@ export function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    productHtml,
+    productHtmlWith7B,
     "utf8",
   );
   writeFileSync(

@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7B - Coach Insight Depth & Next-Match Recommendations. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

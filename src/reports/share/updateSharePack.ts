@@ -115,6 +115,8 @@ import {
   renderFullMatchEconomyFinalStabilization6XValidation,
   renderProductBaselineCoachReportReadiness7ADoc,
   renderProductBaselineCoachReportReadiness7AValidation,
+  renderCoachInsightDepthNextMatchRecommendations7BDoc,
+  renderCoachInsightDepthNextMatchRecommendations7BValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -127,9 +129,11 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "product-baseline-coach-report-readiness-7a.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.product-baseline-coach-report-readiness-7a.md";
+const TASK_NAME =
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7B - Coach Insight Depth & Next-Match Recommendations";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-insight-depth-next-match-recommendations-7b.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
+  "validation.coach-insight-depth-next-match-recommendations-7b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2360,6 +2364,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7A warning-code registry for product baseline coach report readiness, source separation, actionability, clarity, and appendix boundaries",
       },
       {
+        source: "src/reports/coachInsightDepthNextMatchRecommendationsWarnings.ts",
+        required: true,
+        reason: "Sprint 7B warning-code registry for coach insight depth, causal evidence, next-match recommendations, and wording safety",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2558,6 +2567,41 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/productBaselineCoachReportReadiness.test.ts",
         required: true,
         reason: "Sprint 7A executable test proving coach report readiness, source separation, actionability, clarity, appendix boundaries, and 6X preservation",
+      },
+      {
+        source: "src/reports/coachDeepInsights.ts",
+        required: true,
+        reason: "Sprint 7B deep coach insight and next-match recommendation builder plus product/export render helpers",
+      },
+      {
+        source: "src/reports/coachInsightDepthAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving insights include cause, consequence, tradeoff, confidence, evidence, and next-match checks",
+      },
+      {
+        source: "src/reports/nextMatchRecommendationAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving next-match recommendations are concrete, observable, non-forced, and training-oriented",
+      },
+      {
+        source: "src/reports/coachInsightCausalityEvidenceAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving causal explanations are tied to match evidence instead of unsupported claims",
+      },
+      {
+        source: "src/reports/coachLanguageReadabilityAudit.ts",
+        required: true,
+        reason: "Sprint 7B audit proving coach language is readable, avoids jargon leakage, and keeps technical details out of main reading",
+      },
+      {
+        source: "src/reports/coachInsightDepthNextMatchRecommendations.ts",
+        required: true,
+        reason: "Sprint 7B model, report renderer, and validation renderer for coach insight depth and next-match recommendations",
+      },
+      {
+        source: "src/reports/coachInsightDepthNextMatchRecommendations.test.ts",
+        required: true,
+        reason: "Sprint 7B executable test proving product/export sections, insight depth, recommendation safety, and baseline preservation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4716,6 +4760,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7B")) {
+    return renderCoachInsightDepthNextMatchRecommendations7BDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7A")) {
     return renderProductBaselineCoachReportReadiness7ADoc(fullMatchTraceValidationModel());
   }
@@ -7009,6 +7056,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7B")) {
+    return renderCoachInsightDepthNextMatchRecommendations7BValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7A")) {
     return renderProductBaselineCoachReportReadiness7AValidation(fullMatchTraceValidationModel());
   }
@@ -9248,6 +9298,38 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7B")) {
+    return [
+      "# Sprint 7B Share Pack",
+      "",
+      "Current sprint: Sprint 7B - Coach Insight Depth & Next-Match Recommendations",
+      "",
+      "## Purpose",
+      "Review whether the 7A coach product baseline now gives deeper causal insight, clear tradeoffs, and concrete next-match recommendations without changing scoring, route selection, or match mechanics.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-insight-depth-next-match-recommendations-7b.md",
+      "- validation.coach-insight-depth-next-match-recommendations-7b.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-insight-depth-next-match-recommendations-7b.md",
+      "3. coach-insight-depth-next-match-recommendations-7b.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7B must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7A")) {
     return [
       "# Sprint 7A Share Pack",

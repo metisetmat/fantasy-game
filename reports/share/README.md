@@ -1,15 +1,15 @@
-# Sprint 7A Share Pack
+# Sprint 7B Share Pack
 
-Current sprint: Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness
+Current sprint: Sprint 7B - Coach Insight Depth & Next-Match Recommendations
 
 ## Purpose
-Review whether the validated 6X match economy is now presented as a coach-readable product baseline with clear official score source, separated diagnostics, non-applied sandbox hypotheses, actionable insights, and collapsed technical detail.
+Review whether the 7A coach product baseline now gives deeper causal insight, clear tradeoffs, and concrete next-match recommendations without changing scoring, route selection, or match mechanics.
 
 ## Required Review Files
 - coach-report.export.html
 - coach-report.product.html
-- product-baseline-coach-report-readiness-7a.md
-- validation.product-baseline-coach-report-readiness-7a.md
+- coach-insight-depth-next-match-recommendations-7b.md
+- validation.coach-insight-depth-next-match-recommendations-7b.md
 - validation.share-pack.md
 - scoring-events-summary.md
 - bundle__simulation.md
@@ -17,11 +17,11 @@ Review whether the validated 6X match economy is now presented as a coach-readab
 
 ## Validation Order
 1. validation.share-pack.md
-2. validation.product-baseline-coach-report-readiness-7a.md
-3. product-baseline-coach-report-readiness-7a.md
+2. validation.coach-insight-depth-next-match-recommendations-7b.md
+3. coach-insight-depth-next-match-recommendations-7b.md
 4. coach-report.product.html
 5. coach-report.export.html
 6. scoring-events-summary.md
 
 ## Guardrail Reminder
-7A must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.
+7B must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.

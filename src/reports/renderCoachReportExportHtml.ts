@@ -76,6 +76,9 @@ import type {
 import type {
   ProductBaselineCoachReportReadinessModel,
 } from "./productBaselineCoachReportReadiness";
+import type {
+  CoachInsightDepthNextMatchRecommendationsModel,
+} from "./coachInsightDepthNextMatchRecommendations";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -1370,6 +1373,46 @@ function renderKeyStatistics(html: string): string {
     <div class="report-kpi-grid">
       ${signalCards.map(toKpiCard).join("")}
     </div>
+  </section>`;
+}
+
+function renderCoachDeepInsightsExport(html: string): string {
+  const body = extractSectionInner(html, "coach-deep-insights");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="coach-deep-insights" class="premium-section" data-source-product-sections="coach-deep-insights">
+    <div class="report-section-divider">Coach insight depth</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Insights coach approfondis</h2>
+        <p>Chaque carte relie observation, cause probable, consequence, risque et signal prochain match.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderNextMatchPlanExport(html: string): string {
+  const body = extractSectionInner(html, "next-match-plan");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="next-match-plan" class="premium-section" data-source-product-sections="next-match-plan">
+    <div class="report-section-divider">Next-match plan</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Plan prochain match</h2>
+        <p>Priorites prudentes: observation, travail, signal visible et tradeoff.</p>
+      </div>
+    </div>
+    ${body}
   </section>`;
 }
 
@@ -3766,6 +3809,49 @@ export function renderProductBaselineCoachReportReadinessSection(
     </section>`;
 }
 
+export function renderCoachInsightDepthNextMatchRecommendationsSection(
+  model: CoachInsightDepthNextMatchRecommendationsModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Profondeur insights coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7B</p>
+        <h3>Insights coach & plan prochain match</h3>
+        <p>Les signaux officiels sont transform&eacute;s en lectures causales prudentes, avec risques et signaux observables.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Profondeur d'insight</h4>
+          <ul>
+            <li>Insights approfondis: ${model.deepInsightCount}/${model.coachInsightCount}</li>
+            <li>Causes liees: ${model.causeLinkedInsightCount}</li>
+            <li>Risques visibles: ${model.riskLinkedInsightCount}</li>
+            <li>Preuves liees: ${model.evidenceLinkedInsightCount}</li>
+            <li>Confiance visible: ${model.confidenceLabeledInsightCount}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Plan prochain match</h4>
+          <ul>
+            <li>Priorites concretes: ${model.concreteNextMatchRecommendationCount}/${model.nextMatchRecommendationCount}</li>
+            <li>Signaux observables: ${model.recommendationWithObservableSignalCount}</li>
+            <li>Tradeoffs visibles: ${model.recommendationWithTradeoffCount}</li>
+            <li>Selection forcee: ${model.forcedSelectionRecommendationCount}</li>
+            <li>Recommandations non supportees: ${model.unsupportedRecommendationCount}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Sprint suivant: ${escapeHtml(model.nextSprintRecommendation)}.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4843,6 +4929,7 @@ function renderAppendices(input: {
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
   readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
+  readonly coachInsightDepthNextMatchRecommendations?: CoachInsightDepthNextMatchRecommendationsModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4948,6 +5035,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
   readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
+  readonly coachInsightDepthNextMatchRecommendations?: CoachInsightDepthNextMatchRecommendationsModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -5038,6 +5126,8 @@ export function renderCoachReportExportHtml(input: {
     renderExecutiveSummary(input.productReportHtml),
     renderMatchStory(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
+    renderCoachDeepInsightsExport(input.productReportHtml),
+    renderNextMatchPlanExport(input.productReportHtml),
     renderPhaseLegend(readabilityPresentation.legendItems),
     ...phasePanels.map((panel) =>
       renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
@@ -5077,6 +5167,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring),
     renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
     renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
+    renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
