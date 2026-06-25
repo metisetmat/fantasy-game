@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6V - Late Game Threat Quality & Trailing Conversion Follow-up. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 6W - Late Game Threat Quality Monitoring. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

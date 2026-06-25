@@ -1724,6 +1724,67 @@
         Batch 50 matchs; les scores restent issus des &eacute;v&eacute;nements officiels score_change, sans cap, sans injection et sans comeback forc&eacute;.
       </p>
     </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Monitoring de la menace de fin de match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6W</p>
+        <h3>Monitoring de la menace de fin de match</h3>
+        <p>Le monitoring 6W confirme que la menace de fin de match reste issue de signaux tactiques, sans comeback forc&eacute;.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Automaticit&eacute; de la menace</h4>
+          <ul>
+            <li>Qualit&eacute; menace fin de match: 100% -> 100%</li>
+            <li>Menace automatique: 0%</li>
+            <li>Menace sans signal: 0%</li>
+            <li>Menace avec signal r&eacute;el: 100%</li>
+            <li>Menaces refus&eacute;es: 0</li>
+            <li>Menaces downgrad&eacute;es: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Suspicion comeback</h4>
+          <ul>
+            <li>Suspicion avant/apr&egrave;s: 171 -> 230</li>
+            <li>Expliqu&eacute;e: 230</li>
+            <li>Non expliqu&eacute;e: 0</li>
+            <li>Comeback forc&eacute; d&eacute;tect&eacute;: 0</li>
+            <li>Scores naturels &eacute;quipe men&eacute;e: 127</li>
+            <li>Chemins scoring complets: 127</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 56% -> 50%</li>
+            <li>Match comp&eacute;titif: 76% -> 78%</li>
+            <li>Blowout: 8% -> 14%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 22.8 -> 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.4 -> 7.2</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous officiels</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Danger automatique bloqu&eacute;: true</li>
+            <li>Cha&icirc;ne max: 2</li>
+            <li>Score inject&eacute; &eacute;quipe men&eacute;e: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_MONITORING.
+        Sprint suivant: Sprint 6X - Match Economy Final Stabilization. Le monitoring ne modifie ni les constantes de scoring,
+        ni les score_change officiels, ni la possession dangereuse de mani&egrave;re automatique.
+      </p>
+    </section>
 </main>
 </body>
 </html>
