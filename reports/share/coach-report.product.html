@@ -1785,6 +1785,68 @@
         ni les score_change officiels, ni la possession dangereuse de mani&egrave;re automatique.
       </p>
     </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6X</p>
+        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
+        <p>La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Baseline finale</h4>
+          <ul>
+            <li>Matchs batch: 50</li>
+            <li>Total points moyen: 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.2</li>
+            <li>Opportunit&eacute;s/match: 16.3</li>
+            <li>Match serr&eacute;: 50%</li>
+            <li>Match comp&eacute;titif: 78%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Distribution et routes</h4>
+          <ul>
+            <li>Blowout: 14%</li>
+            <li>Severe blowout: 0%</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Part points non-SHOT: 27%</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Rollback SHOT_ONLY: true</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace et fin de match</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 54.8%</li>
+            <li>Part scoring &eacute;quipe men&eacute;e: 35.3%</li>
+            <li>Menace trailing: 53.6%</li>
+            <li>Menace fin de match corrig&eacute;e: 100%</li>
+            <li>Ratio menace/pression: 1</li>
+            <li>Menace automatique: 0%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous finaux</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Manipulation de score: false</li>
+            <li>Comeback forc&eacute;: false</li>
+            <li>Suspicion inexpliqu&eacute;e: 0</li>
+            <li>Persistence pour scoring: false</li>
+            <li>SQLite pour scoring: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_MATCH_ECONOMY_FINAL_STABILIZATION.
+        Sprint suivant: 7A - Product Baseline &amp; Coach-Facing Match Report Readiness.
+        D&eacute;finition corrig&eacute;e: lateGameThreatQualityRate = lateGameThreatCount / lateGamePressureCount after both values are restricted to late-game pressure-window events; lateGameThreatQualityRatio exposes the same population as a decimal ratio.
+      </p>
+    </section>
 </main>
 </body>
 </html>

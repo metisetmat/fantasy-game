@@ -111,6 +111,8 @@ import {
   renderFullMatchLateGameThreatQualityTrailingConversion6VValidation,
   renderFullMatchLateGameThreatQualityMonitoring6WDoc,
   renderFullMatchLateGameThreatQualityMonitoring6WValidation,
+  renderFullMatchEconomyFinalStabilization6XDoc,
+  renderFullMatchEconomyFinalStabilization6XValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -123,9 +125,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6W - Late Game Threat Quality Monitoring";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-late-game-threat-quality-monitoring-6w.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-late-game-threat-quality-monitoring-6w.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6X - Match Economy Final Stabilization";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-match-economy-final-stabilization-6x.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-match-economy-final-stabilization-6x.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2346,6 +2348,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6W warning-code registry for late-game threat automaticity, forced-comeback suspicion, natural trailing paths, and strict no-score-manipulation guardrails",
       },
       {
+        source: "src/simulation/fullMatch/matchEconomyFinalStabilizationWarnings.ts",
+        required: true,
+        reason: "Sprint 6X warning-code registry for final match-economy stabilization, metric consistency, route diversity, and no-score-manipulation guardrails",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2384,6 +2391,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/fullMatchNaturalTrailingConversionPathAudit.ts",
         required: true,
         reason: "Sprint 6W audit proving trailing scoring events keep an official route, tactical signal, and score_change path",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchMetricConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 6X audit proving rate metrics use consistent populations and cannot publish impossible percentages",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchEconomyFinalAudit.ts",
+        required: true,
+        reason: "Sprint 6X final economy audit consolidating scoring volume, close games, route diversity, trailing response, and late-game threat health",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchFinalGuardrailAudit.ts",
+        required: true,
+        reason: "Sprint 6X final guardrail audit proving score_change source, unchanged constants, no forced scores, no injected events, and no persistence scoring input",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchFinalLongitudinalStabilityAudit.ts",
+        required: true,
+        reason: "Sprint 6X longitudinal stability audit proving the final economy remains stable across batch windows",
       },
       {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
@@ -2484,6 +2511,16 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts",
         required: true,
         reason: "Sprint 6W executable test proving automaticity monitoring, forced-comeback suspicion explanation, natural trailing paths, and scoring guardrails",
+      },
+      {
+        source: "src/reports/fullMatchMatchEconomyFinalStabilization.ts",
+        required: true,
+        reason: "Sprint 6X final stabilization model, report renderer, and validation renderer consolidating the 6S-6W product baseline",
+      },
+      {
+        source: "src/reports/fullMatchMatchEconomyFinalStabilization.test.ts",
+        required: true,
+        reason: "Sprint 6X executable test proving final economy stabilization, corrected rate semantics, guardrails, and next-sprint readiness",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4642,6 +4679,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 6X")) {
+    return renderFullMatchEconomyFinalStabilization6XDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6W")) {
     return renderFullMatchLateGameThreatQualityMonitoring6WDoc(fullMatchTraceValidationModel());
   }
@@ -6929,6 +6969,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 6X")) {
+    return renderFullMatchEconomyFinalStabilization6XValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6W")) {
     return renderFullMatchLateGameThreatQualityMonitoring6WValidation(fullMatchTraceValidationModel());
   }
@@ -9162,6 +9205,36 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 6X")) {
+    return [
+      "# Sprint 6X Share Pack",
+      "",
+      "Current sprint: Sprint 6X - Match Economy Final Stabilization",
+      "",
+      "## Purpose",
+      "Review the final 6S-6W match-economy baseline before product-readiness work: scoring volume, route diversity, close-game distribution, trailing response, late-game threat quality, and no-score-manipulation guardrails are consolidated in one pass.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- fullmatch-match-economy-final-stabilization-6x.md",
+      "- validation.fullmatch-match-economy-final-stabilization-6x.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-match-economy-final-stabilization-6x.md",
+      "3. fullmatch-match-economy-final-stabilization-6x.md",
+      "4. coach-report.export.html",
+      "5. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "6X must not add mechanics, change point values, activate PENALTY_SHOT, cap or rewrite scores, delete scoring events, force trailing scores, inject score_change events, or use persistence/SQLite as scoring input.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6W")) {
     return [
       "# Sprint 6W Share Pack",

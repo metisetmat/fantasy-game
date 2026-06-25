@@ -34,6 +34,7 @@ import { currentFullMatchCloseGameDistributionCalibrationModel } from "./fullMat
 import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./fullMatchTrailingTeamResponseLateGamePressure";
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
+import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -73,6 +74,7 @@ import {
   renderFullMatchTrailingTeamResponseLateGamePressureSection,
   renderFullMatchLateGameThreatQualityTrailingConversionSection,
   renderFullMatchLateGameThreatQualityMonitoringSection,
+  renderFullMatchEconomyFinalStabilizationSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -109,6 +111,7 @@ export function writeLatestCoachReport(): void {
   const fullMatchTrailingTeamResponseLateGamePressure = currentFullMatchTrailingTeamResponseLateGamePressureModel();
   const fullMatchLateGameThreatQualityTrailingConversion = currentFullMatchLateGameThreatQualityTrailingConversionModel();
   const fullMatchLateGameThreatQualityMonitoring = currentFullMatchLateGameThreatQualityMonitoringModel();
+  const fullMatchEconomyFinalStabilization = currentFullMatchEconomyFinalStabilizationModel();
   const productHtml = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
@@ -127,6 +130,7 @@ export function writeLatestCoachReport(): void {
     renderFullMatchTrailingTeamResponseLateGamePressureSection(fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
+    renderFullMatchEconomyFinalStabilizationSection(fullMatchEconomyFinalStabilization),
   ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
@@ -153,6 +157,7 @@ export function writeLatestCoachReport(): void {
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -347,6 +352,7 @@ export function writeLatestCoachReport(): void {
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

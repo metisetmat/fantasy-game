@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-25T06:41:38.630Z
-Task/sprint: Sprint 6W - Late Game Threat Quality Monitoring
+Generated: 2026-06-25T08:08:40.318Z
+Task/sprint: Sprint 6X - Match Economy Final Stabilization
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-late-game-threat-quality-monitoring-6w.md
-- validation.fullmatch-late-game-threat-quality-monitoring-6w.md
+- fullmatch-match-economy-final-stabilization-6x.md
+- validation.fullmatch-match-economy-final-stabilization-6x.md
 - README.md
 
 ## Bundle Files

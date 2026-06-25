@@ -1,14 +1,14 @@
-# Sprint 6W Share Pack
+# Sprint 6X Share Pack
 
-Current sprint: Sprint 6W - Late Game Threat Quality Monitoring
+Current sprint: Sprint 6X - Match Economy Final Stabilization
 
 ## Purpose
-Review whether the late-game threat restored in 6V remains natural, signal-driven, and non-automatic without forcing scores, opportunities, possession, or comeback behavior.
+Review the final 6S-6W match-economy baseline before product-readiness work: scoring volume, route diversity, close-game distribution, trailing response, late-game threat quality, and no-score-manipulation guardrails are consolidated in one pass.
 
 ## Required Review Files
 - coach-report.export.html
-- fullmatch-late-game-threat-quality-monitoring-6w.md
-- validation.fullmatch-late-game-threat-quality-monitoring-6w.md
+- fullmatch-match-economy-final-stabilization-6x.md
+- validation.fullmatch-match-economy-final-stabilization-6x.md
 - validation.share-pack.md
 - scoring-events-summary.md
 - bundle__simulation.md
@@ -16,10 +16,10 @@ Review whether the late-game threat restored in 6V remains natural, signal-drive
 
 ## Validation Order
 1. validation.share-pack.md
-2. validation.fullmatch-late-game-threat-quality-monitoring-6w.md
-3. fullmatch-late-game-threat-quality-monitoring-6w.md
+2. validation.fullmatch-match-economy-final-stabilization-6x.md
+3. fullmatch-match-economy-final-stabilization-6x.md
 4. coach-report.export.html
 5. scoring-events-summary.md
 
 ## Guardrail Reminder
-6W must not increase offensive volume, force trailing scores, cap scores, rewrite scorelines, inject scoring events, suppress leading teams, activate PENALTY_SHOT, or use persistence/SQLite as scoring input.
+6X must not add mechanics, change point values, activate PENALTY_SHOT, cap or rewrite scores, delete scoring events, force trailing scores, inject score_change events, or use persistence/SQLite as scoring input.

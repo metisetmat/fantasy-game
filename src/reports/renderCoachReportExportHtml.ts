@@ -70,6 +70,9 @@ import type {
 import type {
   FullMatchLateGameThreatQualityMonitoringModel,
 } from "./fullMatchLateGameThreatQualityMonitoring";
+import type {
+  FullMatchEconomyFinalStabilizationModel,
+} from "./fullMatchMatchEconomyFinalStabilization";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3616,6 +3619,81 @@ export function renderFullMatchLateGameThreatQualityMonitoringSection(
     </section>`;
 }
 
+export function renderFullMatchEconomyFinalStabilizationSection(
+  model: FullMatchEconomyFinalStabilizationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit."
+    : "La stabilisation 6X rend visibles les points &agrave; reprendre avant de figer la baseline produit.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6X</p>
+        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Baseline finale</h4>
+          <ul>
+            <li>Matchs batch: ${model.matchCount}</li>
+            <li>Total points moyen: ${model.averageTotalPointsAfter}</li>
+            <li>&Eacute;v&eacute;nements scoring/match: ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Match serr&eacute;: ${model.closeGameRateAfter}%</li>
+            <li>Match comp&eacute;titif: ${model.competitiveGameRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Distribution et routes</h4>
+          <ul>
+            <li>Blowout: ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout: ${model.severeBlowoutRateAfter}%</li>
+            <li>Diversit&eacute; route-family: ${model.routeFamilyDiversityPreserved}</li>
+            <li>Part points non-SHOT: ${model.nonShotPointShare}%</li>
+            <li>Matchs avec TRY/DROP: ${model.matchesWithTryOrDrop}</li>
+            <li>Rollback SHOT_ONLY: ${model.noRollbackToShotOnly}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace et fin de match</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: ${model.trailingTeamResponseRateAfter}%</li>
+            <li>Part scoring &eacute;quipe men&eacute;e: ${model.trailingTeamScoringShareAfter}%</li>
+            <li>Menace trailing: ${model.trailingThreatQualityRateAfter}%</li>
+            <li>Menace fin de match corrig&eacute;e: ${model.lateGameThreatQualityRateAfter}%</li>
+            <li>Ratio menace/pression: ${model.lateGameThreatQualityRatio}</li>
+            <li>Menace automatique: ${model.lateGameAutomaticThreatRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous finaux</h4>
+          <ul>
+            <li>Score issu de score_change: ${model.scoreFromScoreChangeAllRuns}</li>
+            <li>Chemin officiel connect&eacute;: ${model.officialPathConnectedAllRuns}</li>
+            <li>Manipulation de score: false</li>
+            <li>Comeback forc&eacute;: ${model.comebackForced}</li>
+            <li>Suspicion inexpliqu&eacute;e: ${model.forcedComebackSuspicionUnexplainedCountAfter}</li>
+            <li>Persistence pour scoring: ${model.persistenceUsedForScoring}</li>
+            <li>SQLite pour scoring: ${model.sqliteUsedForScoring}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Sprint suivant: ${escapeHtml(model.nextSprintRecommendation)}.
+        D&eacute;finition corrig&eacute;e: ${escapeHtml(model.lateGameThreatQualityMetricDefinition)}
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -4689,6 +4767,7 @@ function renderAppendices(input: {
   readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
+  readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4792,6 +4871,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
+  readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4919,6 +4999,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring),
+    renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
