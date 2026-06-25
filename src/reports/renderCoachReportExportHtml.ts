@@ -73,6 +73,9 @@ import type {
 import type {
   FullMatchEconomyFinalStabilizationModel,
 } from "./fullMatchMatchEconomyFinalStabilization";
+import type {
+  ProductBaselineCoachReportReadinessModel,
+} from "./productBaselineCoachReportReadiness";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3694,6 +3697,75 @@ export function renderFullMatchEconomyFinalStabilizationSection(
     </section>`;
 }
 
+export function renderProductBaselineCoachReportReadinessSection(
+  model: ProductBaselineCoachReportReadinessModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: ${model.productReportReady}</li>
+            <li>Export coach pr&ecirc;t: ${model.coachExportReady}</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: ${model.matchEconomyBaselinePreserved}</li>
+            <li>Score officiel visible: ${model.officialScoreVisible}</li>
+            <li>Source score_change visible: ${model.scoreChangeSourceVisible}</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: ${model.guardrailsPreserved}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: ${model.diagnosticSeparationReady}</li>
+            <li>Sandbox s&eacute;par&eacute;: ${model.sandboxSeparationReady}</li>
+            <li>Preview non appliqu&eacute;e: ${model.selectionPreviewNonAppliedLabelCount}/${model.selectionPreviewCount}</li>
+            <li>Fuite sandbox: ${!model.noSandboxTruthLeakage}</li>
+            <li>Fuite diagnostic score: ${!model.noDiagnosticScoreLeakage}</li>
+            <li>Fuite batch score: ${!model.noBatchScoreLeakage}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: ${model.coachInsightCount}</li>
+            <li>Insights actionnables: ${model.actionableInsightCount}</li>
+            <li>Signaux prochain match: ${model.nextMatchSignalCount}</li>
+            <li>Axe de travail: ${model.trainingFocusCount}</li>
+            <li>Profils observ&eacute;s: ${model.profileObservationCount}</li>
+            <li>S&eacute;lection forc&eacute;e: ${model.profileRecommendationForcedCount}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: ${model.sourceBadgeCoverageRate}%</li>
+            <li>Preuves lisibles: ${model.evidenceLinkCoverageRate}%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: ${model.technicalAppendixReady}</li>
+            <li>Wording interdit: ${model.forbiddenWordingCount}</li>
+            <li>Lecture mobile: ${escapeHtml(model.mobileReadabilityStatus)}</li>
+            <li>Lecture export: ${escapeHtml(model.exportReadabilityStatus)}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Sprint suivant: ${escapeHtml(model.nextSprintRecommendation)}.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -3954,7 +4026,7 @@ function renderNextMatch(html: string): string {
   const body = extractSectionInner(html, "next-match-signals");
 
   return `
-  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals">
+  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals|training-focus">
     <div class="report-section-divider">Next-match checklist</div>
     <div class="report-section-header">
       <div>
@@ -3970,7 +4042,7 @@ function renderInterpretationGuard(html: string): string {
   const body = extractSectionInner(html, "interpretation-guard");
 
   return `
-  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard">
+  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard|guardrail-summary">
     <div class="report-section-divider">Interpretation guard</div>
     <div class="report-section-header">
       <div>
@@ -4768,6 +4840,7 @@ function renderAppendices(input: {
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
+  readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4872,6 +4945,7 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
   readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
+  readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -5000,6 +5074,7 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring),
     renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
+    renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

@@ -73,7 +73,7 @@
           <span class="badge">Match : contract-fixture-001</span>
           <span class="badge">Type : rapport produit</span>
         </div>
-        <p class="muted">Les diagnostics batch et les échantillons live restent séparés de ce score.</p>
+        <p class="muted">Score issu des événements officiels score_change. Les diagnostics batch et les échantillons live restent séparés de ce score. Le sandbox non appliqué reste également séparé du score officiel.</p>
       </div>
       <div class="score-box">
         <span class="score-label">Score du rapport full-match</span>
@@ -795,12 +795,47 @@
     <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
   </section>
 
+  <section id="training-focus" class="product-section">
+    <h2>&Agrave; travailler</h2>
+    <article class="product-card training-card">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance moyenne</span>
+      </div>
+      <h3>Stabiliser la premi&egrave;re sortie utile</h3>
+      <div class="signal-grid">
+        <section>
+          <h4>Axe prioritaire</h4>
+          <p>S&eacute;curiser la premi&egrave;re sortie apr&egrave;s r&eacute;cup&eacute;ration sans perdre la structure derri&egrave;re le ballon.</p>
+        </section>
+        <section>
+          <h4>Justification simple</h4>
+          <p>Les signaux officiels relient r&eacute;cup&eacute;ration, progression et continuit&eacute;; ils doivent rester lisibles au prochain match.</p>
+        </section>
+        <section>
+          <h4>Signal observable</h4>
+          <p>La premi&egrave;re passe ou conservation apr&egrave;s r&eacute;cup&eacute;ration cr&eacute;e-t-elle une continuit&eacute; propre ?</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
   <section id="interpretation-guard" class="product-section">
     <h2>À ne pas sur-interpréter</h2>
     <div class="interpretation-guard">
       <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
       <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
       <p>Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
+    </div>
+  </section>
+
+  <section id="guardrail-summary" class="product-section">
+    <h2>R&eacute;sum&eacute; guardrails</h2>
+    <div class="interpretation-guard">
+      <p>Score issu des &eacute;v&eacute;nements officiels score_change.</p>
+      <p>Diagnostics batch et &eacute;chantillons live s&eacute;par&eacute;s du score officiel.</p>
+      <p>Sandbox non appliqu&eacute; : aucune modification de score, possession, timeline, composition ou scoring event.</p>
+      <p>Sans cap de score, sans score forc&eacute;, sans comeback forc&eacute;, sans opportunit&eacute; impos&eacute;e.</p>
     </div>
   </section>
 
@@ -1845,6 +1880,66 @@
         Statut: PASS. Recommendation: KEEP_MATCH_ECONOMY_FINAL_STABILIZATION.
         Sprint suivant: 7A - Product Baseline &amp; Coach-Facing Match Report Readiness.
         D&eacute;finition corrig&eacute;e: lateGameThreatQualityRate = lateGameThreatCount / lateGamePressureCount after both values are restricted to late-game pressure-window events; lateGameThreatQualityRatio exposes the same population as a decimal ratio.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: false</li>
+            <li>Export coach pr&ecirc;t: false</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: true</li>
+            <li>Score officiel visible: true</li>
+            <li>Source score_change visible: true</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: true</li>
+            <li>Sandbox s&eacute;par&eacute;: true</li>
+            <li>Preview non appliqu&eacute;e: 3/3</li>
+            <li>Fuite sandbox: false</li>
+            <li>Fuite diagnostic score: false</li>
+            <li>Fuite batch score: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: 6</li>
+            <li>Insights actionnables: 6</li>
+            <li>Signaux prochain match: 3</li>
+            <li>Axe de travail: 1</li>
+            <li>Profils observ&eacute;s: 3</li>
+            <li>S&eacute;lection forc&eacute;e: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: 100%</li>
+            <li>Preuves lisibles: 100%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: true</li>
+            <li>Wording interdit: 0</li>
+            <li>Lecture mobile: PASS</li>
+            <li>Lecture export: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PARTIAL. Recommendation: COACH_REPORT_CLARITY_CLEANUP.
+        Sprint suivant: 7B - Coach Report Clarity Cleanup.
       </p>
     </section>
 </main>

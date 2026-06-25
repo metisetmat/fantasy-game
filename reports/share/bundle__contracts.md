@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 6X - Match Economy Final Stabilization. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

@@ -35,6 +35,7 @@ import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./ful
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
 import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
+import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -75,6 +76,7 @@ import {
   renderFullMatchLateGameThreatQualityTrailingConversionSection,
   renderFullMatchLateGameThreatQualityMonitoringSection,
   renderFullMatchEconomyFinalStabilizationSection,
+  renderProductBaselineCoachReportReadinessSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -112,7 +114,11 @@ export function writeLatestCoachReport(): void {
   const fullMatchLateGameThreatQualityTrailingConversion = currentFullMatchLateGameThreatQualityTrailingConversionModel();
   const fullMatchLateGameThreatQualityMonitoring = currentFullMatchLateGameThreatQualityMonitoringModel();
   const fullMatchEconomyFinalStabilization = currentFullMatchEconomyFinalStabilizationModel();
-  const productHtml = [
+  const productReportView = buildCoachProductReportViewFromMatchReport(
+    experimentalReport,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtmlWithout7A = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
@@ -131,10 +137,17 @@ export function writeLatestCoachReport(): void {
     renderFullMatchLateGameThreatQualityTrailingConversionSection(fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
     renderFullMatchEconomyFinalStabilizationSection(fullMatchEconomyFinalStabilization),
-  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
-    experimentalReport,
-    rosterCoverageFixturePlayers,
-  )));
+  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(productReportView));
+  const productBaselineCoachReportReadiness = buildProductBaselineCoachReportReadinessModel({
+    productReport: productReportView,
+    productReportHtml: productHtmlWithout7A,
+    exportReportHtml: productHtmlWithout7A,
+    matchEconomyBaseline: fullMatchEconomyFinalStabilization,
+  });
+  const productHtml = appendProductSection(
+    productHtmlWithout7A,
+    renderProductBaselineCoachReportReadinessSection(productBaselineCoachReportReadiness),
+  );
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -158,6 +171,7 @@ export function writeLatestCoachReport(): void {
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
     fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -353,6 +367,7 @@ export function writeLatestCoachReport(): void {
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
     fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

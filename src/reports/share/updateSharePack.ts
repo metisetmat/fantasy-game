@@ -113,6 +113,8 @@ import {
   renderFullMatchLateGameThreatQualityMonitoring6WValidation,
   renderFullMatchEconomyFinalStabilization6XDoc,
   renderFullMatchEconomyFinalStabilization6XValidation,
+  renderProductBaselineCoachReportReadiness7ADoc,
+  renderProductBaselineCoachReportReadiness7AValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -125,9 +127,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6X - Match Economy Final Stabilization";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-match-economy-final-stabilization-6x.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-match-economy-final-stabilization-6x.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "product-baseline-coach-report-readiness-7a.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.product-baseline-coach-report-readiness-7a.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2353,6 +2355,11 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6X warning-code registry for final match-economy stabilization, metric consistency, route diversity, and no-score-manipulation guardrails",
       },
       {
+        source: "src/reports/productBaselineCoachReportReadinessWarnings.ts",
+        required: true,
+        reason: "Sprint 7A warning-code registry for product baseline coach report readiness, source separation, actionability, clarity, and appendix boundaries",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2521,6 +2528,36 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchMatchEconomyFinalStabilization.test.ts",
         required: true,
         reason: "Sprint 6X executable test proving final economy stabilization, corrected rate semantics, guardrails, and next-sprint readiness",
+      },
+      {
+        source: "src/reports/coachReportSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit proving official score, batch diagnostics, live samples, sandbox hypotheses, and selection previews stay separated",
+      },
+      {
+        source: "src/reports/coachReportActionabilityAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit measuring actionable insights, next-match signals, profile observations, and unsupported recommendation leakage",
+      },
+      {
+        source: "src/reports/coachReportProductClarityAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit measuring report hierarchy, readability, wording safety, source badges, confidence labels, and export/print readiness",
+      },
+      {
+        source: "src/reports/coachReportAppendixBoundaryAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit proving sandbox, technical traceability, validation, and debug details remain collapsed or outside the main coach reading",
+      },
+      {
+        source: "src/reports/productBaselineCoachReportReadiness.ts",
+        required: true,
+        reason: "Sprint 7A product baseline readiness model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/productBaselineCoachReportReadiness.test.ts",
+        required: true,
+        reason: "Sprint 7A executable test proving coach report readiness, source separation, actionability, clarity, appendix boundaries, and 6X preservation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4679,6 +4716,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7A")) {
+    return renderProductBaselineCoachReportReadiness7ADoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6X")) {
     return renderFullMatchEconomyFinalStabilization6XDoc(fullMatchTraceValidationModel());
   }
@@ -6969,6 +7009,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7A")) {
+    return renderProductBaselineCoachReportReadiness7AValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6X")) {
     return renderFullMatchEconomyFinalStabilization6XValidation(fullMatchTraceValidationModel());
   }
@@ -9205,6 +9248,38 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7A")) {
+    return [
+      "# Sprint 7A Share Pack",
+      "",
+      "Current sprint: Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness",
+      "",
+      "## Purpose",
+      "Review whether the validated 6X match economy is now presented as a coach-readable product baseline with clear official score source, separated diagnostics, non-applied sandbox hypotheses, actionable insights, and collapsed technical detail.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- product-baseline-coach-report-readiness-7a.md",
+      "- validation.product-baseline-coach-report-readiness-7a.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.product-baseline-coach-report-readiness-7a.md",
+      "3. product-baseline-coach-report-readiness-7a.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7A must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6X")) {
     return [
       "# Sprint 6X Share Pack",

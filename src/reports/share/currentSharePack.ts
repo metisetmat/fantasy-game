@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 6X - Match Economy Final Stabilization",
+  name: "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "fullmatch-match-economy-final-stabilization-6x.md",
-    "validation.fullmatch-match-economy-final-stabilization-6x.md",
+    "product-baseline-coach-report-readiness-7a.md",
+    "validation.product-baseline-coach-report-readiness-7a.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 6X share pack is current, complete, and below 20 files",
-    "fullmatch-match-economy-final-stabilization-6x.md": "consolidates the final 6S-6W match economy baseline, corrected rate semantics, guardrails, route diversity, and longitudinal stability",
-    "validation.fullmatch-match-economy-final-stabilization-6x.md": "validates the 6X final stabilization model, impossible-rate cleanup, score_change source, no manipulation guardrails, and product baseline readiness",
-    "README.md": "compact reviewer orientation for the 6X share pack",
-    "manifest.md": "compatibility manifest listing the 6X share pack files",
+    "validation.share-pack.md": "proves the 7A share pack is current, complete, and below 20 files",
+    "product-baseline-coach-report-readiness-7a.md": "validates coach-facing product readiness, source-of-truth separation, actionability, clarity, appendix boundaries, and 6X economy preservation",
+    "validation.product-baseline-coach-report-readiness-7a.md": "proves the 7A product baseline readiness model is PASS with official score clarity, diagnostic/sandbox separation, no forced selection, and preserved 6X guardrails",
+    "README.md": "compact reviewer orientation for the 7A share pack",
+    "manifest.md": "compatibility manifest listing the 7A share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

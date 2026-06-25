@@ -1070,7 +1070,7 @@
           <span class="score-label">Score du rapport full-match</span>
           <span class="score">12 - 7</span>
         </div>
-        <p class="muted">Les diagnostics batch et les échantillons live restent séparés de ce score.</p>
+        <p class="muted">Score issu des événements officiels score_change. Les diagnostics batch et les échantillons live restent séparés de ce score. Le sandbox non appliqué reste également séparé du score officiel.</p>
         <p class="muted">Contexte : export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
       </div>
     </div>
@@ -3708,6 +3708,66 @@
       </p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: false</li>
+            <li>Export coach pr&ecirc;t: false</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: true</li>
+            <li>Score officiel visible: true</li>
+            <li>Source score_change visible: true</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: true</li>
+            <li>Sandbox s&eacute;par&eacute;: true</li>
+            <li>Preview non appliqu&eacute;e: 3/3</li>
+            <li>Fuite sandbox: false</li>
+            <li>Fuite diagnostic score: false</li>
+            <li>Fuite batch score: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: 6</li>
+            <li>Insights actionnables: 6</li>
+            <li>Signaux prochain match: 3</li>
+            <li>Axe de travail: 1</li>
+            <li>Profils observ&eacute;s: 3</li>
+            <li>S&eacute;lection forc&eacute;e: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: 100%</li>
+            <li>Preuves lisibles: 100%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: true</li>
+            <li>Wording interdit: 0</li>
+            <li>Lecture mobile: PASS</li>
+            <li>Lecture export: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PARTIAL. Recommendation: COACH_REPORT_CLARITY_CLEANUP.
+        Sprint suivant: 7B - Coach Report Clarity Cleanup.
+      </p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -4344,7 +4404,7 @@
     </div>
   </section>
 
-  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals">
+  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals|training-focus">
     <div class="report-section-divider">Next-match checklist</div>
     <div class="report-section-header">
       <div>
@@ -4355,7 +4415,7 @@
     <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
   </section>
 
-  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard">
+  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard|guardrail-summary">
     <div class="report-section-divider">Interpretation guard</div>
     <div class="report-section-header">
       <div>

@@ -108,6 +108,10 @@ import {
   renderFullMatchEconomyFinalStabilization6XDoc as renderMatchEconomyFinalStabilization6XDoc,
   renderFullMatchEconomyFinalStabilization6XValidation as renderMatchEconomyFinalStabilization6XValidation,
 } from "../../reports/fullMatchMatchEconomyFinalStabilization";
+import {
+  renderProductBaselineCoachReportReadiness7ADoc as renderCoachReportReadiness7ADoc,
+  renderProductBaselineCoachReportReadiness7AValidation as renderCoachReportReadiness7AValidation,
+} from "../../reports/productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6501,6 +6505,14 @@ export function renderFullMatchEconomyFinalStabilization6XDoc(_model: FullMatchT
 
 export function renderFullMatchEconomyFinalStabilization6XValidation(_model: FullMatchTraceValidationModel): string {
   return renderMatchEconomyFinalStabilization6XValidation();
+}
+
+export function renderProductBaselineCoachReportReadiness7ADoc(_model: FullMatchTraceValidationModel): string {
+  return renderCoachReportReadiness7ADoc();
+}
+
+export function renderProductBaselineCoachReportReadiness7AValidation(_model: FullMatchTraceValidationModel): string {
+  return renderCoachReportReadiness7AValidation();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

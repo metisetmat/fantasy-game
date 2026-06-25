@@ -359,6 +359,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchLateGameThreatQualityMonitoring6WValidation = readIfExists(join(shareDirectory, "validation.fullmatch-late-game-threat-quality-monitoring-6w.md"));
   const fullMatchEconomyFinalStabilization6X = readIfExists(join(shareDirectory, "fullmatch-match-economy-final-stabilization-6x.md"));
   const fullMatchEconomyFinalStabilization6XValidation = readIfExists(join(shareDirectory, "validation.fullmatch-match-economy-final-stabilization-6x.md"));
+  const productBaselineCoachReportReadiness7A = readIfExists(join(shareDirectory, "product-baseline-coach-report-readiness-7a.md"));
+  const productBaselineCoachReportReadiness7AValidation = readIfExists(join(shareDirectory, "validation.product-baseline-coach-report-readiness-7a.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3168,6 +3170,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-late-game-threat-quality-monitoring-6w.md",
     ...sprint6WForbiddenLeftovers,
   ];
+  const sprint7AExpectedFiles = sprint6XExpectedFiles.map((file) =>
+    file === "fullmatch-match-economy-final-stabilization-6x.md"
+      ? "product-baseline-coach-report-readiness-7a.md"
+      : file === "validation.fullmatch-match-economy-final-stabilization-6x.md"
+        ? "validation.product-baseline-coach-report-readiness-7a.md"
+        : file
+  );
+  const sprint7AForbiddenLeftovers = [
+    "fullmatch-match-economy-final-stabilization-6x.md",
+    "validation.fullmatch-match-economy-final-stabilization-6x.md",
+    ...sprint6XForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4242,6 +4256,34 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("coach export avoids forbidden 6X wording", !/score equilibre manuellement|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
     check("bundle includes 6X source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchMetricConsistencyAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchEconomyFinalAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchFinalGuardrailAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchFinalLongitudinalStabilityAudit.ts") && bundleReports.includes("src/reports/fullMatchMatchEconomyFinalStabilization.ts") && bundleReports.includes("src/reports/fullMatchMatchEconomyFinalStabilization.test.ts"), "6X source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEconomyFinalStabilization6XValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7AChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7AExpectedFiles.every((file) => requiredCopied(file)), sprint7AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7AExpectedFiles.every((file) => manifest.includes(file)), sprint7AExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7A", activeConfig.sprintName === "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7AForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7AForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7A oriented", readme.includes("# Sprint 7A Share Pack") && readme.includes("product-baseline-coach-report-readiness-7a.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("7A report included", productBaselineCoachReportReadiness7A.includes("# Product Baseline Coach Report Readiness 7A") && productBaselineCoachReportReadiness7A.includes("Source Of Truth Audit") && productBaselineCoachReportReadiness7A.includes("Actionability Audit") && productBaselineCoachReportReadiness7A.includes("Clarity Audit") && productBaselineCoachReportReadiness7A.includes("Appendix Boundary Audit"), "7A doc included"),
+    check("7A validation is PASS", productBaselineCoachReportReadiness7AValidation.includes("Status: PASS") && productBaselineCoachReportReadiness7AValidation.includes("ProductBaselineCoachReportReadinessModel exists"), "7A validation current"),
+    check("baseline 6X preserved", productBaselineCoachReportReadiness7A.includes("baselineVersion: MATCH_ECONOMY_FINAL_STABILIZATION_6X") && productBaselineCoachReportReadiness7AValidation.includes("match economy baseline preserved"), "6X baseline visible"),
+    check("product and export ready", productBaselineCoachReportReadiness7A.includes("productReportReady: true") && productBaselineCoachReportReadiness7A.includes("coachExportReady: true") && productBaselineCoachReportReadiness7A.includes("productBaselineReady: true"), "readiness true"),
+    check("official score source visible", productBaselineCoachReportReadiness7AValidation.includes("official score source explained") && coachProductHtml.includes("score_change") && coachExportHtml.includes("score_change"), "score_change source visible"),
+    check("diagnostic/live/sandbox separation visible", productBaselineCoachReportReadiness7AValidation.includes("batch diagnostics separated") && productBaselineCoachReportReadiness7AValidation.includes("live scoring sample separated") && productBaselineCoachReportReadiness7AValidation.includes("sandbox separated"), "separation visible"),
+    check("selection preview remains non-applied", productBaselineCoachReportReadiness7AValidation.includes("selection preview non-applied - 3/3") && productBaselineCoachReportReadiness7AValidation.includes("profiles are observations not imposed choices"), "preview non-applied"),
+    check("actionable insights present", productBaselineCoachReportReadiness7AValidation.includes("actionable insights present") && productBaselineCoachReportReadiness7A.includes("actionableInsightCount"), "actionability visible"),
+    check("technical appendices collapsed", productBaselineCoachReportReadiness7AValidation.includes("technical details collapsed") && coachProductHtml.includes("<details class=\"appendix\""), "appendices collapsed"),
+    check("guardrail summary visible", productBaselineCoachReportReadiness7AValidation.includes("guardrail summary visible - true") && (coachProductHtml.includes("R&eacute;sum&eacute; guardrails") || coachProductHtml.includes("Résumé guardrails")) && coachExportHtml.includes("Baseline produit coach"), "guardrail summary visible"),
+    check("forbidden wording absent", productBaselineCoachReportReadiness7AValidation.includes("forbidden wording absent") && !/score equilibre manuellement|score ajuste|but de compensation|essai de compensation|comeback garanti|equilibre garanti|preuve definitive|selection imposee|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/i.test(`${coachProductHtml}\n${coachExportHtml}`), "forbidden wording absent"),
+    check("guardrails preserved", productBaselineCoachReportReadiness7AValidation.includes("guardrails preserved") && productBaselineCoachReportReadiness7AValidation.includes("no score manipulation") && productBaselineCoachReportReadiness7AValidation.includes("no PENALTY leak") && productBaselineCoachReportReadiness7AValidation.includes("no UNKNOWN scoring family"), "guardrails preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && productBaselineCoachReportReadiness7AValidation.includes("score constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && productBaselineCoachReportReadiness7AValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && productBaselineCoachReportReadiness7AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 7A source files", bundleReports.includes("src/reports/productBaselineCoachReportReadiness.ts") && bundleReports.includes("src/reports/coachReportSourceOfTruthAudit.ts") && bundleReports.includes("src/reports/coachReportActionabilityAudit.ts") && bundleReports.includes("src/reports/coachReportProductClarityAudit.ts") && bundleReports.includes("src/reports/coachReportAppendixBoundaryAudit.ts") && bundleReports.includes("src/reports/productBaselineCoachReportReadiness.test.ts"), "7A source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && productBaselineCoachReportReadiness7AValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8312,6 +8354,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7A - Product Baseline")
+      ? sprint7AChecks
     : activeConfig.sprintName.includes("Sprint 6X - Match Economy")
       ? sprint6XChecks
     : activeConfig.sprintName.includes("Sprint 6W - Late Game Threat Quality")

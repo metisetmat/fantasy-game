@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-25T08:08:40.318Z
-Task/sprint: Sprint 6X - Match Economy Final Stabilization
+Generated: 2026-06-25T09:32:41.563Z
+Task/sprint: Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- fullmatch-match-economy-final-stabilization-6x.md
-- validation.fullmatch-match-economy-final-stabilization-6x.md
+- product-baseline-coach-report-readiness-7a.md
+- validation.product-baseline-coach-report-readiness-7a.md
 - README.md
 
 ## Bundle Files
