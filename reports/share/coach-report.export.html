@@ -1070,7 +1070,7 @@
           <span class="score-label">Score du rapport full-match</span>
           <span class="score">12 - 7</span>
         </div>
-        <p class="muted">Les diagnostics batch et les échantillons live restent séparés de ce score.</p>
+        <p class="muted">Score issu des événements officiels score_change. Les diagnostics batch et les échantillons live restent séparés de ce score. Le sandbox non appliqué reste également séparé du score officiel.</p>
         <p class="muted">Contexte : export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
       </div>
     </div>
@@ -3646,6 +3646,128 @@
       </p>
     </section>
 
+    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6X</p>
+        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
+        <p>La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Baseline finale</h4>
+          <ul>
+            <li>Matchs batch: 50</li>
+            <li>Total points moyen: 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.2</li>
+            <li>Opportunit&eacute;s/match: 16.3</li>
+            <li>Match serr&eacute;: 50%</li>
+            <li>Match comp&eacute;titif: 78%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Distribution et routes</h4>
+          <ul>
+            <li>Blowout: 14%</li>
+            <li>Severe blowout: 0%</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Part points non-SHOT: 27%</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Rollback SHOT_ONLY: true</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace et fin de match</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 54.8%</li>
+            <li>Part scoring &eacute;quipe men&eacute;e: 35.3%</li>
+            <li>Menace trailing: 53.6%</li>
+            <li>Menace fin de match corrig&eacute;e: 100%</li>
+            <li>Ratio menace/pression: 1</li>
+            <li>Menace automatique: 0%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous finaux</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Manipulation de score: false</li>
+            <li>Comeback forc&eacute;: false</li>
+            <li>Suspicion inexpliqu&eacute;e: 0</li>
+            <li>Persistence pour scoring: false</li>
+            <li>SQLite pour scoring: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_MATCH_ECONOMY_FINAL_STABILIZATION.
+        Sprint suivant: 7A - Product Baseline &amp; Coach-Facing Match Report Readiness.
+        D&eacute;finition corrig&eacute;e: lateGameThreatQualityRate = lateGameThreatCount / lateGamePressureCount after both values are restricted to late-game pressure-window events; lateGameThreatQualityRatio exposes the same population as a decimal ratio.
+      </p>
+    </section>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: true</li>
+            <li>Export coach pr&ecirc;t: true</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: true</li>
+            <li>Score officiel visible: true</li>
+            <li>Source score_change visible: true</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: true</li>
+            <li>Sandbox s&eacute;par&eacute;: true</li>
+            <li>Preview non appliqu&eacute;e: 3/3</li>
+            <li>Fuite sandbox: false</li>
+            <li>Fuite diagnostic score: false</li>
+            <li>Fuite batch score: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: 6</li>
+            <li>Insights actionnables: 6</li>
+            <li>Signaux prochain match: 3</li>
+            <li>Axe de travail: 1</li>
+            <li>Profils observ&eacute;s: 3</li>
+            <li>S&eacute;lection forc&eacute;e: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: 100%</li>
+            <li>Preuves lisibles: 100%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: true</li>
+            <li>Wording interdit: 0</li>
+            <li>Lecture mobile: PASS</li>
+            <li>Lecture export: PASS</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS.
+        Sprint suivant: 7B - Coach Insight Depth &amp; Next-Match Recommendations.
+      </p>
+    </section>
+
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
     <div class="report-section-divider">Profiles and players to study</div>
     <div class="report-section-header">
@@ -4282,7 +4404,7 @@
     </div>
   </section>
 
-  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals">
+  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals|training-focus">
     <div class="report-section-divider">Next-match checklist</div>
     <div class="report-section-header">
       <div>
@@ -4293,7 +4415,7 @@
     <ul><li>La première sortie après récupération devient-elle plus propre ?</li><li>Les secondes actions augmentent-elles sans exposer la rest-defense ?</li><li>L&#39;équipe garde-t-elle une structure utile après arrêt ou neutralisation ?</li></ul>
   </section>
 
-  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard">
+  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard|guardrail-summary">
     <div class="report-section-divider">Interpretation guard</div>
     <div class="report-section-header">
       <div>
@@ -4307,6 +4429,12 @@
       <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
       <p>Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
     </div>
+      <div class="guardrail-summary"><div class="interpretation-guard">
+      <p>Score issu des &eacute;v&eacute;nements officiels score_change.</p>
+      <p>Diagnostics batch et &eacute;chantillons live s&eacute;par&eacute;s du score officiel.</p>
+      <p>Sandbox non appliqu&eacute; : aucune modification de score, possession, timeline, composition ou scoring event.</p>
+      <p>Sans cap de score, sans score forc&eacute;, sans comeback forc&eacute;, sans opportunit&eacute; impos&eacute;e.</p>
+    </div></div>
       <p>Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.</p>
     </div>
   </section>

@@ -34,6 +34,8 @@ import { currentFullMatchCloseGameDistributionCalibrationModel } from "./fullMat
 import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./fullMatchTrailingTeamResponseLateGamePressure";
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
+import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
+import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -73,6 +75,8 @@ import {
   renderFullMatchTrailingTeamResponseLateGamePressureSection,
   renderFullMatchLateGameThreatQualityTrailingConversionSection,
   renderFullMatchLateGameThreatQualityMonitoringSection,
+  renderFullMatchEconomyFinalStabilizationSection,
+  renderProductBaselineCoachReportReadinessSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -109,7 +113,12 @@ export function writeLatestCoachReport(): void {
   const fullMatchTrailingTeamResponseLateGamePressure = currentFullMatchTrailingTeamResponseLateGamePressureModel();
   const fullMatchLateGameThreatQualityTrailingConversion = currentFullMatchLateGameThreatQualityTrailingConversionModel();
   const fullMatchLateGameThreatQualityMonitoring = currentFullMatchLateGameThreatQualityMonitoringModel();
-  const productHtml = [
+  const fullMatchEconomyFinalStabilization = currentFullMatchEconomyFinalStabilizationModel();
+  const productReportView = buildCoachProductReportViewFromMatchReport(
+    experimentalReport,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtmlWithout7A = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
@@ -127,10 +136,38 @@ export function writeLatestCoachReport(): void {
     renderFullMatchTrailingTeamResponseLateGamePressureSection(fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
-  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
-    experimentalReport,
-    rosterCoverageFixturePlayers,
-  )));
+    renderFullMatchEconomyFinalStabilizationSection(fullMatchEconomyFinalStabilization),
+  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(productReportView));
+  const productExportHtmlFor7A = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWithout7A,
+    fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
+    fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
+    fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
+    fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+  });
+  const productBaselineCoachReportReadiness = buildProductBaselineCoachReportReadinessModel({
+    productReport: productReportView,
+    productReportHtml: productHtmlWithout7A,
+    exportReportHtml: productExportHtmlFor7A,
+    matchEconomyBaseline: fullMatchEconomyFinalStabilization,
+  });
+  const productHtml = appendProductSection(
+    productHtmlWithout7A,
+    renderProductBaselineCoachReportReadinessSection(productBaselineCoachReportReadiness),
+  );
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -153,6 +190,8 @@ export function writeLatestCoachReport(): void {
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -347,6 +386,8 @@ export function writeLatestCoachReport(): void {
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

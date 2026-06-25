@@ -70,6 +70,12 @@ import type {
 import type {
   FullMatchLateGameThreatQualityMonitoringModel,
 } from "./fullMatchLateGameThreatQualityMonitoring";
+import type {
+  FullMatchEconomyFinalStabilizationModel,
+} from "./fullMatchMatchEconomyFinalStabilization";
+import type {
+  ProductBaselineCoachReportReadinessModel,
+} from "./productBaselineCoachReportReadiness";
 import type { ScoringFamilyAttributionAuditModel } from "./scoringFamilyAttributionAudit";
 import { deriveCoachReportPhasePanels } from "./buildCoachReportPhaseVisuals";
 import {
@@ -3616,6 +3622,150 @@ export function renderFullMatchLateGameThreatQualityMonitoringSection(
     </section>`;
 }
 
+export function renderFullMatchEconomyFinalStabilizationSection(
+  model: FullMatchEconomyFinalStabilizationModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  const statusCopy = model.status === "PASS"
+    ? "La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit."
+    : "La stabilisation 6X rend visibles les points &agrave; reprendre avant de figer la baseline produit.";
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6X</p>
+        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
+        <p>${statusCopy}</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Baseline finale</h4>
+          <ul>
+            <li>Matchs batch: ${model.matchCount}</li>
+            <li>Total points moyen: ${model.averageTotalPointsAfter}</li>
+            <li>&Eacute;v&eacute;nements scoring/match: ${model.scoringEventsPerMatchAfter}</li>
+            <li>Opportunit&eacute;s/match: ${model.scoringOpportunitiesPerMatchAfter}</li>
+            <li>Match serr&eacute;: ${model.closeGameRateAfter}%</li>
+            <li>Match comp&eacute;titif: ${model.competitiveGameRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Distribution et routes</h4>
+          <ul>
+            <li>Blowout: ${model.blowoutRateAfter}%</li>
+            <li>Severe blowout: ${model.severeBlowoutRateAfter}%</li>
+            <li>Diversit&eacute; route-family: ${model.routeFamilyDiversityPreserved}</li>
+            <li>Part points non-SHOT: ${model.nonShotPointShare}%</li>
+            <li>Matchs avec TRY/DROP: ${model.matchesWithTryOrDrop}</li>
+            <li>Rollback SHOT_ONLY: ${model.noRollbackToShotOnly}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace et fin de match</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: ${model.trailingTeamResponseRateAfter}%</li>
+            <li>Part scoring &eacute;quipe men&eacute;e: ${model.trailingTeamScoringShareAfter}%</li>
+            <li>Menace trailing: ${model.trailingThreatQualityRateAfter}%</li>
+            <li>Menace fin de match corrig&eacute;e: ${model.lateGameThreatQualityRateAfter}%</li>
+            <li>Ratio menace/pression: ${model.lateGameThreatQualityRatio}</li>
+            <li>Menace automatique: ${model.lateGameAutomaticThreatRateAfter}%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous finaux</h4>
+          <ul>
+            <li>Score issu de score_change: ${model.scoreFromScoreChangeAllRuns}</li>
+            <li>Chemin officiel connect&eacute;: ${model.officialPathConnectedAllRuns}</li>
+            <li>Manipulation de score: false</li>
+            <li>Comeback forc&eacute;: ${model.comebackForced}</li>
+            <li>Suspicion inexpliqu&eacute;e: ${model.forcedComebackSuspicionUnexplainedCountAfter}</li>
+            <li>Persistence pour scoring: ${model.persistenceUsedForScoring}</li>
+            <li>SQLite pour scoring: ${model.sqliteUsedForScoring}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Sprint suivant: ${escapeHtml(model.nextSprintRecommendation)}.
+        D&eacute;finition corrig&eacute;e: ${escapeHtml(model.lateGameThreatQualityMetricDefinition)}
+      </p>
+    </section>`;
+}
+
+export function renderProductBaselineCoachReportReadinessSection(
+  model: ProductBaselineCoachReportReadinessModel | undefined,
+): string {
+  if (model === undefined) {
+    return "";
+  }
+
+  return `
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: ${model.productReportReady}</li>
+            <li>Export coach pr&ecirc;t: ${model.coachExportReady}</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: ${model.matchEconomyBaselinePreserved}</li>
+            <li>Score officiel visible: ${model.officialScoreVisible}</li>
+            <li>Source score_change visible: ${model.scoreChangeSourceVisible}</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: ${model.guardrailsPreserved}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: ${model.diagnosticSeparationReady}</li>
+            <li>Sandbox s&eacute;par&eacute;: ${model.sandboxSeparationReady}</li>
+            <li>Preview non appliqu&eacute;e: ${model.selectionPreviewNonAppliedLabelCount}/${model.selectionPreviewCount}</li>
+            <li>Fuite sandbox: ${!model.noSandboxTruthLeakage}</li>
+            <li>Fuite diagnostic score: ${!model.noDiagnosticScoreLeakage}</li>
+            <li>Fuite batch score: ${!model.noBatchScoreLeakage}</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: ${model.coachInsightCount}</li>
+            <li>Insights actionnables: ${model.actionableInsightCount}</li>
+            <li>Signaux prochain match: ${model.nextMatchSignalCount}</li>
+            <li>Axe de travail: ${model.trainingFocusCount}</li>
+            <li>Profils observ&eacute;s: ${model.profileObservationCount}</li>
+            <li>S&eacute;lection forc&eacute;e: ${model.profileRecommendationForcedCount}</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: ${model.sourceBadgeCoverageRate}%</li>
+            <li>Preuves lisibles: ${model.evidenceLinkCoverageRate}%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: ${model.technicalAppendixReady}</li>
+            <li>Wording interdit: ${model.forbiddenWordingCount}</li>
+            <li>Lecture mobile: ${escapeHtml(model.mobileReadabilityStatus)}</li>
+            <li>Lecture export: ${escapeHtml(model.exportReadabilityStatus)}</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: ${escapeHtml(model.status)}. Recommendation: ${escapeHtml(model.recommendation)}.
+        Sprint suivant: ${escapeHtml(model.nextSprintRecommendation)}.
+      </p>
+    </section>`;
+}
+
 function renderFullMatchOfficialScoringConnectionAppendix(
   model: FullMatchOfficialScoringCalibrationConnectionModel | undefined,
 ): string {
@@ -3876,7 +4026,7 @@ function renderNextMatch(html: string): string {
   const body = extractSectionInner(html, "next-match-signals");
 
   return `
-  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals">
+  <section id="next-match" class="premium-section" data-source-product-sections="next-match-signals|training-focus">
     <div class="report-section-divider">Next-match checklist</div>
     <div class="report-section-header">
       <div>
@@ -3890,9 +4040,10 @@ function renderNextMatch(html: string): string {
 
 function renderInterpretationGuard(html: string): string {
   const body = extractSectionInner(html, "interpretation-guard");
+  const guardrailSummary = extractSectionInner(html, "guardrail-summary");
 
   return `
-  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard">
+  <section id="interpretation-guard" class="premium-section" data-source-product-sections="interpretation-guard|guardrail-summary">
     <div class="report-section-divider">Interpretation guard</div>
     <div class="report-section-header">
       <div>
@@ -3902,6 +4053,7 @@ function renderInterpretationGuard(html: string): string {
     </div>
     <div class="interpretation-guard">
       ${body}
+      ${guardrailSummary.length > 0 ? `<div class="guardrail-summary">${guardrailSummary}</div>` : ""}
       <p>Ce rapport export&eacute; reprend la lecture du rapport produit. Il ne cr&eacute;e pas une seconde source de v&eacute;rit&eacute;.</p>
     </div>
   </section>`;
@@ -4689,6 +4841,8 @@ function renderAppendices(input: {
   readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
+  readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
+  readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
 }): string {
   const intro = stripTags(extractMatch(extractSection(input.html, "appendices"), /<p class="muted">([\s\S]*?)<\/p>/u));
   const originalAppendicesBody = extractSectionInner(input.html, "appendices");
@@ -4792,6 +4946,8 @@ export function renderCoachReportExportHtml(input: {
   readonly fullMatchTrailingTeamResponseLateGamePressure?: FullMatchTrailingTeamResponseLateGamePressureModel;
   readonly fullMatchLateGameThreatQualityTrailingConversion?: FullMatchLateGameThreatQualityTrailingConversionModel;
   readonly fullMatchLateGameThreatQualityMonitoring?: FullMatchLateGameThreatQualityMonitoringModel;
+  readonly fullMatchEconomyFinalStabilization?: FullMatchEconomyFinalStabilizationModel;
+  readonly productBaselineCoachReportReadiness?: ProductBaselineCoachReportReadinessModel;
 }): string {
   const withTitle = replaceTitle(input.productReportHtml);
   const withStyle = replaceStyle(withTitle);
@@ -4919,6 +5075,8 @@ export function renderCoachReportExportHtml(input: {
     renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring),
+    renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
+    renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
     renderProfilesAndPlayers(input.productReportHtml),
     renderNextMatch(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),

@@ -701,7 +701,7 @@ export function buildCoachProductReportViewFromMatchReport(
     status,
     matchId: report.matchId,
     scoreLabel,
-    scoreSourceNote: "Les diagnostics batch et les échantillons live restent séparés de ce score.",
+    scoreSourceNote: "Score issu des événements officiels score_change. Les diagnostics batch et les échantillons live restent séparés de ce score. Le sandbox non appliqué reste également séparé du score officiel.",
     executiveSummary: [
       `Score final : ${scoreLabel}.`,
       "Signal officiel principal : les zones de danger et de récupération structurent la lecture du match.",

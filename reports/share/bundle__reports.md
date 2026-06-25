@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 6W - Late Game Threat Quality Monitoring. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -118,6 +118,10 @@ import {
   renderFullMatchLateGameThreatQualityTrailingConversion6VValidation,
   renderFullMatchLateGameThreatQualityMonitoring6WDoc,
   renderFullMatchLateGameThreatQualityMonitoring6WValidation,
+  renderFullMatchEconomyFinalStabilization6XDoc,
+  renderFullMatchEconomyFinalStabilization6XValidation,
+  renderProductBaselineCoachReportReadiness7ADoc,
+  renderProductBaselineCoachReportReadiness7AValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -130,9 +134,9 @@ import {
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
-const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 6W - Late Game Threat Quality Monitoring";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "fullmatch-late-game-threat-quality-monitoring-6w.md";
-const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.fullmatch-late-game-threat-quality-monitoring-6w.md";
+const TASK_NAME = process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "product-baseline-coach-report-readiness-7a.md";
+const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET = "validation.product-baseline-coach-report-readiness-7a.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2353,6 +2357,16 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 6W warning-code registry for late-game threat automaticity, forced-comeback suspicion, natural trailing paths, and strict no-score-manipulation guardrails",
       },
       {
+        source: "src/simulation/fullMatch/matchEconomyFinalStabilizationWarnings.ts",
+        required: true,
+        reason: "Sprint 6X warning-code registry for final match-economy stabilization, metric consistency, route diversity, and no-score-manipulation guardrails",
+      },
+      {
+        source: "src/reports/productBaselineCoachReportReadinessWarnings.ts",
+        required: true,
+        reason: "Sprint 7A warning-code registry for product baseline coach report readiness, source separation, actionability, clarity, and appendix boundaries",
+      },
+      {
         source: "src/simulation/fullMatch/fullMatchTrailingTeamResponseAudit.ts",
         required: true,
         reason: "Sprint 6U audit measuring trailing-team response windows, response causes, route quality, pressure relief, and recovery signals",
@@ -2391,6 +2405,26 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/simulation/fullMatch/fullMatchNaturalTrailingConversionPathAudit.ts",
         required: true,
         reason: "Sprint 6W audit proving trailing scoring events keep an official route, tactical signal, and score_change path",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchMetricConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 6X audit proving rate metrics use consistent populations and cannot publish impossible percentages",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchEconomyFinalAudit.ts",
+        required: true,
+        reason: "Sprint 6X final economy audit consolidating scoring volume, close games, route diversity, trailing response, and late-game threat health",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchFinalGuardrailAudit.ts",
+        required: true,
+        reason: "Sprint 6X final guardrail audit proving score_change source, unchanged constants, no forced scores, no injected events, and no persistence scoring input",
+      },
+      {
+        source: "src/simulation/fullMatch/fullMatchFinalLongitudinalStabilityAudit.ts",
+        required: true,
+        reason: "Sprint 6X longitudinal stability audit proving the final economy remains stable across batch windows",
       },
       {
         source: "src/reports/fullMatchEarnedDangerGateCalibration.ts",
@@ -2491,6 +2525,46 @@ const BUNDLES: readonly BundleConfig[] = [
         source: "src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts",
         required: true,
         reason: "Sprint 6W executable test proving automaticity monitoring, forced-comeback suspicion explanation, natural trailing paths, and scoring guardrails",
+      },
+      {
+        source: "src/reports/fullMatchMatchEconomyFinalStabilization.ts",
+        required: true,
+        reason: "Sprint 6X final stabilization model, report renderer, and validation renderer consolidating the 6S-6W product baseline",
+      },
+      {
+        source: "src/reports/fullMatchMatchEconomyFinalStabilization.test.ts",
+        required: true,
+        reason: "Sprint 6X executable test proving final economy stabilization, corrected rate semantics, guardrails, and next-sprint readiness",
+      },
+      {
+        source: "src/reports/coachReportSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit proving official score, batch diagnostics, live samples, sandbox hypotheses, and selection previews stay separated",
+      },
+      {
+        source: "src/reports/coachReportActionabilityAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit measuring actionable insights, next-match signals, profile observations, and unsupported recommendation leakage",
+      },
+      {
+        source: "src/reports/coachReportProductClarityAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit measuring report hierarchy, readability, wording safety, source badges, confidence labels, and export/print readiness",
+      },
+      {
+        source: "src/reports/coachReportAppendixBoundaryAudit.ts",
+        required: true,
+        reason: "Sprint 7A audit proving sandbox, technical traceability, validation, and debug details remain collapsed or outside the main coach reading",
+      },
+      {
+        source: "src/reports/productBaselineCoachReportReadiness.ts",
+        required: true,
+        reason: "Sprint 7A product baseline readiness model, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/productBaselineCoachReportReadiness.test.ts",
+        required: true,
+        reason: "Sprint 7A executable test proving coach report readiness, source separation, actionability, clarity, appendix boundaries, and 6X preservation",
       },
       {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
@@ -4649,6 +4723,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7A")) {
+    return renderProductBaselineCoachReportReadiness7ADoc(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 6X")) {
+    return renderFullMatchEconomyFinalStabilization6XDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6W")) {
     return renderFullMatchLateGameThreatQualityMonitoring6WDoc(fullMatchTraceValidationModel());
   }
@@ -6936,6 +7016,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7A")) {
+    return renderProductBaselineCoachReportReadiness7AValidation(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 6X")) {
+    return renderFullMatchEconomyFinalStabilization6XValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 6W")) {
     return renderFullMatchLateGameThreatQualityMonitoring6WValidation(fullMatchTraceValidationModel());
   }
@@ -9169,6 +9255,68 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7A")) {
+    return [
+      "# Sprint 7A Share Pack",
+      "",
+      "Current sprint: Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness",
+      "",
+      "## Purpose",
+      "Review whether the validated 6X match economy is now presented as a coach-readable product baseline with clear official score source, separated diagnostics, non-applied sandbox hypotheses, actionable insights, and collapsed technical detail.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- product-baseline-coach-report-readiness-7a.md",
+      "- validation.product-baseline-coach-report-readiness-7a.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.product-baseline-coach-report-readiness-7a.md",
+      "3. product-baseline-coach-report-readiness-7a.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "6. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "7A must not recalibrate scoring, change point values, add match mechanics, force scores, inject score_change events, apply sandbox hypotheses, impose selections, or treat diagnostics as official match truth.",
+      "",
+    ].join("\n");
+  }
+  if (TASK_NAME.includes("Sprint 6X")) {
+    return [
+      "# Sprint 6X Share Pack",
+      "",
+      "Current sprint: Sprint 6X - Match Economy Final Stabilization",
+      "",
+      "## Purpose",
+      "Review the final 6S-6W match-economy baseline before product-readiness work: scoring volume, route diversity, close-game distribution, trailing response, late-game threat quality, and no-score-manipulation guardrails are consolidated in one pass.",
+      "",
+      "## Required Review Files",
+      "- coach-report.export.html",
+      "- fullmatch-match-economy-final-stabilization-6x.md",
+      "- validation.fullmatch-match-economy-final-stabilization-6x.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "- bundle__simulation.md",
+      "- bundle__reports.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.fullmatch-match-economy-final-stabilization-6x.md",
+      "3. fullmatch-match-economy-final-stabilization-6x.md",
+      "4. coach-report.export.html",
+      "5. scoring-events-summary.md",
+      "",
+      "## Guardrail Reminder",
+      "6X must not add mechanics, change point values, activate PENALTY_SHOT, cap or rewrite scores, delete scoring events, force trailing scores, inject score_change events, or use persistence/SQLite as scoring input.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 6W")) {
     return [
       "# Sprint 6W Share Pack",
@@ -27090,6 +27238,8 @@ import { currentFullMatchCloseGameDistributionCalibrationModel } from "./fullMat
 import { currentFullMatchTrailingTeamResponseLateGamePressureModel } from "./fullMatchTrailingTeamResponseLateGamePressure";
 import { currentFullMatchLateGameThreatQualityTrailingConversionModel } from "./fullMatchLateGameThreatQualityTrailingConversion";
 import { currentFullMatchLateGameThreatQualityMonitoringModel } from "./fullMatchLateGameThreatQualityMonitoring";
+import { currentFullMatchEconomyFinalStabilizationModel } from "./fullMatchMatchEconomyFinalStabilization";
+import { buildProductBaselineCoachReportReadinessModel } from "./productBaselineCoachReportReadiness";
 import { buildCoachReportMultiMatchPhaseComparisonSamples } from "./buildCoachReportMultiMatchPhaseComparisonSamples";
 import { buildCoachReportPhaseVisualReadability } from "./buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "./buildCoachReportPhaseVisuals";
@@ -27129,6 +27279,8 @@ import {
   renderFullMatchTrailingTeamResponseLateGamePressureSection,
   renderFullMatchLateGameThreatQualityTrailingConversionSection,
   renderFullMatchLateGameThreatQualityMonitoringSection,
+  renderFullMatchEconomyFinalStabilizationSection,
+  renderProductBaselineCoachReportReadinessSection,
 } from "./renderCoachReportExportHtml";
 
 function appendProductSection(html: string, section: string): string {
@@ -27165,7 +27317,12 @@ export function writeLatestCoachReport(): void {
   const fullMatchTrailingTeamResponseLateGamePressure = currentFullMatchTrailingTeamResponseLateGamePressureModel();
   const fullMatchLateGameThreatQualityTrailingConversion = currentFullMatchLateGameThreatQualityTrailingConversionModel();
   const fullMatchLateGameThreatQualityMonitoring = currentFullMatchLateGameThreatQualityMonitoringModel();
-  const productHtml = [
+  const fullMatchEconomyFinalStabilization = currentFullMatchEconomyFinalStabilizationModel();
+  const productReportView = buildCoachProductReportViewFromMatchReport(
+    experimentalReport,
+    rosterCoverageFixturePlayers,
+  );
+  const productHtmlWithout7A = [
     renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
     renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
     renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
@@ -27183,10 +27340,38 @@ export function writeLatestCoachReport(): void {
     renderFullMatchTrailingTeamResponseLateGamePressureSection(fullMatchTrailingTeamResponseLateGamePressure),
     renderFullMatchLateGameThreatQualityTrailingConversionSection(fullMatchLateGameThreatQualityTrailingConversion),
     renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
-  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(buildCoachProductReportViewFromMatchReport(
-    experimentalReport,
-    rosterCoverageFixturePlayers,
-  )));
+    renderFullMatchEconomyFinalStabilizationSection(fullMatchEconomyFinalStabilization),
+  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(productReportView));
+  const productExportHtmlFor7A = renderCoachReportExportHtml({
+    productReportHtml: productHtmlWithout7A,
+    fullMatchSegmentScoringDensityCalibration,
+    fullMatchTeamOpportunityBalanceCalibration,
+    fullMatchDominanceChainCalibration,
+    fullMatchBreakEventPostScoreResetCalibration,
+    fullMatchGoalkeeperSecureResetBreakSpecificity,
+    fullMatchResetBreakBlowoutEconomy,
+    fullMatchEarnedDangerGate,
+    fullMatchEarnedDangerGateTuning,
+    fullMatchGateSelectivityVolumeRegressionFix,
+    fullMatchRouteEconomyRecheckAfterSelectivityFix,
+    fullMatchEarnedDangerOutcomeDistribution,
+    fullMatchDominanceChainCalibrationCoverageFix,
+    fullMatchCloseGameDistributionCalibration,
+    fullMatchTrailingTeamResponseLateGamePressure,
+    fullMatchLateGameThreatQualityTrailingConversion,
+    fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+  });
+  const productBaselineCoachReportReadiness = buildProductBaselineCoachReportReadinessModel({
+    productReport: productReportView,
+    productReportHtml: productHtmlWithout7A,
+    exportReportHtml: productExportHtmlFor7A,
+    matchEconomyBaseline: fullMatchEconomyFinalStabilization,
+  });
+  const productHtml = appendProductSection(
+    productHtmlWithout7A,
+    renderProductBaselineCoachReportReadinessSection(productBaselineCoachReportReadiness),
+  );
   const exportSnapshot = buildCoachReportExportSnapshot({
     productReportHtml: productHtml,
     productReportPath: "reports/coach-report.product.html",
@@ -27209,6 +27394,8 @@ export function writeLatestCoachReport(): void {
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
   });
   const premiumLayout = buildCoachReportPremiumLayout({
     exportSnapshot,
@@ -27403,6 +27590,8 @@ export function writeLatestCoachReport(): void {
     fullMatchTrailingTeamResponseLateGamePressure,
     fullMatchLateGameThreatQualityTrailingConversion,
     fullMatchLateGameThreatQualityMonitoring,
+    fullMatchEconomyFinalStabilization,
+    productBaselineCoachReportReadiness,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

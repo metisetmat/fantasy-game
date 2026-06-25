@@ -408,12 +408,47 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     ${renderList(model.nextMatchSignals.slice(0, 5))}
   </section>
 
+  <section id="training-focus" class="product-section">
+    <h2>&Agrave; travailler</h2>
+    <article class="product-card training-card">
+      <div class="badge-row">
+        ${renderBadge("Source : Officiel")}
+        ${renderBadge("Confiance moyenne")}
+      </div>
+      <h3>Stabiliser la premi&egrave;re sortie utile</h3>
+      <div class="signal-grid">
+        <section>
+          <h4>Axe prioritaire</h4>
+          <p>S&eacute;curiser la premi&egrave;re sortie apr&egrave;s r&eacute;cup&eacute;ration sans perdre la structure derri&egrave;re le ballon.</p>
+        </section>
+        <section>
+          <h4>Justification simple</h4>
+          <p>Les signaux officiels relient r&eacute;cup&eacute;ration, progression et continuit&eacute;; ils doivent rester lisibles au prochain match.</p>
+        </section>
+        <section>
+          <h4>Signal observable</h4>
+          <p>La premi&egrave;re passe ou conservation apr&egrave;s r&eacute;cup&eacute;ration cr&eacute;e-t-elle une continuit&eacute; propre ?</p>
+        </section>
+      </div>
+    </article>
+  </section>
+
   <section id="interpretation-guard" class="product-section">
     <h2>À ne pas sur-interpréter</h2>
     <div class="interpretation-guard">
       <p>Ces profils ne sont pas des choix imposés. Ils servent à guider l'observation et doivent être confirmés sur d'autres matchs.</p>
       <p>Les rapprochements profil-joueur ne sont pas des choix de composition. Ils servent à préparer l'observation et doivent être confirmés par plusieurs matchs.</p>
       <p>Un joueur peut être utile pour un profil et non pertinent pour un autre.</p>
+    </div>
+  </section>
+
+  <section id="guardrail-summary" class="product-section">
+    <h2>R&eacute;sum&eacute; guardrails</h2>
+    <div class="interpretation-guard">
+      <p>Score issu des &eacute;v&eacute;nements officiels score_change.</p>
+      <p>Diagnostics batch et &eacute;chantillons live s&eacute;par&eacute;s du score officiel.</p>
+      <p>Sandbox non appliqu&eacute; : aucune modification de score, possession, timeline, composition ou scoring event.</p>
+      <p>Sans cap de score, sans score forc&eacute;, sans comeback forc&eacute;, sans opportunit&eacute; impos&eacute;e.</p>
     </div>
   </section>
 

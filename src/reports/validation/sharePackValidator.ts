@@ -357,6 +357,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const fullMatchLateGameThreatQualityTrailingConversion6VValidation = readIfExists(join(shareDirectory, "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md"));
   const fullMatchLateGameThreatQualityMonitoring6W = readIfExists(join(shareDirectory, "fullmatch-late-game-threat-quality-monitoring-6w.md"));
   const fullMatchLateGameThreatQualityMonitoring6WValidation = readIfExists(join(shareDirectory, "validation.fullmatch-late-game-threat-quality-monitoring-6w.md"));
+  const fullMatchEconomyFinalStabilization6X = readIfExists(join(shareDirectory, "fullmatch-match-economy-final-stabilization-6x.md"));
+  const fullMatchEconomyFinalStabilization6XValidation = readIfExists(join(shareDirectory, "validation.fullmatch-match-economy-final-stabilization-6x.md"));
+  const productBaselineCoachReportReadiness7A = readIfExists(join(shareDirectory, "product-baseline-coach-report-readiness-7a.md"));
+  const productBaselineCoachReportReadiness7AValidation = readIfExists(join(shareDirectory, "validation.product-baseline-coach-report-readiness-7a.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3154,6 +3158,30 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.fullmatch-late-game-threat-quality-trailing-conversion-6v.md",
     ...sprint6VForbiddenLeftovers,
   ];
+  const sprint6XExpectedFiles = sprint6WExpectedFiles.map((file) =>
+    file === "fullmatch-late-game-threat-quality-monitoring-6w.md"
+      ? "fullmatch-match-economy-final-stabilization-6x.md"
+      : file === "validation.fullmatch-late-game-threat-quality-monitoring-6w.md"
+        ? "validation.fullmatch-match-economy-final-stabilization-6x.md"
+        : file
+  );
+  const sprint6XForbiddenLeftovers = [
+    "fullmatch-late-game-threat-quality-monitoring-6w.md",
+    "validation.fullmatch-late-game-threat-quality-monitoring-6w.md",
+    ...sprint6WForbiddenLeftovers,
+  ];
+  const sprint7AExpectedFiles = sprint6XExpectedFiles.map((file) =>
+    file === "fullmatch-match-economy-final-stabilization-6x.md"
+      ? "product-baseline-coach-report-readiness-7a.md"
+      : file === "validation.fullmatch-match-economy-final-stabilization-6x.md"
+        ? "validation.product-baseline-coach-report-readiness-7a.md"
+        : file
+  );
+  const sprint7AForbiddenLeftovers = [
+    "fullmatch-match-economy-final-stabilization-6x.md",
+    "validation.fullmatch-match-economy-final-stabilization-6x.md",
+    ...sprint6XForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4194,6 +4222,68 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("coach export avoids forbidden 6W wording", !/score equilibre manuellement|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
     check("bundle includes 6W source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchLateGameThreatAutomaticityAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchForcedComebackSuspicionAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchNaturalTrailingConversionPathAudit.ts") && bundleReports.includes("src/reports/fullMatchLateGameThreatQualityMonitoring.ts") && bundleReports.includes("src/reports/fullMatchLateGameThreatQualityMonitoring.test.ts"), "6W source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchLateGameThreatQualityMonitoring6WValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint6XChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint6XExpectedFiles.every((file) => requiredCopied(file)), sprint6XExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint6XExpectedFiles.every((file) => manifest.includes(file)), sprint6XExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 6X", activeConfig.sprintName === "Sprint 6X - Match Economy Final Stabilization", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint6XForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint6XForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 6X oriented", readme.includes("# Sprint 6X Share Pack") && readme.includes("fullmatch-match-economy-final-stabilization-6x.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("6X report included", fullMatchEconomyFinalStabilization6X.includes("# Full-Match Match Economy Final Stabilization 6X") && fullMatchEconomyFinalStabilization6X.includes("Metric Consistency") && fullMatchEconomyFinalStabilization6X.includes("Economy Final Audit") && fullMatchEconomyFinalStabilization6X.includes("Guardrail") && fullMatchEconomyFinalStabilization6X.includes("Longitudinal Stability"), "6X doc included"),
+    check("6X validation is PASS", fullMatchEconomyFinalStabilization6XValidation.includes("Status: PASS") && fullMatchEconomyFinalStabilization6XValidation.includes("match economy final stabilization model exists"), "6X validation current"),
+    check("batch match count visible", fullMatchEconomyFinalStabilization6X.includes("- matchCount: 50") && fullMatchEconomyFinalStabilization6XValidation.includes("matchCount >= 50"), "50 matches visible"),
+    check("baseline 6W visible", fullMatchEconomyFinalStabilization6X.includes("LATE_GAME_THREAT_MONITORING_6W") && fullMatchEconomyFinalStabilization6X.includes("Baseline 6W vs Final 6X"), "6W baseline visible"),
+    check("metric consistency and corrected rate visible", fullMatchEconomyFinalStabilization6X.includes("lateGameThreatQualityRateCorrected: 100") && fullMatchEconomyFinalStabilization6X.includes("lateGameThreatQualityRatio: 1") && fullMatchEconomyFinalStabilization6XValidation.includes("lateGameThreatQualityRate corrected or documented"), "rate correction visible"),
+    check("final stabilization ready", fullMatchEconomyFinalStabilization6X.includes("finalStabilizationReady: true") && fullMatchEconomyFinalStabilization6X.includes("productBaselineReady: true") && fullMatchEconomyFinalStabilization6XValidation.includes("productBaselineReady = true"), "final ready"),
+    check("score from score_change all runs", fullMatchEconomyFinalStabilization6X.includes("| scoreFromScoreChangeAllRuns | true |") && fullMatchEconomyFinalStabilization6XValidation.includes("score from score_change"), "score_change source all runs"),
+    check("official path connected all runs", fullMatchEconomyFinalStabilization6X.includes("| officialPathConnectedAllRuns | true |"), "official path all runs"),
+    check("no cap/rewrite/delete/forced score", fullMatchEconomyFinalStabilization6X.includes("scoreCapApplied: false") && fullMatchEconomyFinalStabilization6X.includes("postHocRewriteApplied: false") && fullMatchEconomyFinalStabilization6X.includes("scoringEventsDeleted: false") && fullMatchEconomyFinalStabilization6X.includes("forcedOpponentScoreApplied: false") && fullMatchEconomyFinalStabilization6X.includes("forcedTrailingTeamScoreApplied: false"), "guardrails false"),
+    check("no trailing injection or opportunity forcing", fullMatchEconomyFinalStabilization6X.includes("trailingTeamOpportunityForced: false") && fullMatchEconomyFinalStabilization6X.includes("trailingTeamScoreChangeInjected: false") && fullMatchEconomyFinalStabilization6X.includes("trailingTeamScoringEventInjected: false"), "trailing forcing false"),
+    check("no artificial comeback controls", fullMatchEconomyFinalStabilization6X.includes("rubberBandingApplied: false") && fullMatchEconomyFinalStabilization6X.includes("comebackForced: false") && fullMatchEconomyFinalStabilization6X.includes("leadingTeamScoreSuppressed: false"), "artificial comeback controls false"),
+    check("route diversity remains visible", fullMatchEconomyFinalStabilization6X.includes("routeFamilyDiversityPreserved: true") && fullMatchEconomyFinalStabilization6X.includes("TRY_TOUCHDOWN") && fullMatchEconomyFinalStabilization6X.includes("DROP_GOAL") && fullMatchEconomyFinalStabilization6X.includes("noRollbackToShotOnly: true"), "route diversity visible"),
+    check("trailing natural scoring path complete", fullMatchEconomyFinalStabilization6X.includes("| trailingScoringPathCompleteCount | 127 |") && fullMatchEconomyFinalStabilization6X.includes("| trailingScoringPathIncompleteCount | 0 |"), "natural path complete"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && fullMatchEconomyFinalStabilization6XValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && fullMatchEconomyFinalStabilization6X.includes("MatchBonusEventChanged: false"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && fullMatchEconomyFinalStabilization6X.includes("batchLiveSeparationPreserved: true"), "batch/live PASS"),
+    check("no UNKNOWN scoring family", fullMatchEconomyFinalStabilization6XValidation.includes("no UNKNOWN"), "UNKNOWN blocked"),
+    check("PENALTY_SHOT inactive", fullMatchEconomyFinalStabilization6XValidation.includes("PENALTY_SHOT inactive") && fullMatchEconomyFinalStabilization6X.includes("penaltyShotActiveLeakageCount: 0"), "PENALTY blocked"),
+    check("coach product contains 6X section", coachProductHtml.includes("Stabilisation finale de l") && coachProductHtml.includes("Sprint 6X"), "product 6X visible"),
+    check("coach export contains 6X section", coachExportHtml.includes("Stabilisation finale de l") && coachExportHtml.includes("Sprint 6X"), "export 6X visible"),
+    check("coach export avoids forbidden 6X wording", !/score equilibre manuellement|score ajuste|rubber banding|but de compensation|essai de compensation|equilibre garanti|preuve definitive|scores forces/i.test(coachExportHtml), "forbidden wording absent"),
+    check("bundle includes 6X source files", bundleSimulation.includes("src/simulation/fullMatch/fullMatchMetricConsistencyAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchEconomyFinalAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchFinalGuardrailAudit.ts") && bundleSimulation.includes("src/simulation/fullMatch/fullMatchFinalLongitudinalStabilityAudit.ts") && bundleReports.includes("src/reports/fullMatchMatchEconomyFinalStabilization.ts") && bundleReports.includes("src/reports/fullMatchMatchEconomyFinalStabilization.test.ts"), "6X source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && fullMatchEconomyFinalStabilization6XValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7AChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7AExpectedFiles.every((file) => requiredCopied(file)), sprint7AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7AExpectedFiles.every((file) => manifest.includes(file)), sprint7AExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7A", activeConfig.sprintName === "Sprint 7A - Product Baseline & Coach-Facing Match Report Readiness", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7AForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7AForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7A oriented", readme.includes("# Sprint 7A Share Pack") && readme.includes("product-baseline-coach-report-readiness-7a.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("7A report included", productBaselineCoachReportReadiness7A.includes("# Product Baseline Coach Report Readiness 7A") && productBaselineCoachReportReadiness7A.includes("Source Of Truth Audit") && productBaselineCoachReportReadiness7A.includes("Actionability Audit") && productBaselineCoachReportReadiness7A.includes("Clarity Audit") && productBaselineCoachReportReadiness7A.includes("Appendix Boundary Audit"), "7A doc included"),
+    check("7A validation is PASS", productBaselineCoachReportReadiness7AValidation.includes("Status: PASS") && productBaselineCoachReportReadiness7AValidation.includes("ProductBaselineCoachReportReadinessModel exists"), "7A validation current"),
+    check("baseline 6X preserved", productBaselineCoachReportReadiness7A.includes("baselineVersion: MATCH_ECONOMY_FINAL_STABILIZATION_6X") && productBaselineCoachReportReadiness7AValidation.includes("match economy baseline preserved"), "6X baseline visible"),
+    check("product and export ready", productBaselineCoachReportReadiness7A.includes("productReportReady: true") && productBaselineCoachReportReadiness7A.includes("coachExportReady: true") && productBaselineCoachReportReadiness7A.includes("productBaselineReady: true"), "readiness true"),
+    check("official score source visible", productBaselineCoachReportReadiness7AValidation.includes("official score source explained") && coachProductHtml.includes("score_change") && coachExportHtml.includes("score_change"), "score_change source visible"),
+    check("diagnostic/live/sandbox separation visible", productBaselineCoachReportReadiness7AValidation.includes("batch diagnostics separated") && productBaselineCoachReportReadiness7AValidation.includes("live scoring sample separated") && productBaselineCoachReportReadiness7AValidation.includes("sandbox separated"), "separation visible"),
+    check("selection preview remains non-applied", productBaselineCoachReportReadiness7AValidation.includes("selection preview non-applied - 3/3") && productBaselineCoachReportReadiness7AValidation.includes("profiles are observations not imposed choices"), "preview non-applied"),
+    check("actionable insights present", productBaselineCoachReportReadiness7AValidation.includes("actionable insights present") && productBaselineCoachReportReadiness7A.includes("actionableInsightCount"), "actionability visible"),
+    check("technical appendices collapsed", productBaselineCoachReportReadiness7AValidation.includes("technical details collapsed") && coachProductHtml.includes("<details class=\"appendix\""), "appendices collapsed"),
+    check("guardrail summary visible", productBaselineCoachReportReadiness7AValidation.includes("guardrail summary visible - true") && (coachProductHtml.includes("R&eacute;sum&eacute; guardrails") || coachProductHtml.includes("Résumé guardrails")) && coachExportHtml.includes("Baseline produit coach"), "guardrail summary visible"),
+    check("forbidden wording absent", productBaselineCoachReportReadiness7AValidation.includes("forbidden wording absent") && !/score equilibre manuellement|score ajuste|but de compensation|essai de compensation|comeback garanti|equilibre garanti|preuve definitive|selection imposee|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/i.test(`${coachProductHtml}\n${coachExportHtml}`), "forbidden wording absent"),
+    check("guardrails preserved", productBaselineCoachReportReadiness7AValidation.includes("guardrails preserved") && productBaselineCoachReportReadiness7AValidation.includes("no score manipulation") && productBaselineCoachReportReadiness7AValidation.includes("no PENALTY leak") && productBaselineCoachReportReadiness7AValidation.includes("no UNKNOWN scoring family"), "guardrails preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && productBaselineCoachReportReadiness7AValidation.includes("score constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && productBaselineCoachReportReadiness7AValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && productBaselineCoachReportReadiness7AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 7A source files", bundleReports.includes("src/reports/productBaselineCoachReportReadiness.ts") && bundleReports.includes("src/reports/coachReportSourceOfTruthAudit.ts") && bundleReports.includes("src/reports/coachReportActionabilityAudit.ts") && bundleReports.includes("src/reports/coachReportProductClarityAudit.ts") && bundleReports.includes("src/reports/coachReportAppendixBoundaryAudit.ts") && bundleReports.includes("src/reports/productBaselineCoachReportReadiness.test.ts"), "7A source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && productBaselineCoachReportReadiness7AValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8264,6 +8354,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7A - Product Baseline")
+      ? sprint7AChecks
+    : activeConfig.sprintName.includes("Sprint 6X - Match Economy")
+      ? sprint6XChecks
     : activeConfig.sprintName.includes("Sprint 6W - Late Game Threat Quality")
       ? sprint6WChecks
     : activeConfig.sprintName.includes("Sprint 6V - Late Game Threat Quality")
