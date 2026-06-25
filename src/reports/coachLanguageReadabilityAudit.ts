@@ -13,7 +13,26 @@ export interface CoachLanguageReadabilityAudit {
   readonly recommendation: "KEEP_COACH_LANGUAGE" | "SIMPLIFY_COACH_LANGUAGE";
 }
 
-const forbidden = /score [Ã©e]quilibr[Ã©e] manuellement|score ajust[Ã©e]|but de compensation|essai de compensation|comeback garanti|[Ã©e]quilibre garanti|preuve d[Ã©e]finitive|v[Ã©e]rit[Ã©e] globale depuis ce run|composition recommand[Ã©e]e automatiquement|s[Ã©e]lection impos[Ã©e]e|plan tactique impos[Ã©e]?|sandbox appliqu[Ã©e]|diagnostic comme v[Ã©e]rit[Ã©e] officielle|batch score comme score officiel/giu;
+const forbidden = /score equilibre manuellement|score ajuste|but de compensation|essai de compensation|comeback garanti|equilibre garanti|preuve definitive|verite globale depuis ce run|composition recommandee automatiquement|selection imposee|plan tactique impose|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/giu;
+
+function normalizedCoachText(text: string): string {
+  return text
+    .replace(/<[^>]+>/gu, " ")
+    .replaceAll("&eacute;", "e")
+    .replaceAll("&Eacute;", "e")
+    .replaceAll("&egrave;", "e")
+    .replaceAll("&Egrave;", "e")
+    .replaceAll("&ecirc;", "e")
+    .replaceAll("&Ecirc;", "e")
+    .replaceAll("&agrave;", "a")
+    .replaceAll("&Agrave;", "a")
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&rsquo;", "'")
+    .replace(/\s+/gu, " ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr-FR");
+}
 
 function count(text: string, pattern: RegExp): number {
   return [...text.matchAll(pattern)].length;
@@ -21,22 +40,23 @@ function count(text: string, pattern: RegExp): number {
 
 function mainBody(html: string): string {
   const appendix = html.indexOf("<section id=\"appendices\"");
-  return (appendix === -1 ? html : html.slice(0, appendix)).replace(/<[^>]+>/gu, " ");
+  return appendix === -1 ? html : html.slice(0, appendix);
 }
 
 export function auditCoachLanguageReadability(input: {
   readonly productReportHtml: string;
   readonly exportReportHtml: string;
 }): CoachLanguageReadabilityAudit {
-  const text = `${mainBody(input.productReportHtml)}\n${mainBody(input.exportReportHtml)}`;
+  const rawText = `${mainBody(input.productReportHtml)}\n${mainBody(input.exportReportHtml)}`;
+  const text = normalizedCoachText(rawText);
   const sentences = text.split(/[.!?]+/u).map((item) => item.trim()).filter((item) => item.length > 0);
-  const jargonCount = count(text, /internalTags|sandbox_only|trace_supported|canDriveLiveSelection|production route|score mutation/giu);
+  const jargonCount = count(text, /internaltags|sandbox_only|trace_supported|candriverliveselection|production route|score mutation/giu);
   const forbiddenWordingCount = count(text, forbidden);
-  const technicalSentenceCount = sentences.filter((sentence) => /internalTags|score_change|sandbox|batch|guardrail/iu.test(sentence)).length;
+  const technicalSentenceCount = sentences.filter((sentence) => /internaltags|score_change|sandbox|batch|guardrail/iu.test(sentence)).length;
   const repeatedTechnicalCopyCount = Math.max(0, count(text, /score_change|sandbox|batch|guardrail/giu) - 90);
   const overlongParagraphCount = count(text, /\b(?:\S+\s+){85,}\S+/gu);
   const excessiveCaveatCount = Math.max(0, count(text, /non appliqu|a confirmer|ne remplace pas|separe/giu) - 80);
-  const missingPlainLanguageExplanationCount = text.includes("Pourquoi c'est important") || text.includes("Pourquoi")
+  const missingPlainLanguageExplanationCount = text.includes("pourquoi c'est important") || text.includes("pourquoi")
     ? 0
     : 1;
   const ready = forbiddenWordingCount === 0 &&

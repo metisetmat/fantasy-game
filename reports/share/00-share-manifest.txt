@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-25T11:51:42.123Z
+Generated timestamp: 2026-06-25T12:41:35.023Z
 Task/sprint name: Sprint 7B - Coach Insight Depth & Next-Match Recommendations
 Final file count: 20
 
@@ -901,17 +901,8 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachProductReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachDeepInsights.ts
-?? src/reports/coachInsightCausalityEvidenceAudit.ts
-?? src/reports/coachInsightDepthAudit.ts
-?? src/reports/coachInsightDepthNextMatchRecommendations.test.ts
-?? src/reports/coachInsightDepthNextMatchRecommendations.ts
-?? src/reports/coachInsightDepthNextMatchRecommendationsWarnings.ts
-?? src/reports/coachLanguageReadabilityAudit.ts
-?? src/reports/nextMatchRecommendationAudit.ts
+ M src/reports/coachInsightDepthNextMatchRecommendations.test.ts
+ M src/reports/coachLanguageReadabilityAudit.ts
+ M src/reports/coachReportActionabilityAudit.ts
+ M src/reports/nextMatchRecommendationAudit.ts
+ M src/reports/productBaselineCoachReportReadiness.test.ts

@@ -21,12 +21,30 @@ function hasText(value: string): boolean {
   return value.trim().length > 0;
 }
 
+function normalizedCoachText(text: string): string {
+  return text
+    .replace(/<[^>]+>/gu, " ")
+    .replaceAll("&eacute;", "e")
+    .replaceAll("&Eacute;", "e")
+    .replaceAll("&egrave;", "e")
+    .replaceAll("&Egrave;", "e")
+    .replaceAll("&agrave;", "a")
+    .replaceAll("&Agrave;", "a")
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("&rsquo;", "'")
+    .replace(/\s+/gu, " ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("fr-FR");
+}
+
 function forcedSelection(text: string): boolean {
-  return /composition recommand|selection impose|s[eÃ©]lection impos|titulaire conseill|doit s[eÃ©]lectionner/iu.test(text);
+  const normalized = normalizedCoachText(text);
+  return /composition recommand|selection impose|titulaire conseill|doit selectionner/iu.test(normalized);
 }
 
 function forcedPlan(text: string): boolean {
-  return /plan tactique impos|doit jouer|doit presser|doit attaquer/iu.test(text);
+  return /plan tactique impos|doit jouer|doit presser|doit attaquer/iu.test(normalizedCoachText(text));
 }
 
 export function auditNextMatchRecommendations(recommendations: readonly NextMatchRecommendation[]): NextMatchRecommendationAudit {

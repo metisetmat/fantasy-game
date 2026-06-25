@@ -11,6 +11,7 @@ import {
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
 import { rosterCoverageFixturePlayers } from "./fixtures/rosterCoverageFixture";
+import { auditCoachReportActionability } from "./coachReportActionabilityAudit";
 
 const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
   routeSelectionMode: "workbench_chain_replay_experimental",
@@ -56,5 +57,15 @@ assert.ok(doc.includes("Appendix Boundary Audit"));
 assert.ok(validation.includes("Status: PASS"));
 assert.ok(validation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"));
 
-console.log("PASS productBaselineCoachReportReadiness");
+const accentedRecommendationLeakAudit = auditCoachReportActionability({
+  productReport,
+  productReportHtml: [
+    "<p>Ce profil reste non confirm\u00e9e comme recommandation officielle.</p>",
+    "<p>Recommandation: doit s\u00e9lectionner ML au prochain match.</p>",
+  ].join(""),
+  exportReportHtml: "",
+});
+assert.equal(accentedRecommendationLeakAudit.unsupportedRecommendationCount, 1);
+assert.equal(accentedRecommendationLeakAudit.selectionPreviewAsRecommendationCount, 1);
 
+console.log("PASS productBaselineCoachReportReadiness");

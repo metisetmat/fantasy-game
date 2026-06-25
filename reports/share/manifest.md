@@ -1,6 +1,6 @@
 # Share Pack
 
-Generated: 2026-06-25T11:51:42.123Z
+Generated: 2026-06-25T12:41:35.023Z
 Task/sprint: Sprint 7B - Coach Insight Depth & Next-Match Recommendations
 Mode: MINIMAL_REVIEW
 Final file count: 20

@@ -11,6 +11,8 @@ import {
   renderCoachInsightDepthNextMatchRecommendations7BDoc,
   renderCoachInsightDepthNextMatchRecommendations7BValidation,
 } from "./coachInsightDepthNextMatchRecommendations";
+import { auditCoachLanguageReadability } from "./coachLanguageReadabilityAudit";
+import { auditNextMatchRecommendations } from "./nextMatchRecommendationAudit";
 
 const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
   routeSelectionMode: "workbench_chain_replay_experimental",
@@ -72,5 +74,27 @@ assert.ok(doc.includes("Causality / Evidence Audit"));
 assert.ok(doc.includes("Coach Language Audit"));
 assert.ok(validation.includes("Status: PASS"));
 assert.ok(validation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"));
+
+const forcedNextMatchAudit = auditNextMatchRecommendations([
+  {
+    recommendationId: "forced-accented-selection",
+    priority: "HIGH",
+    whatToImprove: "Ne doit pas imposer une s\u00e9lection",
+    why: "La s\u00e9lection impos\u00e9e est une instruction forc\u00e9e.",
+    observableSignal: "Le texte dit doit s\u00e9lectionner un joueur.",
+    tradeoff: "Le coach perd le choix.",
+    trainingFocus: "Conserver le signal comme observation.",
+    confidence: "medium",
+    sourceInsightIds: ["insight-1"],
+    evidenceSummary: ["Phrase accentu\u00e9e d\u00e9tect\u00e9e."],
+  },
+]);
+assert.equal(forcedNextMatchAudit.forcedSelectionRecommendationCount, 1);
+
+const forbiddenLanguageAudit = auditCoachLanguageReadability({
+  productReportHtml: "<section><p>Pourquoi: score \u00e9quilibr\u00e9 manuellement, s\u00e9lection impos\u00e9e, diagnostic comme v\u00e9rit\u00e9 officielle, sandbox appliqu\u00e9.</p></section>",
+  exportReportHtml: "",
+});
+assert.equal(forbiddenLanguageAudit.forbiddenWordingCount, 4);
 
 console.log("PASS coachInsightDepthNextMatchRecommendations");

@@ -23,24 +23,15 @@ export interface CoachReportActionabilityAudit {
   readonly recommendation: CoachReportActionabilityRecommendation;
 }
 
-function countForcedSelection(text: string): number {
-  return [
-    /composition recommand/giu,
-    /selection impose/giu,
-    /s[eé]lection impos/giu,
-    /doit selectionner/giu,
-    /doit s[eé]lectionner/giu,
-    /titulaire conseill/giu,
-  ].reduce((count, pattern) => count + [...text.matchAll(pattern)].length, 0);
-}
-
-function countUnsupportedRecommendations(text: string): number {
-  const normalized = text
+function normalizeCoachAuditText(text: string): string {
+  return text
     .replace(/<[^>]+>/gu, " ")
     .replaceAll("&agrave;", "a")
     .replaceAll("&Agrave;", "a")
     .replaceAll("&eacute;", "e")
     .replaceAll("&Eacute;", "e")
+    .replaceAll("&egrave;", "e")
+    .replaceAll("&Egrave;", "e")
     .replaceAll("&ecirc;", "e")
     .replaceAll("&Ecirc;", "e")
     .replaceAll("&nbsp;", " ")
@@ -53,11 +44,35 @@ function countUnsupportedRecommendations(text: string): number {
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .toLocaleLowerCase("fr-FR");
+}
+function countForcedSelection(text: string): number {
+  const normalized = normalizeCoachAuditText(text);
+  return [
+    /composition recommand/giu,
+    /selection impose/giu,
+    /doit selectionner/giu,
+    /titulaire conseill/giu,
+  ].reduce((count, pattern) => count + [...normalized.matchAll(pattern)].length, 0);
+}
+
+function countUnsupportedRecommendations(text: string): number {
+  const normalized = normalizeCoachAuditText(text);
   let unsupported = 0;
 
   for (const match of normalized.matchAll(/recommand\p{L}*/gu)) {
     const index = match.index ?? 0;
-    const context = normalized.slice(Math.max(0, index - 90), index + 120);
+    const sentenceStart = Math.max(
+      normalized.lastIndexOf(".", index - 1),
+      normalized.lastIndexOf("!", index - 1),
+      normalized.lastIndexOf("?", index - 1),
+      0,
+    );
+    const nextPeriod = normalized.indexOf(".", index);
+    const nextBang = normalized.indexOf("!", index);
+    const nextQuestion = normalized.indexOf("?", index);
+    const sentenceEndCandidates = [nextPeriod, nextBang, nextQuestion].filter((value) => value >= 0);
+    const sentenceEnd = sentenceEndCandidates.length === 0 ? normalized.length : Math.min(...sentenceEndCandidates);
+    const context = normalized.slice(sentenceStart, sentenceEnd);
     const explicitlyNonApplied = context.includes("non confir") ||
       context.includes("pas des choix") ||
       context.includes("pas un choix") ||
