@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 7D - Coach Report Premium Layout & Visual Hierarchy. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -128,6 +128,8 @@ import {
   renderCoachActionPlanCardsTrainingFocusPackaging7CValidation,
   renderCoachReportPremiumLayoutVisualHierarchy7DDoc,
   renderCoachReportPremiumLayoutVisualHierarchy7DValidation,
+  renderCoachReportPhaseVisualsTacticalMapCards7EDoc,
+  renderCoachReportPhaseVisualsTacticalMapCards7EValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -141,10 +143,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-premium-layout-visual-hierarchy-7d.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-phase-visuals-tactical-map-cards-7e.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-premium-layout-visual-hierarchy-7d.md";
+  "validation.coach-report-phase-visuals-tactical-map-cards-7e.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2700,6 +2702,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7D executable test proving premium layout readiness, baseline metadata consistency, and export/mobile checks",
       },
       {
+        source: "src/reports/coachReportTacticalMapCards.ts",
+        required: true,
+        reason: "Sprint 7E tactical map card model and product-report renderer for 2-3 compact official visual cards",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsTacticalMapCardsWarnings.ts",
+        required: true,
+        reason: "Sprint 7E warning-code registry for tactical map cards, visual density, source-of-truth, and mobile/export readability",
+      },
+      {
+        source: "src/reports/coachReportTacticalMapCardsAudit.ts",
+        required: true,
+        reason: "Sprint 7E tactical map card audit proving source badges, confidence badges, legends, action-plan links, and next-match checks",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsAudit.ts",
+        required: true,
+        reason: "Sprint 7E phase visual audit proving zone coverage, empty states, confidence, and action-plan links",
+      },
+      {
+        source: "src/reports/coachReportVisualDensityAudit.ts",
+        required: true,
+        reason: "Sprint 7E visual density audit proving map cards do not crowd out express read or action plan priority",
+      },
+      {
+        source: "src/reports/coachReportVisualMobileExportAudit.ts",
+        required: true,
+        reason: "Sprint 7E mobile/export visual readability audit proving stacked map cards, readable legends, and print guards",
+      },
+      {
+        source: "src/reports/coachReportVisualSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 7E visual source-of-truth audit preventing sandbox, diagnostic, or batch signals from becoming official visual truth",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsTacticalMapCards.ts",
+        required: true,
+        reason: "Sprint 7E model, report renderer, and validation renderer for coach report phase visuals and tactical map cards",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsTacticalMapCards.test.ts",
+        required: true,
+        reason: "Sprint 7E executable test proving tactical map card PASS status, density control, and source boundary checks",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4856,6 +4903,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7E")) {
+    return renderCoachReportPhaseVisualsTacticalMapCards7EDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7D")) {
     return renderCoachReportPremiumLayoutVisualHierarchy7DDoc(fullMatchTraceValidationModel());
   }
@@ -7158,6 +7208,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7E")) {
+    return renderCoachReportPhaseVisualsTacticalMapCards7EValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7D")) {
     return renderCoachReportPremiumLayoutVisualHierarchy7DValidation(fullMatchTraceValidationModel());
   }
@@ -9406,6 +9459,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7E")) {
+    return [
+      "# Sprint 7E Share Pack",
+      "",
+      "Current sprint: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards",
+      "",
+      "## Purpose",
+      "This pack proves the premium coach report now includes 2-3 compact tactical map cards without changing scoring, match mechanics, route selection, or source-of-truth boundaries.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "- validation.coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "3. coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "7E is presentation-only: tactical map cards visualize official/support signals but do not change scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score boundaries.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7D")) {
     return [
       "# Sprint 7D Share Pack",

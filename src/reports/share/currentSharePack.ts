@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy",
+  name: "Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "coach-report-premium-layout-visual-hierarchy-7d.md",
-    "validation.coach-report-premium-layout-visual-hierarchy-7d.md",
+    "coach-report-phase-visuals-tactical-map-cards-7e.md",
+    "validation.coach-report-phase-visuals-tactical-map-cards-7e.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 7D share pack is current, complete, and below 20 files",
-    "coach-report-premium-layout-visual-hierarchy-7d.md": "validates the premium coach report layout, visual hierarchy, mobile/export readability, and baseline metadata reconciliation",
-    "validation.coach-report-premium-layout-visual-hierarchy-7d.md": "proves the 7D model is PASS with premium cover, express read, action-plan prominence, print/mobile readiness, and preserved baselines",
-    "README.md": "compact reviewer orientation for the 7D share pack",
-    "manifest.md": "compatibility manifest listing the 7D share pack files",
+    "validation.share-pack.md": "proves the 7E share pack is current, complete, and below 20 files",
+    "coach-report-phase-visuals-tactical-map-cards-7e.md": "validates the tactical map cards, phase visuals, visual density, mobile/export readability, and visual source-of-truth boundaries",
+    "validation.coach-report-phase-visuals-tactical-map-cards-7e.md": "proves the 7E model is PASS with 2-3 visual map cards, preserved 7D hierarchy, controlled density, and preserved baselines",
+    "README.md": "compact reviewer orientation for the 7E share pack",
+    "manifest.md": "compatibility manifest listing the 7E share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

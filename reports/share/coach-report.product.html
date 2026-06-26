@@ -58,6 +58,20 @@
     .action-plan-card--primary h3 { font-size: 1.2rem; color: var(--accent-strong); }
     .action-plan-card--primary .badge:first-child { color: #fff; background: var(--accent); border-color: var(--accent); }
     .action-plan-card-grid { align-items: stretch; }
+    .tactical-map-section { margin-top: 20px; }
+    .tactical-map-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .tactical-map-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: #fbfdff; break-inside: avoid; }
+    .tactical-map-card h3 { margin-bottom: 12px; }
+    .tactical-map-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 10px 0 12px; }
+    .tactical-map-zone { min-height: 50px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: grid; align-content: center; text-align: center; background: var(--soft); }
+    .tactical-map-zone strong { font-size: .86rem; }
+    .tactical-map-zone span { color: var(--muted); font-size: .78rem; }
+    .tactical-map-zone--danger { background: #fff4ec; border-color: #f0c5a6; }
+    .tactical-map-zone--recovery { background: #eef9f3; border-color: #b8dfca; }
+    .tactical-map-zone--pressure { background: #fff8df; border-color: #ead486; }
+    .tactical-map-zone--high { box-shadow: inset 0 0 0 2px rgba(31, 111, 139, .2); }
+    .tactical-map-zone--empty { color: var(--muted); background: var(--soft); border-style: dashed; }
+    .tactical-map-legend { color: var(--muted); font-size: .9rem; }
     .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
     .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
     .appendix summary { cursor: pointer; font-weight: 700; }
@@ -68,8 +82,9 @@
       .express-head { display: block; }
       .express-score { text-align: left; margin-top: 10px; }
       .express-grid { grid-template-columns: 1fr; }
+      .tactical-map-card-grid { grid-template-columns: 1fr; }
       .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
-      .product-card, .express-read { overflow-wrap: anywhere; }
+      .product-card, .express-read, .tactical-map-card { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
@@ -202,6 +217,111 @@
             <p>Carte de surveillance: elle n&#39;impose ni selection, ni plan tactique.</p>
           </details>
         </article>
+    </div>
+  </section>
+
+  
+  <section id="tactical-map-cards" class="product-section tactical-map-section">
+    <h2>Ou le match s'est joue</h2>
+    <p class="muted">Cartes sobres issues des signaux officiels disponibles. Elles visualisent une lecture coach, sans imposer de conclusion tactique.</p>
+    <div class="tactical-map-card-grid">
+      
+    <article class="tactical-map-card" data-card-id="tactical-map-danger-zones" data-source-type="official">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance haute</span>
+      </div>
+      <p class="card-kicker">Carte tactique</p>
+      <h3>Zones de danger repetees</h3>
+      
+      <div class="tactical-map-grid" aria-label="Zones de danger repetees">
+        
+          <div class="tactical-map-zone tactical-map-zone--danger tactical-map-zone--medium">
+            <strong>Z3-C</strong>
+            <span>4</span>
+          </div>
+        
+          <div class="tactical-map-zone tactical-map-zone--danger tactical-map-zone--medium">
+            <strong>Z2-C</strong>
+            <span>2</span>
+          </div>
+        
+          <div class="tactical-map-zone tactical-map-zone--danger tactical-map-zone--high">
+            <strong>Z5-C</strong>
+            <span>16</span>
+          </div>
+        
+      </div>
+      <p><strong>Lecture :</strong> Le point coach est de verifier si ces entrees produisent une deuxieme action controlee.</p>
+      <p><strong>Lien plan d'action :</strong> Transformer les zones de danger en continuite.</p>
+      <p><strong>Signal prochain match :</strong> La progression mene-t-elle a une deuxieme action controlee ?</p>
+      <p class="tactical-map-legend"><strong>Legende :</strong> Plus fonce = signal plus visible ; Chiffre = occurrences officielles du run</p>
+      <p class="guard">Signal a confirmer sur plusieurs matchs.</p>
+    </article>
+    <article class="tactical-map-card" data-card-id="tactical-map-useful-recoveries" data-source-type="official">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance faible</span>
+      </div>
+      <p class="card-kicker">Carte tactique</p>
+      <h3>Recuperations detectees, carte prudente</h3>
+      
+      <div class="tactical-map-grid" aria-label="Recuperations detectees, carte prudente">
+        
+          <div class="tactical-map-zone tactical-map-zone--empty">
+            <strong>signal</strong>
+            <span>etat vide</span>
+          </div>
+        
+          <div class="tactical-map-zone tactical-map-zone--empty">
+            <strong>non</strong>
+            <span>etat vide</span>
+          </div>
+        
+          <div class="tactical-map-zone tactical-map-zone--empty">
+            <strong>stable</strong>
+            <span>etat vide</span>
+          </div>
+        
+      </div>
+      <p><strong>Lecture :</strong> Le rapport reste prudent et n&#39;invente pas de zone quand le signal officiel est trop faible.</p>
+      <p><strong>Lien plan d'action :</strong> Securiser la première sortie après récupération.</p>
+      <p><strong>Signal prochain match :</strong> Moins de pertes immediates après récupération.</p>
+      <p class="tactical-map-legend"><strong>Legende :</strong> Vert = récupération utile ; Chiffre = signal officiel observe</p>
+      <p class="guard">Le rapport ne confond pas récupération et sequence maitrisee.</p>
+    </article>
+    <article class="tactical-map-card" data-card-id="tactical-map-pressure-continuity" data-source-type="official">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance haute</span>
+      </div>
+      <p class="card-kicker">Carte tactique</p>
+      <h3>Pression, rebond et continuite</h3>
+      
+      <div class="tactical-map-grid" aria-label="Pression, rebond et continuite">
+        
+          <div class="tactical-map-zone tactical-map-zone--pressure tactical-map-zone--high">
+            <strong>Z3-C</strong>
+            <span>24</span>
+          </div>
+        
+          <div class="tactical-map-zone tactical-map-zone--pressure tactical-map-zone--high">
+            <strong>Z5-C</strong>
+            <span>16</span>
+          </div>
+        
+          <div class="tactical-map-zone tactical-map-zone--pressure tactical-map-zone--medium">
+            <strong>Z5-HSR</strong>
+            <span>4</span>
+          </div>
+        
+      </div>
+      <p><strong>Lecture :</strong> La structure après pression ou action neutralisee est le point a confirmer.</p>
+      <p><strong>Lien plan d'action :</strong> Garder une structure après pression ou arret du gardien.</p>
+      <p><strong>Signal prochain match :</strong> L&#39;equipe garde-t-elle sa structure après action neutralisee ?</p>
+      <p class="tactical-map-legend"><strong>Legende :</strong> Orange = instabilite ; Carte vide = signal insuffisant</p>
+      <p class="guard">Carte volontairement prudente si les zones instables ne sont pas assez solides.</p>
+    </article>
     </div>
   </section>
 

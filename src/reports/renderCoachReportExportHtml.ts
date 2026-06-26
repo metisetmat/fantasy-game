@@ -225,6 +225,45 @@ const PREMIUM_EXPORT_CSS = `
       padding: 22px;
     }
 
+    .tactical-map-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .tactical-map-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fbfdff;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .tactical-map-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin: 10px 0 12px;
+    }
+
+    .tactical-map-zone {
+      min-height: 48px;
+      border: 1px solid var(--report-line);
+      border-radius: 8px;
+      padding: 8px;
+      display: grid;
+      align-content: center;
+      text-align: center;
+      background: var(--report-soft);
+    }
+
+    .tactical-map-zone--danger { background: #fff4ec; border-color: #efc3a3; }
+    .tactical-map-zone--recovery { background: #eef9f3; border-color: #b8dfca; }
+    .tactical-map-zone--pressure { background: #fff8df; border-color: #ead486; }
+    .tactical-map-zone--empty { color: var(--report-muted); border-style: dashed; }
+    .tactical-map-legend { color: var(--report-muted); font-size: 0.9rem; }
+
     .report-section-divider {
       display: flex;
       align-items: center;
@@ -1434,6 +1473,26 @@ function renderCoachActionPlanExport(html: string): string {
       <div>
         <h2>Plan d'action coach</h2>
         <p>Cartes courtes: observation, travail, signal observable, critere de reussite et risque.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderTacticalMapCardsExport(html: string): string {
+  const body = extractSectionInner(html, "tactical-map-cards");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="tactical-map-cards" class="premium-section" data-source-product-sections="tactical-map-cards">
+    <div class="report-section-divider">Cartes tactiques</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Ou le match s'est joue</h2>
+        <p>Cartes de zones issues du rapport produit. Source, confiance, legende et lien avec le plan d'action restent visibles a l'impression.</p>
       </div>
     </div>
     ${body}
@@ -5192,6 +5251,7 @@ export function renderCoachReportExportHtml(input: {
     renderExpressReadExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
+    renderTacticalMapCardsExport(input.productReportHtml),
     renderTrainingFocusPackageExport(input.productReportHtml),
     renderNextMatchPlanExport(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),

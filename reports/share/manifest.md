@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-25T16:23:03.253Z
-Task/sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy
+Generated: 2026-06-26T08:35:47.620Z
+Task/sprint: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-premium-layout-visual-hierarchy-7d.md
-- validation.coach-report-premium-layout-visual-hierarchy-7d.md
+- coach-report-phase-visuals-tactical-map-cards-7e.md
+- validation.coach-report-phase-visuals-tactical-map-cards-7e.md
 - README.md
 
 ## Bundle Files

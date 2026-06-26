@@ -124,6 +124,10 @@ import {
   renderCoachReportPremiumLayoutVisualHierarchy7DDoc as renderCoachReportPremiumLayoutVisualHierarchy7DDocBase,
   renderCoachReportPremiumLayoutVisualHierarchy7DValidation as renderCoachReportPremiumLayoutVisualHierarchy7DValidationBase,
 } from "../../reports/coachReportPremiumLayoutVisualHierarchy";
+import {
+  renderCoachReportPhaseVisualsTacticalMapCards7EDoc as renderCoachReportPhaseVisualsTacticalMapCards7EDocBase,
+  renderCoachReportPhaseVisualsTacticalMapCards7EValidation as renderCoachReportPhaseVisualsTacticalMapCards7EValidationBase,
+} from "../../reports/coachReportPhaseVisualsTacticalMapCards";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6561,6 +6565,18 @@ export function renderCoachReportPremiumLayoutVisualHierarchy7DValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportPremiumLayoutVisualHierarchy7DValidationBase();
+}
+
+export function renderCoachReportPhaseVisualsTacticalMapCards7EDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportPhaseVisualsTacticalMapCards7EDocBase();
+}
+
+export function renderCoachReportPhaseVisualsTacticalMapCards7EValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportPhaseVisualsTacticalMapCards7EValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

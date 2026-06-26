@@ -1,27 +1,24 @@
-# Sprint 7D Share Pack
+# Sprint 7E Share Pack
 
-Current sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy
+Current sprint: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards
 
 ## Purpose
-Review whether the coach report now reads like a premium product artifact: official score and source first, express read, prominent action-plan cards, compact next-match plan, readable mobile/export layout, and reconciled 7A/7B/7C baseline metadata.
+This pack proves the premium coach report now includes 2-3 compact tactical map cards without changing scoring, match mechanics, route selection, or source-of-truth boundaries.
 
-## Required Review Files
+## Key Files
 - coach-report.export.html
 - coach-report.product.html
-- coach-report-premium-layout-visual-hierarchy-7d.md
-- validation.coach-report-premium-layout-visual-hierarchy-7d.md
+- coach-report-phase-visuals-tactical-map-cards-7e.md
+- validation.coach-report-phase-visuals-tactical-map-cards-7e.md
 - validation.share-pack.md
 - scoring-events-summary.md
-- bundle__simulation.md
-- bundle__reports.md
 
 ## Validation Order
 1. validation.share-pack.md
-2. validation.coach-report-premium-layout-visual-hierarchy-7d.md
-3. coach-report-premium-layout-visual-hierarchy-7d.md
+2. validation.coach-report-phase-visuals-tactical-map-cards-7e.md
+3. coach-report-phase-visuals-tactical-map-cards-7e.md
 4. coach-report.product.html
 5. coach-report.export.html
-6. scoring-events-summary.md
 
 ## Guardrail Reminder
-7D is presentation-only: no scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score changes.
+7E is presentation-only: tactical map cards visualize official/support signals but do not change scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score boundaries.

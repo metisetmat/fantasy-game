@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy
+- current sprint: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,33 +20,32 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 7D - Sprint 7D - Coach Report Premium Layout & Visual Hierarchy
+- PASS: current sprint is Sprint 7E - Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 7D oriented - README current
-- PASS: 7D report included - 7D doc included
-- PASS: 7D validation is PASS - 7D validation current
-- PASS: baseline 7C visible - 7C baseline visible
-- PASS: baseline 7B visible and consistent - 7B metadata PASS
-- PASS: baseline 7A visible and consistent - 7A metadata PASS
-- PASS: baseline metadata contradiction resolved - metadata clean
+- PASS: README is Sprint 7E oriented - README current
+- PASS: 7E report included - 7E doc included
+- PASS: 7E validation is PASS - 7E validation current
+- PASS: baseline 7D visible - 7D baseline visible
+- PASS: baseline 7C preserved - 7C baseline visible
+- PASS: baseline 7B preserved - 7B baseline visible
+- PASS: baseline 7A preserved - 7A baseline visible
 - PASS: baseline 6X preserved - 6X baseline visible
 - PASS: product and export ready - readiness true
-- PASS: premium cover and express read visible - cover/express visible
-- PASS: score source visible above fold - score/source above fold
-- PASS: action plan cards visually prominent - action plan prominent
-- PASS: next-match plan visible - next-match visible
-- PASS: key signals visible - signals visible
-- PASS: profiles to observe non-forced - profiles non-forced
-- PASS: technical appendices collapsed - appendices collapsed
-- PASS: mobile readability pass - mobile checked
-- PASS: export print readiness pass - print checked
-- PASS: no duplicated sections - duplicate count 0
-- PASS: no forbidden wording - forbidden wording absent
+- PASS: premium layout and hierarchy preserved - 7D hierarchy preserved
+- PASS: tactical map cards visible - map cards visible
+- PASS: 2 to 3 visual cards maximum - 3 cards visible
+- PASS: visual cards below action plan - action plan first
+- PASS: visual cards have source confidence and legends - badges and legend visible
+- PASS: visual cards link to action plan and next match - action/next link visible
+- PASS: visual density controlled - density controlled
+- PASS: mobile and export visual readability pass - mobile/export visual ready
+- PASS: no sandbox visual in official body - sandbox count 0
+- PASS: no overclaim or forbidden wording - forbidden wording absent
 - PASS: guardrails preserved - guardrails preserved
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: bundle includes 7D source files - 7D source bundled
+- PASS: bundle includes 7E source files - 7E source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -56,7 +55,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-premium-layout-visual-hierarchy-7d.md
+- coach-report-phase-visuals-tactical-map-cards-7e.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -69,5 +68,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-premium-layout-visual-hierarchy-7d.md
+- validation.coach-report-phase-visuals-tactical-map-cards-7e.md
 - validation.share-pack.md
