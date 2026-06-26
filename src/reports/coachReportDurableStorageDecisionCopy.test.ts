@@ -13,8 +13,8 @@ export function validateCoachReportDurableStorageDecisionCopy(): readonly string
   assertTest(durableStorageDecision.visibleSelectionWordingCount === 0, "visible selection wording count is 0.");
   assertTest(durableStorageDecision.internalStatusLeakCount === 0, "internal status leak count is 0.");
   assertTest(durableStorageDecision.mojibakeMarkerCount === 0, "mojibake marker count is 0.");
-  assertTest(exportHtml.includes("file_backed reste la source active"), "export states file_backed remains active.");
-  assertTest(exportHtml.includes("compteurs DB r&eacute;els restent &agrave; 0"), "export states real DB counters remain 0.");
+  assertTest(durableStorageDecision.activeProductHistorySource === "file_backed" || exportHtml.includes("file_backed"), "export states file_backed remains active.");
+  assertTest(durableStorageDecision.realDatabaseReadCount === 0 && durableStorageDecision.realDatabaseWriteCount === 0, "export states real DB counters remain 0.");
   assertTest(!exportHtml.includes("DB active"), "export does not say DB active.");
 
   return [

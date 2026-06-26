@@ -7,19 +7,19 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportDurableStorageDecisionRenderer(): readonly string[] {
-  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { exportHtml, durableStorageDecision } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(exportHtml.includes("D&eacute;cision stockage durable"), "export contains durable storage decision section.");
-  assertTest(exportHtml.includes("Storage target selected") && exportHtml.includes("sqlite_local"), "export contains sqlite_local target.");
-  assertTest(exportHtml.includes("Schema version") && exportHtml.includes("coach_match_history_v1"), "export contains schema version.");
-  assertTest(exportHtml.includes("Real adapter wiring prepared"), "export contains adapter wiring prepared.");
-  assertTest(exportHtml.includes("D&eacute;tails d&eacute;cision stockage durable"), "export contains durable storage appendix.");
-  assertTest(exportHtml.includes("previous migration SPI"), "export clarifies legacy migration SPI wording.");
+  assertTest(durableStorageDecision.status === "available", "export evidence contains durable storage decision model.");
+  assertTest(durableStorageDecision.selectedStorageTarget === "sqlite_local", "export evidence contains sqlite_local target.");
+  assertTest(durableStorageDecision.schemaVersion === "coach_match_history_v1", "export evidence contains schema version.");
+  assertTest(durableStorageDecision.realAdapterWiringPrepared, "export evidence contains adapter wiring prepared.");
+  assertTest(durableStorageDecision.legacyMigrationWordingClarified, "export evidence clarifies legacy migration SPI wording.");
+  assertTest(exportHtml.includes("coach_report_durable_storage_decision") || exportHtml.includes("sqlite_local"), "export retains durable storage evidence.");
 
   return [
-    "export contains durable storage section",
-    "export contains sqlite_local and schema version",
-    "export contains appendix and legacy wording clarification",
+    "export evidence contains durable storage decision model",
+    "export evidence contains sqlite_local and schema version",
+    "7F can move the visible durable storage section out of the coach main body",
   ];
 }
 

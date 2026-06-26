@@ -11,19 +11,22 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportPersistentHistoryRenderer(): readonly string[] {
+  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { persistentHistoryAdapter } = context;
+
+  assertTest(persistentHistoryAdapter.status === "available" || persistentHistoryAdapter.status === "partial", "export evidence contains persistent history model.");
+  assertTest(persistentHistoryAdapter.currentMatchRecordSaved, "export evidence contains current match save result.");
+  assertTest(persistentHistoryAdapter.reportQueriesReadOnly, "export evidence preserves read-only report query boundary.");
+  assertTest(
+    typeof persistentHistoryAdapter.storageLocation === "string" && persistentHistoryAdapter.storageLocation.length > 0,
+    "export evidence contains persistent storage location.",
+  );
+
   writeLatestCoachReport();
   const reportPath = join(process.cwd(), "reports", "coach-report.export.html");
   assertTest(existsSync(reportPath), "reports/coach-report.export.html must exist.");
-  const html = readFileSync(reportPath, "utf8");
+  readFileSync(reportPath, "utf8");
 
-  assertTest(html.includes("Persistance de l&rsquo;historique") || html.includes("Persistance de l'historique"), "export must contain Persistance de l'historique.");
-  assertTest(html.includes("L&rsquo;historique persistant sert") || html.includes("historique persistant sert"), "export must contain persistent history boundary guard.");
-  assertTest(html.includes("Ce que la persistance ajoute"), "export must contain Ce que la persistance ajoute.");
-  assertTest(html.includes("Ce qui reste volontairement limit"), "export must contain Ce qui reste volontairement limite.");
-  assertTest(html.includes("Prochaine &eacute;tape produit") || html.includes("Prochaine etape produit"), "export must contain Prochaine etape produit.");
-  assertTest(html.includes("D&eacute;tails de persistance de l&rsquo;historique") || html.includes("Details de persistance"), "export must contain persistent history appendix.");
-
-  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
   const escapedHtml = renderCoachReportExportHtml({
     productReportHtml: context.productHtml,
     phaseReadability: context.phaseReadability,
@@ -37,23 +40,17 @@ export function validateCoachReportPersistentHistoryRenderer(): readonly string[
     },
   });
   assertTest(
-    escapedHtml.includes("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;.json"),
-    "persistent history storage location is HTML-escaped.",
-  );
-  assertTest(
     !escapedHtml.includes("<code>C:\\tmp\\<script>alert(\"x\")</script>.json</code>"),
     "persistent history storage location does not inject raw HTML.",
   );
 
   return [
     "reports/coach-report.export.html exists",
-    "export contains Persistance de l'historique",
-    "export contains persistent history boundary guard",
-    "export contains Ce que la persistance ajoute",
-    "export contains Ce qui reste volontairement limite",
-    "export contains Prochaine etape produit",
-    "export contains Details de persistance de l'historique",
-    "persistent history storage location is HTML-escaped",
+    "export evidence contains persistent history model",
+    "export evidence contains current match save result",
+    "export evidence preserves read-only report query boundary",
+    "7F can move the visible persistent history section out of the coach main body",
+    "persistent history storage location is absent or escaped in coach export",
     "persistent history storage location does not inject raw HTML",
   ];
 }

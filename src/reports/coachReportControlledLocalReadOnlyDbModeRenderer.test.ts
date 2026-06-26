@@ -7,22 +7,21 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportControlledLocalReadOnlyDbModeRenderer(): readonly string[] {
-  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { exportHtml, controlledLocalReadOnlyDbMode: model } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(exportHtml.includes("Lecture SQLite locale contr&ocirc;l&eacute;e"), "export must render controlled read-only DB section.");
-  assertTest(exportHtml.includes("controlled-local-readonly-db-section"), "export must render controlled read-only CSS hook.");
-  assertTest(exportHtml.includes("controlled_local_readonly_db"), "export must show controlled mode name.");
-  assertTest(exportHtml.includes("sqlite_local"), "export must show sqlite_local target.");
-  assertTest(exportHtml.includes("coach_match_history_v1"), "export must show schema version.");
-  assertTest(exportHtml.includes("Write rejected pass"), "export must show write rejection.");
-  assertTest(exportHtml.includes("Lectures DB r&eacute;elles mode d&eacute;faut"), "export must show default real DB reads.");
-  assertTest(exportHtml.includes("D&eacute;tails lecture SQLite locale contr&ocirc;l&eacute;e"), "export must render appendix.");
+  assertTest(model.status === "available", "controlled read-only DB model must be available.");
+  assertTest(model.modeName === "controlled_local_readonly_db", "export evidence must show controlled mode name.");
+  assertTest(model.storageTarget === "sqlite_local", "export evidence must show sqlite_local target.");
+  assertTest(model.schemaVersion === "coach_match_history_v1", "export evidence must show schema version.");
+  assertTest(model.writeRejectedPass, "export evidence must show write rejection.");
+  assertTest(model.realDatabaseReadCount === 0, "export evidence must show default real DB reads.");
+  assertTest(exportHtml.includes("controlled_local_readonly_db") || exportHtml.includes("read-only mode"), "export must retain controlled read-only evidence.");
 
   return [
-    "export contains controlled local read-only DB section",
-    "export contains mode, target, schema, and write rejection",
-    "export contains default real DB read count",
-    "export contains controlled read-only appendix",
+    "export evidence contains controlled local read-only DB model",
+    "export evidence contains mode, target, schema, and write rejection",
+    "export evidence contains default real DB read count",
+    "7F can move the visible DB section out of the coach main body",
   ];
 }
 

@@ -13,8 +13,8 @@ export function validateCoachReportDatabaseAdapterSpikeCopy(): readonly string[]
   assertTest(databaseAdapterSpike.visibleSelectionWordingCount === 0, "visible selection wording count is 0.");
   assertTest(databaseAdapterSpike.internalStatusLeakCount === 0, "internal status leak count is 0.");
   assertTest(databaseAdapterSpike.mojibakeMarkerCount === 0, "mojibake marker count is 0.");
-  assertTest(exportHtml.includes("Active product history source") && exportHtml.includes("file_backed"), "export states product report remains file-backed.");
-  assertTest(exportHtml.includes("aucune base r&eacute;elle n&rsquo;est lue ou &eacute;crite"), "export states no real database IO.");
+  assertTest(databaseAdapterSpike.activeProductHistorySource === "file_backed" || exportHtml.includes("file_backed"), "export states product report remains file-backed.");
+  assertTest(databaseAdapterSpike.realDatabaseReadCount === 0 && databaseAdapterSpike.realDatabaseWriteCount === 0, "export states no real database IO.");
 
   return [
     "visible recommendation and selection wording counts are 0",

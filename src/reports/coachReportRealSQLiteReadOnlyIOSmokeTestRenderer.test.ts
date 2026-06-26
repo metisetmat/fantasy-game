@@ -9,24 +9,24 @@ function assertTest(condition: boolean, message: string): void {
 export function validateCoachReportRealSQLiteReadOnlyIOSmokeTestRenderer(): readonly string[] {
   const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
   const exportHtml = context.exportHtml;
+  const model = context.realSQLiteReadOnlyIOSmokeTest;
 
-  assertTest(exportHtml.includes("Smoke test SQLite read-only"), "export must contain the 5H smoke test section.");
-  assertTest(exportHtml.includes("real_sqlite_readonly_io_smoke_test"), "export must show the 5H mode name.");
-  assertTest(exportHtml.includes("sqlite_local"), "export must show sqlite_local target.");
-  assertTest(exportHtml.includes("coach_match_history_v1"), "export must show coach_match_history_v1 schema.");
-  assertTest(exportHtml.includes("Vraie lecture SQLite contr&ocirc;l&eacute;e"), "export must state real controlled SQLite read.");
-  assertTest(exportHtml.includes("Lecture DB r&eacute;elle mode d&eacute;faut"), "export must show default real DB read count.");
-  assertTest(exportHtml.includes("Lecture DB r&eacute;elle mode contr&ocirc;l&eacute;"), "export must show controlled real DB read count.");
-  assertTest(exportHtml.includes("&Eacute;criture DB"), "export must show DB write count.");
-  assertTest(exportHtml.includes("Write rejected"), "export must show write rejection.");
-  assertTest(exportHtml.includes("Query by team"), "export must show query by team.");
-  assertTest(exportHtml.includes("Query by phase"), "export must show query by phase.");
-  assertTest(exportHtml.includes("Details smoke test SQLite read-only") || exportHtml.includes("D&eacute;tails smoke test SQLite read-only"), "export must contain smoke test appendix.");
+  assertTest(model.status === "available", "export evidence must contain the 5H smoke test model.");
+  assertTest(model.modeName === "real_sqlite_readonly_io_smoke_test", "export evidence must show the 5H mode name.");
+  assertTest(model.storageTarget === "sqlite_local", "export evidence must show sqlite_local target.");
+  assertTest(model.schemaVersion === "coach_match_history_v1", "export evidence must show coach_match_history_v1 schema.");
+  assertTest(model.controlledRealDatabaseReadCount > 0, "export evidence must state real controlled SQLite read.");
+  assertTest(model.defaultRealDatabaseReadCount === 0, "export evidence must show default real DB read count.");
+  assertTest(model.realDatabaseWriteCount === 0, "export evidence must show DB write count.");
+  assertTest(model.writeRejectedPass, "export evidence must show write rejection.");
+  assertTest(model.queryByTeamPass, "export evidence must show query by team.");
+  assertTest(model.queryByPhasePass, "export evidence must show query by phase.");
+  assertTest(exportHtml.includes("real_sqlite_readonly_io_smoke_test") || exportHtml.includes("read-only mode"), "export must retain smoke test evidence.");
 
   return [
-    "export contains real SQLite read-only smoke test section",
+    "export evidence contains real SQLite read-only smoke test model",
     "export contains mode, target, schema, real read, and write rejection",
-    "export contains read-only smoke test appendix",
+    "7F can move the visible smoke test section out of the coach main body",
   ];
 }
 

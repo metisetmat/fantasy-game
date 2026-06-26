@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
 import { writeLatestCoachReport } from "./generateCoachHtmlReport";
 
 function assertTest(condition: boolean, message: string): asserts condition {
@@ -9,6 +10,7 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportPhaseVisualReadabilityExportRenderer(): readonly string[] {
+  const { phaseReadability } = buildCoachReportMultiMatchPhaseComparisonTestContext();
   writeLatestCoachReport();
 
   const reportPath = join(process.cwd(), "reports", "coach-report.export.html");
@@ -16,23 +18,19 @@ export function validateCoachReportPhaseVisualReadabilityExportRenderer(): reado
 
   const html = readFileSync(reportPath, "utf8");
 
-  assertTest(html.includes("Avec ballon"), "export HTML must contain Avec ballon.");
-  assertTest(html.includes("Sans ballon"), "export HTML must contain Sans ballon.");
-  assertTest(html.includes("Dernier rempart"), "export HTML must contain Dernier rempart.");
-  assertTest(html.includes("L&eacute;gende des cartes terrain"), "export HTML must contain the phase legend.");
-  assertTest(html.includes("Les cartes terrain affichent uniquement les signaux stabilis") || html.includes("Les cartes terrain affichent uniquement les signaux"), "export HTML must contain the phase-specific guard.");
-  assertTest(html.includes("La couleur et l'intensit&eacute; des zones servent"), "export HTML must contain the non-prescriptive color/intensity guard.");
-  assertTest(html.includes("D&eacute;tails de lisibilit&eacute; des visualisations par phase"), "export HTML must contain the readability appendix.");
+  assertTest(html.includes("Rapport coach"), "export HTML must contain the coach report shell.");
+  assertTest(phaseReadability.status === "available" || phaseReadability.status === "partial", "phase readability evidence must be available or partial.");
+  assertTest(phaseReadability.panelCount >= 3, "phase readability evidence must contain phase panels.");
+  assertTest(phaseReadability.legendItemCount === 5, "phase readability evidence must contain the phase legend.");
+  assertTest(phaseReadability.controlledEmptyStateReadable, "phase readability evidence must keep controlled empty states readable.");
 
   return [
     "reports/coach-report.export.html exists",
-    "export contains Avec ballon",
-    "export contains Sans ballon",
-    "export contains Dernier rempart",
-    "export contains Legende des cartes terrain",
-    "export contains phase-specific guard",
-    "export contains color-intensity non-prescriptive guard",
-    "export contains Details de lisibilite des visualisations par phase",
+    "export contains the coach report shell",
+    "phase readability evidence is available or partial",
+    "phase readability evidence contains phase panels",
+    "phase readability evidence contains the phase legend",
+    "7F can move visible phase readability details out of the coach main body",
   ];
 }
 

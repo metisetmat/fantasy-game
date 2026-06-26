@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { writeLatestCoachReport } from "./generateCoachHtmlReport";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
 
 function assertTest(condition: boolean, message: string): asserts condition {
   if (!condition) {
@@ -9,28 +7,19 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportMultiMatchHistoryRenderer(): readonly string[] {
-  writeLatestCoachReport();
+  const { historyView } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  const reportPath = join(process.cwd(), "reports", "coach-report.export.html");
-  assertTest(existsSync(reportPath), "reports/coach-report.export.html must exist.");
-
-  const html = readFileSync(reportPath, "utf8");
-
-  assertTest(html.includes("Historique des signaux compar") || html.includes("Historique des signaux compar&eacute;s"), "export must contain history section.");
-  assertTest(html.includes("Cet historique d") || html.includes("Cet historique d&eacute;crit uniquement les &eacute;chantillons disponibles."), "export must contain local history guard.");
-  assertTest(html.includes("Ce que l&rsquo;historique montre") || html.includes("Ce que l’historique montre"), "export must contain history reading.");
-  assertTest(html.includes("Pourquoi on reste prudent"), "export must contain cautious copy.");
-  assertTest(html.includes("&Agrave; v&eacute;rifier ensuite") || html.includes("À vérifier ensuite"), "export must contain next check.");
-  assertTest(html.includes("D&eacute;tails de l&rsquo;historique multi-run") || html.includes("Détails de l’historique multi-run"), "export must contain history appendix.");
+  assertTest(historyView.status === "available" || historyView.status === "partial", "history evidence model must exist.");
+  assertTest(historyView.sampleCount > 0, "history evidence contains local samples.");
+  assertTest(historyView.drilldowns.length > 0, "history evidence contains history reading.");
+  assertTest(!historyView.canClaimGlobalEconomy, "history evidence stays cautious.");
+  assertTest(historyView.tags.includes("coach_report_multi_match_history_view"), "history evidence tags remain present.");
 
   return [
-    "reports/coach-report.export.html exists",
-    "export contains Historique des signaux compares",
-    "export contains local history guard",
-    "export contains Ce que l'historique montre",
-    "export contains Pourquoi on reste prudent",
-    "export contains A verifier ensuite",
-    "export contains Details de l'historique multi-run",
+    "history evidence model exists",
+    "history evidence contains local samples",
+    "history evidence contains drilldown reading",
+    "7F can move visible history sections out of the coach main body",
   ];
 }
 

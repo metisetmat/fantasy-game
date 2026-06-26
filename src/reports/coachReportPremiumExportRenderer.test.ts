@@ -20,9 +20,6 @@ export function validateCoachReportPremiumExportRenderer(): readonly string[] {
   assertTest(html.includes("report-scoreboard"), "export HTML must contain report-scoreboard.");
   assertTest(html.includes("report-section-divider"), "export HTML must contain report-section-divider.");
   assertTest(html.includes("report-kpi-grid"), "export HTML must contain report-kpi-grid.");
-  assertTest(html.includes("Avec ballon"), "export HTML must contain Avec ballon.");
-  assertTest(html.includes("Sans ballon"), "export HTML must contain Sans ballon.");
-  assertTest(html.includes("Dernier rempart"), "export HTML must contain Dernier rempart.");
   assertTest(html.includes("Profils"), "export HTML must contain Profils a observer.");
   assertTest(html.includes("Joueurs"), "export HTML must contain Joueurs a etudier.");
   assertTest(html.includes("&Agrave; v&eacute;rifier au prochain match") || html.includes("prochain match"), "export HTML must contain next-match section.");
@@ -35,9 +32,7 @@ export function validateCoachReportPremiumExportRenderer(): readonly string[] {
     "contains report-scoreboard",
     "contains report-section-divider",
     "contains report-kpi-grid",
-    "contains Avec ballon",
-    "contains Sans ballon",
-    "contains Dernier rempart",
+    "7F can move visible phase panels out of the premium main body",
     "contains Profils a observer",
     "contains Joueurs a etudier",
     "contains A verifier au prochain match",

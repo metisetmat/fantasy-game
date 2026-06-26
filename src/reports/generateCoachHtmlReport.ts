@@ -124,26 +124,8 @@ export function writeLatestCoachReport(): void {
     experimentalReport,
     rosterCoverageFixturePlayers,
   );
-  const productHtmlWithout7A = [
-    renderFullMatchRouteFamilyMixActivationSection(fullMatchRouteFamilyMixActivation),
-    renderFullMatchRouteFamilyScoringRateCalibrationSection(fullMatchRouteFamilyScoringRateCalibration),
-    renderFullMatchSegmentScoringDensityCalibrationSection(fullMatchSegmentScoringDensityCalibration),
-    renderFullMatchTeamOpportunityBalanceCalibrationSection(fullMatchTeamOpportunityBalanceCalibration),
-    renderFullMatchDominanceChainCalibrationSection(fullMatchDominanceChainCalibration),
-    renderFullMatchBreakEventPostScoreResetCalibrationSection(fullMatchBreakEventPostScoreResetCalibration),
-    renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(fullMatchGoalkeeperSecureResetBreakSpecificity),
-    renderFullMatchResetBreakBlowoutEconomySection(fullMatchResetBreakBlowoutEconomy),
-    renderFullMatchEarnedDangerGateSection(fullMatchEarnedDangerGate),
-    renderFullMatchEarnedDangerGateTuningSection(fullMatchEarnedDangerGateTuning),
-    renderFullMatchGateSelectivityVolumeRegressionFixSection(fullMatchGateSelectivityVolumeRegressionFix),
-    renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(fullMatchRouteEconomyRecheckAfterSelectivityFix),
-    renderFullMatchDominanceChainCalibrationCoverageFixSection(fullMatchDominanceChainCalibrationCoverageFix),
-    renderFullMatchCloseGameDistributionCalibrationSection(fullMatchCloseGameDistributionCalibration),
-    renderFullMatchTrailingTeamResponseLateGamePressureSection(fullMatchTrailingTeamResponseLateGamePressure),
-    renderFullMatchLateGameThreatQualityTrailingConversionSection(fullMatchLateGameThreatQualityTrailingConversion),
-    renderFullMatchLateGameThreatQualityMonitoringSection(fullMatchLateGameThreatQualityMonitoring),
-    renderFullMatchEconomyFinalStabilizationSection(fullMatchEconomyFinalStabilization),
-  ].reduce((html, section) => appendProductSection(html, section), renderCoachProductReport(productReportView));
+  const coachOnlyProductHtml = renderCoachProductReport(productReportView);
+  const productHtmlWithout7A = coachOnlyProductHtml;
   const productExportHtmlFor7A = renderCoachReportExportHtml({
     productReportHtml: productHtmlWithout7A,
     fullMatchSegmentScoringDensityCalibration,
@@ -425,7 +407,7 @@ export function writeLatestCoachReport(): void {
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
   const exportHtml = renderCoachReportExportHtml({
-    productReportHtml: productHtmlWith7C,
+    productReportHtml: coachOnlyProductHtml,
     phaseReadability,
     multiMatchPhaseComparison,
     multiMatchHistoryView,
@@ -489,7 +471,7 @@ export function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    productHtmlWith7C,
+    coachOnlyProductHtml,
     "utf8",
   );
   writeFileSync(

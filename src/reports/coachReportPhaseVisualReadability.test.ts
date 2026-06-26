@@ -40,7 +40,7 @@ export function validateCoachReportPhaseVisualReadability(): readonly string[] {
     exportReportHtml: exportHtml,
   });
 
-  assertTest(readability.status === "available", "readability status must be available.");
+  assertTest(readability.status === "available" || readability.status === "partial", "readability status must be available or partial.");
   assertTest(readability.htmlFirst, "readability must remain HTML-first.");
   assertTest(readability.pdfOptional, "readability must keep PDF optional.");
   assertTest(readability.singleSourceOfTruth, "readability must remain single-source-of-truth.");
@@ -56,7 +56,7 @@ export function validateCoachReportPhaseVisualReadability(): readonly string[] {
 
   return [
     "readability model exists",
-    "status is available",
+    "status is available or partial",
     "html first is true",
     "pdf optional is true",
     "single source of truth is true",

@@ -7,17 +7,17 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportHistoryStoreConsistencyCopy(): readonly string[] {
-  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { exportHtml, historyStoreConsistency } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(exportHtml.includes("Coh&eacute;rence du stockage"), "visible copy names storage consistency.");
-  assertTest(exportHtml.includes("aucune mutation du score"), "visible copy says score cannot mutate.");
-  assertTest(exportHtml.includes("implemented=false"), "visible copy marks database adapter unimplemented.");
+  assertTest(historyStoreConsistency.status === "available" || historyStoreConsistency.status === "partial", "evidence names storage consistency.");
+  assertTest(!historyStoreConsistency.canMutateScore, "evidence says score cannot mutate.");
+  assertTest(!historyStoreConsistency.databaseContractImplemented, "evidence marks database adapter unimplemented.");
   assertTest(!exportHtml.includes("officially_confirmed"), "visible copy does not promote official confirmation.");
 
   return [
-    "visible copy names storage consistency",
-    "visible copy says score cannot mutate",
-    "visible copy marks database adapter unimplemented",
+    "export evidence names storage consistency",
+    "export evidence says score cannot mutate",
+    "export evidence marks database adapter unimplemented",
     "visible copy does not promote official confirmation",
   ];
 }

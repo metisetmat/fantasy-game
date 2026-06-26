@@ -369,6 +369,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReportPremiumLayoutVisualHierarchy7DValidation = readIfExists(join(shareDirectory, "validation.coach-report-premium-layout-visual-hierarchy-7d.md"));
   const coachReportPhaseVisualsTacticalMapCards7E = readIfExists(join(shareDirectory, "coach-report-phase-visuals-tactical-map-cards-7e.md"));
   const coachReportPhaseVisualsTacticalMapCards7EValidation = readIfExists(join(shareDirectory, "validation.coach-report-phase-visuals-tactical-map-cards-7e.md"));
+  const productReportScopeDensityWordingCleanup7F = readIfExists(join(shareDirectory, "product-report-scope-density-wording-cleanup-7f.md"));
+  const productReportScopeDensityWordingCleanup7FValidation = readIfExists(join(shareDirectory, "validation.product-report-scope-density-wording-cleanup-7f.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3238,6 +3240,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-premium-layout-visual-hierarchy-7d.md",
     ...sprint7DForbiddenLeftovers,
   ];
+  const sprint7FExpectedFiles = sprint7EExpectedFiles.map((file) =>
+    file === "coach-report-phase-visuals-tactical-map-cards-7e.md"
+      ? "product-report-scope-density-wording-cleanup-7f.md"
+      : file === "validation.coach-report-phase-visuals-tactical-map-cards-7e.md"
+        ? "validation.product-report-scope-density-wording-cleanup-7f.md"
+        : file
+  );
+  const sprint7FForbiddenLeftovers = [
+    "coach-report-phase-visuals-tactical-map-cards-7e.md",
+    "validation.coach-report-phase-visuals-tactical-map-cards-7e.md",
+    ...sprint7EForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4473,6 +4487,42 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportPhaseVisualsTacticalMapCards7EValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 7E source files", bundleReports.includes("src/reports/coachReportPhaseVisualsTacticalMapCards.ts") && bundleReports.includes("src/reports/coachReportTacticalMapCards.ts") && bundleReports.includes("src/reports/coachReportTacticalMapCardsAudit.ts") && bundleReports.includes("src/reports/coachReportPhaseVisualsAudit.ts") && bundleReports.includes("src/reports/coachReportVisualDensityAudit.ts") && bundleReports.includes("src/reports/coachReportVisualMobileExportAudit.ts") && bundleReports.includes("src/reports/coachReportVisualSourceOfTruthAudit.ts") && bundleReports.includes("src/reports/coachReportPhaseVisualsTacticalMapCards.test.ts"), "7E source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportPhaseVisualsTacticalMapCards7EValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7FChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7FExpectedFiles.every((file) => requiredCopied(file)), sprint7FExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7FExpectedFiles.every((file) => manifest.includes(file)), sprint7FExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7F", activeConfig.sprintName === "Sprint 7F - Product Report Scope, Density & Wording Cleanup", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7FForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7FForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7F oriented", readme.includes("# Sprint 7F Share Pack") && readme.includes("product-report-scope-density-wording-cleanup-7f.md") && readme.includes("coach-report.export.html"), "README current"),
+    check("7F report included", productReportScopeDensityWordingCleanup7F.includes("# Product Report Scope, Density & Wording Cleanup 7F") && productReportScopeDensityWordingCleanup7F.includes("Scope Boundary Audit") && productReportScopeDensityWordingCleanup7F.includes("Wording Cleanup Audit"), "7F doc included"),
+    check("7F validation is PASS", productReportScopeDensityWordingCleanup7FValidation.includes("Status: PASS") && productReportScopeDensityWordingCleanup7FValidation.includes("CoachReportScopeDensityWordingCleanupModel exists"), "7F validation current"),
+    check("baseline 7E visible", productReportScopeDensityWordingCleanup7F.includes("baselineVersion: COACH_REPORT_PHASE_VISUALS_TACTICAL_MAP_CARDS_7E") && productReportScopeDensityWordingCleanup7FValidation.includes("baseline 7E visible"), "7E baseline visible"),
+    check("baseline 7D preserved", productReportScopeDensityWordingCleanup7FValidation.includes("baseline 7D preserved"), "7D baseline visible"),
+    check("baseline 7C preserved", productReportScopeDensityWordingCleanup7FValidation.includes("baseline 7C preserved"), "7C baseline visible"),
+    check("baseline 7B preserved", productReportScopeDensityWordingCleanup7FValidation.includes("baseline 7B preserved"), "7B baseline visible"),
+    check("baseline 7A preserved", productReportScopeDensityWordingCleanup7FValidation.includes("baseline 7A preserved"), "7A baseline visible"),
+    check("baseline 6X preserved", productReportScopeDensityWordingCleanup7FValidation.includes("baseline 6X preserved") && productReportScopeDensityWordingCleanup7F.includes("| 6X match economy | PASS |"), "6X baseline visible"),
+    check("product and export ready", productReportScopeDensityWordingCleanup7F.includes("productReportReady: true") && productReportScopeDensityWordingCleanup7F.includes("coachExportReady: true"), "readiness true"),
+    check("main body coach-only", productReportScopeDensityWordingCleanup7F.includes("| mainBodyCoachOnly | true |") && productReportScopeDensityWordingCleanup7FValidation.includes("main body coach-only"), "coach-only true"),
+    check("database sections not in main body", productReportScopeDensityWordingCleanup7F.includes("| databaseMainBodySectionCount | 0 |") && productReportScopeDensityWordingCleanup7F.includes("| exportDatabaseSectionsCount | 0 |"), "database count 0"),
+    check("persistence sections not in main body", productReportScopeDensityWordingCleanup7F.includes("| persistenceMainBodySectionCount | 0 |") && productReportScopeDensityWordingCleanup7F.includes("| exportPersistenceSectionsCount | 0 |"), "persistence count 0"),
+    check("calibration history not in main body", productReportScopeDensityWordingCleanup7F.includes("| calibrationMainBodySectionCount | 0 |") && productReportScopeDensityWordingCleanup7F.includes("| exportCalibrationSectionsCount | 0 |"), "calibration count 0"),
+    check("mechanical wording removed", productReportScopeDensityWordingCleanup7F.includes("| mechanicalPhraseCount | 0 |") && productReportScopeDensityWordingCleanup7F.includes("| duplicatedLabelCount | 0 |"), "mechanical counts 0"),
+    check("repeated warnings reduced", productReportScopeDensityWordingCleanup7F.includes("| repeatedWarningSentenceCount | 0 |"), "repeated warnings 0"),
+    check("no forbidden wording", productReportScopeDensityWordingCleanup7F.includes("| forbiddenWordingCount | 0 |") && !/preuve d.finitive|verite globale depuis ce run|zone dominante garantie|plan tactique impose|score ajuste|selection imposee|sandbox applique|diagnostic comme verite officielle|batch score comme score officiel/iu.test(`${coachProductHtml}\n${coachExportHtml}`), "forbidden wording absent"),
+    check("express read action plan and tactical maps preserved", coachProductHtml.includes("id=\"express-read\"") && coachProductHtml.includes("id=\"coach-action-plan\"") && coachProductHtml.includes("id=\"tactical-map-cards\"") && coachExportHtml.includes("id=\"tactical-map-cards\""), "main coach sections visible"),
+    check("technical appendices collapsed", coachProductHtml.includes("<details class=\"appendix\">") && coachExportHtml.includes("<section id=\"appendices\"") && coachExportHtml.includes("premium-appendix-card"), "appendices visible"),
+    check("source of truth preserved", productReportScopeDensityWordingCleanup7F.includes("| sourceOfTruthStillAboveFold | true |") && productReportScopeDensityWordingCleanup7F.includes("| persistenceNotScoringTruth | true |") && productReportScopeDensityWordingCleanup7F.includes("| sqliteNotScoringTruth | true |"), "source-of-truth clean"),
+    check("guardrails preserved", productReportScopeDensityWordingCleanup7FValidation.includes("score constants unchanged") && productReportScopeDensityWordingCleanup7FValidation.includes("MatchBonusEvent unchanged") && productReportScopeDensityWordingCleanup7FValidation.includes("batch/live separation preserved"), "guardrails preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS"), "batch/live PASS"),
+    check("bundle includes 7F source files", bundleReports.includes("src/reports/productReportScopeDensityWordingCleanup7F.ts") && bundleReports.includes("src/reports/coachReportScopeBoundaryAudit.ts") && bundleReports.includes("src/reports/coachReportProductDensityCleanupAudit.ts") && bundleReports.includes("src/reports/coachReportWordingRegressionCleanupAudit.ts") && bundleReports.includes("src/reports/coachReportCoachExportScopeAudit.ts") && bundleReports.includes("src/reports/coachReportSourceOfTruthScopeCleanupAudit.ts") && bundleReports.includes("src/reports/productReportScopeDensityWordingCleanup7F.test.ts"), "7F source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && productReportScopeDensityWordingCleanup7FValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8543,6 +8593,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7F - Product Report Scope")
+      ? sprint7FChecks
     : activeConfig.sprintName.includes("Sprint 7E - Coach Report Phase Visuals")
       ? sprint7EChecks
     : activeConfig.sprintName.includes("Sprint 7D - Coach Report Premium Layout")

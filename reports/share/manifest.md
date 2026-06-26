@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-26T09:09:56.076Z
-Task/sprint: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards
+Generated: 2026-06-26T15:23:14.416Z
+Task/sprint: Sprint 7F - Product Report Scope, Density & Wording Cleanup
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-phase-visuals-tactical-map-cards-7e.md
-- validation.coach-report-phase-visuals-tactical-map-cards-7e.md
+- product-report-scope-density-wording-cleanup-7f.md
+- validation.product-report-scope-density-wording-cleanup-7f.md
 - README.md
 
 ## Bundle Files
