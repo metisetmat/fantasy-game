@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-26T08:35:47.620Z
+Generated timestamp: 2026-06-26T09:09:56.076Z
 Task/sprint name: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards
 Final file count: 20
 
@@ -927,17 +927,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/renderCoachProductReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachReportPhaseVisualsAudit.ts
-?? src/reports/coachReportPhaseVisualsTacticalMapCards.test.ts
-?? src/reports/coachReportPhaseVisualsTacticalMapCards.ts
-?? src/reports/coachReportPhaseVisualsTacticalMapCardsWarnings.ts
-?? src/reports/coachReportTacticalMapCards.ts
-?? src/reports/coachReportTacticalMapCardsAudit.ts
-?? src/reports/coachReportVisualDensityAudit.ts
-?? src/reports/coachReportVisualMobileExportAudit.ts
-?? src/reports/coachReportVisualSourceOfTruthAudit.ts
+ M src/reports/coachReportPhaseVisualsTacticalMapCards.test.ts
+ M src/reports/coachReportPhaseVisualsTacticalMapCards.ts
+ M src/reports/coachReportTacticalMapCards.ts

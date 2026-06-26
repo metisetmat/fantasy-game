@@ -388,13 +388,15 @@ export function renderCoachReportPhaseVisualsTacticalMapCards7EDoc(
     "",
     "## Tactical Map Cards",
     ...table([
-      ["Card", "Type", "Source", "Confidence", "Primary zone", "Action-plan link", "Next check", "Limitation"],
+      ["Card", "Type", "Source", "Confidence", "Primary zone", "Action-plan card", "Insight links", "Action-plan cue", "Next check", "Limitation"],
       ...model.tacticalMapCards.map((card) => [
         card.title,
         card.visualType,
         card.sourceType,
         card.confidence,
         card.primaryZone ?? "empty_state",
+        card.linkedActionPlanCardId,
+        card.linkedInsightIds.join(", ") || "none",
         card.coachingUse,
         card.nextMatchCheck,
         card.limitationNote,

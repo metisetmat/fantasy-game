@@ -54,11 +54,11 @@
 | overconfidentMapCardCount | 0 |
 
 ## Tactical Map Cards
-| Card | Type | Source | Confidence | Primary zone | Action-plan link | Next check | Limitation |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Zones de danger repetees | danger_map | official | high | Z3-C | Transformer les zones de danger en continuite. | La progression mene-t-elle a une deuxieme action controlee ? | Signal a confirmer sur plusieurs matchs. |
-| Recuperations detectees, carte prudente | recovery_map | official | low | empty_state | Securiser la premiere sortie apres recuperation. | Moins de pertes immediates apres recuperation. | Le rapport ne confond pas recuperation et sequence maitrisee. |
-| Pression, rebond et continuite | combined_map | official | high | Z3-C | Garder une structure apres pression ou arret du gardien. | L'equipe garde-t-elle sa structure apres action neutralisee ? | Carte volontairement prudente si les zones instables ne sont pas assez solides. |
+| Card | Type | Source | Confidence | Primary zone | Action-plan card | Insight links | Action-plan cue | Next check | Limitation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Zones de danger repetees | danger_map | official | high | Z5-C | action-card-danger-to-continuity | deep-insight-2-recovery_first_outlet | Transformer les zones de danger en continuite. | La progression mene-t-elle a une deuxieme action controlee ? | Signal a confirmer sur plusieurs matchs. |
+| Recuperations detectees, carte prudente | recovery_map | official | low | empty_state | action-card-secure-first-exit | deep-insight-1-danger_progression_zones | Securiser la premiere sortie apres recuperation. | Moins de pertes immediates apres recuperation. | Le rapport ne confond pas recuperation et sequence maitrisee. |
+| Pression, rebond et continuite | combined_map | official | high | Z3-C | action-card-structure-after-pressure | deep-insight-3-pressure_continuity_goalkeeper | Garder une structure apres pression ou arret du gardien. | L'equipe garde-t-elle sa structure apres action neutralisee ? | Carte volontairement prudente si les zones instables ne sont pas assez solides. |
 
 ## Phase Visuals Audit
 | Metric | Value |

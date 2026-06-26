@@ -85,6 +85,11 @@ function maxSignals(
 ): readonly TacticalPitchZoneSignal[] {
   return (seed?.[panel].signals ?? [])
     .filter((signal) => kinds.includes(signal.kind))
+    .sort((a, b) =>
+      b.value - a.value ||
+      kinds.indexOf(a.kind) - kinds.indexOf(b.kind) ||
+      a.zone.localeCompare(b.zone, "fr-FR")
+    )
     .slice(0, 3);
 }
 
@@ -111,6 +116,8 @@ function createCard(input: {
   readonly coachingUse: string;
   readonly limitationNote: string;
   readonly legend: readonly string[];
+  readonly linkedActionPlanCardId: string;
+  readonly linkedInsightIds: readonly string[];
 }): CoachTacticalMapCard {
   const affectedZones = zoneList(input.signals);
   const primaryZone = affectedZones[0];
@@ -123,8 +130,8 @@ function createCard(input: {
     sourceType: "official",
     confidence: insufficientDataState ? "low" : confidenceFromSignals(input.signals),
     priority: input.priority,
-    linkedActionPlanCardId: "action-card-secure-first-exit",
-    linkedInsightIds: ["deep-insight-1-danger_progression_zones"],
+    linkedActionPlanCardId: input.linkedActionPlanCardId,
+    linkedInsightIds: input.linkedInsightIds,
     observation: insufficientDataState
       ? "Signal detecte, cartographie non stabilisee dans ce run."
       : input.observation,
@@ -154,6 +161,10 @@ export function buildCoachTacticalMapCardsFromProductReport(
   const dangerSignals = maxSignals(model.phaseVisualSeed, "withBall", ["danger_zone", "progression_zone"]);
   const recoverySignals = maxSignals(model.phaseVisualSeed, "withoutBall", ["recovery_zone"]);
   const pressureSignals = maxSignals(model.phaseVisualSeed, "withoutBall", ["pressure_instability_zone"]);
+  const insightIdAt = (index: number): readonly string[] => {
+    const signal = model.keyCoachSignals[index];
+    return signal === undefined ? [] : [`deep-insight-${index + 1}-${signal.signalId}`];
+  };
 
   return [
     createCard({
@@ -171,6 +182,8 @@ export function buildCoachTacticalMapCardsFromProductReport(
       coachingUse: "Transformer les zones de danger en continuite.",
       limitationNote: "Signal a confirmer sur plusieurs matchs.",
       legend: ["Plus fonce = signal plus visible", "Chiffre = occurrences officielles du run"],
+      linkedActionPlanCardId: "action-card-danger-to-continuity",
+      linkedInsightIds: insightIdAt(1),
     }),
     createCard({
       cardId: "tactical-map-useful-recoveries",
@@ -187,6 +200,8 @@ export function buildCoachTacticalMapCardsFromProductReport(
       coachingUse: "Securiser la premiere sortie apres recuperation.",
       limitationNote: "Le rapport ne confond pas recuperation et sequence maitrisee.",
       legend: ["Vert = recuperation utile", "Chiffre = signal officiel observe"],
+      linkedActionPlanCardId: "action-card-secure-first-exit",
+      linkedInsightIds: insightIdAt(0),
     }),
     createCard({
       cardId: "tactical-map-pressure-continuity",
@@ -203,6 +218,8 @@ export function buildCoachTacticalMapCardsFromProductReport(
       coachingUse: "Garder une structure apres pression ou arret du gardien.",
       limitationNote: "Carte volontairement prudente si les zones instables ne sont pas assez solides.",
       legend: ["Orange = instabilite", "Carte vide = signal insuffisant"],
+      linkedActionPlanCardId: "action-card-structure-after-pressure",
+      linkedInsightIds: insightIdAt(2),
     }),
   ];
 }
@@ -253,7 +270,7 @@ function renderZoneGrid(card: CoachTacticalMapCard): string {
 
 function renderTacticalMapCard(card: CoachTacticalMapCard): string {
   return `
-    <article class="tactical-map-card" data-card-id="${escapeHtml(card.cardId)}" data-source-type="${card.sourceType}">
+    <article class="tactical-map-card" data-card-id="${escapeHtml(card.cardId)}" data-source-type="${card.sourceType}" data-linked-action-plan-card-id="${escapeHtml(card.linkedActionPlanCardId)}" data-linked-insight-ids="${escapeHtml(card.linkedInsightIds.join(","))}">
       <div class="badge-row">
         <span class="badge">Source : ${card.sourceType === "official" ? "Officiel" : escapeHtml(card.sourceType)}</span>
         <span class="badge">Confiance ${card.confidence === "high" ? "haute" : card.confidence === "medium" ? "moyenne" : "faible"}</span>
