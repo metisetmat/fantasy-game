@@ -1361,7 +1361,7 @@ function renderCoachReportFromTraceAggregates(report: MatchReport): string {
     renderTraceV0Card({
       title: "Point de vigilance coach",
       summary:
-        "Ce point de vigilance reste une piste prudente issue des agrÃ©gats officiels du run, pas une preuve globale.",
+        "Ce point de vigilance reste une piste prudente issue des agrÃ©gats officiels du run, pas une conclusion generale.",
       bullets: [watchpoint],
     }),
   ].join("");

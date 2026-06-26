@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-26T16:15:13.970Z
-Task/sprint: Sprint 7F - Product Report Scope, Density & Wording Cleanup
+Generated: 2026-06-26T18:43:41.458Z
+Task/sprint: Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- product-report-scope-density-wording-cleanup-7f.md
-- validation.product-report-scope-density-wording-cleanup-7f.md
+- coach-report-multi-match-comparison-trend-signals-7g.md
+- validation.coach-report-multi-match-comparison-trend-signals-7g.md
 - README.md
 
 ## Bundle Files

@@ -263,6 +263,30 @@ const PREMIUM_EXPORT_CSS = `
     .tactical-map-zone--pressure { background: #fff8df; border-color: #ead486; }
     .tactical-map-zone--empty { color: var(--report-muted); border-style: dashed; }
     .tactical-map-legend { color: var(--report-muted); font-size: 0.9rem; }
+    .trend-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .trend-card {
+      border: 1px solid var(--report-line);
+      border-radius: 10px;
+      padding: 14px;
+      background: #fbfdff;
+      break-inside: avoid;
+    }
+    .trend-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .trend-grid section {
+      border: 1px solid var(--report-line);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--report-soft);
+    }
 
     .report-section-divider {
       display: flex;
@@ -1493,6 +1517,26 @@ function renderTacticalMapCardsExport(html: string): string {
       <div>
         <h2>Ou le match s'est joue</h2>
         <p>Cartes de zones issues du rapport produit. Source, confiance, legende et lien avec le plan d'action restent visibles a l'impression.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderMultiMatchTrendSignalsExport(html: string): string {
+  const body = extractSectionInner(html, "multi-match-trend-signals");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="multi-match-trend-signals" class="premium-section" data-source-product-sections="multi-match-trend-signals">
+    <div class="report-section-divider">Tendances a confirmer</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Tendances a confirmer</h2>
+        <p>Comparaison locale prudente: observation seulement, sans effet sur score, selection ou moteur live.</p>
       </div>
     </div>
     ${body}
@@ -5282,6 +5326,7 @@ export function renderCoachReportExportHtml(input: {
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),
+    renderMultiMatchTrendSignalsExport(input.productReportHtml),
     renderTrainingFocusPackageExport(input.productReportHtml),
     renderNextMatchPlanExport(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),

@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 7F - Product Report Scope, Density & Wording Cleanup. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
