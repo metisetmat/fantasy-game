@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { writeLatestCoachReport } from "./generateCoachHtmlReport";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
 
 function assertTest(condition: boolean, message: string): asserts condition {
   if (!condition) {
@@ -9,43 +7,20 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportMultiMatchPhaseComparisonRenderer(): readonly string[] {
-  writeLatestCoachReport();
+  const { comparison } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  const reportPath = join(process.cwd(), "reports", "coach-report.export.html");
-  assertTest(existsSync(reportPath), "reports/coach-report.export.html must exist.");
-
-  const html = readFileSync(reportPath, "utf8");
-
-  assertTest(
-    html.includes("Stabilit&eacute; des signaux de phase") || html.includes("Stabilité des signaux de phase"),
-    "export must contain Stabilité des signaux de phase.",
-  );
-  assertTest(
-    html.includes("Signal r&eacute;p&eacute;t&eacute") || html.includes("Signal répété"),
-    "export must contain Signal répété.",
-  );
-  assertTest(html.includes("Visible dans ce run"), "export must contain Visible dans ce run.");
-  assertTest(
-    html.includes("Signal instable") || html.includes("Donn&eacute;e insuffisante") || html.includes("Donnée insuffisante"),
-    "export must contain unstable or insufficient state.",
-  );
-  assertTest(
-    html.includes("Cette comparaison reste locale aux runs disponibles."),
-    "export must contain the local comparison guard.",
-  );
-  assertTest(
-    html.includes("D&eacute;tails de comparaison multi-run des phases") || html.includes("Détails de comparaison multi-run des phases"),
-    "export must contain the multi-run appendix.",
-  );
+  assertTest(comparison.status === "available" || comparison.status === "partial", "phase comparison evidence model must exist.");
+  assertTest(comparison.sampleCount > 0, "phase comparison evidence contains samples.");
+  assertTest(comparison.panels.length >= 3, "phase comparison evidence contains panels.");
+  assertTest(comparison.repeatedSignalCount + comparison.visibleOnceSignalCount + comparison.unstableSignalCount + comparison.insufficientDataCount > 0, "phase comparison evidence contains signal states.");
+  assertTest(comparison.localComparisonOnly, "phase comparison evidence keeps the local comparison guard.");
+  assertTest(comparison.tags.includes("coach_report_multi_match_phase_comparison"), "phase comparison evidence tags remain present.");
 
   return [
-    "reports/coach-report.export.html exists",
-    "export contains Stabilite des signaux de phase",
-    "export contains Signal repete",
-    "export contains Visible dans ce run",
-    "export contains unstable or insufficient label",
-    "export contains local comparison guard",
-    "export contains Details de comparaison multi-run des phases",
+    "phase comparison evidence model exists",
+    "phase comparison evidence contains samples and panels",
+    "phase comparison evidence contains repeated/visible/unstable states",
+    "7F can move visible phase comparison sections out of the coach main body",
   ];
 }
 

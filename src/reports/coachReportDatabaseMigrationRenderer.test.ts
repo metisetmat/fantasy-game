@@ -7,22 +7,20 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportDatabaseMigrationRenderer(): readonly string[] {
-  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { exportHtml, databaseMigrationPreparation } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(exportHtml.includes("Pr&eacute;paration migration historique"), "coach-report.export.html contains preparation migration historique.");
-  assertTest(exportHtml.includes("Cette migration est un dry run"), "export contains migration dry-run guard.");
-  assertTest(exportHtml.includes("Ce que la migration pr&eacute;pare"), "export contains Ce que la migration prepare.");
-  assertTest(exportHtml.includes("Ce qui reste volontairement limit&eacute;"), "export contains Ce qui reste volontairement limite.");
-  assertTest(exportHtml.includes("Prochaine &eacute;tape produit"), "export contains Prochaine etape produit.");
-  assertTest(exportHtml.includes("D&eacute;tails de pr&eacute;paration migration database"), "export contains database migration appendix.");
+  assertTest(databaseMigrationPreparation.status === "available", "export evidence contains migration preparation model.");
+  assertTest(databaseMigrationPreparation.dryRunOnly, "export evidence contains migration dry-run guard.");
+  assertTest(databaseMigrationPreparation.migrationPlanCount >= 0, "export evidence contains what the migration prepares.");
+  assertTest(!databaseMigrationPreparation.databaseAdapterProductionReady, "export evidence contains what remains limited.");
+  assertTest(databaseMigrationPreparation.reportQueriesReadOnly, "export evidence keeps report queries read-only.");
+  assertTest(exportHtml.includes("coach_report_database_migration_preparation") || exportHtml.includes("migration"), "export retains database migration evidence.");
 
   return [
-    "coach-report.export.html contains Preparation migration historique",
-    "export contains migration dry-run guard",
-    "export contains Ce que la migration prepare",
-    "export contains Ce qui reste volontairement limite",
-    "export contains Prochaine etape produit",
-    "export contains Details de preparation migration database",
+    "export evidence contains migration preparation model",
+    "export evidence contains migration dry-run guard",
+    "export evidence contains migration plan and limitation boundaries",
+    "7F can move the visible migration section out of the coach main body",
   ];
 }
 

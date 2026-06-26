@@ -57,11 +57,39 @@ function zonesFromText(text: string): readonly string[] {
   return unique([...text.matchAll(/\bZ\d(?:-[A-Z]+)?\b/gu)].map((match) => match[0] ?? ""));
 }
 
+function coachReadableSignalSummary(summary: string): string {
+  let readable = summary.trim();
+  let previous = "";
+
+  while (readable !== previous) {
+    previous = readable;
+    readable = readable
+      .replace(/^Le rapport officiel\s+(?:met en avant|fait ressortir)\s+/iu, "")
+      .replace(/^La deuxieme lecture\s+(?:met en avant|signale)\s+/iu, "")
+      .replace(/^La suite du rapport\s+signale\s+/iu, "")
+      .trim();
+  }
+
+  return readable
+    .replace(/^La qualit[ée]\s+/iu, "la qualite ")
+    .replace(/^La suite\s+/iu, "la suite ")
+    .replace(/\.+$/u, "")
+    .trim();
+}
+
+function sentence(text: string): string {
+  const trimmed = text.trim().replace(/\.+$/u, "");
+
+  return `${trimmed}.`;
+}
+
 function deepInsightTemplate(signal: CoachProductReportSignal, index: number): Omit<CoachDeepInsight, "insightId" | "title" | "confidence" | "evidenceSummary" | "affectedZones"> {
+  const readableSummary = coachReadableSignalSummary(signal.summary);
+
   if (index === 0) {
     return {
       sourceType: "official",
-      observation: `Le rapport officiel fait ressortir ${signal.summary}`,
+      observation: sentence(`Signal officiel: ${readableSummary}`),
       whyItMatters: "C'est important parce que la progression propre donne au coach un repere sur la premiere structure offensive utile.",
       probableCause: "Le porteur trouve une solution proche avant que la pression ne ferme la zone.",
       tacticalConsequence: "L'equipe peut avancer sans transformer chaque recuperation en action forcee.",
@@ -77,7 +105,7 @@ function deepInsightTemplate(signal: CoachProductReportSignal, index: number): O
   if (index === 1) {
     return {
       sourceType: "official",
-      observation: `La deuxieme lecture met en avant ${signal.summary}`,
+      observation: sentence(`Deuxieme lecture: ${readableSummary}`),
       whyItMatters: "C'est important parce que la deuxieme action decide si le gain initial devient une sequence stable ou une perte rapide.",
       probableCause: "L'equipe cherche le second ballon ou le relais avant que le bloc adverse ne se replace.",
       tacticalConsequence: "Une bonne deuxieme action peut maintenir la pression sans forcer une finition precoce.",
@@ -92,7 +120,7 @@ function deepInsightTemplate(signal: CoachProductReportSignal, index: number): O
   }
   return {
     sourceType: "official",
-    observation: `La suite du rapport signale ${signal.summary}`,
+    observation: sentence(`Suite d'action a surveiller: ${readableSummary}`),
     whyItMatters: "C'est important parce que la reponse a la pression et au gardien stabilise la fin de sequence.",
     probableCause: "La ligne de soutien reste disponible quand la premiere option est neutralisee.",
     tacticalConsequence: "L'equipe peut conserver une menace sans confondre continuation et score automatique.",

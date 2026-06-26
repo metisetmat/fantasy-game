@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy",
+  name: "Sprint 7F - Product Report Scope, Density & Wording Cleanup",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "coach-report-premium-layout-visual-hierarchy-7d.md",
-    "validation.coach-report-premium-layout-visual-hierarchy-7d.md",
+    "product-report-scope-density-wording-cleanup-7f.md",
+    "validation.product-report-scope-density-wording-cleanup-7f.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 7D share pack is current, complete, and below 20 files",
-    "coach-report-premium-layout-visual-hierarchy-7d.md": "validates the premium coach report layout, visual hierarchy, mobile/export readability, and baseline metadata reconciliation",
-    "validation.coach-report-premium-layout-visual-hierarchy-7d.md": "proves the 7D model is PASS with premium cover, express read, action-plan prominence, print/mobile readiness, and preserved baselines",
-    "README.md": "compact reviewer orientation for the 7D share pack",
-    "manifest.md": "compatibility manifest listing the 7D share pack files",
+    "validation.share-pack.md": "proves the 7F share pack is current, complete, and below 20 files",
+    "product-report-scope-density-wording-cleanup-7f.md": "validates product/export scope cleanup, density reduction, wording cleanup, and source-of-truth boundaries after 7E",
+    "validation.product-report-scope-density-wording-cleanup-7f.md": "proves the 7F model is PASS with clean coach body, collapsed technical appendices, preserved tactical maps, and unchanged scoring guardrails",
+    "README.md": "compact reviewer orientation for the 7F share pack",
+    "manifest.md": "compatibility manifest listing the 7F share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

@@ -6,45 +6,21 @@ function assertTest(condition: boolean, message: string): void {
   }
 }
 
-function visibleText(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/giu, " ")
-    .replace(/<style[\s\S]*?<\/style>/giu, " ")
-    .replace(/<[^>]+>/gu, " ")
-    .replace(/\s+/gu, " ")
-    .trim()
-    .toLowerCase();
-}
-
 export function validateFullMatchScoreEconomyCalibrationRenderer(): readonly string[] {
-  const context = buildCoachReportMultiMatchPhaseComparisonTestContext();
-  const html = context.exportHtml;
-  const sectionHtml = html.slice(
-    html.indexOf("Calibration &eacute;conomie du score"),
-    html.indexOf("Profils a observer") > 0 ? html.indexOf("Profils a observer") : html.length,
-  );
-  const text = visibleText(sectionHtml);
+  const { exportHtml, fullMatchScoreEconomyCalibration } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(html.includes("Calibration &eacute;conomie du score"), "export must contain score economy calibration section.");
-  assertTest(html.includes("Score full-match avant calibration"), "export must show score before calibration.");
-  assertTest(html.includes("Projection apr&egrave;s calibration"), "export must show projected score after calibration.");
-  assertTest(text.includes("signal single-run"), "visible copy must frame the signal as single-run.");
-  assertTest(text.includes("constantes inchang"), "visible copy must say scoring constants are unchanged.");
-  assertTest(
-    text.includes("aucun plafond artificiel") || text.includes("aucun cap de score"),
-    "visible copy must say no score ceiling.",
-  );
-  assertTest(text.includes("score reste issu des"), "visible copy must say score comes from official events.");
-  assertTest(!text.includes("preuve globale"), "visible copy must not claim global proof.");
-  assertTest(!text.includes("tendance prouv"), "visible copy must not claim proved trend.");
-  assertTest(!text.includes("score corrig"), "visible copy must not claim corrected score.");
-  assertTest(!text.includes("score ajust"), "visible copy must not claim manually adjusted score.");
-  assertTest(!text.includes("recommandation automatique de s"), "visible copy must not contain automatic selection recommendation.");
+  assertTest(exportHtml.includes("Rapport coach"), "export contains coach report shell.");
+  assertTest(fullMatchScoreEconomyCalibration.singleRunOnly, "score economy evidence frames the signal as single-run.");
+  assertTest(!fullMatchScoreEconomyCalibration.scoringConstantsChanged, "score economy evidence keeps scoring constants unchanged.");
+  assertTest(!fullMatchScoreEconomyCalibration.scoreCapApplied, "score economy evidence applies no score ceiling.");
+  assertTest(!fullMatchScoreEconomyCalibration.postHocScoreRewriteApplied, "score economy evidence applies no manual score rewrite.");
+  assertTest(fullMatchScoreEconomyCalibration.globalEconomyClaimCount === 0, "score economy evidence avoids global proof claims.");
+  assertTest(fullMatchScoreEconomyCalibration.trendProofClaimCount === 0, "score economy evidence avoids proved-trend claims.");
 
   return [
-    "export contains full-match score economy calibration section",
-    "visible copy states single-run, unchanged constants, no score ceiling, and official-event score source",
-    "visible copy avoids global proof, proved trend, manual correction, and automatic selection wording",
+    "export contains coach report shell",
+    "score economy evidence states single-run, unchanged constants, no score ceiling, and no manual rewrite",
+    "score economy evidence avoids global proof and proved-trend claims",
   ];
 }
 

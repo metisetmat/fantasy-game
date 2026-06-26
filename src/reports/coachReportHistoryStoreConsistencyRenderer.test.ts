@@ -7,20 +7,19 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportHistoryStoreConsistencyRenderer(): readonly string[] {
-  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { historyStoreConsistency } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(exportHtml.includes("Coh&eacute;rence du stockage"), "export renders history-store consistency section.");
-  assertTest(exportHtml.includes("history-consistency-section"), "export renders consistency CSS hook.");
-  assertTest(exportHtml.includes("Migration SPI adapter contract visible"), "export renders migration SPI contract note.");
-  assertTest(exportHtml.includes("previous migration SPI, not to the experimental or durable storage adapter"), "export clarifies legacy adapter wording.");
-  assertTest(exportHtml.includes("D&eacute;tails de coh&eacute;rence du stockage historique"), "export renders consistency appendix.");
+  assertTest(historyStoreConsistency.status === "available" || historyStoreConsistency.status === "partial", "export evidence renders history-store consistency model.");
+  assertTest(historyStoreConsistency.consistencyBoundaryVisible, "export evidence renders consistency boundary.");
+  assertTest(historyStoreConsistency.databaseContractVisible, "export evidence renders migration SPI contract note.");
+  assertTest(!historyStoreConsistency.databaseContractImplemented, "export evidence clarifies legacy adapter is not implemented.");
+  assertTest(historyStoreConsistency.tags.includes("coach_report_history_store_consistency"), "export retains consistency evidence.");
 
   return [
-    "export renders history-store consistency section",
-    "export renders consistency CSS hook",
-    "export renders migration SPI contract note",
-    "export clarifies legacy adapter wording",
-    "export renders consistency appendix",
+    "export evidence renders history-store consistency model",
+    "export evidence renders consistency boundary",
+    "export evidence renders migration SPI contract note",
+    "7F can move the visible history consistency section out of the coach main body",
   ];
 }
 

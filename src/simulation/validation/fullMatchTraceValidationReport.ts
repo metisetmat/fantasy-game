@@ -124,6 +124,14 @@ import {
   renderCoachReportPremiumLayoutVisualHierarchy7DDoc as renderCoachReportPremiumLayoutVisualHierarchy7DDocBase,
   renderCoachReportPremiumLayoutVisualHierarchy7DValidation as renderCoachReportPremiumLayoutVisualHierarchy7DValidationBase,
 } from "../../reports/coachReportPremiumLayoutVisualHierarchy";
+import {
+  renderCoachReportPhaseVisualsTacticalMapCards7EDoc as renderCoachReportPhaseVisualsTacticalMapCards7EDocBase,
+  renderCoachReportPhaseVisualsTacticalMapCards7EValidation as renderCoachReportPhaseVisualsTacticalMapCards7EValidationBase,
+} from "../../reports/coachReportPhaseVisualsTacticalMapCards";
+import {
+  renderProductReportScopeDensityWordingCleanup7FDoc as renderProductReportScopeDensityWordingCleanup7FDocBase,
+  renderProductReportScopeDensityWordingCleanup7FValidation as renderProductReportScopeDensityWordingCleanup7FValidationBase,
+} from "../../reports/productReportScopeDensityWordingCleanup7F";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6561,6 +6569,30 @@ export function renderCoachReportPremiumLayoutVisualHierarchy7DValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportPremiumLayoutVisualHierarchy7DValidationBase();
+}
+
+export function renderCoachReportPhaseVisualsTacticalMapCards7EDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportPhaseVisualsTacticalMapCards7EDocBase();
+}
+
+export function renderCoachReportPhaseVisualsTacticalMapCards7EValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportPhaseVisualsTacticalMapCards7EValidationBase();
+}
+
+export function renderProductReportScopeDensityWordingCleanup7FDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderProductReportScopeDensityWordingCleanup7FDocBase();
+}
+
+export function renderProductReportScopeDensityWordingCleanup7FValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderProductReportScopeDensityWordingCleanup7FValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

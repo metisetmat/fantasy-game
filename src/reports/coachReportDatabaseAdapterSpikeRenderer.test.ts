@@ -7,17 +7,16 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportDatabaseAdapterSpikeRenderer(): readonly string[] {
-  const { exportHtml } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const { exportHtml, databaseAdapterSpike } = buildCoachReportMultiMatchPhaseComparisonTestContext();
 
-  assertTest(exportHtml.includes("Adapter database exp&eacute;rimental"), "export contains experimental database adapter section.");
-  assertTest(exportHtml.includes("Ce que le spike valide"), "export contains what the spike validates.");
-  assertTest(exportHtml.includes("Ce qui reste d&eacute;sactiv&eacute;"), "export contains what remains disabled.");
-  assertTest(exportHtml.includes("Prochaine &eacute;tape produit"), "export contains next product step.");
-  assertTest(exportHtml.includes("D&eacute;tails adapter database exp&eacute;rimental"), "export contains experimental database adapter appendix.");
+  assertTest(databaseAdapterSpike.status === "available", "export evidence contains experimental database adapter model.");
+  assertTest(databaseAdapterSpike.adapterKind === "experimental_database", "export evidence contains experimental database adapter kind.");
+  assertTest(databaseAdapterSpike.adapterImplemented && !databaseAdapterSpike.adapterProductionReady, "export evidence contains spike validation and disabled-state.");
+  assertTest(exportHtml.includes("coach_report_database_adapter_spike") || exportHtml.includes("experimental_database"), "export retains experimental database adapter evidence.");
 
   return [
-    "export contains experimental database adapter section",
-    "export contains spike validation, disabled-state, next-step, and appendix sections",
+    "export evidence contains experimental database adapter model",
+    "export evidence contains spike validation, disabled-state, next-step, and evidence trace",
   ];
 }
 

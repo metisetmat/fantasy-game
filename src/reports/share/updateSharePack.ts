@@ -121,6 +121,10 @@ import {
   renderCoachActionPlanCardsTrainingFocusPackaging7CValidation,
   renderCoachReportPremiumLayoutVisualHierarchy7DDoc,
   renderCoachReportPremiumLayoutVisualHierarchy7DValidation,
+  renderCoachReportPhaseVisualsTacticalMapCards7EDoc,
+  renderCoachReportPhaseVisualsTacticalMapCards7EValidation,
+  renderProductReportScopeDensityWordingCleanup7FDoc,
+  renderProductReportScopeDensityWordingCleanup7FValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -134,10 +138,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7D - Coach Report Premium Layout & Visual Hierarchy";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-premium-layout-visual-hierarchy-7d.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7F - Product Report Scope, Density & Wording Cleanup";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "product-report-scope-density-wording-cleanup-7f.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-premium-layout-visual-hierarchy-7d.md";
+  "validation.product-report-scope-density-wording-cleanup-7f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2693,6 +2697,91 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7D executable test proving premium layout readiness, baseline metadata consistency, and export/mobile checks",
       },
       {
+        source: "src/reports/coachReportTacticalMapCards.ts",
+        required: true,
+        reason: "Sprint 7E tactical map card model and product-report renderer for 2-3 compact official visual cards",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsTacticalMapCardsWarnings.ts",
+        required: true,
+        reason: "Sprint 7E warning-code registry for tactical map cards, visual density, source-of-truth, and mobile/export readability",
+      },
+      {
+        source: "src/reports/coachReportTacticalMapCardsAudit.ts",
+        required: true,
+        reason: "Sprint 7E tactical map card audit proving source badges, confidence badges, legends, action-plan links, and next-match checks",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsAudit.ts",
+        required: true,
+        reason: "Sprint 7E phase visual audit proving zone coverage, empty states, confidence, and action-plan links",
+      },
+      {
+        source: "src/reports/coachReportVisualDensityAudit.ts",
+        required: true,
+        reason: "Sprint 7E visual density audit proving map cards do not crowd out express read or action plan priority",
+      },
+      {
+        source: "src/reports/coachReportVisualMobileExportAudit.ts",
+        required: true,
+        reason: "Sprint 7E mobile/export visual readability audit proving stacked map cards, readable legends, and print guards",
+      },
+      {
+        source: "src/reports/coachReportVisualSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 7E visual source-of-truth audit preventing sandbox, diagnostic, or batch signals from becoming official visual truth",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsTacticalMapCards.ts",
+        required: true,
+        reason: "Sprint 7E model, report renderer, and validation renderer for coach report phase visuals and tactical map cards",
+      },
+      {
+        source: "src/reports/coachReportPhaseVisualsTacticalMapCards.test.ts",
+        required: true,
+        reason: "Sprint 7E executable test proving tactical map card PASS status, density control, and source boundary checks",
+      },
+      {
+        source: "src/reports/productReportScopeDensityWordingCleanupWarnings.ts",
+        required: true,
+        reason: "Sprint 7F warning-code registry for product scope, density, wording, export, and source-of-truth cleanup",
+      },
+      {
+        source: "src/reports/coachReportScopeBoundaryAudit.ts",
+        required: true,
+        reason: "Sprint 7F scope boundary audit proving developer, persistence, database, and calibration sections stay out of the coach body",
+      },
+      {
+        source: "src/reports/coachReportProductDensityCleanupAudit.ts",
+        required: true,
+        reason: "Sprint 7F density cleanup audit proving express read, action plan, and tactical map cards remain prominent after scope cleanup",
+      },
+      {
+        source: "src/reports/coachReportWordingRegressionCleanupAudit.ts",
+        required: true,
+        reason: "Sprint 7F wording regression audit removing mechanical duplicated labels and repeated warning phrasing",
+      },
+      {
+        source: "src/reports/coachReportCoachExportScopeAudit.ts",
+        required: true,
+        reason: "Sprint 7F export scope audit proving the shareable export is coach/product focused and printable",
+      },
+      {
+        source: "src/reports/coachReportSourceOfTruthScopeCleanupAudit.ts",
+        required: true,
+        reason: "Sprint 7F source-of-truth cleanup audit proving persistence, SQLite, database, calibration, sandbox, and batch diagnostics are not scoring truth",
+      },
+      {
+        source: "src/reports/productReportScopeDensityWordingCleanup7F.ts",
+        required: true,
+        reason: "Sprint 7F model, report renderer, and validation renderer for product scope, density, and wording cleanup",
+      },
+      {
+        source: "src/reports/productReportScopeDensityWordingCleanup7F.test.ts",
+        required: true,
+        reason: "Sprint 7F executable test proving scope cleanup PASS status and coach-only main body counters",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4849,6 +4938,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7F")) {
+    return renderProductReportScopeDensityWordingCleanup7FDoc(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 7E")) {
+    return renderCoachReportPhaseVisualsTacticalMapCards7EDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7D")) {
     return renderCoachReportPremiumLayoutVisualHierarchy7DDoc(fullMatchTraceValidationModel());
   }
@@ -7151,6 +7246,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7F")) {
+    return renderProductReportScopeDensityWordingCleanup7FValidation(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 7E")) {
+    return renderCoachReportPhaseVisualsTacticalMapCards7EValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7D")) {
     return renderCoachReportPremiumLayoutVisualHierarchy7DValidation(fullMatchTraceValidationModel());
   }
@@ -9399,6 +9500,64 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7F")) {
+    return [
+      "# Sprint 7F Share Pack",
+      "",
+      "Current sprint: Sprint 7F - Product Report Scope, Density & Wording Cleanup",
+      "",
+      "## Purpose",
+      "This pack proves the coach product/export report has been scoped back to coach-readable content after 7E, while preserving tactical map cards, premium layout, source-of-truth guardrails, and unchanged scoring.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- product-report-scope-density-wording-cleanup-7f.md",
+      "- validation.product-report-scope-density-wording-cleanup-7f.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.product-report-scope-density-wording-cleanup-7f.md",
+      "3. product-report-scope-density-wording-cleanup-7f.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "7F is presentation-only: it cleans scope, density, and wording. It does not change scoring constants, score_change events, match mechanics, route selection, MatchBonusEvent, persistence/SQLite scoring boundaries, sandbox application, or batch-as-official-score boundaries.",
+      "",
+    ].join("\n");
+  }
+  if (TASK_NAME.includes("Sprint 7E")) {
+    return [
+      "# Sprint 7E Share Pack",
+      "",
+      "Current sprint: Sprint 7E - Coach Report Phase Visuals & Tactical Map Cards",
+      "",
+      "## Purpose",
+      "This pack proves the premium coach report now includes 2-3 compact tactical map cards without changing scoring, match mechanics, route selection, or source-of-truth boundaries.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "- validation.coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "3. coach-report-phase-visuals-tactical-map-cards-7e.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "7E is presentation-only: tactical map cards visualize official/support signals but do not change scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score boundaries.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7D")) {
     return [
       "# Sprint 7D Share Pack",

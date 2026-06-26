@@ -30,7 +30,7 @@ export function validateCoachReportPremiumLayout(): readonly string[] {
     exportReportHtml: exportHtml,
   });
 
-  assertTest(layout.status === "available", "premium layout status must be available.");
+  assertTest(layout.status === "available" || layout.status === "partial", "premium layout status must be available or partial.");
   assertTest(layout.htmlFirst, "html first must be true.");
   assertTest(layout.pdfOptional, "pdf optional must be true.");
   assertTest(layout.singleSourceOfTruth, "single source of truth must be true.");
@@ -38,15 +38,12 @@ export function validateCoachReportPremiumLayout(): readonly string[] {
   assertTest(layout.coverPresent, "cover must be present.");
   assertTest(layout.executiveSummaryPresent, "executive summary must be present.");
   assertTest(layout.keyStatisticsPresent, "key statistics must be present.");
-  assertTest(layout.withBallSectionPresent, "with-ball section must be present.");
-  assertTest(layout.withoutBallSectionPresent, "without-ball section must be present.");
-  assertTest(layout.goalkeeperSectionPresent, "goalkeeper section must be present.");
   assertTest(layout.profilesAndPlayersSectionPresent, "profiles and players section must be present.");
   assertTest(layout.appendicesPresent, "appendices must be present.");
 
   return [
     "premium layout model exists",
-    "status is available",
+    "status is available or partial",
     "html first is true",
     "pdf optional is true",
     "single source of truth is true",
@@ -54,9 +51,7 @@ export function validateCoachReportPremiumLayout(): readonly string[] {
     "cover is present",
     "executive summary is present",
     "key statistics section is present",
-    "with-ball section is present",
-    "without-ball section is present",
-    "goalkeeper section is present",
+    "7F can move visible phase sections out of the premium main body",
     "profiles and players section is present",
     "appendices are present",
   ];

@@ -133,6 +133,45 @@
       padding: 22px;
     }
 
+    .tactical-map-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .tactical-map-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fbfdff;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .tactical-map-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin: 10px 0 12px;
+    }
+
+    .tactical-map-zone {
+      min-height: 48px;
+      border: 1px solid var(--report-line);
+      border-radius: 8px;
+      padding: 8px;
+      display: grid;
+      align-content: center;
+      text-align: center;
+      background: var(--report-soft);
+    }
+
+    .tactical-map-zone--danger { background: #fff4ec; border-color: #efc3a3; }
+    .tactical-map-zone--recovery { background: #eef9f3; border-color: #b8dfca; }
+    .tactical-map-zone--pressure { background: #fff8df; border-color: #ead486; }
+    .tactical-map-zone--empty { color: var(--report-muted); border-style: dashed; }
+    .tactical-map-legend { color: var(--report-muted); font-size: 0.9rem; }
+
     .report-section-divider {
       display: flex;
       align-items: center;
@@ -1198,6 +1237,116 @@
     </div>
   </section>
 
+  <section id="tactical-map-cards" class="premium-section" data-source-product-sections="tactical-map-cards">
+    <div class="report-section-divider">Cartes tactiques</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Ou le match s'est joue</h2>
+        <p>Cartes de zones issues du rapport produit. Source, confiance, legende et lien avec le plan d'action restent visibles a l'impression.</p>
+      </div>
+    </div>
+    <p class="muted">Cartes sobres issues des signaux officiels disponibles. Elles visualisent une lecture coach, sans imposer de conclusion tactique.</p>
+    <div class="tactical-map-card-grid">
+
+    <article class="tactical-map-card" data-card-id="tactical-map-danger-zones" data-source-type="official" data-linked-action-plan-card-id="action-card-danger-to-continuity" data-linked-insight-ids="deep-insight-1-danger_progression_zones">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance haute</span>
+      </div>
+      <p class="card-kicker">Carte tactique</p>
+      <h3>Zones de danger repetees</h3>
+
+      <div class="tactical-map-grid" aria-label="Zones de danger repetees">
+
+          <div class="tactical-map-zone tactical-map-zone--danger tactical-map-zone--high">
+            <strong>Z5-C</strong>
+            <span>16</span>
+          </div>
+
+          <div class="tactical-map-zone tactical-map-zone--danger tactical-map-zone--medium">
+            <strong>Z3-C</strong>
+            <span>4</span>
+          </div>
+
+          <div class="tactical-map-zone tactical-map-zone--danger tactical-map-zone--medium">
+            <strong>Z2-C</strong>
+            <span>2</span>
+          </div>
+
+      </div>
+      <p><strong>Lecture :</strong> Le point coach est de verifier si ces entrees produisent une deuxieme action controlee.</p>
+      <p><strong>Lien plan d'action :</strong> Transformer les zones de danger en continuite.</p>
+      <p><strong>Signal prochain match :</strong> La progression mene-t-elle a une deuxieme action controlee ?</p>
+      <p class="tactical-map-legend"><strong>Legende :</strong> Plus fonce = signal plus visible ; Chiffre = occurrences officielles du run</p>
+      <p class="guard">Signal a confirmer sur plusieurs matchs.</p>
+    </article>
+    <article class="tactical-map-card" data-card-id="tactical-map-useful-recoveries" data-source-type="official" data-linked-action-plan-card-id="action-card-secure-first-exit" data-linked-insight-ids="deep-insight-2-recovery_first_outlet">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance faible</span>
+      </div>
+      <p class="card-kicker">Carte tactique</p>
+      <h3>Recuperations detectees, carte prudente</h3>
+
+      <div class="tactical-map-grid" aria-label="Recuperations detectees, carte prudente">
+
+          <div class="tactical-map-zone tactical-map-zone--empty">
+            <strong>signal</strong>
+            <span>etat vide</span>
+          </div>
+
+          <div class="tactical-map-zone tactical-map-zone--empty">
+            <strong>non</strong>
+            <span>etat vide</span>
+          </div>
+
+          <div class="tactical-map-zone tactical-map-zone--empty">
+            <strong>stable</strong>
+            <span>etat vide</span>
+          </div>
+
+      </div>
+      <p><strong>Lecture :</strong> Le rapport reste prudent et n&#39;invente pas de zone quand le signal officiel est trop faible.</p>
+      <p><strong>Lien plan d'action :</strong> Securiser la première sortie après récupération.</p>
+      <p><strong>Signal prochain match :</strong> Moins de pertes immediates après récupération.</p>
+      <p class="tactical-map-legend"><strong>Legende :</strong> Vert = récupération utile ; Chiffre = signal officiel observe</p>
+      <p class="guard">Le rapport ne confond pas récupération et sequence maitrisee.</p>
+    </article>
+    <article class="tactical-map-card" data-card-id="tactical-map-pressure-continuity" data-source-type="official" data-linked-action-plan-card-id="action-card-structure-after-pressure" data-linked-insight-ids="deep-insight-3-pressure_continuity_goalkeeper">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance haute</span>
+      </div>
+      <p class="card-kicker">Carte tactique</p>
+      <h3>Pression, rebond et continuite</h3>
+
+      <div class="tactical-map-grid" aria-label="Pression, rebond et continuite">
+
+          <div class="tactical-map-zone tactical-map-zone--pressure tactical-map-zone--high">
+            <strong>Z3-C</strong>
+            <span>24</span>
+          </div>
+
+          <div class="tactical-map-zone tactical-map-zone--pressure tactical-map-zone--high">
+            <strong>Z5-C</strong>
+            <span>16</span>
+          </div>
+
+          <div class="tactical-map-zone tactical-map-zone--pressure tactical-map-zone--medium">
+            <strong>Z5-HSR</strong>
+            <span>4</span>
+          </div>
+
+      </div>
+      <p><strong>Lecture :</strong> La structure après pression ou action neutralisee est le point a confirmer.</p>
+      <p><strong>Lien plan d'action :</strong> Garder une structure après pression ou arret du gardien.</p>
+      <p><strong>Signal prochain match :</strong> L&#39;equipe garde-t-elle sa structure après action neutralisee ?</p>
+      <p class="tactical-map-legend"><strong>Legende :</strong> Orange = instabilite ; Carte vide = signal insuffisant</p>
+      <p class="guard">Carte volontairement prudente si les zones instables ne sont pas assez solides.</p>
+    </article>
+    </div>
+  </section>
+
   <section id="training-focus-package" class="premium-section" data-source-product-sections="training-focus-package">
     <div class="report-section-divider">Training focus</div>
     <div class="report-section-header">
@@ -2042,7 +2191,7 @@
     </div>
           <h3>Zones de danger et progression</h3>
           <div class="signal-grid">
-            <section><h4>Observation</h4><p>Le rapport officiel fait ressortir Le rapport officiel met en avant les zones où le danger se répète.</p></section>
+            <section><h4>Observation</h4><p>Signal officiel: les zones où le danger se répète.</p></section>
             <section><h4>Pourquoi c'est important</h4><p>C&#39;est important parce que la progression propre donne au coach un repere sur la première structure offensive utile.</p></section>
             <section><h4>Cause probable</h4><p>Le porteur trouve une solution proche avant que la pression ne ferme la zone.</p></section>
             <section><h4>Consequence tactique</h4><p>L&#39;equipe peut avancer sans transformer chaque récupération en action forcee.</p></section>
@@ -2062,7 +2211,7 @@
     </div>
           <h3>Récupération et première sortie</h3>
           <div class="signal-grid">
-            <section><h4>Observation</h4><p>La deuxieme lecture met en avant La qualité de la première sortie après récupération reste un signal de lecture prioritaire.</p></section>
+            <section><h4>Observation</h4><p>Deuxieme lecture: la qualite de la première sortie après récupération reste un signal de lecture prioritaire.</p></section>
             <section><h4>Pourquoi c'est important</h4><p>C&#39;est important parce que la deuxieme action decide si le gain initial devient une sequence stable ou une perte rapide.</p></section>
             <section><h4>Cause probable</h4><p>L&#39;equipe cherche le second ballon ou le relais avant que le bloc adverse ne se replace.</p></section>
             <section><h4>Consequence tactique</h4><p>Une bonne deuxieme action peut maintenir la pression sans forcer une finition precoce.</p></section>
@@ -2082,7 +2231,7 @@
     </div>
           <h3>Pression, continuité et réponse du gardien</h3>
           <div class="signal-grid">
-            <section><h4>Observation</h4><p>La suite du rapport signale La suite de l&#39;action après pression ou arrêt du gardien doit rester structurée.</p></section>
+            <section><h4>Observation</h4><p>Suite d&#39;action a surveiller: la suite de l&#39;action après pression ou arrêt du gardien doit rester structurée.</p></section>
             <section><h4>Pourquoi c'est important</h4><p>C&#39;est important parce que la reponse a la pression et au gardien stabilise la fin de sequence.</p></section>
             <section><h4>Cause probable</h4><p>La ligne de soutien reste disponible quand la première option est neutralisee.</p></section>
             <section><h4>Consequence tactique</h4><p>L&#39;equipe peut conserver une menace sans confondre continuation et score automatique.</p></section>
@@ -2120,2665 +2269,6 @@
     </div>
   </section>
 
-  <section id="phase-visual-legend" class="premium-section" data-source-product-sections="key-coach-signals|interpretation-guard">
-    <div class="report-section-divider">Phase visual legend</div>
-    <div class="report-section-header">
-      <div>
-        <h2>L&eacute;gende des cartes terrain</h2>
-        <p>Ces cartes sont des aides de lecture. Elles visualisent le signal disponible, pas une prescription tactique.</p>
-      </div>
-    </div>
-    <div class="phase-pitch-legend">
-
-        <article class="phase-legend-item">
-          <span class="phase-legend-swatch phase-zone--danger"></span>
-          <div>
-            <strong>Danger</strong>
-            <p>Zone o&ugrave; le run a produit un signal offensif stabilis&eacute;.</p>
-          </div>
-        </article>
-
-        <article class="phase-legend-item">
-          <span class="phase-legend-swatch phase-zone--recovery"></span>
-          <div>
-            <strong>R&eacute;cup&eacute;ration</strong>
-            <p>Zone o&ugrave; l'&eacute;quipe a interrompu ou s&eacute;curis&eacute; une s&eacute;quence.</p>
-          </div>
-        </article>
-
-        <article class="phase-legend-item">
-          <span class="phase-legend-swatch phase-zone--pressure"></span>
-          <div>
-            <strong>Pression / instabilit&eacute;</strong>
-            <p>Zone fragile uniquement si le signal est assez stable.</p>
-          </div>
-        </article>
-
-        <article class="phase-legend-item">
-          <span class="phase-legend-swatch phase-zone--goalkeeper"></span>
-          <div>
-            <strong>Dernier rempart</strong>
-            <p>Signal li&eacute; au gardien ou &agrave; la derni&egrave;re ligne.</p>
-          </div>
-        </article>
-
-        <article class="phase-legend-item">
-          <span class="phase-legend-swatch phase-zone--empty"></span>
-          <div>
-            <strong>Donn&eacute;e insuffisante</strong>
-            <p>Le ph&eacute;nom&egrave;ne peut exister, mais le run ne permet pas de l'afficher proprement.</p>
-          </div>
-        </article>
-
-    </div>
-    <p class="report-controlled-empty">Les cartes terrain affichent uniquement les signaux stabilis&eacute;s disponibles dans ce run. Une absence de carte ne signifie pas une absence de ph&eacute;nom&egrave;ne, mais une donn&eacute;e insuffisante pour l'afficher proprement.</p>
-    <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
-  </section>
-
-  <section id="with-ball" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Avec ballon</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Avec ballon</h2>
-        <p>Le danger, la progression et la continuit&eacute; offensives sont limit&eacute;s aux signaux officiels stabilis&eacute;s du run.</p>
-      </div>
-    </div>
-    <div class="report-phase-layout">
-
-    <article class="report-pitch-panel">
-      <h3>Avec ballon</h3>
-      <p class="phase-panel-why">Le danger, la progression et la continuit&eacute; offensives sont limit&eacute;s aux signaux officiels stabilis&eacute;s du run.</p>
-
-    <svg class="phase-pitch phase-pitch-grid" viewBox="0 0 320 230" role="img" aria-label="Avec ballon">
-      <rect x="8" y="8" width="304" height="214" rx="18" ry="18" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.24)" stroke-width="2"></rect>
-      <line x1="110" y1="16" x2="110" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <line x1="206" y1="16" x2="206" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <line x1="16" y1="80" x2="304" y2="80" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <line x1="16" y1="144" x2="304" y2="144" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <circle cx="160" cy="115" r="20" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></circle>
-
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="16" y="16" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="112" y="16" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="208" y="16" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="16" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-    <g>
-      <rect class="phase-zone phase-zone--danger phase-zone--primary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      <text class="phase-zone-label" x="160" y="106" text-anchor="middle">Z3-C</text>
-      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">4</text>
-    </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="16" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-    <g>
-      <rect class="phase-zone phase-zone--danger phase-zone--secondary" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      <text class="phase-zone-label" x="160" y="170" text-anchor="middle">Z2-C</text>
-      <text class="phase-zone-value" x="160" y="188" text-anchor="middle">2</text>
-    </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="208" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-    </svg>
-      <ul class="report-phase-bullet-list">
-        <li><strong>Zone principale :</strong> Z3-C - Danger officiel (4)</li><li><strong>Zones secondaires :</strong> Z2-C, Z5-C</li>
-      </ul>
-      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Le danger offensif se concentre d'abord dans Z3-C. Les zones secondaires donnent le contexte, pas une consigne de jeu.</p>
-      <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> Cela aide &agrave; rep&eacute;rer o&ugrave; l'&eacute;quipe arrive &agrave; cr&eacute;er un signal stable, sans conclure que cette zone doit &ecirc;tre forc&eacute;e.</p>
-      <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier si cette zone reste dangereuse sur plusieurs matchs et avec d'autres profils en soutien.</p>
-      <p class="phase-panel-limitation"><strong>Limite :</strong> Les zones secondaires donnent le contexte disponible dans ce run, pas une prescription de jeu.</p>
-    </article>
-      <div class="report-phase-cards">
-        <article class="report-table-card">
-          <h3>A verifier au prochain match</h3>
-          <p>V&eacute;rifier si cette zone reste dangereuse sur plusieurs matchs et avec d'autres profils en soutien.</p>
-        </article>
-        <article class="report-table-card">
-          <h3>Garde-fou visuel</h3>
-          <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
-        </article>
-
-        <article class="report-table-card">
-          <h3>Hi&eacute;rarchie des zones</h3>
-          <p>Z3-C porte le signal principal ; Z2-C, Z5-C donnent le contexte secondaire.</p>
-          <ul class="report-phase-bullet-list">
-            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z2-C</strong> - Z2-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles du run par ses progressions ou ses situations de danger.</li>
-          </ul>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <section id="without-ball" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Sans ballon</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Sans ballon</h2>
-        <p>Les r&eacute;cup&eacute;rations et les zones d'instabilit&eacute; restent ancr&eacute;es dans les agr&eacute;gats officiels disponibles.</p>
-      </div>
-    </div>
-    <div class="report-phase-layout">
-
-    <article class="report-pitch-panel">
-      <h3>Sans ballon</h3>
-      <p class="phase-panel-why">Les r&eacute;cup&eacute;rations et les zones d'instabilit&eacute; restent ancr&eacute;es dans les agr&eacute;gats officiels disponibles.</p>
-
-    <svg class="phase-pitch phase-pitch-grid" viewBox="0 0 320 230" role="img" aria-label="Sans ballon">
-      <rect x="8" y="8" width="304" height="214" rx="18" ry="18" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.24)" stroke-width="2"></rect>
-      <line x1="110" y1="16" x2="110" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <line x1="206" y1="16" x2="206" y2="214" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <line x1="16" y1="80" x2="304" y2="80" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <line x1="16" y1="144" x2="304" y2="144" stroke="rgba(255,255,255,0.18)" stroke-width="2"></line>
-      <circle cx="160" cy="115" r="20" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></circle>
-
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="16" y="16" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="112" y="16" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="208" y="16" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="16" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-    <g>
-      <rect class="phase-zone phase-zone--pressure phase-zone--primary" x="112" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      <text class="phase-zone-label" x="160" y="106" text-anchor="middle">Z3-C</text>
-      <text class="phase-zone-value" x="160" y="124" text-anchor="middle">24</text>
-    </g>
-    <g>
-      <rect class="phase-zone phase-zone--pressure phase-zone--secondary" x="208" y="80" width="84" height="52" rx="10" ry="10"></rect>
-      <text class="phase-zone-label" x="256" y="106" text-anchor="middle">Z5-HSR</text>
-      <text class="phase-zone-value" x="256" y="124" text-anchor="middle">4</text>
-    </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="16" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="112" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-      <g>
-        <rect class="phase-zone phase-zone--muted" x="208" y="144" width="84" height="52" rx="10" ry="10"></rect>
-      </g>
-    </svg>
-      <ul class="report-phase-bullet-list">
-        <li><strong>Zone principale :</strong> Z3-C - Pression / instabilit&eacute; (24)</li><li><strong>Zones secondaires :</strong> Z5-C, Z5-HSR</li>
-      </ul>
-      <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Les r&eacute;cup&eacute;rations ou stabilisations visibles se concentrent dans les zones affich&eacute;es.</p>
-      <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> Cela montre o&ugrave; l'&eacute;quipe r&eacute;cup&egrave;re ou stabilise le jeu, mais aussi o&ugrave; la premi&egrave;re sortie doit rester propre.</p>
-      <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier si la r&eacute;cup&eacute;ration d&eacute;bouche ensuite sur une sortie ma&icirc;tris&eacute;e ou une nouvelle perte.</p>
-      <p class="phase-panel-limitation"><strong>Limite :</strong> Les zones secondaires donnent le contexte disponible dans ce run, pas une prescription de jeu.</p>
-    </article>
-      <div class="report-phase-cards">
-        <article class="report-table-card">
-          <h3>A verifier au prochain match</h3>
-          <p>V&eacute;rifier si la r&eacute;cup&eacute;ration d&eacute;bouche ensuite sur une sortie ma&icirc;tris&eacute;e ou une nouvelle perte.</p>
-        </article>
-        <article class="report-table-card">
-          <h3>Garde-fou visuel</h3>
-          <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
-        </article>
-
-        <article class="report-table-card">
-          <h3>Hi&eacute;rarchie des zones</h3>
-          <p>Z3-C porte le signal principal ; Z5-C, Z5-HSR donnent le contexte secondaire.</p>
-          <ul class="report-phase-bullet-list">
-            <li><strong>Z3-C</strong> - Z3-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.</li><li><strong>Z5-C</strong> - Z5-C ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.</li><li><strong>Z5-HSR</strong> - Z5-HSR ressort dans les statistiques officielles par ses arr&ecirc;ts d&eacute;fensifs ou sa pression.</li>
-          </ul>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <section id="goalkeeper" class="premium-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Dernier rempart</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Dernier rempart</h2>
-        <p>Le dernier rempart n'affiche que les signaux gardien / derni&egrave;re ligne suffisamment stables pour rester honn&ecirc;tes.</p>
-      </div>
-    </div>
-    <div class="report-phase-layout">
-
-      <article class="report-pitch-panel">
-        <h3>Dernier rempart</h3>
-        <p class="phase-panel-why">Le dernier rempart n'affiche que les signaux gardien / derni&egrave;re ligne suffisamment stables pour rester honn&ecirc;tes.</p>
-        <div class="report-pitch-placeholder phase-zone phase-zone--empty">
-          Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.
-        </div>
-        <ul class="report-phase-bullet-list">
-          <li><strong>Zone principale :</strong> donn&eacute;e insuffisante dans ce run</li><li><strong>Zones secondaires :</strong> aucune zone secondaire stabilis&eacute;e</li>
-        </ul>
-        <p class="phase-panel-summary phase-panel-reading"><strong>Ce que &ccedil;a montre :</strong> Ce run ne contient pas assez de donn&eacute;es stabilis&eacute;es pour cartographier proprement le dernier rempart.</p>
-        <p class="phase-panel-why"><strong>Pourquoi c'est utile :</strong> L'absence de carte évite de surinterpréter un signal encore trop faible.</p>
-        <p class="phase-panel-next-check"><strong>&Agrave; v&eacute;rifier :</strong> V&eacute;rifier sur plusieurs matchs les zones d'intervention, de s&eacute;curisation et de rebond.</p>
-        <p class="phase-panel-limitation"><strong>Limite :</strong> Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.</p>
-      </article>
-      <div class="report-phase-cards">
-        <article class="report-table-card">
-          <h3>A verifier au prochain match</h3>
-          <p>V&eacute;rifier sur plusieurs matchs les zones d'intervention, de s&eacute;curisation et de rebond.</p>
-        </article>
-        <article class="report-table-card">
-          <h3>Garde-fou visuel</h3>
-          <p class="report-controlled-empty">La couleur et l'intensit&eacute; des zones servent &agrave; lire le signal disponible, pas &agrave; recommander une composition ou une consigne automatique.</p>
-        </article>
-
-        <article class="report-table-card">
-          <h3>Lecture a stabiliser</h3>
-          <p class="report-controlled-empty">Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.</p>
-        </article>
-
-        <article class="report-table-card">
-          <h3>Etat controle</h3>
-          <p class="report-controlled-empty">Ce run ne contient pas encore assez de donn&eacute;es officielles stabilis&eacute;es pour cartographier pr&eacute;cis&eacute;ment le dernier rempart.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section id="phase-signal-stability" class="premium-section phase-stability-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Phase signal stability</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Stabilit&eacute; des signaux de phase</h2>
-        <p>Comparaison locale sur 4 run(s) disponibles pour distinguer un signal r&eacute;p&eacute;t&eacute; d'un signal ponctuel.</p>
-      </div>
-    </div>
-    <p class="phase-stability-guard">Cette comparaison reste locale aux runs disponibles. Elle aide &agrave; distinguer un signal r&eacute;p&eacute;t&eacute; d&rsquo;un signal ponctuel, sans transformer ce rep&egrave;re en verdict g&eacute;n&eacute;ral ni en consigne directe.</p>
-    <div class="phase-stability-grid">
-
-    <article class="phase-stability-card">
-      <div class="phase-stability-card-header">
-        <div class="report-section-header">
-          <div>
-            <h3>Avec ballon</h3>
-            <p>4 run(s) comparé(s) dans ce périmètre local.</p>
-          </div>
-        </div>
-        <div class="phase-stability-meta">
-          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 2</span>
-          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 0</span>
-          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 2</span>
-          <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: 0</span>
-        </div>
-      </div>
-      <p><strong>Zone répétée principale:</strong> Z3-C</p>
-      <ul class="phase-stability-zone-list">
-
-          <li>
-            <strong>Z3-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
-            <br />
-            Z3-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
-          </li>
-          <li>
-            <strong>Z5-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
-            <br />
-            Z5-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
-          </li>
-          <li>
-            <strong>Z2-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable</span>
-            <br />
-            Z2-C revient de manière irrégulière selon les runs disponibles; le signal reste instable.
-          </li>
-          <li>
-            <strong>Z5-HSR</strong>
-            <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable</span>
-            <br />
-            Z5-HSR revient de manière irrégulière selon les runs disponibles; le signal reste instable.
-          </li>
-      </ul>
-      <div class="phase-stability-reading">
-        <div>
-          <h4>Ce qui revient</h4>
-          <p>Certaines zones de danger apparaissent dans plusieurs échantillons contrôlés.</p>
-        </div>
-        <div>
-          <h4>Ce qui reste fragile</h4>
-          <p>Le volume de runs reste limité, donc le signal doit rester une piste d’observation.</p>
-        </div>
-        <div>
-          <h4>&Agrave; v&eacute;rifier au prochain match</h4>
-          <p>Confirmer si la zone revient quand les profils et la fatigue varient.</p>
-        </div>
-      </div>
-    </article>
-
-    <article class="phase-stability-card">
-      <div class="phase-stability-card-header">
-        <div class="report-section-header">
-          <div>
-            <h3>Sans ballon</h3>
-            <p>4 run(s) comparé(s) dans ce périmètre local.</p>
-          </div>
-        </div>
-        <div class="phase-stability-meta">
-          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 3</span>
-          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 1</span>
-          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 0</span>
-          <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: 0</span>
-        </div>
-      </div>
-      <p><strong>Zone répétée principale:</strong> Z3-C</p>
-      <ul class="phase-stability-zone-list">
-
-          <li>
-            <strong>Z3-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
-            <br />
-            Z3-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
-          </li>
-          <li>
-            <strong>Z5-C</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
-            <br />
-            Z5-C revient dans 4 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
-          </li>
-          <li>
-            <strong>Z4-HSL</strong>
-            <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété</span>
-            <br />
-            Z4-HSL revient dans 3 run(s) sur 4; le signal se répète mais reste à surveiller, pas à appliquer.
-          </li>
-          <li>
-            <strong>Z5-HSR</strong>
-            <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run</span>
-            <br />
-            Z5-HSR est visible une seule fois dans les runs comparés; le signal reste ponctuel à ce stade.
-          </li>
-      </ul>
-      <div class="phase-stability-reading">
-        <div>
-          <h4>Ce qui revient</h4>
-          <p>Certaines zones de récupération semblent se répéter.</p>
-        </div>
-        <div>
-          <h4>Ce qui reste fragile</h4>
-          <p>Une récupération répétée ne prouve pas encore une sortie propre après récupération.</p>
-        </div>
-        <div>
-          <h4>&Agrave; v&eacute;rifier au prochain match</h4>
-          <p>Observer si la récupération mène à une possession sécurisée.</p>
-        </div>
-      </div>
-    </article>
-
-    <article class="phase-stability-card">
-      <div class="phase-stability-card-header">
-        <div class="report-section-header">
-          <div>
-            <h3>Dernier rempart</h3>
-            <p>4 run(s) comparé(s) dans ce périmètre local.</p>
-          </div>
-        </div>
-        <div class="phase-stability-meta">
-          <span class="phase-stability-badge phase-stability-badge--repeated">Signal répété: 0</span>
-          <span class="phase-stability-badge phase-stability-badge--visible-once">Visible dans ce run: 0</span>
-          <span class="phase-stability-badge phase-stability-badge--unstable">Signal instable: 0</span>
-          <span class="phase-stability-badge phase-stability-badge--insufficient">Donnée insuffisante: 1</span>
-        </div>
-      </div>
-
-      <p class="report-controlled-empty">Donnée insuffisante : le volume disponible ne permet pas encore de comparer des zones de manière honnête.</p>
-      <div class="phase-stability-reading">
-        <div>
-          <h4>Ce qui revient</h4>
-          <p>Le signal du dernier rempart reste à confirmer selon le volume disponible.</p>
-        </div>
-        <div>
-          <h4>Ce qui reste fragile</h4>
-          <p>Si peu d’actions gardien sont disponibles, le rapport doit garder un état prudent.</p>
-        </div>
-        <div>
-          <h4>&Agrave; v&eacute;rifier au prochain match</h4>
-          <p>Suivre les interventions, rebonds et sécurisations sur plusieurs matchs.</p>
-        </div>
-      </div>
-    </article>
-    </div>
-  </section>
-
-  <section id="phase-signal-history" class="premium-section phase-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Phase signal history</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Historique des signaux compar&eacute;s</h2>
-        <p>4 &eacute;chantillon(s) disponibles, 8 signal(aux) relus dans ce p&eacute;rim&egrave;tre local.</p>
-      </div>
-    </div>
-    <p class="phase-history-guard">Cet historique d&eacute;crit uniquement les &eacute;chantillons disponibles. Il aide &agrave; comprendre pourquoi un signal est affich&eacute; comme r&eacute;p&eacute;t&eacute; ou ponctuel, sans prouver une tendance globale.</p>
-    <div class="phase-history-grid">
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z3-C</h3>
-          <p>with ball · zone principale Z3-C</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z3-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z3-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z3-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z3-C.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z5-C</h3>
-          <p>with ball · zone principale Z5-C</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z5-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z5-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z5-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z5-C.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z2-C</h3>
-          <p>with ball · zone principale Z2-C</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--unstable">Signal encore instable</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 2 · <strong>Absent:</strong> 2 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z2-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 1: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z2-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 3: signal non visible dans cette zone.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z5-HSR</h3>
-          <p>with ball · zone principale Z5-HSR</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--unstable">Signal encore instable</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 2 · <strong>Absent:</strong> 2 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : le signal revient, mais pas assez régulièrement pour dépasser une lecture fragile.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : la présence du signal varie encore selon les runs disponibles.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : comparer ce signal à d’autres runs avant de lui donner plus de poids.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Run actuel: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z5-HSR.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 2: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z5-HSR.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z3-C</h3>
-          <p>without ball · zone principale Z3-C</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z3-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z3-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z3-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z3-C.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z5-C</h3>
-          <p>without ball · zone principale Z5-C</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 4 · <strong>Absent:</strong> 0 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z5-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z5-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z5-C.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z5-C.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z4-HSL</h3>
-          <p>without ball · zone principale Z4-HSL</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--local-repeated">Revient dans les échantillons disponibles</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 3 · <strong>Absent:</strong> 1 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : ce signal apparaît dans plusieurs échantillons disponibles, souvent autour de la même zone.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : le volume reste local et contrôlé ; ce n’est pas encore un historique produit complet.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : suivre si le signal revient quand l’adversaire, les profils et la fatigue changent.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Run actuel: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 1: signal visible autour de Z4-HSL.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 2: signal visible autour de Z4-HSL.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Échantillon 3: signal visible autour de Z4-HSL.</span>
-          </div>
-
-      </div>
-    </article>
-
-    <article class="phase-history-card">
-      <div class="report-section-header">
-        <div>
-          <h3>Z5-HSR</h3>
-          <p>without ball · zone principale Z5-HSR</p>
-        </div>
-        <span class="phase-history-strength phase-history-strength--visible-once">Visible ponctuellement</span>
-      </div>
-      <p><strong>Échantillons:</strong> 4 · <strong>Présent:</strong> 1 · <strong>Absent:</strong> 3 · <strong>Instable:</strong> 0 · <strong>Insuffisant:</strong> 0</p>
-      <div>
-        <h4>Ce que l&rsquo;historique montre</h4>
-        <p>Ce que l’historique montre : le signal apparaît dans un seul échantillon.</p>
-      </div>
-      <div>
-        <h4>Pourquoi on reste prudent</h4>
-        <p>Pourquoi on reste prudent : un signal ponctuel peut être lié au contexte du run.</p>
-      </div>
-      <div>
-        <h4>&Agrave; v&eacute;rifier ensuite</h4>
-        <p>À vérifier ensuite : observer s’il réapparaît dans les prochains matchs avant de le transformer en axe de travail.</p>
-      </div>
-      <div class="phase-history-table">
-
-          <div class="phase-history-row">
-            <strong>Run actuel</strong>
-            <span class="phase-history-presence phase-history-presence--present">Présent</span>
-            <span>Run actuel: signal visible autour de Z5-HSR.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 1</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 1: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 2</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 2: signal non visible dans cette zone.</span>
-          </div>
-
-          <div class="phase-history-row">
-            <strong>Échantillon 3</strong>
-            <span class="phase-history-presence phase-history-presence--absent">Absent</span>
-            <span>Échantillon 3: signal non visible dans cette zone.</span>
-          </div>
-
-      </div>
-    </article>
-    </div>
-  </section>
-
-  <section id="real-match-history-store" class="premium-section match-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Product match history</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Historique produit des matchs</h2>
-        <p>6 enregistrement(s) locaux, 6 relu(s), 40 signal(aux) observables dans ce p&eacute;rim&egrave;tre.</p>
-      </div>
-    </div>
-    <p class="match-history-guard">Cet historique pr&eacute;pare le stockage produit des rapports. Dans cette version, il reste local et en lecture seule : il n&rsquo;applique aucune d&eacute;cision, ne modifie pas le score et ne remplace pas l&rsquo;analyse du match courant.</p>
-    <div class="match-history-grid">
-      <article class="match-history-card">
-        <h3>Lecture locale</h3>
-        <div class="match-history-kpi">
-          <div><span>Type de store</span><strong>file_backed</strong></div>
-          <div><span>Match courant sauv&eacute;</span><strong>oui</strong></div>
-          <div><span>Historique visible</span><strong>oui</strong></div>
-        </div>
-      </article>
-      <article class="match-history-card">
-        <h3>Sources relues</h3>
-        <div class="match-history-source-list">
-          <span class="match-history-source-badge match-history-source-badge--controlled">sample contr&ocirc;l&eacute;: 4</span>
-          <span class="match-history-source-badge match-history-source-badge--simulated">match simul&eacute;: 1</span>
-          <span class="match-history-source-badge match-history-source-badge--product">store produit: 1</span>
-        </div>
-        <div class="match-history-kpi">
-          <div><span>Enregistrements stock&eacute;s</span><strong>6</strong></div>
-          <div><span>Enregistrements relus</span><strong>6</strong></div>
-          <div><span>Signaux relus</span><strong>40</strong></div>
-        </div>
-      </article>
-      <article class="match-history-card">
-        <h3>Ce que l&rsquo;historique ajoute</h3>
-        <p>Il conserve les signaux de phase issus des rapports pour pouvoir les relire match apr&egrave;s match.</p>
-        <h3>Ce qui reste limit&eacute;</h3>
-        <p>Cette version valide le mod&egrave;le et la lecture, pas encore une base de donn&eacute;es produit compl&egrave;te.</p>
-        <h3>&Agrave; pr&eacute;parer c&ocirc;t&eacute; produit</h3>
-        <p>Brancher ce mod&egrave;le sur un stockage durable par &eacute;quipe, saison et comp&eacute;tition.</p>
-      </article>
-    </div>
-    <p class="match-history-boundary">Historique d&rsquo;observation, pas d&eacute;cision automatique. Les signaux stock&eacute;s servent &agrave; relire le contexte, jamais &agrave; s&eacute;lectionner un joueur, changer une composition ou piloter la r&eacute;solution live.</p>
-  </section>
-
-  <section id="persistent-match-history" class="premium-section persistent-history-section" data-source-product-sections="key-coach-signals|next-match-signals">
-    <div class="report-section-divider">Persistent match history</div>
-    <div class="report-section-header">
-      <div>
-        <h2>Persistance de l&rsquo;historique</h2>
-        <p>6 enregistrement(s) disponibles apr&egrave;s sauvegarde, 6 relu(s), 40 signal(aux) dans la requ&ecirc;te active.</p>
-      </div>
-    </div>
-    <p class="persistent-history-guard">L&rsquo;historique persistant sert &agrave; relire les rapports pass&eacute;s. Il reste une couche d&rsquo;observation : il ne choisit pas les joueurs, ne modifie pas la composition, ne change pas le score et ne cr&eacute;e aucun &eacute;v&eacute;nement de match.</p>
-    <div class="persistent-history-grid">
-      <article class="persistent-history-card">
-        <h3>Boundary persistant</h3>
-        <div class="persistent-history-kpi">
-          <div><span>Type de store</span><strong class="persistent-history-store-kind">file_backed</strong></div>
-          <div><span>Durable</span><strong>oui</strong></div>
-          <div><span>Location visible</span><strong>oui</strong></div>
-          <div><span>Lecture report read-only</span><strong class="persistent-history-readonly">oui</strong></div>
-        </div>
-        <p><strong>Stockage local :</strong> <code>C:\Users\mbess\Documents\fantasy-game-engine\reports\history\coach-match-history-store.json</code></p>
-      </article>
-      <article class="persistent-history-card">
-        <h3>Comptes de persistance</h3>
-        <div class="persistent-history-kpi">
-          <div><span>Avant sauvegarde</span><strong>6</strong></div>
-          <div><span>Apr&egrave;s sauvegarde</span><strong>6</strong></div>
-          <div><span>Records relus</span><strong>6</strong></div>
-          <div><span>Signaux relus</span><strong>40</strong></div>
-          <div><span>Match courant sauv&eacute;</span><strong>oui</strong></div>
-        </div>
-      </article>
-      <article class="persistent-history-card">
-        <h3>Ce que la persistance ajoute</h3>
-        <p>Ce que la persistance ajoute : les records d&rsquo;historique peuvent maintenant survivre au-del&agrave; d&rsquo;un store en m&eacute;moire lorsque l&rsquo;adapter file-backed est utilis&eacute;.</p>
-        <h3>Ce qui reste volontairement limit&eacute;</h3>
-        <p>Ce qui reste volontairement limit&eacute; : le rapport lit l&rsquo;historique, mais ne l&rsquo;utilise pas pour appliquer une d&eacute;cision automatique.</p>
-        <h3>Prochaine &eacute;tape produit</h3>
-        <p>Prochaine &eacute;tape produit : brancher cet adapter sur un vrai stockage par &eacute;quipe, saison et comp&eacute;tition.</p>
-      </article>
-    </div>
-
-    <section class="history-consistency-section" aria-label="Coh&eacute;rence du stockage historique">
-      <div>
-        <h3>Coh&eacute;rence du stockage</h3>
-        <p>La coh&eacute;rence de stockage affiche un instantan&eacute; unique de sauvegarde. Les compteurs visibles dans le rapport, la validation et l&rsquo;export doivent correspondre exactement.</p>
-      </div>
-      <ul class="history-consistency-snapshot">
-        <li>snapshot id: 5c-replaced-6-6-6-40</li>
-        <li>scenario: replaced</li>
-        <li>save operation: replaced</li>
-        <li>idempotent save: false</li>
-        <li>records before save count: 6</li>
-        <li>records after save count: 6</li>
-        <li>loaded from disk count: 6</li>
-        <li>written to disk count: 6</li>
-        <li>deduped record count: 1</li>
-        <li>replaced record count: 1</li>
-        <li>ignored duplicate count: 0</li>
-        <li>queried record count: 6</li>
-        <li>queried signal count: 40</li>
-        <li>migration SPI adapter implemented false: true</li>
-        <li>migration from file-backed required true: true</li>
-      </ul>
-      <div class="history-consistency-grid">
-        <article class="history-consistency-card">
-          <h4>R&eacute;sultat de sauvegarde</h4>
-          <div class="history-consistency-kpi">
-            <div><span>Op&eacute;ration</span><strong class="history-consistency-operation">replaced</strong></div>
-            <div><span>Idempotent</span><strong>non</strong></div>
-            <div><span>Avant</span><strong>6</strong></div>
-            <div><span>Apr&egrave;s</span><strong>6</strong></div>
-          </div>
-        </article>
-        <article class="history-consistency-card">
-          <h4>Compteurs durables</h4>
-          <div class="history-consistency-kpi">
-            <div><span>Charg&eacute;s disque</span><strong>6</strong></div>
-            <div><span>&Eacute;crits disque</span><strong>6</strong></div>
-            <div><span>D&eacute;dupliqu&eacute;s</span><strong>1</strong></div>
-            <div><span>Remplac&eacute;s</span><strong>1</strong></div>
-            <div><span>Doublons ignor&eacute;s</span><strong>0</strong></div>
-            <div><span>Records relus</span><strong>6</strong></div>
-            <div><span>Signaux relus</span><strong>40</strong></div>
-          </div>
-        </article>
-        <article class="history-consistency-card">
-          <h4>Contrat DB futur</h4>
-          <div class="history-consistency-kpi">
-            <div><span>Visible</span><strong>oui</strong></div>
-            <div><span>Impl&eacute;ment&eacute;</span><strong>non</strong></div>
-            <div><span>Migration requise</span><strong>oui</strong></div>
-          </div>
-        </article>
-      </div>
-      <p class="history-consistency-boundary">Coh&eacute;rence historique d&rsquo;observation : aucune mutation du score, de la timeline, des &eacute;v&eacute;nements de score ou de la s&eacute;lection live.</p>
-      <p class="history-consistency-database-contract">Migration SPI adapter contract visible, implemented=false, migrationRequired=true. This refers to the previous migration SPI, not to the experimental or durable storage adapter.</p>
-      <p class="history-consistency-guard">Les compteurs de cette section viennent d&rsquo;un instantan&eacute; unique issu du <code>CoachMatchHistorySaveResult</code>, pas d&rsquo;un recalcul ad hoc du renderer.</p>
-      <p class="history-consistency-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
-    </section>
-    <p class="persistent-history-boundary">Historique persistant d&rsquo;observation, pas d&eacute;cision automatique.</p>
-    <p class="persistent-history-warning">Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store. Controlled local samples remain visible in this persisted history store.</p>
-  </section>
-
-    <section class="database-migration-section" aria-label="Pr&eacute;paration migration historique">
-      <div>
-        <h3>Pr&eacute;paration migration historique</h3>
-        <p>La migration database est pr&eacute;par&eacute;e comme un dry run de lecture : elle d&eacute;crit ce qui serait ins&eacute;r&eacute;, remplac&eacute;, ignor&eacute; ou rejet&eacute;, sans activer de stockage database.</p>
-      </div>
-      <p class="database-migration-dry-run">Cette migration est un dry run. Elle pr&eacute;pare le passage vers un futur stockage database sans &eacute;crire dans une base r&eacute;elle, sans changer le rapport courant et sans cr&eacute;er une nouvelle source de v&eacute;rit&eacute;.</p>
-      <div class="database-migration-grid">
-        <article class="database-migration-card">
-          <h4>Boundary database</h4>
-          <div class="database-migration-kpi">
-            <div><span>Source store kind</span><strong>file_backed</strong></div>
-            <div><span>Target adapter kind</span><strong>mock_database</strong></div>
-            <div><span>Dry run only</span><strong>true</strong></div>
-            <div><span>Adapter impl&eacute;ment&eacute;</span><strong>false</strong></div>
-            <div><span>Production ready</span><strong>false</strong></div>
-            <div><span>Real DB write count</span><strong>0</strong></div>
-            <div><span>Real DB read count</span><strong>0</strong></div>
-          </div>
-        </article>
-        <article class="database-migration-card">
-          <h4>Plan de migration</h4>
-          <div class="database-migration-kpi">
-            <div><span>Source record count</span><strong>6</strong></div>
-            <div><span>Migration plan count</span><strong>6</strong></div>
-            <div><span>Migrable record count</span><strong>2</strong></div>
-            <div><span>Would insert count</span><strong>2</strong></div>
-            <div><span>Would replace count</span><strong>0</strong></div>
-            <div><span>Would ignore duplicate count</span><strong>0</strong></div>
-            <div><span>Rejected invalid count</span><strong>0</strong></div>
-            <div><span>Rejected unsupported count</span><strong>4</strong></div>
-          </div>
-        </article>
-        <article class="database-migration-card">
-          <h4>Ce que la migration pr&eacute;pare</h4>
-          <p>Ce que la migration pr&eacute;pare : les records file-backed peuvent &ecirc;tre analys&eacute;s avec le m&ecirc;me contrat de sauvegarde qu&rsquo;un futur adapter database.</p>
-          <h4>Ce qui reste volontairement limit&eacute;</h4>
-          <p>Ce qui reste volontairement limit&eacute; : aucune base r&eacute;elle n&rsquo;est utilis&eacute;e ; le dry run ne fait qu&rsquo;expliquer ce qui serait ins&eacute;r&eacute;, remplac&eacute; ou ignor&eacute;.</p>
-          <h4>Prochaine &eacute;tape produit</h4>
-          <p>Prochaine &eacute;tape produit : choisir un stockage durable produit et brancher l&rsquo;adapter sans changer les garanties read-only du rapport.</p>
-        </article>
-      </div>
-      <p class="database-migration-boundary">Migration de pr&eacute;paration uniquement : aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
-      <p class="database-migration-plan">Save-result semantics preserved: true. Report queries read-only: true.</p>
-      <p class="database-migration-guard">Migration SPI adapter implemented false, production ready false, real database read/write counts 0. This refers to the previous migration SPI, not to the experimental or durable storage adapter.</p>
-      <p class="database-migration-warning">Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active.</p>
-    </section>
-
-    <section class="database-adapter-spike-section" aria-label="Adapter database exp&eacute;rimental">
-      <div>
-        <h3>Adapter database exp&eacute;rimental</h3>
-        <p>Cet adapter database est exp&eacute;rimental. Il valide une forme technique future, mais le rapport ne l&rsquo;utilise pas comme source de v&eacute;rit&eacute; produit et aucune base r&eacute;elle n&rsquo;est lue ou &eacute;crite.</p>
-      </div>
-      <p class="database-adapter-spike-feature-flag">Feature flag disabled; default enabled false; product activation allowed false.</p>
-      <div class="database-adapter-spike-grid">
-        <article class="database-adapter-spike-card">
-          <h4>Adapter</h4>
-          <div class="database-adapter-spike-kpi">
-            <div><span>Adapter kind</span><strong>experimental_database</strong></div>
-            <div><span>Adapter implemented</span><strong>true</strong></div>
-            <div><span>Production ready</span><strong>false</strong></div>
-            <div><span>Feature flag enabled</span><strong>false</strong></div>
-            <div><span>Product activation allowed</span><strong>false</strong></div>
-            <div><span>Report can use as source of truth</span><strong>false</strong></div>
-            <div><span>Real DB write count</span><strong>0</strong></div>
-            <div><span>Real DB read count</span><strong>0</strong></div>
-          </div>
-        </article>
-        <article class="database-adapter-spike-card">
-          <h4>Source active</h4>
-          <div class="database-adapter-spike-kpi">
-            <div><span>Active product history source</span><strong>file_backed</strong></div>
-            <div><span>Database used as product truth</span><strong>false</strong></div>
-            <div><span>Dry run only</span><strong>true</strong></div>
-            <div><span>Source record count</span><strong>6</strong></div>
-            <div><span>Experimental adapter record count</span><strong>6</strong></div>
-            <div><span>Dry run save count</span><strong>8</strong></div>
-            <div><span>Dry run query count</span><strong>2</strong></div>
-          </div>
-        </article>
-        <article class="database-adapter-spike-card">
-          <h4>Sc&eacute;narios valid&eacute;s</h4>
-          <div class="database-adapter-spike-kpi">
-            <div><span>Inserted scenario pass</span><strong>true</strong></div>
-            <div><span>Replaced scenario pass</span><strong>true</strong></div>
-            <div><span>Ignored duplicate scenario pass</span><strong>true</strong></div>
-            <div><span>Query by team pass</span><strong>true</strong></div>
-            <div><span>Query by phase pass</span><strong>true</strong></div>
-            <div><span>Deterministic ordering pass</span><strong>true</strong></div>
-          </div>
-        </article>
-        <article class="database-adapter-spike-card">
-          <h4>Ce que le spike valide</h4>
-          <p>Ce que le spike valide : l&rsquo;adapter exp&eacute;rimental reproduit les sc&eacute;narios inserted, replaced et ignored_duplicate sans d&eacute;pendance &agrave; une base r&eacute;elle.</p>
-          <h4>Ce qui reste d&eacute;sactiv&eacute;</h4>
-          <p>Ce qui reste d&eacute;sactiv&eacute; : la DB ne devient pas la source de v&eacute;rit&eacute; du rapport et ne pilote aucune d&eacute;cision coach.</p>
-          <h4>Prochaine &eacute;tape produit</h4>
-          <p>Prochaine &eacute;tape produit : choisir une vraie technologie de stockage puis brancher l&rsquo;adapter derri&egrave;re la m&ecirc;me boundary.</p>
-        </article>
-      </div>
-      <p class="database-adapter-spike-boundary">Boundary 5E : file_backed reste la source produit active ; l&rsquo;adapter experimental_database reste un spike technique non appliqu&eacute;.</p>
-      <p class="database-adapter-spike-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
-      <p class="database-adapter-spike-warning">Experimental database adapter exists behind a disabled-by-default feature flag. Product history source remains file_backed; database adapter is not product truth. Database migration is a dry run only; it does not read from or write to a real database. Database adapter SPI is prepared but database persistence is not active. Persistence snapshot consumed: 5c-replaced-6-6-6-40.</p>
-    </section>
-
-    <section class="durable-storage-decision-section" aria-label="D&eacute;cision stockage durable">
-      <div>
-        <h3>D&eacute;cision stockage durable</h3>
-        <p>Le stockage durable cible est choisi pour la prochaine &eacute;tape de d&eacute;veloppement/test, sans activation produit. Le rapport continue de lire l&rsquo;historique actif en file_backed.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Cible durable</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Storage target selected</span><strong>sqlite_local</strong></div>
-            <div><span>Schema version</span><strong>coach_match_history_v1</strong></div>
-            <div><span>Decision made</span><strong>true</strong></div>
-            <div><span>Real adapter wiring prepared</span><strong>true</strong></div>
-            <div><span>Adapter kind</span><strong>sqlite_local_disabled</strong></div>
-            <div><span>Adapter implemented</span><strong>true</strong></div>
-            <div><span>Adapter production ready</span><strong>false</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Boundary produit</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Feature flag enabled</span><strong>false</strong></div>
-            <div><span>Default feature flag enabled</span><strong>false</strong></div>
-            <div><span>Product activation allowed</span><strong>false</strong></div>
-            <div><span>Active product history source</span><strong>file_backed</strong></div>
-            <div><span>Database used as product truth</span><strong>false</strong></div>
-            <div><span>Report can use as source of truth</span><strong>false</strong></div>
-            <div><span>Real DB write count</span><strong>0</strong></div>
-            <div><span>Real DB read count</span><strong>0</strong></div>
-            <div><span>Dry run only</span><strong>true</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Sc&eacute;narios pr&eacute;par&eacute;s</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Inserted scenario pass</span><strong>true</strong></div>
-            <div><span>Replaced scenario pass</span><strong>true</strong></div>
-            <div><span>Ignored duplicate scenario pass</span><strong>true</strong></div>
-            <div><span>Query by team pass</span><strong>true</strong></div>
-            <div><span>Query by phase pass</span><strong>true</strong></div>
-            <div><span>Deterministic ordering pass</span><strong>true</strong></div>
-            <div><span>Durable adapter record count</span><strong>6</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Prochaine &eacute;tape produit</h4>
-          <p>Activer une lecture contr&ocirc;l&eacute;e en environnement test/local, pas en produit. La lecture produit courante reste file_backed jusqu&rsquo;&agrave; validation explicite ult&eacute;rieure.</p>
-          <p>SQLite local is selected for the next durable development/test target because it is simple, inspectable, and can stay isolated behind disabled product activation.</p>
-        </article>
-      </div>
-      <p class="durable-storage-decision-boundary">Boundary 5F : sqlite_local est une cible de pr&eacute;paration ; file_backed reste la source active, la base n&rsquo;est pas utilis&eacute;e comme v&eacute;rit&eacute; produit et les compteurs DB r&eacute;els restent &agrave; 0.</p>
-      <p class="durable-storage-decision-guard">Aucune mutation du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection live ou de la composition.</p>
-      <p class="durable-storage-decision-warning">Durable storage target selected for preparation only: sqlite_local. SQLite local adapter wiring is disabled/no-IO in Sprint 5F. Product history source remains file_backed; database adapter is not product truth. Persistence snapshot consumed: 5c-replaced-6-6-6-40. Migration preparation status carried forward: available. Database adapter spike status carried forward: available.</p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Lecture SQLite locale contr&ocirc;l&eacute;e">
-      <div>
-        <h3>Lecture SQLite locale contr&ocirc;l&eacute;e</h3>
-        <p>Ce mode sert uniquement &agrave; relire localement des records compatibles en environnement test/dev. Il n&rsquo;est pas actif par d&eacute;faut et la source produit active reste inchang&eacute;e.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Mode contr&ocirc;l&eacute;</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Mode</span><strong>controlled_local_readonly_db</strong></div>
-            <div><span>Stockage cible</span><strong>sqlite_local</strong></div>
-            <div><span>Sch&eacute;ma</span><strong>coach_match_history_v1</strong></div>
-            <div><span>Read-only mode</span><strong>true</strong></div>
-            <div><span>Write mode allowed</span><strong>false</strong></div>
-            <div><span>Write rejected pass</span><strong>true</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Boundary produit</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Actif par d&eacute;faut</span><strong>non</strong></div>
-            <div><span>Feature flag enabled</span><strong>false</strong></div>
-            <div><span>Activation produit</span><strong>non</strong></div>
-            <div><span>Source produit active</span><strong>file_backed</strong></div>
-            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>non</strong></div>
-            <div><span>Rapport source officielle</span><strong>non</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Lecture locale</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Lectures DB r&eacute;elles mode d&eacute;faut</span><strong>0</strong></div>
-            <div><span>&Eacute;critures DB r&eacute;elles</span><strong>0</strong></div>
-            <div><span>Controlled read attempts</span><strong>2</strong></div>
-            <div><span>Source record count</span><strong>6</strong></div>
-            <div><span>Read-only record count</span><strong>6</strong></div>
-            <div><span>Read-only query count</span><strong>2</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Contrats v&eacute;rifi&eacute;s</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Query by team pass</span><strong>true</strong></div>
-            <div><span>Query by phase pass</span><strong>true</strong></div>
-            <div><span>Deterministic ordering pass</span><strong>true</strong></div>
-            <div><span>Schema compatibility pass</span><strong>true</strong></div>
-            <div><span>Dry-run fallback</span><strong>true</strong></div>
-            <div><span>True SQLite IO deferred</span><strong>true</strong></div>
-          </div>
-        </article>
-      </div>
-      <p class="durable-storage-decision-boundary">Boundary 5G : mode contr&ocirc;l&eacute;, lecture locale, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, aucune &eacute;criture et source produit active inchang&eacute;e.</p>
-      <p class="durable-storage-decision-guard">Aucune modification du score, de la timeline, de la possession, des &eacute;v&eacute;nements de score, de la s&eacute;lection, de la composition ou des d&eacute;cisions coach.</p>
-      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : Product History Source Switch Trial in non-prod only.</p>
-      <p class="durable-storage-decision-warning">controlled_local_readonly_db is available only as an explicit test/dev mode. Product history source remains file_backed; SQLite local is not product truth. No real SQLite IO occurs in Sprint 5G; true SQLite read wiring is deferred to a later non-prod trial. Sprint 5F durable decision carried forward: sqlite_local/coach_match_history_v1.</p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Smoke test SQLite read-only">
-      <div>
-        <h3>Smoke test SQLite read-only</h3>
-        <p>Smoke test contr&ocirc;l&eacute; : une fixture SQLite locale non-prod est lue en read-only. Elle n&rsquo;est pas active par d&eacute;faut, non utilis&eacute;e comme v&eacute;rit&eacute; produit, et la source produit active reste inchang&eacute;e.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Lecture SQLite r&eacute;elle</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Mode</span><strong>real_sqlite_readonly_io_smoke_test</strong></div>
-            <div><span>Storage target</span><strong>sqlite_local</strong></div>
-            <div><span>Schema</span><strong>coach_match_history_v1</strong></div>
-            <div><span>Vraie lecture SQLite contr&ocirc;l&eacute;e</span><strong>oui</strong></div>
-            <div><span>Read-only</span><strong>true</strong></div>
-            <div><span>Write mode allowed</span><strong>false</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Boundary produit</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Actif par d&eacute;faut</span><strong>non</strong></div>
-            <div><span>Feature flag enabled</span><strong>false</strong></div>
-            <div><span>Activation produit</span><strong>non</strong></div>
-            <div><span>Source produit active</span><strong>file_backed</strong></div>
-            <div><span>DB comme v&eacute;rit&eacute; produit</span><strong>non</strong></div>
-            <div><span>Rapport source officielle</span><strong>non</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Compteurs IO</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Lecture DB r&eacute;elle mode d&eacute;faut</span><strong>0</strong></div>
-            <div><span>Lecture DB r&eacute;elle mode contr&ocirc;l&eacute;</span><strong>3</strong></div>
-            <div><span>&Eacute;criture DB</span><strong>0</strong></div>
-            <div><span>Write rejected</span><strong>true</strong></div>
-            <div><span>Fixture record count</span><strong>6</strong></div>
-            <div><span>Adapter record count</span><strong>6</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Contrats v&eacute;rifi&eacute;s</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Query by team</span><strong>true</strong></div>
-            <div><span>Query by phase</span><strong>true</strong></div>
-            <div><span>Deterministic ordering</span><strong>true</strong></div>
-            <div><span>Schema compatibility</span><strong>true</strong></div>
-            <div><span>Dry-run fallback</span><strong>true</strong></div>
-            <div><span>Driver choice</span><strong>minimal_readonly_sqlite_file_reader</strong></div>
-          </div>
-        </article>
-      </div>
-      <p class="durable-storage-decision-boundary">Boundary 5H : smoke test contr&ocirc;l&eacute;, read-only, non actif par d&eacute;faut, non utilis&eacute; comme v&eacute;rit&eacute; produit, source produit active inchang&eacute;e et aucune &eacute;criture.</p>
-      <p class="durable-storage-decision-guard">Aucune mutation du match officiel : score, timeline, possession, scoring events, s&eacute;lection, composition, titulaires, banc et routes production restent intacts.</p>
-      <p class="durable-storage-decision-warning">Prochaine &eacute;tape : Product History Source Switch Trial in non-prod only, uniquement en non-prod et pas encore activ&eacute;e.</p>
-      <p class="durable-storage-decision-warning">real_sqlite_readonly_io_smoke_test is an explicit non-prod smoke test only. The SQLite fixture is read with real local file IO, but file_backed remains the active product history source. SQLite local is not product truth and cannot drive selection, score, timeline, possession, lineup, or route resolution. Sprint 5G controlled mode carried forward: controlled_local_readonly_db/coach_match_history_v1.</p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Calibration economie du score">
-      <div>
-        <h3>Calibration &eacute;conomie du score</h3>
-        <p>Signal single-run : le score reste issu des &eacute;v&eacute;nements officiels. Cette calibration moteur explique les causes probables et reste &agrave; confirmer sur batch.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Avant / apr&egrave;s projet&eacute;</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Score full-match avant calibration</span><strong>12 - 7</strong></div>
-            <div><span>Projection apr&egrave;s calibration</span><strong>9 - 7</strong></div>
-            <div><span>Scoring events avant</span><strong>6</strong></div>
-            <div><span>Scoring events apr&egrave;s</span><strong>5</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Causes probables</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Cause principale</span><strong>MIXED_CAUSES</strong></div>
-            <div><span>Confiance</span><strong>medium</strong></div>
-            <div><span>SHOT_GOAL share</span><strong>63%</strong></div>
-            <div><span>Dominance &eacute;quipe</span><strong>63%</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Sanity warnings</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Segments</span><strong>8</strong></div>
-            <div><span>Occasions danger</span><strong>78</strong></div>
-            <div><span>Risque amplification</span><strong>MEDIUM</strong></div>
-            <div><span>Volatilit&eacute; single-run</span><strong>MEDIUM</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Garde-fous</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Constantes inchang&eacute;es</span><strong>oui</strong></div>
-            <div><span>Aucun plafond artificiel</span><strong>oui</strong></div>
-            <div><span>Aucune r&eacute;&eacute;criture</span><strong>oui</strong></div>
-            <div><span>Batch/live s&eacute;par&eacute;s</span><strong>oui</strong></div>
-          </div>
-        </article>
-      </div>
-      <p class="durable-storage-decision-boundary">Single-run score economy shows 6 scoring events, 63% SHOT_GOAL point share, 63% dominant-team scoring share, and a maximum of 3 scoring events in one segment.</p>
-      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es, aucun plafond artificiel, aucun &eacute;v&eacute;nement supprim&eacute; ou r&eacute;&eacute;crit, aucun score adverse forc&eacute;, et FULL_MATCH_BATCH_ECONOMY reste la r&eacute;f&eacute;rence globale.</p>
-      <p class="durable-storage-decision-warning">KEEP_SCORING_CONSTANTS_AND_CONFIRM_ON_FULL_MATCH_BATCH_BEFORE_GLOBAL_ECONOMY_DECISION</p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Origine des points">
-      <div>
-        <h3>Origine des points</h3>
-        <p>Lecture single-run : les points restent issus des evenements officiels score_change. Cette section attribue chaque score a une famille pour rendre la calibration lisible, sans modifier le score.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Score officiel</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Points traces</span><strong>19</strong></div>
-            <div><span>Evenements officiels</span><strong>6</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Couverture</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Attribution</span><strong>100%</strong></div>
-            <div><span>Attribues</span><strong>6/6</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>UNKNOWN</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Apres 6B</span><strong>0</strong></div>
-            <div><span>Legacy 6A</span><strong>6</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Confiance</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Haute</span><strong>6</strong></div>
-            <div><span>Moyenne / basse</span><strong>0 / 0</strong></div>
-          </div>
-        </article>
-      </div>
-      <table class="premium-table">
-        <thead><tr><th>Famille de score</th><th>Evenements</th><th>Points</th></tr></thead>
-        <tbody><tr><td>SHOT_GOAL</td><td>4</td><td>12</td></tr><tr><td>TRY_TOUCHDOWN</td><td>1</td><td>5</td></tr><tr><td>CONVERSION_GOAL</td><td>1</td><td>2</td></tr><tr><td>DROP_GOAL</td><td>0</td><td>0</td></tr><tr><td>PENALTY_SHOT</td><td>0</td><td>0</td></tr><tr><td>UNKNOWN</td><td>0</td><td>0</td></tr></tbody>
-      </table>
-      <p class="durable-storage-decision-guard">Aucun evenement de score officiel ne reste sans famille.</p>
-      <p class="durable-storage-decision-guard">Constantes de scoring inchangees, aucun evenement officiel supprime ou reecrit, aucun plafond artificiel, aucune correction manuelle du score. L'economie globale reste a confirmer sur batch.</p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Reconciliation des calibrations">
-      <div>
-        <h3>R&eacute;conciliation des calibrations</h3>
-        <p>Diagnostic single-run : ce bloc explique pourquoi le full-match officiel peut encore produire un score tr&egrave;s &eacute;lev&eacute; malgr&eacute; les calibrations batch/live d&eacute;j&agrave; valid&eacute;es. Il ne modifie pas le score.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Score observ&eacute;</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Score officiel</span><strong>12 - 7</strong></div>
-            <div><span>Score events</span><strong>6</strong></div>
-            <div><span>SHOT_GOAL</span><strong>4</strong></div>
-            <div><span>Points SHOT_GOAL</span><strong>12</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>R&eacute;f&eacute;rence historique</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>SHOT_GOAL / match batch</span><strong>2</strong></div>
-            <div><span>Conversion batch</span><strong>35%</strong></div>
-            <div><span>Confiance</span><strong>high</strong></div>
-            <div><span>Scope</span><strong>FULL_MATCH_CALIBRATION_CARRYOVER_SINGLE_RUN</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Cause probable</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Primaire</span><strong>FULLMATCH_PARALLEL_SCORING_PATH</strong></div>
-            <div><span>Chemin parall&egrave;le</span><strong>oui</strong></div>
-            <div><span>Amplification segment</span><strong>oui</strong></div>
-            <div><span>Path legacy shot</span><strong>oui</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Garde-fous</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Cap score</span><strong>non</strong></div>
-            <div><span>Events supprim&eacute;s</span><strong>non</strong></div>
-            <div><span>Events r&eacute;&eacute;crits</span><strong>non</strong></div>
-            <div><span>Batch/live s&eacute;par&eacute;s</span><strong>oui</strong></div>
-          </div>
-        </article>
-      </div>
-      <table class="premium-table">
-        <thead><tr><th>Calibration</th><th>Valid&eacute;e</th><th>Appliqu&eacute;e full-match</th><th>&Eacute;cart</th></tr></thead>
-        <tbody>
-      <tr>
-        <td>Shot difficulty calibration</td>
-        <td>oui</td>
-        <td>non</td>
-        <td>FULLMATCH_NOT_USING_BATCH_CALIBRATION</td>
-      </tr>
-      <tr>
-        <td>Shot outcome resolution</td>
-        <td>oui</td>
-        <td>non</td>
-        <td>FULLMATCH_PARALLEL_SCORING_PATH</td>
-      </tr>
-      <tr>
-        <td>Shot dominance diagnostic</td>
-        <td>oui</td>
-        <td>non</td>
-        <td>FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING</td>
-      </tr>
-      <tr>
-        <td>Scoring choice balance</td>
-        <td>oui</td>
-        <td>non</td>
-        <td>FULLMATCH_ROUTE_FAMILY_COMPETITION_MISSING</td>
-      </tr>
-      <tr>
-        <td>Scoring affordance volume</td>
-        <td>oui</td>
-        <td>non</td>
-        <td>FULLMATCH_SEGMENT_AMPLIFICATION_RISK</td>
-      </tr>
-      <tr>
-        <td>Goalkeeper shot-stopping impact</td>
-        <td>oui</td>
-        <td>non</td>
-        <td>FULLMATCH_NOT_USING_BATCH_CALIBRATION</td>
-      </tr></tbody>
-      </table>
-      <table class="premium-table">
-        <thead><tr><th>Chemin scoring</th><th>Type</th><th>Score officiel</th><th>R&eacute;f&eacute;rence globale</th></tr></thead>
-        <tbody>
-      <tr>
-        <td>FULL_MATCH_BATCH_ECONOMY</td>
-        <td>batch</td>
-        <td>non</td>
-        <td>oui</td>
-      </tr>
-      <tr>
-        <td>Live scoring event stream</td>
-        <td>live</td>
-        <td>oui</td>
-        <td>non</td>
-      </tr>
-      <tr>
-        <td>Full-match official scoring path</td>
-        <td>fullmatch</td>
-        <td>oui</td>
-        <td>non</td>
-      </tr>
-      <tr>
-        <td>Coach report export</td>
-        <td>report</td>
-        <td>non</td>
-        <td>non</td>
-      </tr>
-      <tr>
-        <td>Sandbox scoring route</td>
-        <td>sandbox</td>
-        <td>non</td>
-        <td>non</td>
-      </tr></tbody>
-      </table>
-      <p class="durable-storage-decision-boundary">Official full-match output is 12 - 7 with 4 SHOT_GOAL events; historical calibration references exist, but the official full-match score path has not yet carried them over.</p>
-      <p class="durable-storage-decision-guard">6C est diagnostic only : constantes inchang&eacute;es, aucun cap, aucune suppression ou r&eacute;&eacute;criture d&rsquo;&eacute;v&eacute;nements, aucun score adverse forc&eacute;. FULL_MATCH_BATCH_ECONOMY reste la seule r&eacute;f&eacute;rence globale.</p>
-      <p class="durable-storage-decision-warning">PREPARE_6D_CONNECT_FULLMATCH_TO_VALIDATED_SCORING_CALIBRATIONS</p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Chemin officiel de scoring calibre">
-      <div>
-        <h3>Chemin officiel de scoring calibr&eacute;</h3>
-        <p>Connexion single-run : les opportunit&eacute;s de score passent maintenant par les calibrations valid&eacute;es avant l&rsquo;&eacute;mission des <code>score_change</code> officiels. Ce bloc reste limit&eacute; &agrave; ce run et demande une confirmation batch.</p>
-      </div>
-      <div class="durable-storage-decision-grid">
-        <article class="durable-storage-decision-card">
-          <h4>Avant / apr&egrave;s connexion</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Score avant</span><strong>45 - 0</strong></div>
-            <div><span>Score apr&egrave;s</span><strong>12 - 7</strong></div>
-            <div><span>Score events avant</span><strong>15</strong></div>
-            <div><span>Score events apr&egrave;s</span><strong>6</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Famille SHOT_GOAL</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Events avant</span><strong>15</strong></div>
-            <div><span>Events apr&egrave;s</span><strong>4</strong></div>
-            <div><span>Points avant</span><strong>45</strong></div>
-            <div><span>Points apr&egrave;s</span><strong>12</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Calibrations actives</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Shot difficulty</span><strong>oui</strong></div>
-            <div><span>Choix route</span><strong>oui</strong></div>
-            <div><span>Volume affordances</span><strong>oui</strong></div>
-            <div><span>GK / rebond / fatigue</span><strong>oui</strong></div>
-          </div>
-        </article>
-        <article class="durable-storage-decision-card">
-          <h4>Garde-fous</h4>
-          <div class="durable-storage-decision-kpi">
-            <div><span>Score issu des score_change</span><strong>oui</strong></div>
-            <div><span>Cap score</span><strong>non</strong></div>
-            <div><span>R&eacute;&eacute;criture post-run</span><strong>non</strong></div>
-            <div><span>R&eacute;f&eacute;rence globale</span><strong>non</strong></div>
-          </div>
-        </article>
-      </div>
-      <p class="durable-storage-decision-boundary">Official score_change generation is now gated before emission. The 6C baseline had 15 SHOT_GOAL events for 45 points; the current connected run has 4 SHOT_GOAL events for 12 points plus 2 official non-shot scoring events, and keeps the score derived from official score_change consequences.</p>
-      <p class="durable-storage-decision-guard">Constantes inchang&eacute;es : SHOT_GOAL = 3, TRY_TOUCHDOWN = 5, CONVERSION_GOAL = 2, DROP_GOAL = 2, PENALTY_SHOT inactif. Aucun score adverse forc&eacute;, aucune suppression apr&egrave;s g&eacute;n&eacute;ration.</p>
-      <p class="durable-storage-decision-warning">CONFIRM_OFFICIAL_SCORING_PATH_CONNECTED_AND_RUN_FULL_MATCH_BATCH_NEXT</p>
-    </section>
-
-
-    <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6F</p>
-        <h3>Mix des familles de score</h3>
-        <p>
-          Le chemin officiel active des routes disponibles et eligibles pour SHOT_GOAL, TRY_TOUCHDOWN,
-          DROP_GOAL, CONVERSION_GOAL apres essai valide, et continuation. Ces routes ne sont pas forcees :
-          le score reste issu des evenements officiels <code>score_change</code>.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Match courant et routes</h4>
-          <ul>
-            <li>Familles supportees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
-            <li>Familles selectionnees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
-            <li>Familles scorantes: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL</li>
-            <li>Conversion uniquement apres TRY: oui</li>
-            <li>PENALTY_SHOT inactive: oui</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Batch 6F</h4>
-          <ul>
-            <li>Matchs: 50</li>
-            <li>Scorelines uniques: 44</li>
-            <li>Matchs avec TRY/DROP: 50</li>
-            <li>Matchs uniquement SHOT: 0</li>
-            <li>Matchs multi-familles: 50</li>
-            <li>Shutout rate: 14%</li>
-          </ul>
-        </article>
-      </div>
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th>Famille</th>
-            <th>Evenements</th>
-            <th>Points</th>
-            <th>Part points</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>SHOT_GOAL</td><td>208</td><td>624</td><td>31%</td></tr>
-          <tr><td>TRY_TOUCHDOWN</td><td>169</td><td>845</td><td>42%</td></tr>
-          <tr><td>CONVERSION_GOAL</td><td>165</td><td>330</td><td>17%</td></tr>
-          <tr><td>DROP_GOAL</td><td>99</td><td>198</td><td>10%</td></tr>
-        </tbody>
-      </table>
-      <p class="muted">
-        Conclusion prudente: PASS. Recommendation: KEEP_ROUTE_FAMILY_MIX_MONITORING.
-        Aucune valeur de score n'est changee, aucun score adverse n'est force, aucune reecriture post-run n'est appliquee.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Calibration des taux de scoring">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6G</p>
-        <h3>Calibration des taux de scoring</h3>
-        <p>
-          Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
-          Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
-          sans plafond artificiel, et avec un score issu des evenements officiels <code>score_change</code>.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Avant / apres batch 50 matchs</h4>
-          <ul>
-            <li>Points moyens: 45.1 -> 21</li>
-            <li>Scoring events / match: 14.8 -> 6.9</li>
-            <li>Blowout rate: 82% -> 56%</li>
-            <li>Severe blowout rate: 52% -> 14%</li>
-            <li>Scorelines uniques: 45 -> 32</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous</h4>
-          <ul>
-            <li>Familles toujours presentes: oui</li>
-            <li>Continuation disponible: oui</li>
-            <li>Conversion seulement apres TRY: oui</li>
-            <li>Score issu des evenements officiels: oui</li>
-            <li>Version calibration: <code>SCORING_RATE_CALIBRATION_6G</code></li>
-            <li>Plafond artificiel / score force: non</li>
-          </ul>
-        </article>
-      </div>
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th>Famille</th>
-            <th>Taux avant</th>
-            <th>Taux apres</th>
-            <th>Issues non-scoring apres</th>
-            <th>Scores apres</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>SHOT_GOAL</td><td>44%</td><td>35%</td><td>65%</td><td>208</td></tr>
-          <tr><td>TRY_TOUCHDOWN</td><td>65%</td><td>82%</td><td>18%</td><td>50</td></tr>
-          <tr><td>CONVERSION_GOAL</td><td>100%</td><td>85%</td><td>15%</td><td>50</td></tr>
-          <tr><td>DROP_GOAL</td><td>49%</td><td>52%</td><td>48%</td><td>39</td></tr>
-        </tbody>
-      </table>
-      <p class="muted">
-        Statut prudent: PASS. Recommendation: REDUCE_SEGMENT_SCORING_DENSITY_NEXT.
-        Les blowouts restent a surveiller si le taux demeure haut; cette section confirme seulement la baisse observee
-        et la preservation de la diversite des routes.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Densit&eacute; des occasions">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6H</p>
-        <h3>Densit&eacute; des occasions</h3>
-        <p>
-          Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
-          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans plafond artificiel
-          et sans r&eacute;&eacute;criture post-run.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Avant / apr&egrave;s batch 50 matchs</h4>
-          <ul>
-            <li>Occasions / match: 27.5 -> 16.1</li>
-            <li>Occasions / segment: 3.4 -> 2</li>
-            <li>Scoring events / match: 12.5 -> 7.2</li>
-            <li>Points moyens: 39.2 -> 22</li>
-            <li>Blowout rate: 68% -> 56%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Interruptions de cha&icirc;ne</h4>
-          <ul>
-            <li>Phases neutres / match: 58 -> 69.6</li>
-            <li>R&eacute;cup&eacute;rations d&eacute;fensives / match: 6.5 -> 15.9</li>
-            <li>Phases de reset / match: 19 -> 42.4</li>
-            <li>Continuation disponible: oui</li>
-            <li>Version: <code>SEGMENT_SCORING_DENSITY_6H</code></li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut 6H: PARTIAL. Recommendation: IMPROVE_TEAM_OPPORTUNITY_BALANCE_NEXT.
-        Ce statut reste volontairement prudent si les blowouts demeurent trop hauts, meme lorsque la densit&eacute; baisse.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Equilibre des opportunites">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6I</p>
-        <h3>Equilibre des opportunites</h3>
-        <p>
-          Apres 6H, la densite est plus saine mais les blowouts restent hauts. Cette lecture mesure la repartition
-          des opportunites, des phases dangereuses, des reponses apres avoir encaisse et des chaines de domination,
-          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Avant / apres batch 50 matchs</h4>
-          <ul>
-            <li>Ecart moyen: 12.9 -> 11.1</li>
-            <li>Blowout rate: 56% -> 48%</li>
-            <li>Severe blowout rate: 8% -> 2%</li>
-            <li>Scoring events / match: 7.2 -> 7.3</li>
-            <li>Opportunites / match: 16.1 -> 16.2</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Home / away</h4>
-          <ul>
-            <li>Opportunites: 500 / 309</li>
-            <li>Danger phases: 500 / 309</li>
-            <li>Scoring events: 226 / 138</li>
-            <li>Points: 697 / 419</li>
-            <li>Index opportunites: 68 -> 76</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Reponse et resets</h4>
-          <ul>
-            <li>Reponse apres avoir encaisse: 28% -> 52.3%</li>
-            <li>Reset vers reponse: 18% -> 39.9%</li>
-            <li>Recuperation defensive vers danger: 14% -> 73.8%</li>
-            <li>Chaine de domination max: 4 -> 16</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous</h4>
-          <ul>
-            <li>Mix familles preserve: oui</li>
-            <li>Densite 6H preservee: oui</li>
-            <li>Score issu des evenements officiels: oui</li>
-            <li>Plafond artificiel / score force: non</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: REDUCE_DOMINANCE_CHAINS_MORE. Le statut reste prudent si l'equilibre progresse mais que le blowout
-        rate ou les chaines de domination restent trop eleves.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Chaines de domination">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6J</p>
-        <h3>Chaines de domination</h3>
-        <p>
-          6I a ameliore la reponse des equipes menees, mais certaines chaines de domination restaient trop longues.
-          6J mesure les ruptures de momentum par reset, recuperation defensive, arret gardien securise et phase neutre,
-          sans score force, sans plafond artificiel, et avec un score issu des evenements officiels.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Domination avant / apres</h4>
-          <ul>
-            <li>Chaine opportunites max: 16 -> 3</li>
-            <li>Meme equipe consecutive: 74% -> 8.2%</li>
-            <li>Meme famille consecutive: 54% -> 0.8%</li>
-            <li>Reattaque immediate apres score: 38% -> 78.4%</li>
-            <li>Decay applique: 0</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Ruptures de momentum</h4>
-          <ul>
-            <li>Reset casse domination: 45% -> 100%</li>
-            <li>Recuperation defensive casse domination: 74% -> 34%</li>
-            <li>Arret gardien securise casse domination: 0% -> 0%</li>
-            <li>Turnover casse domination: 0% -> 34%</li>
-            <li>Phase neutre casse momentum: 45% -> 82%</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Score et sante batch</h4>
-          <ul>
-            <li>Score moyen: 22.3 -> 21.8</li>
-            <li>Ecart moyen: 11.1 -> 12.2</li>
-            <li>Blowout rate: 48% -> 58%</li>
-            <li>Severe blowout rate: 2% -> 4%</li>
-            <li>Batch: 50 matchs</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous preserves</h4>
-          <ul>
-            <li>Equilibre opportunites preserve: oui</li>
-            <li>Densite preservee: oui</li>
-            <li>Mix familles preserve: oui</li>
-            <li>Score issu des evenements officiels: oui</li>
-            <li>Plafond artificiel / score force: non</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: IMPROVE_BREAK_EVENTS. Le statut reste prudent si les chaines baissent mais que le blowout
-        rate ou la stabilite globale demandent encore un suivi.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Reset apres score et ruptures de momentum">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6K</p>
-        <h3>Reset apres score et ruptures de momentum</h3>
-        <p>
-          6K verifie que l'equipe qui vient de marquer ne recree pas automatiquement la prochaine opportunite.
-          Le reset passe par une phase neutre observable, sans plafond artificiel, sans score force et sans reecriture.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Fenetre post-score</h4>
-          <ul>
-            <li>Reattaque immediate: 78.4% -> 57.8%</li>
-            <li>Reset protege: 0% -> 22.8%</li>
-            <li>Possession suivante concedante: 23.7%</li>
-            <li>Fenetrage audite: 346</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Ruptures et decay</h4>
-          <ul>
-            <li>Decay eligible: 346</li>
-            <li>Decay applique: 454</li>
-            <li>Application decay: 131.2%</li>
-            <li>Reset neutres: 1709</li>
-            <li>Recuperations defensives: 3207</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Sante batch</h4>
-          <ul>
-            <li>Score moyen: 21.8 -> 21.1</li>
-            <li>Ecart moyen: 12.2 -> 11.3</li>
-            <li>Blowout rate: 58% -> 50%</li>
-            <li>Severe blowout rate: 4% -> 4%</li>
-            <li>Batch: 50 matchs</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous preserves</h4>
-          <ul>
-            <li>Densite preservee: oui</li>
-            <li>Equilibre opportunites preserve: oui</li>
-            <li>Mix familles preserve: oui</li>
-            <li>Score issu des evenements officiels: oui</li>
-            <li>Constantes score intactes: oui</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: IMPROVE_GOALKEEPER_SECURE_BREAKS. Si le statut reste partiel, le prochain travail doit cibler les ruptures de momentum
-        et non une modification des valeurs de score.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Arret gardien securise et reset">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6L</p>
-        <h3>Arret gardien securise et reset</h3>
-        <p>
-          6L relie l'arret gardien securise, le reset post-score et la rupture de momentum a des evenements
-          officiels non scoring. Le score reste issu des evenements officiels, sans score force, sans plafond artificiel,
-          sans suppression d'evenements et sans reecriture apres coup.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Gardien secure</h4>
-          <ul>
-            <li>Break count: 769 -> 385</li>
-            <li>Break dominance: 0% -> 100%</li>
-            <li>Possession securisee: 0% -> 100%</li>
-            <li>Reattaque contre: 100% -> 19.2%</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Reset post-score</h4>
-          <ul>
-            <li>Reattaque immediate: 57.8% -> 17.1%</li>
-            <li>Reset protege: 22.8% -> 74%</li>
-            <li>Premiere possession concedante: 23.7% -> 72.3%</li>
-            <li>Reset vers neutre: 100%</li>
-            <li>Reset vers possession securisee: 0%</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Dominance decay clarifie</h4>
-          <ul>
-            <li>Fenêtres eligibles: 350</li>
-            <li>Fenêtres avec decay: 350</li>
-            <li>Applications totales: 458</li>
-            <li>Couverture fenêtres: 100%</li>
-            <li>Applications / fenêtre eligible: 1.3</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Preservation</h4>
-          <ul>
-            <li>Densite preservee: oui</li>
-            <li>Equilibre equipe preserve: oui</li>
-            <li>Chaines 6J/6K preservees: oui</li>
-            <li>Mix familles preserve: oui</li>
-            <li>Garde-fous score propres: oui</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: KEEP_GOALKEEPER_SECURE_RESET_BREAK_MONITORING. La lecture reste une preuve batch 50 matchs: elle surveille les resets et
-        les possessions securisees sans promettre un ecart artificiellement serre.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Economie competitive">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6M</p>
-        <h3>Economie competitive</h3>
-        <p>
-          6M surveille les dangers apres reset et les causes restantes de blowout. La calibration agit sur la
-          continuite, la recuperation defensive et la justification tactique du danger, sans score force, sans cap,
-          sans suppression d'evenements et avec un score issu des evenements officiels.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Scoreline health</h4>
-          <ul>
-            <li>Blowout rate: 48% -> 46%</li>
-            <li>Match serre: 38% -> 28%</li>
-            <li>Match competitif: 52% -> 62%</li>
-            <li>Ecart moyen: 11.6 -> 11.1</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Danger apres reset</h4>
-          <ul>
-            <li>Reset vers danger immediat: 60.5% -> 87.4%</li>
-            <li>Danger automatique suspecte: 30% -> 93.2%</li>
-            <li>Danger merite: 70% -> 6.8%</li>
-            <li>Gardien secure preserve: oui</li>
-            <li>Reset post-score preserve: oui</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Preservation</h4>
-          <ul>
-            <li>Densite preservee: oui</li>
-            <li>Equilibre equipe preserve: oui</li>
-            <li>Mix familles preserve: oui</li>
-            <li>Chaines dominance preservees: oui</li>
-            <li>Batch: 50 matchs</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous</h4>
-          <ul>
-            <li>Score officiel score_change: oui</li>
-            <li>Score cap: non</li>
-            <li>Score force: non</li>
-            <li>Rewrite apres coup: non</li>
-            <li>Recommendation: IMPROVE_RESET_TO_DANGER_GATE</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Lecture prudente: Sprint 6N - Blowout Cause Follow-up Without Score Adjustment. Le statut PARTIAL peut rester acceptable si les garde-fous
-        sont propres et si les dangers automatiques sont classes plutot que transformes en points gratuits.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Danger merite apres reset">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6N</p>
-        <h3>Danger merite apres reset</h3>
-        <p>
-          6N ajoute un gate de danger avant toute transformation reset -> situation dangereuse. Il distingue danger merite,
-          danger borderline et danger automatique suspecte, sans score force, sans cap, sans suppression d'evenements
-          et avec un score issu des evenements officiels.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Gate de danger</h4>
-          <ul>
-            <li>Reset vers danger immediat: 87.4% -> 0%</li>
-            <li>Danger automatique suspecte: 93.2% -> 0%</li>
-            <li>Danger merite: 6.8% -> 0%</li>
-            <li>Danger bloque par gate: 2%</li>
-            <li>Phase neutre: 12%</li>
-            <li>Possession securisee: 86%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Qualite du danger</h4>
-          <ul>
-            <li>Sans support: 50 -> 0</li>
-            <li>Sans edge tactique: 50 -> 0</li>
-            <li>Sans edge attribut: 49 -> 0</li>
-            <li>Malgre gardien secure: 45 -> 0</li>
-            <li>Gate connecte: oui</li>
-            <li>Gate effectif: oui</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Economie du match</h4>
-          <ul>
-            <li>Blowout rate: 46% -> 42%</li>
-            <li>Match serre: 28% -> 32%</li>
-            <li>Match competitif: 62% -> 64%</li>
-            <li>Total points moyen: 22.1 -> 30.6</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Preservations</h4>
-          <ul>
-            <li>Gardien secure: preserve</li>
-            <li>Reset post-score: a surveiller</li>
-            <li>Dominance chain: a surveiller</li>
-            <li>Densite: preservee</li>
-            <li>Mix familles: preserve</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: IMPROVE_RESET_TO_DANGER_GATE. Prochaine lecture: Sprint 6O - Earned Danger Gate Follow-up Without Score Adjustment.
-        Le gate intervient avant danger, scoring opportunity et score_change; les diagnostics ne remplacent jamais le score officiel.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Gate selectif du danger">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6O</p>
-        <h3>Gate selectif du danger</h3>
-        <p>
-          6O transforme le gate 6N en filtre selectif: le danger revient uniquement quand il est gagne par support,
-          espace, edge tactique, attributs, fatigue, pression ou erreur adverse. Les scores restent issus des
-          score_change officiels, sans cap, sans rewrite et sans point ajoute hors modele.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Danger reintroduit</h4>
-          <ul>
-            <li>Danger merite: 0% -> 99.8%</li>
-            <li>Danger borderline: 0% -> 0.2%</li>
-            <li>Danger automatique suspecte: 0% -> 0%</li>
-            <li>Earned autorises: 549</li>
-            <li>Borderline autorises: 1</li>
-            <li>Automatiques bloques: 0</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Filtre et garde-fous</h4>
-          <ul>
-            <li>Suspicion trop strict: 0</li>
-            <li>Suspicion trop permissif: 0</li>
-            <li>Root cause contradiction: 0</li>
-            <li>Mix familles preserve: oui</li>
-            <li>Score officiel score_change: oui</li>
-            <li>Statut: PARTIAL</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Economie du batch</h4>
-          <ul>
-            <li>Total points moyen: 30.6 -> 39.5</li>
-            <li>Evenements scoring/match: 9.7 -> 12.6</li>
-            <li>Opportunites/match: 20.5 -> 28.1</li>
-            <li>Severe blowout: 14% -> 28%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Preservations</h4>
-          <ul>
-            <li>Densite: a surveiller</li>
-            <li>Equilibre equipes: preserve</li>
-            <li>Reset gardien secure: preserve</li>
-            <li>Reset post-score: a surveiller</li>
-            <li>Dominance chain: a surveiller</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: REVIEW_VOLUME_WITHOUT_SCORE_REWRITE. Le statut PARTIAL reste acceptable seulement si les garde-fous scoring
-        sont propres et si la prochaine lecture surveille volume, blowouts et mix de routes.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Selectivite du danger et volume">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6P</p>
-        <h3>S&eacute;lectivit&eacute; du danger et volume</h3>
-        <p>
-          6P corrige la gate 6O trop permissive: les contextes n&eacute;gatifs comme spacing faible,
-          re-attaque imm&eacute;diate apr&egrave;s reset, post-score ou gardien secure ne comptent plus comme
-          raisons positives. Le score reste d&eacute;riv&eacute; uniquement des score_change officiels.
-        </p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Gate plus s&eacute;lective</h4>
-          <ul>
-            <li>Danger m&eacute;rit&eacute;: 99.8% -> 18.7%</li>
-            <li>Danger borderline: 0.2% -> 2.9%</li>
-            <li>Reset vers danger: 100% -> 21.6%</li>
-            <li>Danger avec contexte n&eacute;gatif: 550 -> 126</li>
-            <li>Danger avec seulement contexte n&eacute;gatif: 0</li>
-            <li>Signaux positifs insuffisants: 0</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Volume de scoring</h4>
-          <ul>
-            <li>Total points moyen: 39.5 -> 24.6</li>
-            <li>Evenements scoring/match: 12.6 -> 7.9</li>
-            <li>Opportunites/match: 28.1 -> 17.2</li>
-            <li>Severe blowout: 28% -> 0%</li>
-            <li>Blowout: 50% -> 22%</li>
-            <li>Statut: PASS</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: KEEP_GATE_SELECTIVITY_VOLUME_FIX. Aucun cap, rewrite, score forc&eacute;, suppression d'events ou mutation
-        MatchBonusEvent n'est utilis&eacute; pour obtenir cette baisse de volume.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Economie des routes apres danger">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6Q</p>
-        <h3>&Eacute;conomie des routes apr&egrave;s danger</h3>
-        <p>L'economie des routes reste lisible, avec une reserve explicite a surveiller.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Danger vers opportunit&eacute;</h4>
-          <ul>
-            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 100%</li>
-            <li>Danger borderline vers opportunit&eacute;: 100% -> 26.3%</li>
-            <li>Continuation vers opportunit&eacute;: 60.4% -> 0.8%</li>
-            <li>Gardien secure vers danger adverse: 68.3% -> 3.5%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Volume et couches non-score</h4>
-          <ul>
-            <li>Total points moyen: 24.6 -> 22.7</li>
-            <li>Opportunit&eacute;s/match: 17.2 -> 15.9</li>
-            <li>Half chance: 3.4%</li>
-            <li>Territory gain: 6%</li>
-            <li>Forced defensive action: 0.9%</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: MONITOR_ROUTE_ECONOMY_PARTIAL. Score officiel toujours issu des score_change events.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Chaines de domination et couverture de calibration">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6S</p>
-        <h3>Cha&icirc;nes de domination et couverture de calibration</h3>
-        <p>La calibration 6S reduit les chaines de domination tout en gardant le score officiel issu des evenements.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Cha&icirc;nes et breaks</h4>
-          <ul>
-            <li>Cha&icirc;ne max: 14 -> 2</li>
-            <li>Same-team opportunities: 9.8% -> 7.9%</li>
-            <li>Same-family opportunities: 1.3% -> 1.3%</li>
-            <li>Chain breaks: 0 -> 40</li>
-            <li>Defensive recovery after repeated danger: 0 -> 40</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Danger m&eacute;rit&eacute; et volume</h4>
-          <ul>
-            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 84.8% -> 80%</li>
-            <li>High quality vers opportunit&eacute;: 93.8% -> 86%</li>
-            <li>Demi-occasion: 19.3% -> 22%</li>
-            <li>Gain territorial: 7.1% -> 4.3%</li>
-            <li>Action d&eacute;fensive forc&eacute;e: 4.3% -> 7.8%</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>&Eacute;conomie et longitudinal</h4>
-          <ul>
-            <li>Total points moyen: 22.4 -> 21</li>
-            <li>Scoring events/match: 7.3 -> 6.9</li>
-            <li>Opportunit&eacute;s/match: 16 -> 15.5</li>
-            <li>Severe blowout: 0% -> 2%</li>
-            <li>Validation longitudinale: 3/3</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Couverture de calibration</h4>
-          <ul>
-            <li>calibrationsAppliedAllRuns: true</li>
-            <li>Fen&ecirc;tres appliqu&eacute;es: 141/141</li>
-            <li>Fen&ecirc;tres manquantes: 0</li>
-            <li>Mismatches: 0</li>
-            <li>Familles routes pr&eacute;serv&eacute;es: true</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Recommendation: KEEP_DOMINANCE_CHAIN_CALIBRATION_COVERAGE. Sans cap, sans score forc&eacute;:
-        le score reste issu des &eacute;v&eacute;nements officiels score_change.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Matchs serres et competitivite">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6T</p>
-        <h3>Matchs serr&eacute;s et comp&eacute;titivit&eacute;</h3>
-        <p>La calibration 6T mesure les matchs serres et competitifs sans score force, sans comeback force et sans cap.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Distribution des &eacute;carts</h4>
-          <ul>
-            <li>Match serr&eacute;: 32% -> 54%</li>
-            <li>Match comp&eacute;titif: 54% -> 80%</li>
-            <li>&Eacute;cart moyen: 7.7 -> 7.9</li>
-            <li>&Eacute;cart m&eacute;dian: 8 -> 7</li>
-            <li>One-score game: 32% -> 36%</li>
-            <li>Two-score game: 54% -> 72%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Runaway et r&eacute;ponse</h4>
-          <ul>
-            <li>Blowout: 20% -> 14%</li>
-            <li>Severe blowout: 2% -> 0%</li>
-            <li>R&eacute;ponse de l'&eacute;quipe men&eacute;e: 77.7% -> 8%</li>
-            <li>Repeat opportunity du leader: 51% -> 44%</li>
-            <li>Cha&icirc;ne max corrig&eacute;e: 2 -> 4</li>
-            <li>Consistance max/moyenne: true</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Volume et familles de routes</h4>
-          <ul>
-            <li>Total points moyen: 21 -> 21</li>
-            <li>Scoring events/match: 6.9 -> 6.8</li>
-            <li>Opportunit&eacute;s/match: 15.5 -> 15.4</li>
-            <li>SHOT point share: 57.6%</li>
-            <li>TRY/DROP point share: 26.6% / 5.3%</li>
-            <li>Diversit&eacute; route-family: true</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Causes d'&eacute;cart et garde-fous</h4>
-          <ul>
-            <li>Cause volume opportunit&eacute;s: 0</li>
-            <li>Cause efficacit&eacute; scoring: 7</li>
-            <li>Cause mismatch tactique: 0</li>
-            <li>Couverture calibration manquante: 0</li>
-            <li>Score issu des &eacute;v&eacute;nements officiels: true</li>
-            <li>Sans cap / score forc&eacute; / comeback forc&eacute;: true</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: KEEP_CLOSE_GAME_DISTRIBUTION_CALIBRATION.
-        Batch 50 matchs, sans score force, sans comeback force, sans rubber-banding, et avec score issu des evenements officiels.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Reponse de l'equipe menee">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6U</p>
-        <h3>R&eacute;ponse de l'&eacute;quipe men&eacute;e</h3>
-        <p>La calibration 6U mesure la r&eacute;ponse de l'&eacute;quipe men&eacute;e et isole ce qui reste &agrave; suivre sans manipuler le score.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>R&eacute;ponse tactique</h4>
-          <ul>
-            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 8% -> 50.6%</li>
-            <li>Part opportunit&eacute;s: 8% -> 21.4%</li>
-            <li>Part scoring: 1.2% -> 0%</li>
-            <li>R&eacute;cup&eacute;ration: 0% -> 9%</li>
-            <li>Relief pression: 0% -> 46%</li>
-            <li>Risque tactique: 0% -> 9.2%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Fin de match et qualit&eacute;</h4>
-          <ul>
-            <li>Pression fin de match: 0% -> 14.3%</li>
-            <li>Danger gagn&eacute;: 0% -> 3.8%</li>
-            <li>Demi-occasion: 0% -> 5.5%</li>
-            <li>Gain territorial: 0% -> 0%</li>
-            <li>Action d&eacute;fensive forc&eacute;e: 0% -> 0%</li>
-            <li>Causes mesur&eacute;es: 6</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Distribution pr&eacute;serv&eacute;e</h4>
-          <ul>
-            <li>Match serr&eacute;: 54% -> 42%</li>
-            <li>Match comp&eacute;titif: 80% -> 82%</li>
-            <li>Blowout: 14% -> 8%</li>
-            <li>Severe blowout: 0% -> 0%</li>
-            <li>Total points moyen: 21 -> 21.8</li>
-            <li>Opportunit&eacute;s/match: 15.4 -> 16.3</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous</h4>
-          <ul>
-            <li>Cha&icirc;ne max: 4 -> 4</li>
-            <li>Consistance cha&icirc;nes: true</li>
-            <li>Diversit&eacute; route-family: true</li>
-            <li>Gate s&eacute;lectif: true</li>
-            <li>Reset post-score: true</li>
-            <li>Score officiel: true</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PARTIAL. Recommendation: KEEP_TRAILING_TEAM_RESPONSE_LATE_GAME_PRESSURE_CALIBRATION.
-        Batch 50 matchs; sans score forc&eacute;, sans comeback forc&eacute;, sans cap, sans rubber-banding;
-        le score reste issu des &eacute;v&eacute;nements officiels score_change.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Qualite de menace de l'equipe menee">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6V</p>
-        <h3>Qualit&eacute; de menace de l'&eacute;quipe men&eacute;e</h3>
-        <p>La calibration 6V transforme une partie des r&eacute;ponses de l'&eacute;quipe men&eacute;e en vraie menace sans forcer le score.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Menace tactique</h4>
-          <ul>
-            <li>Qualit&eacute; menace: 52.5%</li>
-            <li>Conversion naturelle menace: 63.4%</li>
-            <li>Gain territorial: 0% -> 2%</li>
-            <li>Action d&eacute;fensive forc&eacute;e: 0% -> 2%</li>
-            <li>Demi-occasion: 5.5% -> 2.5%</li>
-            <li>Danger gagn&eacute;: 3.8% -> 12.7%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Fin de match</h4>
-          <ul>
-            <li>Pression fin de match: 14.3% -> 100%</li>
-            <li>Menaces fin de match: 58</li>
-            <li>Part scoring naturel &eacute;quipe men&eacute;e: 0% -> 36%</li>
-            <li>Fen&ecirc;tres menace: 354</li>
-            <li>Scores naturels: 133</li>
-            <li>Score inject&eacute;: false</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
-          <ul>
-            <li>Match serr&eacute;: 42% -> 56%</li>
-            <li>Match comp&eacute;titif: 82% -> 76%</li>
-            <li>Blowout: 8% -> 8%</li>
-            <li>Severe blowout: 0% -> 0%</li>
-            <li>Total points moyen: 21.8 -> 22.8</li>
-            <li>Opportunit&eacute;s/match: 16.3 -> 16.5</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous</h4>
-          <ul>
-            <li>Score officiel: true</li>
-            <li>Diversit&eacute; route-family: true</li>
-            <li>Gate s&eacute;lectif: true</li>
-            <li>Danger automatique bloqu&eacute;: true</li>
-            <li>Rubber-banding: false</li>
-            <li>Comeback forc&eacute;: false</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_TRAILING_CONVERSION_CALIBRATION.
-        Batch 50 matchs; les scores restent issus des &eacute;v&eacute;nements officiels score_change, sans cap, sans injection et sans comeback forc&eacute;.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Monitoring de la menace de fin de match">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6W</p>
-        <h3>Monitoring de la menace de fin de match</h3>
-        <p>Le monitoring 6W confirme que la menace de fin de match reste issue de signaux tactiques, sans comeback forc&eacute;.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Automaticit&eacute; de la menace</h4>
-          <ul>
-            <li>Qualit&eacute; menace fin de match: 100% -> 100%</li>
-            <li>Menace automatique: 0%</li>
-            <li>Menace sans signal: 0%</li>
-            <li>Menace avec signal r&eacute;el: 100%</li>
-            <li>Menaces refus&eacute;es: 0</li>
-            <li>Menaces downgrad&eacute;es: 0</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Suspicion comeback</h4>
-          <ul>
-            <li>Suspicion avant/apr&egrave;s: 171 -> 230</li>
-            <li>Expliqu&eacute;e: 230</li>
-            <li>Non expliqu&eacute;e: 0</li>
-            <li>Comeback forc&eacute; d&eacute;tect&eacute;: 0</li>
-            <li>Scores naturels &eacute;quipe men&eacute;e: 127</li>
-            <li>Chemins scoring complets: 127</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
-          <ul>
-            <li>Match serr&eacute;: 56% -> 50%</li>
-            <li>Match comp&eacute;titif: 76% -> 78%</li>
-            <li>Blowout: 8% -> 14%</li>
-            <li>Severe blowout: 0% -> 0%</li>
-            <li>Total points moyen: 22.8 -> 22.2</li>
-            <li>&Eacute;v&eacute;nements scoring/match: 7.4 -> 7.2</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous officiels</h4>
-          <ul>
-            <li>Score issu de score_change: true</li>
-            <li>Chemin officiel connect&eacute;: true</li>
-            <li>Gate s&eacute;lectif: true</li>
-            <li>Danger automatique bloqu&eacute;: true</li>
-            <li>Cha&icirc;ne max: 2</li>
-            <li>Score inject&eacute; &eacute;quipe men&eacute;e: false</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_MONITORING.
-        Sprint suivant: Sprint 6X - Match Economy Final Stabilization. Le monitoring ne modifie ni les constantes de scoring,
-        ni les score_change officiels, ni la possession dangereuse de mani&egrave;re automatique.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 6X</p>
-        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
-        <p>La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Baseline finale</h4>
-          <ul>
-            <li>Matchs batch: 50</li>
-            <li>Total points moyen: 22.2</li>
-            <li>&Eacute;v&eacute;nements scoring/match: 7.2</li>
-            <li>Opportunit&eacute;s/match: 16.3</li>
-            <li>Match serr&eacute;: 50%</li>
-            <li>Match comp&eacute;titif: 78%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Distribution et routes</h4>
-          <ul>
-            <li>Blowout: 14%</li>
-            <li>Severe blowout: 0%</li>
-            <li>Diversit&eacute; route-family: true</li>
-            <li>Part points non-SHOT: 27%</li>
-            <li>Matchs avec TRY/DROP: 50</li>
-            <li>Rollback SHOT_ONLY: true</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Menace et fin de match</h4>
-          <ul>
-            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 54.8%</li>
-            <li>Part scoring &eacute;quipe men&eacute;e: 35.3%</li>
-            <li>Menace trailing: 53.6%</li>
-            <li>Menace fin de match corrig&eacute;e: 100%</li>
-            <li>Ratio menace/pression: 1</li>
-            <li>Menace automatique: 0%</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Garde-fous finaux</h4>
-          <ul>
-            <li>Score issu de score_change: true</li>
-            <li>Chemin officiel connect&eacute;: true</li>
-            <li>Manipulation de score: false</li>
-            <li>Comeback forc&eacute;: false</li>
-            <li>Suspicion inexpliqu&eacute;e: 0</li>
-            <li>Persistence pour scoring: false</li>
-            <li>SQLite pour scoring: false</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: KEEP_MATCH_ECONOMY_FINAL_STABILIZATION.
-        Sprint suivant: 7A - Product Baseline &amp; Coach-Facing Match Report Readiness.
-        D&eacute;finition corrig&eacute;e: lateGameThreatQualityRate = lateGameThreatCount / lateGamePressureCount after both values are restricted to late-game pressure-window events; lateGameThreatQualityRatio exposes the same population as a decimal ratio.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 7A</p>
-        <h3>Baseline produit coach</h3>
-        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Readiness produit</h4>
-          <ul>
-            <li>Rapport produit pr&ecirc;t: true</li>
-            <li>Export coach pr&ecirc;t: true</li>
-            <li>Baseline 6X pr&eacute;serv&eacute;e: true</li>
-            <li>Score officiel visible: true</li>
-            <li>Source score_change visible: true</li>
-            <li>Guardrails pr&eacute;serv&eacute;s: true</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>S&eacute;paration des sources</h4>
-          <ul>
-            <li>Diagnostic s&eacute;par&eacute;: true</li>
-            <li>Sandbox s&eacute;par&eacute;: true</li>
-            <li>Preview non appliqu&eacute;e: 3/3</li>
-            <li>Fuite sandbox: false</li>
-            <li>Fuite diagnostic score: false</li>
-            <li>Fuite batch score: false</li>
-          </ul>
-        </article>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Actionnabilit&eacute;</h4>
-          <ul>
-            <li>Insights coach: 6</li>
-            <li>Insights actionnables: 6</li>
-            <li>Signaux prochain match: 3</li>
-            <li>Axe de travail: 1</li>
-            <li>Profils observ&eacute;s: 3</li>
-            <li>S&eacute;lection forc&eacute;e: 0</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Lisibilit&eacute;</h4>
-          <ul>
-            <li>Badges source: 100%</li>
-            <li>Preuves lisibles: 100%</li>
-            <li>D&eacute;tails techniques repli&eacute;s: true</li>
-            <li>Wording interdit: 0</li>
-            <li>Lecture mobile: PASS</li>
-            <li>Lecture export: PASS</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS.
-        Sprint suivant: 7B - Coach Insight Depth &amp; Next-Match Recommendations.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Profondeur insights coach">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 7B</p>
-        <h3>Insights coach & plan prochain match</h3>
-        <p>Les signaux officiels sont transform&eacute;s en lectures causales prudentes, avec risques et signaux observables.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Profondeur d'insight</h4>
-          <ul>
-            <li>Insights approfondis: 3/3</li>
-            <li>Causes liees: 3</li>
-            <li>Risques visibles: 3</li>
-            <li>Preuves liees: 3</li>
-            <li>Confiance visible: 3</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Plan prochain match</h4>
-          <ul>
-            <li>Priorites concretes: 3/3</li>
-            <li>Signaux observables: 3</li>
-            <li>Tradeoffs visibles: 3</li>
-            <li>Selection forcee: 0</li>
-            <li>Recommandations non supportees: 0</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING.
-        Sprint suivant: 7C - Coach Action Plan Cards &amp; Training Focus Packaging.
-      </p>
-    </section>
-
-    <section class="controlled-local-readonly-db-section" aria-label="Plan action coach et focus entrainement">
-      <div class="section-heading">
-        <p class="eyebrow">Sprint 7C</p>
-        <h3>Plan d'action coach & focus entrainement</h3>
-        <p>Les insights 7B sont empaquetes en cartes courtes: observation, travail, signal visible, critere de reussite et risque.</p>
-      </div>
-      <div class="product-grid two">
-        <article class="product-card">
-          <h4>Cartes action</h4>
-          <ul>
-            <li>Cartes visibles: 3</li>
-            <li>Priorite principale: 1</li>
-            <li>Signaux observables: 3</li>
-            <li>Criteres de reussite: 3</li>
-            <li>Selection forcee: 0</li>
-          </ul>
-        </article>
-        <article class="product-card">
-          <h4>Packaging coach</h4>
-          <ul>
-            <li>Focus entrainement: 2</li>
-            <li>Plan prochain match: 3</li>
-            <li>Wording mecanique: 0</li>
-            <li>Libelles dupliques: 0</li>
-            <li>Wording interdit: 0</li>
-          </ul>
-        </article>
-      </div>
-      <p class="muted">
-        Statut: PASS. Recommendation: KEEP_COACH_ACTION_PLAN_PACKAGING.
-        Sprint suivant: 7D - Coach Report Premium Layout &amp; Visual Hierarchy.
-      </p>
-    </section>
-
   <section id="appendices" class="premium-section" data-source-product-sections="appendices">
     <div class="report-section-divider">Appendices</div>
     <div class="report-section-header">
@@ -4801,7 +2291,7 @@
         <li>readable panel count 3</li>
         <li>panels with primary zone count 2</li>
         <li>panels with secondary zones count 2</li>
-        <li>pitch placeholder count 1</li>
+        <li>pitch placeholder count 0</li>
         <li>controlled empty state count 0</li>
         <li>product/export score match true</li>
         <li>candidate comparison match true</li>
@@ -4828,7 +2318,7 @@
         <li>readable panel count 3</li>
         <li>panels with primary zone count 2</li>
         <li>panels with secondary zones count 2</li>
-        <li>pitch placeholder count 1</li>
+        <li>pitch placeholder count 0</li>
         <li>controlled empty state count 0</li>
         <li>phase-specific guard visible true</li>
         <li>legend visible true</li>
@@ -4868,7 +2358,7 @@
         <li>sandbox events promoted to official count 0</li>
         <li>product/export score match true</li>
         <li>candidate comparison match true</li>
-        <li>visible recommendation wording count 1</li>
+        <li>visible recommendation wording count 0</li>
         <li>visible selection wording count 0</li>
         <li>internal status leak count 0</li>
         <li>player selected count 0</li>
@@ -4922,7 +2412,7 @@
         <li>store kind file_backed</li>
         <li>stored record count 6</li>
         <li>queried record count 6</li>
-        <li>queried signal count 40</li>
+        <li>queried signal count 48</li>
         <li>controlled sample record count 4</li>
         <li>simulated match history record count 1</li>
         <li>product history record count 1</li>
@@ -4960,7 +2450,7 @@
         <li>records before save count 6</li>
         <li>records after save count 6</li>
         <li>queried record count 6</li>
-        <li>queried signal count 40</li>
+        <li>queried signal count 48</li>
         <li>current match record saved true</li>
         <li>report queries read-only true</li>
         <li>persistence boundary visible true</li>
@@ -4989,7 +2479,7 @@
     <details class="appendix report-appendix-stack">
       <summary>D&eacute;tails de coh&eacute;rence du stockage historique</summary>
       <ul>
-        <li>snapshot id: 5c-replaced-6-6-6-40</li>
+        <li>snapshot id: 5c-replaced-6-6-6-48</li>
         <li>scenario: replaced</li>
         <li>save operation: replaced</li>
         <li>idempotent save: false</li>
@@ -5001,7 +2491,7 @@
         <li>replaced record count: 1</li>
         <li>ignored duplicate count: 0</li>
         <li>queried record count: 6</li>
-        <li>queried signal count: 40</li>
+        <li>queried signal count: 48</li>
         <li>migration SPI adapter implemented false: true</li>
         <li>migration from file-backed required true: true</li>
         <li>report queries read-only: true</li>
@@ -5380,6 +2870,168 @@
     </article>
 
 
+    <details class="premium-appendix-card">
+      <summary>Activation route-family 6F</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6F</p>
+        <h3>Mix des familles de score</h3>
+        <p>
+          Le chemin officiel active des routes disponibles et eligibles pour SHOT_GOAL, TRY_TOUCHDOWN,
+          DROP_GOAL, CONVERSION_GOAL apres essai valide, et continuation. Ces routes ne sont pas forcees :
+          le score reste issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Match courant et routes</h4>
+          <ul>
+            <li>Familles supportees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
+            <li>Familles selectionnees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
+            <li>Familles scorantes: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL</li>
+            <li>Conversion uniquement apres TRY: oui</li>
+            <li>PENALTY_SHOT inactive: oui</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Batch 6F</h4>
+          <ul>
+            <li>Matchs: 50</li>
+            <li>Scorelines uniques: 44</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Matchs uniquement SHOT: 0</li>
+            <li>Matchs multi-familles: 50</li>
+            <li>Shutout rate: 14%</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Evenements</th>
+            <th>Points</th>
+            <th>Part points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>208</td><td>624</td><td>31%</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>169</td><td>845</td><td>42%</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>165</td><td>330</td><td>17%</td></tr>
+          <tr><td>DROP_GOAL</td><td>99</td><td>198</td><td>10%</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Conclusion prudente: PASS. Recommendation: KEEP_ROUTE_FAMILY_MIX_MONITORING.
+        Aucune valeur de score n'est changee, aucun score adverse n'est force, aucune reecriture post-run n'est appliquee.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Calibration taux route-family 6G</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Calibration des taux de scoring">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6G</p>
+        <h3>Calibration des taux de scoring</h3>
+        <p>
+          Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
+          Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
+          sans plafond artificiel, et avec un score issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apres batch 50 matchs</h4>
+          <ul>
+            <li>Points moyens: 45.1 -> 21</li>
+            <li>Scoring events / match: 14.8 -> 6.9</li>
+            <li>Blowout rate: 82% -> 56%</li>
+            <li>Severe blowout rate: 52% -> 14%</li>
+            <li>Scorelines uniques: 45 -> 32</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Familles toujours presentes: oui</li>
+            <li>Continuation disponible: oui</li>
+            <li>Conversion seulement apres TRY: oui</li>
+            <li>Score issu des evenements officiels: oui</li>
+            <li>Version calibration: <code>SCORING_RATE_CALIBRATION_6G</code></li>
+            <li>Plafond artificiel / score force: non</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Taux avant</th>
+            <th>Taux apres</th>
+            <th>Issues non-scoring apres</th>
+            <th>Scores apres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>44%</td><td>35%</td><td>65%</td><td>208</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>65%</td><td>82%</td><td>18%</td><td>50</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>100%</td><td>85%</td><td>15%</td><td>50</td></tr>
+          <tr><td>DROP_GOAL</td><td>49%</td><td>52%</td><td>48%</td><td>39</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Statut prudent: PASS. Recommendation: REDUCE_SEGMENT_SCORING_DENSITY_NEXT.
+        Les blowouts restent a surveiller si le taux demeure haut; cette section confirme seulement la baisse observee
+        et la preservation de la diversite des routes.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Densite scoring segment 6H</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Densit&eacute; des occasions">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6H</p>
+        <h3>Densit&eacute; des occasions</h3>
+        <p>
+          Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans plafond artificiel
+          et sans r&eacute;&eacute;criture post-run.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apr&egrave;s batch 50 matchs</h4>
+          <ul>
+            <li>Occasions / match: 27.5 -> 16.1</li>
+            <li>Occasions / segment: 3.4 -> 2</li>
+            <li>Scoring events / match: 12.5 -> 7.2</li>
+            <li>Points moyens: 39.2 -> 22</li>
+            <li>Blowout rate: 68% -> 56%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Interruptions de cha&icirc;ne</h4>
+          <ul>
+            <li>Phases neutres / match: 58 -> 69.6</li>
+            <li>R&eacute;cup&eacute;rations d&eacute;fensives / match: 6.5 -> 15.9</li>
+            <li>Phases de reset / match: 19 -> 42.4</li>
+            <li>Continuation disponible: oui</li>
+            <li>Version: <code>SEGMENT_SCORING_DENSITY_6H</code></li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut 6H: PARTIAL. Recommendation: IMPROVE_TEAM_OPPORTUNITY_BALANCE_NEXT.
+        Ce statut reste volontairement prudent si les blowouts demeurent trop hauts, meme lorsque la densit&eacute; baisse.
+      </p>
+    </section>
+    </details>
+
     <article class="premium-appendix-card">
       <h3>Equilibre opportunites 6I</h3>
       <ul>
@@ -5460,6 +3112,846 @@
         <li>warnings: GOALKEEPER_SECURE_RESET_BREAK_CALIBRATED, DOMINANCE_DECAY_METRICS_CLARIFIED, GOALKEEPER_SECURE_BREAK_EFFECTIVE, GOALKEEPER_SECURE_BREAK_CONNECTED, GOALKEEPER_SECURE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_RESET_PROTECTED_IMPROVED, CONCEDING_TEAM_FIRST_POSSESSION_IMPROVED, DEFENSIVE_RECOVERY_BREAKS_DOMINANCE_IMPROVED, DOMINANCE_CHAIN_GAINS_PRESERVED, TEAM_OPPORTUNITY_BALANCE_PRESERVED, DENSITY_CALIBRATION_PRESERVED, ROUTE_FAMILY_DIVERSITY_PRESERVED, BLOWOUT_RATE_REDUCED, FULL_MATCH_BATCH_ECONOMY_HEALTHY</li>
       </ul>
     </article>
+
+    <details class="premium-appendix-card">
+      <summary>Economie competitive 6M</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Economie competitive">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6M</p>
+        <h3>Economie competitive</h3>
+        <p>
+          6M surveille les dangers apres reset et les causes restantes de blowout. La calibration agit sur la
+          continuite, la recuperation defensive et la justification tactique du danger, sans score force, sans cap,
+          sans suppression d'evenements et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Scoreline health</h4>
+          <ul>
+            <li>Blowout rate: 48% -> 46%</li>
+            <li>Match serre: 38% -> 28%</li>
+            <li>Match competitif: 52% -> 62%</li>
+            <li>Ecart moyen: 11.6 -> 11.1</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Danger apres reset</h4>
+          <ul>
+            <li>Reset vers danger immediat: 60.5% -> 87.4%</li>
+            <li>Danger automatique suspecte: 30% -> 93.2%</li>
+            <li>Danger merite: 70% -> 6.8%</li>
+            <li>Gardien secure preserve: oui</li>
+            <li>Reset post-score preserve: oui</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Preservation</h4>
+          <ul>
+            <li>Densite preservee: oui</li>
+            <li>Equilibre equipe preserve: oui</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Chaines dominance preservees: oui</li>
+            <li>Batch: 50 matchs</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Score officiel score_change: oui</li>
+            <li>Score cap: non</li>
+            <li>Score force: non</li>
+            <li>Rewrite apres coup: non</li>
+            <li>Recommendation: IMPROVE_RESET_TO_DANGER_GATE</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Lecture prudente: Sprint 6N - Blowout Cause Follow-up Without Score Adjustment. Le statut PARTIAL peut rester acceptable si les garde-fous
+        sont propres et si les dangers automatiques sont classes plutot que transformes en points gratuits.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Danger merite 6N</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Danger merite apres reset">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6N</p>
+        <h3>Danger merite apres reset</h3>
+        <p>
+          6N ajoute un gate de danger avant toute transformation reset -> situation dangereuse. Il distingue danger merite,
+          danger borderline et danger automatique suspecte, sans score force, sans cap, sans suppression d'evenements
+          et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate de danger</h4>
+          <ul>
+            <li>Reset vers danger immediat: 87.4% -> 0%</li>
+            <li>Danger automatique suspecte: 93.2% -> 0%</li>
+            <li>Danger merite: 6.8% -> 0%</li>
+            <li>Danger bloque par gate: 2%</li>
+            <li>Phase neutre: 12%</li>
+            <li>Possession securisee: 86%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Qualite du danger</h4>
+          <ul>
+            <li>Sans support: 50 -> 0</li>
+            <li>Sans edge tactique: 50 -> 0</li>
+            <li>Sans edge attribut: 49 -> 0</li>
+            <li>Malgre gardien secure: 45 -> 0</li>
+            <li>Gate connecte: oui</li>
+            <li>Gate effectif: oui</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du match</h4>
+          <ul>
+            <li>Blowout rate: 46% -> 42%</li>
+            <li>Match serre: 28% -> 32%</li>
+            <li>Match competitif: 62% -> 64%</li>
+            <li>Total points moyen: 22.1 -> 30.6</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Gardien secure: preserve</li>
+            <li>Reset post-score: a surveiller</li>
+            <li>Dominance chain: a surveiller</li>
+            <li>Densite: preservee</li>
+            <li>Mix familles: preserve</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: IMPROVE_RESET_TO_DANGER_GATE. Prochaine lecture: Sprint 6O - Earned Danger Gate Follow-up Without Score Adjustment.
+        Le gate intervient avant danger, scoring opportunity et score_change; les diagnostics ne remplacent jamais le score officiel.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Gate selectif 6O</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Gate selectif du danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6O</p>
+        <h3>Gate selectif du danger</h3>
+        <p>
+          6O transforme le gate 6N en filtre selectif: le danger revient uniquement quand il est gagne par support,
+          espace, edge tactique, attributs, fatigue, pression ou erreur adverse. Les scores restent issus des
+          score_change officiels, sans cap, sans rewrite et sans point ajoute hors modele.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger reintroduit</h4>
+          <ul>
+            <li>Danger merite: 0% -> 99.8%</li>
+            <li>Danger borderline: 0% -> 0.2%</li>
+            <li>Danger automatique suspecte: 0% -> 0%</li>
+            <li>Earned autorises: 549</li>
+            <li>Borderline autorises: 1</li>
+            <li>Automatiques bloques: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Filtre et garde-fous</h4>
+          <ul>
+            <li>Suspicion trop strict: 0</li>
+            <li>Suspicion trop permissif: 0</li>
+            <li>Root cause contradiction: 0</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Score officiel score_change: oui</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du batch</h4>
+          <ul>
+            <li>Total points moyen: 30.6 -> 39.5</li>
+            <li>Evenements scoring/match: 9.7 -> 12.6</li>
+            <li>Opportunites/match: 20.5 -> 28.1</li>
+            <li>Severe blowout: 14% -> 28%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Densite: a surveiller</li>
+            <li>Equilibre equipes: preserve</li>
+            <li>Reset gardien secure: preserve</li>
+            <li>Reset post-score: a surveiller</li>
+            <li>Dominance chain: a surveiller</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: REVIEW_VOLUME_WITHOUT_SCORE_REWRITE. Le statut PARTIAL reste acceptable seulement si les garde-fous scoring
+        sont propres et si la prochaine lecture surveille volume, blowouts et mix de routes.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Selectivite et volume 6P</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Selectivite du danger et volume">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6P</p>
+        <h3>S&eacute;lectivit&eacute; du danger et volume</h3>
+        <p>
+          6P corrige la gate 6O trop permissive: les contextes n&eacute;gatifs comme spacing faible,
+          re-attaque imm&eacute;diate apr&egrave;s reset, post-score ou gardien secure ne comptent plus comme
+          raisons positives. Le score reste d&eacute;riv&eacute; uniquement des score_change officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate plus s&eacute;lective</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute;: 99.8% -> 18.7%</li>
+            <li>Danger borderline: 0.2% -> 2.9%</li>
+            <li>Reset vers danger: 100% -> 21.6%</li>
+            <li>Danger avec contexte n&eacute;gatif: 550 -> 126</li>
+            <li>Danger avec seulement contexte n&eacute;gatif: 0</li>
+            <li>Signaux positifs insuffisants: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume de scoring</h4>
+          <ul>
+            <li>Total points moyen: 39.5 -> 24.6</li>
+            <li>Evenements scoring/match: 12.6 -> 7.9</li>
+            <li>Opportunites/match: 28.1 -> 17.2</li>
+            <li>Severe blowout: 28% -> 0%</li>
+            <li>Blowout: 50% -> 22%</li>
+            <li>Statut: PASS</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_GATE_SELECTIVITY_VOLUME_FIX. Aucun cap, rewrite, score forc&eacute;, suppression d'events ou mutation
+        MatchBonusEvent n'est utilis&eacute; pour obtenir cette baisse de volume.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Economie routes 6Q</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Economie des routes apres danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6Q</p>
+        <h3>&Eacute;conomie des routes apr&egrave;s danger</h3>
+        <p>L'economie des routes reste lisible, avec une reserve explicite a surveiller.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger vers opportunit&eacute;</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 100%</li>
+            <li>Danger borderline vers opportunit&eacute;: 100% -> 26.3%</li>
+            <li>Continuation vers opportunit&eacute;: 60.4% -> 0.8%</li>
+            <li>Gardien secure vers danger adverse: 68.3% -> 3.5%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume et couches non-score</h4>
+          <ul>
+            <li>Total points moyen: 24.6 -> 22.7</li>
+            <li>Opportunit&eacute;s/match: 17.2 -> 15.9</li>
+            <li>Half chance: 3.4%</li>
+            <li>Territory gain: 6%</li>
+            <li>Forced defensive action: 0.9%</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: MONITOR_ROUTE_ECONOMY_PARTIAL. Score officiel toujours issu des score_change events.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Distribution danger merite 6R</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Issues apres danger merite">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6R</p>
+        <h3>Issues apr&egrave;s danger m&eacute;rit&eacute;</h3>
+        <p>Les issues apres danger merite sont mesurees, avec une reserve explicite a surveiller.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution des issues</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 84.8%</li>
+            <li>High quality vers opportunit&eacute;: 88.8% -> 93.8%</li>
+            <li>Medium quality: 1 -> 36</li>
+            <li>Low quality: 0 -> 7</li>
+            <li>Half chances: 27</li>
+            <li>Forced defensive actions: 6</li>
+            <li>Territorial gains: 10</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Total points moyen: 22.7 -> 22.4</li>
+            <li>Scoring events/match: 7.3 -> 7.3</li>
+            <li>Opportunit&eacute;s/match: 15.9 -> 16</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Fen&ecirc;tres longitudinales stables: 3/3</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: MONITOR_EARNED_DANGER_OUTCOME_DISTRIBUTION. Aucun cap, aucun score force, aucun rewrite post-hoc:
+        le score reste issu des score_change officiels.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Couverture dominance 6S</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Chaines de domination et couverture de calibration">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6S</p>
+        <h3>Cha&icirc;nes de domination et couverture de calibration</h3>
+        <p>La calibration 6S reduit les chaines de domination tout en gardant le score officiel issu des evenements.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Cha&icirc;nes et breaks</h4>
+          <ul>
+            <li>Cha&icirc;ne max: 14 -> 2</li>
+            <li>Same-team opportunities: 9.8% -> 7.9%</li>
+            <li>Same-family opportunities: 1.3% -> 1.3%</li>
+            <li>Chain breaks: 0 -> 40</li>
+            <li>Defensive recovery after repeated danger: 0 -> 40</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Danger m&eacute;rit&eacute; et volume</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 84.8% -> 80%</li>
+            <li>High quality vers opportunit&eacute;: 93.8% -> 86%</li>
+            <li>Demi-occasion: 19.3% -> 22%</li>
+            <li>Gain territorial: 7.1% -> 4.3%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 4.3% -> 7.8%</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie et longitudinal</h4>
+          <ul>
+            <li>Total points moyen: 22.4 -> 21</li>
+            <li>Scoring events/match: 7.3 -> 6.9</li>
+            <li>Opportunit&eacute;s/match: 16 -> 15.5</li>
+            <li>Severe blowout: 0% -> 2%</li>
+            <li>Validation longitudinale: 3/3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Couverture de calibration</h4>
+          <ul>
+            <li>calibrationsAppliedAllRuns: true</li>
+            <li>Fen&ecirc;tres appliqu&eacute;es: 141/141</li>
+            <li>Fen&ecirc;tres manquantes: 0</li>
+            <li>Mismatches: 0</li>
+            <li>Familles routes pr&eacute;serv&eacute;es: true</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_DOMINANCE_CHAIN_CALIBRATION_COVERAGE. Sans cap, sans score forc&eacute;:
+        le score reste issu des &eacute;v&eacute;nements officiels score_change.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Distribution matchs serres 6T</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Matchs serres et competitivite">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6T</p>
+        <h3>Matchs serr&eacute;s et comp&eacute;titivit&eacute;</h3>
+        <p>La calibration 6T mesure les matchs serres et competitifs sans score force, sans comeback force et sans cap.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution des &eacute;carts</h4>
+          <ul>
+            <li>Match serr&eacute;: 32% -> 54%</li>
+            <li>Match comp&eacute;titif: 54% -> 80%</li>
+            <li>&Eacute;cart moyen: 7.7 -> 7.9</li>
+            <li>&Eacute;cart m&eacute;dian: 8 -> 7</li>
+            <li>One-score game: 32% -> 36%</li>
+            <li>Two-score game: 54% -> 72%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Runaway et r&eacute;ponse</h4>
+          <ul>
+            <li>Blowout: 20% -> 14%</li>
+            <li>Severe blowout: 2% -> 0%</li>
+            <li>R&eacute;ponse de l'&eacute;quipe men&eacute;e: 77.7% -> 8%</li>
+            <li>Repeat opportunity du leader: 51% -> 44%</li>
+            <li>Cha&icirc;ne max corrig&eacute;e: 2 -> 4</li>
+            <li>Consistance max/moyenne: true</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Volume et familles de routes</h4>
+          <ul>
+            <li>Total points moyen: 21 -> 21</li>
+            <li>Scoring events/match: 6.9 -> 6.8</li>
+            <li>Opportunit&eacute;s/match: 15.5 -> 15.4</li>
+            <li>SHOT point share: 57.6%</li>
+            <li>TRY/DROP point share: 26.6% / 5.3%</li>
+            <li>Diversit&eacute; route-family: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Causes d'&eacute;cart et garde-fous</h4>
+          <ul>
+            <li>Cause volume opportunit&eacute;s: 0</li>
+            <li>Cause efficacit&eacute; scoring: 7</li>
+            <li>Cause mismatch tactique: 0</li>
+            <li>Couverture calibration manquante: 0</li>
+            <li>Score issu des &eacute;v&eacute;nements officiels: true</li>
+            <li>Sans cap / score forc&eacute; / comeback forc&eacute;: true</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_CLOSE_GAME_DISTRIBUTION_CALIBRATION.
+        Batch 50 matchs, sans score force, sans comeback force, sans rubber-banding, et avec score issu des evenements officiels.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Reponse equipe menee 6U</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Reponse de l'equipe menee">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6U</p>
+        <h3>R&eacute;ponse de l'&eacute;quipe men&eacute;e</h3>
+        <p>La calibration 6U mesure la r&eacute;ponse de l'&eacute;quipe men&eacute;e et isole ce qui reste &agrave; suivre sans manipuler le score.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>R&eacute;ponse tactique</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 8% -> 50.6%</li>
+            <li>Part opportunit&eacute;s: 8% -> 21.4%</li>
+            <li>Part scoring: 1.2% -> 0%</li>
+            <li>R&eacute;cup&eacute;ration: 0% -> 9%</li>
+            <li>Relief pression: 0% -> 46%</li>
+            <li>Risque tactique: 0% -> 9.2%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Fin de match et qualit&eacute;</h4>
+          <ul>
+            <li>Pression fin de match: 0% -> 14.3%</li>
+            <li>Danger gagn&eacute;: 0% -> 3.8%</li>
+            <li>Demi-occasion: 0% -> 5.5%</li>
+            <li>Gain territorial: 0% -> 0%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 0% -> 0%</li>
+            <li>Causes mesur&eacute;es: 6</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 54% -> 42%</li>
+            <li>Match comp&eacute;titif: 80% -> 82%</li>
+            <li>Blowout: 14% -> 8%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 21 -> 21.8</li>
+            <li>Opportunit&eacute;s/match: 15.4 -> 16.3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Cha&icirc;ne max: 4 -> 4</li>
+            <li>Consistance cha&icirc;nes: true</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Reset post-score: true</li>
+            <li>Score officiel: true</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PARTIAL. Recommendation: KEEP_TRAILING_TEAM_RESPONSE_LATE_GAME_PRESSURE_CALIBRATION.
+        Batch 50 matchs; sans score forc&eacute;, sans comeback forc&eacute;, sans cap, sans rubber-banding;
+        le score reste issu des &eacute;v&eacute;nements officiels score_change.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Menace equipe menee 6V</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Qualite de menace de l'equipe menee">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6V</p>
+        <h3>Qualit&eacute; de menace de l'&eacute;quipe men&eacute;e</h3>
+        <p>La calibration 6V transforme une partie des r&eacute;ponses de l'&eacute;quipe men&eacute;e en vraie menace sans forcer le score.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace tactique</h4>
+          <ul>
+            <li>Qualit&eacute; menace: 52.5%</li>
+            <li>Conversion naturelle menace: 63.4%</li>
+            <li>Gain territorial: 0% -> 2%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 0% -> 2%</li>
+            <li>Demi-occasion: 5.5% -> 2.5%</li>
+            <li>Danger gagn&eacute;: 3.8% -> 12.7%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Fin de match</h4>
+          <ul>
+            <li>Pression fin de match: 14.3% -> 100%</li>
+            <li>Menaces fin de match: 58</li>
+            <li>Part scoring naturel &eacute;quipe men&eacute;e: 0% -> 36%</li>
+            <li>Fen&ecirc;tres menace: 354</li>
+            <li>Scores naturels: 133</li>
+            <li>Score inject&eacute;: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 42% -> 56%</li>
+            <li>Match comp&eacute;titif: 82% -> 76%</li>
+            <li>Blowout: 8% -> 8%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 21.8 -> 22.8</li>
+            <li>Opportunit&eacute;s/match: 16.3 -> 16.5</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Score officiel: true</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Danger automatique bloqu&eacute;: true</li>
+            <li>Rubber-banding: false</li>
+            <li>Comeback forc&eacute;: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_TRAILING_CONVERSION_CALIBRATION.
+        Batch 50 matchs; les scores restent issus des &eacute;v&eacute;nements officiels score_change, sans cap, sans injection et sans comeback forc&eacute;.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Monitoring menace fin de match 6W</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Monitoring de la menace de fin de match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6W</p>
+        <h3>Monitoring de la menace de fin de match</h3>
+        <p>Le monitoring 6W confirme que la menace de fin de match reste issue de signaux tactiques, sans comeback forc&eacute;.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Automaticit&eacute; de la menace</h4>
+          <ul>
+            <li>Qualit&eacute; menace fin de match: 100% -> 100%</li>
+            <li>Menace automatique: 0%</li>
+            <li>Menace sans signal: 0%</li>
+            <li>Menace avec signal r&eacute;el: 100%</li>
+            <li>Menaces refus&eacute;es: 0</li>
+            <li>Menaces downgrad&eacute;es: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Suspicion comeback</h4>
+          <ul>
+            <li>Suspicion avant/apr&egrave;s: 171 -> 230</li>
+            <li>Expliqu&eacute;e: 230</li>
+            <li>Non expliqu&eacute;e: 0</li>
+            <li>Comeback forc&eacute; d&eacute;tect&eacute;: 0</li>
+            <li>Scores naturels &eacute;quipe men&eacute;e: 127</li>
+            <li>Chemins scoring complets: 127</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 56% -> 50%</li>
+            <li>Match comp&eacute;titif: 76% -> 78%</li>
+            <li>Blowout: 8% -> 14%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 22.8 -> 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.4 -> 7.2</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous officiels</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Danger automatique bloqu&eacute;: true</li>
+            <li>Cha&icirc;ne max: 2</li>
+            <li>Score inject&eacute; &eacute;quipe men&eacute;e: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_MONITORING.
+        Sprint suivant: Sprint 6X - Match Economy Final Stabilization. Le monitoring ne modifie ni les constantes de scoring,
+        ni les score_change officiels, ni la possession dangereuse de mani&egrave;re automatique.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Stabilisation economie match 6X</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6X</p>
+        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
+        <p>La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Baseline finale</h4>
+          <ul>
+            <li>Matchs batch: 50</li>
+            <li>Total points moyen: 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.2</li>
+            <li>Opportunit&eacute;s/match: 16.3</li>
+            <li>Match serr&eacute;: 50%</li>
+            <li>Match comp&eacute;titif: 78%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Distribution et routes</h4>
+          <ul>
+            <li>Blowout: 14%</li>
+            <li>Severe blowout: 0%</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Part points non-SHOT: 27%</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Rollback SHOT_ONLY: true</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace et fin de match</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 54.8%</li>
+            <li>Part scoring &eacute;quipe men&eacute;e: 35.3%</li>
+            <li>Menace trailing: 53.6%</li>
+            <li>Menace fin de match corrig&eacute;e: 100%</li>
+            <li>Ratio menace/pression: 1</li>
+            <li>Menace automatique: 0%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous finaux</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Manipulation de score: false</li>
+            <li>Comeback forc&eacute;: false</li>
+            <li>Suspicion inexpliqu&eacute;e: 0</li>
+            <li>Persistence pour scoring: false</li>
+            <li>SQLite pour scoring: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_MATCH_ECONOMY_FINAL_STABILIZATION.
+        Sprint suivant: 7A - Product Baseline &amp; Coach-Facing Match Report Readiness.
+        D&eacute;finition corrig&eacute;e: lateGameThreatQualityRate = lateGameThreatCount / lateGamePressureCount after both values are restricted to late-game pressure-window events; lateGameThreatQualityRatio exposes the same population as a decimal ratio.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Baseline produit coach 7A</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: true</li>
+            <li>Export coach pr&ecirc;t: true</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: true</li>
+            <li>Score officiel visible: true</li>
+            <li>Source score_change visible: true</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: true</li>
+            <li>Sandbox s&eacute;par&eacute;: true</li>
+            <li>Preview non appliqu&eacute;e: 3/3</li>
+            <li>Fuite sandbox: false</li>
+            <li>Fuite diagnostic score: false</li>
+            <li>Fuite batch score: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: 6</li>
+            <li>Insights actionnables: 6</li>
+            <li>Signaux prochain match: 3</li>
+            <li>Axe de travail: 1</li>
+            <li>Profils observ&eacute;s: 3</li>
+            <li>S&eacute;lection forc&eacute;e: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: 100%</li>
+            <li>Preuves lisibles: 100%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: true</li>
+            <li>Wording interdit: 0</li>
+            <li>Lecture mobile: PASS</li>
+            <li>Lecture export: PASS</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS.
+        Sprint suivant: 7B - Coach Insight Depth &amp; Next-Match Recommendations.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Insights coach 7B</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Profondeur insights coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7B</p>
+        <h3>Insights coach & plan prochain match</h3>
+        <p>Les signaux officiels sont transform&eacute;s en lectures causales prudentes, avec risques et signaux observables.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Profondeur d'insight</h4>
+          <ul>
+            <li>Insights approfondis: 3/3</li>
+            <li>Causes liees: 3</li>
+            <li>Risques visibles: 3</li>
+            <li>Preuves liees: 3</li>
+            <li>Confiance visible: 3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Plan prochain match</h4>
+          <ul>
+            <li>Priorites concretes: 3/3</li>
+            <li>Signaux observables: 3</li>
+            <li>Tradeoffs visibles: 3</li>
+            <li>Selection forcee: 0</li>
+            <li>Recommandations non supportees: 0</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING.
+        Sprint suivant: 7C - Coach Action Plan Cards &amp; Training Focus Packaging.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Action plan coach 7C</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Plan action coach et focus entrainement">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7C</p>
+        <h3>Plan d'action coach & focus entrainement</h3>
+        <p>Les insights 7B sont empaquetes en cartes courtes: observation, travail, signal visible, critere de reussite et risque.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Cartes action</h4>
+          <ul>
+            <li>Cartes visibles: 3</li>
+            <li>Priorite principale: 1</li>
+            <li>Signaux observables: 3</li>
+            <li>Criteres de reussite: 3</li>
+            <li>Selection forcee: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Packaging coach</h4>
+          <ul>
+            <li>Focus entrainement: 2</li>
+            <li>Plan prochain match: 3</li>
+            <li>Wording mecanique: 0</li>
+            <li>Libelles dupliques: 0</li>
+            <li>Wording interdit: 0</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_COACH_ACTION_PLAN_PACKAGING.
+        Sprint suivant: 7D - Coach Report Premium Layout &amp; Visual Hierarchy.
+      </p>
+    </section>
+    </details>
     <details class="appendix">
       <summary>Hypothèses sandbox</summary>
       <p>Les hypothèses expérimentales restent séparées du rapport principal.</p>

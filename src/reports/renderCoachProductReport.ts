@@ -21,6 +21,10 @@ import {
   renderCoachActionPlanCards,
   renderTrainingFocusPackage,
 } from "./coachActionPlanCards";
+import {
+  buildCoachTacticalMapCardsFromProductReport,
+  renderCoachTacticalMapCardsSection,
+} from "./coachReportTacticalMapCards";
 import { escapeHtml } from "./htmlCoachReport";
 import {
   candidateDisplayPriorityLabel,
@@ -328,6 +332,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   const nextMatchRecommendations = buildNextMatchRecommendations(deepInsights);
   const actionPlanCards = buildCoachActionPlanCards(deepInsights);
   const trainingFocuses = buildTrainingFocusPackages(actionPlanCards);
+  const tacticalMapCards = buildCoachTacticalMapCardsFromProductReport(model);
   const primaryActionCard = actionPlanCards[0];
   const primarySignal = model.nextMatchSignals[0] ?? model.keyCoachSignals[0]?.summary ?? "Signal a confirmer au prochain match.";
   const primaryRisk = primaryActionCard?.riskOrTradeoff ?? "Risque a surveiller: ne pas transformer un signal en consigne automatique.";
@@ -392,6 +397,20 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .action-plan-card--primary h3 { font-size: 1.2rem; color: var(--accent-strong); }
     .action-plan-card--primary .badge:first-child { color: #fff; background: var(--accent); border-color: var(--accent); }
     .action-plan-card-grid { align-items: stretch; }
+    .tactical-map-section { margin-top: 20px; }
+    .tactical-map-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .tactical-map-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: #fbfdff; break-inside: avoid; }
+    .tactical-map-card h3 { margin-bottom: 12px; }
+    .tactical-map-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 10px 0 12px; }
+    .tactical-map-zone { min-height: 50px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: grid; align-content: center; text-align: center; background: var(--soft); }
+    .tactical-map-zone strong { font-size: .86rem; }
+    .tactical-map-zone span { color: var(--muted); font-size: .78rem; }
+    .tactical-map-zone--danger { background: #fff4ec; border-color: #f0c5a6; }
+    .tactical-map-zone--recovery { background: #eef9f3; border-color: #b8dfca; }
+    .tactical-map-zone--pressure { background: #fff8df; border-color: #ead486; }
+    .tactical-map-zone--high { box-shadow: inset 0 0 0 2px rgba(31, 111, 139, .2); }
+    .tactical-map-zone--empty { color: var(--muted); background: var(--soft); border-style: dashed; }
+    .tactical-map-legend { color: var(--muted); font-size: .9rem; }
     .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
     .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
     .appendix summary { cursor: pointer; font-weight: 700; }
@@ -402,8 +421,9 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
       .express-head { display: block; }
       .express-score { text-align: left; margin-top: 10px; }
       .express-grid { grid-template-columns: 1fr; }
+      .tactical-map-card-grid { grid-template-columns: 1fr; }
       .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
-      .product-card, .express-read { overflow-wrap: anywhere; }
+      .product-card, .express-read, .tactical-map-card { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
@@ -449,6 +469,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   </section>
 
   ${renderCoachActionPlanCards(actionPlanCards)}
+
+  ${renderCoachTacticalMapCardsSection(tacticalMapCards)}
 
   ${renderTrainingFocusPackage(trainingFocuses)}
 

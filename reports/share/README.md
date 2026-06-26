@@ -1,27 +1,24 @@
-# Sprint 7D Share Pack
+# Sprint 7F Share Pack
 
-Current sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy
+Current sprint: Sprint 7F - Product Report Scope, Density & Wording Cleanup
 
 ## Purpose
-Review whether the coach report now reads like a premium product artifact: official score and source first, express read, prominent action-plan cards, compact next-match plan, readable mobile/export layout, and reconciled 7A/7B/7C baseline metadata.
+This pack proves the coach product/export report has been scoped back to coach-readable content after 7E, while preserving tactical map cards, premium layout, source-of-truth guardrails, and unchanged scoring.
 
-## Required Review Files
+## Key Files
 - coach-report.export.html
 - coach-report.product.html
-- coach-report-premium-layout-visual-hierarchy-7d.md
-- validation.coach-report-premium-layout-visual-hierarchy-7d.md
+- product-report-scope-density-wording-cleanup-7f.md
+- validation.product-report-scope-density-wording-cleanup-7f.md
 - validation.share-pack.md
 - scoring-events-summary.md
-- bundle__simulation.md
-- bundle__reports.md
 
 ## Validation Order
 1. validation.share-pack.md
-2. validation.coach-report-premium-layout-visual-hierarchy-7d.md
-3. coach-report-premium-layout-visual-hierarchy-7d.md
+2. validation.product-report-scope-density-wording-cleanup-7f.md
+3. product-report-scope-density-wording-cleanup-7f.md
 4. coach-report.product.html
 5. coach-report.export.html
-6. scoring-events-summary.md
 
 ## Guardrail Reminder
-7D is presentation-only: no scoring constants, score_change events, match mechanics, route selection, forced scores, sandbox application, forced selection, or batch-as-official-score changes.
+7F is presentation-only: it cleans scope, density, and wording. It does not change scoring constants, score_change events, match mechanics, route selection, MatchBonusEvent, persistence/SQLite scoring boundaries, sandbox application, or batch-as-official-score boundaries.

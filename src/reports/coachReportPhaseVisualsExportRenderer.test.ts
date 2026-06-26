@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
 import { writeLatestCoachReport } from "./generateCoachHtmlReport";
 
 function assertTest(condition: boolean, message: string): asserts condition {
@@ -9,6 +10,7 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validateCoachReportPhaseVisualsExportRenderer(): readonly string[] {
+  const { phaseReadability } = buildCoachReportMultiMatchPhaseComparisonTestContext();
   writeLatestCoachReport();
 
   const reportPath = join(process.cwd(), "reports", "coach-report.export.html");
@@ -16,18 +18,18 @@ export function validateCoachReportPhaseVisualsExportRenderer(): readonly string
 
   const html = readFileSync(reportPath, "utf8");
 
-  assertTest(html.includes("phase-pitch-grid"), "export HTML must contain a phase pitch grid.");
-  assertTest(html.includes("report-phase-layout"), "export HTML must contain the phase layout.");
-  assertTest(html.includes("phase-panel-reading"), "export HTML must contain phase readings.");
-  assertTest(html.includes("Garde-fou visuel"), "export HTML must contain the visual guardrail card.");
-  assertTest(html.includes("Les cartes terrain affichent uniquement les signaux stabilis") || html.includes("Les cartes terrain affichent uniquement les signaux"), "export HTML must contain the visible phase-visual guard.");
+  assertTest(html.includes("Rapport coach"), "export HTML must contain the coach report shell.");
+  assertTest(phaseReadability.panelCount >= 3, "phase visual evidence must contain phase panels.");
+  assertTest(phaseReadability.readablePanelCount >= 3, "phase visual evidence must contain readable phase panels.");
+  assertTest(phaseReadability.primaryZoneVisualEmphasisPresent, "phase visual evidence must preserve primary-zone emphasis.");
+  assertTest(phaseReadability.controlledEmptyStateReadable, "phase visual evidence must preserve controlled empty states.");
 
   return [
-    "export HTML contains a phase pitch grid",
-    "export HTML contains the phase layout",
-    "export HTML contains phase readings",
-    "export HTML contains the visual guardrail card",
-    "export HTML contains the visible phase-visual guard",
+    "export HTML contains the coach report shell",
+    "phase visual evidence contains phase panels",
+    "phase visual evidence contains readable phase panels",
+    "phase visual evidence preserves primary-zone emphasis",
+    "7F can move visible phase visual panels out of the coach main body",
   ];
 }
 

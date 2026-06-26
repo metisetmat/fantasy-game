@@ -1,8 +1,4 @@
-import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
-import { runFullMatch } from "../simulation/runFullMatch";
-import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
-import { renderCoachProductReport } from "./renderCoachProductReport";
-import { renderCoachReportExportHtml } from "./renderCoachReportExportHtml";
+import { buildCoachReportMultiMatchPhaseComparisonTestContext } from "./coachReportMultiMatchPhaseComparisonTestUtils";
 
 function assertTest(condition: boolean, message: string): asserts condition {
   if (!condition) {
@@ -11,30 +7,26 @@ function assertTest(condition: boolean, message: string): asserts condition {
 }
 
 export function validatePhaseVisualLegendRenderer(): readonly string[] {
-  const report = runFullMatch(engineToCoachPublicContractFixtures.matchInputFixture, {
-    routeSelectionMode: "workbench_chain_replay_experimental",
-  });
-  const productHtml = renderCoachProductReport(buildCoachProductReportViewFromMatchReport(report));
-  const exportHtml = renderCoachReportExportHtml({ productReportHtml: productHtml });
+  const { exportHtml, phaseReadability } = buildCoachReportMultiMatchPhaseComparisonTestContext();
+  const legendLabels = phaseReadability.legendItems.map((item) => item.label);
 
-  assertTest(exportHtml.includes("L&eacute;gende des cartes terrain"), "export must contain the phase legend title.");
-  assertTest(exportHtml.includes("Danger"), "export must contain the danger legend item.");
-  assertTest(exportHtml.includes("R&eacute;cup&eacute;ration"), "export must contain the recovery legend item.");
-  assertTest(exportHtml.includes("Pression / instabilit&eacute;"), "export must contain the pressure legend item.");
-  assertTest(exportHtml.includes("Dernier rempart"), "export must contain the goalkeeper legend item.");
-  assertTest(exportHtml.includes("Donn&eacute;e insuffisante"), "export must contain the insufficient-data legend item.");
-  assertTest(exportHtml.includes("phase-legend-swatch"), "each legend item must expose a swatch.");
-  assertTest(exportHtml.includes("Zone o&ugrave; le run a produit un signal offensif stabilis&eacute;."), "legend items must expose explanations.");
+  assertTest(exportHtml.includes("Rapport coach"), "export contains coach report shell.");
+  assertTest(phaseReadability.legendItemCount === 5, "phase legend evidence must contain five items.");
+  assertTest(legendLabels.includes("Danger"), "phase legend evidence must contain the danger item.");
+  assertTest(legendLabels.includes("R&eacute;cup&eacute;ration"), "phase legend evidence must contain the recovery item.");
+  assertTest(legendLabels.includes("Pression / instabilit&eacute;"), "phase legend evidence must contain the pressure item.");
+  assertTest(legendLabels.includes("Dernier rempart"), "phase legend evidence must contain the goalkeeper item.");
+  assertTest(legendLabels.includes("Donn&eacute;e insuffisante"), "phase legend evidence must contain the insufficient-data item.");
 
   return [
-    "export contains Legende des cartes terrain",
+    "export contains coach report shell",
+    "phase legend evidence contains five items",
     "danger legend is present",
     "recovery legend is present",
     "pressure and instability legend is present",
     "goalkeeper legend is present",
     "insufficient-data legend is present",
-    "legend items include swatches",
-    "legend items include explanations",
+    "7F can move visible phase legend out of the coach main body",
   ];
 }
 

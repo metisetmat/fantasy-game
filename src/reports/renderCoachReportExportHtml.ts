@@ -225,6 +225,45 @@ const PREMIUM_EXPORT_CSS = `
       padding: 22px;
     }
 
+    .tactical-map-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .tactical-map-card {
+      border: 1px solid var(--report-line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fbfdff;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .tactical-map-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin: 10px 0 12px;
+    }
+
+    .tactical-map-zone {
+      min-height: 48px;
+      border: 1px solid var(--report-line);
+      border-radius: 8px;
+      padding: 8px;
+      display: grid;
+      align-content: center;
+      text-align: center;
+      background: var(--report-soft);
+    }
+
+    .tactical-map-zone--danger { background: #fff4ec; border-color: #efc3a3; }
+    .tactical-map-zone--recovery { background: #eef9f3; border-color: #b8dfca; }
+    .tactical-map-zone--pressure { background: #fff8df; border-color: #ead486; }
+    .tactical-map-zone--empty { color: var(--report-muted); border-style: dashed; }
+    .tactical-map-legend { color: var(--report-muted); font-size: 0.9rem; }
+
     .report-section-divider {
       display: flex;
       align-items: center;
@@ -1434,6 +1473,26 @@ function renderCoachActionPlanExport(html: string): string {
       <div>
         <h2>Plan d'action coach</h2>
         <p>Cartes courtes: observation, travail, signal observable, critere de reussite et risque.</p>
+      </div>
+    </div>
+    ${body}
+  </section>`;
+}
+
+function renderTacticalMapCardsExport(html: string): string {
+  const body = extractSectionInner(html, "tactical-map-cards");
+
+  if (body.length === 0) {
+    return "";
+  }
+
+  return `
+  <section id="tactical-map-cards" class="premium-section" data-source-product-sections="tactical-map-cards">
+    <div class="report-section-divider">Cartes tactiques</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Ou le match s'est joue</h2>
+        <p>Cartes de zones issues du rapport produit. Source, confiance, legende et lien avec le plan d'action restent visibles a l'impression.</p>
       </div>
     </div>
     ${body}
@@ -4091,6 +4150,18 @@ function renderFullMatchGoalkeeperSecureResetBreakSpecificityAppendix(
     </article>`;
 }
 
+function renderTechnicalEvidenceSectionAppendix(label: string, sectionHtml: string): string {
+  if (sectionHtml.trim().length === 0) {
+    return "";
+  }
+
+  return `
+    <details class="premium-appendix-card">
+      <summary>${escapeHtml(label)}</summary>
+      ${sectionHtml}
+    </details>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -5040,10 +5111,28 @@ function renderAppendices(input: {
     ${renderFullMatchCalibrationCarryoverReconciliationAppendix(input.fullMatchCalibrationCarryoverReconciliation)}
     ${renderFullMatchOfficialScoringConnectionAppendix(input.fullMatchOfficialScoringConnection)}
     ${renderFullMatchBatchEconomyProofAppendix(input.fullMatchBatchEconomyProof)}
+    ${renderTechnicalEvidenceSectionAppendix("Activation route-family 6F", renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation))}
+    ${renderTechnicalEvidenceSectionAppendix("Calibration taux route-family 6G", renderFullMatchRouteFamilyScoringRateCalibrationSection(input.fullMatchRouteFamilyScoringRateCalibration))}
+    ${renderTechnicalEvidenceSectionAppendix("Densite scoring segment 6H", renderFullMatchSegmentScoringDensityCalibrationSection(input.fullMatchSegmentScoringDensityCalibration))}
     ${renderFullMatchTeamOpportunityBalanceCalibrationAppendix(input.fullMatchTeamOpportunityBalanceCalibration)}
     ${renderFullMatchDominanceChainCalibrationAppendix(input.fullMatchDominanceChainCalibration)}
     ${renderFullMatchBreakEventPostScoreResetCalibrationAppendix(input.fullMatchBreakEventPostScoreResetCalibration)}
     ${renderFullMatchGoalkeeperSecureResetBreakSpecificityAppendix(input.fullMatchGoalkeeperSecureResetBreakSpecificity)}
+    ${renderTechnicalEvidenceSectionAppendix("Economie competitive 6M", renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy))}
+    ${renderTechnicalEvidenceSectionAppendix("Danger merite 6N", renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate))}
+    ${renderTechnicalEvidenceSectionAppendix("Gate selectif 6O", renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning))}
+    ${renderTechnicalEvidenceSectionAppendix("Selectivite et volume 6P", renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix))}
+    ${renderTechnicalEvidenceSectionAppendix("Economie routes 6Q", renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix))}
+    ${renderTechnicalEvidenceSectionAppendix("Distribution danger merite 6R", renderFullMatchEarnedDangerOutcomeDistributionSection(input.fullMatchEarnedDangerOutcomeDistribution))}
+    ${renderTechnicalEvidenceSectionAppendix("Couverture dominance 6S", renderFullMatchDominanceChainCalibrationCoverageFixSection(input.fullMatchDominanceChainCalibrationCoverageFix))}
+    ${renderTechnicalEvidenceSectionAppendix("Distribution matchs serres 6T", renderFullMatchCloseGameDistributionCalibrationSection(input.fullMatchCloseGameDistributionCalibration))}
+    ${renderTechnicalEvidenceSectionAppendix("Reponse equipe menee 6U", renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure))}
+    ${renderTechnicalEvidenceSectionAppendix("Menace equipe menee 6V", renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion))}
+    ${renderTechnicalEvidenceSectionAppendix("Monitoring menace fin de match 6W", renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring))}
+    ${renderTechnicalEvidenceSectionAppendix("Stabilisation economie match 6X", renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization))}
+    ${renderTechnicalEvidenceSectionAppendix("Baseline produit coach 7A", renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness))}
+    ${renderTechnicalEvidenceSectionAppendix("Insights coach 7B", renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations))}
+    ${renderTechnicalEvidenceSectionAppendix("Action plan coach 7C", renderCoachActionPlanCardsTrainingFocusPackagingSection(input.coachActionPlanCardsTrainingFocusPackaging))}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -5192,6 +5281,7 @@ export function renderCoachReportExportHtml(input: {
     renderExpressReadExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
+    renderTacticalMapCardsExport(input.productReportHtml),
     renderTrainingFocusPackageExport(input.productReportHtml),
     renderNextMatchPlanExport(input.productReportHtml),
     renderKeyStatistics(input.productReportHtml),
@@ -5200,47 +5290,6 @@ export function renderCoachReportExportHtml(input: {
     renderMatchStory(input.productReportHtml),
     renderCoachDeepInsightsExport(input.productReportHtml),
     renderInterpretationGuard(input.productReportHtml),
-    renderPhaseLegend(readabilityPresentation.legendItems),
-    ...phasePanels.map((panel) =>
-      renderPhaseSection(panel, readabilityContextForPanel(panel, readabilityPresentation))
-    ),
-    renderMultiMatchPhaseComparison(multiMatchPhaseComparison),
-    renderMultiMatchHistoryView(multiMatchHistoryView),
-    ...(input.realMatchHistoryIntegration === undefined ? [] : [renderRealMatchHistoryIntegration(input.realMatchHistoryIntegration)]),
-    ...(input.persistentHistoryAdapter === undefined ? [] : [
-      renderPersistentHistoryAdapter(input.persistentHistoryAdapter, input.historyStoreConsistency, input.persistenceEvidenceSnapshot),
-    ]),
-    renderDatabaseMigrationPreparation(input.databaseMigrationPreparation),
-    renderDatabaseAdapterSpike(input.databaseAdapterSpike),
-    renderDurableStorageDecision(input.durableStorageDecision),
-    renderControlledLocalReadOnlyDbMode(input.controlledLocalReadOnlyDbMode),
-    renderRealSQLiteReadOnlyIOSmokeTest(input.realSQLiteReadOnlyIOSmokeTest),
-    renderFullMatchScoreEconomyCalibration(input.fullMatchScoreEconomyCalibration),
-    renderScoringFamilyAttributionAudit(input.scoringFamilyAttributionAudit),
-    renderFullMatchCalibrationCarryoverReconciliation(input.fullMatchCalibrationCarryoverReconciliation),
-    renderFullMatchOfficialScoringConnection(input.fullMatchOfficialScoringConnection),
-    renderFullMatchBatchEconomyProofSection(input.fullMatchBatchEconomyProof),
-    renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation),
-    renderFullMatchRouteFamilyScoringRateCalibrationSection(input.fullMatchRouteFamilyScoringRateCalibration),
-    renderFullMatchSegmentScoringDensityCalibrationSection(input.fullMatchSegmentScoringDensityCalibration),
-    renderFullMatchTeamOpportunityBalanceCalibrationSection(input.fullMatchTeamOpportunityBalanceCalibration),
-    renderFullMatchDominanceChainCalibrationSection(input.fullMatchDominanceChainCalibration),
-    renderFullMatchBreakEventPostScoreResetCalibrationSection(input.fullMatchBreakEventPostScoreResetCalibration),
-    renderFullMatchGoalkeeperSecureResetBreakSpecificitySection(input.fullMatchGoalkeeperSecureResetBreakSpecificity),
-    renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy),
-    renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate),
-    renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning),
-    renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix),
-    renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix),
-    renderFullMatchDominanceChainCalibrationCoverageFixSection(input.fullMatchDominanceChainCalibrationCoverageFix),
-    renderFullMatchCloseGameDistributionCalibrationSection(input.fullMatchCloseGameDistributionCalibration),
-    renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure),
-    renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion),
-    renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring),
-    renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization),
-    renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness),
-    renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations),
-    renderCoachActionPlanCardsTrainingFocusPackagingSection(input.coachActionPlanCardsTrainingFocusPackaging),
   ].join("\n");
   const appendices = renderAppendices({
     html: input.productReportHtml,
@@ -5315,9 +5364,24 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchGoalkeeperSecureResetBreakSpecificity === undefined
       ? {}
       : { fullMatchGoalkeeperSecureResetBreakSpecificity: input.fullMatchGoalkeeperSecureResetBreakSpecificity }),
+    ...(input.fullMatchResetBreakBlowoutEconomy === undefined
+      ? {}
+      : { fullMatchResetBreakBlowoutEconomy: input.fullMatchResetBreakBlowoutEconomy }),
     ...(input.fullMatchEarnedDangerGate === undefined
       ? {}
       : { fullMatchEarnedDangerGate: input.fullMatchEarnedDangerGate }),
+    ...(input.fullMatchEarnedDangerGateTuning === undefined
+      ? {}
+      : { fullMatchEarnedDangerGateTuning: input.fullMatchEarnedDangerGateTuning }),
+    ...(input.fullMatchGateSelectivityVolumeRegressionFix === undefined
+      ? {}
+      : { fullMatchGateSelectivityVolumeRegressionFix: input.fullMatchGateSelectivityVolumeRegressionFix }),
+    ...(input.fullMatchRouteEconomyRecheckAfterSelectivityFix === undefined
+      ? {}
+      : { fullMatchRouteEconomyRecheckAfterSelectivityFix: input.fullMatchRouteEconomyRecheckAfterSelectivityFix }),
+    ...(input.fullMatchEarnedDangerOutcomeDistribution === undefined
+      ? {}
+      : { fullMatchEarnedDangerOutcomeDistribution: input.fullMatchEarnedDangerOutcomeDistribution }),
     ...(input.fullMatchDominanceChainCalibrationCoverageFix === undefined
       ? {}
       : { fullMatchDominanceChainCalibrationCoverageFix: input.fullMatchDominanceChainCalibrationCoverageFix }),
@@ -5327,6 +5391,24 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchTrailingTeamResponseLateGamePressure === undefined
       ? {}
       : { fullMatchTrailingTeamResponseLateGamePressure: input.fullMatchTrailingTeamResponseLateGamePressure }),
+    ...(input.fullMatchLateGameThreatQualityTrailingConversion === undefined
+      ? {}
+      : { fullMatchLateGameThreatQualityTrailingConversion: input.fullMatchLateGameThreatQualityTrailingConversion }),
+    ...(input.fullMatchLateGameThreatQualityMonitoring === undefined
+      ? {}
+      : { fullMatchLateGameThreatQualityMonitoring: input.fullMatchLateGameThreatQualityMonitoring }),
+    ...(input.fullMatchEconomyFinalStabilization === undefined
+      ? {}
+      : { fullMatchEconomyFinalStabilization: input.fullMatchEconomyFinalStabilization }),
+    ...(input.productBaselineCoachReportReadiness === undefined
+      ? {}
+      : { productBaselineCoachReportReadiness: input.productBaselineCoachReportReadiness }),
+    ...(input.coachInsightDepthNextMatchRecommendations === undefined
+      ? {}
+      : { coachInsightDepthNextMatchRecommendations: input.coachInsightDepthNextMatchRecommendations }),
+    ...(input.coachActionPlanCardsTrainingFocusPackaging === undefined
+      ? {}
+      : { coachActionPlanCardsTrainingFocusPackaging: input.coachActionPlanCardsTrainingFocusPackaging }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

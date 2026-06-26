@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-25T16:23:03.253Z
-Task/sprint: Sprint 7D - Coach Report Premium Layout & Visual Hierarchy
+Generated: 2026-06-26T16:15:13.970Z
+Task/sprint: Sprint 7F - Product Report Scope, Density & Wording Cleanup
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-premium-layout-visual-hierarchy-7d.md
-- validation.coach-report-premium-layout-visual-hierarchy-7d.md
+- product-report-scope-density-wording-cleanup-7f.md
+- validation.product-report-scope-density-wording-cleanup-7f.md
 - README.md
 
 ## Bundle Files
