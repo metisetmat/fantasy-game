@@ -29,6 +29,19 @@ assert.equal(
   tacticalMapCardsById.get("tactical-map-pressure-continuity")?.linkedActionPlanCardId,
   "action-card-structure-after-pressure",
 );
+assert.equal(new Set(model.tacticalMapCards.map((card) => card.linkedActionPlanCardId)).size, model.tacticalMapCards.length);
+assert.deepEqual(
+  tacticalMapCardsById.get("tactical-map-danger-zones")?.linkedInsightIds,
+  ["deep-insight-1-danger_progression_zones"],
+);
+assert.deepEqual(
+  tacticalMapCardsById.get("tactical-map-useful-recoveries")?.linkedInsightIds,
+  ["deep-insight-2-recovery_first_outlet"],
+);
+assert.deepEqual(
+  tacticalMapCardsById.get("tactical-map-pressure-continuity")?.linkedInsightIds,
+  ["deep-insight-3-pressure_continuity_goalkeeper"],
+);
 for (const card of model.tacticalMapCards) {
   const signalValues = card.affectedZones.map((zone) => card.zoneIntensity[zone] ?? 0);
   assert.deepEqual(signalValues, [...signalValues].sort((a, b) => b - a));

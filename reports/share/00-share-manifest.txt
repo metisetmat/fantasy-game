@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-26T16:01:48.833Z
+Generated timestamp: 2026-06-26T16:15:13.970Z
 Task/sprint name: Sprint 7F - Product Report Scope, Density & Wording Cleanup
 Final file count: 20
 
@@ -935,4 +935,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/reports/renderCoachReportExportHtml.ts
+ M src/reports/coachReportPhaseVisualsTacticalMapCards.test.ts
+ M src/reports/coachReportTacticalMapCards.ts

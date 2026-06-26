@@ -161,8 +161,9 @@ export function buildCoachTacticalMapCardsFromProductReport(
   const dangerSignals = maxSignals(model.phaseVisualSeed, "withBall", ["danger_zone", "progression_zone"]);
   const recoverySignals = maxSignals(model.phaseVisualSeed, "withoutBall", ["recovery_zone"]);
   const pressureSignals = maxSignals(model.phaseVisualSeed, "withoutBall", ["pressure_instability_zone"]);
-  const insightIdAt = (index: number): readonly string[] => {
-    const signal = model.keyCoachSignals[index];
+  const insightIdForSignal = (signalId: string): readonly string[] => {
+    const index = model.keyCoachSignals.findIndex((signal) => signal.signalId === signalId);
+    const signal = index < 0 ? undefined : model.keyCoachSignals[index];
     return signal === undefined ? [] : [`deep-insight-${index + 1}-${signal.signalId}`];
   };
 
@@ -183,7 +184,7 @@ export function buildCoachTacticalMapCardsFromProductReport(
       limitationNote: "Signal a confirmer sur plusieurs matchs.",
       legend: ["Plus fonce = signal plus visible", "Chiffre = occurrences officielles du run"],
       linkedActionPlanCardId: "action-card-danger-to-continuity",
-      linkedInsightIds: insightIdAt(1),
+      linkedInsightIds: insightIdForSignal("danger_progression_zones"),
     }),
     createCard({
       cardId: "tactical-map-useful-recoveries",
@@ -201,7 +202,7 @@ export function buildCoachTacticalMapCardsFromProductReport(
       limitationNote: "Le rapport ne confond pas recuperation et sequence maitrisee.",
       legend: ["Vert = recuperation utile", "Chiffre = signal officiel observe"],
       linkedActionPlanCardId: "action-card-secure-first-exit",
-      linkedInsightIds: insightIdAt(0),
+      linkedInsightIds: insightIdForSignal("recovery_first_outlet"),
     }),
     createCard({
       cardId: "tactical-map-pressure-continuity",
@@ -219,7 +220,7 @@ export function buildCoachTacticalMapCardsFromProductReport(
       limitationNote: "Carte volontairement prudente si les zones instables ne sont pas assez solides.",
       legend: ["Orange = instabilite", "Carte vide = signal insuffisant"],
       linkedActionPlanCardId: "action-card-structure-after-pressure",
-      linkedInsightIds: insightIdAt(2),
+      linkedInsightIds: insightIdForSignal("pressure_continuity_goalkeeper"),
     }),
   ];
 }
