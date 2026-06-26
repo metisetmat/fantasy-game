@@ -12,7 +12,7 @@ Status: PASS
 - PASS: baseline 7D preserved - true
 - PASS: baseline 7C preserved - 7C validation
 - PASS: baseline 7B preserved - 7B validation
-- PASS: baseline 7A preserved - 7A validation
+- FAIL: baseline 7A preserved - 7A validation
 - PASS: baseline 6X preserved - PASS
 - PASS: product report ready - true
 - PASS: export report ready - true

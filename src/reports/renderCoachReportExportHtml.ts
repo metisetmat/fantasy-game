@@ -4150,6 +4150,18 @@ function renderFullMatchGoalkeeperSecureResetBreakSpecificityAppendix(
     </article>`;
 }
 
+function renderTechnicalEvidenceSectionAppendix(label: string, sectionHtml: string): string {
+  if (sectionHtml.trim().length === 0) {
+    return "";
+  }
+
+  return `
+    <details class="premium-appendix-card">
+      <summary>${escapeHtml(label)}</summary>
+      ${sectionHtml}
+    </details>`;
+}
+
 function renderPersistentHistoryAdapter(
   model: CoachReportPersistentHistoryAdapterModel,
   historyStoreConsistency?: CoachReportHistoryStoreConsistencyModel,
@@ -5099,10 +5111,28 @@ function renderAppendices(input: {
     ${renderFullMatchCalibrationCarryoverReconciliationAppendix(input.fullMatchCalibrationCarryoverReconciliation)}
     ${renderFullMatchOfficialScoringConnectionAppendix(input.fullMatchOfficialScoringConnection)}
     ${renderFullMatchBatchEconomyProofAppendix(input.fullMatchBatchEconomyProof)}
+    ${renderTechnicalEvidenceSectionAppendix("Activation route-family 6F", renderFullMatchRouteFamilyMixActivationSection(input.fullMatchRouteFamilyMixActivation))}
+    ${renderTechnicalEvidenceSectionAppendix("Calibration taux route-family 6G", renderFullMatchRouteFamilyScoringRateCalibrationSection(input.fullMatchRouteFamilyScoringRateCalibration))}
+    ${renderTechnicalEvidenceSectionAppendix("Densite scoring segment 6H", renderFullMatchSegmentScoringDensityCalibrationSection(input.fullMatchSegmentScoringDensityCalibration))}
     ${renderFullMatchTeamOpportunityBalanceCalibrationAppendix(input.fullMatchTeamOpportunityBalanceCalibration)}
     ${renderFullMatchDominanceChainCalibrationAppendix(input.fullMatchDominanceChainCalibration)}
     ${renderFullMatchBreakEventPostScoreResetCalibrationAppendix(input.fullMatchBreakEventPostScoreResetCalibration)}
     ${renderFullMatchGoalkeeperSecureResetBreakSpecificityAppendix(input.fullMatchGoalkeeperSecureResetBreakSpecificity)}
+    ${renderTechnicalEvidenceSectionAppendix("Economie competitive 6M", renderFullMatchResetBreakBlowoutEconomySection(input.fullMatchResetBreakBlowoutEconomy))}
+    ${renderTechnicalEvidenceSectionAppendix("Danger merite 6N", renderFullMatchEarnedDangerGateSection(input.fullMatchEarnedDangerGate))}
+    ${renderTechnicalEvidenceSectionAppendix("Gate selectif 6O", renderFullMatchEarnedDangerGateTuningSection(input.fullMatchEarnedDangerGateTuning))}
+    ${renderTechnicalEvidenceSectionAppendix("Selectivite et volume 6P", renderFullMatchGateSelectivityVolumeRegressionFixSection(input.fullMatchGateSelectivityVolumeRegressionFix))}
+    ${renderTechnicalEvidenceSectionAppendix("Economie routes 6Q", renderFullMatchRouteEconomyRecheckAfterSelectivityFixSection(input.fullMatchRouteEconomyRecheckAfterSelectivityFix))}
+    ${renderTechnicalEvidenceSectionAppendix("Distribution danger merite 6R", renderFullMatchEarnedDangerOutcomeDistributionSection(input.fullMatchEarnedDangerOutcomeDistribution))}
+    ${renderTechnicalEvidenceSectionAppendix("Couverture dominance 6S", renderFullMatchDominanceChainCalibrationCoverageFixSection(input.fullMatchDominanceChainCalibrationCoverageFix))}
+    ${renderTechnicalEvidenceSectionAppendix("Distribution matchs serres 6T", renderFullMatchCloseGameDistributionCalibrationSection(input.fullMatchCloseGameDistributionCalibration))}
+    ${renderTechnicalEvidenceSectionAppendix("Reponse equipe menee 6U", renderFullMatchTrailingTeamResponseLateGamePressureSection(input.fullMatchTrailingTeamResponseLateGamePressure))}
+    ${renderTechnicalEvidenceSectionAppendix("Menace equipe menee 6V", renderFullMatchLateGameThreatQualityTrailingConversionSection(input.fullMatchLateGameThreatQualityTrailingConversion))}
+    ${renderTechnicalEvidenceSectionAppendix("Monitoring menace fin de match 6W", renderFullMatchLateGameThreatQualityMonitoringSection(input.fullMatchLateGameThreatQualityMonitoring))}
+    ${renderTechnicalEvidenceSectionAppendix("Stabilisation economie match 6X", renderFullMatchEconomyFinalStabilizationSection(input.fullMatchEconomyFinalStabilization))}
+    ${renderTechnicalEvidenceSectionAppendix("Baseline produit coach 7A", renderProductBaselineCoachReportReadinessSection(input.productBaselineCoachReportReadiness))}
+    ${renderTechnicalEvidenceSectionAppendix("Insights coach 7B", renderCoachInsightDepthNextMatchRecommendationsSection(input.coachInsightDepthNextMatchRecommendations))}
+    ${renderTechnicalEvidenceSectionAppendix("Action plan coach 7C", renderCoachActionPlanCardsTrainingFocusPackagingSection(input.coachActionPlanCardsTrainingFocusPackaging))}
     ${originalAppendicesWithoutIntro}
     <p class="report-print-footer">Export partageable d&eacute;riv&eacute; de <code>reports/coach-report.product.html</code>.</p>
   </section>`;
@@ -5334,9 +5364,24 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchGoalkeeperSecureResetBreakSpecificity === undefined
       ? {}
       : { fullMatchGoalkeeperSecureResetBreakSpecificity: input.fullMatchGoalkeeperSecureResetBreakSpecificity }),
+    ...(input.fullMatchResetBreakBlowoutEconomy === undefined
+      ? {}
+      : { fullMatchResetBreakBlowoutEconomy: input.fullMatchResetBreakBlowoutEconomy }),
     ...(input.fullMatchEarnedDangerGate === undefined
       ? {}
       : { fullMatchEarnedDangerGate: input.fullMatchEarnedDangerGate }),
+    ...(input.fullMatchEarnedDangerGateTuning === undefined
+      ? {}
+      : { fullMatchEarnedDangerGateTuning: input.fullMatchEarnedDangerGateTuning }),
+    ...(input.fullMatchGateSelectivityVolumeRegressionFix === undefined
+      ? {}
+      : { fullMatchGateSelectivityVolumeRegressionFix: input.fullMatchGateSelectivityVolumeRegressionFix }),
+    ...(input.fullMatchRouteEconomyRecheckAfterSelectivityFix === undefined
+      ? {}
+      : { fullMatchRouteEconomyRecheckAfterSelectivityFix: input.fullMatchRouteEconomyRecheckAfterSelectivityFix }),
+    ...(input.fullMatchEarnedDangerOutcomeDistribution === undefined
+      ? {}
+      : { fullMatchEarnedDangerOutcomeDistribution: input.fullMatchEarnedDangerOutcomeDistribution }),
     ...(input.fullMatchDominanceChainCalibrationCoverageFix === undefined
       ? {}
       : { fullMatchDominanceChainCalibrationCoverageFix: input.fullMatchDominanceChainCalibrationCoverageFix }),
@@ -5346,6 +5391,24 @@ export function renderCoachReportExportHtml(input: {
     ...(input.fullMatchTrailingTeamResponseLateGamePressure === undefined
       ? {}
       : { fullMatchTrailingTeamResponseLateGamePressure: input.fullMatchTrailingTeamResponseLateGamePressure }),
+    ...(input.fullMatchLateGameThreatQualityTrailingConversion === undefined
+      ? {}
+      : { fullMatchLateGameThreatQualityTrailingConversion: input.fullMatchLateGameThreatQualityTrailingConversion }),
+    ...(input.fullMatchLateGameThreatQualityMonitoring === undefined
+      ? {}
+      : { fullMatchLateGameThreatQualityMonitoring: input.fullMatchLateGameThreatQualityMonitoring }),
+    ...(input.fullMatchEconomyFinalStabilization === undefined
+      ? {}
+      : { fullMatchEconomyFinalStabilization: input.fullMatchEconomyFinalStabilization }),
+    ...(input.productBaselineCoachReportReadiness === undefined
+      ? {}
+      : { productBaselineCoachReportReadiness: input.productBaselineCoachReportReadiness }),
+    ...(input.coachInsightDepthNextMatchRecommendations === undefined
+      ? {}
+      : { coachInsightDepthNextMatchRecommendations: input.coachInsightDepthNextMatchRecommendations }),
+    ...(input.coachActionPlanCardsTrainingFocusPackaging === undefined
+      ? {}
+      : { coachActionPlanCardsTrainingFocusPackaging: input.coachActionPlanCardsTrainingFocusPackaging }),
   });
   const premiumMain = `${premiumBodyBeforeAppendices}\n${appendices}`;
   const mainOpenMatch = /<main\s+id="product-main"[^>]*>/u.exec(withMarkers);

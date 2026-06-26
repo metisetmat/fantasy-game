@@ -22,7 +22,7 @@
 | 7D premium layout | true |
 | 7C action plan packaging | PASS |
 | 7B insight layer | PASS |
-| 7A product baseline | PASS |
+| 7A product baseline | CHECK |
 | 6X match economy | PASS |
 
 ## Scope Boundary Audit

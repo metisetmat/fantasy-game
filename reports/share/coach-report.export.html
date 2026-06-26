@@ -2870,6 +2870,168 @@
     </article>
 
 
+    <details class="premium-appendix-card">
+      <summary>Activation route-family 6F</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Mix des familles de score">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6F</p>
+        <h3>Mix des familles de score</h3>
+        <p>
+          Le chemin officiel active des routes disponibles et eligibles pour SHOT_GOAL, TRY_TOUCHDOWN,
+          DROP_GOAL, CONVERSION_GOAL apres essai valide, et continuation. Ces routes ne sont pas forcees :
+          le score reste issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Match courant et routes</h4>
+          <ul>
+            <li>Familles supportees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
+            <li>Familles selectionnees: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL, CONTINUATION</li>
+            <li>Familles scorantes: SHOT_GOAL, TRY_TOUCHDOWN, CONVERSION_GOAL, DROP_GOAL</li>
+            <li>Conversion uniquement apres TRY: oui</li>
+            <li>PENALTY_SHOT inactive: oui</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Batch 6F</h4>
+          <ul>
+            <li>Matchs: 50</li>
+            <li>Scorelines uniques: 44</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Matchs uniquement SHOT: 0</li>
+            <li>Matchs multi-familles: 50</li>
+            <li>Shutout rate: 14%</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Evenements</th>
+            <th>Points</th>
+            <th>Part points</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>208</td><td>624</td><td>31%</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>169</td><td>845</td><td>42%</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>165</td><td>330</td><td>17%</td></tr>
+          <tr><td>DROP_GOAL</td><td>99</td><td>198</td><td>10%</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Conclusion prudente: PASS. Recommendation: KEEP_ROUTE_FAMILY_MIX_MONITORING.
+        Aucune valeur de score n'est changee, aucun score adverse n'est force, aucune reecriture post-run n'est appliquee.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Calibration taux route-family 6G</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Calibration des taux de scoring">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6G</p>
+        <h3>Calibration des taux de scoring</h3>
+        <p>
+          Le sprint 6F avait preserv&eacute; la diversit&eacute; des familles, mais l'economie etait trop explosive.
+          Cette calibration ajoute davantage d'issues non-scoring dans la resolution officielle, sans score forc&eacute;,
+          sans plafond artificiel, et avec un score issu des evenements officiels <code>score_change</code>.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apres batch 50 matchs</h4>
+          <ul>
+            <li>Points moyens: 45.1 -> 21</li>
+            <li>Scoring events / match: 14.8 -> 6.9</li>
+            <li>Blowout rate: 82% -> 56%</li>
+            <li>Severe blowout rate: 52% -> 14%</li>
+            <li>Scorelines uniques: 45 -> 32</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Familles toujours presentes: oui</li>
+            <li>Continuation disponible: oui</li>
+            <li>Conversion seulement apres TRY: oui</li>
+            <li>Score issu des evenements officiels: oui</li>
+            <li>Version calibration: <code>SCORING_RATE_CALIBRATION_6G</code></li>
+            <li>Plafond artificiel / score force: non</li>
+          </ul>
+        </article>
+      </div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Famille</th>
+            <th>Taux avant</th>
+            <th>Taux apres</th>
+            <th>Issues non-scoring apres</th>
+            <th>Scores apres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>SHOT_GOAL</td><td>44%</td><td>35%</td><td>65%</td><td>208</td></tr>
+          <tr><td>TRY_TOUCHDOWN</td><td>65%</td><td>82%</td><td>18%</td><td>50</td></tr>
+          <tr><td>CONVERSION_GOAL</td><td>100%</td><td>85%</td><td>15%</td><td>50</td></tr>
+          <tr><td>DROP_GOAL</td><td>49%</td><td>52%</td><td>48%</td><td>39</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">
+        Statut prudent: PASS. Recommendation: REDUCE_SEGMENT_SCORING_DENSITY_NEXT.
+        Les blowouts restent a surveiller si le taux demeure haut; cette section confirme seulement la baisse observee
+        et la preservation de la diversite des routes.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Densite scoring segment 6H</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Densit&eacute; des occasions">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6H</p>
+        <h3>Densit&eacute; des occasions</h3>
+        <p>
+          Le sprint 6H intervient avant la cr&eacute;ation des <code>score_change</code>: il transforme certains encha&icirc;nements
+          de danger en phases de continuation, de r&eacute;cup&eacute;ration d&eacute;fensive ou de reset, sans plafond artificiel
+          et sans r&eacute;&eacute;criture post-run.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Avant / apr&egrave;s batch 50 matchs</h4>
+          <ul>
+            <li>Occasions / match: 27.5 -> 16.1</li>
+            <li>Occasions / segment: 3.4 -> 2</li>
+            <li>Scoring events / match: 12.5 -> 7.2</li>
+            <li>Points moyens: 39.2 -> 22</li>
+            <li>Blowout rate: 68% -> 56%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Interruptions de cha&icirc;ne</h4>
+          <ul>
+            <li>Phases neutres / match: 58 -> 69.6</li>
+            <li>R&eacute;cup&eacute;rations d&eacute;fensives / match: 6.5 -> 15.9</li>
+            <li>Phases de reset / match: 19 -> 42.4</li>
+            <li>Continuation disponible: oui</li>
+            <li>Version: <code>SEGMENT_SCORING_DENSITY_6H</code></li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut 6H: PARTIAL. Recommendation: IMPROVE_TEAM_OPPORTUNITY_BALANCE_NEXT.
+        Ce statut reste volontairement prudent si les blowouts demeurent trop hauts, meme lorsque la densit&eacute; baisse.
+      </p>
+    </section>
+    </details>
+
     <article class="premium-appendix-card">
       <h3>Equilibre opportunites 6I</h3>
       <ul>
@@ -2950,6 +3112,846 @@
         <li>warnings: GOALKEEPER_SECURE_RESET_BREAK_CALIBRATED, DOMINANCE_DECAY_METRICS_CLARIFIED, GOALKEEPER_SECURE_BREAK_EFFECTIVE, GOALKEEPER_SECURE_BREAK_CONNECTED, GOALKEEPER_SECURE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_IMMEDIATE_REATTACK_REDUCED, POST_SCORE_RESET_PROTECTED_IMPROVED, CONCEDING_TEAM_FIRST_POSSESSION_IMPROVED, DEFENSIVE_RECOVERY_BREAKS_DOMINANCE_IMPROVED, DOMINANCE_CHAIN_GAINS_PRESERVED, TEAM_OPPORTUNITY_BALANCE_PRESERVED, DENSITY_CALIBRATION_PRESERVED, ROUTE_FAMILY_DIVERSITY_PRESERVED, BLOWOUT_RATE_REDUCED, FULL_MATCH_BATCH_ECONOMY_HEALTHY</li>
       </ul>
     </article>
+
+    <details class="premium-appendix-card">
+      <summary>Economie competitive 6M</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Economie competitive">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6M</p>
+        <h3>Economie competitive</h3>
+        <p>
+          6M surveille les dangers apres reset et les causes restantes de blowout. La calibration agit sur la
+          continuite, la recuperation defensive et la justification tactique du danger, sans score force, sans cap,
+          sans suppression d'evenements et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Scoreline health</h4>
+          <ul>
+            <li>Blowout rate: 48% -> 46%</li>
+            <li>Match serre: 38% -> 28%</li>
+            <li>Match competitif: 52% -> 62%</li>
+            <li>Ecart moyen: 11.6 -> 11.1</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Danger apres reset</h4>
+          <ul>
+            <li>Reset vers danger immediat: 60.5% -> 87.4%</li>
+            <li>Danger automatique suspecte: 30% -> 93.2%</li>
+            <li>Danger merite: 70% -> 6.8%</li>
+            <li>Gardien secure preserve: oui</li>
+            <li>Reset post-score preserve: oui</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Preservation</h4>
+          <ul>
+            <li>Densite preservee: oui</li>
+            <li>Equilibre equipe preserve: oui</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Chaines dominance preservees: oui</li>
+            <li>Batch: 50 matchs</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Score officiel score_change: oui</li>
+            <li>Score cap: non</li>
+            <li>Score force: non</li>
+            <li>Rewrite apres coup: non</li>
+            <li>Recommendation: IMPROVE_RESET_TO_DANGER_GATE</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Lecture prudente: Sprint 6N - Blowout Cause Follow-up Without Score Adjustment. Le statut PARTIAL peut rester acceptable si les garde-fous
+        sont propres et si les dangers automatiques sont classes plutot que transformes en points gratuits.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Danger merite 6N</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Danger merite apres reset">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6N</p>
+        <h3>Danger merite apres reset</h3>
+        <p>
+          6N ajoute un gate de danger avant toute transformation reset -> situation dangereuse. Il distingue danger merite,
+          danger borderline et danger automatique suspecte, sans score force, sans cap, sans suppression d'evenements
+          et avec un score issu des evenements officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate de danger</h4>
+          <ul>
+            <li>Reset vers danger immediat: 87.4% -> 0%</li>
+            <li>Danger automatique suspecte: 93.2% -> 0%</li>
+            <li>Danger merite: 6.8% -> 0%</li>
+            <li>Danger bloque par gate: 2%</li>
+            <li>Phase neutre: 12%</li>
+            <li>Possession securisee: 86%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Qualite du danger</h4>
+          <ul>
+            <li>Sans support: 50 -> 0</li>
+            <li>Sans edge tactique: 50 -> 0</li>
+            <li>Sans edge attribut: 49 -> 0</li>
+            <li>Malgre gardien secure: 45 -> 0</li>
+            <li>Gate connecte: oui</li>
+            <li>Gate effectif: oui</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du match</h4>
+          <ul>
+            <li>Blowout rate: 46% -> 42%</li>
+            <li>Match serre: 28% -> 32%</li>
+            <li>Match competitif: 62% -> 64%</li>
+            <li>Total points moyen: 22.1 -> 30.6</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Gardien secure: preserve</li>
+            <li>Reset post-score: a surveiller</li>
+            <li>Dominance chain: a surveiller</li>
+            <li>Densite: preservee</li>
+            <li>Mix familles: preserve</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: IMPROVE_RESET_TO_DANGER_GATE. Prochaine lecture: Sprint 6O - Earned Danger Gate Follow-up Without Score Adjustment.
+        Le gate intervient avant danger, scoring opportunity et score_change; les diagnostics ne remplacent jamais le score officiel.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Gate selectif 6O</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Gate selectif du danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6O</p>
+        <h3>Gate selectif du danger</h3>
+        <p>
+          6O transforme le gate 6N en filtre selectif: le danger revient uniquement quand il est gagne par support,
+          espace, edge tactique, attributs, fatigue, pression ou erreur adverse. Les scores restent issus des
+          score_change officiels, sans cap, sans rewrite et sans point ajoute hors modele.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger reintroduit</h4>
+          <ul>
+            <li>Danger merite: 0% -> 99.8%</li>
+            <li>Danger borderline: 0% -> 0.2%</li>
+            <li>Danger automatique suspecte: 0% -> 0%</li>
+            <li>Earned autorises: 549</li>
+            <li>Borderline autorises: 1</li>
+            <li>Automatiques bloques: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Filtre et garde-fous</h4>
+          <ul>
+            <li>Suspicion trop strict: 0</li>
+            <li>Suspicion trop permissif: 0</li>
+            <li>Root cause contradiction: 0</li>
+            <li>Mix familles preserve: oui</li>
+            <li>Score officiel score_change: oui</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Economie du batch</h4>
+          <ul>
+            <li>Total points moyen: 30.6 -> 39.5</li>
+            <li>Evenements scoring/match: 9.7 -> 12.6</li>
+            <li>Opportunites/match: 20.5 -> 28.1</li>
+            <li>Severe blowout: 14% -> 28%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Preservations</h4>
+          <ul>
+            <li>Densite: a surveiller</li>
+            <li>Equilibre equipes: preserve</li>
+            <li>Reset gardien secure: preserve</li>
+            <li>Reset post-score: a surveiller</li>
+            <li>Dominance chain: a surveiller</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: REVIEW_VOLUME_WITHOUT_SCORE_REWRITE. Le statut PARTIAL reste acceptable seulement si les garde-fous scoring
+        sont propres et si la prochaine lecture surveille volume, blowouts et mix de routes.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Selectivite et volume 6P</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Selectivite du danger et volume">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6P</p>
+        <h3>S&eacute;lectivit&eacute; du danger et volume</h3>
+        <p>
+          6P corrige la gate 6O trop permissive: les contextes n&eacute;gatifs comme spacing faible,
+          re-attaque imm&eacute;diate apr&egrave;s reset, post-score ou gardien secure ne comptent plus comme
+          raisons positives. Le score reste d&eacute;riv&eacute; uniquement des score_change officiels.
+        </p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Gate plus s&eacute;lective</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute;: 99.8% -> 18.7%</li>
+            <li>Danger borderline: 0.2% -> 2.9%</li>
+            <li>Reset vers danger: 100% -> 21.6%</li>
+            <li>Danger avec contexte n&eacute;gatif: 550 -> 126</li>
+            <li>Danger avec seulement contexte n&eacute;gatif: 0</li>
+            <li>Signaux positifs insuffisants: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume de scoring</h4>
+          <ul>
+            <li>Total points moyen: 39.5 -> 24.6</li>
+            <li>Evenements scoring/match: 12.6 -> 7.9</li>
+            <li>Opportunites/match: 28.1 -> 17.2</li>
+            <li>Severe blowout: 28% -> 0%</li>
+            <li>Blowout: 50% -> 22%</li>
+            <li>Statut: PASS</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_GATE_SELECTIVITY_VOLUME_FIX. Aucun cap, rewrite, score forc&eacute;, suppression d'events ou mutation
+        MatchBonusEvent n'est utilis&eacute; pour obtenir cette baisse de volume.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Economie routes 6Q</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Economie des routes apres danger">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6Q</p>
+        <h3>&Eacute;conomie des routes apr&egrave;s danger</h3>
+        <p>L'economie des routes reste lisible, avec une reserve explicite a surveiller.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Danger vers opportunit&eacute;</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 100%</li>
+            <li>Danger borderline vers opportunit&eacute;: 100% -> 26.3%</li>
+            <li>Continuation vers opportunit&eacute;: 60.4% -> 0.8%</li>
+            <li>Gardien secure vers danger adverse: 68.3% -> 3.5%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Volume et couches non-score</h4>
+          <ul>
+            <li>Total points moyen: 24.6 -> 22.7</li>
+            <li>Opportunit&eacute;s/match: 17.2 -> 15.9</li>
+            <li>Half chance: 3.4%</li>
+            <li>Territory gain: 6%</li>
+            <li>Forced defensive action: 0.9%</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: MONITOR_ROUTE_ECONOMY_PARTIAL. Score officiel toujours issu des score_change events.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Distribution danger merite 6R</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Issues apres danger merite">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6R</p>
+        <h3>Issues apr&egrave;s danger m&eacute;rit&eacute;</h3>
+        <p>Les issues apres danger merite sont mesurees, avec une reserve explicite a surveiller.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution des issues</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 100% -> 84.8%</li>
+            <li>High quality vers opportunit&eacute;: 88.8% -> 93.8%</li>
+            <li>Medium quality: 1 -> 36</li>
+            <li>Low quality: 0 -> 7</li>
+            <li>Half chances: 27</li>
+            <li>Forced defensive actions: 6</li>
+            <li>Territorial gains: 10</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Total points moyen: 22.7 -> 22.4</li>
+            <li>Scoring events/match: 7.3 -> 7.3</li>
+            <li>Opportunit&eacute;s/match: 15.9 -> 16</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Fen&ecirc;tres longitudinales stables: 3/3</li>
+            <li>Statut: PARTIAL</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: MONITOR_EARNED_DANGER_OUTCOME_DISTRIBUTION. Aucun cap, aucun score force, aucun rewrite post-hoc:
+        le score reste issu des score_change officiels.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Couverture dominance 6S</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Chaines de domination et couverture de calibration">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6S</p>
+        <h3>Cha&icirc;nes de domination et couverture de calibration</h3>
+        <p>La calibration 6S reduit les chaines de domination tout en gardant le score officiel issu des evenements.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Cha&icirc;nes et breaks</h4>
+          <ul>
+            <li>Cha&icirc;ne max: 14 -> 2</li>
+            <li>Same-team opportunities: 9.8% -> 7.9%</li>
+            <li>Same-family opportunities: 1.3% -> 1.3%</li>
+            <li>Chain breaks: 0 -> 40</li>
+            <li>Defensive recovery after repeated danger: 0 -> 40</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Danger m&eacute;rit&eacute; et volume</h4>
+          <ul>
+            <li>Danger m&eacute;rit&eacute; vers opportunit&eacute;: 84.8% -> 80%</li>
+            <li>High quality vers opportunit&eacute;: 93.8% -> 86%</li>
+            <li>Demi-occasion: 19.3% -> 22%</li>
+            <li>Gain territorial: 7.1% -> 4.3%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 4.3% -> 7.8%</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie et longitudinal</h4>
+          <ul>
+            <li>Total points moyen: 22.4 -> 21</li>
+            <li>Scoring events/match: 7.3 -> 6.9</li>
+            <li>Opportunit&eacute;s/match: 16 -> 15.5</li>
+            <li>Severe blowout: 0% -> 2%</li>
+            <li>Validation longitudinale: 3/3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Couverture de calibration</h4>
+          <ul>
+            <li>calibrationsAppliedAllRuns: true</li>
+            <li>Fen&ecirc;tres appliqu&eacute;es: 141/141</li>
+            <li>Fen&ecirc;tres manquantes: 0</li>
+            <li>Mismatches: 0</li>
+            <li>Familles routes pr&eacute;serv&eacute;es: true</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Recommendation: KEEP_DOMINANCE_CHAIN_CALIBRATION_COVERAGE. Sans cap, sans score forc&eacute;:
+        le score reste issu des &eacute;v&eacute;nements officiels score_change.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Distribution matchs serres 6T</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Matchs serres et competitivite">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6T</p>
+        <h3>Matchs serr&eacute;s et comp&eacute;titivit&eacute;</h3>
+        <p>La calibration 6T mesure les matchs serres et competitifs sans score force, sans comeback force et sans cap.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution des &eacute;carts</h4>
+          <ul>
+            <li>Match serr&eacute;: 32% -> 54%</li>
+            <li>Match comp&eacute;titif: 54% -> 80%</li>
+            <li>&Eacute;cart moyen: 7.7 -> 7.9</li>
+            <li>&Eacute;cart m&eacute;dian: 8 -> 7</li>
+            <li>One-score game: 32% -> 36%</li>
+            <li>Two-score game: 54% -> 72%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Runaway et r&eacute;ponse</h4>
+          <ul>
+            <li>Blowout: 20% -> 14%</li>
+            <li>Severe blowout: 2% -> 0%</li>
+            <li>R&eacute;ponse de l'&eacute;quipe men&eacute;e: 77.7% -> 8%</li>
+            <li>Repeat opportunity du leader: 51% -> 44%</li>
+            <li>Cha&icirc;ne max corrig&eacute;e: 2 -> 4</li>
+            <li>Consistance max/moyenne: true</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Volume et familles de routes</h4>
+          <ul>
+            <li>Total points moyen: 21 -> 21</li>
+            <li>Scoring events/match: 6.9 -> 6.8</li>
+            <li>Opportunit&eacute;s/match: 15.5 -> 15.4</li>
+            <li>SHOT point share: 57.6%</li>
+            <li>TRY/DROP point share: 26.6% / 5.3%</li>
+            <li>Diversit&eacute; route-family: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Causes d'&eacute;cart et garde-fous</h4>
+          <ul>
+            <li>Cause volume opportunit&eacute;s: 0</li>
+            <li>Cause efficacit&eacute; scoring: 7</li>
+            <li>Cause mismatch tactique: 0</li>
+            <li>Couverture calibration manquante: 0</li>
+            <li>Score issu des &eacute;v&eacute;nements officiels: true</li>
+            <li>Sans cap / score forc&eacute; / comeback forc&eacute;: true</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_CLOSE_GAME_DISTRIBUTION_CALIBRATION.
+        Batch 50 matchs, sans score force, sans comeback force, sans rubber-banding, et avec score issu des evenements officiels.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Reponse equipe menee 6U</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Reponse de l'equipe menee">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6U</p>
+        <h3>R&eacute;ponse de l'&eacute;quipe men&eacute;e</h3>
+        <p>La calibration 6U mesure la r&eacute;ponse de l'&eacute;quipe men&eacute;e et isole ce qui reste &agrave; suivre sans manipuler le score.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>R&eacute;ponse tactique</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 8% -> 50.6%</li>
+            <li>Part opportunit&eacute;s: 8% -> 21.4%</li>
+            <li>Part scoring: 1.2% -> 0%</li>
+            <li>R&eacute;cup&eacute;ration: 0% -> 9%</li>
+            <li>Relief pression: 0% -> 46%</li>
+            <li>Risque tactique: 0% -> 9.2%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Fin de match et qualit&eacute;</h4>
+          <ul>
+            <li>Pression fin de match: 0% -> 14.3%</li>
+            <li>Danger gagn&eacute;: 0% -> 3.8%</li>
+            <li>Demi-occasion: 0% -> 5.5%</li>
+            <li>Gain territorial: 0% -> 0%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 0% -> 0%</li>
+            <li>Causes mesur&eacute;es: 6</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Distribution pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 54% -> 42%</li>
+            <li>Match comp&eacute;titif: 80% -> 82%</li>
+            <li>Blowout: 14% -> 8%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 21 -> 21.8</li>
+            <li>Opportunit&eacute;s/match: 15.4 -> 16.3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Cha&icirc;ne max: 4 -> 4</li>
+            <li>Consistance cha&icirc;nes: true</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Reset post-score: true</li>
+            <li>Score officiel: true</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PARTIAL. Recommendation: KEEP_TRAILING_TEAM_RESPONSE_LATE_GAME_PRESSURE_CALIBRATION.
+        Batch 50 matchs; sans score forc&eacute;, sans comeback forc&eacute;, sans cap, sans rubber-banding;
+        le score reste issu des &eacute;v&eacute;nements officiels score_change.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Menace equipe menee 6V</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Qualite de menace de l'equipe menee">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6V</p>
+        <h3>Qualit&eacute; de menace de l'&eacute;quipe men&eacute;e</h3>
+        <p>La calibration 6V transforme une partie des r&eacute;ponses de l'&eacute;quipe men&eacute;e en vraie menace sans forcer le score.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace tactique</h4>
+          <ul>
+            <li>Qualit&eacute; menace: 52.5%</li>
+            <li>Conversion naturelle menace: 63.4%</li>
+            <li>Gain territorial: 0% -> 2%</li>
+            <li>Action d&eacute;fensive forc&eacute;e: 0% -> 2%</li>
+            <li>Demi-occasion: 5.5% -> 2.5%</li>
+            <li>Danger gagn&eacute;: 3.8% -> 12.7%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Fin de match</h4>
+          <ul>
+            <li>Pression fin de match: 14.3% -> 100%</li>
+            <li>Menaces fin de match: 58</li>
+            <li>Part scoring naturel &eacute;quipe men&eacute;e: 0% -> 36%</li>
+            <li>Fen&ecirc;tres menace: 354</li>
+            <li>Scores naturels: 133</li>
+            <li>Score inject&eacute;: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 42% -> 56%</li>
+            <li>Match comp&eacute;titif: 82% -> 76%</li>
+            <li>Blowout: 8% -> 8%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 21.8 -> 22.8</li>
+            <li>Opportunit&eacute;s/match: 16.3 -> 16.5</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous</h4>
+          <ul>
+            <li>Score officiel: true</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Danger automatique bloqu&eacute;: true</li>
+            <li>Rubber-banding: false</li>
+            <li>Comeback forc&eacute;: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_TRAILING_CONVERSION_CALIBRATION.
+        Batch 50 matchs; les scores restent issus des &eacute;v&eacute;nements officiels score_change, sans cap, sans injection et sans comeback forc&eacute;.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Monitoring menace fin de match 6W</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Monitoring de la menace de fin de match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6W</p>
+        <h3>Monitoring de la menace de fin de match</h3>
+        <p>Le monitoring 6W confirme que la menace de fin de match reste issue de signaux tactiques, sans comeback forc&eacute;.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Automaticit&eacute; de la menace</h4>
+          <ul>
+            <li>Qualit&eacute; menace fin de match: 100% -> 100%</li>
+            <li>Menace automatique: 0%</li>
+            <li>Menace sans signal: 0%</li>
+            <li>Menace avec signal r&eacute;el: 100%</li>
+            <li>Menaces refus&eacute;es: 0</li>
+            <li>Menaces downgrad&eacute;es: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Suspicion comeback</h4>
+          <ul>
+            <li>Suspicion avant/apr&egrave;s: 171 -> 230</li>
+            <li>Expliqu&eacute;e: 230</li>
+            <li>Non expliqu&eacute;e: 0</li>
+            <li>Comeback forc&eacute; d&eacute;tect&eacute;: 0</li>
+            <li>Scores naturels &eacute;quipe men&eacute;e: 127</li>
+            <li>Chemins scoring complets: 127</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>&Eacute;conomie pr&eacute;serv&eacute;e</h4>
+          <ul>
+            <li>Match serr&eacute;: 56% -> 50%</li>
+            <li>Match comp&eacute;titif: 76% -> 78%</li>
+            <li>Blowout: 8% -> 14%</li>
+            <li>Severe blowout: 0% -> 0%</li>
+            <li>Total points moyen: 22.8 -> 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.4 -> 7.2</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous officiels</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Gate s&eacute;lectif: true</li>
+            <li>Danger automatique bloqu&eacute;: true</li>
+            <li>Cha&icirc;ne max: 2</li>
+            <li>Score inject&eacute; &eacute;quipe men&eacute;e: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_LATE_GAME_THREAT_QUALITY_MONITORING.
+        Sprint suivant: Sprint 6X - Match Economy Final Stabilization. Le monitoring ne modifie ni les constantes de scoring,
+        ni les score_change officiels, ni la possession dangereuse de mani&egrave;re automatique.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Stabilisation economie match 6X</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Stabilisation finale de l'economie match">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 6X</p>
+        <h3>Stabilisation finale de l'&eacute;conomie match</h3>
+        <p>La baseline finale 6X consolide l'&eacute;conomie match avant le passage aux sprints produit.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Baseline finale</h4>
+          <ul>
+            <li>Matchs batch: 50</li>
+            <li>Total points moyen: 22.2</li>
+            <li>&Eacute;v&eacute;nements scoring/match: 7.2</li>
+            <li>Opportunit&eacute;s/match: 16.3</li>
+            <li>Match serr&eacute;: 50%</li>
+            <li>Match comp&eacute;titif: 78%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Distribution et routes</h4>
+          <ul>
+            <li>Blowout: 14%</li>
+            <li>Severe blowout: 0%</li>
+            <li>Diversit&eacute; route-family: true</li>
+            <li>Part points non-SHOT: 27%</li>
+            <li>Matchs avec TRY/DROP: 50</li>
+            <li>Rollback SHOT_ONLY: true</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Menace et fin de match</h4>
+          <ul>
+            <li>R&eacute;ponse &eacute;quipe men&eacute;e: 54.8%</li>
+            <li>Part scoring &eacute;quipe men&eacute;e: 35.3%</li>
+            <li>Menace trailing: 53.6%</li>
+            <li>Menace fin de match corrig&eacute;e: 100%</li>
+            <li>Ratio menace/pression: 1</li>
+            <li>Menace automatique: 0%</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Garde-fous finaux</h4>
+          <ul>
+            <li>Score issu de score_change: true</li>
+            <li>Chemin officiel connect&eacute;: true</li>
+            <li>Manipulation de score: false</li>
+            <li>Comeback forc&eacute;: false</li>
+            <li>Suspicion inexpliqu&eacute;e: 0</li>
+            <li>Persistence pour scoring: false</li>
+            <li>SQLite pour scoring: false</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_MATCH_ECONOMY_FINAL_STABILIZATION.
+        Sprint suivant: 7A - Product Baseline &amp; Coach-Facing Match Report Readiness.
+        D&eacute;finition corrig&eacute;e: lateGameThreatQualityRate = lateGameThreatCount / lateGamePressureCount after both values are restricted to late-game pressure-window events; lateGameThreatQualityRatio exposes the same population as a decimal ratio.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Baseline produit coach 7A</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Baseline produit coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7A</p>
+        <h3>Baseline produit coach</h3>
+        <p>Le rapport distingue la lecture officielle du match, les diagnostics s&eacute;par&eacute;s et les hypoth&egrave;ses non appliqu&eacute;es.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Readiness produit</h4>
+          <ul>
+            <li>Rapport produit pr&ecirc;t: true</li>
+            <li>Export coach pr&ecirc;t: true</li>
+            <li>Baseline 6X pr&eacute;serv&eacute;e: true</li>
+            <li>Score officiel visible: true</li>
+            <li>Source score_change visible: true</li>
+            <li>Guardrails pr&eacute;serv&eacute;s: true</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>S&eacute;paration des sources</h4>
+          <ul>
+            <li>Diagnostic s&eacute;par&eacute;: true</li>
+            <li>Sandbox s&eacute;par&eacute;: true</li>
+            <li>Preview non appliqu&eacute;e: 3/3</li>
+            <li>Fuite sandbox: false</li>
+            <li>Fuite diagnostic score: false</li>
+            <li>Fuite batch score: false</li>
+          </ul>
+        </article>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Actionnabilit&eacute;</h4>
+          <ul>
+            <li>Insights coach: 6</li>
+            <li>Insights actionnables: 6</li>
+            <li>Signaux prochain match: 3</li>
+            <li>Axe de travail: 1</li>
+            <li>Profils observ&eacute;s: 3</li>
+            <li>S&eacute;lection forc&eacute;e: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Lisibilit&eacute;</h4>
+          <ul>
+            <li>Badges source: 100%</li>
+            <li>Preuves lisibles: 100%</li>
+            <li>D&eacute;tails techniques repli&eacute;s: true</li>
+            <li>Wording interdit: 0</li>
+            <li>Lecture mobile: PASS</li>
+            <li>Lecture export: PASS</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: COACH_INSIGHT_DEPTH_NEXT_MATCH_RECOMMENDATIONS.
+        Sprint suivant: 7B - Coach Insight Depth &amp; Next-Match Recommendations.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Insights coach 7B</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Profondeur insights coach">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7B</p>
+        <h3>Insights coach & plan prochain match</h3>
+        <p>Les signaux officiels sont transform&eacute;s en lectures causales prudentes, avec risques et signaux observables.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Profondeur d'insight</h4>
+          <ul>
+            <li>Insights approfondis: 3/3</li>
+            <li>Causes liees: 3</li>
+            <li>Risques visibles: 3</li>
+            <li>Preuves liees: 3</li>
+            <li>Confiance visible: 3</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Plan prochain match</h4>
+          <ul>
+            <li>Priorites concretes: 3/3</li>
+            <li>Signaux observables: 3</li>
+            <li>Tradeoffs visibles: 3</li>
+            <li>Selection forcee: 0</li>
+            <li>Recommandations non supportees: 0</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: COACH_ACTION_PLAN_CARDS_TRAINING_FOCUS_PACKAGING.
+        Sprint suivant: 7C - Coach Action Plan Cards &amp; Training Focus Packaging.
+      </p>
+    </section>
+    </details>
+
+    <details class="premium-appendix-card">
+      <summary>Action plan coach 7C</summary>
+
+    <section class="controlled-local-readonly-db-section" aria-label="Plan action coach et focus entrainement">
+      <div class="section-heading">
+        <p class="eyebrow">Sprint 7C</p>
+        <h3>Plan d'action coach & focus entrainement</h3>
+        <p>Les insights 7B sont empaquetes en cartes courtes: observation, travail, signal visible, critere de reussite et risque.</p>
+      </div>
+      <div class="product-grid two">
+        <article class="product-card">
+          <h4>Cartes action</h4>
+          <ul>
+            <li>Cartes visibles: 3</li>
+            <li>Priorite principale: 1</li>
+            <li>Signaux observables: 3</li>
+            <li>Criteres de reussite: 3</li>
+            <li>Selection forcee: 0</li>
+          </ul>
+        </article>
+        <article class="product-card">
+          <h4>Packaging coach</h4>
+          <ul>
+            <li>Focus entrainement: 2</li>
+            <li>Plan prochain match: 3</li>
+            <li>Wording mecanique: 0</li>
+            <li>Libelles dupliques: 0</li>
+            <li>Wording interdit: 0</li>
+          </ul>
+        </article>
+      </div>
+      <p class="muted">
+        Statut: PASS. Recommendation: KEEP_COACH_ACTION_PLAN_PACKAGING.
+        Sprint suivant: 7D - Coach Report Premium Layout &amp; Visual Hierarchy.
+      </p>
+    </section>
+    </details>
     <details class="appendix">
       <summary>Hypothèses sandbox</summary>
       <p>Les hypothèses expérimentales restent séparées du rapport principal.</p>

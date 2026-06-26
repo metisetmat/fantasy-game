@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-26T15:23:14.416Z
+Generated timestamp: 2026-06-26T16:01:48.833Z
 Task/sprint name: Sprint 7F - Product Report Scope, Density & Wording Cleanup
 Final file count: 20
 
@@ -935,46 +935,4 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/coachDeepInsights.ts
- M src/reports/coachReportControlledLocalReadOnlyDbModeCopy.test.ts
- M src/reports/coachReportControlledLocalReadOnlyDbModeRenderer.test.ts
- M src/reports/coachReportDatabaseAdapterSpikeCopy.test.ts
- M src/reports/coachReportDatabaseAdapterSpikeRenderer.test.ts
- M src/reports/coachReportDatabaseMigrationRenderer.test.ts
- M src/reports/coachReportDurableStorageDecisionCopy.test.ts
- M src/reports/coachReportDurableStorageDecisionRenderer.test.ts
- M src/reports/coachReportHistoryStoreConsistencyCopy.test.ts
- M src/reports/coachReportHistoryStoreConsistencyRenderer.test.ts
- M src/reports/coachReportMultiMatchHistoryRenderer.test.ts
- M src/reports/coachReportMultiMatchPhaseComparisonRenderer.test.ts
- M src/reports/coachReportPersistentHistoryRenderer.test.ts
- M src/reports/coachReportPhaseVisualReadability.test.ts
- M src/reports/coachReportPhaseVisualReadabilityExportRenderer.test.ts
- M src/reports/coachReportPhaseVisualsExportRenderer.test.ts
- M src/reports/coachReportPremiumDensity.test.ts
- M src/reports/coachReportPremiumExportRenderer.test.ts
- M src/reports/coachReportPremiumLayout.test.ts
- M src/reports/coachReportRealMatchHistoryRenderer.test.ts
- M src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestCopy.test.ts
- M src/reports/coachReportRealSQLiteReadOnlyIOSmokeTestRenderer.test.ts
- M src/reports/fullMatchCalibrationCarryoverRenderer.test.ts
- M src/reports/fullMatchOfficialScoringConnectionRenderer.test.ts
- M src/reports/fullMatchScoreEconomyCalibrationRenderer.test.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/persistenceEvidenceMarkdownAlignment.test.ts
- M src/reports/persistenceEvidenceRendererAlignment.test.ts
- M src/reports/persistenceEvidenceValidationAlignment.test.ts
- M src/reports/phaseVisualLegendRenderer.test.ts
  M src/reports/renderCoachReportExportHtml.ts
- M src/reports/scoringFamilyAttributionRenderer.test.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachReportCoachExportScopeAudit.ts
-?? src/reports/coachReportProductDensityCleanupAudit.ts
-?? src/reports/coachReportScopeBoundaryAudit.ts
-?? src/reports/coachReportSourceOfTruthScopeCleanupAudit.ts
-?? src/reports/coachReportWordingRegressionCleanupAudit.ts
-?? src/reports/productReportScopeDensityWordingCleanup7F.test.ts
-?? src/reports/productReportScopeDensityWordingCleanup7F.ts
-?? src/reports/productReportScopeDensityWordingCleanupWarnings.ts
