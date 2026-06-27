@@ -113,12 +113,18 @@ export function buildMatchStoryNarrativeQuality(input: {
   const finalTurningPoint = input.turningPoints[input.turningPoints.length - 1];
   const fatigueBeat = input.beats.find((beat) => beat.beatType === "fatigue_effect");
   const pressureBeat = input.beats.find((beat) => beat.beatType === "pressure_signal");
+  const firstScoringTeam = firstScore?.teamId ?? homeTeam;
+  const opponentScoringTeam = teams.find((teamId) => teamId !== firstScoringTeam);
+  const nonScoringOpponent = opponentScoringTeam === undefined ? awayTeam : opponentScoringTeam;
+  const hasOpponentScoreResponse = opponentScoringTeam !== undefined;
 
   const storyOpening = firstScore === undefined
     ? `${homeTeam} et ${awayTeam} ouvrent le match sans score immediat, avec une lecture officielle encore prudente.`
-    : `${firstScore.teamId ?? homeTeam} frappe des la minute ${firstScore.minute} et donne tout de suite une direction au tableau d'affichage.`;
-  const storyMiddle = scoringSegments.length >= 2
-    ? `${awayTeam} reste dans le recit par sa reponse officielle, puis ${homeTeam} retrouve assez de controle pour faire bouger le cumul sans fabriquer d'evenement.`
+    : `${firstScoringTeam} frappe des la minute ${firstScore.minute} et donne tout de suite une direction au tableau d'affichage.`;
+  const storyMiddle = scoringSegments.length >= 2 && hasOpponentScoreResponse
+    ? `${opponentScoringTeam} reste dans le recit par sa reponse officielle, puis ${firstScoringTeam} retrouve assez de controle pour faire bouger le cumul sans fabriquer d'evenement.`
+    : scoringSegments.length >= 2
+      ? `${firstScoringTeam} prolonge son avantage par plusieurs marques officielles pendant que ${nonScoringOpponent} reste dans le recit par la resistance et les phases sans score.`
     : "Le coeur du match reste plus territorial que spectaculaire: le recit garde la main sur les faits officiels.";
   const storyEnd = scorelessClosing === undefined
     ? `La fin confirme le score officiel ${input.officialScore} par les derniers evenements relies au tableau.`
@@ -131,15 +137,17 @@ export function buildMatchStoryNarrativeQuality(input: {
       "Les periodes sans score sont racontees comme de la stabilisation, jamais comme un retour a 0-0.",
     ])
     : sentenceJoin([
-      `${firstScore.teamId ?? homeTeam} marque des la minute ${firstScore.minute}.`,
-      `${awayTeam} repond et garde le match sous tension, puis ${homeTeam} reprend l'ecart.`,
+      `${firstScoringTeam} marque des la minute ${firstScore.minute}.`,
+      hasOpponentScoreResponse
+        ? `${opponentScoringTeam} repond et garde le match sous tension, puis ${firstScoringTeam} reprend l'ecart.`
+        : `${firstScoringTeam} garde le fil du score; ${nonScoringOpponent} existe surtout par les sequences qui ralentissent l'ecart.`,
       `Le cumul final ${input.officialScore} reste lisible meme dans les segments sans score.`,
     ]);
 
   const detailedNarrative = sentenceJoin([
     firstScore === undefined
       ? `L'ouverture reste prudente: aucun score precoce ne doit etre invente.`
-      : `L'ouverture installe vite un avantage officiel pour ${firstScore.teamId ?? homeTeam}.`,
+      : `L'ouverture installe vite un avantage officiel pour ${firstScoringTeam}.`,
     firstTurningPoint === undefined ? "" : `Le premier tournant retenu arrive a la minute ${firstTurningPoint.minute}: ${firstTurningPoint.whyItTurned}`,
     pressureBeat === undefined ? "" : `La pression apparait ensuite comme un facteur de rythme, pas comme une explication inventee: ${pressureBeat.coachReadableText}`,
     scoringSegments.length === 0
@@ -153,8 +161,10 @@ export function buildMatchStoryNarrativeQuality(input: {
   const coachFacingNarrative = sentenceJoin([
     firstScore === undefined
       ? "Lecture coach: le match s'ouvre sans rupture precoce, donc l'attention porte d'abord sur la patience collective."
-      : `Lecture coach: le score precoce de ${firstScore.teamId ?? homeTeam} donne le ton sans fermer le match.`,
-    `${awayTeam} reste present apres la premiere rupture; c'est la reaction collective, plus que le chiffre brut, qui merite le visionnage.`,
+      : `Lecture coach: le score precoce de ${firstScoringTeam} donne le ton sans fermer le match.`,
+    hasOpponentScoreResponse
+      ? `${opponentScoringTeam} reste present apres la premiere rupture; c'est la reaction collective, plus que le chiffre brut, qui merite le visionnage.`
+      : `${nonScoringOpponent} reste a lire par ses phases de resistance et de stabilisation, pas par une reponse au score que la timeline ne montre pas.`,
     "Les tournants sont presentes dans l'ordre chronologique afin de distinguer ce qui change vraiment le score de ce qui change seulement le rythme.",
     "Le prochain visionnage peut donc se concentrer sur la stabilisation, les sorties sous pression et la proprete des reponses, sans choix de joueur obligatoire.",
   ]);

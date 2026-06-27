@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-27T19:03:39.560Z
+Generated timestamp: 2026-06-27T19:49:23.329Z
 Task/sprint name: Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
 Final file count: 20
 
@@ -974,21 +974,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/buildOfficialMatchStoryNarrative.ts
- M src/reports/buildOfficialMatchStorySpine.ts
- M src/reports/officialMatchStorySpineEngineCausalityProof8A.test.ts
- M src/reports/officialMatchStorySpineTypes.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildMatchStoryNarrativeQuality.ts
-?? src/reports/matchStoryChronologyAudit.ts
-?? src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.test.ts
-?? src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.ts
-?? src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFixWarnings.ts
-?? src/reports/matchStoryCumulativeScoreAudit.ts
-?? src/reports/matchStoryNarrativeQualityAudit.ts
-?? src/reports/matchStoryReportIntegrationRegressionAudit.ts
-?? src/reports/matchStorySourceOfTruthRegressionAudit.ts
-?? src/reports/repairOfficialMatchStoryChronology.ts
-?? src/reports/turningPointNarrativeOrderAudit.ts
+ M src/reports/buildMatchStoryNarrativeQuality.ts
+ M src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.test.ts
+ M src/reports/repairOfficialMatchStoryChronology.ts

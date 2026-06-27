@@ -161,11 +161,17 @@ function repairSegments(model: OfficialMatchStorySpineModel, report: MatchReport
   });
 }
 
-function previousCounts(report: MatchReport, minute: number): {
+function previousCounts(report: MatchReport, point: OfficialMatchTurningPoint): {
   readonly previousScoreChangeCount: number;
   readonly previousDangerEventCount: number;
 } {
-  const previousEvents = report.timeline.filter((event) => eventMinute(event) < minute);
+  const linkedEventId = point.linkedOfficialEventIds[0];
+  const linkedIndex = linkedEventId === undefined
+    ? -1
+    : report.timeline.findIndex((event) => event.eventId === linkedEventId);
+  const previousEvents = linkedIndex >= 0
+    ? report.timeline.slice(0, linkedIndex)
+    : report.timeline.filter((event) => eventMinute(event) < point.minute);
   return {
     previousScoreChangeCount: previousEvents.filter(eventHasScoreChange).length,
     previousDangerEventCount: previousEvents.filter(isDangerEvent).length,
@@ -233,7 +239,7 @@ function repairTurningPoints(model: OfficialMatchStorySpineModel, report: MatchR
     .sort((a, b) => a.minute - b.minute || priorityForTurningPoint(b) - priorityForTurningPoint(a))
     .slice(0, 4)
     .map((point, index): OfficialMatchTurningPoint => {
-      const counts = previousCounts(report, point.minute);
+      const counts = previousCounts(report, point);
       const isFirstDangerCandidate = point.turningPointType === "first_real_danger";
       const invalidFirstDangerLabel = isFirstDangerCandidate &&
         counts.previousScoreChangeCount > 0 &&
@@ -370,4 +376,3 @@ export function repairOfficialMatchStoryChronology(
     warningCodes: warningCodesFor(repaired),
   };
 }
-
