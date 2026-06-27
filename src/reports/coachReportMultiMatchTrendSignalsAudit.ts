@@ -54,7 +54,7 @@ export function auditCoachReportMultiMatchTrendSignals(input: {
   const forcedSelectionTrendCount = matchesForbidden(allText, /doit s.lectionner|composition recommand.e|s.lection impos.e/giu);
   const forcedTacticalPlanTrendCount = matchesForbidden(allText, /plan tactique impos.|consigne automatique impos.e/giu);
   const sandboxTrendInOfficialBodyCount = visibleCards.filter((card) => card.sourceType === "sandbox").length;
-  const trendSignalWithLimitationCount = cards.filter((card) => card.limitationNote.length > 0 && /echantillons disponibles|pas une conclusion generale|ne remplace pas/iu.test(card.limitationNote)).length;
+  const trendSignalWithLimitationCount = cards.filter((card) => card.limitationNote.length > 0 && /echantillons disponibles|match courant uniquement|donnee insuffisante|volume insuffisant|pas une conclusion generale|ne remplace pas/iu.test(card.limitationNote)).length;
   const trendSignalWithNextMatchCheckCount = cards.filter((card) => /prochain match|A verifier|verifier/iu.test(card.nextMatchCheck)).length;
   const clean = input.productReportHtml.includes("id=\"multi-match-trend-signals\"") &&
     visibleCards.length >= 1 &&

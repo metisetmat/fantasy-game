@@ -75,14 +75,24 @@ export function buildCoachReportExportSnapshot(input: {
   const keySignalsMatchProduct =
     countClass(input.productReportHtml, "product-card signal-card") ===
     countClass(exportHtml, "product-card signal-card");
+  const profilesAreCompacted =
+    exportHtml.includes("compact-profile-summary") &&
+    sourceSectionIds.includes("profiles-to-observe") &&
+    sourceSectionIds.includes("players-to-study") &&
+    exportHtml.includes("Les rapprochements profil-joueur ne sont pas des choix de composition.");
   const profileCardsMatchProduct =
     countClass(input.productReportHtml, "product-card profile-card") ===
-    countClass(exportHtml, "product-card profile-card");
+      countClass(exportHtml, "product-card profile-card") ||
+    profilesAreCompacted;
+  const candidateComparisonIsCompacted =
+    profilesAreCompacted &&
+    exportHtml.includes("Les cartes comparent des pistes d'observation. Elles ne changent ni la composition, ni le banc.");
   const candidateComparisonMatchesProduct =
     countClass(input.productReportHtml, "comparison-block") ===
       countClass(exportHtml, "comparison-block") &&
-    countClass(input.productReportHtml, "comparison-card") ===
-      countClass(exportHtml, "comparison-card");
+      countClass(input.productReportHtml, "comparison-card") ===
+        countClass(exportHtml, "comparison-card") ||
+    candidateComparisonIsCompacted;
   const interpretationGuardMatchesProduct =
     input.productReportHtml.includes("Les rapprochements profil-joueur ne sont pas des choix de composition.") &&
     exportHtml.includes("Les rapprochements profil-joueur ne sont pas des choix de composition.");

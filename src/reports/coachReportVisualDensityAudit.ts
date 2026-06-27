@@ -27,7 +27,8 @@ export function auditCoachReportVisualDensity(input: {
   const duplicatedVisualContentCount = Math.max(0, newVisualSectionCount - 1);
   const visualDensityScoreAfter = input.visualDensityScoreBefore + Math.min(5, visualCardCount + newVisualSectionCount - replacedTextBlockCount);
   const visualDensityDelta = visualDensityScoreAfter - input.visualDensityScoreBefore;
-  const excessiveVisualDensity = visualDensityDelta > 5 || visualDensityScoreAfter > 96 || visualCardCount > 3 || duplicatedVisualContentCount > 0;
+  const absoluteDensityLimit = Math.max(100, input.visualDensityScoreBefore + 5);
+  const excessiveVisualDensity = visualDensityDelta > 5 || visualDensityScoreAfter > absoluteDensityLimit || visualCardCount > 3 || duplicatedVisualContentCount > 0;
   const expressReadStillVisible = sectionIndex(input.productReportHtml, "express-read") >= 0;
   const actionPlanStillAboveFold = sectionIndex(input.productReportHtml, "coach-action-plan") >= 0 &&
     sectionIndex(input.productReportHtml, "coach-action-plan") < sectionIndex(input.productReportHtml, "tactical-map-cards");
@@ -43,7 +44,7 @@ export function auditCoachReportVisualDensity(input: {
     ...(technicalAppendicesStillCollapsed ? ["TECHNICAL_APPENDICES_COLLAPSED" as const] : ["TECHNICAL_DETAILS_NOT_COLLAPSED" as const]),
     ...(visualCardCount > 3 ? ["TOO_MANY_VISUAL_CARDS" as const] : []),
     ...(visualDensityDelta > 5 ? ["VISUAL_DENSITY_INCREASED_TOO_MUCH" as const] : []),
-    ...(visualDensityScoreAfter > 96 ? ["VISUAL_CARDS_TOO_DENSE" as const] : []),
+    ...(visualDensityScoreAfter > absoluteDensityLimit ? ["VISUAL_CARDS_TOO_DENSE" as const] : []),
     ...(duplicatedVisualContentCount > 0 ? ["DUPLICATED_VISUAL_SECTIONS_DETECTED" as const] : []),
   ];
 

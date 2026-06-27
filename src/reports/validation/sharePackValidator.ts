@@ -373,6 +373,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const productReportScopeDensityWordingCleanup7FValidation = readIfExists(join(shareDirectory, "validation.product-report-scope-density-wording-cleanup-7f.md"));
   const coachReportMultiMatchComparisonTrendSignals7G = readIfExists(join(shareDirectory, "coach-report-multi-match-comparison-trend-signals-7g.md"));
   const coachReportMultiMatchComparisonTrendSignals7GValidation = readIfExists(join(shareDirectory, "validation.coach-report-multi-match-comparison-trend-signals-7g.md"));
+  const coachReportExportLengthTrendCountCleanup7H = readIfExists(join(shareDirectory, "coach-report-export-length-trend-count-cleanup-7h.md"));
+  const coachReportExportLengthTrendCountCleanup7HValidation = readIfExists(join(shareDirectory, "validation.coach-report-export-length-trend-count-cleanup-7h.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3266,6 +3268,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.product-report-scope-density-wording-cleanup-7f.md",
     ...sprint7FForbiddenLeftovers,
   ];
+  const sprint7HExpectedFiles = sprint7GExpectedFiles.map((file) =>
+    file === "coach-report-multi-match-comparison-trend-signals-7g.md"
+      ? "coach-report-export-length-trend-count-cleanup-7h.md"
+      : file === "validation.coach-report-multi-match-comparison-trend-signals-7g.md"
+        ? "validation.coach-report-export-length-trend-count-cleanup-7h.md"
+        : file
+  );
+  const sprint7HForbiddenLeftovers = [
+    "coach-report-multi-match-comparison-trend-signals-7g.md",
+    "validation.coach-report-multi-match-comparison-trend-signals-7g.md",
+    ...sprint7GForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4567,6 +4581,32 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportMultiMatchComparisonTrendSignals7GValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 7G source files", bundleReports.includes("src/reports/coachReportMultiMatchComparisonTrendSignals7G.ts") && bundleReports.includes("src/reports/coachReportMultiMatchTrendSignals.ts") && bundleReports.includes("src/reports/coachReportMultiMatchTrendSignalsAudit.ts") && bundleReports.includes("src/reports/coachReportTrendPrudenceAudit.ts") && bundleReports.includes("src/reports/coachReportHistoryScopeAudit.ts") && bundleReports.includes("src/reports/coachReportMultiMatchSourceOfTruthAudit.ts") && bundleReports.includes("src/reports/coachReportMultiMatchComparisonTrendSignals7G.test.ts"), "7G source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportMultiMatchComparisonTrendSignals7GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint7HChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint7HExpectedFiles.every((file) => requiredCopied(file)), sprint7HExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint7HExpectedFiles.every((file) => manifest.includes(file)), sprint7HExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 7H", activeConfig.sprintName === "Sprint 7H - Export Length & Trend Count Cleanup", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint7HForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint7HForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 7H oriented", readme.includes("# Sprint 7H Share Pack") && readme.includes("coach-report-export-length-trend-count-cleanup-7h.md") && readme.includes("cleanup-only"), "README current"),
+    check("7H report included", coachReportExportLengthTrendCountCleanup7H.includes("# Coach Report Export Length & Trend Count Cleanup 7H") && coachReportExportLengthTrendCountCleanup7H.includes("Export Length Cleanup Audit") && coachReportExportLengthTrendCountCleanup7H.includes("Trend Count Consistency Audit"), "7H doc included"),
+    check("7H validation is PASS", coachReportExportLengthTrendCountCleanup7HValidation.includes("Status: PASS") && coachReportExportLengthTrendCountCleanup7HValidation.includes("CoachReportExportLengthTrendCountCleanupModel exists"), "7H validation current"),
+    check("baseline 7G visible", coachReportExportLengthTrendCountCleanup7H.includes("baselineVersion: COACH_REPORT_MULTI_MATCH_COMPARISON_TREND_SIGNALS_7G") && coachReportExportLengthTrendCountCleanup7HValidation.includes("baseline 7G visible"), "7G baseline visible"),
+    check("export not too long", coachReportExportLengthTrendCountCleanup7HValidation.includes("exportTooLongAfter = false") && coachReportExportLengthTrendCountCleanup7HValidation.includes("exportReadTimeSecondsAfter <= hard limit"), "export length clean"),
+    check("no FAIL inside PASS validation", coachReportExportLengthTrendCountCleanup7HValidation.includes("Status: PASS") && !coachReportExportLengthTrendCountCleanup7HValidation.includes("- FAIL:"), "no FAIL lines"),
+    check("trend count consistent", coachReportExportLengthTrendCountCleanup7H.includes("| trendCountMismatchCount | 0 |") && coachReportExportLengthTrendCountCleanup7HValidation.includes("trend count mismatch count = 0"), "trend count 0 mismatch"),
+    check("trend section visible in product/export", coachProductHtml.includes("id=\"multi-match-trend-signals\"") && coachExportHtml.includes("id=\"multi-match-trend-signals\"") && coachExportHtml.includes("trend-card-compact"), "trend section compact"),
+    check("profile export compacted", coachExportHtml.includes('id="profiles-and-players"') && coachExportHtml.includes("compact-profile-summary"), "profile summary compact"),
+    check("no new narrative layer", coachReportExportLengthTrendCountCleanup7H.includes("| noNewNarrativeLayerPreserved | true |") && coachReportExportLengthTrendCountCleanup7HValidation.includes("no-new-layer audit exists"), "no new layer"),
+    check("source of truth preserved", coachReportExportLengthTrendCountCleanup7H.includes("| sourceOfTruthSeparationPreserved | true |") || coachReportExportLengthTrendCountCleanup7H.includes("| trendsSeparatedFromCurrentMatchTruth | true |"), "source-of-truth clean"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && coachReportExportLengthTrendCountCleanup7HValidation.includes("score constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && coachReportExportLengthTrendCountCleanup7HValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportExportLengthTrendCountCleanup7HValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 7H source files", bundleReports.includes("src/reports/coachReportExportLengthTrendCountCleanup7H.ts") && bundleReports.includes("src/reports/coachReportExportLengthCleanupAudit.ts") && bundleReports.includes("src/reports/coachReportTrendCountConsistencyAudit.ts") && bundleReports.includes("src/reports/coachReportValidationStatusConsistencyAudit.ts") && bundleReports.includes("src/reports/coachReportNoNewNarrativeLayerAudit.ts") && bundleReports.includes("src/reports/coachReport7HSourceOfTruthAudit.ts"), "7H source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportExportLengthTrendCountCleanup7HValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8637,6 +8677,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 7H - Export Length")
+      ? sprint7HChecks
     : activeConfig.sprintName.includes("Sprint 7G - Coach Report Multi-Match")
       ? sprint7GChecks
     : activeConfig.sprintName.includes("Sprint 7F - Product Report Scope")

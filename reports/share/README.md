@@ -1,24 +1,24 @@
-# Sprint 7G Share Pack
+# Sprint 7H Share Pack
 
-Current sprint: Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals
+Current sprint: Sprint 7H - Export Length & Trend Count Cleanup
 
 ## Purpose
-This pack proves the coach product/export report now includes prudent multi-match trend signals while preserving the 7F clean coach scope, 7E tactical map cards, source-of-truth guardrails, and unchanged scoring.
+This pack proves the coach export is shorter, trend counts are reconciled, and PASS validations no longer hide FAIL lines while preserving 7G trend signals, 7F scope cleanup, 7E tactical maps, and unchanged scoring.
 
 ## Key Files
 - coach-report.export.html
 - coach-report.product.html
-- coach-report-multi-match-comparison-trend-signals-7g.md
-- validation.coach-report-multi-match-comparison-trend-signals-7g.md
+- coach-report-export-length-trend-count-cleanup-7h.md
+- validation.coach-report-export-length-trend-count-cleanup-7h.md
 - validation.share-pack.md
 - scoring-events-summary.md
 
 ## Validation Order
 1. validation.share-pack.md
-2. validation.coach-report-multi-match-comparison-trend-signals-7g.md
-3. coach-report-multi-match-comparison-trend-signals-7g.md
-4. coach-report.product.html
-5. coach-report.export.html
+2. validation.coach-report-export-length-trend-count-cleanup-7h.md
+3. coach-report-export-length-trend-count-cleanup-7h.md
+4. coach-report.export.html
+5. coach-report.product.html
 
 ## Guardrail Reminder
-7G is presentation-only: trends are local observation aids. They do not change scoring constants, score_change events, match mechanics, route selection, MatchBonusEvent, persistence/SQLite scoring boundaries, sandbox application, or batch-as-official-score boundaries.
+7H is cleanup-only: no team style memory, no season narrative, no new history engine, no scoring value change, no forced selection, and no trend-as-official-truth promotion.

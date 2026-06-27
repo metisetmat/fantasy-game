@@ -127,6 +127,8 @@ import {
   renderProductReportScopeDensityWordingCleanup7FValidation,
   renderCoachReportMultiMatchComparisonTrendSignals7GDoc,
   renderCoachReportMultiMatchComparisonTrendSignals7GValidation,
+  renderCoachReportExportLengthTrendCountCleanup7HDoc,
+  renderCoachReportExportLengthTrendCountCleanup7HValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -140,10 +142,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-multi-match-comparison-trend-signals-7g.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7H - Export Length & Trend Count Cleanup";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-export-length-trend-count-cleanup-7h.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-multi-match-comparison-trend-signals-7g.md";
+  "validation.coach-report-export-length-trend-count-cleanup-7h.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2839,6 +2841,46 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7G executable test proving PASS status, no placeholders, no overclaiming, and preserved source boundaries",
       },
       {
+        source: "src/reports/coachReportExportLengthTrendCountCleanupWarnings.ts",
+        required: true,
+        reason: "Sprint 7H warning-code registry for export length, trend count, validation-status, and no-new-layer cleanup",
+      },
+      {
+        source: "src/reports/coachReportExportLengthCleanupAudit.ts",
+        required: true,
+        reason: "Sprint 7H export length audit proving the shareable export is under the hard limit and coach-only in main body",
+      },
+      {
+        source: "src/reports/coachReportTrendCountConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 7H trend count audit reconciling reported, product-rendered, and export-rendered trend cards",
+      },
+      {
+        source: "src/reports/coachReportValidationStatusConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 7H validation status audit preventing PASS reports from containing FAIL checks",
+      },
+      {
+        source: "src/reports/coachReportExportContentPrioritizationAudit.ts",
+        required: true,
+        reason: "Sprint 7H export prioritization audit keeping only coach-readable essentials in the main export body",
+      },
+      {
+        source: "src/reports/coachReportNoNewNarrativeLayerAudit.ts",
+        required: true,
+        reason: "Sprint 7H no-new-layer audit proving Team Style Memory and Season Narrative are not started prematurely",
+      },
+      {
+        source: "src/reports/coachReport7HSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 7H source-of-truth audit proving trends remain separate from official score, selection, batch, sandbox, persistence, and SQLite truth",
+      },
+      {
+        source: "src/reports/coachReportExportLengthTrendCountCleanup7H.ts",
+        required: true,
+        reason: "Sprint 7H model, report renderer, and validation renderer for export length and trend count cleanup",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4995,6 +5037,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7H")) {
+    return renderCoachReportExportLengthTrendCountCleanup7HDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7G")) {
     return renderCoachReportMultiMatchComparisonTrendSignals7GDoc(fullMatchTraceValidationModel());
   }
@@ -7306,6 +7351,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7H")) {
+    return renderCoachReportExportLengthTrendCountCleanup7HValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7G")) {
     return renderCoachReportMultiMatchComparisonTrendSignals7GValidation(fullMatchTraceValidationModel());
   }
@@ -9563,6 +9611,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7H")) {
+    return [
+      "# Sprint 7H Share Pack",
+      "",
+      "Current sprint: Sprint 7H - Export Length & Trend Count Cleanup",
+      "",
+      "## Purpose",
+      "This pack proves the coach export is shorter, trend counts are reconciled, and PASS validations no longer hide FAIL lines while preserving 7G trend signals, 7F scope cleanup, 7E tactical maps, and unchanged scoring.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-report-export-length-trend-count-cleanup-7h.md",
+      "- validation.coach-report-export-length-trend-count-cleanup-7h.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-export-length-trend-count-cleanup-7h.md",
+      "3. coach-report-export-length-trend-count-cleanup-7h.md",
+      "4. coach-report.export.html",
+      "5. coach-report.product.html",
+      "",
+      "## Guardrail Reminder",
+      "7H is cleanup-only: no team style memory, no season narrative, no new history engine, no scoring value change, no forced selection, and no trend-as-official-truth promotion.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7G")) {
     return [
       "# Sprint 7G Share Pack",
