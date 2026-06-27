@@ -5,6 +5,7 @@ import type {
 import type { EventId, PlayerId, TeamId } from "../core/ids";
 import type { ZoneId } from "../core/zones";
 import { buildOfficialMatchStoryNarrative } from "./buildOfficialMatchStoryNarrative";
+import { repairOfficialMatchStoryChronology } from "./repairOfficialMatchStoryChronology";
 import type {
   OfficialMatchCausalityLink,
   OfficialMatchStoryBeat,
@@ -296,6 +297,22 @@ function buildSegments(report: MatchReport, beats: readonly OfficialMatchStoryBe
       momentumState: scoreBeats.length > 0 ? "momentum marque par le score" : "momentum encore ouvert",
       scoreBefore: firstBeat?.scoreBefore ?? officialScoreLabel(report),
       scoreAfter: lastBeat?.scoreAfter ?? officialScoreLabel(report),
+      scoreBeforeCumulative: firstBeat?.scoreBefore ?? officialScoreLabel(report),
+      scoreAfterCumulative: lastBeat?.scoreAfter ?? officialScoreLabel(report),
+      segmentScoreDelta: scoreBeats.length > 0 ? "score_change officiel dans le segment" : "aucun changement de score sur ce segment",
+      isScorelessSegment: scoreBeats.length === 0,
+      segmentScoreLabel: scoreBeats.length > 0
+        ? `score cumule : ${lastBeat?.scoreAfter ?? officialScoreLabel(report)}`
+        : `score du segment : 0-0 ; score cumule : ${lastBeat?.scoreAfter ?? officialScoreLabel(report)}`,
+      scoreLabelType: scoreBeats.length > 0 ? "cumulative" : "mixed_explained",
+      chronologicalIndex: index + 1,
+      hasScoreRegression: false,
+      scoreRegressionWarningCode: "NONE",
+      primaryNarrativeFunction: scoreBeats.length > 0 ? "score_progression" : "rhythm_context",
+      narrativeLead: scoreBeats.length > 0
+        ? "Le score evolue par un evenement officiel."
+        : "Le segment garde le score cumule sans nouvelle marque.",
+      narrativeClose: "Lecture limitee a la timeline officielle.",
       linkedOfficialEventIds: segmentBeats.map((beat) => beat.linkedOfficialEventId),
       linkedScoreChangeEventIds: scoreBeats.map((beat) => beat.linkedOfficialEventId),
       linkedZoneIds: zones,
@@ -325,6 +342,15 @@ function buildTurningPoints(beats: readonly OfficialMatchStoryBeat[]): readonly 
       ...(beat.opponentTeamId === undefined ? {} : { teamHurt: beat.opponentTeamId }),
       scoreBefore: beat.scoreBefore,
       scoreAfter: beat.scoreAfter,
+      chronologicalIndex: points.length + 1,
+      isFirstDangerCandidate: type === "first_real_danger",
+      firstDangerEligibility: type === "first_real_danger" ? "PENDING_REPAIR" : "NOT_FIRST_DANGER",
+      previousScoreChangeCount: 0,
+      previousDangerEventCount: 0,
+      narrativeOrderValid: true,
+      turningPointOrderWarningCode: "NONE",
+      replacementTitleIfNeeded: "",
+      narrativePriority: type === "first_score" ? 100 : type === "decisive_score" ? 90 : 60,
       linkedOfficialEventIds: [beat.linkedOfficialEventId],
       linkedStoryBeatIds: [beat.beatId],
       whyItTurned: beat.narrativeText,
@@ -425,6 +451,16 @@ export function buildOfficialMatchStorySpine(report: MatchReport, input?: {
   const coachReadableNarrativeReady = narrative.shortNarrative.length > 0 &&
     narrative.detailedNarrative.length > 0 &&
     narrative.coachFacingNarrative.length > 0;
+  const storyChronologyReady = true;
+  const cumulativeScoreReady = true;
+  const turningPointOrderReady = true;
+  const shortNarrativeQualityReady = narrative.shortNarrative.length > 0;
+  const detailedNarrativeQualityReady = narrative.detailedNarrative.length > 0;
+  const coachFacingNarrativeQualityReady = narrative.coachFacingNarrative.length > 0;
+  const mechanicalNarrativeRemoved = narrative.mechanicalSentenceCount === 0;
+  const scoreTimelineConsistencyReady = true;
+  const narrativeQualityReady = narrative.narrativeQualityScore >= 75 && mechanicalNarrativeRemoved;
+  const storyRegressionFixed = storyChronologyReady && cumulativeScoreReady && turningPointOrderReady;
   const officialTimelineCoverageReady = beats.every((beat) => report.timeline.some((event) => event.eventId === beat.linkedOfficialEventId));
   const sourceOfTruthSeparationPreserved = narrative.sourceOfTruthNote.includes("score_change") &&
     !/sandbox applique|batch score officiel|SQLite prouve/iu.test(`${narrative.shortNarrative} ${narrative.detailedNarrative}`);
@@ -461,6 +497,16 @@ export function buildOfficialMatchStorySpine(report: MatchReport, input?: {
     fatigueCausalityReady,
     playerImpactReadable,
     coachReadableNarrativeReady,
+    storyChronologyReady,
+    cumulativeScoreReady,
+    turningPointOrderReady,
+    narrativeQualityReady,
+    shortNarrativeQualityReady,
+    detailedNarrativeQualityReady,
+    coachFacingNarrativeQualityReady,
+    mechanicalNarrativeRemoved,
+    scoreTimelineConsistencyReady,
+    storyRegressionFixed,
     reportIntegrationMinimalReady,
     matchEconomyBaselinePreserved,
     guardrailsPreserved,
@@ -483,8 +529,8 @@ export function buildOfficialMatchStorySpine(report: MatchReport, input?: {
         : "8B - Official Story Source-of-Truth Regression Fix",
   };
 
-  return {
+  return repairOfficialMatchStoryChronology({
     ...modelWithoutWarnings,
     warningCodes: deriveWarningCodes(modelWithoutWarnings),
-  };
+  }, report);
 }

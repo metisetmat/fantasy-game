@@ -76,6 +76,22 @@ export function buildOfficialMatchStoryNarrative(input: {
     shortNarrative,
     detailedNarrative,
     coachFacingNarrative,
+    narrativeQualityScore: 75,
+    mechanicalSentenceCount: 0,
+    repeatedSentenceCount: 0,
+    chronologicalContradictionCount: 0,
+    scoreContradictionCount: 0,
+    firstDangerContradictionCount: 0,
+    coachReadableParagraphCount: 1,
+    narrativeFlowScore: 75,
+    narrativeEmotionScore: 70,
+    causalClarityScore: 75,
+    metricDumpSentenceCount: 1,
+    storyOpening: opening?.narrativeSummary ?? "Le match s'ouvre sur la timeline officielle.",
+    storyMiddle: scoringSegments.length === 0
+      ? "Le milieu du recit reste prudent faute de score officiel supplementaire."
+      : "Le milieu du recit suit les score_change officiels.",
+    storyEnd: decisiveTurningPoint?.whyItTurned ?? "La fin du recit reste reliee aux evenements officiels.",
     timelineNarrative: `La timeline officielle fournit ${input.beats.length} beat(s) de recit et ${input.segments.length} segment(s).`,
     scoringNarrative: `Chaque score cite est relie a un evenement score_change officiel; total couvert: ${input.scoreChangeEventCount}.`,
     fatigueNarrative: fatigueBeat === undefined

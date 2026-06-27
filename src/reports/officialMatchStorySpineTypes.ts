@@ -64,6 +64,7 @@ export type OfficialMatchCausalityEffectType =
 
 export type StoryConfidence = "low" | "medium" | "high";
 export type EvidenceStrength = "weak" | "medium" | "strong";
+export type StoryScoreLabelType = "cumulative" | "segment_delta" | "mixed_explained";
 
 export interface OfficialMatchStorySegment {
   readonly segmentId: string;
@@ -78,6 +79,18 @@ export interface OfficialMatchStorySegment {
   readonly momentumState: string;
   readonly scoreBefore: string;
   readonly scoreAfter: string;
+  readonly scoreBeforeCumulative: string;
+  readonly scoreAfterCumulative: string;
+  readonly segmentScoreDelta: string;
+  readonly isScorelessSegment: boolean;
+  readonly segmentScoreLabel: string;
+  readonly scoreLabelType: StoryScoreLabelType;
+  readonly chronologicalIndex: number;
+  readonly hasScoreRegression: boolean;
+  readonly scoreRegressionWarningCode: string;
+  readonly primaryNarrativeFunction: string;
+  readonly narrativeLead: string;
+  readonly narrativeClose: string;
   readonly linkedOfficialEventIds: readonly EventId[];
   readonly linkedScoreChangeEventIds: readonly EventId[];
   readonly linkedZoneIds: readonly ZoneId[];
@@ -121,6 +134,15 @@ export interface OfficialMatchTurningPoint {
   readonly teamHurt?: TeamId;
   readonly scoreBefore: string;
   readonly scoreAfter: string;
+  readonly chronologicalIndex: number;
+  readonly isFirstDangerCandidate: boolean;
+  readonly firstDangerEligibility: string;
+  readonly previousScoreChangeCount: number;
+  readonly previousDangerEventCount: number;
+  readonly narrativeOrderValid: boolean;
+  readonly turningPointOrderWarningCode: string;
+  readonly replacementTitleIfNeeded: string;
+  readonly narrativePriority: number;
   readonly linkedOfficialEventIds: readonly EventId[];
   readonly linkedStoryBeatIds: readonly string[];
   readonly whyItTurned: string;
@@ -153,6 +175,20 @@ export interface OfficialMatchNarrative {
   readonly shortNarrative: string;
   readonly detailedNarrative: string;
   readonly coachFacingNarrative: string;
+  readonly narrativeQualityScore: number;
+  readonly mechanicalSentenceCount: number;
+  readonly repeatedSentenceCount: number;
+  readonly chronologicalContradictionCount: number;
+  readonly scoreContradictionCount: number;
+  readonly firstDangerContradictionCount: number;
+  readonly coachReadableParagraphCount: number;
+  readonly narrativeFlowScore: number;
+  readonly narrativeEmotionScore: number;
+  readonly causalClarityScore: number;
+  readonly metricDumpSentenceCount: number;
+  readonly storyOpening: string;
+  readonly storyMiddle: string;
+  readonly storyEnd: string;
   readonly timelineNarrative: string;
   readonly scoringNarrative: string;
   readonly fatigueNarrative: string;
@@ -177,6 +213,16 @@ export interface OfficialMatchStorySpineModel {
   readonly fatigueCausalityReady: boolean;
   readonly playerImpactReadable: boolean;
   readonly coachReadableNarrativeReady: boolean;
+  readonly storyChronologyReady: boolean;
+  readonly cumulativeScoreReady: boolean;
+  readonly turningPointOrderReady: boolean;
+  readonly narrativeQualityReady: boolean;
+  readonly shortNarrativeQualityReady: boolean;
+  readonly detailedNarrativeQualityReady: boolean;
+  readonly coachFacingNarrativeQualityReady: boolean;
+  readonly mechanicalNarrativeRemoved: boolean;
+  readonly scoreTimelineConsistencyReady: boolean;
+  readonly storyRegressionFixed: boolean;
   readonly reportIntegrationMinimalReady: boolean;
   readonly matchEconomyBaselinePreserved: boolean;
   readonly guardrailsPreserved: boolean;

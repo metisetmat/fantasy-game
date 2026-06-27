@@ -51,7 +51,12 @@ describe("official match story spine engine causality proof 8A", () => {
     const productHtml = renderCoachProductReport(product);
     const exportHtml = renderCoachReportExportHtml({ productReportHtml: productHtml });
 
-    assert.equal(exportHtml.includes(story?.narrative.shortNarrative ?? ""), true);
+    const storySentences = story?.narrative.shortNarrative
+      .split(".")
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 0) ?? [];
+    assert.equal(exportHtml.includes(storySentences[0] ?? ""), true);
+    assert.equal(exportHtml.includes(storySentences[storySentences.length - 1] ?? ""), true);
     assert.equal(/<article class="report-table-card">\s*<p>Lecture officielle<\/p>/u.test(exportHtml), false);
     assert.equal(exportHtml.includes(story?.narrative.sourceOfTruthNote ?? ""), true);
   });

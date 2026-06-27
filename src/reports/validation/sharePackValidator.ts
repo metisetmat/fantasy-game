@@ -377,6 +377,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReportExportLengthTrendCountCleanup7HValidation = readIfExists(join(shareDirectory, "validation.coach-report-export-length-trend-count-cleanup-7h.md"));
   const officialMatchStorySpineEngineCausalityProof8A = readIfExists(join(shareDirectory, "official-match-story-spine-engine-causality-proof-8a.md"));
   const officialMatchStorySpineEngineCausalityProof8AValidation = readIfExists(join(shareDirectory, "validation.official-match-story-spine-engine-causality-proof-8a.md"));
+  const matchStoryChronologyCumulativeScoreNarrativeQualityFix8B = readIfExists(join(shareDirectory, "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"));
+  const matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation = readIfExists(join(shareDirectory, "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3293,6 +3295,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "coach-report-export-length-trend-count-cleanup-7h.md",
     "validation.coach-report-export-length-trend-count-cleanup-7h.md",
   ];
+  const sprint8BExpectedFiles = sprint8AExpectedFiles.map((file) =>
+    file === "official-match-story-spine-engine-causality-proof-8a.md"
+      ? "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"
+      : file === "validation.official-match-story-spine-engine-causality-proof-8a.md"
+        ? "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"
+        : file
+  );
+  const sprint8BForbiddenLeftovers = [
+    "official-match-story-spine-engine-causality-proof-8a.md",
+    "validation.official-match-story-spine-engine-causality-proof-8a.md",
+    ...sprint8AForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4648,6 +4662,39 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 8A source files", bundleReports.includes("src/reports/officialMatchStorySpineEngineCausalityProof8A.ts") && bundleReports.includes("src/reports/buildOfficialMatchStorySpine.ts") && bundleReports.includes("src/reports/engineCausalityProofAudit.ts") && bundleReports.includes("src/reports/officialStorySourceOfTruthAudit.ts") && bundleReports.includes("src/reports/reportConsumptionReadinessAudit.ts"), "8A source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8BChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8BExpectedFiles.every((file) => requiredCopied(file)), sprint8BExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8BExpectedFiles.every((file) => manifest.includes(file)), sprint8BExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8B", activeConfig.sprintName === "Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8BForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8BForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8B oriented", readme.includes("# Sprint 8B Share Pack") && readme.includes("match-story-chronology-cumulative-score-narrative-quality-fix-8b.md") && readme.includes("cumulative segment scores"), "README current"),
+    check("8B report included", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("# Match Story Chronology, Cumulative Score & Narrative Quality Fix 8B") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("Chronology Audit") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("Narrative Quality Audit"), "8B doc included"),
+    check("8B validation is PASS", matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("Status: PASS") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("OfficialMatchStoryChronologyNarrativeQualityFixModel exists"), "8B validation current"),
+    check("baseline 8A visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("baselineVersion: OFFICIAL_MATCH_STORY_SPINE_ENGINE_CAUSALITY_PROOF_8A") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("baseline 8A visible"), "8A baseline visible"),
+    check("baseline 7H visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("7H export length/trend count cleanup") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("baseline 7H preserved"), "7H baseline visible"),
+    check("baseline 6X visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("6X match economy") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("baseline 6X match economy preserved"), "6X baseline visible"),
+    check("chronology audit visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("storySegmentsChronological") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("story segments chronological"), "chronology visible"),
+    check("cumulative score audit visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("finalCumulativeScoreMatchesOfficial") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("final cumulative score matches official score"), "cumulative score visible"),
+    check("turning point order audit visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("firstRealDangerTitleValid") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("no invalid first danger label"), "turning points visible"),
+    check("narrative quality audit visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("mechanicalSentenceCount") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("mechanical sentence count = 0"), "narrative quality visible"),
+    check("source-of-truth regression audit visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("storyUsesOfficialTimelineOnly") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("story uses official timeline only"), "source of truth visible"),
+    check("report integration regression audit visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("exportReadTimeSecondsAfter8B") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("export remains under 900 seconds"), "report integration visible"),
+    check("corrected segments visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("Corrected Story Segments") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("score cumule"), "corrected segments visible"),
+    check("corrected turning points visible", matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("Corrected Turning Points") && !matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.includes("Premier vrai danger officiel |"), "corrected turning points visible"),
+    check("product official story section visible", coachProductHtml.includes('id="official-match-story-spine"') && coachProductHtml.includes("R&eacute;cit officiel du match"), "product story visible"),
+    check("export official story section visible", coachExportHtml.includes('id="official-match-story-spine"') && (coachExportHtml.includes("R&eacute;cit du match en 45 secondes") || coachExportHtml.includes("Recit du match en 45 secondes")), "export story visible"),
+    check("story is not a season narrative", !coachProductHtml.includes("season narrative") && !coachExportHtml.includes("season narrative") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("no new season memory"), "no season layer"),
+    check("story is not team style memory", !coachProductHtml.includes("team style memory") && !coachExportHtml.includes("team style memory") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("no new team style memory"), "no style memory"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8B source files", bundleReports.includes("src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.ts") && bundleReports.includes("src/reports/repairOfficialMatchStoryChronology.ts") && bundleReports.includes("src/reports/matchStoryChronologyAudit.ts") && bundleReports.includes("src/reports/matchStoryCumulativeScoreAudit.ts") && bundleReports.includes("src/reports/matchStoryNarrativeQualityAudit.ts"), "8B source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8718,6 +8765,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8B - Match Story Chronology")
+      ? sprint8BChecks
     : activeConfig.sprintName.includes("Sprint 8A - Official Match Story Spine")
       ? sprint8AChecks
     : activeConfig.sprintName.includes("Sprint 7H - Export Length")
