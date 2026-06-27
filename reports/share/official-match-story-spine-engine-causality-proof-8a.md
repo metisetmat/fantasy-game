@@ -70,7 +70,7 @@
 | product story section visible | true |
 | export story section visible | true |
 | export compact story visible | true |
-| export read time seconds after 8A | 871 |
+| export read time seconds after 8A | 892 |
 | story spine serializable | true |
 | stable ids | true |
 | event links | true |

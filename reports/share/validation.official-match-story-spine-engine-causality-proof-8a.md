@@ -28,7 +28,7 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 - PASS: product official story section visible - true
 - PASS: export official story section visible - true
 - PASS: export compact 45-second story visible - true
-- PASS: export remains under hard limit - 871
+- PASS: export remains under hard limit - 892
 - PASS: report consumption ready - READY_FOR_MINIMAL_REPORT_CONSUMPTION
 - PASS: source-of-truth separation preserved - true
 - PASS: guardrails preserved - true
@@ -47,5 +47,5 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 - score changes covered: 6/6
 - unsupported narrative claims: 0
 - unsupported causality claims: 0
-- exportReadTimeSecondsAfter8A: 871
+- exportReadTimeSecondsAfter8A: 892
 - recommendation: KEEP_OFFICIAL_MATCH_STORY_SPINE

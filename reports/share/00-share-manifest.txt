@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-27T15:38:52.265Z
+Generated timestamp: 2026-06-27T16:27:59.299Z
 Task/sprint name: Sprint 8A - Official Match Story Spine & Engine Causality Proof
 Final file count: 20
 
@@ -964,21 +964,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/buildCoachProductReportView.ts
- M src/reports/coachProductReportView.ts
- M src/reports/renderCoachProductReport.ts
+ M src/reports/officialMatchStorySpineEngineCausalityProof8A.test.ts
  M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildOfficialMatchStoryNarrative.ts
-?? src/reports/buildOfficialMatchStorySpine.ts
-?? src/reports/engineCausalityProofAudit.ts
-?? src/reports/matchStoryReadabilityAudit.ts
-?? src/reports/officialMatchStorySpineAudit.ts
-?? src/reports/officialMatchStorySpineEngineCausalityProof8A.test.ts
-?? src/reports/officialMatchStorySpineEngineCausalityProof8A.ts
-?? src/reports/officialMatchStorySpineEngineCausalityProofWarnings.ts
-?? src/reports/officialMatchStorySpineTypes.ts
-?? src/reports/officialStorySourceOfTruthAudit.ts
-?? src/reports/reportConsumptionReadinessAudit.ts

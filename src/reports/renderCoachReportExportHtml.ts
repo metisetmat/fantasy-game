@@ -1434,11 +1434,23 @@ function renderOfficialMatchStorySpineExport(html: string): string {
   if (body.length === 0) {
     return "";
   }
-  const paragraphs = [...body.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/giu)]
-    .map((match) => stripTags(match[1] ?? ""))
-    .filter((text) => text.length > 0);
-  const shortNarrative = paragraphs[0] ?? "Le recit officiel du match reste disponible dans le rapport produit.";
-  const sourceNote = paragraphs.find((text) => /timeline officielle|score_change|lecture officielle/iu.test(text)) ??
+  const paragraphs = [...body.matchAll(/<p\b([^>]*)>([\s\S]*?)<\/p>/giu)]
+    .map((match) => ({
+      attributes: match[1] ?? "",
+      text: stripTags(match[2] ?? ""),
+    }))
+    .filter((paragraph) => paragraph.text.length > 0);
+  const narrativeParagraphs = paragraphs.filter((paragraph) =>
+    !/class=["'][^"']*\bcard-kicker\b/iu.test(paragraph.attributes) &&
+    !/class=["'][^"']*\bguard\b/iu.test(paragraph.attributes) &&
+    !/^lecture officielle$/iu.test(paragraph.text)
+  );
+  const guardParagraph = paragraphs.find((paragraph) => /class=["'][^"']*\bguard\b/iu.test(paragraph.attributes));
+  const shortNarrative = narrativeParagraphs.find((paragraph) => paragraph.text.length >= 40)?.text ??
+    narrativeParagraphs[0]?.text ??
+    "Le recit officiel du match reste disponible dans le rapport produit.";
+  const sourceNote = guardParagraph?.text ??
+    paragraphs.find((paragraph) => /timeline officielle|score_change|evidence facts/iu.test(paragraph.text))?.text ??
     "Score et recit viennent des evenements officiels.";
   const turningPoints = [...body.matchAll(/<h4\b[^>]*>([\s\S]*?)<\/h4>/giu)]
     .map((match) => stripTags(match[1] ?? ""))
