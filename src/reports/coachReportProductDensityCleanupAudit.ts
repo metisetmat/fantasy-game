@@ -45,7 +45,7 @@ function visibleReadTimeSeconds(html: string): number {
 function countTechnicalSections(html: string): number {
   return [...mainBody(html).matchAll(/<section\b([^>]*)>([\s\S]*?)<\/section>/giu)]
     .filter((match) => /\bid="/iu.test(match[1] ?? ""))
-    .filter((match) => !/id="(?:express-read|executive-summary|coach-action-plan|tactical-map-cards|training-focus-package|next-match-plan|key-coach-signals|profiles-to-observe|players-to-study|next-match-signals|official-match-reading|coach-deep-insights|training-focus|interpretation-guard|guardrail-summary|cover)"/iu.test(match[1] ?? ""))
+    .filter((match) => !/id="(?:express-read|executive-summary|coach-action-plan|tactical-map-cards|multi-match-trend-signals|training-focus-package|next-match-plan|key-coach-signals|profiles-to-observe|players-to-study|next-match-signals|official-match-reading|coach-deep-insights|training-focus|interpretation-guard|guardrail-summary|cover)"/iu.test(match[1] ?? ""))
     .filter((match) => /database|sqlite|migration|adapter|persistent|persistence|history consistency|score economy|scoring family|calibration|reconciliation/iu.test(match[0]))
     .length;
 }

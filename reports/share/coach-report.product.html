@@ -72,6 +72,11 @@
     .tactical-map-zone--high { box-shadow: inset 0 0 0 2px rgba(31, 111, 139, .2); }
     .tactical-map-zone--empty { color: var(--muted); background: var(--soft); border-style: dashed; }
     .tactical-map-legend { color: var(--muted); font-size: .9rem; }
+    .trend-signals-section { margin-top: 20px; }
+    .trend-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .trend-card { background: #fbfdff; break-inside: avoid; }
+    .trend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .trend-grid section { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--soft); }
     .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
     .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
     .appendix summary { cursor: pointer; font-weight: 700; }
@@ -83,8 +88,9 @@
       .express-score { text-align: left; margin-top: 10px; }
       .express-grid { grid-template-columns: 1fr; }
       .tactical-map-card-grid { grid-template-columns: 1fr; }
+      .trend-card-grid, .trend-grid { grid-template-columns: 1fr; }
       .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
-      .product-card, .express-read, .tactical-map-card { overflow-wrap: anywhere; }
+      .product-card, .express-read, .tactical-map-card, .trend-card { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
@@ -321,6 +327,73 @@
       <p><strong>Signal prochain match :</strong> L&#39;equipe garde-t-elle sa structure après action neutralisee ?</p>
       <p class="tactical-map-legend"><strong>Legende :</strong> Orange = instabilite ; Carte vide = signal insuffisant</p>
       <p class="guard">Carte volontairement prudente si les zones instables ne sont pas assez solides.</p>
+    </article>
+    </div>
+  </section>
+
+  
+  <section id="multi-match-trend-signals" class="product-section trend-signals-section">
+    <h2>Tendances a confirmer</h2>
+    <p class="muted">Mini-comparaison prudente: historique d&#39;observation local, 6 echantillons disponibles. Comparaison locale sur les echantillons disponibles; pas une conclusion generale.</p>
+    <div class="interpretation-guard">
+      <p>Ces tendances ne remplacent pas la lecture officielle du match courant et ne changent ni score, ni selection, ni moteur live.</p>
+      <p>Chaque tendance reste une piste d'observation a verifier au prochain match.</p>
+    </div>
+    <div class="trend-card-grid">
+      
+    <article class="product-card trend-card" data-trend-id="trend-danger-zone-returns" data-trend-type="repeated" data-source-type="official" data-linked-tactical-map-card-ids="tactical-map-danger-zones" data-linked-action-plan-card-ids="action-card-danger-to-continuity">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance haute</span>
+        <span class="badge">signal repete localement</span>
+      </div>
+      <p class="card-kicker">Tendance a confirmer</p>
+      <h3>Zone de danger qui revient</h3>
+      <div class="trend-grid">
+        <section>
+          <h4>Observation</h4>
+          <p>Signal a confirmer: Z5-C, Z3-C, Z2-C revient sur les echantillons disponibles.</p>
+          <p class="muted">Zones: Z5-C, Z3-C, Z2-C</p>
+        </section>
+        <section>
+          <h4>Ce que le coach retient</h4>
+          <p>Cette zone merite d&#39;etre surveillee, pas forcee.</p>
+          <p>Si elle produit une deuxieme action controlee, le plan d&#39;action gagne en lisibilite.</p>
+        </section>
+        <section>
+          <h4>A verifier</h4>
+          <p>A verifier au prochain match: la zone produit-elle encore une deuxieme action controlee ?</p>
+        </section>
+      </div>
+      <p class="guard">Comparaison locale sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant.</p>
+      <p class="muted">Historique d&#39;observation officiel, sans effet sur le score ni le moteur live. Echantillons: 4/6; absences: 2; instable: 1; insuffisant: 0.</p>
+    </article>
+    <article class="product-card trend-card" data-trend-id="trend-last-line-rebound-volume" data-trend-type="insufficient_data" data-source-type="official" data-linked-tactical-map-card-ids="tactical-map-pressure-continuity" data-linked-action-plan-card-ids="action-card-structure-after-pressure">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance faible</span>
+        <span class="badge">donnee insuffisante</span>
+      </div>
+      <p class="card-kicker">Tendance a confirmer</p>
+      <h3>Dernier rempart / rebond encore insuffisant</h3>
+      <div class="trend-grid">
+        <section>
+          <h4>Observation</h4>
+          <p>Donnee insuffisante: pas assez de volume stabilise pour conclure.</p>
+          <p class="muted">Zones: Z3-C, Z5-C, Z5-HSR</p>
+        </section>
+        <section>
+          <h4>Ce que le coach retient</h4>
+          <p>Garder le signal en observation sans l&#39;utiliser comme instruction.</p>
+          <p>Le dernier rempart, les rebonds et les securisations doivent se confirmer sur plusieurs matchs.</p>
+        </section>
+        <section>
+          <h4>A verifier</h4>
+          <p>A verifier au prochain match: interventions, rebonds et securisations restent-ils propres ?</p>
+        </section>
+      </div>
+      <p class="guard">Insuffisant sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant.</p>
+      <p class="muted">Historique d&#39;observation officiel, volume encore trop faible. Echantillons: 1/6; absences: 5; instable: 1; insuffisant: 5.</p>
     </article>
     </div>
   </section>

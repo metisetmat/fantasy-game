@@ -63,6 +63,7 @@ const coachSectionIds = new Set([
   "executive-summary",
   "coach-action-plan",
   "tactical-map-cards",
+  "multi-match-trend-signals",
   "training-focus-package",
   "next-match-plan",
   "key-coach-signals",
@@ -110,8 +111,9 @@ function classifySection(match: RegExpMatchArray, inMainBody: boolean): CoachRep
   const title = sectionTitle(body);
   const haystack = `${id} ${title} ${body}`;
   const coachFacing = coachSectionIds.has(id);
+  const allowedTrendHistorySection = id === "multi-match-trend-signals";
   const containsDatabaseDetails = /database|sqlite|adapter/iu.test(haystack);
-  const containsPersistenceDetails = /persistent|persistence|history store|match history|historique/iu.test(haystack);
+  const containsPersistenceDetails = !allowedTrendHistorySection && /persistent|persistence|history store|match history|historique/iu.test(haystack);
   const containsCalibrationHistory = !coachFacing && /calibration|reconciliation|score economy|scoring family/iu.test(haystack);
   const containsScoringDiagnostics = /scoring|score_change|SHOT_GOAL|TRY_TOUCHDOWN|DROP_GOAL|CONVERSION_GOAL/iu.test(haystack);
   const containsTechnicalDetails = containsDatabaseDetails || containsPersistenceDetails || containsCalibrationHistory || (!coachFacing && /diagnostic|sandbox|validation|guardrail/iu.test(haystack));

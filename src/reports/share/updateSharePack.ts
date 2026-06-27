@@ -125,6 +125,8 @@ import {
   renderCoachReportPhaseVisualsTacticalMapCards7EValidation,
   renderProductReportScopeDensityWordingCleanup7FDoc,
   renderProductReportScopeDensityWordingCleanup7FValidation,
+  renderCoachReportMultiMatchComparisonTrendSignals7GDoc,
+  renderCoachReportMultiMatchComparisonTrendSignals7GValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -138,10 +140,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7F - Product Report Scope, Density & Wording Cleanup";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "product-report-scope-density-wording-cleanup-7f.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-multi-match-comparison-trend-signals-7g.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.product-report-scope-density-wording-cleanup-7f.md";
+  "validation.coach-report-multi-match-comparison-trend-signals-7g.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2782,6 +2784,61 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7F executable test proving scope cleanup PASS status and coach-only main body counters",
       },
       {
+        source: "src/reports/coachReportMultiMatchTrendSignals.ts",
+        required: true,
+        reason: "Sprint 7G coach trend card types, builder, and product/export section renderer",
+      },
+      {
+        source: "src/reports/coachReportMultiMatchComparisonTrendSignalsWarnings.ts",
+        required: true,
+        reason: "Sprint 7G warning-code registry for prudent multi-match trend signals and source-of-truth boundaries",
+      },
+      {
+        source: "src/reports/coachReport7GBaselineMetadataRepairAudit.ts",
+        required: true,
+        reason: "Sprint 7G baseline metadata audit proving 7A checks are PASS or explicitly explained",
+      },
+      {
+        source: "src/reports/coachReportTemplatePlaceholderCleanupAudit.ts",
+        required: true,
+        reason: "Sprint 7G placeholder cleanup audit proving no visible template placeholders remain",
+      },
+      {
+        source: "src/reports/coachReportMultiMatchTrendSignalsAudit.ts",
+        required: true,
+        reason: "Sprint 7G trend-signal audit proving 1-3 cards, source badges, next-match checks, and no overclaiming",
+      },
+      {
+        source: "src/reports/coachReportTrendPrudenceAudit.ts",
+        required: true,
+        reason: "Sprint 7G trend-prudence audit preventing local history from becoming official truth or forced selection",
+      },
+      {
+        source: "src/reports/coachReportHistoryScopeAudit.ts",
+        required: true,
+        reason: "Sprint 7G history-scope audit keeping DB, persistence, calibration, and record dumps out of the coach body",
+      },
+      {
+        source: "src/reports/coachReport7GDensityRegressionAudit.ts",
+        required: true,
+        reason: "Sprint 7G density regression audit keeping the product/export report within the 7F visual density envelope",
+      },
+      {
+        source: "src/reports/coachReportMultiMatchSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 7G multi-match source-of-truth audit proving trends do not replace the official match reading",
+      },
+      {
+        source: "src/reports/coachReportMultiMatchComparisonTrendSignals7G.ts",
+        required: true,
+        reason: "Sprint 7G model, report renderer, and validation renderer for coach-readable trend signals",
+      },
+      {
+        source: "src/reports/coachReportMultiMatchComparisonTrendSignals7G.test.ts",
+        required: true,
+        reason: "Sprint 7G executable test proving PASS status, no placeholders, no overclaiming, and preserved source boundaries",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -4938,6 +4995,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 7G")) {
+    return renderCoachReportMultiMatchComparisonTrendSignals7GDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7F")) {
     return renderProductReportScopeDensityWordingCleanup7FDoc(fullMatchTraceValidationModel());
   }
@@ -7246,6 +7306,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 7G")) {
+    return renderCoachReportMultiMatchComparisonTrendSignals7GValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7F")) {
     return renderProductReportScopeDensityWordingCleanup7FValidation(fullMatchTraceValidationModel());
   }
@@ -9500,6 +9563,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 7G")) {
+    return [
+      "# Sprint 7G Share Pack",
+      "",
+      "Current sprint: Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals",
+      "",
+      "## Purpose",
+      "This pack proves the coach product/export report now includes prudent multi-match trend signals while preserving the 7F clean coach scope, 7E tactical map cards, source-of-truth guardrails, and unchanged scoring.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- coach-report-multi-match-comparison-trend-signals-7g.md",
+      "- validation.coach-report-multi-match-comparison-trend-signals-7g.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-multi-match-comparison-trend-signals-7g.md",
+      "3. coach-report-multi-match-comparison-trend-signals-7g.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "7G is presentation-only: trends are local observation aids. They do not change scoring constants, score_change events, match mechanics, route selection, MatchBonusEvent, persistence/SQLite scoring boundaries, sandbox application, or batch-as-official-score boundaries.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7F")) {
     return [
       "# Sprint 7F Share Pack",

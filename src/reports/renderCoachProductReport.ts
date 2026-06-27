@@ -25,6 +25,11 @@ import {
   buildCoachTacticalMapCardsFromProductReport,
   renderCoachTacticalMapCardsSection,
 } from "./coachReportTacticalMapCards";
+import {
+  buildCoachMultiMatchTrendSummary,
+  buildCoachTrendSignalCardsFromProductReport,
+  renderCoachMultiMatchTrendSignalsSection,
+} from "./coachReportMultiMatchTrendSignals";
 import { escapeHtml } from "./htmlCoachReport";
 import {
   candidateDisplayPriorityLabel,
@@ -333,6 +338,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   const actionPlanCards = buildCoachActionPlanCards(deepInsights);
   const trainingFocuses = buildTrainingFocusPackages(actionPlanCards);
   const tacticalMapCards = buildCoachTacticalMapCardsFromProductReport(model);
+  const trendSignalCards = buildCoachTrendSignalCardsFromProductReport(model, tacticalMapCards);
+  const trendSummary = buildCoachMultiMatchTrendSummary(trendSignalCards);
   const primaryActionCard = actionPlanCards[0];
   const primarySignal = model.nextMatchSignals[0] ?? model.keyCoachSignals[0]?.summary ?? "Signal a confirmer au prochain match.";
   const primaryRisk = primaryActionCard?.riskOrTradeoff ?? "Risque a surveiller: ne pas transformer un signal en consigne automatique.";
@@ -411,6 +418,11 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .tactical-map-zone--high { box-shadow: inset 0 0 0 2px rgba(31, 111, 139, .2); }
     .tactical-map-zone--empty { color: var(--muted); background: var(--soft); border-style: dashed; }
     .tactical-map-legend { color: var(--muted); font-size: .9rem; }
+    .trend-signals-section { margin-top: 20px; }
+    .trend-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .trend-card { background: #fbfdff; break-inside: avoid; }
+    .trend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .trend-grid section { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--soft); }
     .interpretation-guard { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; padding: 16px; }
     .appendix { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: var(--paper); }
     .appendix summary { cursor: pointer; font-weight: 700; }
@@ -422,8 +434,9 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
       .express-score { text-align: left; margin-top: 10px; }
       .express-grid { grid-template-columns: 1fr; }
       .tactical-map-card-grid { grid-template-columns: 1fr; }
+      .trend-card-grid, .trend-grid { grid-template-columns: 1fr; }
       .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
-      .product-card, .express-read, .tactical-map-card { overflow-wrap: anywhere; }
+      .product-card, .express-read, .tactical-map-card, .trend-card { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
@@ -471,6 +484,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   ${renderCoachActionPlanCards(actionPlanCards)}
 
   ${renderCoachTacticalMapCardsSection(tacticalMapCards)}
+
+  ${renderCoachMultiMatchTrendSignalsSection({ summary: trendSummary, cards: trendSignalCards })}
 
   ${renderTrainingFocusPackage(trainingFocuses)}
 

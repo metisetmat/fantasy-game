@@ -24,6 +24,10 @@ function mainBody(html: string): string {
   return stripDetails(html).replace(/<section\s+id="appendices"[\s\S]*?(?=<\/main>|$)/giu, "");
 }
 
+function stripAllowedTrendSection(html: string): string {
+  return html.replace(/<section\s+id="multi-match-trend-signals"[\s\S]*?<\/section>/giu, "");
+}
+
 function countSections(html: string, pattern: RegExp): number {
   return [...html.matchAll(/<section\b([^>]*)>([\s\S]*?)<\/section>/giu)]
     .filter((match) => /\bid="/iu.test(match[1] ?? ""))
@@ -35,12 +39,13 @@ export function auditCoachReportCoachExportScope(input: {
   readonly exportReportHtml: string;
 }): CoachReportCoachExportScopeAudit {
   const exportMain = mainBody(input.exportReportHtml);
+  const exportMainForTechnicalScope = stripAllowedTrendSection(exportMain);
   const exportAppendix = input.exportReportHtml.replace(exportMain, "");
-  const exportDatabaseSectionsCount = countSections(exportMain, /database|sqlite|adapter/iu);
-  const exportPersistenceSectionsCount = countSections(exportMain, /persistent|persistence|history store|match history|historique/iu);
-  const exportCalibrationSectionsCount = countSections(exportMain, /calibration|reconciliation|score economy|scoring family/iu);
+  const exportDatabaseSectionsCount = countSections(exportMainForTechnicalScope, /database|sqlite|adapter/iu);
+  const exportPersistenceSectionsCount = countSections(exportMainForTechnicalScope, /persistent|persistence|history store|match history|historique/iu);
+  const exportCalibrationSectionsCount = countSections(exportMainForTechnicalScope, /calibration|reconciliation|score economy|scoring family/iu);
   const exportDeveloperSectionsCount = exportDatabaseSectionsCount + exportPersistenceSectionsCount + exportCalibrationSectionsCount;
-  const exportTechnicalSectionsCount = countSections(exportMain, /technical|validation|database|sqlite|migration|adapter|persistent|persistence|calibration|reconciliation/iu);
+  const exportTechnicalSectionsCount = countSections(exportMainForTechnicalScope, /technical|validation|database|sqlite|migration|adapter|persistent|persistence|calibration|reconciliation/iu);
   const exportAppendixTechnicalSectionsCount = countSections(exportAppendix, /technical|validation|database|sqlite|migration|adapter|persistent|persistence|calibration|reconciliation/iu);
   const exportCoachSectionsCount = Math.max(0, [...exportMain.matchAll(/<section\b[^>]*\bid="/giu)].length - exportDeveloperSectionsCount);
   const exportPrintable = input.exportReportHtml.includes("@media print") && input.exportReportHtml.includes("break-inside: avoid");
