@@ -136,6 +136,10 @@ import {
   renderCoachReportMultiMatchComparisonTrendSignals7GDoc as renderCoachReportMultiMatchComparisonTrendSignals7GDocBase,
   renderCoachReportMultiMatchComparisonTrendSignals7GValidation as renderCoachReportMultiMatchComparisonTrendSignals7GValidationBase,
 } from "../../reports/coachReportMultiMatchComparisonTrendSignals7G";
+import {
+  renderCoachReportExportLengthTrendCountCleanup7HDoc as renderCoachReportExportLengthTrendCountCleanup7HDocBase,
+  renderCoachReportExportLengthTrendCountCleanup7HValidation as renderCoachReportExportLengthTrendCountCleanup7HValidationBase,
+} from "../../reports/coachReportExportLengthTrendCountCleanup7H";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6609,6 +6613,18 @@ export function renderCoachReportMultiMatchComparisonTrendSignals7GValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportMultiMatchComparisonTrendSignals7GValidationBase();
+}
+
+export function renderCoachReportExportLengthTrendCountCleanup7HDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportExportLengthTrendCountCleanup7HDocBase();
+}
+
+export function renderCoachReportExportLengthTrendCountCleanup7HValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportExportLengthTrendCountCleanup7HValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

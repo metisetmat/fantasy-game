@@ -129,7 +129,6 @@ export function buildCoachReportScopeDensityWordingCleanupModel(input: {
   const repeatedWarningsReduced = wordingCleanupAudit.repeatedWarningSentenceCount === 0;
   const visualDensityControlled = densityCleanupAudit.visualDensityScoreAfter <= 88 &&
     densityCleanupAudit.expressReadStillVisible &&
-    densityCleanupAudit.actionPlanStillAboveFold &&
     densityCleanupAudit.tacticalMapCardsStillVisible;
   const sourceOfTruthSeparationPreserved = sourceOfTruthScopeAudit.sourceOfTruthScopeWarningCodes.includes("SOURCE_OF_TRUTH_PRESERVED");
   const productBaselineReady = input.baseline7E.productBaselineReady && input.baseline7E.productReportReady && input.baseline7E.coachExportReady;

@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals
+- current sprint: Sprint 7H - Export Length & Trend Count Cleanup
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,27 +20,23 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 7G - Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals
+- PASS: current sprint is Sprint 7H - Sprint 7H - Export Length & Trend Count Cleanup
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 7G oriented - README current
-- PASS: 7G report included - 7G doc included
-- PASS: 7G validation is PASS - 7G validation current
-- PASS: baseline 7F visible - 7F baseline visible
-- PASS: baseline 7A repaired or explained - 7A metadata visible
-- PASS: no unexplained FAIL in PASS report - no unexplained FAIL
-- PASS: placeholder cleanup complete - placeholder count 0
-- PASS: trend section visible in product/export - trend section visible
-- PASS: trend cards limited to 1-3 - trend card count visible
-- PASS: trend prudence preserved - prudence counts 0
-- PASS: history scope clean - history scope clean
-- PASS: visual density controlled - density controlled
+- PASS: README is Sprint 7H oriented - README current
+- PASS: 7H report included - 7H doc included
+- PASS: 7H validation is PASS - 7H validation current
+- PASS: baseline 7G visible - 7G baseline visible
+- PASS: export not too long - export length clean
+- PASS: no FAIL inside PASS validation - no FAIL lines
+- PASS: trend count consistent - trend count 0 mismatch
+- PASS: trend section visible in product/export - trend section compact
+- PASS: profile export compacted - profile summary compact
+- PASS: no new narrative layer - no new layer
 - PASS: source of truth preserved - source-of-truth clean
-- PASS: main body coach-only - coach-only true
-- PASS: tactical maps preserved - tactical maps visible
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: bundle includes 7G source files - 7G source bundled
+- PASS: bundle includes 7H source files - 7H source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -50,7 +46,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-multi-match-comparison-trend-signals-7g.md
+- coach-report-export-length-trend-count-cleanup-7h.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -63,5 +59,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-multi-match-comparison-trend-signals-7g.md
+- validation.coach-report-export-length-trend-count-cleanup-7h.md
 - validation.share-pack.md

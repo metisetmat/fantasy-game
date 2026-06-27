@@ -1529,6 +1529,27 @@ function renderMultiMatchTrendSignalsExport(html: string): string {
   if (body.length === 0) {
     return "";
   }
+  const cardBlocks = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)].map((match) => match[0]).slice(0, 3);
+  const compactCards = cardBlocks.length === 0
+    ? body
+    : cardBlocks.map((card) => {
+      const title = stripTags((card.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/iu) ?? [])[1] ?? "Tendance a confirmer");
+      const badges = [...card.matchAll(/<span\b[^>]*class="badge"[^>]*>([\s\S]*?)<\/span>/giu)]
+        .map((match) => stripTags(match[1] ?? ""))
+        .slice(0, 3);
+      const check = stripTags((card.match(/<h4>\s*A verifier\s*<\/h4>\s*<p>([\s\S]*?)<\/p>/iu) ?? [])[1] ?? "A verifier au prochain match.");
+      const guard = stripTags((card.match(/<p\b[^>]*class="guard"[^>]*>([\s\S]*?)<\/p>/iu) ?? [])[1] ?? "Ne remplace pas le score officiel.");
+      const sample = stripTags((card.match(/<p\b[^>]*class="muted"[^>]*>([\s\S]*?Echantillons[\s\S]*?)<\/p>/iu) ?? [])[1] ?? "Echantillons courant: 1/1.");
+
+      return `
+      <article class="product-card trend-card trend-card-compact">
+        <h3>${escapeHtml(title)}</h3>
+        <p class="muted">${escapeHtml(badges.join(" - "))}</p>
+        <p>${escapeHtml(check)}</p>
+        <p class="guard">${escapeHtml(guard)}</p>
+        <p class="muted">${escapeHtml(sample)}</p>
+      </article>`;
+    }).join("\n");
 
   return `
   <section id="multi-match-trend-signals" class="premium-section" data-source-product-sections="multi-match-trend-signals">
@@ -1539,7 +1560,9 @@ function renderMultiMatchTrendSignalsExport(html: string): string {
         <p>Comparaison locale prudente: observation seulement, sans effet sur score, selection ou moteur live.</p>
       </div>
     </div>
-    ${body}
+    <div class="trend-card-grid trend-card-grid-compact">
+      ${compactCards}
+    </div>
   </section>`;
 }
 
@@ -4264,6 +4287,20 @@ function renderPersistentHistoryAdapter(
 function renderProfilesAndPlayers(html: string): string {
   const profilesBody = extractSectionInner(html, "profiles-to-observe");
   const playersBody = extractSectionInner(html, "players-to-study");
+  const profileTitles = [...profilesBody.matchAll(/<h3\b[^>]*>([\s\S]*?)<\/h3>/giu)]
+    .map((match) => stripTags(match[1] ?? ""))
+    .filter((title) => title.length > 0)
+    .slice(0, 3);
+  const playerTitles = [...playersBody.matchAll(/<h3\b[^>]*>([\s\S]*?)<\/h3>/giu)]
+    .map((match) => stripTags(match[1] ?? ""))
+    .filter((title) => title.length > 0)
+    .slice(0, 3);
+  const profileSummary = profileTitles.length === 0
+    ? "Profils a observer: lecture non appliquee."
+    : `Profils a observer: ${profileTitles.join(", ")}.`;
+  const playerSummary = playerTitles.length === 0
+    ? "Joueurs a etudier: aucun choix applique."
+    : `Joueurs a etudier: ${playerTitles.join(", ")}.`;
 
   return `
   <section id="profiles-and-players" class="premium-section" data-source-product-sections="profiles-to-observe|players-to-study">
@@ -4271,19 +4308,17 @@ function renderProfilesAndPlayers(html: string): string {
     <div class="report-section-header">
       <div>
         <h2>Profils et joueurs &agrave; &eacute;tudier</h2>
-        <p>Les profils et les candidats restent des pistes d'observation, jamais des choix appliqu&eacute;s.</p>
+        <p>R&eacute;sum&eacute; compact: pistes d'observation uniquement, jamais des choix appliqu&eacute;s.</p>
       </div>
     </div>
-    <div class="report-player-study-grid">
-      <article class="report-table-card report-player-study">
-        <h3>Profils &agrave; observer</h3>
-        ${profilesBody}
-      </article>
-      <article class="report-table-card report-player-study">
-        <h3>Joueurs &agrave; &eacute;tudier</h3>
-        ${playersBody}
-      </article>
-    </div>
+    <article class="report-table-card report-player-study compact-profile-summary">
+      <h3>R&eacute;sum&eacute; compact</h3>
+      <p>${escapeHtml(profileSummary)}</p>
+      <p>${escapeHtml(playerSummary)}</p>
+      <p>Les rapprochements profil-joueur ne sont pas des choix de composition.</p>
+      <p>Les cartes comparent des pistes d'observation. Elles ne changent ni la composition, ni le banc.</p>
+      <p class="guard">Pr&eacute;visualisation non appliqu&eacute;e: ne modifie ni s&eacute;lection, ni score, ni moteur live.</p>
+    </article>
   </section>`;
 }
 
