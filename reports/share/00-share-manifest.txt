@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-27T12:44:09.638Z
+Generated timestamp: 2026-06-27T13:44:43.805Z
 Task/sprint name: Sprint 7H - Export Length & Trend Count Cleanup
 Final file count: 20
 
@@ -954,17 +954,4 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/buildCoachReportExportSnapshot.ts
- M src/reports/productReportScopeDensityWordingCleanup7F.ts
  M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachReport7HSourceOfTruthAudit.ts
-?? src/reports/coachReportExportContentPrioritizationAudit.ts
-?? src/reports/coachReportExportLengthCleanupAudit.ts
-?? src/reports/coachReportExportLengthTrendCountCleanup7H.ts
-?? src/reports/coachReportExportLengthTrendCountCleanupWarnings.ts
-?? src/reports/coachReportNoNewNarrativeLayerAudit.ts
-?? src/reports/coachReportTrendCountConsistencyAudit.ts
-?? src/reports/coachReportValidationStatusConsistencyAudit.ts

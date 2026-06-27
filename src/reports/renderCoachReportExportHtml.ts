@@ -1529,6 +1529,9 @@ function renderMultiMatchTrendSignalsExport(html: string): string {
   if (body.length === 0) {
     return "";
   }
+  const mutedParagraphsWithText = (card: string): readonly string[] => [...card.matchAll(/<p\b[^>]*class="[^"]*\bmuted\b[^"]*"[^>]*>([\s\S]*?)<\/p>/giu)]
+    .map((match) => stripTags(match[1] ?? ""))
+    .filter((text) => text.length > 0);
   const cardBlocks = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)].map((match) => match[0]).slice(0, 3);
   const compactCards = cardBlocks.length === 0
     ? body
@@ -1539,7 +1542,7 @@ function renderMultiMatchTrendSignalsExport(html: string): string {
         .slice(0, 3);
       const check = stripTags((card.match(/<h4>\s*A verifier\s*<\/h4>\s*<p>([\s\S]*?)<\/p>/iu) ?? [])[1] ?? "A verifier au prochain match.");
       const guard = stripTags((card.match(/<p\b[^>]*class="guard"[^>]*>([\s\S]*?)<\/p>/iu) ?? [])[1] ?? "Ne remplace pas le score officiel.");
-      const sample = stripTags((card.match(/<p\b[^>]*class="muted"[^>]*>([\s\S]*?Echantillons[\s\S]*?)<\/p>/iu) ?? [])[1] ?? "Echantillons courant: 1/1.");
+      const sample = mutedParagraphsWithText(card).find((paragraph) => paragraph.includes("Echantillons")) ?? "Echantillons courant: 1/1.";
 
       return `
       <article class="product-card trend-card trend-card-compact">

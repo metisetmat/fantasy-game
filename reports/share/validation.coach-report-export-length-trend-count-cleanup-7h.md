@@ -19,7 +19,7 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 - PASS: trend count consistency audit exists - 3
 - PASS: validation status consistency audit exists - PASS
 - PASS: no-new-layer audit exists - true
-- PASS: exportReadTimeSecondsAfter <= hard limit - 701/1100
+- PASS: exportReadTimeSecondsAfter <= hard limit - 654/1100
 - PASS: exportTooLongAfter = false - false
 - PASS: validation contains no FAIL if status PASS - true
 - PASS: trendSignalCardCountReported equals rendered trend count - 3/3
@@ -48,7 +48,7 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 - PASS: calibration history not in main body - 0
 - PASS: no record dump visible - 0
 - PASS: visual density controlled - true
-- PASS: export not too long - 701
+- PASS: export not too long - 654
 - PASS: no unresolved placeholders - 0
 - PASS: source of truth separation preserved - true
 - PASS: guardrails preserved - true
@@ -65,8 +65,8 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 
 ## Counts
 - exportReadTimeSecondsBefore: 1290
-- exportReadTimeSecondsAfter: 701
-- exportReadTimeDelta: -589
+- exportReadTimeSecondsAfter: 654
+- exportReadTimeDelta: -636
 - trendSignalCardCountReported: 3
 - trendSignalCardCountRendered: 3
 - trendCountMismatchCount: 0

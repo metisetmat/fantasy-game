@@ -29,8 +29,8 @@
 | Metric | Value |
 | --- | --- |
 | exportReadTimeSecondsBefore | 1290 |
-| exportReadTimeSecondsAfter | 701 |
-| exportReadTimeDelta | -589 |
+| exportReadTimeSecondsAfter | 654 |
+| exportReadTimeDelta | -636 |
 | exportLengthTargetSeconds | 900 |
 | exportLengthHardLimitSeconds | 1100 |
 | exportTooLongAfter | false |
