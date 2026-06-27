@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-27T13:44:43.805Z
-Task/sprint: Sprint 7H - Export Length & Trend Count Cleanup
+Generated: 2026-06-27T15:38:52.265Z
+Task/sprint: Sprint 8A - Official Match Story Spine & Engine Causality Proof
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-export-length-trend-count-cleanup-7h.md
-- validation.coach-report-export-length-trend-count-cleanup-7h.md
+- official-match-story-spine-engine-causality-proof-8a.md
+- validation.official-match-story-spine-engine-causality-proof-8a.md
 - README.md
 
 ## Bundle Files

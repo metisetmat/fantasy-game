@@ -301,6 +301,36 @@ function renderExpressRead(input: {
   </section>`;
 }
 
+function renderOfficialMatchStorySpine(model: CoachProductReportViewModel): string {
+  const story = model.officialMatchStorySpine;
+  if (story === undefined) {
+    return "";
+  }
+
+  return `
+  <section id="official-match-story-spine" class="product-section official-story-spine" aria-label="Recit officiel du match">
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">Lecture officielle</p>
+        <h2>R&eacute;cit officiel du match</h2>
+      </div>
+      ${renderBadge(`Score officiel : ${story.officialScore}`)}
+    </div>
+    <article class="product-card official-story-card">
+      <h3>Le match en 45 secondes</h3>
+      <p>${escapeHtml(story.narrative.shortNarrative)}</p>
+      <div class="story-turning-points">
+        ${story.turningPoints.slice(0, 4).map((turningPoint) => `
+          <section>
+            <h4>${escapeHtml(turningPoint.title)}</h4>
+            <p>${escapeHtml(turningPoint.coachMeaning)}</p>
+          </section>`).join("")}
+      </div>
+      <p class="guard">${escapeHtml(story.narrative.sourceOfTruthNote)}</p>
+    </article>
+  </section>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
   const detail = appendix.details !== undefined
     ? appendix.details
@@ -418,6 +448,10 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .tactical-map-zone--high { box-shadow: inset 0 0 0 2px rgba(31, 111, 139, .2); }
     .tactical-map-zone--empty { color: var(--muted); background: var(--soft); border-style: dashed; }
     .tactical-map-legend { color: var(--muted); font-size: .9rem; }
+    .story-head { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+    .official-story-card { border-color: rgba(31, 111, 139, .32); }
+    .story-turning-points { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+    .story-turning-points section { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 11px; }
     .trend-signals-section { margin-top: 20px; }
     .trend-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
     .trend-card { background: #fbfdff; break-inside: avoid; }
@@ -475,6 +509,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     primarySignal,
     primaryRisk,
   })}
+
+  ${renderOfficialMatchStorySpine(model)}
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>

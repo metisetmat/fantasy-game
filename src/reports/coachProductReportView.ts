@@ -4,6 +4,7 @@ import type { PlayerCandidateComparisonViewModel } from "./playerCandidateCompar
 import type { PlayerMatchupViewModel } from "./playerMatchupView";
 import type { RosterCoverageMatchupModel } from "./rosterCoverageMatchup";
 import type { CoachReportPhaseVisualSeed } from "./coachReportPhaseVisuals";
+import type { OfficialMatchStorySpineModel } from "./officialMatchStorySpineTypes";
 
 export type CoachProductReportViewStatus =
   | "not_available"
@@ -74,6 +75,7 @@ export interface CoachProductReportViewModel {
   readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
   readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
+  readonly officialMatchStorySpine?: OfficialMatchStorySpineModel;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly productVisibleJargonCount: number;
@@ -129,6 +131,10 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     ...(model.rosterCoverageMatchup?.tags ?? []),
     ...(model.playerCandidateComparisonView?.tags ?? []),
     ...(model.phaseVisualSeed === undefined ? [] : ["coach_product_report_phase_visual_seed_present"]),
+    ...(model.officialMatchStorySpine === undefined ? [] : [
+      "coach_product_report_official_match_story_spine_present",
+      `coach_product_report_official_match_story_spine_status_${model.officialMatchStorySpine.status}`,
+    ]),
     "coach_product_report_next_match_signal_count_present",
     "coach_product_report_appendix_count_present",
     `coach_product_report_visible_jargon_count_${model.productVisibleJargonCount}`,

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 7H - Export Length & Trend Count Cleanup. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8A - Official Match Story Spine & Engine Causality Proof. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -136,6 +136,8 @@ import {
   renderCoachReportMultiMatchComparisonTrendSignals7GValidation,
   renderCoachReportExportLengthTrendCountCleanup7HDoc,
   renderCoachReportExportLengthTrendCountCleanup7HValidation,
+  renderOfficialMatchStorySpineEngineCausalityProof8ADoc,
+  renderOfficialMatchStorySpineEngineCausalityProof8AValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -149,10 +151,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 7H - Export Length & Trend Count Cleanup";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-export-length-trend-count-cleanup-7h.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8A - Official Match Story Spine & Engine Causality Proof";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "official-match-story-spine-engine-causality-proof-8a.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-export-length-trend-count-cleanup-7h.md";
+  "validation.official-match-story-spine-engine-causality-proof-8a.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2888,6 +2890,56 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 7H model, report renderer, and validation renderer for export length and trend count cleanup",
       },
       {
+        source: "src/reports/officialMatchStorySpineTypes.ts",
+        required: true,
+        reason: "Sprint 8A official match story spine contract for segments, beats, turning points, causality links, and narrative fields",
+      },
+      {
+        source: "src/reports/buildOfficialMatchStoryNarrative.ts",
+        required: true,
+        reason: "Sprint 8A coach-readable story narrative builder sourced only from the official timeline and score_change consequences",
+      },
+      {
+        source: "src/reports/buildOfficialMatchStorySpine.ts",
+        required: true,
+        reason: "Sprint 8A official story spine builder connecting official events to story beats, segments, turning points, and causality links",
+      },
+      {
+        source: "src/reports/officialMatchStorySpineAudit.ts",
+        required: true,
+        reason: "Sprint 8A audit proving score changes, official events, danger, fatigue, and player impact are covered by the story spine",
+      },
+      {
+        source: "src/reports/engineCausalityProofAudit.ts",
+        required: true,
+        reason: "Sprint 8A audit proving causality links are official-only and not sandbox or diagnostic truth",
+      },
+      {
+        source: "src/reports/officialStorySourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 8A source-of-truth audit separating official timeline/score from batch, sandbox, persistence, and database diagnostics",
+      },
+      {
+        source: "src/reports/matchStoryReadabilityAudit.ts",
+        required: true,
+        reason: "Sprint 8A readability audit keeping the match story coach-readable instead of metric-dump oriented",
+      },
+      {
+        source: "src/reports/reportConsumptionReadinessAudit.ts",
+        required: true,
+        reason: "Sprint 8A report-consumption audit proving the story spine can render in product and export reports with stable ids",
+      },
+      {
+        source: "src/reports/officialMatchStorySpineEngineCausalityProofWarnings.ts",
+        required: true,
+        reason: "Sprint 8A warning-code registry for official story spine and engine causality proof",
+      },
+      {
+        source: "src/reports/officialMatchStorySpineEngineCausalityProof8A.ts",
+        required: true,
+        reason: "Sprint 8A model, report renderer, and validation renderer for official match story spine and engine causality proof",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5044,6 +5096,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8A")) {
+    return renderOfficialMatchStorySpineEngineCausalityProof8ADoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7H")) {
     return renderCoachReportExportLengthTrendCountCleanup7HDoc(fullMatchTraceValidationModel());
   }
@@ -7358,6 +7413,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8A")) {
+    return renderOfficialMatchStorySpineEngineCausalityProof8AValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 7H")) {
     return renderCoachReportExportLengthTrendCountCleanup7HValidation(fullMatchTraceValidationModel());
   }
@@ -9618,6 +9676,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8A")) {
+    return [
+      "# Sprint 8A Share Pack",
+      "",
+      "Current sprint: Sprint 8A - Official Match Story Spine & Engine Causality Proof",
+      "",
+      "## Purpose",
+      "This pack proves the coach product/export reports now include a compact official match story spine sourced only from the official timeline, evidence facts, and score_change consequences while preserving the 7H export cleanup and 6X match-economy guardrails.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- official-match-story-spine-engine-causality-proof-8a.md",
+      "- validation.official-match-story-spine-engine-causality-proof-8a.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.official-match-story-spine-engine-causality-proof-8a.md",
+      "3. official-match-story-spine-engine-causality-proof-8a.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "8A is story-spine and causality-proof only: no scoring value change, no season memory, no team style memory, no batch-as-official-truth promotion, and no sandbox truth promotion.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 7H")) {
     return [
       "# Sprint 7H Share Pack",
