@@ -123,6 +123,7 @@ export function writeLatestCoachReport(): void {
   const productReportView = buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
+    { includeOfficialMatchCausality: true },
   );
   const coachOnlyProductHtml = renderCoachProductReport(productReportView);
   const productHtmlWithout7A = coachOnlyProductHtml;

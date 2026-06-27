@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-27T19:49:23.329Z
-Task/sprint: Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
+Generated: 2026-06-27T22:14:27.883Z
+Task/sprint: Sprint 8C - Attribute Role Fatigue Causality Deepening
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
-- validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
+- attribute-role-fatigue-causality-deepening-8c.md
+- validation.attribute-role-fatigue-causality-deepening-8c.md
 - README.md
 
 ## Bundle Files

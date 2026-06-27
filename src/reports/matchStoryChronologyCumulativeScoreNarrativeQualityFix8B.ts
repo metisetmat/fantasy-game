@@ -252,7 +252,8 @@ export function currentGeneratedOfficialMatchStoryChronologyNarrativeQualityFix8
   if (storySpine === undefined) {
     throw new Error("official match story spine must be available for Sprint 8B");
   }
-  const productReportHtml = renderCoachProductReport(productReport);
+  const { officialMatchCausality: _officialMatchCausality, ...productReportWithout8C } = productReport;
+  const productReportHtml = renderCoachProductReport(productReportWithout8C);
   const baseline8A = currentGeneratedOfficialMatchStorySpineEngineCausalityProof8AModel();
   const exportReportHtml = renderCoachReportExportHtml({
     productReportHtml,

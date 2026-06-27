@@ -331,6 +331,40 @@ function renderOfficialMatchStorySpine(model: CoachProductReportViewModel): stri
   </section>`;
 }
 
+function renderOfficialCausality8C(model: CoachProductReportViewModel): string {
+  const causality = model.officialMatchCausality;
+  if (causality === undefined) {
+    return "";
+  }
+  const cards = causality.evidenceFacts.slice(0, 2);
+
+  return `
+  <section id="official-causality-8c" class="product-section official-causality-8c" aria-label="Pourquoi le match a bascule">
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">Causalit&eacute; officielle</p>
+        <h2>Pourquoi le match a bascul&eacute;</h2>
+      </div>
+      ${renderBadge(`Confiance : ${causality.status}`)}
+    </div>
+    <p class="guard">Deux causes officielles sont retenues ici; le rapport 8C garde la matrice compl&egrave;te.</p>
+    <div class="cards">
+      ${cards.map((fact) => `
+        <article class="product-card causality-card">
+          <div class="badge-row">
+            ${renderBadge(`Source officielle : ${fact.linkedOfficialEventIds[0]}`)}
+            ${renderBadge(`Confiance ${fact.confidence}`)}
+          </div>
+          <h3>${escapeHtml(fact.causeLabel)}</h3>
+          <p><strong>Effet :</strong> ${escapeHtml(fact.effectLabel)}</p>
+          <p><strong>Joueur / r&ocirc;le :</strong> ${escapeHtml([fact.primaryPlayerId, fact.role].filter((value): value is string => value !== undefined).join(" / ") || "non pr&eacute;cis&eacute;")}</p>
+          <p><strong>Zone :</strong> ${escapeHtml(fact.zoneIds.join(", ") || "non pr&eacute;cis&eacute;e")}</p>
+          <p><strong>Limite :</strong> ${escapeHtml(fact.limitationNote)}</p>
+        </article>`).join("")}
+    </div>
+  </section>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
   const detail = appendix.details !== undefined
     ? appendix.details
@@ -511,6 +545,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   })}
 
   ${renderOfficialMatchStorySpine(model)}
+
+  ${renderOfficialCausality8C(model)}
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>

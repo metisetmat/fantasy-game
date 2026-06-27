@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix",
+  name: "Sprint 8C - Attribute Role Fatigue Causality Deepening",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
-    "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+    "attribute-role-fatigue-causality-deepening-8c.md",
+    "validation.attribute-role-fatigue-causality-deepening-8c.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,11 +39,11 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 8B share pack is current, complete, minimal, and below 20 files",
-    "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md": "documents the corrected official story chronology, cumulative segment scores, turning-point order, narrative quality, and source-of-truth regression audits",
-    "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md": "proves the 8B story fix is PASS, preserves 8A/7H/6X guardrails, and keeps product/export story integration clean",
-    "README.md": "compact reviewer orientation for the 8B share pack",
-    "manifest.md": "compatibility manifest listing the 8B share pack files",
+    "validation.share-pack.md": "proves the 8C share pack is current, complete, minimal, and below 20 files",
+    "attribute-role-fatigue-causality-deepening-8c.md": "documents the official evidence-limited causality layer connecting events, roles, attributes, fatigue, strategy, pressure, zones, and coach-readable story cause/effect",
+    "validation.attribute-role-fatigue-causality-deepening-8c.md": "proves the 8C causality layer is event-backed, source-of-truth safe, compact in product/export, and preserves 8B/8A/7H/6X guardrails",
+    "README.md": "compact reviewer orientation for the 8C share pack",
+    "manifest.md": "compatibility manifest listing the 8C share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",

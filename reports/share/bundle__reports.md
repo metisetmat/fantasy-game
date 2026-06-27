@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8C - Attribute Role Fatigue Causality Deepening. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -140,6 +140,8 @@ import {
   renderOfficialMatchStorySpineEngineCausalityProof8AValidation,
   renderOfficialMatchStoryChronologyNarrativeQualityFix8BDoc,
   renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation,
+  renderAttributeRoleFatigueCausalityDeepening8CDoc,
+  renderAttributeRoleFatigueCausalityDeepening8CValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -153,10 +155,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8C - Attribute Role Fatigue Causality Deepening";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "attribute-role-fatigue-causality-deepening-8c.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md";
+  "validation.attribute-role-fatigue-causality-deepening-8c.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2992,6 +2994,71 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8B model, report renderer, and validation renderer for official story chronology and narrative quality fix",
       },
       {
+        source: "src/reports/officialMatchAttributeRoleFatigueCausalityTypes.ts",
+        required: true,
+        reason: "Sprint 8C official attribute, role, fatigue, strategy, pressure, zone, player-impact, and evidence-limited causality contracts",
+      },
+      {
+        source: "src/reports/buildOfficialMatchAttributeRoleFatigueCausality.ts",
+        required: true,
+        reason: "Sprint 8C builder deriving official event-backed causality facts from the timeline, story spine, roster snapshots, plans, zones, pressure, and fatigue signals",
+      },
+      {
+        source: "src/reports/buildCoachReadableCausalityNarrative.ts",
+        required: true,
+        reason: "Sprint 8C coach-readable causal narrative builder keeping export causality compact and evidence-limited",
+      },
+      {
+        source: "src/reports/officialAttributeRoleFatigueCausalityAudit.ts",
+        required: true,
+        reason: "Sprint 8C headline audit for official causality links, role/attribute/fatigue/strategy counts, event backing, and invented claim prevention",
+      },
+      {
+        source: "src/reports/officialFatigueCausalityAudit.ts",
+        required: true,
+        reason: "Sprint 8C fatigue audit ensuring visible fatigue is not promoted to unsupported certainty",
+      },
+      {
+        source: "src/reports/officialRoleCausalityAudit.ts",
+        required: true,
+        reason: "Sprint 8C role causality audit requiring player and official-event links",
+      },
+      {
+        source: "src/reports/officialAttributeCausalityAudit.ts",
+        required: true,
+        reason: "Sprint 8C attribute causality audit requiring attribute snapshots and event backing",
+      },
+      {
+        source: "src/reports/officialStrategyPressureZoneCausalityAudit.ts",
+        required: true,
+        reason: "Sprint 8C strategy, pressure, and zone audit requiring observed official effects",
+      },
+      {
+        source: "src/reports/officialCausalNarrativeQualityAudit.ts",
+        required: true,
+        reason: "Sprint 8C causal narrative quality audit preventing unsupported, mechanical, jargon-heavy, or metric-dump causal copy",
+      },
+      {
+        source: "src/reports/officialCausalitySourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 8C source-of-truth audit excluding sandbox, batch, diagnostic, persistence, and database truth from official causality",
+      },
+      {
+        source: "src/reports/causalityReportIntegrationBudgetAudit.ts",
+        required: true,
+        reason: "Sprint 8C product/export budget audit preserving story, action plan, maps, trends, and export under 900 seconds",
+      },
+      {
+        source: "src/reports/attributeRoleFatigueCausalityDeepeningWarnings.ts",
+        required: true,
+        reason: "Sprint 8C warning-code registry for causality readiness, source-of-truth separation, and export budget",
+      },
+      {
+        source: "src/reports/attributeRoleFatigueCausalityDeepening8C.ts",
+        required: true,
+        reason: "Sprint 8C model, report renderer, and validation renderer for official attribute-role-fatigue causality deepening",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5148,6 +5215,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8C")) {
+    return renderAttributeRoleFatigueCausalityDeepening8CDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8B")) {
     return renderOfficialMatchStoryChronologyNarrativeQualityFix8BDoc(fullMatchTraceValidationModel());
   }
@@ -7468,6 +7538,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8C")) {
+    return renderAttributeRoleFatigueCausalityDeepening8CValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8B")) {
     return renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation(fullMatchTraceValidationModel());
   }
@@ -9734,6 +9807,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8C")) {
+    return [
+      "# Sprint 8C Share Pack",
+      "",
+      "Current sprint: Sprint 8C - Attribute Role Fatigue Causality Deepening",
+      "",
+      "## Purpose",
+      "This pack proves the official match story now includes compact, evidence-limited causality linking official events to players, roles, attributes, fatigue signals, tactical plan fields, zones, pressure, and coach-readable cause/effect copy while preserving 8B chronology, 8A story spine, 7H export cleanup, and 6X match-economy guardrails.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- attribute-role-fatigue-causality-deepening-8c.md",
+      "- validation.attribute-role-fatigue-causality-deepening-8c.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.attribute-role-fatigue-causality-deepening-8c.md",
+      "3. attribute-role-fatigue-causality-deepening-8c.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "8C is official causality depth only: no scoring value change, no score cap, no post-hoc rewrite, no event deletion, no forced score, no sandbox truth promotion, no batch truth promotion, no season memory, and no team-style memory layer.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8B")) {
     return [
       "# Sprint 8B Share Pack",
@@ -27978,6 +28080,7 @@ export function writeLatestCoachReport(): void {
   const productReportView = buildCoachProductReportViewFromMatchReport(
     experimentalReport,
     rosterCoverageFixturePlayers,
+    { includeOfficialMatchCausality: true },
   );
   const coachOnlyProductHtml = renderCoachProductReport(productReportView);
   const productHtmlWithout7A = coachOnlyProductHtml;
