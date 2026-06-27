@@ -131,6 +131,8 @@ import {
   renderCoachReportExportLengthTrendCountCleanup7HValidation,
   renderOfficialMatchStorySpineEngineCausalityProof8ADoc,
   renderOfficialMatchStorySpineEngineCausalityProof8AValidation,
+  renderOfficialMatchStoryChronologyNarrativeQualityFix8BDoc,
+  renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -144,10 +146,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8A - Official Match Story Spine & Engine Causality Proof";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "official-match-story-spine-engine-causality-proof-8a.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.official-match-story-spine-engine-causality-proof-8a.md";
+  "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -2933,6 +2935,56 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8A model, report renderer, and validation renderer for official match story spine and engine causality proof",
       },
       {
+        source: "src/reports/repairOfficialMatchStoryChronology.ts",
+        required: true,
+        reason: "Sprint 8B repair pass recalculating cumulative segment scores, chronological turning points, and narrative readiness without mutating official events",
+      },
+      {
+        source: "src/reports/buildMatchStoryNarrativeQuality.ts",
+        required: true,
+        reason: "Sprint 8B narrative quality builder producing short, detailed, and coach-facing story copy from official story evidence",
+      },
+      {
+        source: "src/reports/matchStoryChronologyAudit.ts",
+        required: true,
+        reason: "Sprint 8B chronology audit for story segments, beats, turning points, score resets, and first-danger labels",
+      },
+      {
+        source: "src/reports/matchStoryCumulativeScoreAudit.ts",
+        required: true,
+        reason: "Sprint 8B cumulative score audit proving segment labels match official score_change totals",
+      },
+      {
+        source: "src/reports/turningPointNarrativeOrderAudit.ts",
+        required: true,
+        reason: "Sprint 8B turning-point order audit preventing generic or contradictory first-danger wording",
+      },
+      {
+        source: "src/reports/matchStoryNarrativeQualityAudit.ts",
+        required: true,
+        reason: "Sprint 8B narrative quality audit preventing mechanical, repeated, placeholder, or technical coach-facing story copy",
+      },
+      {
+        source: "src/reports/matchStorySourceOfTruthRegressionAudit.ts",
+        required: true,
+        reason: "Sprint 8B source-of-truth regression audit separating official story from sandbox, batch, diagnostics, persistence, and database truth",
+      },
+      {
+        source: "src/reports/matchStoryReportIntegrationRegressionAudit.ts",
+        required: true,
+        reason: "Sprint 8B product/export integration audit preserving story visibility, action plan, tactical maps, trends, and export length",
+      },
+      {
+        source: "src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFixWarnings.ts",
+        required: true,
+        reason: "Sprint 8B warning-code registry for chronology, cumulative score, narrative quality, source-of-truth, and report integration fixes",
+      },
+      {
+        source: "src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.ts",
+        required: true,
+        reason: "Sprint 8B model, report renderer, and validation renderer for official story chronology and narrative quality fix",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5089,6 +5141,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8B")) {
+    return renderOfficialMatchStoryChronologyNarrativeQualityFix8BDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8A")) {
     return renderOfficialMatchStorySpineEngineCausalityProof8ADoc(fullMatchTraceValidationModel());
   }
@@ -7406,6 +7461,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8B")) {
+    return renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8A")) {
     return renderOfficialMatchStorySpineEngineCausalityProof8AValidation(fullMatchTraceValidationModel());
   }
@@ -9669,6 +9727,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8B")) {
+    return [
+      "# Sprint 8B Share Pack",
+      "",
+      "Current sprint: Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix",
+      "",
+      "## Purpose",
+      "This pack proves the official match story spine now has chronological turning points, cumulative segment scores, and coach-readable narrative copy while preserving the 8A story spine, 7H export cleanup, and 6X match-economy guardrails.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+      "- validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+      "3. match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "8B is narrative quality and chronology only: no scoring value change, no score cap, no post-hoc rewrite, no event deletion, no sandbox truth promotion, no batch truth promotion, and no season or team-style memory layer.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8A")) {
     return [
       "# Sprint 8A Share Pack",

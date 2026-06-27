@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-27T16:27:59.299Z
-Task/sprint: Sprint 8A - Official Match Story Spine & Engine Causality Proof
+Generated: 2026-06-27T19:49:23.329Z
+Task/sprint: Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- official-match-story-spine-engine-causality-proof-8a.md
-- validation.official-match-story-spine-engine-causality-proof-8a.md
+- match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
+- validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
 - README.md
 
 ## Bundle Files

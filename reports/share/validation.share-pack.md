@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 8A - Official Match Story Spine & Engine Causality Proof
+- current sprint: Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,25 +20,30 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 8A - Sprint 8A - Official Match Story Spine & Engine Causality Proof
+- PASS: current sprint is Sprint 8B - Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 8A oriented - README current
-- PASS: 8A report included - 8A doc included
-- PASS: 8A validation is PASS - 8A validation current
+- PASS: README is Sprint 8B oriented - README current
+- PASS: 8B report included - 8B doc included
+- PASS: 8B validation is PASS - 8B validation current
+- PASS: baseline 8A visible - 8A baseline visible
 - PASS: baseline 7H visible - 7H baseline visible
-- PASS: story spine counts visible - story counts visible
-- PASS: score_change coverage visible - score_change coverage visible
-- PASS: source-of-truth audit visible - source-of-truth visible
-- PASS: no unsupported story claims - unsupported counts 0
+- PASS: baseline 6X visible - 6X baseline visible
+- PASS: chronology audit visible - chronology visible
+- PASS: cumulative score audit visible - cumulative score visible
+- PASS: turning point order audit visible - turning points visible
+- PASS: narrative quality audit visible - narrative quality visible
+- PASS: source-of-truth regression audit visible - source of truth visible
+- PASS: report integration regression audit visible - report integration visible
+- PASS: corrected segments visible - corrected segments visible
+- PASS: corrected turning points visible - corrected turning points visible
 - PASS: product official story section visible - product story visible
 - PASS: export official story section visible - export story visible
 - PASS: story is not a season narrative - no season layer
 - PASS: story is not team style memory - no style memory
-- PASS: export remains under hard limit - export limit checked
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: bundle includes 8A source files - 8A source bundled
+- PASS: bundle includes 8B source files - 8B source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -54,12 +59,12 @@ Status: PASS
 - coach-report.latest.html
 - coach-report.product.html
 - manifest.md
-- official-match-story-spine-engine-causality-proof-8a.md
+- match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
 - package.json
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.official-match-story-spine-engine-causality-proof-8a.md
+- validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
 - validation.share-pack.md

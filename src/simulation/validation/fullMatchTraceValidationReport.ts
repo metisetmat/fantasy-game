@@ -144,6 +144,10 @@ import {
   renderOfficialMatchStorySpineEngineCausalityProof8ADoc as renderOfficialMatchStorySpineEngineCausalityProof8ADocBase,
   renderOfficialMatchStorySpineEngineCausalityProof8AValidation as renderOfficialMatchStorySpineEngineCausalityProof8AValidationBase,
 } from "../../reports/officialMatchStorySpineEngineCausalityProof8A";
+import {
+  renderOfficialMatchStoryChronologyNarrativeQualityFix8BDoc as renderOfficialMatchStoryChronologyNarrativeQualityFix8BDocBase,
+  renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation as renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidationBase,
+} from "../../reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6641,6 +6645,18 @@ export function renderOfficialMatchStorySpineEngineCausalityProof8AValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderOfficialMatchStorySpineEngineCausalityProof8AValidationBase();
+}
+
+export function renderOfficialMatchStoryChronologyNarrativeQualityFix8BDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderOfficialMatchStoryChronologyNarrativeQualityFix8BDocBase();
+}
+
+export function renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
