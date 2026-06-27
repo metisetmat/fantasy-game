@@ -375,6 +375,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReportMultiMatchComparisonTrendSignals7GValidation = readIfExists(join(shareDirectory, "validation.coach-report-multi-match-comparison-trend-signals-7g.md"));
   const coachReportExportLengthTrendCountCleanup7H = readIfExists(join(shareDirectory, "coach-report-export-length-trend-count-cleanup-7h.md"));
   const coachReportExportLengthTrendCountCleanup7HValidation = readIfExists(join(shareDirectory, "validation.coach-report-export-length-trend-count-cleanup-7h.md"));
+  const officialMatchStorySpineEngineCausalityProof8A = readIfExists(join(shareDirectory, "official-match-story-spine-engine-causality-proof-8a.md"));
+  const officialMatchStorySpineEngineCausalityProof8AValidation = readIfExists(join(shareDirectory, "validation.official-match-story-spine-engine-causality-proof-8a.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3280,6 +3282,17 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-multi-match-comparison-trend-signals-7g.md",
     ...sprint7GForbiddenLeftovers,
   ];
+  const sprint8AExpectedFiles = sprint7HExpectedFiles.map((file) =>
+    file === "coach-report-export-length-trend-count-cleanup-7h.md"
+      ? "official-match-story-spine-engine-causality-proof-8a.md"
+      : file === "validation.coach-report-export-length-trend-count-cleanup-7h.md"
+        ? "validation.official-match-story-spine-engine-causality-proof-8a.md"
+        : file
+  );
+  const sprint8AForbiddenLeftovers = [
+    "coach-report-export-length-trend-count-cleanup-7h.md",
+    "validation.coach-report-export-length-trend-count-cleanup-7h.md",
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4607,6 +4620,34 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportExportLengthTrendCountCleanup7HValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 7H source files", bundleReports.includes("src/reports/coachReportExportLengthTrendCountCleanup7H.ts") && bundleReports.includes("src/reports/coachReportExportLengthCleanupAudit.ts") && bundleReports.includes("src/reports/coachReportTrendCountConsistencyAudit.ts") && bundleReports.includes("src/reports/coachReportValidationStatusConsistencyAudit.ts") && bundleReports.includes("src/reports/coachReportNoNewNarrativeLayerAudit.ts") && bundleReports.includes("src/reports/coachReport7HSourceOfTruthAudit.ts"), "7H source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportExportLengthTrendCountCleanup7HValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8AChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8AExpectedFiles.every((file) => requiredCopied(file)), sprint8AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8AExpectedFiles.every((file) => manifest.includes(file)), sprint8AExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8A", activeConfig.sprintName === "Sprint 8A - Official Match Story Spine & Engine Causality Proof", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8AForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8AForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8A oriented", readme.includes("# Sprint 8A Share Pack") && readme.includes("official-match-story-spine-engine-causality-proof-8a.md") && readme.includes("official timeline"), "README current"),
+    check("8A report included", officialMatchStorySpineEngineCausalityProof8A.includes("# Official Match Story Spine & Engine Causality Proof 8A") && officialMatchStorySpineEngineCausalityProof8A.includes("Official Match Story Spine") && officialMatchStorySpineEngineCausalityProof8A.includes("Engine Causality Proof"), "8A doc included"),
+    check("8A validation is PASS", officialMatchStorySpineEngineCausalityProof8AValidation.includes("Status: PASS") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("OfficialMatchStorySpineModel exists"), "8A validation current"),
+    check("baseline 7H visible", officialMatchStorySpineEngineCausalityProof8A.includes("baselineVersion: COACH_REPORT_EXPORT_LENGTH_TREND_COUNT_CLEANUP_7H") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("baseline 7H preserved"), "7H baseline visible"),
+    check("story spine counts visible", officialMatchStorySpineEngineCausalityProof8A.includes("story segments") && officialMatchStorySpineEngineCausalityProof8A.includes("story beats") && officialMatchStorySpineEngineCausalityProof8A.includes("turning points") && officialMatchStorySpineEngineCausalityProof8A.includes("causality links"), "story counts visible"),
+    check("score_change coverage visible", officialMatchStorySpineEngineCausalityProof8A.includes("score changes covered") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("score_change events covered"), "score_change coverage visible"),
+    check("source-of-truth audit visible", officialMatchStorySpineEngineCausalityProof8A.includes("story uses official timeline only") && officialMatchStorySpineEngineCausalityProof8A.includes("all score claims backed by score_change"), "source-of-truth visible"),
+    check("no unsupported story claims", officialMatchStorySpineEngineCausalityProof8AValidation.includes("no unsupported causality claims") && officialMatchStorySpineEngineCausalityProof8A.includes("unsupported narrative claims | 0"), "unsupported counts 0"),
+    check("product official story section visible", coachProductHtml.includes('id="official-match-story-spine"') && coachProductHtml.includes("R&eacute;cit officiel du match"), "product story visible"),
+    check("export official story section visible", coachExportHtml.includes('id="official-match-story-spine"') && (coachExportHtml.includes("R&eacute;cit du match en 45 secondes") || coachExportHtml.includes("Recit du match en 45 secondes")), "export story visible"),
+    check("story is not a season narrative", !coachProductHtml.includes("season narrative") && !coachExportHtml.includes("season narrative") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("no season narrative added"), "no season layer"),
+    check("story is not team style memory", !coachProductHtml.includes("team style memory") && !coachExportHtml.includes("team style memory") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("no team style memory added"), "no style memory"),
+    check("export remains under hard limit", officialMatchStorySpineEngineCausalityProof8AValidation.includes("export remains under hard limit") && officialMatchStorySpineEngineCausalityProof8A.includes("export read time seconds after 8A"), "export limit checked"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8A source files", bundleReports.includes("src/reports/officialMatchStorySpineEngineCausalityProof8A.ts") && bundleReports.includes("src/reports/buildOfficialMatchStorySpine.ts") && bundleReports.includes("src/reports/engineCausalityProofAudit.ts") && bundleReports.includes("src/reports/officialStorySourceOfTruthAudit.ts") && bundleReports.includes("src/reports/reportConsumptionReadinessAudit.ts"), "8A source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && officialMatchStorySpineEngineCausalityProof8AValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8677,6 +8718,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8A - Official Match Story Spine")
+      ? sprint8AChecks
     : activeConfig.sprintName.includes("Sprint 7H - Export Length")
       ? sprint7HChecks
     : activeConfig.sprintName.includes("Sprint 7G - Coach Report Multi-Match")

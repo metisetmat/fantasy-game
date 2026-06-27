@@ -72,6 +72,10 @@
     .tactical-map-zone--high { box-shadow: inset 0 0 0 2px rgba(31, 111, 139, .2); }
     .tactical-map-zone--empty { color: var(--muted); background: var(--soft); border-style: dashed; }
     .tactical-map-legend { color: var(--muted); font-size: .9rem; }
+    .story-head { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+    .official-story-card { border-color: rgba(31, 111, 139, .32); }
+    .story-turning-points { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+    .story-turning-points section { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 11px; }
     .trend-signals-section { margin-top: 20px; }
     .trend-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
     .trend-card { background: #fbfdff; break-inside: avoid; }
@@ -141,6 +145,41 @@
       <article><h3>Risque principal</h3><p>Trop de soutien proche peut ralentir la projection ou exposer la rest-defense.</p></article>
       <article><h3>Garde-fou source de verite</h3><p>Score issu des evenements officiels; diagnostics et sandbox restent separes.</p></article>
     </div>
+  </section>
+
+  
+  <section id="official-match-story-spine" class="product-section official-story-spine" aria-label="Recit officiel du match">
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">Lecture officielle</p>
+        <h2>R&eacute;cit officiel du match</h2>
+      </div>
+      <span class="badge">Score officiel : 12 - 7</span>
+    </div>
+    <article class="product-card official-story-card">
+      <h3>Le match en 45 secondes</h3>
+      <p>Le segment explique une evolution du score par evenement officiel. La pression et le danger restent lus uniquement dans les evenements officiels. Le premier tournant vient de premier vrai danger officiel. La fin du recit se comprend par score decisif du recit officiel. Le score final 12 - 7 vient de 6 evenement(s) officiels score_change.</p>
+      <div class="story-turning-points">
+        
+          <section>
+            <h4>Premier vrai danger officiel</h4>
+            <p>Ce tournant aide a comprendre le match sans imposer de decision.</p>
+          </section>
+          <section>
+            <h4>Premier score officiel</h4>
+            <p>Ce tournant aide a comprendre le match sans imposer de decision.</p>
+          </section>
+          <section>
+            <h4>Score decisif du recit officiel</h4>
+            <p>Ce tournant aide a comprendre le match sans imposer de decision.</p>
+          </section>
+          <section>
+            <h4>Stabilisation defensive</h4>
+            <p>Ce tournant aide a comprendre le match sans imposer de decision.</p>
+          </section>
+      </div>
+      <p class="guard">Lecture officielle: timeline officielle, evidence facts officiels et score_change officiels uniquement.</p>
+    </article>
   </section>
 
   <section id="executive-summary" class="product-section">

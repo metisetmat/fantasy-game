@@ -1,6 +1,7 @@
 import type { MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
 import type { MatchTraceAggregateModel } from "../simulation/tracing/matchTraceAggregateTypes";
 import { buildPlayerCandidateComparisonView } from "./buildPlayerCandidateComparisonView";
+import { buildOfficialMatchStorySpine } from "./buildOfficialMatchStorySpine";
 import { buildPlayerMatchupView } from "./buildPlayerMatchupView";
 import { buildRosterCoverageMatchup } from "./buildRosterCoverageMatchup";
 import {
@@ -385,6 +386,7 @@ function buildModelWithoutTags(input: {
   readonly rosterCoverageMatchup?: RosterCoverageMatchupModel;
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
   readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
+  readonly officialMatchStorySpine?: ReturnType<typeof buildOfficialMatchStorySpine>;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
@@ -482,6 +484,7 @@ function buildModelWithoutTags(input: {
     ...(input.rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup: input.rosterCoverageMatchup }),
     ...(input.playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView: input.playerCandidateComparisonView }),
     ...(input.phaseVisualSeed === undefined ? {} : { phaseVisualSeed: input.phaseVisualSeed }),
+    ...(input.officialMatchStorySpine === undefined ? {} : { officialMatchStorySpine: input.officialMatchStorySpine }),
     nextMatchSignals: input.nextMatchSignals,
     appendices: input.appendices,
     productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
@@ -679,6 +682,7 @@ export function buildCoachProductReportViewFromMatchReport(
     },
   ];
   const nextMatchSignals = profilesToObserve.flatMap((profile) => profile.nextMatchSignal).slice(0, 5);
+  const officialMatchStorySpine = buildOfficialMatchStorySpine(report);
   const playerMatchupView = buildPlayerMatchupView({
     profileView: profileViewFromProductProfiles(profilesToObserve),
     rosterPlayers: productRosterPlayers.length === 0
@@ -718,6 +722,7 @@ export function buildCoachProductReportViewFromMatchReport(
     ...(rosterCoverageMatchup === undefined ? {} : { rosterCoverageMatchup }),
     ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
     phaseVisualSeed: buildCoachReportPhaseVisualSeedFromMatchReport({ report }),
+    officialMatchStorySpine,
     nextMatchSignals,
     appendices: buildAppendices(playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
     warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],

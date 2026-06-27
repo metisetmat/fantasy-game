@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 7H - Export Length & Trend Count Cleanup. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8A - Official Match Story Spine & Engine Causality Proof. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

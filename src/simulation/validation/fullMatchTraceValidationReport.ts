@@ -140,6 +140,10 @@ import {
   renderCoachReportExportLengthTrendCountCleanup7HDoc as renderCoachReportExportLengthTrendCountCleanup7HDocBase,
   renderCoachReportExportLengthTrendCountCleanup7HValidation as renderCoachReportExportLengthTrendCountCleanup7HValidationBase,
 } from "../../reports/coachReportExportLengthTrendCountCleanup7H";
+import {
+  renderOfficialMatchStorySpineEngineCausalityProof8ADoc as renderOfficialMatchStorySpineEngineCausalityProof8ADocBase,
+  renderOfficialMatchStorySpineEngineCausalityProof8AValidation as renderOfficialMatchStorySpineEngineCausalityProof8AValidationBase,
+} from "../../reports/officialMatchStorySpineEngineCausalityProof8A";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6625,6 +6629,18 @@ export function renderCoachReportExportLengthTrendCountCleanup7HValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportExportLengthTrendCountCleanup7HValidationBase();
+}
+
+export function renderOfficialMatchStorySpineEngineCausalityProof8ADoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderOfficialMatchStorySpineEngineCausalityProof8ADocBase();
+}
+
+export function renderOfficialMatchStorySpineEngineCausalityProof8AValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderOfficialMatchStorySpineEngineCausalityProof8AValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

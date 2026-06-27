@@ -1429,6 +1429,51 @@ function renderExpressReadExport(html: string): string {
   </section>`;
 }
 
+function renderOfficialMatchStorySpineExport(html: string): string {
+  const body = extractSectionInner(html, "official-match-story-spine");
+  if (body.length === 0) {
+    return "";
+  }
+  const paragraphs = [...body.matchAll(/<p\b([^>]*)>([\s\S]*?)<\/p>/giu)]
+    .map((match) => ({
+      attributes: match[1] ?? "",
+      text: stripTags(match[2] ?? ""),
+    }))
+    .filter((paragraph) => paragraph.text.length > 0);
+  const narrativeParagraphs = paragraphs.filter((paragraph) =>
+    !/class=["'][^"']*\bcard-kicker\b/iu.test(paragraph.attributes) &&
+    !/class=["'][^"']*\bguard\b/iu.test(paragraph.attributes) &&
+    !/^lecture officielle$/iu.test(paragraph.text)
+  );
+  const guardParagraph = paragraphs.find((paragraph) => /class=["'][^"']*\bguard\b/iu.test(paragraph.attributes));
+  const shortNarrative = narrativeParagraphs.find((paragraph) => paragraph.text.length >= 40)?.text ??
+    narrativeParagraphs[0]?.text ??
+    "Le recit officiel du match reste disponible dans le rapport produit.";
+  const sourceNote = guardParagraph?.text ??
+    paragraphs.find((paragraph) => /timeline officielle|score_change|evidence facts/iu.test(paragraph.text))?.text ??
+    "Score et recit viennent des evenements officiels.";
+  const turningPoints = [...body.matchAll(/<h4\b[^>]*>([\s\S]*?)<\/h4>/giu)]
+    .map((match) => stripTags(match[1] ?? ""))
+    .filter((text) => text.length > 0)
+    .slice(0, 2);
+
+  return `
+  <section id="official-match-story-spine" class="premium-section" data-source-product-sections="official-match-story-spine">
+    <div class="report-section-divider">Recit officiel</div>
+    <div class="report-section-header">
+      <div>
+        <h2>R&eacute;cit du match en 45 secondes</h2>
+        <p>Version compacte issue de la timeline officielle et des score_change officiels.</p>
+      </div>
+    </div>
+    <article class="report-table-card">
+      <p>${escapeHtml(shortNarrative)}</p>
+      ${turningPoints.length === 0 ? "" : `<ul>${turningPoints.map((turningPoint) => `<li>${escapeHtml(turningPoint)}</li>`).join("")}</ul>`}
+      <p class="guard">${escapeHtml(sourceNote)}</p>
+    </article>
+  </section>`;
+}
+
 function renderMatchStory(html: string): string {
   const body = extractSectionInner(html, "official-match-reading");
 
@@ -5361,6 +5406,7 @@ export function renderCoachReportExportHtml(input: {
   const premiumBodyBeforeAppendices = [
     renderCover(input.productReportHtml),
     renderExpressReadExport(input.productReportHtml),
+    renderOfficialMatchStorySpineExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),
