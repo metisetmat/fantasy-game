@@ -49,11 +49,11 @@
 ## Trend Signals
 | Metric | Value |
 | --- | --- |
-| trendSignalCardCount | 2 |
-| repeatedTrendSignalCount | 1 |
+| trendSignalCardCount | 3 |
+| repeatedTrendSignalCount | 0 |
 | visibleOnceTrendSignalCount | 0 |
-| unstableTrendSignalCount | 1 |
-| insufficientDataTrendSignalCount | 1 |
+| unstableTrendSignalCount | 0 |
+| insufficientDataTrendSignalCount | 3 |
 | officialTrendSignalCount | 3 |
 | sandboxTrendInOfficialBodyCount | 0 |
 | forcedSelectionTrendCount | 0 |
@@ -63,9 +63,9 @@
 ## Trend Cards
 | Trend | Type | Source | Confidence | Samples | Next check | Limitation |
 | --- | --- | --- | --- | --- | --- | --- |
-| Zone de danger qui revient | repeated | official | high | 4/6 | A verifier au prochain match: la zone produit-elle encore une deuxieme action controlee ? | Comparaison locale sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant. |
-| Premiere sortie apres recuperation a confirmer | unstable | official | low | 3/6 | A verifier au prochain match: moins de pertes immediates apres recuperation. | Signal instable sur les echantillons disponibles; pas une conclusion generale. |
-| Dernier rempart / rebond encore insuffisant | insufficient_data | official | low | 1/6 | A verifier au prochain match: interventions, rebonds et securisations restent-ils propres ? | Insuffisant sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant. |
+| Zone de danger qui revient | insufficient_data | official | medium | 1/1 | A verifier au prochain match: la zone produit-elle encore une deuxieme action controlee ? | Match courant uniquement: donnee insuffisante pour parler de tendance multi-match; ne remplace pas la lecture officielle. |
+| Premiere sortie apres recuperation a confirmer | insufficient_data | official | low | 1/1 | A verifier au prochain match: moins de pertes immediates apres recuperation. | Match courant uniquement: donnee insuffisante pour parler de tendance multi-match; pas une conclusion generale. |
+| Dernier rempart / rebond encore insuffisant | insufficient_data | official | low | 1/1 | A verifier au prochain match: interventions, rebonds et securisations restent-ils propres ? | Match courant uniquement: volume insuffisant pour parler de tendance multi-match; ne remplace pas la lecture officielle. |
 
 ## Trend Prudence Audit
 | Metric | Value |
@@ -103,8 +103,8 @@
 | exportSectionCount7F | 14 |
 | exportSectionCount7G | 14 |
 | trendSectionAddedCount | 1 |
-| coachReadTimeSeconds7G | 1228 |
-| exportReadTimeSeconds7G | 1290 |
+| coachReadTimeSeconds7G | 1270 |
+| exportReadTimeSeconds7G | 1333 |
 
 ## Source-of-Truth Multi-Match Audit
 | Metric | Value |

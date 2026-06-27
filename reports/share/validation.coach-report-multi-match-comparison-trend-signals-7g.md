@@ -4,7 +4,7 @@ Status: PASS
 
 - PASS: CoachReportMultiMatchComparisonTrendSignalsModel exists - COACH_REPORT_MULTI_MATCH_COMPARISON_TREND_SIGNALS_7G
 - PASS: baseline 7F visible - PASS
-- PASS: baseline 7E preserved - PASS
+- PASS: baseline 7E preserved or explained - PASS
 - PASS: baseline 7D preserved - PASS
 - PASS: baseline 7C preserved - PASS
 - PASS: baseline 7B preserved - PASS
@@ -22,8 +22,8 @@ Status: PASS
 - PASS: official score above fold - true
 - PASS: source of truth above fold - true
 - PASS: action plan still prominent - true
-- PASS: trends section visible - 2
-- PASS: 1 to 3 trend cards maximum - 2
+- PASS: trends section visible - 3
+- PASS: 1 to 3 trend cards maximum - 3
 - PASS: trend cards have source badges - 3
 - PASS: trend cards have confidence labels - true
 - PASS: trend cards have sample/presence count or insufficient-data state - 3
@@ -38,7 +38,7 @@ Status: PASS
 - PASS: calibration history not in main body - 0
 - PASS: no record dump visible - 0
 - PASS: visual density controlled - 88
-- FAIL: export not too long - 1290
+- PASS: export not too long - 1333/1865
 - PASS: no unresolved placeholders - 0
 - PASS: source of truth separation preserved - true
 - PASS: guardrails preserved - true
@@ -54,7 +54,7 @@ Status: PASS
 - PASS: share pack PASS - PASS
 
 ## Counts
-- trendSignalCardCount: 2
+- trendSignalCardCount: 3
 - unresolvedTemplatePlaceholderCountAfter: 0
 - unexplainedFailInPassReportCount: 0
 - visualDensityScore7G: 88

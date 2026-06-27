@@ -79,8 +79,12 @@ export function buildCoachTrendSignalCardsFromProductReport(
   const dangerZones = zonesOrFallback(dangerCard, ["Z3-C"]);
   const recoveryZones = zonesOrFallback(recoveryCard, ["Z2-C"]);
   const pressureZones = pressureCard?.affectedZones ?? [];
+  const currentMatchSampleCount = 1;
+  const dangerPresentCount = dangerZones.length > 0 ? 1 : 0;
+  const recoveryPresentCount = recoveryZones.length > 0 ? 1 : 0;
+  const pressurePresentCount = pressureZones.length > 0 ? 1 : 0;
 
-  const repeatedConfidence: CoachTrendConfidence = dangerCard?.confidence === "high" ? "high" : "medium";
+  const repeatedConfidence: CoachTrendConfidence = dangerCard?.confidence === "high" ? "medium" : "low";
   const recoveryConfidence: CoachTrendConfidence = recoveryCard?.confidence === "high" ? "medium" : "low";
   const pressureConfidence: CoachTrendConfidence = "low";
 
@@ -88,39 +92,39 @@ export function buildCoachTrendSignalCardsFromProductReport(
     {
       trendId: "trend-danger-zone-returns",
       title: "Zone de danger qui revient",
-      trendType: "repeated",
+      trendType: "insufficient_data",
       sourceType: "official",
       confidence: repeatedConfidence,
-      sampleCount: 6,
-      presentCount: 4,
-      absentCount: 2,
-      unstableCount: 1,
-      insufficientDataCount: 0,
+      sampleCount: currentMatchSampleCount,
+      presentCount: dangerPresentCount,
+      absentCount: currentMatchSampleCount - dangerPresentCount,
+      unstableCount: 0,
+      insufficientDataCount: 1,
       repeatedZones: dangerZones,
       currentMatchZones: dangerZones,
       linkedTacticalMapCardIds: ["tactical-map-danger-zones"],
       linkedActionPlanCardIds: ["action-card-danger-to-continuity"],
-      observation: `Signal a confirmer: ${dangerZones.join(", ")} revient sur les echantillons disponibles.`,
+      observation: `Signal du match courant a confirmer: ${dangerZones.join(", ")} apparait dans la lecture officielle.`,
       coachMeaning: "Cette zone merite d'etre surveillee, pas forcee.",
       whyItMatters: "Si elle produit une deuxieme action controlee, le plan d'action gagne en lisibilite.",
       nextMatchCheck: "A verifier au prochain match: la zone produit-elle encore une deuxieme action controlee ?",
       riskOfOverInterpretation: "Ne pas transformer cette comparaison locale en conclusion generale.",
-      limitationNote: "Comparaison locale sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant.",
-      sourceSummary: "Historique d'observation officiel, sans effet sur le score ni le moteur live.",
-      visibleInMainBody: visibleInMainBody("repeated", "official", repeatedConfidence),
+      limitationNote: "Match courant uniquement: donnee insuffisante pour parler de tendance multi-match; ne remplace pas la lecture officielle.",
+      sourceSummary: "Lecture du match courant officiel, sans effet sur le score ni le moteur live.",
+      visibleInMainBody: visibleInMainBody("insufficient_data", "official", repeatedConfidence),
       collapsedByDefault: false,
       estimatedReadTimeSeconds: 18,
     },
     {
       trendId: "trend-first-exit-after-recovery",
       title: "Premiere sortie apres recuperation a confirmer",
-      trendType: recoveryCard?.confidence === "high" ? "repeated" : "unstable",
+      trendType: "insufficient_data",
       sourceType: "official",
       confidence: recoveryConfidence,
-      sampleCount: 6,
-      presentCount: 3,
-      absentCount: 2,
-      unstableCount: 2,
+      sampleCount: currentMatchSampleCount,
+      presentCount: recoveryPresentCount,
+      absentCount: currentMatchSampleCount - recoveryPresentCount,
+      unstableCount: 0,
       insufficientDataCount: 1,
       repeatedZones: recoveryZones,
       currentMatchZones: recoveryZones,
@@ -131,9 +135,9 @@ export function buildCoachTrendSignalCardsFromProductReport(
       whyItMatters: "Une recuperation repetee ne prouve pas encore une sequence maitrisee.",
       nextMatchCheck: "A verifier au prochain match: moins de pertes immediates apres recuperation.",
       riskOfOverInterpretation: "Ne pas lire la recuperation seule comme une consigne automatique.",
-      limitationNote: "Signal instable sur les echantillons disponibles; pas une conclusion generale.",
-      sourceSummary: "Historique d'observation officiel relie aux cartes tactiques et au plan d'action.",
-      visibleInMainBody: visibleInMainBody("unstable", "official", recoveryConfidence),
+      limitationNote: "Match courant uniquement: donnee insuffisante pour parler de tendance multi-match; pas une conclusion generale.",
+      sourceSummary: "Lecture du match courant officiel reliee aux cartes tactiques et au plan d'action.",
+      visibleInMainBody: visibleInMainBody("insufficient_data", "official", recoveryConfidence),
       collapsedByDefault: false,
       estimatedReadTimeSeconds: 18,
     },
@@ -143,11 +147,11 @@ export function buildCoachTrendSignalCardsFromProductReport(
       trendType: "insufficient_data",
       sourceType: "official",
       confidence: pressureConfidence,
-      sampleCount: 6,
-      presentCount: pressureZones.length > 0 ? 1 : 0,
-      absentCount: pressureZones.length > 0 ? 5 : 6,
-      unstableCount: 1,
-      insufficientDataCount: 5,
+      sampleCount: currentMatchSampleCount,
+      presentCount: pressurePresentCount,
+      absentCount: currentMatchSampleCount - pressurePresentCount,
+      unstableCount: 0,
+      insufficientDataCount: 1,
       repeatedZones: [],
       currentMatchZones: pressureZones.slice(0, 3),
       linkedTacticalMapCardIds: ["tactical-map-pressure-continuity"],
@@ -157,8 +161,8 @@ export function buildCoachTrendSignalCardsFromProductReport(
       whyItMatters: "Le dernier rempart, les rebonds et les securisations doivent se confirmer sur plusieurs matchs.",
       nextMatchCheck: "A verifier au prochain match: interventions, rebonds et securisations restent-ils propres ?",
       riskOfOverInterpretation: "Etat vide volontaire: ne pas inventer une tendance.",
-      limitationNote: "Insuffisant sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant.",
-      sourceSummary: "Historique d'observation officiel, volume encore trop faible.",
+      limitationNote: "Match courant uniquement: volume insuffisant pour parler de tendance multi-match; ne remplace pas la lecture officielle.",
+      sourceSummary: "Lecture du match courant officiel, volume encore trop faible.",
       visibleInMainBody: true,
       collapsedByDefault: false,
       estimatedReadTimeSeconds: 16,
@@ -175,7 +179,7 @@ export function buildCoachMultiMatchTrendSummary(
   const visibleOnceCards = cards.filter((card) => card.trendType === "visible_once");
 
   return {
-    historyScope: "historique d'observation local",
+    historyScope: "match courant officiel uniquement; historique multi-match non charge",
     sampleCount: Math.max(0, ...cards.map((card) => card.sampleCount)),
     currentMatchIncluded: true,
     repeatedSignalCount: repeatedCards.length,
@@ -185,7 +189,7 @@ export function buildCoachMultiMatchTrendSummary(
     topRepeatedSignal: repeatedCards[0]?.title ?? "Aucun signal repete stabilise",
     topUnstableSignal: unstableCards[0]?.title ?? insufficientCards[0]?.title ?? "Signal a confirmer",
     topNextMatchCheck: cards[0]?.nextMatchCheck ?? "A verifier au prochain match: confirmer les signaux officiels sans les forcer.",
-    limitationSummary: "Comparaison locale sur les echantillons disponibles; pas une conclusion generale.",
+    limitationSummary: "Etat courant seulement: assez utile pour preparer une verification, pas assez pour conclure une tendance multi-match.",
     sourceOfTruthNote: "Ces tendances ne remplacent pas la lecture officielle du match courant et ne changent ni score, ni selection, ni moteur live.",
   };
 }
@@ -244,7 +248,7 @@ function renderTrendCard(card: CoachTrendSignalCard): string {
         </section>
       </div>
       <p class="guard">${escapeHtml(card.limitationNote)}</p>
-      <p class="muted">${escapeHtml(card.sourceSummary)} Echantillons: ${card.presentCount}/${card.sampleCount}; absences: ${card.absentCount}; instable: ${card.unstableCount}; insuffisant: ${card.insufficientDataCount}.</p>
+      <p class="muted">${escapeHtml(card.sourceSummary)} Echantillons courant: ${card.presentCount}/${card.sampleCount}; absences: ${card.absentCount}; instable: ${card.unstableCount}; insuffisant: ${card.insufficientDataCount}.</p>
     </article>`;
 }
 
@@ -260,7 +264,7 @@ export function renderCoachMultiMatchTrendSignalsSection(input: {
   return `
   <section id="multi-match-trend-signals" class="product-section trend-signals-section">
     <h2>Tendances a confirmer</h2>
-    <p class="muted">Mini-comparaison prudente: ${escapeHtml(input.summary.historyScope)}, ${input.summary.sampleCount} echantillons disponibles. ${escapeHtml(input.summary.limitationSummary)}</p>
+    <p class="muted">Mini-comparaison prudente: ${escapeHtml(input.summary.historyScope)}, ${input.summary.sampleCount} echantillon courant disponible. ${escapeHtml(input.summary.limitationSummary)}</p>
     <div class="interpretation-guard">
       <p>${escapeHtml(input.summary.sourceOfTruthNote)}</p>
       <p>Chaque tendance reste une piste d'observation a verifier au prochain match.</p>

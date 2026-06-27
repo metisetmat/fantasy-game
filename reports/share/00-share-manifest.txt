@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-26T18:43:41.458Z
+Generated timestamp: 2026-06-27T06:53:10.316Z
 Task/sprint name: Sprint 7G - Coach Report Multi-Match Comparison & Trend Signals
 Final file count: 20
 
@@ -946,26 +946,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/coachReportCoachExportScopeAudit.ts
- M src/reports/coachReportFromTraceAggregates.ts
- M src/reports/coachReportProductClarityAudit.ts
- M src/reports/coachReportProductDensityCleanupAudit.ts
- M src/reports/coachReportScopeBoundaryAudit.ts
+ M src/reports/coachReportMultiMatchComparisonTrendSignals7G.ts
+ M src/reports/coachReportMultiMatchTrendSignals.ts
+ M src/reports/coachReportMultiMatchTrendSignalsAudit.ts
  M src/reports/coachReportVisualDensityAudit.ts
- M src/reports/htmlCoachReport.ts
- M src/reports/renderCoachProductReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/coachReport7GBaselineMetadataRepairAudit.ts
-?? src/reports/coachReport7GDensityRegressionAudit.ts
-?? src/reports/coachReportHistoryScopeAudit.ts
-?? src/reports/coachReportMultiMatchComparisonTrendSignals7G.test.ts
-?? src/reports/coachReportMultiMatchComparisonTrendSignals7G.ts
-?? src/reports/coachReportMultiMatchComparisonTrendSignalsWarnings.ts
-?? src/reports/coachReportMultiMatchSourceOfTruthAudit.ts
-?? src/reports/coachReportMultiMatchTrendSignals.ts
-?? src/reports/coachReportMultiMatchTrendSignalsAudit.ts
-?? src/reports/coachReportTemplatePlaceholderCleanupAudit.ts
-?? src/reports/coachReportTrendPrudenceAudit.ts

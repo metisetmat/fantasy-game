@@ -1379,25 +1379,25 @@
         <p>Comparaison locale prudente: observation seulement, sans effet sur score, selection ou moteur live.</p>
       </div>
     </div>
-    <p class="muted">Mini-comparaison prudente: historique d&#39;observation local, 6 echantillons disponibles. Comparaison locale sur les echantillons disponibles; pas une conclusion generale.</p>
+    <p class="muted">Mini-comparaison prudente: match courant officiel uniquement; historique multi-match non charge, 1 echantillon courant disponible. Etat courant seulement: assez utile pour preparer une verification, pas assez pour conclure une tendance multi-match.</p>
     <div class="interpretation-guard">
       <p>Ces tendances ne remplacent pas la lecture officielle du match courant et ne changent ni score, ni selection, ni moteur live.</p>
       <p>Chaque tendance reste une piste d'observation a verifier au prochain match.</p>
     </div>
     <div class="trend-card-grid">
 
-    <article class="product-card trend-card" data-trend-id="trend-danger-zone-returns" data-trend-type="repeated" data-source-type="official" data-linked-tactical-map-card-ids="tactical-map-danger-zones" data-linked-action-plan-card-ids="action-card-danger-to-continuity">
+    <article class="product-card trend-card" data-trend-id="trend-danger-zone-returns" data-trend-type="insufficient_data" data-source-type="official" data-linked-tactical-map-card-ids="tactical-map-danger-zones" data-linked-action-plan-card-ids="action-card-danger-to-continuity">
       <div class="badge-row">
         <span class="badge">Source : Officiel</span>
-        <span class="badge">Confiance haute</span>
-        <span class="badge">signal repete localement</span>
+        <span class="badge">Confiance moyenne</span>
+        <span class="badge">donnee insuffisante</span>
       </div>
       <p class="card-kicker">Tendance a confirmer</p>
       <h3>Zone de danger qui revient</h3>
       <div class="trend-grid">
         <section>
           <h4>Observation</h4>
-          <p>Signal a confirmer: Z5-C, Z3-C, Z2-C revient sur les echantillons disponibles.</p>
+          <p>Signal du match courant a confirmer: Z5-C, Z3-C, Z2-C apparait dans la lecture officielle.</p>
           <p class="muted">Zones: Z5-C, Z3-C, Z2-C</p>
         </section>
         <section>
@@ -1410,8 +1410,35 @@
           <p>A verifier au prochain match: la zone produit-elle encore une deuxieme action controlee ?</p>
         </section>
       </div>
-      <p class="guard">Comparaison locale sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant.</p>
-      <p class="muted">Historique d&#39;observation officiel, sans effet sur le score ni le moteur live. Echantillons: 4/6; absences: 2; instable: 1; insuffisant: 0.</p>
+      <p class="guard">Match courant uniquement: donnee insuffisante pour parler de tendance multi-match; ne remplace pas la lecture officielle.</p>
+      <p class="muted">Lecture du match courant officiel, sans effet sur le score ni le moteur live. Echantillons courant: 1/1; absences: 0; instable: 0; insuffisant: 1.</p>
+    </article>
+    <article class="product-card trend-card" data-trend-id="trend-first-exit-after-recovery" data-trend-type="insufficient_data" data-source-type="official" data-linked-tactical-map-card-ids="tactical-map-useful-recoveries" data-linked-action-plan-card-ids="action-card-secure-first-exit">
+      <div class="badge-row">
+        <span class="badge">Source : Officiel</span>
+        <span class="badge">Confiance faible</span>
+        <span class="badge">donnee insuffisante</span>
+      </div>
+      <p class="card-kicker">Tendance a confirmer</p>
+      <h3>Premiere sortie après récupération a confirmer</h3>
+      <div class="trend-grid">
+        <section>
+          <h4>Observation</h4>
+          <p>Les récupérations existent, mais la sortie propre reste une piste d&#39;observation.</p>
+          <p class="muted">Zones: Z2-C</p>
+        </section>
+        <section>
+          <h4>Ce que le coach retient</h4>
+          <p>Le gain defensif ne vaut que s&#39;il devient possession utile.</p>
+          <p>Une récupération repetee ne prouve pas encore une sequence maitrisee.</p>
+        </section>
+        <section>
+          <h4>A verifier</h4>
+          <p>A verifier au prochain match: moins de pertes immediates après récupération.</p>
+        </section>
+      </div>
+      <p class="guard">Match courant uniquement: donnee insuffisante pour parler de tendance multi-match; pas une conclusion generale.</p>
+      <p class="muted">Lecture du match courant officiel reliee aux cartes tactiques et au plan d&#39;action. Echantillons courant: 1/1; absences: 0; instable: 0; insuffisant: 1.</p>
     </article>
     <article class="product-card trend-card" data-trend-id="trend-last-line-rebound-volume" data-trend-type="insufficient_data" data-source-type="official" data-linked-tactical-map-card-ids="tactical-map-pressure-continuity" data-linked-action-plan-card-ids="action-card-structure-after-pressure">
       <div class="badge-row">
@@ -1437,8 +1464,8 @@
           <p>A verifier au prochain match: interventions, rebonds et securisations restent-ils propres ?</p>
         </section>
       </div>
-      <p class="guard">Insuffisant sur les echantillons disponibles; ne remplace pas la lecture officielle du match courant.</p>
-      <p class="muted">Historique d&#39;observation officiel, volume encore trop faible. Echantillons: 1/6; absences: 5; instable: 1; insuffisant: 5.</p>
+      <p class="guard">Match courant uniquement: volume insuffisant pour parler de tendance multi-match; ne remplace pas la lecture officielle.</p>
+      <p class="muted">Lecture du match courant officiel, volume encore trop faible. Echantillons courant: 1/1; absences: 0; instable: 0; insuffisant: 1.</p>
     </article>
     </div>
   </section>
