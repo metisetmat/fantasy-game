@@ -379,6 +379,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const officialMatchStorySpineEngineCausalityProof8AValidation = readIfExists(join(shareDirectory, "validation.official-match-story-spine-engine-causality-proof-8a.md"));
   const matchStoryChronologyCumulativeScoreNarrativeQualityFix8B = readIfExists(join(shareDirectory, "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"));
   const matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation = readIfExists(join(shareDirectory, "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"));
+  const attributeRoleFatigueCausalityDeepening8C = readIfExists(join(shareDirectory, "attribute-role-fatigue-causality-deepening-8c.md"));
+  const attributeRoleFatigueCausalityDeepening8CValidation = readIfExists(join(shareDirectory, "validation.attribute-role-fatigue-causality-deepening-8c.md"));
+  const playerRoleCausalitySequenceLevelStoryUpgrade8D = readIfExists(join(shareDirectory, "player-role-causality-sequence-level-story-upgrade-8d.md"));
+  const playerRoleCausalitySequenceLevelStoryUpgrade8DValidation = readIfExists(join(shareDirectory, "validation.player-role-causality-sequence-level-story-upgrade-8d.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3307,6 +3311,30 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.official-match-story-spine-engine-causality-proof-8a.md",
     ...sprint8AForbiddenLeftovers,
   ];
+  const sprint8CExpectedFiles = sprint8BExpectedFiles.map((file) =>
+    file === "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"
+      ? "attribute-role-fatigue-causality-deepening-8c.md"
+      : file === "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md"
+        ? "validation.attribute-role-fatigue-causality-deepening-8c.md"
+        : file
+  );
+  const sprint8CForbiddenLeftovers = [
+    "match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+    "validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md",
+    ...sprint8BForbiddenLeftovers,
+  ];
+  const sprint8DExpectedFiles = sprint8CExpectedFiles.map((file) =>
+    file === "attribute-role-fatigue-causality-deepening-8c.md"
+      ? "player-role-causality-sequence-level-story-upgrade-8d.md"
+      : file === "validation.attribute-role-fatigue-causality-deepening-8c.md"
+        ? "validation.player-role-causality-sequence-level-story-upgrade-8d.md"
+        : file
+  );
+  const sprint8DForbiddenLeftovers = [
+    "attribute-role-fatigue-causality-deepening-8c.md",
+    "validation.attribute-role-fatigue-causality-deepening-8c.md",
+    ...sprint8CForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4695,6 +4723,69 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 8B source files", bundleReports.includes("src/reports/matchStoryChronologyCumulativeScoreNarrativeQualityFix8B.ts") && bundleReports.includes("src/reports/repairOfficialMatchStoryChronology.ts") && bundleReports.includes("src/reports/matchStoryChronologyAudit.ts") && bundleReports.includes("src/reports/matchStoryCumulativeScoreAudit.ts") && bundleReports.includes("src/reports/matchStoryNarrativeQualityAudit.ts"), "8B source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && matchStoryChronologyCumulativeScoreNarrativeQualityFix8BValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8CChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8CExpectedFiles.every((file) => requiredCopied(file)), sprint8CExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8CExpectedFiles.every((file) => manifest.includes(file)), sprint8CExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8C", activeConfig.sprintName === "Sprint 8C - Attribute Role Fatigue Causality Deepening", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8CForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8CForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8C oriented", readme.includes("# Sprint 8C Share Pack") && readme.includes("attribute-role-fatigue-causality-deepening-8c.md") && readme.includes("evidence-limited causality"), "README current"),
+    check("8C report included", attributeRoleFatigueCausalityDeepening8C.includes("# Attribute Role Fatigue Causality Deepening 8C") && attributeRoleFatigueCausalityDeepening8C.includes("Official Causality Evidence Facts") && attributeRoleFatigueCausalityDeepening8C.includes("Report Integration Budget Audit"), "8C doc included"),
+    check("8C validation is PASS", attributeRoleFatigueCausalityDeepening8CValidation.includes("Status: PASS") && attributeRoleFatigueCausalityDeepening8CValidation.includes("OfficialMatchAttributeRoleFatigueCausalityDeepening8CModel exists"), "8C validation current"),
+    check("baseline 8B visible", attributeRoleFatigueCausalityDeepening8C.includes("baselineVersion: MATCH_STORY_CHRONOLOGY_CUMULATIVE_SCORE_NARRATIVE_QUALITY_FIX_8B") && attributeRoleFatigueCausalityDeepening8CValidation.includes("baseline 8B preserved"), "8B baseline visible"),
+    check("baseline 8A visible", attributeRoleFatigueCausalityDeepening8CValidation.includes("baseline 8A preserved"), "8A baseline visible"),
+    check("baseline 7H visible", attributeRoleFatigueCausalityDeepening8CValidation.includes("baseline 7H preserved"), "7H baseline visible"),
+    check("baseline 6X visible", attributeRoleFatigueCausalityDeepening8CValidation.includes("baseline 6X match economy preserved"), "6X baseline visible"),
+    check("official causality layer exists", attributeRoleFatigueCausalityDeepening8CValidation.includes("official causality layer exists") && attributeRoleFatigueCausalityDeepening8C.includes("officialCausalityLinkCount"), "causality visible"),
+    check("causality links are event-backed", attributeRoleFatigueCausalityDeepening8CValidation.includes("causalityWithoutOfficialEventCount = 0") && attributeRoleFatigueCausalityDeepening8CValidation.includes("eventBackedCausalityCount > 0"), "event backed"),
+    check("unsupported and invented causality claims are 0", attributeRoleFatigueCausalityDeepening8CValidation.includes("unsupportedCausalityClaimCount: 0") && attributeRoleFatigueCausalityDeepening8CValidation.includes("inventedCausalityClaimCount: 0"), "unsupported/invented 0"),
+    check("sandbox/diagnostic/batch causality not promoted", attributeRoleFatigueCausalityDeepening8CValidation.includes("sandbox-only causality promoted = 0") && attributeRoleFatigueCausalityDeepening8CValidation.includes("diagnostic-only causality promoted = 0") && attributeRoleFatigueCausalityDeepening8CValidation.includes("batch-only causality promoted = 0"), "truth separation visible"),
+    check("role/attribute/fatigue/strategy tables visible", attributeRoleFatigueCausalityDeepening8C.includes("Role Causality") && attributeRoleFatigueCausalityDeepening8C.includes("Attribute Causality") && attributeRoleFatigueCausalityDeepening8C.includes("Fatigue Causality") && attributeRoleFatigueCausalityDeepening8C.includes("Strategy / Pressure / Zone Causality"), "tables visible"),
+    check("product causality section visible", coachProductHtml.includes('id="official-causality-8c"') && coachProductHtml.includes("Pourquoi le match a bascul"), "product causality visible"),
+    check("export causality section visible", coachExportHtml.includes('id="official-causality-8c"') && coachExportHtml.includes("Pourquoi le match a tourn"), "export causality visible"),
+    check("export remains under 900 seconds", attributeRoleFatigueCausalityDeepening8CValidation.includes("export remains under 900 seconds"), "export budget checked"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && attributeRoleFatigueCausalityDeepening8CValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && attributeRoleFatigueCausalityDeepening8CValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && attributeRoleFatigueCausalityDeepening8CValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8C source files", bundleReports.includes("src/reports/attributeRoleFatigueCausalityDeepening8C.ts") && bundleReports.includes("src/reports/buildOfficialMatchAttributeRoleFatigueCausality.ts") && bundleReports.includes("src/reports/officialCausalNarrativeQualityAudit.ts") && bundleReports.includes("src/reports/officialCausalitySourceOfTruthAudit.ts"), "8C source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && attributeRoleFatigueCausalityDeepening8CValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8DChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8DExpectedFiles.every((file) => requiredCopied(file)), sprint8DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8DExpectedFiles.every((file) => manifest.includes(file)), sprint8DExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8D", activeConfig.sprintName === "Sprint 8D - Player Role Causality Sequence-Level Story Upgrade", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8DForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8DForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8D oriented", readme.includes("# Sprint 8D Share Pack") && readme.includes("player-role-causality-sequence-level-story-upgrade-8d.md") && readme.includes("sequence-level coach causality"), "README current"),
+    check("8D report included", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("# Player Role Causality & Sequence-Level Story Upgrade 8D") && playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("Selected Official Sequences") && playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("Actor Contributions"), "8D doc included"),
+    check("8D validation is PASS", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("Status: PASS") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("OfficialPlayerRoleSequenceCausalityUpgrade8DModel exists"), "8D validation current"),
+    check("baseline 8C visible", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("baselineVersion: ATTRIBUTE_ROLE_FATIGUE_CAUSALITY_DEEPENING_8C") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("baseline 8C preserved"), "8C baseline visible"),
+    check("baseline 8B visible", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("baseline 8B preserved"), "8B baseline visible"),
+    check("baseline 8A visible", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("baseline 8A preserved"), "8A baseline visible"),
+    check("baseline 7H visible", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("baseline 7H preserved"), "7H baseline visible"),
+    check("baseline 6X visible", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("baseline 6X match economy preserved"), "6X baseline visible"),
+    check("selected official sequences visible", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("## Selected Official Sequences") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("selected sequences between 3 and 6"), "sequences visible"),
+    check("actor contribution chains visible", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("## Actor Contributions") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("sequence actor chains exist"), "actors visible"),
+    check("role function chains visible", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("## Role Function Chains") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("sequence role chains exist"), "role chains visible"),
+    check("fatigue specificity visible", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("## Sequence Fatigue Specificity") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("fatigue effects are player/sequence specific"), "fatigue visible"),
+    check("counter labels are unambiguous", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("eventBackedCausalityCount") && playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("causalityWithoutOfficialEventCount") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("causalityWithoutOfficialEventCount = 0") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("eventBackedCausalityCount > 0"), "counter labels clear"),
+    check("no invented sequence event", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("no invented sequence event") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("no sequence without official event"), "official event backing"),
+    check("source-of-truth sequence audit visible", playerRoleCausalitySequenceLevelStoryUpgrade8D.includes("Source-Of-Truth Sequence Audit") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("sandbox excluded from official sequence causality") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("batch excluded from official sequence causality") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("diagnostic separated from official sequence causality"), "truth separation visible"),
+    check("product sequence causality section visible", coachProductHtml.includes('id="sequence-causality-8d"') && coachProductHtml.includes("Les s&eacute;quences qui expliquent le match"), "product 8D visible"),
+    check("export sequence causality section visible", coachExportHtml.includes('id="sequence-causality-8d"') && coachExportHtml.includes("Deux s&eacute;quences &agrave; revoir"), "export 8D visible"),
+    check("export remains under 900 seconds", playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("export remains under 900 seconds"), "export budget checked"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8D source files", bundleReports.includes("src/reports/playerRoleCausalitySequenceLevelStoryUpgrade8D.ts") && bundleReports.includes("src/reports/buildOfficialSequenceLevelCausality.ts") && bundleReports.includes("src/reports/buildCoachReadableSequenceStory.ts") && bundleReports.includes("src/reports/sequenceLevelCausalityAudit.ts"), "8D source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8765,6 +8856,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8D - Player Role Causality")
+      ? sprint8DChecks
+    : activeConfig.sprintName.includes("Sprint 8C - Attribute Role Fatigue")
+      ? sprint8CChecks
     : activeConfig.sprintName.includes("Sprint 8B - Match Story Chronology")
       ? sprint8BChecks
     : activeConfig.sprintName.includes("Sprint 8A - Official Match Story Spine")

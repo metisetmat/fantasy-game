@@ -1474,6 +1474,70 @@ function renderOfficialMatchStorySpineExport(html: string): string {
   </section>`;
 }
 
+function renderOfficialCausality8CExport(html: string): string {
+  const body = extractSectionInner(html, "official-causality-8c");
+  if (body.length === 0) {
+    return "";
+  }
+  const guard = stripTags(extractMatch(body, /<p class="guard">([\s\S]*?)<\/p>/u));
+  const titles = [...body.matchAll(/<h3\b[^>]*>([\s\S]*?)<\/h3>/giu)]
+    .map((match) => stripTags(match[1] ?? ""))
+    .filter((title) => title.length > 0)
+    .slice(0, 3);
+  const limits = [...body.matchAll(/<p><strong>Limite\s*:<\/strong>\s*([\s\S]*?)<\/p>/giu)]
+    .map((match) => stripTags(match[1] ?? ""))
+    .filter((limit) => limit.length > 0)
+    .slice(0, 1);
+
+  return `
+  <section id="official-causality-8c" class="premium-section" data-source-product-sections="official-causality-8c">
+    <div class="report-section-divider">Causalite officielle</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Pourquoi le match a tourn&eacute;</h2>
+        <p>Lecture causale compacte, limit&eacute;e aux &eacute;v&eacute;nements officiels.</p>
+      </div>
+    </div>
+    <article class="report-table-card">
+      <p>${escapeHtml(guard || "La causalit&eacute; officielle reste disponible dans le rapport produit.")}</p>
+      ${titles.length === 0 ? "" : `<ul>${titles.map((title) => `<li>${escapeHtml(title)}</li>`).join("")}</ul>`}
+      <p class="guard">${escapeHtml(limits[0] ?? "Chaque cause reste evidence-limited et ne remplace jamais les score_change officiels.")}</p>
+    </article>
+  </section>`;
+}
+
+function renderSequenceCausality8DExport(html: string): string {
+  const body = extractSectionInner(html, "sequence-causality-8d");
+  if (body.length === 0) {
+    return "";
+  }
+  const cards = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)]
+    .map((match) => match[0])
+    .slice(0, 2);
+  const items = cards.map((card) => {
+    const title = stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u));
+    const effect = stripTags(extractMatch(card, /<p><strong>Effet officiel\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const proof = stripTags(extractMatch(card, /<p><strong>Preuve\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const limit = stripTags(extractMatch(card, /<p><strong>Limite\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    return `${title}: ${effect}; source ${proof}; limite ${limit}`;
+  }).filter((item) => item.length > 0);
+
+  return `
+  <section id="sequence-causality-8d" class="premium-section" data-source-product-sections="sequence-causality-8d">
+    <div class="report-section-divider">Sequences a revoir</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Deux s&eacute;quences &agrave; revoir</h2>
+        <p>Version ultra-compacte: acteurs, effet et source officielle seulement.</p>
+      </div>
+    </div>
+    <article class="report-table-card">
+      <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      <p class="guard">Ces s&eacute;quences n'imposent ni s&eacute;lection ni plan tactique; elles bornent la relecture coach.</p>
+    </article>
+  </section>`;
+}
+
 function renderMatchStory(html: string): string {
   const body = extractSectionInner(html, "official-match-reading");
 
@@ -5407,6 +5471,8 @@ export function renderCoachReportExportHtml(input: {
     renderCover(input.productReportHtml),
     renderExpressReadExport(input.productReportHtml),
     renderOfficialMatchStorySpineExport(input.productReportHtml),
+    renderOfficialCausality8CExport(input.productReportHtml),
+    renderSequenceCausality8DExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),

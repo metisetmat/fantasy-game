@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8D - Player Role Causality Sequence-Level Story Upgrade. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

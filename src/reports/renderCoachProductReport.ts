@@ -331,6 +331,76 @@ function renderOfficialMatchStorySpine(model: CoachProductReportViewModel): stri
   </section>`;
 }
 
+function renderOfficialCausality8C(model: CoachProductReportViewModel): string {
+  const causality = model.officialMatchCausality;
+  if (causality === undefined) {
+    return "";
+  }
+  const cards = causality.evidenceFacts.slice(0, 2);
+
+  return `
+  <section id="official-causality-8c" class="product-section official-causality-8c" aria-label="Pourquoi le match a bascule">
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">Causalit&eacute; officielle</p>
+        <h2>Pourquoi le match a bascul&eacute;</h2>
+      </div>
+      ${renderBadge(`Confiance : ${causality.status}`)}
+    </div>
+    <p class="guard">Deux causes officielles sont retenues ici; le rapport 8C garde la matrice compl&egrave;te.</p>
+    <div class="cards">
+      ${cards.map((fact) => `
+        <article class="product-card causality-card">
+          <div class="badge-row">
+            ${renderBadge(`Source officielle : ${fact.linkedOfficialEventIds[0]}`)}
+            ${renderBadge(`Confiance ${fact.confidence}`)}
+          </div>
+          <h3>${escapeHtml(fact.causeLabel)}</h3>
+          <p><strong>Effet :</strong> ${escapeHtml(fact.effectLabel)}</p>
+          <p><strong>Joueur / r&ocirc;le :</strong> ${escapeHtml([fact.primaryPlayerId, fact.role].filter((value): value is string => value !== undefined).join(" / ") || "non pr&eacute;cis&eacute;")}</p>
+          <p><strong>Zone :</strong> ${escapeHtml(fact.zoneIds.join(", ") || "non pr&eacute;cis&eacute;e")}</p>
+          <p><strong>Limite :</strong> ${escapeHtml(fact.limitationNote)}</p>
+        </article>`).join("")}
+    </div>
+  </section>`;
+}
+
+function renderSequenceCausality8D(model: CoachProductReportViewModel): string {
+  const sequenceCausality = model.officialSequenceCausality8D;
+  if (sequenceCausality === undefined) {
+    return "";
+  }
+  const cards = sequenceCausality.sequences.slice(0, 5);
+
+  return `
+  <section id="sequence-causality-8d" class="product-section sequence-causality-8d" aria-label="Les sequences qui expliquent le match">
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">S&eacute;quences officielles</p>
+        <h2>Les s&eacute;quences qui expliquent le match</h2>
+      </div>
+      ${renderBadge(`${cards.length} s&eacute;quences`)}
+    </div>
+    <p class="guard">${escapeHtml(sequenceCausality.sequenceStory.shortSequenceStory)}</p>
+    <div class="cards">
+      ${cards.map((sequence) => `
+        <article class="product-card sequence-card">
+          <div class="badge-row">
+            ${renderBadge(`Minute ${sequence.minuteStart}`)}
+            ${renderBadge(`Confiance ${sequence.confidence}`)}
+          </div>
+          <h3>${escapeHtml(sequence.sequenceType.replace(/_/gu, " "))}</h3>
+          <p><strong>Score :</strong> ${escapeHtml(sequence.scoreBefore)} &rarr; ${escapeHtml(sequence.scoreAfter)}</p>
+          <p><strong>Cha&icirc;ne joueur / r&ocirc;le :</strong> ${escapeHtml(sequence.actorChain.map((actor) => `${actor.playerId} / ${actor.role}`).join(" -> ") || "niveau equipe")}</p>
+          <p><strong>Zone :</strong> ${escapeHtml(sequence.zoneChain.join(" -> "))}</p>
+          <p><strong>Effet officiel :</strong> ${escapeHtml(sequence.observedEffect)}</p>
+          <p><strong>Preuve :</strong> ${escapeHtml(sequence.linkedOfficialEventIds.join(", "))}</p>
+          <p><strong>Limite :</strong> ${escapeHtml(sequence.limitationNote)}</p>
+        </article>`).join("")}
+    </div>
+  </section>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
   const detail = appendix.details !== undefined
     ? appendix.details
@@ -511,6 +581,10 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   })}
 
   ${renderOfficialMatchStorySpine(model)}
+
+  ${renderOfficialCausality8C(model)}
+
+  ${renderSequenceCausality8D(model)}
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>

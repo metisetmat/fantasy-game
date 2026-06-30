@@ -1,6 +1,7 @@
 import type { MatchReport, PlayerSnapshot } from "../contracts/engineToCoach";
 import type { MatchTraceAggregateModel } from "../simulation/tracing/matchTraceAggregateTypes";
 import { buildPlayerCandidateComparisonView } from "./buildPlayerCandidateComparisonView";
+import { buildOfficialMatchAttributeRoleFatigueCausality } from "./buildOfficialMatchAttributeRoleFatigueCausality";
 import { buildOfficialMatchStorySpine } from "./buildOfficialMatchStorySpine";
 import { buildPlayerMatchupView } from "./buildPlayerMatchupView";
 import { buildRosterCoverageMatchup } from "./buildRosterCoverageMatchup";
@@ -387,6 +388,7 @@ function buildModelWithoutTags(input: {
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
   readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
   readonly officialMatchStorySpine?: ReturnType<typeof buildOfficialMatchStorySpine>;
+  readonly officialMatchCausality?: ReturnType<typeof buildOfficialMatchAttributeRoleFatigueCausality>;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly warnings?: readonly string[];
@@ -485,6 +487,7 @@ function buildModelWithoutTags(input: {
     ...(input.playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView: input.playerCandidateComparisonView }),
     ...(input.phaseVisualSeed === undefined ? {} : { phaseVisualSeed: input.phaseVisualSeed }),
     ...(input.officialMatchStorySpine === undefined ? {} : { officialMatchStorySpine: input.officialMatchStorySpine }),
+    ...(input.officialMatchCausality === undefined ? {} : { officialMatchCausality: input.officialMatchCausality }),
     nextMatchSignals: input.nextMatchSignals,
     appendices: input.appendices,
     productVisibleJargonCount: countMatches(visibleText, forbiddenVisibleTechnicalTerms),
@@ -604,6 +607,9 @@ export function buildCoachProductReportView(input: {
 export function buildCoachProductReportViewFromMatchReport(
   report: MatchReport,
   rosterPlayers?: readonly PlayerSnapshot[],
+  options: {
+    readonly includeOfficialMatchCausality?: boolean;
+  } = {},
 ): CoachProductReportViewModel {
   const hasV1 = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_COACH_REPORT_V1_VISUALIZATION");
   const hasProfile = report.evidenceFacts.some((fact) => fact.category === "WORKBENCH_CHAIN_SELECTION_PREVIEW_PROFILE_VIEW");
@@ -683,6 +689,13 @@ export function buildCoachProductReportViewFromMatchReport(
   ];
   const nextMatchSignals = profilesToObserve.flatMap((profile) => profile.nextMatchSignal).slice(0, 5);
   const officialMatchStorySpine = buildOfficialMatchStorySpine(report);
+  const officialMatchCausality = options.includeOfficialMatchCausality === true
+    ? buildOfficialMatchAttributeRoleFatigueCausality({
+        report,
+        storySpine: officialMatchStorySpine,
+        playerSnapshots: productRosterPlayers,
+      })
+    : undefined;
   const playerMatchupView = buildPlayerMatchupView({
     profileView: profileViewFromProductProfiles(profilesToObserve),
     rosterPlayers: productRosterPlayers.length === 0
@@ -723,6 +736,7 @@ export function buildCoachProductReportViewFromMatchReport(
     ...(playerCandidateComparisonView === undefined ? {} : { playerCandidateComparisonView }),
     phaseVisualSeed: buildCoachReportPhaseVisualSeedFromMatchReport({ report }),
     officialMatchStorySpine,
+    ...(officialMatchCausality === undefined ? {} : { officialMatchCausality }),
     nextMatchSignals,
     appendices: buildAppendices(playerMatchupView, rosterCoverageMatchup, playerCandidateComparisonView),
     warnings: status === "available" ? [] : ["Product view is missing V1 or profile evidence."],

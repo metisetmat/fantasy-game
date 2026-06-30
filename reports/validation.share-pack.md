@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
+- current sprint: Sprint 8D - Player Role Causality Sequence-Level Story Upgrade
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,30 +20,30 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 8B - Sprint 8B - Match Story Chronology, Cumulative Score & Narrative Quality Fix
+- PASS: current sprint is Sprint 8D - Sprint 8D - Player Role Causality Sequence-Level Story Upgrade
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 8B oriented - README current
-- PASS: 8B report included - 8B doc included
-- PASS: 8B validation is PASS - 8B validation current
+- PASS: README is Sprint 8D oriented - README current
+- PASS: 8D report included - 8D doc included
+- PASS: 8D validation is PASS - 8D validation current
+- PASS: baseline 8C visible - 8C baseline visible
+- PASS: baseline 8B visible - 8B baseline visible
 - PASS: baseline 8A visible - 8A baseline visible
 - PASS: baseline 7H visible - 7H baseline visible
 - PASS: baseline 6X visible - 6X baseline visible
-- PASS: chronology audit visible - chronology visible
-- PASS: cumulative score audit visible - cumulative score visible
-- PASS: turning point order audit visible - turning points visible
-- PASS: narrative quality audit visible - narrative quality visible
-- PASS: source-of-truth regression audit visible - source of truth visible
-- PASS: report integration regression audit visible - report integration visible
-- PASS: corrected segments visible - corrected segments visible
-- PASS: corrected turning points visible - corrected turning points visible
-- PASS: product official story section visible - product story visible
-- PASS: export official story section visible - export story visible
-- PASS: story is not a season narrative - no season layer
-- PASS: story is not team style memory - no style memory
+- PASS: selected official sequences visible - sequences visible
+- PASS: actor contribution chains visible - actors visible
+- PASS: role function chains visible - role chains visible
+- PASS: fatigue specificity visible - fatigue visible
+- PASS: counter labels are unambiguous - counter labels clear
+- PASS: no invented sequence event - official event backing
+- PASS: source-of-truth sequence audit visible - truth separation visible
+- PASS: product sequence causality section visible - product 8D visible
+- PASS: export sequence causality section visible - export 8D visible
+- PASS: export remains under 900 seconds - export budget checked
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: bundle includes 8B source files - 8B source bundled
+- PASS: bundle includes 8D source files - 8D source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -59,12 +59,12 @@ Status: PASS
 - coach-report.latest.html
 - coach-report.product.html
 - manifest.md
-- match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
 - package.json
+- player-role-causality-sequence-level-story-upgrade-8d.md
 - scoring-events-summary.md
 - sequence-1-action-1.html
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.match-story-chronology-cumulative-score-narrative-quality-fix-8b.md
+- validation.player-role-causality-sequence-level-story-upgrade-8d.md
 - validation.share-pack.md

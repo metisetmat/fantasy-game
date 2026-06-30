@@ -4,6 +4,11 @@ import type { PlayerCandidateComparisonViewModel } from "./playerCandidateCompar
 import type { PlayerMatchupViewModel } from "./playerMatchupView";
 import type { RosterCoverageMatchupModel } from "./rosterCoverageMatchup";
 import type { CoachReportPhaseVisualSeed } from "./coachReportPhaseVisuals";
+import type { OfficialMatchAttributeRoleFatigueCausalityModel } from "./officialMatchAttributeRoleFatigueCausalityTypes";
+import type {
+  CoachReadableSequenceStory,
+  OfficialMatchSequenceCausality,
+} from "./officialPlayerRoleSequenceCausalityTypes";
 import type { OfficialMatchStorySpineModel } from "./officialMatchStorySpineTypes";
 
 export type CoachProductReportViewStatus =
@@ -76,6 +81,11 @@ export interface CoachProductReportViewModel {
   readonly playerCandidateComparisonView?: PlayerCandidateComparisonViewModel;
   readonly phaseVisualSeed?: CoachReportPhaseVisualSeed;
   readonly officialMatchStorySpine?: OfficialMatchStorySpineModel;
+  readonly officialMatchCausality?: OfficialMatchAttributeRoleFatigueCausalityModel;
+  readonly officialSequenceCausality8D?: {
+    readonly sequences: readonly OfficialMatchSequenceCausality[];
+    readonly sequenceStory: CoachReadableSequenceStory;
+  };
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly productVisibleJargonCount: number;
@@ -134,6 +144,15 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     ...(model.officialMatchStorySpine === undefined ? [] : [
       "coach_product_report_official_match_story_spine_present",
       `coach_product_report_official_match_story_spine_status_${model.officialMatchStorySpine.status}`,
+    ]),
+    ...(model.officialMatchCausality === undefined ? [] : [
+      "coach_product_report_official_causality_8c_present",
+      `coach_product_report_official_causality_8c_status_${model.officialMatchCausality.status}`,
+      `coach_product_report_official_causality_8c_fact_count_${model.officialMatchCausality.evidenceFacts.length}`,
+    ]),
+    ...(model.officialSequenceCausality8D === undefined ? [] : [
+      "coach_product_report_sequence_causality_8d_present",
+      `coach_product_report_sequence_causality_8d_sequence_count_${model.officialSequenceCausality8D.sequences.length}`,
     ]),
     "coach_product_report_next_match_signal_count_present",
     "coach_product_report_appendix_count_present",

@@ -237,7 +237,8 @@ export function currentGeneratedOfficialMatchStorySpineEngineCausalityProof8AMod
   if (storySpine === undefined) {
     throw new Error("official match story spine must be present in product report model");
   }
-  const productReportHtml = renderCoachProductReport(productReport);
+  const { officialMatchCausality: _officialMatchCausality, ...productReportWithout8C } = productReport;
+  const productReportHtml = renderCoachProductReport(productReportWithout8C);
   const baseline7H = currentGeneratedCoachReportExportLengthTrendCountCleanup7HModel();
   const exportReportHtml = renderCoachReportExportHtml({
     productReportHtml,
