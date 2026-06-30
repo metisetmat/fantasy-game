@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8D - Player Role Causality Sequence-Level Story Upgrade. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8E - Match Storyline Immersion Coach Replay View. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -144,6 +144,8 @@ import {
   renderAttributeRoleFatigueCausalityDeepening8CValidation,
   renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DDoc,
   renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation,
+  renderMatchStorylineImmersionCoachReplayView8EDoc,
+  renderMatchStorylineImmersionCoachReplayView8EValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -157,10 +159,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8D - Player Role Causality Sequence-Level Story Upgrade";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "player-role-causality-sequence-level-story-upgrade-8d.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8E - Match Storyline Immersion Coach Replay View";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "match-storyline-immersion-coach-replay-view-8e.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.player-role-causality-sequence-level-story-upgrade-8d.md";
+  "validation.match-storyline-immersion-coach-replay-view-8e.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3126,6 +3128,61 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8D model, report renderer, and validation renderer for player-role sequence-level story upgrade",
       },
       {
+        source: "src/reports/matchStorylineImmersionTypes.ts",
+        required: true,
+        reason: "Sprint 8E contracts for storyline chapters, replay moments, replay timeline, and wording transforms",
+      },
+      {
+        source: "src/reports/buildCoachReplayView.ts",
+        required: true,
+        reason: "Sprint 8E builder transforming official sequence causality into coach replay moments and chapters",
+      },
+      {
+        source: "src/reports/buildNaturalCoachMatchNarrative.ts",
+        required: true,
+        reason: "Sprint 8E natural coach narrative builder for immersive replay copy",
+      },
+      {
+        source: "src/reports/matchStorylineImmersionAudit.ts",
+        required: true,
+        reason: "Sprint 8E audit proving storyline chapters and replay moments are evidence-backed and non-mutating",
+      },
+      {
+        source: "src/reports/coachReplayViewAudit.ts",
+        required: true,
+        reason: "Sprint 8E audit proving product/export replay view visibility, coverage, and compact export limits",
+      },
+      {
+        source: "src/reports/naturalNarrativeWordingAudit.ts",
+        required: true,
+        reason: "Sprint 8E audit preventing raw player, event, and effect identifiers in coach-facing replay copy",
+      },
+      {
+        source: "src/reports/replayScoreSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 8E audit proving replay score claims remain tied to official score_change events",
+      },
+      {
+        source: "src/reports/replayWordingTransformAudit.ts",
+        required: true,
+        reason: "Sprint 8E audit proving technical evidence is transformed into safe coach wording",
+      },
+      {
+        source: "src/reports/coachReplayReportIntegrationBudgetAudit.ts",
+        required: true,
+        reason: "Sprint 8E audit preserving compact product/export integration and export read-time budget",
+      },
+      {
+        source: "src/reports/matchStorylineImmersionCoachReplayViewWarnings.ts",
+        required: true,
+        reason: "Sprint 8E warning-code registry for replay readiness and source-of-truth safety",
+      },
+      {
+        source: "src/reports/matchStorylineImmersionCoachReplayView8E.ts",
+        required: true,
+        reason: "Sprint 8E model, report renderer, and validation renderer for match storyline immersion coach replay view",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5282,6 +5339,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8E")) {
+    return renderMatchStorylineImmersionCoachReplayView8EDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8D")) {
     return renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DDoc(fullMatchTraceValidationModel());
   }
@@ -7608,6 +7668,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8E")) {
+    return renderMatchStorylineImmersionCoachReplayView8EValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8D")) {
     return renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation(fullMatchTraceValidationModel());
   }
@@ -9880,6 +9943,32 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8E")) {
+    return [
+      "# Sprint 8E Share Pack",
+      "",
+      "Current sprint: Sprint 8E - Match Storyline Immersion Coach Replay View",
+      "",
+      "Purpose: review the coach-facing replay layer built on top of Sprint 8D official sequence causality. The replay must read naturally while keeping all score, timeline, and source-of-truth guardrails intact.",
+      "",
+      "Core files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- match-storyline-immersion-coach-replay-view-8e.md",
+      "- validation.match-storyline-immersion-coach-replay-view-8e.md",
+      "- validation.share-pack.md",
+      "",
+      "Review order:",
+      "1. validation.share-pack.md",
+      "2. validation.match-storyline-immersion-coach-replay-view-8e.md",
+      "3. match-storyline-immersion-coach-replay-view-8e.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "Guardrail: this sprint adds replay wording and report integration only. It does not change scoring values, official score consequences, sandbox promotion, season memory, or team style memory.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8D")) {
     return [
       "# Sprint 8D Share Pack",
@@ -28117,6 +28206,7 @@ import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sql
 import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
+import { buildCoachReplayView } from "./buildCoachReplayView";
 import { buildOfficialSequenceLevelCausality } from "./buildOfficialSequenceLevelCausality";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
@@ -28202,12 +28292,21 @@ export function writeLatestCoachReport(): void {
       engineToCoachPublicContractFixtures.matchInputFixture.awayTeam,
     ],
   });
+  const replay8E = buildCoachReplayView({
+    matchId: experimentalReport.matchId,
+    officialScore: productReportView.scoreLabel,
+    sequences: sequenceCausality8D.sequences,
+    officialScoreChangeEventIds: experimentalReport.timeline
+      .filter((event) => event.consequences.some((consequence) => consequence.type === "score_change"))
+      .map((event) => event.eventId),
+  });
   const coachOnlyProductHtml = renderCoachProductReport({
     ...productReportView,
     officialSequenceCausality8D: {
       sequences: sequenceCausality8D.sequences,
       sequenceStory: sequenceCausality8D.story,
     },
+    officialReplay8E: replay8E.timeline,
   });
   const productHtmlWithout7A = coachOnlyProductHtml;
   const productExportHtmlFor7A = renderCoachReportExportHtml({

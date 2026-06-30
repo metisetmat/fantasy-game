@@ -1278,6 +1278,50 @@ function stripTags(html: string): string {
     .trim();
 }
 
+function decodeHtmlEntities(text: string): string {
+  const named: Record<string, string> = {
+    amp: "&",
+    quot: "\"",
+    apos: "'",
+    "#39": "'",
+    rarr: "->",
+    nbsp: " ",
+    eacute: "e",
+    egrave: "e",
+    ecirc: "e",
+    agrave: "a",
+    acirc: "a",
+    ccedil: "c",
+    ocirc: "o",
+    ugrave: "u",
+    icirc: "i",
+  };
+
+  let decoded = text;
+  for (let pass = 0; pass < 3; pass += 1) {
+    const next = decoded.replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/giu, (entity, code: string) => {
+      const lower = code.toLowerCase();
+      if (named[lower] !== undefined) {
+        return named[lower];
+      }
+      if (lower.startsWith("#x")) {
+        const value = Number.parseInt(lower.slice(2), 16);
+        return Number.isFinite(value) ? String.fromCodePoint(value) : entity;
+      }
+      if (lower.startsWith("#")) {
+        const value = Number.parseInt(lower.slice(1), 10);
+        return Number.isFinite(value) ? String.fromCodePoint(value) : entity;
+      }
+      return entity;
+    });
+    if (next === decoded) {
+      return decoded;
+    }
+    decoded = next;
+  }
+  return decoded;
+}
+
 function extractSignalCards(sectionHtml: string): readonly string[] {
   return [...sectionHtml.matchAll(/<article class="product-card signal-card">[\s\S]*?<\/article>/gu)].map((match) =>
     match[0] ?? ""
@@ -1534,6 +1578,40 @@ function renderSequenceCausality8DExport(html: string): string {
     <article class="report-table-card">
       <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
       <p class="guard">Ces s&eacute;quences n'imposent ni s&eacute;lection ni plan tactique; elles bornent la relecture coach.</p>
+    </article>
+  </section>`;
+}
+
+function renderCoachReplay8EExport(html: string): string {
+  const body = extractSectionInner(html, "coach-replay-8e");
+  if (body.length === 0) {
+    return "";
+  }
+  const cards = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)]
+    .map((match) => match[0])
+    .slice(0, 3);
+  const items = cards.map((card) => {
+    const title = decodeHtmlEntities(stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u)));
+    const score = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Score\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+    const reading = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Lecture coach\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+    const why = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Pourquoi cela compte\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+    return `${title} (${score}): ${reading} ${why}`;
+  }).filter((item) => item.length > 0);
+  const guard = decodeHtmlEntities(stripTags(extractMatch(body, /<p class="guard">([\s\S]*?)<\/p>/u)));
+
+  return `
+  <section id="coach-replay-8e" class="premium-section" data-source-product-sections="coach-replay-8e">
+    <div class="report-section-divider">Replay coach</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Replay coach en 60 secondes</h2>
+        <p>Trois moments maximum, lus depuis les sequences officielles.</p>
+      </div>
+    </div>
+    <article class="report-table-card">
+      <p>${escapeHtml(guard || "Le replay utilise uniquement les evenements officiels et le score officiel.")}</p>
+      <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      <p class="guard">Cette synthese ne change ni le score, ni la timeline, ni les evenements de scoring.</p>
     </article>
   </section>`;
 }
@@ -5473,6 +5551,7 @@ export function renderCoachReportExportHtml(input: {
     renderOfficialMatchStorySpineExport(input.productReportHtml),
     renderOfficialCausality8CExport(input.productReportHtml),
     renderSequenceCausality8DExport(input.productReportHtml),
+    renderCoachReplay8EExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),

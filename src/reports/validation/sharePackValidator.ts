@@ -383,6 +383,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const attributeRoleFatigueCausalityDeepening8CValidation = readIfExists(join(shareDirectory, "validation.attribute-role-fatigue-causality-deepening-8c.md"));
   const playerRoleCausalitySequenceLevelStoryUpgrade8D = readIfExists(join(shareDirectory, "player-role-causality-sequence-level-story-upgrade-8d.md"));
   const playerRoleCausalitySequenceLevelStoryUpgrade8DValidation = readIfExists(join(shareDirectory, "validation.player-role-causality-sequence-level-story-upgrade-8d.md"));
+  const matchStorylineImmersionCoachReplayView8E = readIfExists(join(shareDirectory, "match-storyline-immersion-coach-replay-view-8e.md"));
+  const matchStorylineImmersionCoachReplayView8EValidation = readIfExists(join(shareDirectory, "validation.match-storyline-immersion-coach-replay-view-8e.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3335,6 +3337,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.attribute-role-fatigue-causality-deepening-8c.md",
     ...sprint8CForbiddenLeftovers,
   ];
+  const sprint8EExpectedFiles = sprint8DExpectedFiles.map((file) =>
+    file === "player-role-causality-sequence-level-story-upgrade-8d.md"
+      ? "match-storyline-immersion-coach-replay-view-8e.md"
+      : file === "validation.player-role-causality-sequence-level-story-upgrade-8d.md"
+        ? "validation.match-storyline-immersion-coach-replay-view-8e.md"
+        : file
+  );
+  const sprint8EForbiddenLeftovers = [
+    "player-role-causality-sequence-level-story-upgrade-8d.md",
+    "validation.player-role-causality-sequence-level-story-upgrade-8d.md",
+    ...sprint8DForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4786,6 +4800,41 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 8D source files", bundleReports.includes("src/reports/playerRoleCausalitySequenceLevelStoryUpgrade8D.ts") && bundleReports.includes("src/reports/buildOfficialSequenceLevelCausality.ts") && bundleReports.includes("src/reports/buildCoachReadableSequenceStory.ts") && bundleReports.includes("src/reports/sequenceLevelCausalityAudit.ts"), "8D source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && playerRoleCausalitySequenceLevelStoryUpgrade8DValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8EChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8EExpectedFiles.every((file) => requiredCopied(file)), sprint8EExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8EExpectedFiles.every((file) => manifest.includes(file)), sprint8EExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8E", activeConfig.sprintName === "Sprint 8E - Match Storyline Immersion Coach Replay View", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8EForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8EForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8E oriented", readme.includes("# Sprint 8E Share Pack") && readme.includes("match-storyline-immersion-coach-replay-view-8e.md") && readme.includes("coach-facing replay layer"), "README current"),
+    check("8E report included", matchStorylineImmersionCoachReplayView8E.includes("# Match Storyline Immersion & Coach Replay View 8E") && matchStorylineImmersionCoachReplayView8E.includes("Coach Replay Moments") && matchStorylineImmersionCoachReplayView8E.includes("Storyline Chapters"), "8E doc included"),
+    check("8E validation is PASS", matchStorylineImmersionCoachReplayView8EValidation.includes("Status: PASS") && matchStorylineImmersionCoachReplayView8EValidation.includes("OfficialMatchStorylineImmersionReplay8EModel exists"), "8E validation current"),
+    check("baseline 8D visible", matchStorylineImmersionCoachReplayView8E.includes("baselineVersion: PLAYER_ROLE_CAUSALITY_SEQUENCE_LEVEL_STORY_UPGRADE_8D") && matchStorylineImmersionCoachReplayView8EValidation.includes("baseline 8D preserved"), "8D baseline visible"),
+    check("baseline 8C visible", matchStorylineImmersionCoachReplayView8EValidation.includes("baseline 8C preserved"), "8C baseline visible"),
+    check("baseline 8B visible", matchStorylineImmersionCoachReplayView8EValidation.includes("baseline 8B preserved"), "8B baseline visible"),
+    check("baseline 8A visible", matchStorylineImmersionCoachReplayView8EValidation.includes("baseline 8A preserved"), "8A baseline visible"),
+    check("baseline 7H visible", matchStorylineImmersionCoachReplayView8EValidation.includes("baseline 7H preserved"), "7H baseline visible"),
+    check("baseline 6X visible", matchStorylineImmersionCoachReplayView8EValidation.includes("baseline 6X preserved"), "6X baseline visible"),
+    check("3-5 storyline chapters visible", matchStorylineImmersionCoachReplayView8EValidation.includes("3-5 storyline chapters") && matchStorylineImmersionCoachReplayView8E.includes("## Storyline Chapters"), "chapters visible"),
+    check("4-7 replay moments visible", matchStorylineImmersionCoachReplayView8EValidation.includes("4-7 replay moments") && matchStorylineImmersionCoachReplayView8E.includes("## Coach Replay Moments"), "moments visible"),
+    check("natural narrative wording checked", matchStorylineImmersionCoachReplayView8EValidation.includes("no raw player ids in coach narrative") && matchStorylineImmersionCoachReplayView8EValidation.includes("no raw event ids in coach narrative") && matchStorylineImmersionCoachReplayView8EValidation.includes("no raw effect labels in coach narrative"), "wording checks visible"),
+    check("wording transforms visible", matchStorylineImmersionCoachReplayView8E.includes("## Wording Transforms") && matchStorylineImmersionCoachReplayView8EValidation.includes("wording transforms include players") && matchStorylineImmersionCoachReplayView8EValidation.includes("wording transforms safe"), "transforms visible"),
+    check("replay score source-of-truth audit visible", matchStorylineImmersionCoachReplayView8E.includes("Source-Of-Truth Guardrails") && matchStorylineImmersionCoachReplayView8EValidation.includes("replay score uses official score source") && matchStorylineImmersionCoachReplayView8EValidation.includes("no sandbox score claim") && matchStorylineImmersionCoachReplayView8EValidation.includes("no batch score claim"), "score source visible"),
+    check("product replay section visible", coachProductHtml.includes('id="coach-replay-8e"') && coachProductHtml.includes("Revivez le match"), "product 8E visible"),
+    check("export replay section visible", coachExportHtml.includes('id="coach-replay-8e"') && coachExportHtml.includes("Replay coach en 60 secondes"), "export 8E visible"),
+    check("export remains under 900 seconds", matchStorylineImmersionCoachReplayView8EValidation.includes("export remains under 900 seconds"), "export budget checked"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && matchStorylineImmersionCoachReplayView8EValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && matchStorylineImmersionCoachReplayView8EValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && matchStorylineImmersionCoachReplayView8EValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("no new season memory", matchStorylineImmersionCoachReplayView8EValidation.includes("no new season memory"), "season memory not added"),
+    check("no new team style memory", matchStorylineImmersionCoachReplayView8EValidation.includes("no new team style memory"), "team style memory not added"),
+    check("no new database history feature", matchStorylineImmersionCoachReplayView8EValidation.includes("no new database history feature"), "database history not added"),
+    check("bundle includes 8E source files", bundleReports.includes("src/reports/matchStorylineImmersionCoachReplayView8E.ts") && bundleReports.includes("src/reports/buildCoachReplayView.ts") && bundleReports.includes("src/reports/buildNaturalCoachMatchNarrative.ts") && bundleReports.includes("src/reports/replayScoreSourceOfTruthAudit.ts"), "8E source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && matchStorylineImmersionCoachReplayView8EValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8856,6 +8905,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8E - Match Storyline")
+      ? sprint8EChecks
     : activeConfig.sprintName.includes("Sprint 8D - Player Role Causality")
       ? sprint8DChecks
     : activeConfig.sprintName.includes("Sprint 8C - Attribute Role Fatigue")

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-30T15:50:29.831Z
-Task/sprint: Sprint 8D - Player Role Causality Sequence-Level Story Upgrade
+Generated: 2026-06-30T18:31:54.828Z
+Task/sprint: Sprint 8E - Match Storyline Immersion Coach Replay View
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- player-role-causality-sequence-level-story-upgrade-8d.md
-- validation.player-role-causality-sequence-level-story-upgrade-8d.md
+- match-storyline-immersion-coach-replay-view-8e.md
+- validation.match-storyline-immersion-coach-replay-view-8e.md
 - README.md
 
 ## Bundle Files

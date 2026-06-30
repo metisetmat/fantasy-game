@@ -58,6 +58,7 @@ import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sql
 import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
+import { buildCoachReplayView } from "./buildCoachReplayView";
 import { buildOfficialSequenceLevelCausality } from "./buildOfficialSequenceLevelCausality";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
@@ -143,12 +144,21 @@ export function writeLatestCoachReport(): void {
       engineToCoachPublicContractFixtures.matchInputFixture.awayTeam,
     ],
   });
+  const replay8E = buildCoachReplayView({
+    matchId: experimentalReport.matchId,
+    officialScore: productReportView.scoreLabel,
+    sequences: sequenceCausality8D.sequences,
+    officialScoreChangeEventIds: experimentalReport.timeline
+      .filter((event) => event.consequences.some((consequence) => consequence.type === "score_change"))
+      .map((event) => event.eventId),
+  });
   const coachOnlyProductHtml = renderCoachProductReport({
     ...productReportView,
     officialSequenceCausality8D: {
       sequences: sequenceCausality8D.sequences,
       sequenceStory: sequenceCausality8D.story,
     },
+    officialReplay8E: replay8E.timeline,
   });
   const productHtmlWithout7A = coachOnlyProductHtml;
   const productExportHtmlFor7A = renderCoachReportExportHtml({

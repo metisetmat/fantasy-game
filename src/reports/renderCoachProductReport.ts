@@ -401,6 +401,59 @@ function renderSequenceCausality8D(model: CoachProductReportViewModel): string {
   </section>`;
 }
 
+function renderCoachReplay8E(model: CoachProductReportViewModel): string {
+  const replay = model.officialReplay8E;
+  if (replay === undefined) {
+    return "";
+  }
+  const moments = replay.replayMoments.slice(0, 7);
+
+  return `
+  <section id="coach-replay-8e" class="product-section coach-replay-8e" aria-label="Revivez le match">
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">Replay coach officiel</p>
+        <h2>Revivez le match</h2>
+      </div>
+      ${renderBadge(`${moments.length} moments`)}
+    </div>
+    <p class="guard">${escapeHtml(replay.scoreSourceNote)}</p>
+    <div class="cards">
+      ${moments.map((moment) => `
+        <article class="product-card replay-card">
+          <div class="badge-row">
+            ${renderBadge(`Minute ${moment.minuteLabel}`)}
+            ${renderBadge(moment.sourceBadge === "official" ? "Source officielle" : "Source officielle limitee")}
+            ${renderBadge(`Confiance ${moment.confidence}`)}
+          </div>
+          <h3>${escapeHtml(moment.title)}</h3>
+          <p><strong>Score :</strong> ${escapeHtml(moment.scoreBefore)} &rarr; ${escapeHtml(moment.scoreAfter)}</p>
+          <p><strong>Lecture coach :</strong> ${escapeHtml(moment.coachReplayText)}</p>
+          <p><strong>Pourquoi cela compte :</strong> ${escapeHtml(moment.whyItMatters)}</p>
+          <p><strong>Acteur / r&ocirc;le :</strong> ${escapeHtml(`${moment.actorLabel} / ${moment.roleLabel}`)}</p>
+          <p><strong>Zone lue :</strong> ${escapeHtml(moment.zoneLabel)}</p>
+          <p><strong>Source score :</strong> ${escapeHtml(moment.scoreSourceNote)}</p>
+          <details class="appendix">
+            <summary>Preuves officielles</summary>
+            <p>Evenements: ${escapeHtml(moment.evidenceEventIds.join(", "))}</p>
+            <p>Sequence: ${escapeHtml(moment.evidenceSequenceIds.join(", "))}</p>
+            <p>Limite: ${escapeHtml(moment.limitationNote)}</p>
+          </details>
+        </article>`).join("")}
+    </div>
+    <div class="cards">
+      ${replay.storylineChapters.slice(0, 5).map((chapter) => `
+        <article class="product-card replay-chapter-card">
+          <div class="badge-row">${renderBadge(chapter.minuteRange)}${renderBadge(chapter.sourceBadge)}</div>
+          <h3>${escapeHtml(chapter.title)}</h3>
+          <p>${escapeHtml(chapter.chapterNarrative)}</p>
+          <p><strong>Lecture :</strong> ${escapeHtml(chapter.coachMeaning)}</p>
+        </article>`).join("")}
+    </div>
+    <p class="guard">${escapeHtml(replay.replayLimitations.join(" "))}</p>
+  </section>`;
+}
+
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
   const detail = appendix.details !== undefined
     ? appendix.details
@@ -585,6 +638,8 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
   ${renderOfficialCausality8C(model)}
 
   ${renderSequenceCausality8D(model)}
+
+  ${renderCoachReplay8E(model)}
 
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach</h2>
