@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-30T15:22:55.345Z
+Generated timestamp: 2026-06-30T15:50:29.831Z
 Task/sprint name: Sprint 8D - Player Role Causality Sequence-Level Story Upgrade
 Final file count: 20
 
@@ -1000,24 +1000,4 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/attributeRoleFatigueCausalityDeepening8C.ts
- M src/reports/coachProductReportView.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachProductReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReadableSequenceStory.ts
-?? src/reports/buildOfficialSequenceLevelCausality.ts
-?? src/reports/causalityCounterConsistencyAudit.ts
-?? src/reports/officialPlayerRoleSequenceCausalityTypes.ts
-?? src/reports/officialSequenceSourceOfTruthAudit.ts
-?? src/reports/playerRoleActorChainAudit.ts
-?? src/reports/playerRoleCausalitySequenceLevelStoryUpgrade8D.ts
-?? src/reports/playerRoleCausalitySequenceLevelStoryUpgradeWarnings.ts
-?? src/reports/roleFunctionSequenceAudit.ts
-?? src/reports/sequenceCausalNarrativeQualityAudit.ts
-?? src/reports/sequenceCausalityReportIntegrationBudgetAudit.ts
-?? src/reports/sequenceFatigueSpecificityAudit.ts
-?? src/reports/sequenceLevelCausalityAudit.ts
+ M src/reports/buildOfficialSequenceLevelCausality.ts

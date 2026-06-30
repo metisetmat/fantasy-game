@@ -326,6 +326,7 @@ function roleWitnessPriority(event: MatchEvent): readonly string[] {
 function resolveSequencePlayer(input: {
   readonly event: MatchEvent;
   readonly players: ReadonlyMap<PlayerId, PlayerSnapshot>;
+  readonly teamSnapshots: readonly TeamSnapshot[];
   readonly index: number;
 }): { readonly player: PlayerSnapshot; readonly source: "primary_actor" | "role_witness" } | undefined {
   if (input.event.primaryPlayerId !== undefined) {
@@ -334,11 +335,11 @@ function resolveSequencePlayer(input: {
       return { player: primary, source: "primary_actor" };
     }
   }
-  const allPlayers = [...input.players.values()];
+  const eventTeamRoster = input.teamSnapshots.find((team) => team.teamId === input.event.teamId)?.roster ?? [];
   const priorities = roleWitnessPriority(input.event);
   const prioritized = priorities
-    .flatMap((role) => allPlayers.filter((player) => player.role === role));
-  const pool = prioritized.length > 0 ? prioritized : allPlayers;
+    .flatMap((role) => eventTeamRoster.filter((player) => player.role === role));
+  const pool = prioritized.length > 0 ? prioritized : eventTeamRoster;
   const player = pool[input.index % pool.length];
   return player === undefined ? undefined : { player, source: "role_witness" };
 }
@@ -352,7 +353,12 @@ export function buildOfficialSequenceLevelCausality(
   const players = new Map<PlayerId, PlayerSnapshot>(input.playerSnapshots.map((player) => [player.playerId, player]));
   const selected = candidateEvents(input);
   const sequences = selected.map((event, index): OfficialMatchSequenceCausality => {
-    const resolvedPlayer = resolveSequencePlayer({ event, players, index });
+    const resolvedPlayer = resolveSequencePlayer({
+      event,
+      players,
+      teamSnapshots: input.teamSnapshots,
+      index,
+    });
     const contributions = resolvedPlayer === undefined ? [] : [buildContribution({
       event,
       player: resolvedPlayer.player,
