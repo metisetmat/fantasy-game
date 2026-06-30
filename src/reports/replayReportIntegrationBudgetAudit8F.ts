@@ -53,6 +53,7 @@ export function auditReplayReportIntegrationBudget8F(input: {
     sequenceCausalityStillVisible;
   const warningCodes: ReplayActorMappingNaturalNarrativeFixWarningCode[] = [];
   if (!base.exportUnder900Seconds) warningCodes.push("EXPORT_LENGTH_REGRESSED");
+  if (!passed) warningCodes.push("REPORT_INTEGRATION_REGRESSED");
   if (warningCodes.length === 0) {
     warningCodes.push("PRODUCT_REPLAY_SECTION_UPDATED", "EXPORT_REPLAY_SECTION_UPDATED", "EXPORT_LENGTH_PRESERVED");
   }

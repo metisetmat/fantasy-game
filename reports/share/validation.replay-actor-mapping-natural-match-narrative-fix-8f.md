@@ -48,6 +48,7 @@ Status: PASS
 - PASS: batch/live separation preserved - true
 - PASS: product replay section visible - true
 - PASS: export replay section visible - true
+- PASS: report integration audit passes - PASS
 - PASS: export remains under 900 seconds - 746
 - PASS: no new season memory - not added in 8F
 - PASS: no new team style memory - not added in 8F

@@ -64,8 +64,10 @@ function hasMechanicalPhrase(text: string): boolean {
 export function buildNaturalReplayNarrative8F(input: {
   readonly timeline: OfficialMatchReplayTimeline;
   readonly actorMappings: readonly ReplayActorMappingFix[];
+  readonly officialScoreChangeEventIds: readonly EventId[];
 }): NaturalReplayNarrative8F {
   const mappingByMoment = new Map(input.actorMappings.map((mapping) => [mapping.replayMomentId, mapping]));
+  const scoreChangeEventIds = new Set(input.officialScoreChangeEventIds);
   const replayMomentLines = input.timeline.replayMoments.map((moment, index): NaturalReplayNarrativeLine => {
     const mapping = mappingByMoment.get(moment.momentId);
     const actorLabel = mapping?.correctedPlayerLabel ?? moment.actorLabel;
@@ -105,7 +107,7 @@ export function buildNaturalReplayNarrative8F(input: {
     compactProofText: moment.scoreSourceNote,
     officialEventIds: moment.evidenceEventIds,
     sequenceId: moment.sequenceId,
-    scoreChangeBacked: moment.scoreBefore === moment.scoreAfter || input.timeline.officialEventIdsCovered.some((eventId) => moment.evidenceEventIds.includes(eventId)),
+    scoreChangeBacked: moment.scoreBefore === moment.scoreAfter || moment.evidenceEventIds.some((eventId) => scoreChangeEventIds.has(eventId)),
     limitationText: moment.limitationNote,
     visibleInCoachMainText: false,
     visibleInDetails: true,

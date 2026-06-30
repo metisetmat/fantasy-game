@@ -115,6 +115,7 @@ export function buildReplayActorMappingNaturalNarrativeFix8FModel(input: {
   readonly baseline8E: OfficialMatchStorylineImmersionReplay8EModel;
   readonly productReportHtml: string;
   readonly exportReportHtml: string;
+  readonly officialScoreChangeEventIds: readonly EventId[];
 }): ReplayActorMappingNaturalNarrativeFix8FModel {
   const actorMappings = fixReplayActorMappingFrom8D({
     baseline8E: input.baseline8E,
@@ -123,6 +124,7 @@ export function buildReplayActorMappingNaturalNarrativeFix8FModel(input: {
   const naturalNarrative = buildNaturalReplayNarrative8F({
     timeline: input.baseline8E.replayTimeline,
     actorMappings,
+    officialScoreChangeEventIds: input.officialScoreChangeEventIds,
   });
   const actorMappingAudit = auditReplayActorMapping8F(actorMappings);
   const naturalReplayNarrativeAudit = auditNaturalReplayNarrative8F(naturalNarrative);
@@ -218,6 +220,7 @@ export function buildReplayActorMappingNaturalNarrativeFix8FModel(input: {
     exportReplaySectionUpdated,
     exportLengthPreserved,
     sourceOfTruthSeparationPreserved,
+    reportIntegrationBudgetAuditPass: reportIntegrationBudgetAudit.status === "PASS",
     matchEconomyBaselinePreserved,
     guardrailsPreserved,
     productBaselineReady,
@@ -280,6 +283,7 @@ export function currentGeneratedReplayActorMappingNaturalNarrativeFix8FModel(): 
     baseline8E,
     productReportHtml,
     exportReportHtml,
+    officialScoreChangeEventIds: officialScoreChangeEventIds(report),
   });
 }
 
@@ -478,6 +482,7 @@ export function renderReplayActorMappingNaturalNarrativeFix8FValidation(
     checkLine("batch/live separation preserved", model.baseline8E.batchLiveSeparationPreserved, bool(model.baseline8E.batchLiveSeparationPreserved)),
     checkLine("product replay section visible", model.productReplaySectionUpdated, bool(model.productReplaySectionUpdated)),
     checkLine("export replay section visible", model.exportReplaySectionUpdated, bool(model.exportReplaySectionUpdated)),
+    checkLine("report integration audit passes", model.reportIntegrationBudgetAudit.status === "PASS", model.reportIntegrationBudgetAudit.status),
     checkLine("export remains under 900 seconds", model.reportIntegrationBudgetAudit.exportUnder900Seconds, String(model.reportIntegrationBudgetAudit.exportReadTimeSecondsAfter8F)),
     checkLine("no new season memory", true, "not added in 8F"),
     checkLine("no new team style memory", true, "not added in 8F"),
