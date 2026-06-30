@@ -58,6 +58,7 @@ import { createSqliteLocalReadOnlyCoachMatchHistoryAdapter } from "./history/sql
 import { createSqliteRealReadOnlyCoachMatchHistoryAdapter } from "./history/sqliteRealReadOnlyCoachMatchHistoryAdapter";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
+import { buildOfficialSequenceLevelCausality } from "./buildOfficialSequenceLevelCausality";
 import { renderHtmlCoachReport } from "./htmlCoachReport";
 import { renderCoachProductReport } from "./renderCoachProductReport";
 import {
@@ -125,7 +126,30 @@ export function writeLatestCoachReport(): void {
     rosterCoverageFixturePlayers,
     { includeOfficialMatchCausality: true },
   );
-  const coachOnlyProductHtml = renderCoachProductReport(productReportView);
+  if (productReportView.officialMatchStorySpine === undefined || productReportView.officialMatchCausality === undefined) {
+    throw new Error("official story and causality must be available for coach report sequence causality");
+  }
+  const sequenceCausality8D = buildOfficialSequenceLevelCausality({
+    report: experimentalReport,
+    storySpine: productReportView.officialMatchStorySpine,
+    causality8C: productReportView.officialMatchCausality,
+    playerSnapshots: [
+      ...engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
+      ...engineToCoachPublicContractFixtures.matchInputFixture.awayTeam.roster,
+      ...rosterCoverageFixturePlayers,
+    ],
+    teamSnapshots: [
+      engineToCoachPublicContractFixtures.matchInputFixture.homeTeam,
+      engineToCoachPublicContractFixtures.matchInputFixture.awayTeam,
+    ],
+  });
+  const coachOnlyProductHtml = renderCoachProductReport({
+    ...productReportView,
+    officialSequenceCausality8D: {
+      sequences: sequenceCausality8D.sequences,
+      sequenceStory: sequenceCausality8D.story,
+    },
+  });
   const productHtmlWithout7A = coachOnlyProductHtml;
   const productExportHtmlFor7A = renderCoachReportExportHtml({
     productReportHtml: productHtmlWithout7A,

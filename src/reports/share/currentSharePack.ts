@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 8C - Attribute Role Fatigue Causality Deepening",
+  name: "Sprint 8D - Player Role Causality Sequence-Level Story Upgrade",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "attribute-role-fatigue-causality-deepening-8c.md",
-    "validation.attribute-role-fatigue-causality-deepening-8c.md",
+    "player-role-causality-sequence-level-story-upgrade-8d.md",
+    "validation.player-role-causality-sequence-level-story-upgrade-8d.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,14 +39,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 8C share pack is current, complete, minimal, and below 20 files",
-    "attribute-role-fatigue-causality-deepening-8c.md": "documents the official evidence-limited causality layer connecting events, roles, attributes, fatigue, strategy, pressure, zones, and coach-readable story cause/effect",
-    "validation.attribute-role-fatigue-causality-deepening-8c.md": "proves the 8C causality layer is event-backed, source-of-truth safe, compact in product/export, and preserves 8B/8A/7H/6X guardrails",
-    "README.md": "compact reviewer orientation for the 8C share pack",
-    "manifest.md": "compatibility manifest listing the 8C share pack files",
+    "validation.share-pack.md": "proves the 8D share pack is current, complete, minimal, and below 20 files",
+    "player-role-causality-sequence-level-story-upgrade-8d.md": "documents the official player/role/sequence causality upgrade with actor chains, role functions, fatigue specificity, counter consistency, and source-of-truth audits",
+    "validation.player-role-causality-sequence-level-story-upgrade-8d.md": "proves 8D sequence causality is event-backed, player/role-safe, counter-consistent, source-of-truth safe, compact in product/export, and preserves 8C/8B/8A/7H/6X guardrails",
+    "README.md": "compact reviewer orientation for the 8D share pack",
+    "manifest.md": "compatibility manifest listing the 8D share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",
-    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, Player Candidate Comparison View, persistent history evidence, database adapter SPI and migration dry-run preparation, Selection Preview coach copy/model/tests, trace-backed rendering, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
+    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, Player Candidate Comparison View, official 8C causality, official 8D player/role/sequence causality, persistent history evidence, database adapter SPI and migration dry-run preparation, Selection Preview coach copy/model/tests, trace-backed rendering, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
   },
 };

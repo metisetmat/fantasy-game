@@ -1506,6 +1506,38 @@ function renderOfficialCausality8CExport(html: string): string {
   </section>`;
 }
 
+function renderSequenceCausality8DExport(html: string): string {
+  const body = extractSectionInner(html, "sequence-causality-8d");
+  if (body.length === 0) {
+    return "";
+  }
+  const cards = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)]
+    .map((match) => match[0])
+    .slice(0, 2);
+  const items = cards.map((card) => {
+    const title = stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u));
+    const effect = stripTags(extractMatch(card, /<p><strong>Effet officiel\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const proof = stripTags(extractMatch(card, /<p><strong>Preuve\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const limit = stripTags(extractMatch(card, /<p><strong>Limite\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    return `${title}: ${effect}; source ${proof}; limite ${limit}`;
+  }).filter((item) => item.length > 0);
+
+  return `
+  <section id="sequence-causality-8d" class="premium-section" data-source-product-sections="sequence-causality-8d">
+    <div class="report-section-divider">Sequences a revoir</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Deux s&eacute;quences &agrave; revoir</h2>
+        <p>Version ultra-compacte: acteurs, effet et source officielle seulement.</p>
+      </div>
+    </div>
+    <article class="report-table-card">
+      <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      <p class="guard">Ces s&eacute;quences n'imposent ni s&eacute;lection ni plan tactique; elles bornent la relecture coach.</p>
+    </article>
+  </section>`;
+}
+
 function renderMatchStory(html: string): string {
   const body = extractSectionInner(html, "official-match-reading");
 
@@ -5440,6 +5472,7 @@ export function renderCoachReportExportHtml(input: {
     renderExpressReadExport(input.productReportHtml),
     renderOfficialMatchStorySpineExport(input.productReportHtml),
     renderOfficialCausality8CExport(input.productReportHtml),
+    renderSequenceCausality8DExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-27T22:14:27.883Z
-Task/sprint: Sprint 8C - Attribute Role Fatigue Causality Deepening
+Generated: 2026-06-30T15:22:55.345Z
+Task/sprint: Sprint 8D - Player Role Causality Sequence-Level Story Upgrade
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- attribute-role-fatigue-causality-deepening-8c.md
-- validation.attribute-role-fatigue-causality-deepening-8c.md
+- player-role-causality-sequence-level-story-upgrade-8d.md
+- validation.player-role-causality-sequence-level-story-upgrade-8d.md
 - README.md
 
 ## Bundle Files

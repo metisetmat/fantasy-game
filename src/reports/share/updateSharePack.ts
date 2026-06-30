@@ -135,6 +135,8 @@ import {
   renderOfficialMatchStoryChronologyNarrativeQualityFix8BValidation,
   renderAttributeRoleFatigueCausalityDeepening8CDoc,
   renderAttributeRoleFatigueCausalityDeepening8CValidation,
+  renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DDoc,
+  renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -148,10 +150,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8C - Attribute Role Fatigue Causality Deepening";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "attribute-role-fatigue-causality-deepening-8c.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8D - Player Role Causality Sequence-Level Story Upgrade";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "player-role-causality-sequence-level-story-upgrade-8d.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.attribute-role-fatigue-causality-deepening-8c.md";
+  "validation.player-role-causality-sequence-level-story-upgrade-8d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3052,6 +3054,71 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8C model, report renderer, and validation renderer for official attribute-role-fatigue causality deepening",
       },
       {
+        source: "src/reports/officialPlayerRoleSequenceCausalityTypes.ts",
+        required: true,
+        reason: "Sprint 8D sequence-level player, role, fatigue, and function causality contracts",
+      },
+      {
+        source: "src/reports/buildOfficialSequenceLevelCausality.ts",
+        required: true,
+        reason: "Sprint 8D builder deriving official sequence actor chains, role function chains, fatigue effects, and coach-readable summaries",
+      },
+      {
+        source: "src/reports/buildCoachReadableSequenceStory.ts",
+        required: true,
+        reason: "Sprint 8D coach-readable sequence story builder keeping causal copy concrete and evidence-limited",
+      },
+      {
+        source: "src/reports/sequenceLevelCausalityAudit.ts",
+        required: true,
+        reason: "Sprint 8D audit proving selected official sequences, actor chains, role chains, zones, and event backing",
+      },
+      {
+        source: "src/reports/playerRoleActorChainAudit.ts",
+        required: true,
+        reason: "Sprint 8D audit preventing player none, role none, and unsupported player/role claims",
+      },
+      {
+        source: "src/reports/roleFunctionSequenceAudit.ts",
+        required: true,
+        reason: "Sprint 8D audit proving role function chains and non-generic tactical functions",
+      },
+      {
+        source: "src/reports/sequenceFatigueSpecificityAudit.ts",
+        required: true,
+        reason: "Sprint 8D audit keeping visible fatigue labelled and preventing unsupported fatigue overclaims",
+      },
+      {
+        source: "src/reports/causalityCounterConsistencyAudit.ts",
+        required: true,
+        reason: "Sprint 8D audit resolving 8C counter ambiguity and event-backed validation wording",
+      },
+      {
+        source: "src/reports/sequenceCausalNarrativeQualityAudit.ts",
+        required: true,
+        reason: "Sprint 8D audit preventing generic, mechanical, player-none, role-none, and unsupported sequence narrative",
+      },
+      {
+        source: "src/reports/officialSequenceSourceOfTruthAudit.ts",
+        required: true,
+        reason: "Sprint 8D source-of-truth audit excluding sandbox, batch, diagnostic, invented events, score mutation, and event deletion",
+      },
+      {
+        source: "src/reports/sequenceCausalityReportIntegrationBudgetAudit.ts",
+        required: true,
+        reason: "Sprint 8D product/export budget audit preserving compact sequence cards and export under 900 seconds",
+      },
+      {
+        source: "src/reports/playerRoleCausalitySequenceLevelStoryUpgradeWarnings.ts",
+        required: true,
+        reason: "Sprint 8D warning-code registry for sequence causality readiness and source-of-truth safety",
+      },
+      {
+        source: "src/reports/playerRoleCausalitySequenceLevelStoryUpgrade8D.ts",
+        required: true,
+        reason: "Sprint 8D model, report renderer, and validation renderer for player-role sequence-level story upgrade",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5208,6 +5275,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8D")) {
+    return renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8C")) {
     return renderAttributeRoleFatigueCausalityDeepening8CDoc(fullMatchTraceValidationModel());
   }
@@ -7531,6 +7601,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8D")) {
+    return renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8C")) {
     return renderAttributeRoleFatigueCausalityDeepening8CValidation(fullMatchTraceValidationModel());
   }
@@ -9800,6 +9873,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8D")) {
+    return [
+      "# Sprint 8D Share Pack",
+      "",
+      "Current sprint: Sprint 8D - Player Role Causality Sequence-Level Story Upgrade",
+      "",
+      "## Purpose",
+      "This pack proves the official match story can explain decisive sequences through player roles, role-function chains, fatigue-specific effects, and official-event evidence while preserving 8C causality, 8B chronology, 8A story spine, 7H export cleanup, and 6X match-economy guardrails.",
+      "",
+      "## Key Files",
+      "- coach-report.export.html",
+      "- coach-report.product.html",
+      "- player-role-causality-sequence-level-story-upgrade-8d.md",
+      "- validation.player-role-causality-sequence-level-story-upgrade-8d.md",
+      "- validation.share-pack.md",
+      "- scoring-events-summary.md",
+      "",
+      "## Validation Order",
+      "1. validation.share-pack.md",
+      "2. validation.player-role-causality-sequence-level-story-upgrade-8d.md",
+      "3. player-role-causality-sequence-level-story-upgrade-8d.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "## Guardrail Reminder",
+      "8D is sequence-level coach causality only: no scoring value change, no score cap, no post-hoc rewrite, no event deletion, no forced score, no sandbox truth promotion, no batch truth promotion, no season memory, and no team-style memory layer.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8C")) {
     return [
       "# Sprint 8C Share Pack",

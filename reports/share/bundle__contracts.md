@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8C - Attribute Role Fatigue Causality Deepening. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8D - Player Role Causality Sequence-Level Story Upgrade. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
