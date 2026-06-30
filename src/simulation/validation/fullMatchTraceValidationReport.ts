@@ -156,6 +156,10 @@ import {
   renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DDoc as renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DDocBase,
   renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation as renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidationBase,
 } from "../../reports/playerRoleCausalitySequenceLevelStoryUpgrade8D";
+import {
+  renderMatchStorylineImmersionCoachReplayView8EDoc as renderMatchStorylineImmersionCoachReplayView8EDocBase,
+  renderMatchStorylineImmersionCoachReplayView8EValidation as renderMatchStorylineImmersionCoachReplayView8EValidationBase,
+} from "../../reports/matchStorylineImmersionCoachReplayView8E";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6689,6 +6693,18 @@ export function renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidationBase();
+}
+
+export function renderMatchStorylineImmersionCoachReplayView8EDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderMatchStorylineImmersionCoachReplayView8EDocBase();
+}
+
+export function renderMatchStorylineImmersionCoachReplayView8EValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderMatchStorylineImmersionCoachReplayView8EValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

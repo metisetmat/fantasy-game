@@ -1538,6 +1538,40 @@ function renderSequenceCausality8DExport(html: string): string {
   </section>`;
 }
 
+function renderCoachReplay8EExport(html: string): string {
+  const body = extractSectionInner(html, "coach-replay-8e");
+  if (body.length === 0) {
+    return "";
+  }
+  const cards = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)]
+    .map((match) => match[0])
+    .slice(0, 3);
+  const items = cards.map((card) => {
+    const title = stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u));
+    const score = stripTags(extractMatch(card, /<p><strong>Score\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const reading = stripTags(extractMatch(card, /<p><strong>Lecture coach\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const why = stripTags(extractMatch(card, /<p><strong>Pourquoi cela compte\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    return `${title} (${score}): ${reading} ${why}`;
+  }).filter((item) => item.length > 0);
+  const guard = stripTags(extractMatch(body, /<p class="guard">([\s\S]*?)<\/p>/u));
+
+  return `
+  <section id="coach-replay-8e" class="premium-section" data-source-product-sections="coach-replay-8e">
+    <div class="report-section-divider">Replay coach</div>
+    <div class="report-section-header">
+      <div>
+        <h2>Replay coach en 60 secondes</h2>
+        <p>Trois moments maximum, lus depuis les sequences officielles.</p>
+      </div>
+    </div>
+    <article class="report-table-card">
+      <p>${escapeHtml(guard || "Le replay utilise uniquement les evenements officiels et le score officiel.")}</p>
+      <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      <p class="guard">Cette synthese ne change ni le score, ni la timeline, ni les evenements de scoring.</p>
+    </article>
+  </section>`;
+}
+
 function renderMatchStory(html: string): string {
   const body = extractSectionInner(html, "official-match-reading");
 
@@ -5473,6 +5507,7 @@ export function renderCoachReportExportHtml(input: {
     renderOfficialMatchStorySpineExport(input.productReportHtml),
     renderOfficialCausality8CExport(input.productReportHtml),
     renderSequenceCausality8DExport(input.productReportHtml),
+    renderCoachReplay8EExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),

@@ -9,6 +9,7 @@ import type {
   CoachReadableSequenceStory,
   OfficialMatchSequenceCausality,
 } from "./officialPlayerRoleSequenceCausalityTypes";
+import type { OfficialMatchReplayTimeline } from "./matchStorylineImmersionTypes";
 import type { OfficialMatchStorySpineModel } from "./officialMatchStorySpineTypes";
 
 export type CoachProductReportViewStatus =
@@ -86,6 +87,7 @@ export interface CoachProductReportViewModel {
     readonly sequences: readonly OfficialMatchSequenceCausality[];
     readonly sequenceStory: CoachReadableSequenceStory;
   };
+  readonly officialReplay8E?: OfficialMatchReplayTimeline;
   readonly nextMatchSignals: readonly string[];
   readonly appendices: readonly CoachProductReportAppendix[];
   readonly productVisibleJargonCount: number;
@@ -153,6 +155,11 @@ export function buildCoachProductReportTags(model: Omit<CoachProductReportViewMo
     ...(model.officialSequenceCausality8D === undefined ? [] : [
       "coach_product_report_sequence_causality_8d_present",
       `coach_product_report_sequence_causality_8d_sequence_count_${model.officialSequenceCausality8D.sequences.length}`,
+    ]),
+    ...(model.officialReplay8E === undefined ? [] : [
+      "coach_product_report_replay_8e_present",
+      `coach_product_report_replay_8e_moment_count_${model.officialReplay8E.replayMoments.length}`,
+      `coach_product_report_replay_8e_chapter_count_${model.officialReplay8E.storylineChapters.length}`,
     ]),
     "coach_product_report_next_match_signal_count_present",
     "coach_product_report_appendix_count_present",
