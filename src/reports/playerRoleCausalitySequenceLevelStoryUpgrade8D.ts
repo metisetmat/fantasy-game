@@ -329,7 +329,16 @@ export function currentGeneratedOfficialPlayerRoleSequenceCausalityUpgrade8DMode
       ...matchInput.awayTeam.roster,
       ...rosterCoverageFixturePlayers,
     ],
-    teamSnapshots: [matchInput.homeTeam, matchInput.awayTeam],
+    teamSnapshots: [
+      {
+        ...matchInput.homeTeam,
+        roster: [
+          ...matchInput.homeTeam.roster,
+          ...rosterCoverageFixturePlayers,
+        ],
+      },
+      matchInput.awayTeam,
+    ],
   });
   const productReportWith8D = {
     ...productReport,

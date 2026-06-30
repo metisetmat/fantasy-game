@@ -1587,17 +1587,26 @@ function renderCoachReplay8EExport(html: string): string {
   if (body.length === 0) {
     return "";
   }
-  const cards = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)]
+  const allItems = [...body.matchAll(/<article\b[\s\S]*?<\/article>/giu)]
     .map((match) => match[0])
-    .slice(0, 3);
-  const items = cards.map((card) => {
-    const title = decodeHtmlEntities(stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u)));
-    const score = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Score\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
-    const reading = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Lecture coach\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
-    const why = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Pourquoi cela compte\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
-    return `${title} (${score}): ${reading} ${why}`;
-  }).filter((item) => item.length > 0);
-  const guard = decodeHtmlEntities(stripTags(extractMatch(body, /<p class="guard">([\s\S]*?)<\/p>/u)));
+    .map((card) => {
+      const title = decodeHtmlEntities(stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u)));
+      const score = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Score\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+      const reading = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Lecture coach\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+      return { title, score, reading, text: `${title} (${score}): ${reading}` };
+    }).filter((item) => item.title.length > 0 && item.reading.length > 0);
+  const scoringItems = allItems.filter((item) => {
+    const parts = item.score.split(/\s*(?:→|->|â†’)\s*/u);
+    return parts.length >= 2 && parts[0] !== parts[1];
+  });
+  const blitzResponse = scoringItems.find((item) => item.title.includes("BLITZ"));
+  const selectedItems = [
+    scoringItems[0],
+    blitzResponse,
+    scoringItems[scoringItems.length - 1],
+  ].filter((item, index, items): item is NonNullable<typeof item> =>
+    item !== undefined && items.findIndex((candidate) => candidate?.text === item.text) === index
+  ).slice(0, 3);
 
   return `
   <section id="coach-replay-8e" class="premium-section" data-source-product-sections="coach-replay-8e">
@@ -1609,9 +1618,8 @@ function renderCoachReplay8EExport(html: string): string {
       </div>
     </div>
     <article class="report-table-card">
-      <p>${escapeHtml(guard || "Le replay utilise uniquement les evenements officiels et le score officiel.")}</p>
-      <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-      <p class="guard">Cette synthese ne change ni le score, ni la timeline, ni les evenements de scoring.</p>
+      <p>Replay fond&eacute; sur les &eacute;v&eacute;nements officiels ; les preuves d&eacute;taill&eacute;es restent en annexe.</p>
+      <ul>${selectedItems.map((item) => `<li>${escapeHtml(item.text)}</li>`).join("")}</ul>
     </article>
   </section>`;
 }

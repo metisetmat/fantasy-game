@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-06-30T18:31:54.828Z
-Task/sprint: Sprint 8E - Match Storyline Immersion Coach Replay View
+Generated: 2026-06-30T22:04:18.480Z
+Task/sprint: Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- match-storyline-immersion-coach-replay-view-8e.md
-- validation.match-storyline-immersion-coach-replay-view-8e.md
+- replay-actor-mapping-natural-match-narrative-fix-8f.md
+- validation.replay-actor-mapping-natural-match-narrative-fix-8f.md
 - README.md
 
 ## Bundle Files
