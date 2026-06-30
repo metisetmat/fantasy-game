@@ -1278,6 +1278,50 @@ function stripTags(html: string): string {
     .trim();
 }
 
+function decodeHtmlEntities(text: string): string {
+  const named: Record<string, string> = {
+    amp: "&",
+    quot: "\"",
+    apos: "'",
+    "#39": "'",
+    rarr: "->",
+    nbsp: " ",
+    eacute: "e",
+    egrave: "e",
+    ecirc: "e",
+    agrave: "a",
+    acirc: "a",
+    ccedil: "c",
+    ocirc: "o",
+    ugrave: "u",
+    icirc: "i",
+  };
+
+  let decoded = text;
+  for (let pass = 0; pass < 3; pass += 1) {
+    const next = decoded.replace(/&(#\d+|#x[0-9a-f]+|[a-z]+);/giu, (entity, code: string) => {
+      const lower = code.toLowerCase();
+      if (named[lower] !== undefined) {
+        return named[lower];
+      }
+      if (lower.startsWith("#x")) {
+        const value = Number.parseInt(lower.slice(2), 16);
+        return Number.isFinite(value) ? String.fromCodePoint(value) : entity;
+      }
+      if (lower.startsWith("#")) {
+        const value = Number.parseInt(lower.slice(1), 10);
+        return Number.isFinite(value) ? String.fromCodePoint(value) : entity;
+      }
+      return entity;
+    });
+    if (next === decoded) {
+      return decoded;
+    }
+    decoded = next;
+  }
+  return decoded;
+}
+
 function extractSignalCards(sectionHtml: string): readonly string[] {
   return [...sectionHtml.matchAll(/<article class="product-card signal-card">[\s\S]*?<\/article>/gu)].map((match) =>
     match[0] ?? ""
@@ -1547,13 +1591,13 @@ function renderCoachReplay8EExport(html: string): string {
     .map((match) => match[0])
     .slice(0, 3);
   const items = cards.map((card) => {
-    const title = stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u));
-    const score = stripTags(extractMatch(card, /<p><strong>Score\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
-    const reading = stripTags(extractMatch(card, /<p><strong>Lecture coach\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
-    const why = stripTags(extractMatch(card, /<p><strong>Pourquoi cela compte\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const title = decodeHtmlEntities(stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u)));
+    const score = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Score\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+    const reading = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Lecture coach\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
+    const why = decodeHtmlEntities(stripTags(extractMatch(card, /<p><strong>Pourquoi cela compte\s*:<\/strong>\s*([\s\S]*?)<\/p>/u)));
     return `${title} (${score}): ${reading} ${why}`;
   }).filter((item) => item.length > 0);
-  const guard = stripTags(extractMatch(body, /<p class="guard">([\s\S]*?)<\/p>/u));
+  const guard = decodeHtmlEntities(stripTags(extractMatch(body, /<p class="guard">([\s\S]*?)<\/p>/u)));
 
   return `
   <section id="coach-replay-8e" class="premium-section" data-source-product-sections="coach-replay-8e">

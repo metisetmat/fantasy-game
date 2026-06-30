@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-06-30T17:27:25.154Z
+Generated timestamp: 2026-06-30T18:31:54.828Z
 Task/sprint name: Sprint 8E - Match Storyline Immersion Coach Replay View
 Final file count: 20
 
@@ -1011,20 +1011,8 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/reports/coachProductReportView.ts
+ M src/reports/buildCoachReplayView.ts
  M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderCoachProductReport.ts
+ M src/reports/matchStorylineImmersionCoachReplayView8E.ts
  M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReplayView.ts
-?? src/reports/buildNaturalCoachMatchNarrative.ts
-?? src/reports/coachReplayReportIntegrationBudgetAudit.ts
-?? src/reports/coachReplayViewAudit.ts
-?? src/reports/matchStorylineImmersionAudit.ts
-?? src/reports/matchStorylineImmersionCoachReplayView8E.ts
-?? src/reports/matchStorylineImmersionCoachReplayViewWarnings.ts
-?? src/reports/matchStorylineImmersionTypes.ts
-?? src/reports/naturalNarrativeWordingAudit.ts
-?? src/reports/replayScoreSourceOfTruthAudit.ts
-?? src/reports/replayWordingTransformAudit.ts
+ M src/reports/replayScoreSourceOfTruthAudit.ts

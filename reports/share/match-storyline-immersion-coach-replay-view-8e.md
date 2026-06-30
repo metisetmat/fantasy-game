@@ -84,7 +84,7 @@ CONTROL frappe le premier: Il relie une sequence officielle au score 3 - 0, sans
 | matchStorylineImmersionAudit | PASS | 5 chapters / 6 moments | KEEP_REPLAY_VIEW |
 | coachReplayViewAudit | PASS | 100% coverage | KEEP_REPLAY_VIEW |
 | naturalNarrativeWordingAudit | PASS | 0 raw event leaks | KEEP_NATURAL_COACH_WORDING |
-| replayScoreSourceOfTruthAudit | PASS | 5/5 score events | KEEP_OFFICIAL_SCORE_SOURCE |
+| replayScoreSourceOfTruthAudit | PASS | 6/6 score events | KEEP_OFFICIAL_SCORE_SOURCE |
 | replayWordingTransformAudit | PASS | 6 player transforms | KEEP_WORDING_TRANSFORMS |
 | reportIntegrationBudgetAudit | PASS | 772s export | KEEP_COMPACT_REPLAY_IN_REPORTS |
 

@@ -237,11 +237,15 @@ export function buildCoachReplayView(input: {
   readonly matchId: string;
   readonly officialScore: string;
   readonly sequences: readonly OfficialMatchSequenceCausality[];
+  readonly officialScoreChangeEventIds?: readonly EventId[];
 }): CoachReplayBuildResult {
   const selectedSequences = input.sequences.slice(0, 7);
   const replayMoments = selectedSequences.map((sequence, index) => buildMoment(sequence, index, selectedSequences.length));
   const storylineChapters = buildChapters(replayMoments);
-  const officialEventIdsCovered = [...new Set(replayMoments.flatMap((moment) => moment.evidenceEventIds))];
+  const officialEventIdsCovered = [...new Set([
+    ...replayMoments.flatMap((moment) => moment.evidenceEventIds),
+    ...(input.officialScoreChangeEventIds ?? []),
+  ])];
   const officialSequenceIdsCovered = [...new Set(replayMoments.flatMap((moment) => moment.evidenceSequenceIds))];
   const timeline: OfficialMatchReplayTimeline = {
     matchId: input.matchId,

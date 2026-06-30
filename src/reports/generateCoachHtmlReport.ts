@@ -148,6 +148,9 @@ export function writeLatestCoachReport(): void {
     matchId: experimentalReport.matchId,
     officialScore: productReportView.scoreLabel,
     sequences: sequenceCausality8D.sequences,
+    officialScoreChangeEventIds: experimentalReport.timeline
+      .filter((event) => event.consequences.some((consequence) => consequence.type === "score_change"))
+      .map((event) => event.eventId),
   });
   const coachOnlyProductHtml = renderCoachProductReport({
     ...productReportView,

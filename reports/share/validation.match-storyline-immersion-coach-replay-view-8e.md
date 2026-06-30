@@ -27,7 +27,7 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 - PASS: no raw player ids in coach narrative - 0
 - PASS: no raw event ids in coach narrative - 0
 - PASS: no raw effect labels in coach narrative - 0
-- PASS: replay score uses official score source - 5/5
+- PASS: replay score uses official score source - 6/6
 - PASS: no sandbox score claim - 0
 - PASS: no batch score claim - 0
 - PASS: no score mutation - 0
@@ -52,7 +52,7 @@ npm run build && npm run typecheck && npm run test:contracts && npm run test:all
 - raw player id leak count: 0
 - raw event id leak count: 0
 - raw effect label leak count: 0
-- score change event coverage: 5/5
+- score change event coverage: 6/6
 - unsafe wording transform count: 0
 - unmapped technical term count: 0
 - export read time seconds after 8E: 772

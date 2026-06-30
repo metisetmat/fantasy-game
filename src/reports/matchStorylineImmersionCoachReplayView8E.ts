@@ -1,4 +1,6 @@
+import type { EventId } from "../core/ids";
 import { engineToCoachPublicContractFixtures } from "../contracts/engineToCoach.test";
+import type { MatchReport } from "../contracts/engineToCoach";
 import { runFullMatch } from "../simulation/runFullMatch";
 import { buildCoachProductReportViewFromMatchReport } from "./buildCoachProductReportView";
 import { buildCoachReplayView } from "./buildCoachReplayView";
@@ -42,6 +44,7 @@ export interface OfficialMatchStorylineImmersionReplay8EModel {
   readonly officialScore: string;
   readonly baseline8D: OfficialPlayerRoleSequenceCausalityUpgrade8DModel;
   readonly replayTimeline: OfficialMatchReplayTimeline;
+  readonly officialScoreChangeEventIds: readonly EventId[];
   readonly naturalNarrative: NaturalCoachMatchNarrative;
   readonly wordingTransforms: readonly ReplayWordingTransform[];
   readonly matchStorylineImmersionAudit: MatchStorylineImmersionAudit;
@@ -107,9 +110,16 @@ function hasBlockingWarning(warnings: readonly MatchStorylineImmersionCoachRepla
   ));
 }
 
+function officialScoreChangeEventIds(report: MatchReport): readonly EventId[] {
+  return report.timeline
+    .filter((event) => event.consequences.some((consequence) => consequence.type === "score_change"))
+    .map((event) => event.eventId);
+}
+
 export function buildOfficialMatchStorylineImmersionReplay8EModel(input: {
   readonly baseline8D: OfficialPlayerRoleSequenceCausalityUpgrade8DModel;
   readonly replayTimeline: OfficialMatchReplayTimeline;
+  readonly officialScoreChangeEventIds: readonly EventId[];
   readonly naturalNarrative: NaturalCoachMatchNarrative;
   readonly wordingTransforms: readonly ReplayWordingTransform[];
   readonly productReportHtml: string;
@@ -126,6 +136,7 @@ export function buildOfficialMatchStorylineImmersionReplay8EModel(input: {
   const replayScoreSourceOfTruthAudit = auditReplayScoreSourceOfTruth({
     baseline8D: input.baseline8D,
     timeline: input.replayTimeline,
+    officialScoreChangeEventIds: input.officialScoreChangeEventIds,
   });
   const replayWordingTransformAudit = auditReplayWordingTransforms(input.wordingTransforms);
   const reportIntegrationBudgetAudit = auditCoachReplayReportIntegrationBudget({
@@ -159,6 +170,7 @@ export function buildOfficialMatchStorylineImmersionReplay8EModel(input: {
     officialScore: input.replayTimeline.officialScore,
     baseline8D: input.baseline8D,
     replayTimeline: input.replayTimeline,
+    officialScoreChangeEventIds: input.officialScoreChangeEventIds,
     naturalNarrative: input.naturalNarrative,
     wordingTransforms: input.wordingTransforms,
     matchStorylineImmersionAudit,
@@ -208,6 +220,7 @@ export function currentGeneratedOfficialMatchStorylineImmersionReplay8EModel(): 
     matchId: baseline8D.matchId,
     officialScore: baseline8D.officialScore,
     sequences: baseline8D.sequences,
+    officialScoreChangeEventIds: officialScoreChangeEventIds(report),
   });
   const naturalNarrative = buildNaturalCoachMatchNarrative(replayBuild.timeline);
   const productReportHtml = renderCoachProductReport({
@@ -226,6 +239,7 @@ export function currentGeneratedOfficialMatchStorylineImmersionReplay8EModel(): 
   return buildOfficialMatchStorylineImmersionReplay8EModel({
     baseline8D,
     replayTimeline: replayBuild.timeline,
+    officialScoreChangeEventIds: officialScoreChangeEventIds(report),
     naturalNarrative,
     wordingTransforms: replayBuild.transforms,
     productReportHtml,

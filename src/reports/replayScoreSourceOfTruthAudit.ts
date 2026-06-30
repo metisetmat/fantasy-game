@@ -1,11 +1,13 @@
+import type { EventId } from "../core/ids";
 import type { OfficialPlayerRoleSequenceCausalityUpgrade8DModel } from "./playerRoleCausalitySequenceLevelStoryUpgrade8D";
 import type { OfficialMatchReplayTimeline, ReplayScoreSourceOfTruthAudit } from "./matchStorylineImmersionTypes";
 
 export function auditReplayScoreSourceOfTruth(input: {
   readonly baseline8D: OfficialPlayerRoleSequenceCausalityUpgrade8DModel;
   readonly timeline: OfficialMatchReplayTimeline;
+  readonly officialScoreChangeEventIds: readonly EventId[];
 }): ReplayScoreSourceOfTruthAudit {
-  const scoreChangeEventIds = [...new Set(input.baseline8D.sequences.flatMap((sequence) => sequence.linkedScoreChangeEventIds))];
+  const scoreChangeEventIds = [...new Set(input.officialScoreChangeEventIds)];
   const coveredEventIds = new Set(input.timeline.officialEventIdsCovered);
   const replayScoreChangeEventCoverageCount = scoreChangeEventIds.filter((eventId) => coveredEventIds.has(eventId)).length;
   const replayScoreChangeEventMissingCount = scoreChangeEventIds.length - replayScoreChangeEventCoverageCount;
