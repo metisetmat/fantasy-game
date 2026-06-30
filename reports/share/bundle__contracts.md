@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8E - Match Storyline Immersion Coach Replay View. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

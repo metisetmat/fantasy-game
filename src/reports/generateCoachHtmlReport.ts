@@ -140,7 +140,13 @@ export function writeLatestCoachReport(): void {
       ...rosterCoverageFixturePlayers,
     ],
     teamSnapshots: [
-      engineToCoachPublicContractFixtures.matchInputFixture.homeTeam,
+      {
+        ...engineToCoachPublicContractFixtures.matchInputFixture.homeTeam,
+        roster: [
+          ...engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
+          ...rosterCoverageFixturePlayers,
+        ],
+      },
       engineToCoachPublicContractFixtures.matchInputFixture.awayTeam,
     ],
   });

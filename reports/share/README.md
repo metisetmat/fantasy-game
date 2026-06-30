@@ -1,21 +1,21 @@
-# Sprint 8E Share Pack
+# Sprint 8F Share Pack
 
-Current sprint: Sprint 8E - Match Storyline Immersion Coach Replay View
+Current sprint: Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix
 
-Purpose: review the coach-facing replay layer built on top of Sprint 8D official sequence causality. The replay must read naturally while keeping all score, timeline, and source-of-truth guardrails intact.
+Purpose: review the coach replay correction that restores 8D actor/role attribution, removes suspicious goalkeeper fallback, and turns mechanical replay guardrail phrasing into natural match narrative.
 
 Core files:
 - coach-report.product.html
 - coach-report.export.html
-- match-storyline-immersion-coach-replay-view-8e.md
-- validation.match-storyline-immersion-coach-replay-view-8e.md
+- replay-actor-mapping-natural-match-narrative-fix-8f.md
+- validation.replay-actor-mapping-natural-match-narrative-fix-8f.md
 - validation.share-pack.md
 
 Review order:
 1. validation.share-pack.md
-2. validation.match-storyline-immersion-coach-replay-view-8e.md
-3. match-storyline-immersion-coach-replay-view-8e.md
+2. validation.replay-actor-mapping-natural-match-narrative-fix-8f.md
+3. replay-actor-mapping-natural-match-narrative-fix-8f.md
 4. coach-report.product.html
 5. coach-report.export.html
 
-Guardrail: this sprint adds replay wording and report integration only. It does not change scoring values, official score consequences, sandbox promotion, season memory, or team style memory.
+Guardrail: this sprint changes replay attribution and wording only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, or team style memory.

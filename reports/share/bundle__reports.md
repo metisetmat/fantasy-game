@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8E - Match Storyline Immersion Coach Replay View. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -146,6 +146,8 @@ import {
   renderPlayerRoleCausalitySequenceLevelStoryUpgrade8DValidation,
   renderMatchStorylineImmersionCoachReplayView8EDoc,
   renderMatchStorylineImmersionCoachReplayView8EValidation,
+  renderReplayActorMappingNaturalNarrativeFix8FDoc,
+  renderReplayActorMappingNaturalNarrativeFix8FValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -159,10 +161,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8E - Match Storyline Immersion Coach Replay View";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "match-storyline-immersion-coach-replay-view-8e.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "replay-actor-mapping-natural-match-narrative-fix-8f.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.match-storyline-immersion-coach-replay-view-8e.md";
+  "validation.replay-actor-mapping-natural-match-narrative-fix-8f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3183,6 +3185,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8E model, report renderer, and validation renderer for match storyline immersion coach replay view",
       },
       {
+        source: "src/reports/fixReplayActorMappingFrom8D.ts",
+        required: true,
+        reason: "Sprint 8F actor mapping correction restoring 8D-specific players and controlling goalkeeper fallback",
+      },
+      {
+        source: "src/reports/buildNaturalReplayNarrative8F.ts",
+        required: true,
+        reason: "Sprint 8F natural replay narrative builder keeping proof compact and coach copy readable",
+      },
+      {
+        source: "src/reports/replayActorMappingAudit8F.ts",
+        required: true,
+        reason: "Sprint 8F audit proving actor mapping fixes, role diversity, and fallback control",
+      },
+      {
+        source: "src/reports/naturalReplayNarrativeAudit8F.ts",
+        required: true,
+        reason: "Sprint 8F audit preventing raw IDs, mechanical replay phrases, and repeated guardrail copy",
+      },
+      {
+        source: "src/reports/replayProofCompactionAudit8F.ts",
+        required: true,
+        reason: "Sprint 8F audit proving official replay proof is compact and appendix-backed",
+      },
+      {
+        source: "src/reports/replayScoreSourceOfTruthRegressionAudit8F.ts",
+        required: true,
+        reason: "Sprint 8F audit preserving score_change source-of-truth and excluding sandbox/batch/diagnostic replay promotion",
+      },
+      {
+        source: "src/reports/replayReportIntegrationBudgetAudit8F.ts",
+        required: true,
+        reason: "Sprint 8F audit preserving product/export replay visibility and export budget",
+      },
+      {
+        source: "src/reports/replayActorMappingNaturalNarrativeFixWarnings.ts",
+        required: true,
+        reason: "Sprint 8F warning-code registry for actor mapping, natural narrative, proof, and source-of-truth safety",
+      },
+      {
+        source: "src/reports/replayActorMappingNaturalMatchNarrativeFix8F.ts",
+        required: true,
+        reason: "Sprint 8F model, report renderer, and validation renderer for replay actor mapping and natural narrative fix",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5339,6 +5386,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8F")) {
+    return renderReplayActorMappingNaturalNarrativeFix8FDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8E")) {
     return renderMatchStorylineImmersionCoachReplayView8EDoc(fullMatchTraceValidationModel());
   }
@@ -7668,6 +7718,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8F")) {
+    return renderReplayActorMappingNaturalNarrativeFix8FValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8E")) {
     return renderMatchStorylineImmersionCoachReplayView8EValidation(fullMatchTraceValidationModel());
   }
@@ -9943,6 +9996,32 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8F")) {
+    return [
+      "# Sprint 8F Share Pack",
+      "",
+      "Current sprint: Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix",
+      "",
+      "Purpose: review the coach replay correction that restores 8D actor/role attribution, removes suspicious goalkeeper fallback, and turns mechanical replay guardrail phrasing into natural match narrative.",
+      "",
+      "Core files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- replay-actor-mapping-natural-match-narrative-fix-8f.md",
+      "- validation.replay-actor-mapping-natural-match-narrative-fix-8f.md",
+      "- validation.share-pack.md",
+      "",
+      "Review order:",
+      "1. validation.share-pack.md",
+      "2. validation.replay-actor-mapping-natural-match-narrative-fix-8f.md",
+      "3. replay-actor-mapping-natural-match-narrative-fix-8f.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "Guardrail: this sprint changes replay attribution and wording only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, or team style memory.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8E")) {
     return [
       "# Sprint 8E Share Pack",
@@ -28288,7 +28367,13 @@ export function writeLatestCoachReport(): void {
       ...rosterCoverageFixturePlayers,
     ],
     teamSnapshots: [
-      engineToCoachPublicContractFixtures.matchInputFixture.homeTeam,
+      {
+        ...engineToCoachPublicContractFixtures.matchInputFixture.homeTeam,
+        roster: [
+          ...engineToCoachPublicContractFixtures.matchInputFixture.homeTeam.roster,
+          ...rosterCoverageFixturePlayers,
+        ],
+      },
       engineToCoachPublicContractFixtures.matchInputFixture.awayTeam,
     ],
   });

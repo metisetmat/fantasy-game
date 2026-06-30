@@ -25,16 +25,16 @@ function teamLabel(teamId: TeamId): string {
 
 function roleLabel(role: string): string {
   const labels: Record<string, string> = {
-    goalkeeper_free_safety: "gardien-libero",
-    tempo_half: "tempo half",
-    hook_link: "hook link",
+    goalkeeper_free_safety: "Gardien-libero",
+    tempo_half: "Tempo Half",
+    hook_link: "Hook Link",
     forward_leader: "leader axial",
     mobile_lock: "verrou mobile",
-    space_hunter: "chasseur d'espace",
-    playmaker: "playmaker",
-    pivot: "pivot",
-    left_piston: "piston gauche",
-    right_piston: "piston droit",
+    space_hunter: "Space Hunter",
+    playmaker: "Playmaker",
+    pivot: "Pivot",
+    left_piston: "Left Piston",
+    right_piston: "Right Piston",
   };
   return labels[role] ?? role.replace(/_/gu, " ");
 }
@@ -47,6 +47,11 @@ function playerLabel(playerId: PlayerId, teamId: TeamId, role: string): string {
     "rc-lp": "Left Piston",
     "rc-pm": "Playmaker",
     "rc-sh": "Space Hunter",
+    "rc-second-ball-chaser": "le Space Hunter de CONTROL",
+    "rc-creative-support": "le Playmaker de soutien de CONTROL",
+    "rc-low-endurance-creator": "le Playmaker createur de CONTROL",
+    "rc-mobile-connector": "le Hook Link mobile de CONTROL",
+    "rc-hybrid-role": "le Left Piston hybride de CONTROL",
   };
   return known[String(playerId)] ?? `${roleLabel(role)} de ${teamLabel(teamId)}`;
 }
@@ -64,7 +69,7 @@ function zoneLabel(zones: readonly string[]): string {
 
 function effectLabel(effect: OfficialSequenceContributionEffect | string): string {
   const labels: Record<string, string> = {
-    score_created: "cree le score officiel",
+    score_created: "change le score",
     danger_created: "cree la menace",
     possession_secured: "securise la possession",
     turnover_created: "provoque la recuperation",
@@ -89,12 +94,26 @@ function roleFunctionLabel(roleFunction: OfficialSequenceRoleFunction | string):
     defensive_screen: "protege l'axe",
     pressure_creator: "declenche la pression",
     pressure_receiver: "subit la pression",
-    goalkeeper_free_safety: "couvre comme gardien-libero",
+    goalkeeper_free_safety: "reste le dernier repere",
     second_ball_presence: "se place sur le second ballon",
     rest_defense_anchor: "stabilise la rest-defense",
     unknown_official_actor: "acteur officiel non specialise",
   };
   return labels[roleFunction] ?? String(roleFunction).replace(/_/gu, " ");
+}
+
+function preferredActor(sequence: OfficialMatchSequenceCausality): OfficialMatchSequenceCausality["actorChain"][number] | undefined {
+  const nonGoalkeeper = sequence.actorChain.find((actor) => actor.role !== "goalkeeper_free_safety");
+  if (nonGoalkeeper !== undefined) return nonGoalkeeper;
+  return sequence.actorChain[0];
+}
+
+function sentenceStart(label: string): string {
+  return label.length === 0 ? label : `${label[0]?.toLocaleUpperCase("fr-FR") ?? ""}${label.slice(1)}`;
+}
+
+function afterGraceA(label: string): string {
+  return label.startsWith("le ") ? `au ${label.slice(3)}` : label;
 }
 
 function momentType(sequence: OfficialMatchSequenceCausality, index: number, total: number): OfficialCoachReplayMomentType {
@@ -117,18 +136,18 @@ function momentTitle(type: OfficialCoachReplayMomentType, sequence: OfficialMatc
 
 function whyItMatters(type: OfficialCoachReplayMomentType, sequence: OfficialMatchSequenceCausality): string {
   if (type === "fatigue_visible") {
-    return "Ce moment aide le coach a relire la stabilite et le soutien, sans conclure qu'un joueur est responsable seul.";
+    return "Ce moment aide a relire la stabilite et le soutien sans transformer la fatigue en explication unique.";
   }
   if (sequence.scoreBefore !== sequence.scoreAfter) {
-    return `Il relie une sequence officielle au score ${sequence.scoreAfter}, sans creer une deuxieme source de verite.`;
+    return "Ce moment change le rythme du match; les details officiels gardent la preuve compacte.";
   }
-  return "Il explique une respiration tactique entre deux scores et garde la causalite limitee aux evenements officiels.";
+  return "Ce moment explique une respiration tactique entre deux scores.";
 }
 
 function scoreSourceNote(sequence: OfficialMatchSequenceCausality): string {
   return sequence.scoreBefore === sequence.scoreAfter
-    ? "Aucun score ajoute dans ce moment; la lecture reste contextuelle."
-    : `Score officiel lu depuis les score_change: ${sequence.scoreBefore} vers ${sequence.scoreAfter}.`;
+    ? "Preuve: aucun score_change dans ce moment; lecture contextuelle."
+    : `Preuve: score_change officiel ${sequence.scoreBefore} vers ${sequence.scoreAfter}.`;
 }
 
 function transform(
@@ -151,7 +170,7 @@ function transform(
 }
 
 function buildMoment(sequence: OfficialMatchSequenceCausality, index: number, total: number): OfficialCoachReplayMoment {
-  const actor = sequence.actorChain[0];
+  const actor = preferredActor(sequence);
   const role = actor?.role ?? sequence.roleChain.rolesInOrder[0] ?? "official_actor";
   const player = actor?.playerId ?? sequence.roleChain.playersInOrder[0] ?? `${sequence.teamId}-actor` as PlayerId;
   const type = momentType(sequence, index, total);
@@ -160,8 +179,26 @@ function buildMoment(sequence: OfficialMatchSequenceCausality, index: number, to
   const actorCoachLabel = playerLabel(player, sequence.teamId, role);
   const roleCoachLabel = roleLabel(role);
   const zoneCoachLabel = zoneLabel(sequence.zoneChain);
-  const effectCoachLabel = effectLabel(effect);
   const functionCoachLabel = roleFunctionLabel(roleFunction);
+  const scoreChanged = sequence.scoreBefore !== sequence.scoreAfter;
+  const naturalCoachText = (() => {
+    if (type === "fatigue_visible") {
+      return `La fatigue apparait dans une sequence de ${teamLabel(sequence.teamId)}, mais son effet reste a confirmer. Le moment sert surtout a relire la stabilite et le soutien.`;
+    }
+    if (type === "first_score") {
+      return `${teamLabel(sequence.teamId)} frappe le premier grace ${afterGraceA(actorCoachLabel)} dans ${zoneCoachLabel}. La sequence fait passer le score de ${sequence.scoreBefore} a ${sequence.scoreAfter}.`;
+    }
+    if (type === "final_score_lock") {
+      return `${sentenceStart(actorCoachLabel)} conclut la derniere sequence de score dans ${zoneCoachLabel} et fixe le ${sequence.scoreAfter}.`;
+    }
+    if (scoreChanged && sequence.teamId === "blitz") {
+      return `${teamLabel(sequence.teamId)} reste dans le match avec ${actorCoachLabel} dans ${zoneCoachLabel}: ${sequence.scoreBefore} devient ${sequence.scoreAfter}.`;
+    }
+    if (scoreChanged) {
+      return `${sentenceStart(actorCoachLabel)} transforme une sequence dans ${zoneCoachLabel} en points: ${sequence.scoreBefore} devient ${sequence.scoreAfter}.`;
+    }
+    return `${sentenceStart(actorCoachLabel)} ${functionCoachLabel} dans ${zoneCoachLabel}.`;
+  })();
 
   return {
     momentId: `8e-moment-${index + 1}`,
@@ -176,7 +213,7 @@ function buildMoment(sequence: OfficialMatchSequenceCausality, index: number, to
     actorLabel: actorCoachLabel,
     roleLabel: roleCoachLabel,
     zoneLabel: zoneCoachLabel,
-    coachReplayText: `${actorCoachLabel} ${functionCoachLabel} dans ${zoneCoachLabel}; la sequence ${effectCoachLabel} et laisse le score a ${sequence.scoreAfter}.`,
+    coachReplayText: naturalCoachText,
     whyItMatters: whyItMatters(type, sequence),
     scoreSourceNote: scoreSourceNote(sequence),
     evidenceEventIds: sequence.linkedOfficialEventIds,
@@ -203,7 +240,7 @@ function buildChapters(moments: readonly OfficialCoachReplayMoment[]): readonly 
     title: moment.title,
     minuteRange: moment.minuteLabel,
     scoreRange: `${moment.scoreBefore} -> ${moment.scoreAfter}`,
-    chapterNarrative: `${moment.title}: ${moment.actorLabel} donne une cle de lecture claire, avec un score source ${moment.scoreAfter}.`,
+    chapterNarrative: `${moment.title}: ${moment.coachReplayText}`,
     coachMeaning: moment.whyItMatters,
     linkedReplayMomentIds: [moment.momentId],
     linkedOfficialEventIds: moment.evidenceEventIds,
@@ -255,10 +292,10 @@ export function buildCoachReplayView(input: {
     baselineVersion: "PLAYER_ROLE_CAUSALITY_SEQUENCE_LEVEL_STORY_UPGRADE_8D",
     replayMoments,
     storylineChapters,
-    scoreSourceNote: "Le replay lit uniquement le score officiel et les evenements officiels; il ne cree aucun score_change.",
+    scoreSourceNote: "Replay fonde sur les evenements officiels; les preuves detaillees restent en annexe.",
     replayLimitations: [
-      "Les libelles coach simplifient les identifiants techniques mais les preuves restent conservees dans le rapport de validation.",
-      "Une sequence sans changement de score explique le contexte, pas une cause de score inventee.",
+      "Les libelles coach simplifient les identifiants techniques; les preuves restent conservees dans le rapport de validation.",
+      "Une sequence sans changement de score explique le contexte, pas une cause de score.",
     ],
     officialEventIdsCovered,
     officialSequenceIdsCovered,

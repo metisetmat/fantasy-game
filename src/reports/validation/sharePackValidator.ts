@@ -385,6 +385,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const playerRoleCausalitySequenceLevelStoryUpgrade8DValidation = readIfExists(join(shareDirectory, "validation.player-role-causality-sequence-level-story-upgrade-8d.md"));
   const matchStorylineImmersionCoachReplayView8E = readIfExists(join(shareDirectory, "match-storyline-immersion-coach-replay-view-8e.md"));
   const matchStorylineImmersionCoachReplayView8EValidation = readIfExists(join(shareDirectory, "validation.match-storyline-immersion-coach-replay-view-8e.md"));
+  const replayActorMappingNaturalMatchNarrativeFix8F = readIfExists(join(shareDirectory, "replay-actor-mapping-natural-match-narrative-fix-8f.md"));
+  const replayActorMappingNaturalMatchNarrativeFix8FValidation = readIfExists(join(shareDirectory, "validation.replay-actor-mapping-natural-match-narrative-fix-8f.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3349,6 +3351,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.player-role-causality-sequence-level-story-upgrade-8d.md",
     ...sprint8DForbiddenLeftovers,
   ];
+  const sprint8FExpectedFiles = sprint8EExpectedFiles.map((file) =>
+    file === "match-storyline-immersion-coach-replay-view-8e.md"
+      ? "replay-actor-mapping-natural-match-narrative-fix-8f.md"
+      : file === "validation.match-storyline-immersion-coach-replay-view-8e.md"
+        ? "validation.replay-actor-mapping-natural-match-narrative-fix-8f.md"
+        : file
+  );
+  const sprint8FForbiddenLeftovers = [
+    "match-storyline-immersion-coach-replay-view-8e.md",
+    "validation.match-storyline-immersion-coach-replay-view-8e.md",
+    ...sprint8EForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4835,6 +4849,41 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("no new database history feature", matchStorylineImmersionCoachReplayView8EValidation.includes("no new database history feature"), "database history not added"),
     check("bundle includes 8E source files", bundleReports.includes("src/reports/matchStorylineImmersionCoachReplayView8E.ts") && bundleReports.includes("src/reports/buildCoachReplayView.ts") && bundleReports.includes("src/reports/buildNaturalCoachMatchNarrative.ts") && bundleReports.includes("src/reports/replayScoreSourceOfTruthAudit.ts"), "8E source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && matchStorylineImmersionCoachReplayView8EValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8FChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8FExpectedFiles.every((file) => requiredCopied(file)), sprint8FExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8FExpectedFiles.every((file) => manifest.includes(file)), sprint8FExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8F", activeConfig.sprintName === "Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8FForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8FForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8F oriented", readme.includes("# Sprint 8F Share Pack") && readme.includes("replay-actor-mapping-natural-match-narrative-fix-8f.md") && readme.includes("Replay Actor Mapping"), "README current"),
+    check("8F report included", replayActorMappingNaturalMatchNarrativeFix8F.includes("# Replay Actor Mapping & Natural Match Narrative Fix 8F") && replayActorMappingNaturalMatchNarrativeFix8F.includes("Actor Mapping Fix Table") && replayActorMappingNaturalMatchNarrativeFix8F.includes("Natural Replay Narrative Audit"), "8F doc included"),
+    check("8F validation is PASS", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("Status: PASS") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("ReplayActorMappingNaturalNarrativeFix8FModel exists"), "8F validation current"),
+    check("baseline 8E visible", replayActorMappingNaturalMatchNarrativeFix8F.includes("baselineVersion: MATCH_STORYLINE_IMMERSION_COACH_REPLAY_VIEW_8E") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 8E preserved"), "8E baseline visible"),
+    check("baseline 8D preserved", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 8D preserved"), "8D baseline visible"),
+    check("baseline 8C/8B/8A/7H/6X preserved", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 8C preserved") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 8B preserved") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 8A preserved") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 7H preserved") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("baseline 6X match economy preserved"), "baseline chain visible"),
+    check("actor mapping fixed", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("actor mapping fixed") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("suspicious goalkeeper fallback after = 0"), "actor mapping fixed"),
+    check("role diversity restored", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("role diversity restored") && replayActorMappingNaturalMatchNarrativeFix8F.includes("roleDiversityCount"), "role diversity visible"),
+    check("no actor or role mismatch with 8D", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("actor mismatch with 8D = 0") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("role mismatch with 8D = 0"), "8D mismatches 0"),
+    check("no invented actor or role", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no invented actor") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no invented role"), "invented counts 0"),
+    check("natural coach narrative available", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("natural coach narrative available") && replayActorMappingNaturalMatchNarrativeFix8F.includes("Natural Replay Narrative Excerpts"), "natural narrative visible"),
+    check("no technical/raw ids in main coach text", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no technical IDs in main coach text") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no raw player IDs in main coach text") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no raw event IDs in main coach text") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no raw effect labels in main coach text"), "raw ids blocked"),
+    check("no repeated guardrail or mechanical replay phrase", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no repeated guardrail phrase") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no mechanical replay phrase"), "mechanical wording blocked"),
+    check("source-of-truth note compacted", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("source-of-truth note compacted") && replayActorMappingNaturalMatchNarrativeFix8F.includes("Replay Proof Notes"), "proof compacted"),
+    check("score claims backed by score_change", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("score claims backed by score_change") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("score_change events still covered"), "score_change backed"),
+    check("sandbox/batch/diagnostic excluded", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("sandbox excluded from official replay") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("batch excluded from official replay") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("diagnostic separated from official replay"), "truth separation preserved"),
+    check("product replay section updated", coachProductHtml.includes('id="coach-replay-8e"') && coachProductHtml.includes("Revivez le match") && coachProductHtml.includes("Space Hunter") && coachProductHtml.includes("Hook Link mobile"), "product 8F visible"),
+    check("export replay section updated", coachExportHtml.includes('id="coach-replay-8e"') && coachExportHtml.includes("Replay coach en 60 secondes") && coachExportHtml.includes("Space Hunter") && coachExportHtml.includes("Left Piston hybride"), "export 8F visible"),
+    check("export remains under 900 seconds", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("export remains under 900 seconds"), "export budget checked"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("no new memory or database feature", replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no new season memory") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no new team style memory") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("no new database history feature"), "no new memory/db"),
+    check("bundle includes 8F source files", bundleReports.includes("src/reports/replayActorMappingNaturalMatchNarrativeFix8F.ts") && bundleReports.includes("src/reports/fixReplayActorMappingFrom8D.ts") && bundleReports.includes("src/reports/buildNaturalReplayNarrative8F.ts") && bundleReports.includes("src/reports/replayActorMappingAudit8F.ts"), "8F source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && replayActorMappingNaturalMatchNarrativeFix8FValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint6SChecks: readonly SharePackCheck[] = [
@@ -8905,6 +8954,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8F - Replay Actor Mapping")
+      ? sprint8FChecks
     : activeConfig.sprintName.includes("Sprint 8E - Match Storyline")
       ? sprint8EChecks
     : activeConfig.sprintName.includes("Sprint 8D - Player Role Causality")
