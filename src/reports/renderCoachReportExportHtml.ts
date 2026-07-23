@@ -91,6 +91,7 @@ import {
 import { buildCoachReportMultiMatchPhaseComparison } from "./buildCoachReportMultiMatchPhaseComparison";
 import { buildCoachReportMultiMatchHistoryView } from "./buildCoachReportMultiMatchHistoryView";
 import { escapeHtml } from "./htmlCoachReport";
+import { renderCoachReplayUXExportSection8GFromProductHtml } from "./renderCoachReplayUXSection8G";
 import { renderTacticalPitchPanel } from "./renderTacticalPitchPanel";
 
 const EXPORT_TITLE = "Rapport coach - export partageable";
@@ -1583,6 +1584,10 @@ function renderSequenceCausality8DExport(html: string): string {
 }
 
 function renderCoachReplay8EExport(html: string): string {
+  const ux8G = renderCoachReplayUXExportSection8GFromProductHtml(html);
+  if (ux8G.length > 0) {
+    return ux8G;
+  }
   const body = extractSectionInner(html, "coach-replay-8e");
   if (body.length === 0) {
     return "";

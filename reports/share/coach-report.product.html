@@ -49,6 +49,7 @@
     .comparison-details { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 12px; }
     .comparison-details summary { cursor: pointer; font-weight: 700; }
     .comparison-detail-list { display: grid; gap: 12px; margin-top: 12px; }
+    .coach-replay-ux-8g .story-head{align-items:flex-start}.replay-priority-block{margin-top:16px}.replay-priority-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.replay-priority-card{border-color:var(--accent);background:linear-gradient(180deg,#fff 0%,#f4fbfd 100%)}.replay-card--response{border-color:#d4b15f}.replay-card--final_lock{border-color:var(--success)}.replay-card--fatigue_context{border-style:dashed}.replay-timeline-rail{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:18px 0}.replay-rail-point{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--paper);min-width:0}.replay-rail-point strong,.replay-rail-point span,.replay-rail-point em{display:block;overflow-wrap:anywhere}.replay-rail-point span{color:var(--accent);font-weight:800}.replay-rail-point em{color:var(--muted);font-style:normal;font-size:.82rem}.replay-proof-details{margin-top:10px}
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
     .attributes .badge { color: #515f6f; background: #fbfcfd; }
@@ -93,15 +94,15 @@
       .express-grid { grid-template-columns: 1fr; }
       .tactical-map-card-grid { grid-template-columns: 1fr; }
       .trend-card-grid, .trend-grid { grid-template-columns: 1fr; }
-      .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
+      .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid, .replay-priority-grid, .replay-timeline-rail { grid-template-columns: 1fr; }
       .product-card, .express-read, .tactical-map-card, .trend-card { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
       main { max-width: none; padding: 0; }
-      header, .product-card, .summary-list, .interpretation-guard, .appendix { box-shadow: none; }
+      header, .product-card, .summary-list, .interpretation-guard, .appendix, .replay-rail-point { box-shadow: none; }
       details[open], details { break-inside: avoid; }
-      .product-card { break-inside: avoid; }
+      .product-card, .replay-rail-point { break-inside: avoid; }
     }
   </style>
 </head>
@@ -300,172 +301,212 @@
   </section>
 
   
-  <section id="coach-replay-8e" class="product-section coach-replay-8e" aria-label="Revivez le match">
+  <section id="coach-replay-8e" class="product-section coach-replay-8e coach-replay-ux-8g" aria-label="Revivez le match" data-replay-ux-version="8G">
     <div class="story-head">
       <div>
         <p class="card-kicker">Replay coach officiel</p>
         <h2>Revivez le match</h2>
+        <p class="muted">Replay fonde sur les evenements officiels ; preuves detaillees repliees.</p>
       </div>
-      <span class="badge">6 moments</span>
+      <div class="badge-row">
+        <span class="badge">Score officiel : 12 - 7</span>
+        <span class="badge">6 moments</span>
+      </div>
     </div>
-    <p class="guard">Replay fonde sur les evenements officiels; les preuves detaillees restent en annexe.</p>
-    <div class="cards">
-      
-        <article class="product-card replay-card">
+    <p class="guard">Replay fonde sur les evenements officiels du match; les preuves detaillees restent repliees.</p>
+    <div class="replay-priority-block" aria-label="2 minutes pour comprendre">
+      <div class="story-head">
+        <div>
+          <p class="card-kicker">2 minutes pour comprendre</p>
+          <h3>Les 3 moments qui structurent le match</h3>
+        </div>
+      </div>
+      <div class="cards replay-priority-grid">
+
+        <article class="product-card replay-priority-card replay-card replay-card--score_change" data-replay-priority="true">
           <div class="badge-row">
-            <span class="badge">Minute 2-2&#39;</span>
-            <span class="badge">Source officielle limitee</span>
-            <span class="badge">Confiance high</span>
+            <span class="badge">2-2&#39;</span>
+            <span class="badge">0 - 0 -&gt; 3 - 0</span>
+            <span class="badge">Score officiel</span>
           </div>
           <h3>CONTROL frappe le premier</h3>
-          <p><strong>Score :</strong> 0 - 0 &rarr; 3 - 0</p>
           <p><strong>Lecture coach :</strong> CONTROL frappe le premier grace au Space Hunter de CONTROL dans axe central. La sequence fait passer le score de 0 - 0 a 3 - 0.</p>
-          <p><strong>Pourquoi cela compte :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
           <p><strong>Acteur / r&ocirc;le :</strong> le Space Hunter de CONTROL / Space Hunter</p>
-          <p><strong>Zone lue :</strong> axe central</p>
-          <p><strong>Source score :</strong> Preuve: score_change officiel 0 - 0 vers 3 - 0.</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: contract-fixture-001-segment-1-score-1</p>
-            <p>Sequence: full-match-segment-1-2</p>
-            <p>Limite: Lecture limitee aux acteurs explicitement presents dans la timeline officielle.</p>
+          <p><strong>Zone :</strong> axe central</p>
+          <p><strong>Pourquoi :</strong> Le match prend sa première direction et fixe le premier rapport de force.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuve officielle</summary>
+            <p>Preuve officielle: 0 - 0 vers 3 - 0.</p>
           </details>
         </article>
-        <article class="product-card replay-card">
+        <article class="product-card replay-priority-card replay-card replay-card--response" data-replay-priority="true">
           <div class="badge-row">
-            <span class="badge">Minute 3-3&#39;</span>
-            <span class="badge">Source officielle limitee</span>
-            <span class="badge">Confiance medium</span>
+            <span class="badge">19-19&#39;</span>
+            <span class="badge">6 - 0 -&gt; 6 - 5</span>
+            <span class="badge">Score officiel</span>
           </div>
-          <h3>La fatigue devient visible chez BLITZ</h3>
-          <p><strong>Score :</strong> 3 - 0 &rarr; 3 - 0</p>
-          <p><strong>Lecture coach :</strong> La fatigue apparait dans une sequence de BLITZ, mais son effet reste a confirmer. Le moment sert surtout a relire la stabilite et le soutien.</p>
-          <p><strong>Pourquoi cela compte :</strong> Ce moment aide a relire la stabilite et le soutien sans transformer la fatigue en explication unique.</p>
-          <p><strong>Acteur / r&ocirc;le :</strong> le gardien-libero de BLITZ / Gardien-libero</p>
-          <p><strong>Zone lue :</strong> axe central</p>
-          <p><strong>Source score :</strong> Preuve: aucun score_change dans ce moment; lecture contextuelle.</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: contract-fixture-001-segment-1-sequence-3</p>
-            <p>Sequence: full-match-segment-1-3</p>
-            <p>Limite: Lecture limitee aux acteurs explicitement presents dans la timeline officielle.</p>
-          </details>
-        </article>
-        <article class="product-card replay-card">
-          <div class="badge-row">
-            <span class="badge">Minute 15-15&#39;</span>
-            <span class="badge">Source officielle limitee</span>
-            <span class="badge">Confiance high</span>
-          </div>
-          <h3>CONTROL change le score</h3>
-          <p><strong>Score :</strong> 3 - 0 &rarr; 6 - 0</p>
-          <p><strong>Lecture coach :</strong> Le Playmaker createur de CONTROL transforme une sequence dans axe central en points: 3 - 0 devient 6 - 0.</p>
-          <p><strong>Pourquoi cela compte :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
-          <p><strong>Acteur / r&ocirc;le :</strong> le Playmaker createur de CONTROL / Playmaker</p>
-          <p><strong>Zone lue :</strong> axe central</p>
-          <p><strong>Source score :</strong> Preuve: score_change officiel 3 - 0 vers 6 - 0.</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: contract-fixture-001-segment-2-score-1</p>
-            <p>Sequence: full-match-segment-2-5</p>
-            <p>Limite: Lecture limitee aux acteurs explicitement presents dans la timeline officielle.</p>
-          </details>
-        </article>
-        <article class="product-card replay-card">
-          <div class="badge-row">
-            <span class="badge">Minute 19-19&#39;</span>
-            <span class="badge">Source officielle limitee</span>
-            <span class="badge">Confiance high</span>
-          </div>
-          <h3>BLITZ change le score</h3>
-          <p><strong>Score :</strong> 6 - 0 &rarr; 6 - 5</p>
+          <h3>BLITZ revient</h3>
           <p><strong>Lecture coach :</strong> BLITZ reste dans le match avec le gardien-libero de BLITZ dans axe central: 6 - 0 devient 6 - 5.</p>
-          <p><strong>Pourquoi cela compte :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
           <p><strong>Acteur / r&ocirc;le :</strong> le gardien-libero de BLITZ / Gardien-libero</p>
-          <p><strong>Zone lue :</strong> axe central</p>
-          <p><strong>Source score :</strong> Preuve: score_change officiel 6 - 0 vers 6 - 5.</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: segment-2-route-family-try_touchdown-blitz</p>
-            <p>Sequence: full-match-segment-2-route-family</p>
-            <p>Limite: Lecture limitee aux acteurs explicitement presents dans la timeline officielle.</p>
+          <p><strong>Zone :</strong> axe central</p>
+          <p><strong>Pourquoi :</strong> La reponse garde BLITZ dans le match et change la pression de fin.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuve officielle</summary>
+            <p>Preuve officielle: 6 - 0 vers 6 - 5.</p>
           </details>
         </article>
-        <article class="product-card replay-card">
+        <article class="product-card replay-priority-card replay-card replay-card--final_lock" data-replay-priority="true">
           <div class="badge-row">
-            <span class="badge">Minute 25-25&#39;</span>
-            <span class="badge">Source officielle limitee</span>
-            <span class="badge">Confiance high</span>
+            <span class="badge">33-33&#39;</span>
+            <span class="badge">9 - 7 -&gt; 12 - 7</span>
+            <span class="badge">Score officiel</span>
           </div>
-          <h3>CONTROL change le score</h3>
-          <p><strong>Score :</strong> 6 - 7 &rarr; 9 - 7</p>
-          <p><strong>Lecture coach :</strong> Le Hook Link mobile de CONTROL transforme une sequence dans axe central en points: 6 - 7 devient 9 - 7.</p>
-          <p><strong>Pourquoi cela compte :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
-          <p><strong>Acteur / r&ocirc;le :</strong> le Hook Link mobile de CONTROL / Hook Link</p>
-          <p><strong>Zone lue :</strong> axe central</p>
-          <p><strong>Source score :</strong> Preuve: score_change officiel 6 - 7 vers 9 - 7.</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: contract-fixture-001-segment-3-score-1</p>
-            <p>Sequence: full-match-segment-3-5</p>
-            <p>Limite: Lecture limitee aux acteurs explicitement presents dans la timeline officielle.</p>
-          </details>
-        </article>
-        <article class="product-card replay-card">
-          <div class="badge-row">
-            <span class="badge">Minute 33-33&#39;</span>
-            <span class="badge">Source officielle limitee</span>
-            <span class="badge">Confiance high</span>
-          </div>
-          <h3>CONTROL verrouille la fin</h3>
-          <p><strong>Score :</strong> 9 - 7 &rarr; 12 - 7</p>
+          <h3>CONTROL verrouille le 12-7</h3>
           <p><strong>Lecture coach :</strong> Le Left Piston hybride de CONTROL conclut la derniere sequence de score dans axe central et fixe le 12 - 7.</p>
-          <p><strong>Pourquoi cela compte :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
           <p><strong>Acteur / r&ocirc;le :</strong> le Left Piston hybride de CONTROL / Left Piston</p>
-          <p><strong>Zone lue :</strong> axe central</p>
-          <p><strong>Source score :</strong> Preuve: score_change officiel 9 - 7 vers 12 - 7.</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: contract-fixture-001-segment-4-score-1</p>
-            <p>Sequence: full-match-segment-4-3</p>
-            <p>Limite: Lecture limitee aux acteurs explicitement presents dans la timeline officielle.</p>
+          <p><strong>Zone :</strong> axe central</p>
+          <p><strong>Pourquoi :</strong> CONTROL ferme le match avec le dernier score officiel.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuve officielle</summary>
+            <p>Preuve officielle: 9 - 7 vers 12 - 7.</p>
+          </details>
+        </article>
+      </div>
+    </div>
+
+    <div class="replay-timeline-rail" aria-label="Rail chronologique du replay">
+
+        <div class="replay-rail-point replay-rail-point--score_change">
+          <strong>2-2&#39;</strong>
+          <span>0 - 0 -&gt; 3 - 0</span>
+          <em>CONTROL frappe le premier</em>
+        </div>
+        <div class="replay-rail-point replay-rail-point--fatigue_context">
+          <strong>3-3&#39;</strong>
+          <span>3 - 0 -&gt; 3 - 0</span>
+          <em>Fatigue visible chez BLITZ</em>
+        </div>
+        <div class="replay-rail-point replay-rail-point--response">
+          <strong>15-15&#39;</strong>
+          <span>3 - 0 -&gt; 6 - 0</span>
+          <em>CONTROL creuse l&#39;ecart</em>
+        </div>
+        <div class="replay-rail-point replay-rail-point--response">
+          <strong>19-19&#39;</strong>
+          <span>6 - 0 -&gt; 6 - 5</span>
+          <em>BLITZ revient</em>
+        </div>
+        <div class="replay-rail-point replay-rail-point--response">
+          <strong>25-25&#39;</strong>
+          <span>6 - 7 -&gt; 9 - 7</span>
+          <em>CONTROL repasse devant</em>
+        </div>
+        <div class="replay-rail-point replay-rail-point--final_lock">
+          <strong>33-33&#39;</strong>
+          <span>9 - 7 -&gt; 12 - 7</span>
+          <em>CONTROL verrouille le 12-7</em>
+        </div>
+    </div>
+    <div class="story-head">
+      <div>
+        <p class="card-kicker">Tous les moments replay</p>
+        <h3>Les 6 points de lecture disponibles</h3>
+      </div>
+    </div>
+    <div class="cards replay-all-moments">
+
+        <article class="product-card replay-card replay-card--score_change">
+          <div class="badge-row">
+            <span class="badge">#1</span>
+            <span class="badge">2-2&#39;</span>
+            <span class="badge">CONTROL</span>
+            <span class="badge">Score officiel</span>
+          </div>
+          <h3>CONTROL frappe le premier</h3>
+          <p><strong>Score :</strong> 0 - 0 -&gt; 3 - 0</p>
+          <p><strong>Rep&egrave;re :</strong> le Space Hunter de CONTROL / Space Hunter, axe central.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuves repliees</summary>
+            <p>Preuve officielle: 0 - 0 vers 3 - 0.</p>
+          </details>
+        </article>
+        <article class="product-card replay-card replay-card--fatigue_context">
+          <div class="badge-row">
+            <span class="badge">#2</span>
+            <span class="badge">3-3&#39;</span>
+            <span class="badge">BLITZ</span>
+            <span class="badge">Score officiel</span>
+          </div>
+          <h3>Fatigue visible chez BLITZ</h3>
+          <p><strong>Score :</strong> 3 - 0 -&gt; 3 - 0</p>
+          <p><strong>Rep&egrave;re :</strong> le gardien-libero de BLITZ / Gardien-libero, axe central.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuves repliees</summary>
+            <p>Preuve officielle: contexte conserve sans causalite forcee.</p>
+          </details>
+        </article>
+        <article class="product-card replay-card replay-card--response">
+          <div class="badge-row">
+            <span class="badge">#3</span>
+            <span class="badge">15-15&#39;</span>
+            <span class="badge">CONTROL</span>
+            <span class="badge">Score officiel</span>
+          </div>
+          <h3>CONTROL creuse l&#39;ecart</h3>
+          <p><strong>Score :</strong> 3 - 0 -&gt; 6 - 0</p>
+          <p><strong>Rep&egrave;re :</strong> le Playmaker createur de CONTROL / Playmaker, axe central.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuves repliees</summary>
+            <p>Preuve officielle: 3 - 0 vers 6 - 0.</p>
+          </details>
+        </article>
+        <article class="product-card replay-card replay-card--response">
+          <div class="badge-row">
+            <span class="badge">#4</span>
+            <span class="badge">19-19&#39;</span>
+            <span class="badge">BLITZ</span>
+            <span class="badge">Score officiel</span>
+          </div>
+          <h3>BLITZ revient</h3>
+          <p><strong>Score :</strong> 6 - 0 -&gt; 6 - 5</p>
+          <p><strong>Rep&egrave;re :</strong> le gardien-libero de BLITZ / Gardien-libero, axe central.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuves repliees</summary>
+            <p>Preuve officielle: 6 - 0 vers 6 - 5.</p>
+          </details>
+        </article>
+        <article class="product-card replay-card replay-card--response">
+          <div class="badge-row">
+            <span class="badge">#5</span>
+            <span class="badge">25-25&#39;</span>
+            <span class="badge">CONTROL</span>
+            <span class="badge">Score officiel</span>
+          </div>
+          <h3>CONTROL repasse devant</h3>
+          <p><strong>Score :</strong> 6 - 7 -&gt; 9 - 7</p>
+          <p><strong>Rep&egrave;re :</strong> le Hook Link mobile de CONTROL / Hook Link, axe central.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuves repliees</summary>
+            <p>Preuve officielle: 6 - 7 vers 9 - 7.</p>
+          </details>
+        </article>
+        <article class="product-card replay-card replay-card--final_lock">
+          <div class="badge-row">
+            <span class="badge">#6</span>
+            <span class="badge">33-33&#39;</span>
+            <span class="badge">CONTROL</span>
+            <span class="badge">Score officiel</span>
+          </div>
+          <h3>CONTROL verrouille le 12-7</h3>
+          <p><strong>Score :</strong> 9 - 7 -&gt; 12 - 7</p>
+          <p><strong>Rep&egrave;re :</strong> le Left Piston hybride de CONTROL / Left Piston, axe central.</p>
+          <details class="appendix replay-proof-details">
+            <summary>Preuves repliees</summary>
+            <p>Preuve officielle: 9 - 7 vers 12 - 7.</p>
           </details>
         </article>
     </div>
-    <div class="cards">
-      
-        <article class="product-card replay-chapter-card">
-          <div class="badge-row"><span class="badge">2-2&#39;</span><span class="badge">official_with_limitation</span></div>
-          <h3>CONTROL frappe le premier</h3>
-          <p>CONTROL frappe le premier: CONTROL frappe le premier grace au Space Hunter de CONTROL dans axe central. La sequence fait passer le score de 0 - 0 a 3 - 0.</p>
-          <p><strong>Lecture :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
-        </article>
-        <article class="product-card replay-chapter-card">
-          <div class="badge-row"><span class="badge">3-3&#39;</span><span class="badge">official_with_limitation</span></div>
-          <h3>La fatigue devient visible chez BLITZ</h3>
-          <p>La fatigue devient visible chez BLITZ: La fatigue apparait dans une sequence de BLITZ, mais son effet reste a confirmer. Le moment sert surtout a relire la stabilite et le soutien.</p>
-          <p><strong>Lecture :</strong> Ce moment aide a relire la stabilite et le soutien sans transformer la fatigue en explication unique.</p>
-        </article>
-        <article class="product-card replay-chapter-card">
-          <div class="badge-row"><span class="badge">15-15&#39;</span><span class="badge">official_with_limitation</span></div>
-          <h3>CONTROL change le score</h3>
-          <p>CONTROL change le score: Le Playmaker createur de CONTROL transforme une sequence dans axe central en points: 3 - 0 devient 6 - 0.</p>
-          <p><strong>Lecture :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
-        </article>
-        <article class="product-card replay-chapter-card">
-          <div class="badge-row"><span class="badge">19-19&#39;</span><span class="badge">official_with_limitation</span></div>
-          <h3>BLITZ change le score</h3>
-          <p>BLITZ change le score: BLITZ reste dans le match avec le gardien-libero de BLITZ dans axe central: 6 - 0 devient 6 - 5.</p>
-          <p><strong>Lecture :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
-        </article>
-        <article class="product-card replay-chapter-card">
-          <div class="badge-row"><span class="badge">25-25&#39;</span><span class="badge">official_with_limitation</span></div>
-          <h3>CONTROL change le score</h3>
-          <p>CONTROL change le score: Le Hook Link mobile de CONTROL transforme une sequence dans axe central en points: 6 - 7 devient 9 - 7.</p>
-          <p><strong>Lecture :</strong> Ce moment change le rythme du match; les details officiels gardent la preuve compacte.</p>
-        </article>
-    </div>
-    <p class="guard">Les libelles coach simplifient les identifiants techniques; les preuves restent conservees dans le rapport de validation. Une sequence sans changement de score explique le contexte, pas une cause de score.</p>
+    <p class="guard">CONTROL frappe en premier, BLITZ revient, puis CONTROL reprend le fil et verrouille la fin.</p>
   </section>
 
   <section id="executive-summary" class="product-section">
