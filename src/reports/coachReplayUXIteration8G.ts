@@ -25,6 +25,7 @@ import {
   COACH_REPLAY_UX_ITERATION_BLOCKING_WARNINGS,
   type CoachReplayUXIterationWarningCode,
 } from "./coachReplayUXIterationWarnings";
+import { guardReportStatusWarningConsistency } from "./reportStatusWarningConsistencyGuard";
 
 function bool(value: boolean): string {
   return value ? "true" : "false";
@@ -201,12 +202,17 @@ export function buildCoachReplayUXIteration8GModel(input: {
     guardrailsPreserved,
     productBaselineReady,
   }).every(([, value]) => value) && !hasBlockingWarning(warningCodes);
-  const status: OfficialCausalityStatus = clean ? "PASS" : hasBlockingWarning(warningCodes) ? "FAIL" : "PARTIAL";
+  const provisionalStatus: OfficialCausalityStatus = clean ? "PASS" : hasBlockingWarning(warningCodes) ? "FAIL" : "PARTIAL";
+  const consistencyGuard = guardReportStatusWarningConsistency({
+    status: provisionalStatus,
+    warnings: warningCodes,
+  });
+  const status = consistencyGuard.status;
 
   return {
     ...modelWithoutStatus,
     status,
-    warningCodes,
+    warningCodes: consistencyGuard.sanitizedWarnings as readonly CoachReplayUXIterationWarningCode[],
     recommendation: status === "PASS" ? "KEEP_REPLAY_UX_ITERATION" : "REVIEW_REPLAY_UX_ITERATION",
     nextSprintRecommendation: status === "PASS"
       ? "8H - Coach Report Story-First Product Recomposition"
@@ -395,6 +401,8 @@ export function renderCoachReplayUXIteration8GDoc(
       ["sequenceCausalityStillVisible", model.integrationBudgetAudit.sequenceCausalityStillVisible],
       ["actorMappingStillVisible", model.integrationBudgetAudit.actorMappingStillVisible],
       ["naturalReplayStillVisible", model.integrationBudgetAudit.naturalReplayStillVisible],
+      ["naturalReplayContentPreserved", model.integrationBudgetAudit.naturalReplayContentPreserved],
+      ["legacyNaturalReplaySectionVisible", model.integrationBudgetAudit.legacyNaturalReplaySectionVisible],
       ["exportReadTimeSecondsBefore8G", model.integrationBudgetAudit.exportReadTimeSecondsBefore8G],
       ["exportReadTimeSecondsAfter8G", model.integrationBudgetAudit.exportReadTimeSecondsAfter8G],
       ["exportReadTimeDelta", model.integrationBudgetAudit.exportReadTimeDelta],

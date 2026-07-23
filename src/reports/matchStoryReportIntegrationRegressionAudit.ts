@@ -44,10 +44,12 @@ export function auditMatchStoryReportIntegrationRegression(input: {
   readonly exportReadTimeSecondsBefore8B: number;
 }): MatchStoryReportIntegrationRegressionAudit {
   const productStorySectionVisible = input.productReportHtml.includes('id="official-match-story-spine"') &&
-    input.productReportHtml.includes("R&eacute;cit officiel du match");
+    (input.productReportHtml.includes("R&eacute;cit officiel du match") ||
+      input.productReportHtml.includes("Le match en 2 minutes"));
   const exportStorySectionVisible = input.exportReportHtml.includes('id="official-match-story-spine"');
   const exportCompact45SecondStoryVisible = input.exportReportHtml.includes("R&eacute;cit du match en 45 secondes") ||
-    input.exportReportHtml.includes("Recit du match en 45 secondes");
+    input.exportReportHtml.includes("Recit du match en 45 secondes") ||
+    input.exportReportHtml.includes("Le match en 2 minutes");
   const exportReadTimeSecondsAfter8B = readTimeSeconds(input.exportReportHtml);
   const productStorySectionTooLong = sectionTextLength(input.productReportHtml, "official-match-story-spine") > 4000;
   const exportStorySectionTooLong = sectionTextLength(input.exportReportHtml, "official-match-story-spine") > 1800;
@@ -85,4 +87,3 @@ export function auditMatchStoryReportIntegrationRegression(input: {
     recommendation: reportIntegrationWarningCodes.length === 0 ? "KEEP_REPORT_INTEGRATION" : "FIX_REPORT_INTEGRATION",
   };
 }
-

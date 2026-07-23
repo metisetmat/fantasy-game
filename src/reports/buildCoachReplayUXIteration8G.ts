@@ -77,7 +77,8 @@ function whyItMatters(moment: OfficialCoachReplayMoment): string {
 
 function selectPriorityMoments(moments: readonly OfficialCoachReplayMoment[]): readonly OfficialCoachReplayMoment[] {
   const firstScore = moments.find((moment) => moment.momentType === "first_score");
-  const response = moments.find((moment) => moment.momentType === "score_response");
+  const response = moments.find((moment) => moment.momentType === "score_response" && moment.teamId !== firstScore?.teamId) ??
+    moments.find((moment) => moment.momentType === "score_response");
   const finalLock = [...moments].reverse().find((moment) => moment.momentType === "final_score_lock" || scoreChanged(moment));
   return [firstScore, response, finalLock]
     .filter((moment, index, selected): moment is OfficialCoachReplayMoment =>

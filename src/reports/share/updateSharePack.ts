@@ -143,6 +143,8 @@ import {
   renderReplayActorMappingNaturalNarrativeFix8FValidation,
   renderCoachReplayUXIteration8GDoc,
   renderCoachReplayUXIteration8GValidation,
+  renderCoachReportStoryFirstRecomposition8HDoc,
+  renderCoachReportStoryFirstRecomposition8HValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -156,10 +158,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8G - Coach Replay UX Iteration";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-replay-ux-iteration-8g.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-story-first-product-recomposition-8h.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-replay-ux-iteration-8g.md";
+  "validation.coach-report-story-first-product-recomposition-8h.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3285,6 +3287,81 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8G model, report renderer, and validation renderer for coach replay UX iteration",
       },
       {
+        source: "src/reports/coachReportStoryFirstRecompositionTypes8H.ts",
+        required: true,
+        reason: "Sprint 8H story-first recomposition contract for section order, story entry, read flow, and validation cleanup",
+      },
+      {
+        source: "src/reports/coachReportStoryFirstRecompositionWarnings.ts",
+        required: true,
+        reason: "Sprint 8H warning-code registry separating blocking regressions from positive readiness tags",
+      },
+      {
+        source: "src/reports/reportStatusWarningConsistencyGuard.ts",
+        required: true,
+        reason: "Sprint 8H reusable guard preventing PASS reports from carrying blocking FAIL/PARTIAL warning states",
+      },
+      {
+        source: "src/reports/storyFirstAuditUtils8H.ts",
+        required: true,
+        reason: "Sprint 8H shared audit helpers for section order, core story scope, and read-time budgets",
+      },
+      {
+        source: "src/reports/validationConsistencyCleanupAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit reconciling status, warning codes, natural replay visibility, and stale validation text",
+      },
+      {
+        source: "src/reports/storyFirstSectionOrderAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit proving story, replay, action plan, evidence, and appendices are ordered for coach reading",
+      },
+      {
+        source: "src/reports/coachReadFlowAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit proving a coach can understand the report through story-first flow before technical detail",
+      },
+      {
+        source: "src/reports/storyFirstReplayPreservationAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit proving 8G replay priority moments, actor mapping, collapsed proof, and score_change coverage remain intact",
+      },
+      {
+        source: "src/reports/storyFirstEvidenceBoundaryAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit proving raw technical IDs move out of main coach text while official evidence remains available",
+      },
+      {
+        source: "src/reports/storyFirstMobilePrintExportAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit proving mobile, print, and export story-first readiness",
+      },
+      {
+        source: "src/reports/storyFirstSourceOfTruthRegressionAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit preserving official score_change, scoring constants, batch/live separation, and sandbox boundaries",
+      },
+      {
+        source: "src/reports/storyFirstReportIntegrationBudgetAudit8H.ts",
+        required: true,
+        reason: "Sprint 8H audit proving story-first recomposition preserves replay, action plan, tactical map cards, trends, and sequence causality",
+      },
+      {
+        source: "src/reports/renderCoachReportStoryFirstProduct8H.ts",
+        required: true,
+        reason: "Sprint 8H product render wrapper for story-first coach report output",
+      },
+      {
+        source: "src/reports/renderCoachReportStoryFirstExport8H.ts",
+        required: true,
+        reason: "Sprint 8H export render wrapper for story-first print/share output",
+      },
+      {
+        source: "src/reports/buildCoachReportStoryFirstRecomposition8H.ts",
+        required: true,
+        reason: "Sprint 8H model, report renderer, and validation renderer for story-first product recomposition",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5441,6 +5518,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8H")) {
+    return renderCoachReportStoryFirstRecomposition8HDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8G")) {
     return renderCoachReplayUXIteration8GDoc(fullMatchTraceValidationModel());
   }
@@ -7776,6 +7856,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8H")) {
+    return renderCoachReportStoryFirstRecomposition8HValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8G")) {
     return renderCoachReplayUXIteration8GValidation(fullMatchTraceValidationModel());
   }
@@ -10057,6 +10140,32 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8H")) {
+    return [
+      "# Sprint 8H Share Pack",
+      "",
+      "Current sprint: Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup",
+      "",
+      "Purpose: review the story-first recomposition of the coach product report. The first reading path now starts with the match story, then the official replay, then coach interpretation and action planning, while technical evidence stays available but demoted.",
+      "",
+      "Core files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-report-story-first-product-recomposition-8h.md",
+      "- validation.coach-report-story-first-product-recomposition-8h.md",
+      "- validation.share-pack.md",
+      "",
+      "Review order:",
+      "1. validation.share-pack.md",
+      "2. validation.coach-report-story-first-product-recomposition-8h.md",
+      "3. coach-report-story-first-product-recomposition-8h.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "Guardrail: this sprint changes report composition and validation consistency only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, team style memory, or the 8G replay evidence.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8G")) {
     return [
       "# Sprint 8G Share Pack",
