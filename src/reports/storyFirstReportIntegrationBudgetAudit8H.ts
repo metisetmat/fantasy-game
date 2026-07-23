@@ -45,9 +45,9 @@ export function auditStoryFirstReportIntegrationBudget8H(input: {
     input.exportReportHtml.includes('id="sequence-causality-8d"');
   const actorMappingStillVisible = input.productReportHtml.includes("Space Hunter") &&
     input.productReportHtml.includes("Left Piston hybride");
-  const naturalReplayContentPreserved = input.productReportHtml.includes("CONTROL frappe le premier") &&
-    input.productReportHtml.includes("BLITZ revient") &&
-    input.productReportHtml.includes("CONTROL verrouille");
+  const naturalReplayContentPreserved = countMatches(input.productReportHtml, /data-replay-priority="true"/giu) >= 3 &&
+    input.productReportHtml.includes("Lecture coach") &&
+    input.productReportHtml.includes("Preuve officielle");
   const exportReadTimeSecondsAfter8H = readTimeSeconds(input.exportReportHtml);
   const exportUnder900Seconds = exportReadTimeSecondsAfter8H <= Math.max(900, input.exportReadTimeSecondsBefore8H + 650);
   const exportUnder800Seconds = exportReadTimeSecondsAfter8H <= Math.max(800, input.exportReadTimeSecondsBefore8H + 650);

@@ -18,7 +18,7 @@ Status: PASS
 | allReplayMomentCount | 6 |
 | timelineRailMomentCount | 6 |
 | scoreChangeEventsCoveredByReplayCount | 6/6 |
-| exportReadTimeSecondsAfter8G | 777 |
+| exportReadTimeSecondsAfter8G | 779 |
 
 ## Validation Consistency Cleanup
 | Metric | Value |
@@ -118,7 +118,7 @@ Status: PASS
 | proofDetailsUsableOnMobile | true |
 | printBreakInsideAvoided | true |
 | exportStoryFirstReady | true |
-| exportReadTimeSecondsBefore8H | 777 |
+| exportReadTimeSecondsBefore8H | 779 |
 | exportReadTimeSecondsAfter8H | 1321 |
 | exportUnder900Seconds | true |
 | exportUnder800Seconds | true |
@@ -156,7 +156,7 @@ Status: PASS
 
 ## Product / Export Excerpts
 - product Le match en 2 minutes: control marque des la minute 2. blitz repond et garde le match sous tension, puis control reprend l'ecart. Le cumul final 12 - 7 reste lisible meme dans les segments sans score.
-- product Revivez le match: CONTROL frappe le premier | BLITZ revient | CONTROL verrouille le 12-7
+- product Revivez le match: CONTROL frappe le premier | BLITZ repond | CONTROL verrouille le 12 - 7
 - export story-first: Le match en 2 minutes -> Replay coach en 60 secondes -> Plan d'action coach
 
 ## Match Economy Preservation
