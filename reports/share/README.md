@@ -1,21 +1,21 @@
-# Sprint 8F Share Pack
+# Sprint 8G Share Pack
 
-Current sprint: Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix
+Current sprint: Sprint 8G - Coach Replay UX Iteration
 
-Purpose: review the coach replay correction that restores 8D actor/role attribution, removes suspicious goalkeeper fallback, and turns mechanical replay guardrail phrasing into natural match narrative.
+Purpose: review the product UX iteration for the official coach replay. It keeps Sprint 8F actor/role mapping and source-of-truth guardrails while adding a 2-minute priority read, timeline rail, collapsed proof details, and a compact 60-second export.
 
 Core files:
 - coach-report.product.html
 - coach-report.export.html
-- replay-actor-mapping-natural-match-narrative-fix-8f.md
-- validation.replay-actor-mapping-natural-match-narrative-fix-8f.md
+- coach-replay-ux-iteration-8g.md
+- validation.coach-replay-ux-iteration-8g.md
 - validation.share-pack.md
 
 Review order:
 1. validation.share-pack.md
-2. validation.replay-actor-mapping-natural-match-narrative-fix-8f.md
-3. replay-actor-mapping-natural-match-narrative-fix-8f.md
+2. validation.coach-replay-ux-iteration-8g.md
+3. coach-replay-ux-iteration-8g.md
 4. coach-report.product.html
 5. coach-report.export.html
 
-Guardrail: this sprint changes replay attribution and wording only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, or team style memory.
+Guardrail: this sprint changes replay UX only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, team style memory, or the 8F actor/role mapping.

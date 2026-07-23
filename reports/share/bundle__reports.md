@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8G - Coach Replay UX Iteration. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -148,6 +148,8 @@ import {
   renderMatchStorylineImmersionCoachReplayView8EValidation,
   renderReplayActorMappingNaturalNarrativeFix8FDoc,
   renderReplayActorMappingNaturalNarrativeFix8FValidation,
+  renderCoachReplayUXIteration8GDoc,
+  renderCoachReplayUXIteration8GValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -161,10 +163,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8F - Replay Actor Mapping & Natural Match Narrative Fix";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "replay-actor-mapping-natural-match-narrative-fix-8f.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8G - Coach Replay UX Iteration";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-replay-ux-iteration-8g.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.replay-actor-mapping-natural-match-narrative-fix-8f.md";
+  "validation.coach-replay-ux-iteration-8g.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3230,6 +3232,66 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8F model, report renderer, and validation renderer for replay actor mapping and natural narrative fix",
       },
       {
+        source: "src/reports/coachReplayUXIterationTypes8G.ts",
+        required: true,
+        reason: "Sprint 8G coach replay UX model types for priority moments, timeline rail, cards, and evidence disclosure",
+      },
+      {
+        source: "src/reports/buildCoachReplayUXIteration8G.ts",
+        required: true,
+        reason: "Sprint 8G builder preserving 8F replay moments while constructing priority read, timeline rail, cards, and collapsed proof",
+      },
+      {
+        source: "src/reports/renderCoachReplayUXSection8G.ts",
+        required: true,
+        reason: "Sprint 8G product/export replay UX renderer with 2-minute read and 60-second export summary",
+      },
+      {
+        source: "src/reports/coachReplayUXHierarchyAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit proving replay hierarchy, priority block, timeline rail, and all replay moments remain available",
+      },
+      {
+        source: "src/reports/coachReplayPriorityAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit proving first score, BLITZ response, and final lock are prioritized while fatigue remains context",
+      },
+      {
+        source: "src/reports/coachReplayEvidenceDisclosureAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit proving proof details are available, collapsed by default, and not leaked into main coach text",
+      },
+      {
+        source: "src/reports/coachReplayMobilePrintAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit proving mobile stacking, timeline readability, proof usability, and print/export readiness",
+      },
+      {
+        source: "src/reports/coachReplayWordingUXAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit preserving natural replay wording and blocking raw IDs or mechanical UX copy",
+      },
+      {
+        source: "src/reports/coachReplaySourceOfTruthRegressionAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit preserving official score_change source-of-truth separation",
+      },
+      {
+        source: "src/reports/coachReplayIntegrationBudgetAudit8G.ts",
+        required: true,
+        reason: "Sprint 8G audit preserving surrounding product/export sections and export read-time budget",
+      },
+      {
+        source: "src/reports/coachReplayUXIterationWarnings.ts",
+        required: true,
+        reason: "Sprint 8G warning-code registry for UX, evidence, mobile/print, and source-of-truth safety",
+      },
+      {
+        source: "src/reports/coachReplayUXIteration8G.ts",
+        required: true,
+        reason: "Sprint 8G model, report renderer, and validation renderer for coach replay UX iteration",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5386,6 +5448,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8G")) {
+    return renderCoachReplayUXIteration8GDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8F")) {
     return renderReplayActorMappingNaturalNarrativeFix8FDoc(fullMatchTraceValidationModel());
   }
@@ -7718,6 +7783,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8G")) {
+    return renderCoachReplayUXIteration8GValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8F")) {
     return renderReplayActorMappingNaturalNarrativeFix8FValidation(fullMatchTraceValidationModel());
   }
@@ -9996,6 +10064,32 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8G")) {
+    return [
+      "# Sprint 8G Share Pack",
+      "",
+      "Current sprint: Sprint 8G - Coach Replay UX Iteration",
+      "",
+      "Purpose: review the product UX iteration for the official coach replay. It keeps Sprint 8F actor/role mapping and source-of-truth guardrails while adding a 2-minute priority read, timeline rail, collapsed proof details, and a compact 60-second export.",
+      "",
+      "Core files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-replay-ux-iteration-8g.md",
+      "- validation.coach-replay-ux-iteration-8g.md",
+      "- validation.share-pack.md",
+      "",
+      "Review order:",
+      "1. validation.share-pack.md",
+      "2. validation.coach-replay-ux-iteration-8g.md",
+      "3. coach-replay-ux-iteration-8g.md",
+      "4. coach-report.product.html",
+      "5. coach-report.export.html",
+      "",
+      "Guardrail: this sprint changes replay UX only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, team style memory, or the 8F actor/role mapping.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8F")) {
     return [
       "# Sprint 8F Share Pack",

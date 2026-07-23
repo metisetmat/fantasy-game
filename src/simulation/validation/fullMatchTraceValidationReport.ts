@@ -164,6 +164,10 @@ import {
   renderReplayActorMappingNaturalNarrativeFix8FDoc as renderReplayActorMappingNaturalNarrativeFix8FDocBase,
   renderReplayActorMappingNaturalNarrativeFix8FValidation as renderReplayActorMappingNaturalNarrativeFix8FValidationBase,
 } from "../../reports/replayActorMappingNaturalMatchNarrativeFix8F";
+import {
+  renderCoachReplayUXIteration8GDoc as renderCoachReplayUXIteration8GDocBase,
+  renderCoachReplayUXIteration8GValidation as renderCoachReplayUXIteration8GValidationBase,
+} from "../../reports/coachReplayUXIteration8G";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6721,6 +6725,18 @@ export function renderReplayActorMappingNaturalNarrativeFix8FValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderReplayActorMappingNaturalNarrativeFix8FValidationBase();
+}
+
+export function renderCoachReplayUXIteration8GDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReplayUXIteration8GDocBase();
+}
+
+export function renderCoachReplayUXIteration8GValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReplayUXIteration8GValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

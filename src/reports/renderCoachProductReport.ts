@@ -30,6 +30,7 @@ import {
   buildCoachTrendSignalCardsFromProductReport,
   renderCoachMultiMatchTrendSignalsSection,
 } from "./coachReportMultiMatchTrendSignals";
+import { renderCoachReplayUXProductSection8G } from "./renderCoachReplayUXSection8G";
 import { escapeHtml } from "./htmlCoachReport";
 import {
   candidateDisplayPriorityLabel,
@@ -406,52 +407,7 @@ function renderCoachReplay8E(model: CoachProductReportViewModel): string {
   if (replay === undefined) {
     return "";
   }
-  const moments = replay.replayMoments.slice(0, 7);
-
-  return `
-  <section id="coach-replay-8e" class="product-section coach-replay-8e" aria-label="Revivez le match">
-    <div class="story-head">
-      <div>
-        <p class="card-kicker">Replay coach officiel</p>
-        <h2>Revivez le match</h2>
-      </div>
-      ${renderBadge(`${moments.length} moments`)}
-    </div>
-    <p class="guard">${escapeHtml(replay.scoreSourceNote)}</p>
-    <div class="cards">
-      ${moments.map((moment) => `
-        <article class="product-card replay-card">
-          <div class="badge-row">
-            ${renderBadge(`Minute ${moment.minuteLabel}`)}
-            ${renderBadge(moment.sourceBadge === "official" ? "Source officielle" : "Source officielle limitee")}
-            ${renderBadge(`Confiance ${moment.confidence}`)}
-          </div>
-          <h3>${escapeHtml(moment.title)}</h3>
-          <p><strong>Score :</strong> ${escapeHtml(moment.scoreBefore)} &rarr; ${escapeHtml(moment.scoreAfter)}</p>
-          <p><strong>Lecture coach :</strong> ${escapeHtml(moment.coachReplayText)}</p>
-          <p><strong>Pourquoi cela compte :</strong> ${escapeHtml(moment.whyItMatters)}</p>
-          <p><strong>Acteur / r&ocirc;le :</strong> ${escapeHtml(`${moment.actorLabel} / ${moment.roleLabel}`)}</p>
-          <p><strong>Zone lue :</strong> ${escapeHtml(moment.zoneLabel)}</p>
-          <p><strong>Source score :</strong> ${escapeHtml(moment.scoreSourceNote)}</p>
-          <details class="appendix">
-            <summary>Preuves officielles</summary>
-            <p>Evenements: ${escapeHtml(moment.evidenceEventIds.join(", "))}</p>
-            <p>Sequence: ${escapeHtml(moment.evidenceSequenceIds.join(", "))}</p>
-            <p>Limite: ${escapeHtml(moment.limitationNote)}</p>
-          </details>
-        </article>`).join("")}
-    </div>
-    <div class="cards">
-      ${replay.storylineChapters.slice(0, 5).map((chapter) => `
-        <article class="product-card replay-chapter-card">
-          <div class="badge-row">${renderBadge(chapter.minuteRange)}${renderBadge(chapter.sourceBadge)}</div>
-          <h3>${escapeHtml(chapter.title)}</h3>
-          <p>${escapeHtml(chapter.chapterNarrative)}</p>
-          <p><strong>Lecture :</strong> ${escapeHtml(chapter.coachMeaning)}</p>
-        </article>`).join("")}
-    </div>
-    <p class="guard">${escapeHtml(replay.replayLimitations.join(" "))}</p>
-  </section>`;
+  return renderCoachReplayUXProductSection8G({ replay });
 }
 
 function renderAppendix(appendix: CoachProductReportAppendix, tags: readonly string[]): string {
@@ -548,6 +504,7 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
     .comparison-details { margin-top: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 12px; }
     .comparison-details summary { cursor: pointer; font-weight: 700; }
     .comparison-detail-list { display: grid; gap: 12px; margin-top: 12px; }
+    .coach-replay-ux-8g .story-head{align-items:flex-start}.replay-priority-block{margin-top:16px}.replay-priority-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.replay-priority-card{border-color:var(--accent);background:linear-gradient(180deg,#fff 0%,#f4fbfd 100%)}.replay-card--response{border-color:#d4b15f}.replay-card--final_lock{border-color:var(--success)}.replay-card--fatigue_context{border-style:dashed}.replay-timeline-rail{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:18px 0}.replay-rail-point{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--paper);min-width:0}.replay-rail-point strong,.replay-rail-point span,.replay-rail-point em{display:block;overflow-wrap:anywhere}.replay-rail-point span{color:var(--accent);font-weight:800}.replay-rail-point em{color:var(--muted);font-style:normal;font-size:.82rem}.replay-proof-details{margin-top:10px}
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .badge { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: .82rem; color: var(--accent); background: #f8fbfd; }
     .attributes .badge { color: #515f6f; background: #fbfcfd; }
@@ -592,15 +549,15 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
       .express-grid { grid-template-columns: 1fr; }
       .tactical-map-card-grid { grid-template-columns: 1fr; }
       .trend-card-grid, .trend-grid { grid-template-columns: 1fr; }
-      .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid { grid-template-columns: 1fr; }
+      .cards, .signal-grid, .profile-grid, .matchup-candidates, .comparison-cards, .comparison-grid, .matchup-grid, .replay-priority-grid, .replay-timeline-rail { grid-template-columns: 1fr; }
       .product-card, .express-read, .tactical-map-card, .trend-card { overflow-wrap: anywhere; }
     }
     @media print {
       body { background: #fff; }
       main { max-width: none; padding: 0; }
-      header, .product-card, .summary-list, .interpretation-guard, .appendix { box-shadow: none; }
+      header, .product-card, .summary-list, .interpretation-guard, .appendix, .replay-rail-point { box-shadow: none; }
       details[open], details { break-inside: avoid; }
-      .product-card { break-inside: avoid; }
+      .product-card, .replay-rail-point { break-inside: avoid; }
     }
   </style>
 </head>
