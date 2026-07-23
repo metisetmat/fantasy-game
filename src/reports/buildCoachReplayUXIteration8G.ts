@@ -15,19 +15,23 @@ function scoreChanged(moment: OfficialCoachReplayMoment): boolean {
   return moment.scoreBefore !== moment.scoreAfter;
 }
 
+function replayScoreLabel(moment: OfficialCoachReplayMoment): string {
+  return `${moment.scoreBefore} -> ${moment.scoreAfter}`;
+}
+
 function titleFor(moment: OfficialCoachReplayMoment): string {
-  if (moment.momentType === "first_score") return "CONTROL frappe le premier";
-  if (moment.momentType === "fatigue_visible") return "Fatigue visible chez BLITZ";
-  if (moment.momentType === "score_response" && moment.teamId === "blitz") return "BLITZ revient";
-  if (moment.momentType === "final_score_lock") return "CONTROL verrouille le 12-7";
-  if (scoreChanged(moment) && moment.teamId === "control" && moment.scoreAfter.includes("6 - 0")) return "CONTROL creuse l'ecart";
-  if (scoreChanged(moment) && moment.teamId === "control") return "CONTROL repasse devant";
+  if (moment.momentType === "first_score") return `${moment.teamLabel} frappe le premier`;
+  if (moment.momentType === "fatigue_visible") return `Fatigue visible chez ${moment.teamLabel}`;
+  if (moment.momentType === "score_response") return `${moment.teamLabel} repond`;
+  if (moment.momentType === "final_score_lock") return `${moment.teamLabel} verrouille le ${moment.scoreAfter}`;
+  if (scoreChanged(moment) && /\b6\s*-\s*0\b/u.test(moment.scoreAfter)) return `${moment.teamLabel} creuse l'ecart`;
+  if (scoreChanged(moment)) return `${moment.teamLabel} change le score`;
   return moment.title;
 }
 
 function priorityReason(moment: OfficialCoachReplayMoment): CoachReplayPriorityReason8G {
   if (moment.momentType === "first_score") return "first_score";
-  if (moment.momentType === "score_response" && moment.teamId === "blitz") return "opponent_response";
+  if (moment.momentType === "score_response") return "opponent_response";
   if (moment.momentType === "final_score_lock") return "final_lock";
   if (moment.momentType === "fatigue_visible") return "fatigue_context";
   if (scoreChanged(moment)) return "lead_change";
@@ -42,12 +46,12 @@ function visualState(moment: OfficialCoachReplayMoment): CoachReplayVisualState8
 }
 
 function sourceBadge(moment: OfficialCoachReplayMoment, scoreChangeBacked: boolean): CoachReplayUXSourceBadge8G {
-  if (scoreChangeBacked) return "official_score_change";
+  if (scoreChanged(moment) && scoreChangeBacked) return "official_score_change";
   return moment.sourceBadge === "official_with_limitation" ? "official_with_limitation" : "official_context";
 }
 
 function scoreChangeBacked(moment: OfficialCoachReplayMoment, scoreChangeEventIds: ReadonlySet<EventId>): boolean {
-  return !scoreChanged(moment) || moment.evidenceEventIds.some((eventId) => scoreChangeEventIds.has(eventId));
+  return scoreChanged(moment) && moment.evidenceEventIds.some((eventId) => scoreChangeEventIds.has(eventId));
 }
 
 function compactProof(moment: OfficialCoachReplayMoment, backed: boolean): string {
@@ -65,15 +69,15 @@ function coachRead(moment: OfficialCoachReplayMoment): string {
 
 function whyItMatters(moment: OfficialCoachReplayMoment): string {
   if (moment.momentType === "first_score") return "Le match prend sa premiere direction et fixe le premier rapport de force.";
-  if (moment.momentType === "score_response") return "La reponse garde BLITZ dans le match et change la pression de fin.";
-  if (moment.momentType === "final_score_lock") return "CONTROL ferme le match avec le dernier score officiel.";
+  if (moment.momentType === "score_response") return `La reponse de ${moment.teamLabel} change la pression de fin.`;
+  if (moment.momentType === "final_score_lock") return `${moment.teamLabel} ferme le match avec le dernier score officiel.`;
   if (moment.momentType === "fatigue_visible") return "Signal de contexte: utile pour lire la stabilite, sans surinterpretion causale.";
   return "Moment utile pour relire la zone et l'acteur qui structurent la sequence.";
 }
 
 function selectPriorityMoments(moments: readonly OfficialCoachReplayMoment[]): readonly OfficialCoachReplayMoment[] {
   const firstScore = moments.find((moment) => moment.momentType === "first_score");
-  const response = moments.find((moment) => moment.momentType === "score_response" && moment.teamId === "blitz");
+  const response = moments.find((moment) => moment.momentType === "score_response");
   const finalLock = [...moments].reverse().find((moment) => moment.momentType === "final_score_lock" || scoreChanged(moment));
   return [firstScore, response, finalLock]
     .filter((moment, index, selected): moment is OfficialCoachReplayMoment =>
@@ -86,7 +90,7 @@ function toTimelineRailMoment(moment: OfficialCoachReplayMoment): CoachReplayTim
   return {
     replayMomentId: moment.momentId,
     minuteLabel: moment.minuteLabel,
-    scoreLabel: `${moment.scoreBefore} -> ${moment.scoreAfter}`,
+    scoreLabel: replayScoreLabel(moment),
     title: titleFor(moment),
     teamId: moment.teamId,
     visualState: visualState(moment),
@@ -133,7 +137,7 @@ export function buildCoachReplayUXViewFromTimeline(input: {
       displayIndex: index + 1,
       priorityLevel: isPriority ? "primary" : "context",
       minuteLabel: moment.minuteLabel,
-      scoreLabel: `${moment.scoreBefore} -> ${moment.scoreAfter}`,
+      scoreLabel: replayScoreLabel(moment),
       title: titleFor(moment),
       subtitle: isPriority ? "Moment structurant" : "Contexte replay",
       teamBadge: moment.teamLabel,
@@ -179,13 +183,17 @@ export function buildCoachReplayUXViewFromTimeline(input: {
       moments: timelineMoments,
       scoreMilestones: timelineMoments.filter((moment) => moment.visualState !== "context" && moment.visualState !== "fatigue_context"),
       contextMoments: timelineMoments.filter((moment) => moment.visualState === "context" || moment.visualState === "fatigue_context"),
-      timelineNarrative: "CONTROL frappe en premier, BLITZ revient, puis CONTROL reprend le fil et verrouille la fin.",
+      timelineNarrative: priorityMoments.length > 0
+        ? `${priorityMoments.map((moment) => moment.title).join(", ")}.`
+        : "Replay officiel disponible sans moment prioritaire supplementaire.",
       sourceOfTruthNote: "Replay fonde sur les evenements officiels du match; les preuves detaillees restent repliees.",
     },
     momentCards,
     evidenceDisclosures,
     globalSourceOfTruthNote: "Replay fonde sur les evenements officiels du match; les preuves detaillees restent repliees.",
-    exportIntroLine: "Trois moments structurent le match : le premier score de CONTROL, la reponse de BLITZ, puis le verrouillage final de CONTROL.",
+    exportIntroLine: priorityMoments.length > 0
+      ? `Moments structurants: ${priorityMoments.map((moment) => moment.title).join("; ")}.`
+      : "Moments structurants issus de la timeline officielle.",
     productIntroLine: "Replay fonde sur les evenements officiels ; preuves detaillees repliees.",
   };
 }

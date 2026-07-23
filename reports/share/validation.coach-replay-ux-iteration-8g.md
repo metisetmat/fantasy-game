@@ -49,8 +49,8 @@ Status: PASS
 - PASS: batch/live separation preserved - true
 - PASS: product replay section visible - true
 - PASS: export replay section visible - true
-- PASS: export remains under 900 seconds - 777
-- PASS: export ideally under 800 seconds - 777
+- PASS: export remains under 900 seconds - 779
+- PASS: export ideally under 800 seconds - 779
 - PASS: no new season memory - not added in 8G
 - PASS: no new team style memory - not added in 8G
 - PASS: no new database history feature - not added in 8G
@@ -69,7 +69,7 @@ Status: PASS
 - roleDiversityCount: 5
 - scoreChangeEventsCoveredByReplayCount: 6
 - scoreChangeEventCount: 6
-- exportReadTimeSecondsAfter8G: 777
+- exportReadTimeSecondsAfter8G: 779
 
 ## Exhaustive Validation Command
 npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share

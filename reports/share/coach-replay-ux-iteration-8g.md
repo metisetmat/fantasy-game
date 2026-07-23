@@ -42,18 +42,18 @@ Status: PASS
 | Minute | Score | Title | Reason | Actor / role | Zone | Proof |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2-2' | 0 - 0 -> 3 - 0 | CONTROL frappe le premier | first_score | le Space Hunter de CONTROL / Space Hunter | axe central | Preuve officielle: 0 - 0 vers 3 - 0. |
-| 19-19' | 6 - 0 -> 6 - 5 | BLITZ revient | opponent_response | le gardien-libero de BLITZ / Gardien-libero | axe central | Preuve officielle: 6 - 0 vers 6 - 5. |
-| 33-33' | 9 - 7 -> 12 - 7 | CONTROL verrouille le 12-7 | final_lock | le Left Piston hybride de CONTROL / Left Piston | axe central | Preuve officielle: 9 - 7 vers 12 - 7. |
+| 15-15' | 3 - 0 -> 6 - 0 | CONTROL repond | opponent_response | le Playmaker createur de CONTROL / Playmaker | axe central | Preuve officielle: 3 - 0 vers 6 - 0. |
+| 33-33' | 9 - 7 -> 12 - 7 | CONTROL verrouille le 12 - 7 | final_lock | le Left Piston hybride de CONTROL / Left Piston | axe central | Preuve officielle: 9 - 7 vers 12 - 7. |
 
 ## Timeline Rail
 | Minute | Score | Title | State |
 | --- | --- | --- | --- |
 | 2-2' | 0 - 0 -> 3 - 0 | CONTROL frappe le premier | score_change |
 | 3-3' | 3 - 0 -> 3 - 0 | Fatigue visible chez BLITZ | fatigue_context |
-| 15-15' | 3 - 0 -> 6 - 0 | CONTROL creuse l'ecart | response |
-| 19-19' | 6 - 0 -> 6 - 5 | BLITZ revient | response |
-| 25-25' | 6 - 7 -> 9 - 7 | CONTROL repasse devant | response |
-| 33-33' | 9 - 7 -> 12 - 7 | CONTROL verrouille le 12-7 | final_lock |
+| 15-15' | 3 - 0 -> 6 - 0 | CONTROL repond | response |
+| 19-19' | 6 - 0 -> 6 - 5 | BLITZ repond | response |
+| 25-25' | 6 - 7 -> 9 - 7 | CONTROL repond | response |
+| 33-33' | 9 - 7 -> 12 - 7 | CONTROL verrouille le 12 - 7 | final_lock |
 
 ## Evidence Disclosure
 | Metric | Value |
@@ -119,15 +119,15 @@ Status: PASS
 | sequenceCausalityStillVisible | true |
 | actorMappingStillVisible | true |
 | naturalReplayStillVisible | false |
-| exportReadTimeSecondsBefore8G | 740 |
-| exportReadTimeSecondsAfter8G | 777 |
-| exportReadTimeDelta | 37 |
+| exportReadTimeSecondsBefore8G | 741 |
+| exportReadTimeSecondsAfter8G | 779 |
+| exportReadTimeDelta | 38 |
 | exportUnder900Seconds | true |
 | exportUnder800Seconds | true |
 
 ## Product / Export Excerpts
-- product 2 minutes: CONTROL frappe le premier | BLITZ revient | CONTROL verrouille le 12-7
-- export 60 secondes: Trois moments structurent le match : le premier score de CONTROL, la reponse de BLITZ, puis le verrouillage final de CONTROL.
+- product 2 minutes: CONTROL frappe le premier | CONTROL repond | CONTROL verrouille le 12 - 7
+- export 60 secondes: Moments structurants: CONTROL frappe le premier; CONTROL repond; CONTROL verrouille le 12 - 7.
 
 ## Match Economy Preservation
 | Metric | Value |

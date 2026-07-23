@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-23T10:38:31.864Z
+Generated timestamp: 2026-07-23T13:15:24.327Z
 Task/sprint name: Sprint 8G - Coach Replay UX Iteration
 Final file count: 20
 
@@ -1032,20 +1032,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/renderCoachProductReport.ts
- M src/reports/renderCoachReportExportHtml.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReplayUXIteration8G.ts
-?? src/reports/coachReplayEvidenceDisclosureAudit8G.ts
-?? src/reports/coachReplayIntegrationBudgetAudit8G.ts
-?? src/reports/coachReplayMobilePrintAudit8G.ts
-?? src/reports/coachReplayPriorityAudit8G.ts
-?? src/reports/coachReplaySourceOfTruthRegressionAudit8G.ts
-?? src/reports/coachReplayUXHierarchyAudit8G.ts
-?? src/reports/coachReplayUXIteration8G.ts
-?? src/reports/coachReplayUXIterationTypes8G.ts
-?? src/reports/coachReplayUXIterationWarnings.ts
-?? src/reports/coachReplayWordingUXAudit8G.ts
-?? src/reports/renderCoachReplayUXSection8G.ts
+ M src/reports/buildCoachReplayUXIteration8G.ts
+?? src/reports/coachReplayUXIterationReviewFix.test.ts
