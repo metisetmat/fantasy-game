@@ -1507,7 +1507,7 @@ function renderOfficialMatchStorySpineExport(html: string): string {
     <div class="report-section-divider">Recit officiel</div>
     <div class="report-section-header">
       <div>
-        <h2>R&eacute;cit du match en 45 secondes</h2>
+        <h2>Le match en 2 minutes</h2>
         <p>Version compacte issue de la timeline officielle et des score_change officiels.</p>
       </div>
     </div>
@@ -1562,7 +1562,7 @@ function renderSequenceCausality8DExport(html: string): string {
   const items = cards.map((card) => {
     const title = stripTags(extractMatch(card, /<h3\b[^>]*>([\s\S]*?)<\/h3>/u));
     const effect = stripTags(extractMatch(card, /<p><strong>Effet officiel\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
-    const proof = stripTags(extractMatch(card, /<p><strong>Preuve\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
+    const proof = stripTags(extractMatch(card, /<details\b[^>]*class="[^"]*sequence-proof-details[^"]*"[\s\S]*?<p>([\s\S]*?)<\/p>[\s\S]*?<\/details>/u));
     const limit = stripTags(extractMatch(card, /<p><strong>Limite\s*:<\/strong>\s*([\s\S]*?)<\/p>/u));
     return `${title}: ${effect}; source ${proof}; limite ${limit}`;
   }).filter((item) => item.length > 0);
@@ -5562,9 +5562,9 @@ export function renderCoachReportExportHtml(input: {
     renderCover(input.productReportHtml),
     renderExpressReadExport(input.productReportHtml),
     renderOfficialMatchStorySpineExport(input.productReportHtml),
+    renderCoachReplay8EExport(input.productReportHtml),
     renderOfficialCausality8CExport(input.productReportHtml),
     renderSequenceCausality8DExport(input.productReportHtml),
-    renderCoachReplay8EExport(input.productReportHtml),
     renderExecutiveSummary(input.productReportHtml),
     renderCoachActionPlanExport(input.productReportHtml),
     renderTacticalMapCardsExport(input.productReportHtml),

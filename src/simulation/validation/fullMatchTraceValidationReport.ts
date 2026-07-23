@@ -168,6 +168,10 @@ import {
   renderCoachReplayUXIteration8GDoc as renderCoachReplayUXIteration8GDocBase,
   renderCoachReplayUXIteration8GValidation as renderCoachReplayUXIteration8GValidationBase,
 } from "../../reports/coachReplayUXIteration8G";
+import {
+  renderCoachReportStoryFirstRecomposition8HDoc as renderCoachReportStoryFirstRecomposition8HDocBase,
+  renderCoachReportStoryFirstRecomposition8HValidation as renderCoachReportStoryFirstRecomposition8HValidationBase,
+} from "../../reports/buildCoachReportStoryFirstRecomposition8H";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6737,6 +6741,18 @@ export function renderCoachReplayUXIteration8GValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReplayUXIteration8GValidationBase();
+}
+
+export function renderCoachReportStoryFirstRecomposition8HDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportStoryFirstRecomposition8HDocBase();
+}
+
+export function renderCoachReportStoryFirstRecomposition8HValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportStoryFirstRecomposition8HValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

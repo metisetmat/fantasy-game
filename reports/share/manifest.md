@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-23T10:38:31.864Z
-Task/sprint: Sprint 8G - Coach Replay UX Iteration
+Generated: 2026-07-23T12:47:58.804Z
+Task/sprint: Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-replay-ux-iteration-8g.md
-- validation.coach-replay-ux-iteration-8g.md
+- coach-report-story-first-product-recomposition-8h.md
+- validation.coach-report-story-first-product-recomposition-8h.md
 - README.md
 
 ## Bundle Files

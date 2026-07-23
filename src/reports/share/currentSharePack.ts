@@ -1,7 +1,7 @@
 import type { CurrentSharePackConfig } from "./sharePackTypes";
 
 export const currentSprint: CurrentSharePackConfig = {
-  name: "Sprint 8G - Coach Replay UX Iteration",
+  name: "Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup",
   mode: "MINIMAL_REVIEW",
   requiredFiles: [
     "package.json",
@@ -16,8 +16,8 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-2.html",
     "sequence-1-action-3.html",
     "validation.share-pack.md",
-    "coach-replay-ux-iteration-8g.md",
-    "validation.coach-replay-ux-iteration-8g.md",
+    "coach-report-story-first-product-recomposition-8h.md",
+    "validation.coach-report-story-first-product-recomposition-8h.md",
     "README.md",
     "manifest.md",
     "00-share-manifest.txt",
@@ -39,14 +39,14 @@ export const currentSprint: CurrentSharePackConfig = {
     "sequence-1-action-1.html": "first visual workbench artifact used as tactical truth fixture and replay seed",
     "sequence-1-action-2.html": "second visual workbench artifact proving ML to PM central reconnect",
     "sequence-1-action-3.html": "third visual workbench artifact proving PM to SH forward progress",
-    "validation.share-pack.md": "proves the 8G share pack is current, complete, minimal, and below 20 files",
-    "coach-replay-ux-iteration-8g.md": "documents the coach replay UX iteration, 2-minute priority read, timeline rail, collapsed proof, mobile/print/export audits, and source-of-truth preservation",
-    "validation.coach-replay-ux-iteration-8g.md": "proves 8G preserves 8F actor mapping/natural narrative while improving replay hierarchy, priority moments, evidence disclosure, mobile/print, and export budget",
-    "README.md": "compact reviewer orientation for the 8G share pack",
-    "manifest.md": "compatibility manifest listing the 8G share pack files",
+    "validation.share-pack.md": "proves the 8H share pack is current, complete, minimal, and below 20 files",
+    "coach-report-story-first-product-recomposition-8h.md": "documents the story-first product recomposition, read-flow audits, replay preservation, evidence boundary, mobile/print/export readiness, and validation consistency cleanup",
+    "validation.coach-report-story-first-product-recomposition-8h.md": "proves 8H starts from the match story, preserves 8G replay evidence, demotes technical detail, keeps source-of-truth guardrails, and resolves stale PASS/FAIL wording",
+    "README.md": "compact reviewer orientation for the 8H share pack",
+    "manifest.md": "compatibility manifest listing the 8H share pack files",
     "00-share-manifest.txt": "detailed generated manifest with bundle contents and missing-file status",
     "bundle__contracts.md": "bundles official engine-to-coach contracts, evidence/warning contracts, and contract guards",
     "bundle__simulation.md": "bundles visual multi-action WorkbenchChain fixtures/replay/tests, experimental full-match chain consumption, sandbox decision batch confidence calibration, multi-scenario coach test plan model, selection preview model, trace-backed selection preview model/matcher/builder/tests, match trace spine contract/adapters/tests, match trace aggregator contract/deduplication/tests, full-match trace validation profiles/runner/comparisons/reports/tests, route selection flag, mini-match spatial route selection, replay seed, grounding diagnostics, and scoring guards including 4R",
-    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, Player Candidate Comparison View, official 8C causality, official 8D player/role/sequence causality, official 8E match replay immersion, official 8F replay actor mapping and natural narrative fix, official 8G coach replay UX iteration, persistent history evidence, database adapter SPI and migration dry-run preparation, Selection Preview coach copy/model/tests, trace-backed rendering, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
+    "bundle__reports.md": "bundles coach report renderer, Coach Product Report View, Product Report Polish, Coach Report Export Snapshot, Premium HTML Layout/export renderer/tests, Player Matchup View, Player Matchup Calibration, Roster Coverage Matchup, Player Candidate Comparison View, official 8C causality, official 8D player/role/sequence causality, official 8E match replay immersion, official 8F replay actor mapping and natural narrative fix, official 8G coach replay UX iteration, official 8H story-first recomposition and validation consistency cleanup, persistent history evidence, database adapter SPI and migration dry-run preparation, Selection Preview coach copy/model/tests, trace-backed rendering, generated artifact encoding validation, renderer tests, UTF-8/copy quality utilities, visible jargon guards, technical detail placement guards, and share-pack updater",
   },
 };

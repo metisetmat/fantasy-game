@@ -55,6 +55,10 @@ function renderBadge(label: string): string {
   return `<span class="badge">${escapeHtml(label)}</span>`;
 }
 
+function coachReadableText(text: string): string {
+  return text.replace(/\b(?:event-|full-match-|contract-fixture-\d+-(?:segment|sequence|score))[a-z0-9_-]+\b/giu, "preuve officielle repliee");
+}
+
 function renderSignal(signal: CoachProductReportSignal): string {
   return `
     <article class="product-card signal-card">
@@ -309,24 +313,25 @@ function renderOfficialMatchStorySpine(model: CoachProductReportViewModel): stri
   }
 
   return `
-  <section id="official-match-story-spine" class="product-section official-story-spine" aria-label="Recit officiel du match">
+  <section id="official-match-story-spine" class="product-section official-story-spine story-first-8h" aria-label="Le match en 2 minutes" data-story-first-version="8H">
     <div class="story-head">
       <div>
-        <p class="card-kicker">Lecture officielle</p>
-        <h2>R&eacute;cit officiel du match</h2>
+        <p class="card-kicker">Le match en 2 minutes</p>
+        <h2>Le match en 2 minutes</h2>
       </div>
       ${renderBadge(`Score officiel : ${story.officialScore}`)}
     </div>
     <article class="product-card official-story-card">
-      <h3>Le match en 45 secondes</h3>
-      <p>${escapeHtml(story.narrative.shortNarrative)}</p>
+      <h3>Qu'est-ce qui explique le match ?</h3>
+      <p>${escapeHtml(coachReadableText(story.narrative.shortNarrative))}</p>
       <div class="story-turning-points">
         ${story.turningPoints.slice(0, 4).map((turningPoint) => `
           <section>
             <h4>${escapeHtml(turningPoint.title)}</h4>
-            <p>${escapeHtml(turningPoint.coachMeaning)}</p>
+            <p>${escapeHtml(coachReadableText(turningPoint.coachMeaning))}</p>
           </section>`).join("")}
       </div>
+      <p><a href="#coach-replay-8e">Voir le replay complet et les preuves officielles repliees.</a></p>
       <p class="guard">${escapeHtml(story.narrative.sourceOfTruthNote)}</p>
     </article>
   </section>`;
@@ -353,13 +358,17 @@ function renderOfficialCausality8C(model: CoachProductReportViewModel): string {
       ${cards.map((fact) => `
         <article class="product-card causality-card">
           <div class="badge-row">
-            ${renderBadge(`Source officielle : ${fact.linkedOfficialEventIds[0]}`)}
+            ${renderBadge("Source officielle disponible")}
             ${renderBadge(`Confiance ${fact.confidence}`)}
           </div>
           <h3>${escapeHtml(fact.causeLabel)}</h3>
           <p><strong>Effet :</strong> ${escapeHtml(fact.effectLabel)}</p>
           <p><strong>Joueur / r&ocirc;le :</strong> ${escapeHtml([fact.primaryPlayerId, fact.role].filter((value): value is string => value !== undefined).join(" / ") || "non pr&eacute;cis&eacute;")}</p>
           <p><strong>Zone :</strong> ${escapeHtml(fact.zoneIds.join(", ") || "non pr&eacute;cis&eacute;e")}</p>
+          <details class="replay-proof-details causality-proof-details">
+            <summary>Preuve officielle</summary>
+            <p>${escapeHtml(fact.linkedOfficialEventIds.join(", "))}</p>
+          </details>
           <p><strong>Limite :</strong> ${escapeHtml(fact.limitationNote)}</p>
         </article>`).join("")}
     </div>
@@ -382,7 +391,7 @@ function renderSequenceCausality8D(model: CoachProductReportViewModel): string {
       </div>
       ${renderBadge(`${cards.length} s&eacute;quences`)}
     </div>
-    <p class="guard">${escapeHtml(sequenceCausality.sequenceStory.shortSequenceStory)}</p>
+    <p class="guard">${escapeHtml(coachReadableText(sequenceCausality.sequenceStory.shortSequenceStory))}</p>
     <div class="cards">
       ${cards.map((sequence) => `
         <article class="product-card sequence-card">
@@ -395,7 +404,10 @@ function renderSequenceCausality8D(model: CoachProductReportViewModel): string {
           <p><strong>Cha&icirc;ne joueur / r&ocirc;le :</strong> ${escapeHtml(sequence.actorChain.map((actor) => `${actor.playerId} / ${actor.role}`).join(" -> ") || "niveau equipe")}</p>
           <p><strong>Zone :</strong> ${escapeHtml(sequence.zoneChain.join(" -> "))}</p>
           <p><strong>Effet officiel :</strong> ${escapeHtml(sequence.observedEffect)}</p>
-          <p><strong>Preuve :</strong> ${escapeHtml(sequence.linkedOfficialEventIds.join(", "))}</p>
+          <details class="replay-proof-details sequence-proof-details">
+            <summary>Preuve officielle</summary>
+            <p>${escapeHtml(sequence.linkedOfficialEventIds.join(", "))}</p>
+          </details>
           <p><strong>Limite :</strong> ${escapeHtml(sequence.limitationNote)}</p>
         </article>`).join("")}
     </div>
@@ -592,14 +604,14 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
 
   ${renderOfficialMatchStorySpine(model)}
 
+  ${renderCoachReplay8E(model)}
+
   ${renderOfficialCausality8C(model)}
 
   ${renderSequenceCausality8D(model)}
 
-  ${renderCoachReplay8E(model)}
-
   <section id="executive-summary" class="product-section">
-    <h2>Résumé coach</h2>
+    <h2>Résumé coach : ce que ça dit au coach</h2>
     <div class="summary-list">${renderList(model.executiveSummary.slice(0, 4))}</div>
   </section>
 

@@ -126,10 +126,12 @@ export function buildOfficialMatchStorySpineEngineCausalityProof8AModel(input: {
   readonly reportConsumptionReadinessAudit: ReportConsumptionReadinessAudit;
 }): OfficialMatchStorySpineEngineCausalityProof8AModel {
   const productStorySectionVisible = input.productReportHtml.includes('id="official-match-story-spine"') &&
-    input.productReportHtml.includes("R&eacute;cit officiel du match");
+    (input.productReportHtml.includes("R&eacute;cit officiel du match") ||
+      input.productReportHtml.includes("Le match en 2 minutes"));
   const exportStorySectionVisible = input.exportReportHtml.includes('id="official-match-story-spine"');
   const exportCompactStoryVisible = input.exportReportHtml.includes("R&eacute;cit du match en 45 secondes") ||
-    input.exportReportHtml.includes("Recit du match en 45 secondes");
+    input.exportReportHtml.includes("Recit du match en 45 secondes") ||
+    input.exportReportHtml.includes("Le match en 2 minutes");
   const exportReadTimeSecondsAfter8A = readTimeSeconds(input.exportReportHtml);
   const matchEconomyBaselinePreserved = input.baseline7H.matchEconomyBaselinePreserved &&
     input.baseline7H.baseline7G.matchEconomyBaseline.status === "PASS" &&
