@@ -606,16 +606,16 @@ export function renderCoachProductReport(model: CoachProductReportViewModel): st
 
   ${renderCoachReplay8E(model)}
 
-  ${renderOfficialCausality8C(model)}
-
-  ${renderSequenceCausality8D(model)}
-
   <section id="executive-summary" class="product-section">
     <h2>Résumé coach : ce que ça dit au coach</h2>
     <div class="summary-list">${renderList(model.executiveSummary.slice(0, 4))}</div>
   </section>
 
   ${renderCoachActionPlanCards(actionPlanCards)}
+
+  ${renderOfficialCausality8C(model)}
+
+  ${renderSequenceCausality8D(model)}
 
   ${renderCoachTacticalMapCardsSection(tacticalMapCards)}
 

@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-23T14:33:05.560Z
+Generated timestamp: 2026-07-23T14:40:14.173Z
 Task/sprint name: Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup
 Final file count: 20
 
@@ -1047,7 +1047,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
-MM src/reports/buildCoachReplayUXIteration8G.ts
-A  src/reports/coachReplayUXIterationReviewFix.test.ts
- M src/reports/storyFirstReportIntegrationBudgetAudit8H.ts
+ M src/reports/buildCoachReportStoryFirstRecomposition8H.ts
+ M src/reports/renderCoachProductReport.ts
+ M src/reports/renderCoachReportExportHtml.ts
+ M src/reports/storyFirstSectionOrderAudit8H.ts

@@ -171,7 +171,7 @@ export function buildCoachReportStoryFirstRecomposition8HModel(input: {
   const coachReadFlowReady = readFlowAudit.status === "PASS";
   const reportSectionOrderReady = sectionOrderAudit.status === "PASS";
   const actionPlanStillProminent = sectionOrderAudit.actionPlanAfterStoryBeforeAppendix;
-  const technicalSectionsDemoted = sectionOrderAudit.technicalBeforeStoryCount === 0 && sectionOrderAudit.technicalBeforeActionPlanCount <= 1;
+  const technicalSectionsDemoted = sectionOrderAudit.technicalBeforeStoryCount === 0 && sectionOrderAudit.technicalBeforeActionPlanCount === 0;
   const evidenceDisclosureReady = evidenceBoundaryAudit.status === "PASS";
   const exportStoryFirstReady = mobilePrintExportAudit.exportStoryFirstReady && integrationBudgetAudit.exportStoryFirstSectionVisible;
   const mobileStoryFirstReady = mobilePrintExportAudit.productMobileNoHorizontalOverflow && mobilePrintExportAudit.storyCardsStackOnMobile;

@@ -25,7 +25,7 @@ export interface StoryFirstSectionOrderAudit8H {
 }
 
 function countTechnicalBefore(productReportHtml: string, boundary: number): number {
-  const technicalIds = ["appendices", "guardrail-summary", "interpretation-guard"];
+  const technicalIds = ["official-causality-8c", "sequence-causality-8d", "appendices", "guardrail-summary", "interpretation-guard"];
   return technicalIds.filter((id) => {
     const position = sectionPosition(productReportHtml, id);
     return position < boundary;
@@ -53,6 +53,8 @@ export function auditStoryFirstSectionOrder8H(productReportHtml: string): StoryF
     replaySectionPosition < sequencePosition;
   const actionPlanAfterStoryBeforeAppendix = actionPlanPosition > storySectionPosition &&
     actionPlanPosition > replaySectionPosition &&
+    actionPlanPosition < causalityPosition &&
+    actionPlanPosition < sequencePosition &&
     actionPlanPosition < appendixPosition;
   const sandboxAfterCoreCoachSections = sandboxSectionPosition > actionPlanPosition;
   const technicalAppendixAfterCoachSections = appendixPosition > actionPlanPosition;
@@ -64,7 +66,7 @@ export function auditStoryFirstSectionOrder8H(productReportHtml: string): StoryF
     (replayBeforeTechnicalSections ? 0 : 20) -
     (actionPlanAfterStoryBeforeAppendix ? 0 : 10) -
     technicalBeforeStoryCount * 15 -
-    Math.max(0, technicalBeforeActionPlanCount - 1) * 8
+    technicalBeforeActionPlanCount * 8
   );
   const warningCodes: CoachReportStoryFirstRecompositionWarningCode[] = [];
   if (!storyFirstLayoutExists) warningCodes.push("STORY_FIRST_LAYOUT_MISSING");
@@ -81,7 +83,7 @@ export function auditStoryFirstSectionOrder8H(productReportHtml: string): StoryF
     actionPlanAfterStoryBeforeAppendix &&
     sandboxAfterCoreCoachSections &&
     technicalBeforeStoryCount === 0 &&
-    technicalBeforeActionPlanCount <= 1 &&
+    technicalBeforeActionPlanCount === 0 &&
     storyFirstScore >= 90;
 
   return {
