@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8I - Story-First Export Budget & Validation Threshold Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

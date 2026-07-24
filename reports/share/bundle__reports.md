@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8I - Story-First Export Budget & Validation Threshold Fix. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -152,6 +152,8 @@ import {
   renderCoachReplayUXIteration8GValidation,
   renderCoachReportStoryFirstRecomposition8HDoc,
   renderCoachReportStoryFirstRecomposition8HValidation,
+  renderStoryFirstExportBudgetValidationThresholdFix8IDoc,
+  renderStoryFirstExportBudgetValidationThresholdFix8IValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -165,10 +167,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-story-first-product-recomposition-8h.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8I - Story-First Export Budget & Validation Threshold Fix";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "story-first-export-budget-validation-threshold-fix-8i.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-story-first-product-recomposition-8h.md";
+  "validation.story-first-export-budget-validation-threshold-fix-8i.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3369,6 +3371,76 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8H model, report renderer, and validation renderer for story-first product recomposition",
       },
       {
+        source: "src/reports/storyFirstExportBudgetValidationThresholdFixTypes8I.ts",
+        required: true,
+        reason: "Sprint 8I contract for strict export budget thresholds, compression plan, and validation honesty audits",
+      },
+      {
+        source: "src/reports/storyFirstExportBudgetValidationThresholdFixWarnings.ts",
+        required: true,
+        reason: "Sprint 8I warning-code registry separating threshold failures from positive readiness tags",
+      },
+      {
+        source: "src/reports/renderStoryFirstCompressedExport8I.ts",
+        required: true,
+        reason: "Sprint 8I compressed story-first export renderer preserving coach story essentials while removing long diagnostics",
+      },
+      {
+        source: "src/reports/exportBudgetThresholdAudit8I.ts",
+        required: true,
+        reason: "Sprint 8I numeric export read-time threshold audit enforcing <=900 and <=800 seconds honestly",
+      },
+      {
+        source: "src/reports/numericValidationHonestyAudit8I.ts",
+        required: true,
+        reason: "Sprint 8I audit proving failed numeric threshold rules cannot be reported as PASS",
+      },
+      {
+        source: "src/reports/storyFirstExportContentAudit8I.ts",
+        required: true,
+        reason: "Sprint 8I audit proving the compressed export keeps story-first sections and removes full timeline, sandbox, and batch panels",
+      },
+      {
+        source: "src/reports/storyFirstProductPreservationAudit8I.ts",
+        required: true,
+        reason: "Sprint 8I audit proving coach-report.product.html remains complete and story-first",
+      },
+      {
+        source: "src/reports/sourceOfTruthRegressionAudit8I.ts",
+        required: true,
+        reason: "Sprint 8I audit preserving official score_change, scoring constants, batch/live separation, and sandbox boundaries",
+      },
+      {
+        source: "src/reports/storyFirstExportMobilePrintAudit8I.ts",
+        required: true,
+        reason: "Sprint 8I audit proving compressed export mobile and print readiness",
+      },
+      {
+        source: "src/reports/buildStoryFirstExportBudgetValidationThresholdFix8I.ts",
+        required: true,
+        reason: "Sprint 8I model, report renderer, and validation renderer for export budget threshold honesty",
+      },
+      {
+        source: "src/reports/renderRestoredCompressedExport8J.ts",
+        required: true,
+        reason: "Sprint 8J finishing wrapper restoring 8I export action-plan content and replay wording without changing engine truth",
+      },
+      {
+        source: "src/reports/sharePackCompletionExportActionPlanRestorationWarnings.ts",
+        required: true,
+        reason: "Sprint 8J warning-code registry for share pack completion, export action-plan restoration, and replay wording cleanup",
+      },
+      {
+        source: "src/reports/sharePackCompletionExportActionPlanRestorationTypes8J.ts",
+        required: true,
+        reason: "Sprint 8J contract proving share pack completion and export action-plan/replay cleanup on top of 8I",
+      },
+      {
+        source: "src/reports/buildSharePackCompletionExportActionPlanRestoration8J.ts",
+        required: true,
+        reason: "Sprint 8J model builder for finishing 8I delivery without adding a new decision layer",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5525,6 +5597,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8I")) {
+    return renderStoryFirstExportBudgetValidationThresholdFix8IDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8H")) {
     return renderCoachReportStoryFirstRecomposition8HDoc(fullMatchTraceValidationModel());
   }
@@ -7863,6 +7938,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8I")) {
+    return renderStoryFirstExportBudgetValidationThresholdFix8IValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8H")) {
     return renderCoachReportStoryFirstRecomposition8HValidation(fullMatchTraceValidationModel());
   }
@@ -10147,6 +10225,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8I")) {
+    return [
+      "# Sprint 8I Share Pack",
+      "",
+      "Current sprint: Sprint 8I - Story-First Export Budget & Validation Threshold Fix",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the product report complete while the export report is compressed and validated against strict numeric read-time thresholds.",
+      "",
+      "Primary files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- story-first-export-budget-validation-threshold-fix-8i.md",
+      "- validation.story-first-export-budget-validation-threshold-fix-8i.md",
+      "- validation.share-pack.md",
+      "",
+      "Recommended review order:",
+      "1. coach-report.export.html",
+      "2. validation.story-first-export-budget-validation-threshold-fix-8i.md",
+      "3. story-first-export-budget-validation-threshold-fix-8i.md",
+      "4. coach-report.product.html",
+      "5. validation.share-pack.md",
+      "",
+      "Key invariants:",
+      "- exportUnder900Seconds and exportUnder800Seconds are computed from actual numeric read-time thresholds.",
+      "- A failed threshold cannot be described as PASS.",
+      "- The product report remains the full story-first report.",
+      "- The export report keeps the story, replay, action plan, tactical map essentials, and source-of-truth note without full timeline, sandbox panel, or batch diagnostics.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8H")) {
     return [
       "# Sprint 8H Share Pack",
@@ -28516,6 +28623,7 @@ import {
   renderProductBaselineCoachReportReadinessSection,
   renderCoachInsightDepthNextMatchRecommendationsSection,
 } from "./renderCoachReportExportHtml";
+import { renderRestoredCompressedExport8J } from "./renderRestoredCompressedExport8J";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -28877,46 +28985,8 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const exportHtml = renderCoachReportExportHtml({
+  const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: coachOnlyProductHtml,
-    phaseReadability,
-    multiMatchPhaseComparison,
-    multiMatchHistoryView,
-    realMatchHistoryIntegration,
-    persistentHistoryAdapter,
-    ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
-    ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
-    ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
-    ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
-    ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
-    ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
-    ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
-    fullMatchScoreEconomyCalibration,
-    scoringFamilyAttributionAudit,
-    fullMatchCalibrationCarryoverReconciliation,
-    fullMatchOfficialScoringConnection,
-    fullMatchRouteFamilyMixActivation,
-    fullMatchRouteFamilyScoringRateCalibration,
-    fullMatchSegmentScoringDensityCalibration,
-    fullMatchTeamOpportunityBalanceCalibration,
-    fullMatchDominanceChainCalibration,
-    fullMatchBreakEventPostScoreResetCalibration,
-    fullMatchGoalkeeperSecureResetBreakSpecificity,
-    fullMatchResetBreakBlowoutEconomy,
-    fullMatchEarnedDangerGate,
-    fullMatchEarnedDangerGateTuning,
-    fullMatchGateSelectivityVolumeRegressionFix,
-    fullMatchRouteEconomyRecheckAfterSelectivityFix,
-    fullMatchEarnedDangerOutcomeDistribution,
-    fullMatchDominanceChainCalibrationCoverageFix,
-    fullMatchCloseGameDistributionCalibration,
-    fullMatchTrailingTeamResponseLateGamePressure,
-    fullMatchLateGameThreatQualityTrailingConversion,
-    fullMatchLateGameThreatQualityMonitoring,
-    fullMatchEconomyFinalStabilization,
-    productBaselineCoachReportReadiness,
-    coachInsightDepthNextMatchRecommendations,
-    coachActionPlanCardsTrainingFocusPackaging,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

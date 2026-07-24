@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-23T14:40:14.173Z
-Task/sprint: Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup
+Generated: 2026-07-24T10:07:31.241Z
+Task/sprint: Sprint 8I - Story-First Export Budget & Validation Threshold Fix
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-story-first-product-recomposition-8h.md
-- validation.coach-report-story-first-product-recomposition-8h.md
+- story-first-export-budget-validation-threshold-fix-8i.md
+- validation.story-first-export-budget-validation-threshold-fix-8i.md
 - README.md
 
 ## Bundle Files

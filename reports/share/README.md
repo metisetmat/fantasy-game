@@ -1,21 +1,25 @@
-# Sprint 8H Share Pack
+# Sprint 8I Share Pack
 
-Current sprint: Sprint 8H - Coach Report Story-First Product Recomposition + Validation Consistency Cleanup
+Current sprint: Sprint 8I - Story-First Export Budget & Validation Threshold Fix
 
-Purpose: review the story-first recomposition of the coach product report. The first reading path now starts with the match story, then the official replay, then coach interpretation and action planning, while technical evidence stays available but demoted.
+Upload every file in this `reports/share` directory for review. This minimal pack keeps the product report complete while the export report is compressed and validated against strict numeric read-time thresholds.
 
-Core files:
+Primary files:
 - coach-report.product.html
 - coach-report.export.html
-- coach-report-story-first-product-recomposition-8h.md
-- validation.coach-report-story-first-product-recomposition-8h.md
+- story-first-export-budget-validation-threshold-fix-8i.md
+- validation.story-first-export-budget-validation-threshold-fix-8i.md
 - validation.share-pack.md
 
-Review order:
-1. validation.share-pack.md
-2. validation.coach-report-story-first-product-recomposition-8h.md
-3. coach-report-story-first-product-recomposition-8h.md
+Recommended review order:
+1. coach-report.export.html
+2. validation.story-first-export-budget-validation-threshold-fix-8i.md
+3. story-first-export-budget-validation-threshold-fix-8i.md
 4. coach-report.product.html
-5. coach-report.export.html
+5. validation.share-pack.md
 
-Guardrail: this sprint changes report composition and validation consistency only. It does not change scoring values, score_change events, MatchBonusEvent, sandbox promotion, batch/live separation, season memory, team style memory, or the 8G replay evidence.
+Key invariants:
+- exportUnder900Seconds and exportUnder800Seconds are computed from actual numeric read-time thresholds.
+- A failed threshold cannot be described as PASS.
+- The product report remains the full story-first report.
+- The export report keeps the story, replay, action plan, tactical map essentials, and source-of-truth note without full timeline, sandbox panel, or batch diagnostics.

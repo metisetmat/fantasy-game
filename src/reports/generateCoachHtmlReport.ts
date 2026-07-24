@@ -86,6 +86,7 @@ import {
   renderProductBaselineCoachReportReadinessSection,
   renderCoachInsightDepthNextMatchRecommendationsSection,
 } from "./renderCoachReportExportHtml";
+import { renderRestoredCompressedExport8J } from "./renderRestoredCompressedExport8J";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -447,46 +448,8 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const exportHtml = renderCoachReportExportHtml({
+  const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: coachOnlyProductHtml,
-    phaseReadability,
-    multiMatchPhaseComparison,
-    multiMatchHistoryView,
-    realMatchHistoryIntegration,
-    persistentHistoryAdapter,
-    ...(historyStoreConsistency === undefined ? {} : { historyStoreConsistency }),
-    ...(persistenceEvidenceSnapshot === undefined ? {} : { persistenceEvidenceSnapshot }),
-    ...(databaseMigrationPreparation === undefined ? {} : { databaseMigrationPreparation }),
-    ...(databaseAdapterSpike === undefined ? {} : { databaseAdapterSpike }),
-    ...(durableStorageDecision === undefined ? {} : { durableStorageDecision }),
-    ...(controlledLocalReadOnlyDbMode === undefined ? {} : { controlledLocalReadOnlyDbMode }),
-    ...(realSQLiteReadOnlyIOSmokeTest === undefined ? {} : { realSQLiteReadOnlyIOSmokeTest }),
-    fullMatchScoreEconomyCalibration,
-    scoringFamilyAttributionAudit,
-    fullMatchCalibrationCarryoverReconciliation,
-    fullMatchOfficialScoringConnection,
-    fullMatchRouteFamilyMixActivation,
-    fullMatchRouteFamilyScoringRateCalibration,
-    fullMatchSegmentScoringDensityCalibration,
-    fullMatchTeamOpportunityBalanceCalibration,
-    fullMatchDominanceChainCalibration,
-    fullMatchBreakEventPostScoreResetCalibration,
-    fullMatchGoalkeeperSecureResetBreakSpecificity,
-    fullMatchResetBreakBlowoutEconomy,
-    fullMatchEarnedDangerGate,
-    fullMatchEarnedDangerGateTuning,
-    fullMatchGateSelectivityVolumeRegressionFix,
-    fullMatchRouteEconomyRecheckAfterSelectivityFix,
-    fullMatchEarnedDangerOutcomeDistribution,
-    fullMatchDominanceChainCalibrationCoverageFix,
-    fullMatchCloseGameDistributionCalibration,
-    fullMatchTrailingTeamResponseLateGamePressure,
-    fullMatchLateGameThreatQualityTrailingConversion,
-    fullMatchLateGameThreatQualityMonitoring,
-    fullMatchEconomyFinalStabilization,
-    productBaselineCoachReportReadiness,
-    coachInsightDepthNextMatchRecommendations,
-    coachActionPlanCardsTrainingFocusPackaging,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

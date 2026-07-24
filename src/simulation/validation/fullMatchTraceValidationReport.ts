@@ -172,6 +172,10 @@ import {
   renderCoachReportStoryFirstRecomposition8HDoc as renderCoachReportStoryFirstRecomposition8HDocBase,
   renderCoachReportStoryFirstRecomposition8HValidation as renderCoachReportStoryFirstRecomposition8HValidationBase,
 } from "../../reports/buildCoachReportStoryFirstRecomposition8H";
+import {
+  renderStoryFirstExportBudgetValidationThresholdFix8IDoc as renderStoryFirstExportBudgetValidationThresholdFix8IDocBase,
+  renderStoryFirstExportBudgetValidationThresholdFix8IValidation as renderStoryFirstExportBudgetValidationThresholdFix8IValidationBase,
+} from "../../reports/buildStoryFirstExportBudgetValidationThresholdFix8I";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6753,6 +6757,18 @@ export function renderCoachReportStoryFirstRecomposition8HValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportStoryFirstRecomposition8HValidationBase();
+}
+
+export function renderStoryFirstExportBudgetValidationThresholdFix8IDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderStoryFirstExportBudgetValidationThresholdFix8IDocBase();
+}
+
+export function renderStoryFirstExportBudgetValidationThresholdFix8IValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderStoryFirstExportBudgetValidationThresholdFix8IValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
