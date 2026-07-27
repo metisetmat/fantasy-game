@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-24T10:07:31.241Z
-Task/sprint: Sprint 8I - Story-First Export Budget & Validation Threshold Fix
+Generated: 2026-07-27T09:43:28.977Z
+Task/sprint: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- story-first-export-budget-validation-threshold-fix-8i.md
-- validation.story-first-export-budget-validation-threshold-fix-8i.md
+- coach-report-decision-layer-next-match-observation-plan-8k.md
+- validation.coach-report-decision-layer-next-match-observation-plan-8k.md
 - README.md
 
 ## Bundle Files

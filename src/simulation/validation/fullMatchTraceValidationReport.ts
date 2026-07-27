@@ -176,6 +176,10 @@ import {
   renderStoryFirstExportBudgetValidationThresholdFix8IDoc as renderStoryFirstExportBudgetValidationThresholdFix8IDocBase,
   renderStoryFirstExportBudgetValidationThresholdFix8IValidation as renderStoryFirstExportBudgetValidationThresholdFix8IValidationBase,
 } from "../../reports/buildStoryFirstExportBudgetValidationThresholdFix8I";
+import {
+  renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc as renderCoachReportDecisionLayerNextMatchObservationPlan8KDocBase,
+  renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation as renderCoachReportDecisionLayerNextMatchObservationPlan8KValidationBase,
+} from "../../reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6769,6 +6773,18 @@ export function renderStoryFirstExportBudgetValidationThresholdFix8IValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderStoryFirstExportBudgetValidationThresholdFix8IValidationBase();
+}
+
+export function renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportDecisionLayerNextMatchObservationPlan8KDocBase();
+}
+
+export function renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportDecisionLayerNextMatchObservationPlan8KValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

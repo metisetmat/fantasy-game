@@ -147,6 +147,8 @@ import {
   renderCoachReportStoryFirstRecomposition8HValidation,
   renderStoryFirstExportBudgetValidationThresholdFix8IDoc,
   renderStoryFirstExportBudgetValidationThresholdFix8IValidation,
+  renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc,
+  renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -160,10 +162,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8I - Story-First Export Budget & Validation Threshold Fix";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "story-first-export-budget-validation-threshold-fix-8i.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-decision-layer-next-match-observation-plan-8k.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.story-first-export-budget-validation-threshold-fix-8i.md";
+  "validation.coach-report-decision-layer-next-match-observation-plan-8k.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3434,6 +3436,76 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8J model builder for finishing 8I delivery without adding a new decision layer",
       },
       {
+        source: "src/reports/coachReportDecisionLayerNextMatchObservationPlanTypes8K.ts",
+        required: true,
+        reason: "Sprint 8K contract for observation-only coach decision cards and next-match observation plan",
+      },
+      {
+        source: "src/reports/coachReportDecisionLayerNextMatchObservationPlanWarnings.ts",
+        required: true,
+        reason: "Sprint 8K warning-code registry separating decision readiness from imposition/source-of-truth regressions",
+      },
+      {
+        source: "src/reports/renderCoachDecisionLayerProduct8K.ts",
+        required: true,
+        reason: "Sprint 8K product renderer for the observation-only coach decision layer",
+      },
+      {
+        source: "src/reports/renderCoachDecisionLayerExport8K.ts",
+        required: true,
+        reason: "Sprint 8K compact export renderer for the next-match observation layer",
+      },
+      {
+        source: "src/reports/cleanupReplayExportWording8K.ts",
+        required: true,
+        reason: "Sprint 8K replay export wording cleanup removing duplicated moment titles",
+      },
+      {
+        source: "src/reports/cleanupProductMainRawIds8K.ts",
+        required: true,
+        reason: "Sprint 8K main-text raw ID cleanup while preserving collapsed technical proof",
+      },
+      {
+        source: "src/reports/coachDecisionLayerAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit proving decision cards are visible, complete, and linked to replay/action/tactical evidence",
+      },
+      {
+        source: "src/reports/nextMatchObservationPlanAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit proving three next-match observation items and confirmation/disconfirmation criteria",
+      },
+      {
+        source: "src/reports/decisionBoundaryAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit blocking selection imposition, tactic imposition, sandbox promotion, and overclaiming",
+      },
+      {
+        source: "src/reports/decisionLayerWordingCleanupAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit proving replay wording and product main-text raw ID cleanup",
+      },
+      {
+        source: "src/reports/decisionLayerExportBudgetAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit proving the export decision layer stays under numeric read-time thresholds",
+      },
+      {
+        source: "src/reports/decisionLayerSourceOfTruthRegressionAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit preserving score_change source-of-truth boundaries for decision wording",
+      },
+      {
+        source: "src/reports/decisionLayerIntegrationBudgetAudit8K.ts",
+        required: true,
+        reason: "Sprint 8K audit proving product/export integration preserves story, replay, action plan, maps, and compact export",
+      },
+      {
+        source: "src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts",
+        required: true,
+        reason: "Sprint 8K model, report renderer, and validation renderer for the decision layer and next-match observation plan",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5590,6 +5662,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8K")) {
+    return renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8I")) {
     return renderStoryFirstExportBudgetValidationThresholdFix8IDoc(fullMatchTraceValidationModel());
   }
@@ -7931,6 +8006,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8K")) {
+    return renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8I")) {
     return renderStoryFirstExportBudgetValidationThresholdFix8IValidation(fullMatchTraceValidationModel());
   }
@@ -10218,6 +10296,36 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8K")) {
+    return [
+      "# Sprint 8K Share Pack",
+      "",
+      "Current sprint: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8I compact export budget and adds an observation-only decision layer for the next match.",
+      "",
+      "Primary files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-report-decision-layer-next-match-observation-plan-8k.md",
+      "- validation.coach-report-decision-layer-next-match-observation-plan-8k.md",
+      "- validation.share-pack.md",
+      "",
+      "Recommended review order:",
+      "1. coach-report.product.html",
+      "2. coach-report.export.html",
+      "3. validation.coach-report-decision-layer-next-match-observation-plan-8k.md",
+      "4. coach-report-decision-layer-next-match-observation-plan-8k.md",
+      "5. validation.share-pack.md",
+      "",
+      "Key invariants:",
+      "- The decision layer is a next-match observation grid, not a selection or tactical instruction engine.",
+      "- Three decision cards link story, replay, action plan, tactical maps, and prudent trends.",
+      "- The export remains compact, below the 900-second hard budget, and ideally below 800 seconds.",
+      "- Score, replay, and official story remain backed by score_change events.",
+      "- Sandbox, batch, and diagnostics remain separate from official truth.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8I")) {
     return [
       "# Sprint 8I Share Pack",

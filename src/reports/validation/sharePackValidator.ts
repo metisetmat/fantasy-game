@@ -393,6 +393,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReportStoryFirstProductRecomposition8HValidation = readIfExists(join(shareDirectory, "validation.coach-report-story-first-product-recomposition-8h.md"));
   const storyFirstExportBudgetValidationThresholdFix8I = readIfExists(join(shareDirectory, "story-first-export-budget-validation-threshold-fix-8i.md"));
   const storyFirstExportBudgetValidationThresholdFix8IValidation = readIfExists(join(shareDirectory, "validation.story-first-export-budget-validation-threshold-fix-8i.md"));
+  const coachReportDecisionLayerNextMatchObservationPlan8K = readIfExists(join(shareDirectory, "coach-report-decision-layer-next-match-observation-plan-8k.md"));
+  const coachReportDecisionLayerNextMatchObservationPlan8KValidation = readIfExists(join(shareDirectory, "validation.coach-report-decision-layer-next-match-observation-plan-8k.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3405,6 +3407,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-story-first-product-recomposition-8h.md",
     ...sprint8HForbiddenLeftovers,
   ];
+  const sprint8KExpectedFiles = sprint8IExpectedFiles.map((file) =>
+    file === "story-first-export-budget-validation-threshold-fix-8i.md"
+      ? "coach-report-decision-layer-next-match-observation-plan-8k.md"
+      : file === "validation.story-first-export-budget-validation-threshold-fix-8i.md"
+        ? "validation.coach-report-decision-layer-next-match-observation-plan-8k.md"
+        : file
+  );
+  const sprint8KForbiddenLeftovers = [
+    "story-first-export-budget-validation-threshold-fix-8i.md",
+    "validation.story-first-export-budget-validation-threshold-fix-8i.md",
+    ...sprint8IForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4957,6 +4971,44 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("no new memory or database feature", coachReplayUXIteration8GValidation.includes("no new season memory") && coachReplayUXIteration8GValidation.includes("no new team style memory") && coachReplayUXIteration8GValidation.includes("no new database history feature"), "no new memory/db"),
     check("bundle includes 8G source files", bundleReports.includes("src/reports/coachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/buildCoachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/renderCoachReplayUXSection8G.ts") && bundleReports.includes("src/reports/coachReplayUXHierarchyAudit8G.ts"), "8G source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReplayUXIteration8GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8KChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8KExpectedFiles.every((file) => requiredCopied(file)), sprint8KExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8KExpectedFiles.every((file) => manifest.includes(file)), sprint8KExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8K", activeConfig.sprintName === "Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8KForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8KForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8K oriented", readme.includes("# Sprint 8K Share Pack") && readme.includes("coach-report-decision-layer-next-match-observation-plan-8k.md") && readme.includes("observation-only decision layer"), "README current"),
+    check("8K report included", coachReportDecisionLayerNextMatchObservationPlan8K.includes("# Coach Report Decision Layer & Next-Match Observation Plan 8K") && coachReportDecisionLayerNextMatchObservationPlan8K.includes("Decision Cards") && coachReportDecisionLayerNextMatchObservationPlan8K.includes("Confirmation / Disconfirmation Matrix"), "8K doc included"),
+    check("8K validation is PASS", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("Status: PASS") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("CoachReportDecisionLayerNextMatchObservationPlan8KModel exists"), "8K validation current"),
+    check("baseline 8J/8I visible", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("baseline 8J visible") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("baseline 8I preserved"), "baseline visible"),
+    check("baseline chain preserved", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("baseline 8H preserved") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("baseline 8G preserved") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("baseline 6X match economy preserved"), "baseline chain visible"),
+    check("product decision layer visible", coachProductHtml.includes('id="coach-decision-layer-8k"') && coachProductHtml.includes("Decider quoi observer au prochain match"), "product 8K visible"),
+    check("export observation layer visible", coachExportHtml.includes('id="next-match-observation-export-8k"') && coachExportHtml.includes("A observer au prochain match"), "export 8K visible"),
+    check("three decision cards visible", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("decisionCardCount: 3") && coachProductHtml.includes("decision-first-exit-after-recovery-8k") && coachProductHtml.includes("decision-danger-continuity-8k") && coachProductHtml.includes("decision-structure-after-pressure-8k"), "3 cards"),
+    check("three observation items visible", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("observationItemCount: 3") && coachExportHtml.includes("observation-export-card-8k"), "3 observation items"),
+    check("confirmation and disconfirmation criteria present", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("confirmation criteria present") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("disconfirmation criteria present") && coachProductHtml.includes("Signal qui confirme") && coachProductHtml.includes("Signal qui infirme"), "criteria visible"),
+    check("do not overinterpret present", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("doNotOverInterpret present") && coachProductHtml.includes("A ne pas surinterpreter"), "prudence visible"),
+    check("decision links present", coachReportDecisionLayerNextMatchObservationPlan8K.includes("Replay / Action / Tactical Links") && coachReportDecisionLayerNextMatchObservationPlan8K.includes("coach-replay-8e") && coachReportDecisionLayerNextMatchObservationPlan8K.includes("coach-action-plan") && coachReportDecisionLayerNextMatchObservationPlan8K.includes("tactical-map-cards"), "links visible"),
+    check("no selection imposition", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no selection imposition") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("selectionImpositionCount: 0"), "selection 0"),
+    check("no tactical plan imposition", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no tactical plan imposition") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("tacticalPlanImpositionCount: 0"), "tactic 0"),
+    check("no sandbox/diagnostic/batch promotion", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no sandbox promotion") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no diagnostic promotion") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no batch promotion"), "truth separated"),
+    check("replay export wording cleaned", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("replayExportDuplicateTitleCount: 0") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("replayExportTruncatedSentenceCount: 0") && !coachExportHtml.includes("CONTROL frappe le premier CONTROL frappe le premier") && !coachExportHtml.includes("BLITZ repond BLITZ"), "replay clean"),
+    check("product raw IDs cleaned from main text", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("productRawIdMainTextCountAfter8K: 0") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("rawEventIdInProductMainTextCount: 0") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("rawPlayerIdInProductMainTextCount: 0"), "raw main text 0"),
+    check("export remains under 900 seconds", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("exportReadTimeSecondsAfter8K <= 900") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("exportUnder900Seconds: true"), "900 checked"),
+    check("exportUnder800Seconds correctly computed", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("exportUnder800Seconds correctly computed"), "800 checked"),
+    check("product story-first preserved", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("product story-first preserved") && coachProductHtml.includes("Le match en 2 minutes") && coachProductHtml.includes("Replay"), "product story-first"),
+    check("export compact preserved", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("export compact preserved") && coachExportHtml.includes('data-story-first-export-version="8I"') && !/timeline complete|sandbox panel|long batch diagnostics/iu.test(coachExportHtml), "export compact"),
+    check("source-of-truth preserved", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("source-of-truth preserved") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("score claims backed by score_change"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("no new memory or database feature", coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no new season memory") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no new team style memory") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("no new database history feature"), "no new memory/db"),
+    check("bundle includes 8K source files", bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts") && bundleReports.includes("src/reports/renderCoachDecisionLayerProduct8K.ts") && bundleReports.includes("src/reports/renderCoachDecisionLayerExport8K.ts") && bundleReports.includes("src/reports/decisionLayerWordingCleanupAudit8K.ts"), "8K source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportDecisionLayerNextMatchObservationPlan8KValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8IChecks: readonly SharePackCheck[] = [
@@ -9087,6 +9139,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8K - Coach Report Decision Layer")
+      ? sprint8KChecks
     : activeConfig.sprintName.includes("Sprint 8I - Story-First Export Budget")
       ? sprint8IChecks
     : activeConfig.sprintName.includes("Sprint 8H - Coach Report Story-First")
