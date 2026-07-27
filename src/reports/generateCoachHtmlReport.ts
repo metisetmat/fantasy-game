@@ -87,6 +87,8 @@ import {
   renderCoachInsightDepthNextMatchRecommendationsSection,
 } from "./renderCoachReportExportHtml";
 import { renderRestoredCompressedExport8J } from "./renderRestoredCompressedExport8J";
+import { cleanupProductMainRawIds8K } from "./cleanupProductMainRawIds8K";
+import { insertCoachDecisionLayerProduct8K } from "./renderCoachDecisionLayerProduct8K";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -448,8 +450,9 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
+  const finalProductHtml = insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml));
   const exportHtml = renderRestoredCompressedExport8J({
-    productReportHtml: coachOnlyProductHtml,
+    productReportHtml: finalProductHtml,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
@@ -475,7 +478,7 @@ export function writeLatestCoachReport(): void {
   );
   writeFileSync(
     join(reportsDirectory, "coach-report.product.html"),
-    coachOnlyProductHtml,
+    finalProductHtml,
     "utf8",
   );
   writeFileSync(
