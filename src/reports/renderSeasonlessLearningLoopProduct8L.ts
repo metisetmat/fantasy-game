@@ -196,6 +196,10 @@ export function renderSeasonlessLearningLoopProduct8L(input: {
 function findBalancedSectionEnd(html: string, markerIndex: number): number {
   const sectionStart = html.lastIndexOf("<section", markerIndex);
   if (sectionStart < 0) return -1;
+  return findBalancedSectionEndFromStart(html, sectionStart);
+}
+
+function findBalancedSectionEndFromStart(html: string, sectionStart: number): number {
   const pattern = /<\/?section\b[^>]*>/giu;
   let depth = 0;
   for (const match of html.slice(sectionStart).matchAll(pattern)) {
@@ -211,6 +215,27 @@ function findBalancedSectionEnd(html: string, markerIndex: number): number {
   return -1;
 }
 
+function findContainingProductSectionEnd(html: string, markerIndex: number): number {
+  const pattern = /<\/?section\b[^>]*>/giu;
+  const stack: { readonly start: number; readonly tag: string }[] = [];
+
+  for (const match of html.matchAll(pattern)) {
+    const tag = match[0];
+    const index = match.index ?? 0;
+    if (index > markerIndex) break;
+    if (tag.startsWith("</")) {
+      stack.pop();
+    } else {
+      stack.push({ start: index, tag });
+    }
+  }
+
+  const productSection = [...stack]
+    .reverse()
+    .find((entry) => /\bproduct-section\b/iu.test(entry.tag));
+  return productSection === undefined ? -1 : findBalancedSectionEndFromStart(html, productSection.start);
+}
+
 export function insertSeasonlessLearningLoopProduct8L(productHtml: string, sourceMatchId: string): string {
   if (productHtml.includes('id="seasonless-learning-loop-8l"')) return productHtml;
   const section = renderSeasonlessLearningLoopProduct8L({ sourceMatchId });
@@ -220,6 +245,10 @@ export function insertSeasonlessLearningLoopProduct8L(productHtml: string, sourc
       ? productHtml.replace("</main>", `${section}\n</main>`)
       : `${productHtml}\n${section}`;
   }
-  const insertAt = findBalancedSectionEnd(productHtml, decisionIndex);
-  return insertAt < 0 ? `${productHtml}\n${section}` : `${productHtml.slice(0, insertAt)}\n${section}${productHtml.slice(insertAt)}`;
+  const insertAt = findContainingProductSectionEnd(productHtml, decisionIndex);
+  if (insertAt >= 0) {
+    return `${productHtml.slice(0, insertAt)}\n${section}${productHtml.slice(insertAt)}`;
+  }
+  const nestedInsertAt = findBalancedSectionEnd(productHtml, decisionIndex);
+  return nestedInsertAt < 0 ? `${productHtml}\n${section}` : `${productHtml.slice(0, nestedInsertAt)}\n${section}${productHtml.slice(nestedInsertAt)}`;
 }

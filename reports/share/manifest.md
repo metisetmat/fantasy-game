@@ -1,6 +1,6 @@
 # Share Pack
 
-Generated: 2026-07-27T11:56:54.784Z
+Generated: 2026-07-27T12:44:27.331Z
 Task/sprint: Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker
 Mode: MINIMAL_REVIEW
 Final file count: 20

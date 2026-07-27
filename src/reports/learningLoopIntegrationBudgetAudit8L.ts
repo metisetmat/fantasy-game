@@ -2,6 +2,15 @@ import { sectionPosition } from "./storyFirstAuditUtils8H";
 import type { LearningLoopIntegrationBudgetAudit8L } from "./coachReportSeasonlessLearningLoopObservationOutcomeTrackerTypes8L";
 import type { CoachReportSeasonlessLearningLoopObservationOutcomeTrackerWarningCode } from "./coachReportSeasonlessLearningLoopObservationOutcomeTrackerWarnings";
 
+function openTagDepthBefore(html: string, tagName: "article" | "section", index: number): number {
+  const pattern = new RegExp(`<\\/?${tagName}\\b[^>]*>`, "giu");
+  let depth = 0;
+  for (const match of html.slice(0, Math.max(0, index)).matchAll(pattern)) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+  }
+  return depth;
+}
+
 export function auditLearningLoopIntegrationBudget8L(input: {
   readonly productHtml: string;
   readonly exportHtml: string;
@@ -25,8 +34,10 @@ export function auditLearningLoopIntegrationBudget8L(input: {
     input.exportHtml.includes("Cartes tactiques essentielles");
   const sourceOfTruthNoteVisible = input.productHtml.includes("Source-of-truth") &&
     input.exportHtml.includes("Source-of-truth note");
+  const learningLoopPosition = sectionPosition(input.productHtml, "seasonless-learning-loop-8l");
   const productSectionOrderPreserved = sectionPosition(input.productHtml, "coach-decision-layer-8k") <
-    sectionPosition(input.productHtml, "seasonless-learning-loop-8l");
+    learningLoopPosition &&
+    openTagDepthBefore(input.productHtml, "article", learningLoopPosition) === 0;
   const exportCompactPreserved = exportStoryFirstSectionVisible &&
     exportDecisionLayer8KStillVisible &&
     exportLearningLoopVisible &&
@@ -38,6 +49,7 @@ export function auditLearningLoopIntegrationBudget8L(input: {
   if (!productDecisionLayer8KStillVisible) warnings.push("PRODUCT_DECISION_LAYER_8K_REGRESSED");
   if (!exportDecisionLayer8KStillVisible) warnings.push("EXPORT_DECISION_LAYER_8K_REGRESSED");
   if (!productStoryFirstSectionVisible) warnings.push("PRODUCT_STORY_FIRST_REGRESSED");
+  if (!productSectionOrderPreserved) warnings.push("PRODUCT_STORY_FIRST_REGRESSED");
   if (!exportCompactPreserved) warnings.push("EXPORT_COMPACT_REGRESSED");
 
   return {

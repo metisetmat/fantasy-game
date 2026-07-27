@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-27T11:56:54.784Z
+Generated timestamp: 2026-07-27T12:44:27.331Z
 Task/sprint name: Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker
 Final file count: 20
 
@@ -1087,6 +1087,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/reports/nextMatchObservationPlanAudit8K.ts
- M src/reports/renderCoachDecisionLayerProduct8K.ts
+ M src/reports/learningLoopIntegrationBudgetAudit8L.ts
+ M src/reports/learningLoopSourceOfTruthRegressionAudit8L.ts
  M src/reports/renderSeasonlessLearningLoopProduct8L.ts

@@ -15,9 +15,12 @@ export function auditLearningLoopSourceOfTruthRegression8L(input: {
   const sandboxLearningPromotionCount = countMatches(text, /\bsandbox (?:officiel|promu|applique comme verite)\b/giu);
   const diagnosticLearningPromotionCount = countMatches(text, /\bdiagnostic (?:officiel|promu|comme verite)\b/giu);
   const batchLearningPromotionCount = countMatches(text, /\bbatch (?:officiel|promu|comme verite|prochain match)\b/giu);
-  const noScoringConstantChange = true;
-  const MatchBonusEventUnchanged = true;
-  const batchLiveSeparationPreserved = true;
+  const baselineGuardrailsPreserved = input.baseline8K.status === "PASS" &&
+    input.baseline8K.guardrailsPreserved &&
+    input.baseline8K.baseline8I.guardrailsPreserved;
+  const noScoringConstantChange = baselineGuardrailsPreserved;
+  const MatchBonusEventUnchanged = baselineGuardrailsPreserved;
+  const batchLiveSeparationPreserved = baselineGuardrailsPreserved;
   const warnings: CoachReportSeasonlessLearningLoopObservationOutcomeTrackerWarningCode[] = [];
 
   if (!source.allStoryScoreClaimsBackedByScoreChange || !source.allReplayScoreClaimsBackedByScoreChange || !learningLoopDoesNotClaimNewScoreEvidence) {
@@ -28,6 +31,8 @@ export function auditLearningLoopSourceOfTruthRegression8L(input: {
   if (diagnosticLearningPromotionCount > 0) warnings.push("DIAGNOSTIC_LEARNING_PROMOTED");
   if (batchLearningPromotionCount > 0) warnings.push("BATCH_LEARNING_PROMOTED");
   if (!source.noScoreMutation) warnings.push("SCORE_MANIPULATION_DETECTED");
+  if (!noScoringConstantChange || !MatchBonusEventUnchanged) warnings.push("SCORE_MANIPULATION_DETECTED");
+  if (!batchLiveSeparationPreserved) warnings.push("BATCH_LEARNING_PROMOTED");
 
   return {
     reportUsesOfficialTimelineOnlyForOfficialStory: source.reportUsesOfficialTimelineOnlyForOfficialStory,
