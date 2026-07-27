@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
+- current sprint: Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,35 +20,36 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 8K - Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
+- PASS: current sprint is Sprint 8L - Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker
 - PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 8K oriented - README current
-- PASS: 8K report included - 8K doc included
-- PASS: 8K validation is PASS - 8K validation current
-- PASS: baseline 8J/8I visible - baseline visible
+- PASS: README is Sprint 8L oriented - README current
+- PASS: 8L report included - 8L doc included
+- PASS: 8L validation is PASS - 8L validation current
+- PASS: baseline 8K visible and preserved - 8K baseline preserved
 - PASS: baseline chain preserved - baseline chain visible
-- PASS: product decision layer visible - product 8K visible
-- PASS: export observation layer visible - export 8K visible
-- PASS: three decision cards visible - 3 cards
-- PASS: three observation items visible - 3 observation items
-- PASS: confirmation and disconfirmation criteria present - criteria visible
-- PASS: do not overinterpret present - prudence visible
-- PASS: decision links present - links visible
-- PASS: no selection imposition - selection 0
-- PASS: no tactical plan imposition - tactic 0
+- PASS: product learning loop visible - product 8L visible
+- PASS: export tracking grid visible - export 8L visible
+- PASS: three pending tracker cards visible - 3 pending cards
+- PASS: confirmation criteria count is 3 - confirmation 3
+- PASS: disconfirmation criteria count is 3 - disconfirmation 3
+- PASS: insufficient evidence criteria count is 3 - insufficient 3
+- PASS: minimum evidence and caution notes are present - minimum/caution 3
+- PASS: manual post-match outcome options visible - manual options visible
+- PASS: no future outcome claim - future claims 0
+- PASS: no fabricated next-match evidence - fabricated evidence 0
+- PASS: no unsupported confirmed/infirmed status - unsupported 0
+- PASS: no season/team memory or persistence created - seasonless boundaries clean
+- PASS: no automatic decision or selection/tactic imposition - decision boundaries clean
 - PASS: no sandbox/diagnostic/batch promotion - truth separated
-- PASS: replay export wording cleaned - replay clean
-- PASS: product raw IDs cleaned from main text - raw main text 0
-- PASS: export remains under 900 seconds - 900 checked
-- PASS: exportUnder800Seconds correctly computed - 800 checked
-- PASS: product story-first preserved - product story-first
-- PASS: export compact preserved - export compact
+- PASS: 8K decision layer remains visible in product/export - 8K product/export preserved
+- PASS: product story-first and compact export preserved - story/export preserved
+- PASS: export budget and numeric guards preserved - export budget checked
 - PASS: source-of-truth preserved - source truth
 - PASS: scoring constants unchanged - scoring constants visible
+- PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: no new memory or database feature - no new memory/db
-- PASS: bundle includes 8K source files - 8K source bundled
+- PASS: bundle includes 8L source files - 8L source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -58,7 +59,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-decision-layer-next-match-observation-plan-8k.md
+- coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -71,5 +72,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-decision-layer-next-match-observation-plan-8k.md
+- validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md
 - validation.share-pack.md

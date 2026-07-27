@@ -89,6 +89,7 @@ import {
 import { renderRestoredCompressedExport8J } from "./renderRestoredCompressedExport8J";
 import { cleanupProductMainRawIds8K } from "./cleanupProductMainRawIds8K";
 import { insertCoachDecisionLayerProduct8K } from "./renderCoachDecisionLayerProduct8K";
+import { insertSeasonlessLearningLoopProduct8L } from "./renderSeasonlessLearningLoopProduct8L";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -450,7 +451,10 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const finalProductHtml = insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml));
+  const finalProductHtml = insertSeasonlessLearningLoopProduct8L(
+    insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
+    experimentalReport.matchId,
+  );
   const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,
   });

@@ -180,6 +180,10 @@ import {
   renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc as renderCoachReportDecisionLayerNextMatchObservationPlan8KDocBase,
   renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation as renderCoachReportDecisionLayerNextMatchObservationPlan8KValidationBase,
 } from "../../reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K";
+import {
+  renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDoc as renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDocBase,
+  renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation as renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidationBase,
+} from "../../reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6785,6 +6789,18 @@ export function renderCoachReportDecisionLayerNextMatchObservationPlan8KValidati
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportDecisionLayerNextMatchObservationPlan8KValidationBase();
+}
+
+export function renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDocBase();
+}
+
+export function renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

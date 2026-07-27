@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-27T09:56:32.143Z
-Task/sprint: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
+Generated: 2026-07-27T11:35:08.212Z
+Task/sprint: Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-decision-layer-next-match-observation-plan-8k.md
-- validation.coach-report-decision-layer-next-match-observation-plan-8k.md
+- coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md
+- validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md
 - README.md
 
 ## Bundle Files

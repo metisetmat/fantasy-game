@@ -395,6 +395,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const storyFirstExportBudgetValidationThresholdFix8IValidation = readIfExists(join(shareDirectory, "validation.story-first-export-budget-validation-threshold-fix-8i.md"));
   const coachReportDecisionLayerNextMatchObservationPlan8K = readIfExists(join(shareDirectory, "coach-report-decision-layer-next-match-observation-plan-8k.md"));
   const coachReportDecisionLayerNextMatchObservationPlan8KValidation = readIfExists(join(shareDirectory, "validation.coach-report-decision-layer-next-match-observation-plan-8k.md"));
+  const coachReportSeasonlessLearningLoopObservationOutcomeTracker8L = readIfExists(join(shareDirectory, "coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md"));
+  const coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation = readIfExists(join(shareDirectory, "validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3419,6 +3421,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.story-first-export-budget-validation-threshold-fix-8i.md",
     ...sprint8IForbiddenLeftovers,
   ];
+  const sprint8LExpectedFiles = sprint8KExpectedFiles.map((file) =>
+    file === "coach-report-decision-layer-next-match-observation-plan-8k.md"
+      ? "coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md"
+      : file === "validation.coach-report-decision-layer-next-match-observation-plan-8k.md"
+        ? "validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md"
+        : file
+  );
+  const sprint8LForbiddenLeftovers = [
+    "coach-report-decision-layer-next-match-observation-plan-8k.md",
+    "validation.coach-report-decision-layer-next-match-observation-plan-8k.md",
+    ...sprint8KForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4971,6 +4985,45 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("no new memory or database feature", coachReplayUXIteration8GValidation.includes("no new season memory") && coachReplayUXIteration8GValidation.includes("no new team style memory") && coachReplayUXIteration8GValidation.includes("no new database history feature"), "no new memory/db"),
     check("bundle includes 8G source files", bundleReports.includes("src/reports/coachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/buildCoachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/renderCoachReplayUXSection8G.ts") && bundleReports.includes("src/reports/coachReplayUXHierarchyAudit8G.ts"), "8G source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReplayUXIteration8GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8LChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8LExpectedFiles.every((file) => requiredCopied(file)), sprint8LExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8LExpectedFiles.every((file) => manifest.includes(file)), sprint8LExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8L", activeConfig.sprintName === "Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8LForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8LForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8L oriented", readme.includes("# Sprint 8L Share Pack") && readme.includes("coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md") && readme.includes("Seasonless Learning Loop"), "README current"),
+    check("8L report included", coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("# Coach Report Seasonless Learning Loop & Observation Outcome Tracker 8L") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("Observation Outcome Tracker") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("Post-Match Outcome Options"), "8L doc included"),
+    check("8L validation is PASS", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("Status: PASS") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("CoachReportSeasonlessLearningLoopObservationOutcomeTracker8LModel exists"), "8L validation current"),
+    check("baseline 8K visible and preserved", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("baseline 8K visible and preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("baselineVersion | COACH_REPORT_DECISION_LAYER_NEXT_MATCH_OBSERVATION_PLAN_8K"), "8K baseline preserved"),
+    check("baseline chain preserved", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("baseline 8I preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("baseline 8H preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("baseline 8G preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("baseline 6X match economy preserved"), "baseline chain visible"),
+    check("product learning loop visible", coachProductHtml.includes('id="seasonless-learning-loop-8l"') && coachProductHtml.includes("Boucle d'apprentissage sans memoire de saison"), "product 8L visible"),
+    check("export tracking grid visible", coachExportHtml.includes('id="seasonless-learning-loop-export-8l"') && coachExportHtml.includes("Grille de suivi apres prochain match"), "export 8L visible"),
+    check("three pending tracker cards visible", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("trackerCardCount: 3") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("trackerCardsPendingCount: 3") && coachProductHtml.includes("observation-outcome-card-8l") && coachExportHtml.includes("observation-outcome-export-card-8l"), "3 pending cards"),
+    check("confirmation criteria count is 3", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("confirmationCriteriaCount: 3") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("confirmation criteria count = 3"), "confirmation 3"),
+    check("disconfirmation criteria count is 3", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("disconfirmationCriteriaCount: 3") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("disconfirmation criteria count = 3"), "disconfirmation 3"),
+    check("insufficient evidence criteria count is 3", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("insufficientEvidenceCriteriaCount: 3") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("insufficient evidence criteria count = 3"), "insufficient 3"),
+    check("minimum evidence and caution notes are present", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("minimumEvidenceCount: 3") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("cautionNoteCount: 3"), "minimum/caution 3"),
+    check("manual post-match outcome options visible", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("post-match outcome options visible") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("Confirme") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("Infirme") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8L.includes("Echantillon insuffisant"), "manual options visible"),
+    check("no future outcome claim", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("futureMatchOutcomeClaimCount: 0") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no future outcome claim"), "future claims 0"),
+    check("no fabricated next-match evidence", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("fakeNextMatchEvidenceCount: 0") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no fabricated next-match evidence"), "fabricated evidence 0"),
+    check("no unsupported confirmed/infirmed status", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("unsupportedConfirmationCount: 0") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("unsupportedDisconfirmationCount: 0"), "unsupported 0"),
+    check("no season/team memory or persistence created", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no season memory created") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no team style memory created") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no database persistence created"), "seasonless boundaries clean"),
+    check("no automatic decision or selection/tactic imposition", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no automatic decision created") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no selection imposition") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no tactical plan imposition"), "decision boundaries clean"),
+    check("no sandbox/diagnostic/batch promotion", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no sandbox promotion") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no diagnostic promotion") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no batch promotion"), "truth separated"),
+    check("8K decision layer remains visible in product/export", coachProductHtml.includes('id="coach-decision-layer-8k"') && coachExportHtml.includes('id="next-match-observation-export-8k"') && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("product decision layer 8K preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("export decision layer 8K preserved"), "8K product/export preserved"),
+    check("product story-first and compact export preserved", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("product story-first preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("export compact preserved"), "story/export preserved"),
+    check("export budget and numeric guards preserved", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("exportReadTimeSecondsAfter8L <= 900") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("exportUnder900Seconds correctly computed") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("exportUnder800Seconds correctly computed"), "export budget checked"),
+    check("source-of-truth preserved", coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("source-of-truth preserved") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("score claims backed by score_change"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8L source files", bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/renderSeasonlessLearningLoopProduct8L.ts") && bundleReports.includes("src/reports/renderSeasonlessLearningLoopExport8L.ts") && bundleReports.includes("src/reports/futureClaimGuardAudit8L.ts") && bundleReports.includes("src/reports/seasonlessBoundaryAudit8L.ts"), "8L source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8KChecks: readonly SharePackCheck[] = [
@@ -9139,6 +9192,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8L - Coach Report Seasonless Learning Loop")
+      ? sprint8LChecks
     : activeConfig.sprintName.includes("Sprint 8K - Coach Report Decision Layer")
       ? sprint8KChecks
     : activeConfig.sprintName.includes("Sprint 8I - Story-First Export Budget")
