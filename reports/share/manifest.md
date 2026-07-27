@@ -1,6 +1,6 @@
 # Share Pack
 
-Generated: 2026-07-27T09:43:28.977Z
+Generated: 2026-07-27T09:56:32.143Z
 Task/sprint: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
 Mode: MINIMAL_REVIEW
 Final file count: 20

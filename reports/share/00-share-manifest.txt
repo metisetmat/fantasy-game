@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-27T09:43:28.977Z
+Generated timestamp: 2026-07-27T09:56:32.143Z
 Task/sprint name: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
 Final file count: 20
 
@@ -1075,22 +1075,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderRestoredCompressedExport8J.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts
-?? src/reports/cleanupProductMainRawIds8K.ts
-?? src/reports/cleanupReplayExportWording8K.ts
-?? src/reports/coachDecisionLayerAudit8K.ts
-?? src/reports/coachReportDecisionLayerNextMatchObservationPlanTypes8K.ts
-?? src/reports/coachReportDecisionLayerNextMatchObservationPlanWarnings.ts
-?? src/reports/decisionBoundaryAudit8K.ts
-?? src/reports/decisionLayerExportBudgetAudit8K.ts
-?? src/reports/decisionLayerIntegrationBudgetAudit8K.ts
-?? src/reports/decisionLayerSourceOfTruthRegressionAudit8K.ts
-?? src/reports/decisionLayerWordingCleanupAudit8K.ts
-?? src/reports/nextMatchObservationPlanAudit8K.ts
-?? src/reports/renderCoachDecisionLayerExport8K.ts
-?? src/reports/renderCoachDecisionLayerProduct8K.ts
+ M src/reports/cleanupProductMainRawIds8K.ts
+ M src/reports/coachReportDecisionLayerNextMatchObservationPlanWarnings.ts
+ M src/reports/decisionLayerSourceOfTruthRegressionAudit8K.ts
+ M src/reports/renderCoachDecisionLayerProduct8K.ts

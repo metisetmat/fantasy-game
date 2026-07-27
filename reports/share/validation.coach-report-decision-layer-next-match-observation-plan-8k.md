@@ -37,7 +37,7 @@ Status: PASS
 - PASS: no raw event IDs in product/export main coach text - 0
 - PASS: no raw player IDs in product/export main coach text - 0
 - PASS: no raw effect labels in product/export main coach text - 0
-- PASS: exportReadTimeSecondsAfter8K <= 900 - 323
+- PASS: exportReadTimeSecondsAfter8K <= 900 - 309
 - PASS: exportUnder900Seconds correctly computed - true
 - PASS: exportUnder800Seconds correctly computed - true
 - PASS: no PASS message on failed numeric rule - 0
@@ -72,8 +72,8 @@ Status: PASS
 - rawPlayerIdInProductMainTextCount: 0
 - rawEffectLabelInProductMainTextCount: 0
 - decisionLayerCoachReadabilityScore: 96
-- exportReadTimeSecondsBefore8K: 323
-- exportReadTimeSecondsAfter8K: 323
+- exportReadTimeSecondsBefore8K: 309
+- exportReadTimeSecondsAfter8K: 309
 - exportUnder900Seconds: true
 - exportUnder800Seconds: true
 - selectionImpositionCount: 0

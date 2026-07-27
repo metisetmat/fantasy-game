@@ -239,22 +239,39 @@ export function renderCoachDecisionLayerProduct8K(): string {
   ].join("\n");
 }
 
+function findBalancedSectionEnd(html: string, markerIndex: number): number {
+  const sectionStart = html.lastIndexOf("<section", markerIndex);
+  if (sectionStart < 0) return -1;
+  const sectionPattern = /<\/?section\b[^>]*>/giu;
+  sectionPattern.lastIndex = sectionStart;
+  let depth = 0;
+  for (const match of html.slice(sectionStart).matchAll(sectionPattern)) {
+    const tag = match[0];
+    const absoluteEnd = sectionStart + (match.index ?? 0) + tag.length;
+    if (tag.startsWith("</")) {
+      depth -= 1;
+      if (depth === 0) return absoluteEnd;
+    } else {
+      depth += 1;
+    }
+  }
+  return -1;
+}
+
 export function insertCoachDecisionLayerProduct8K(productHtml: string): string {
   if (productHtml.includes('id="coach-decision-layer-8k"')) {
     return productHtml;
   }
   const section = renderCoachDecisionLayerProduct8K();
-  const marker = "</section>";
   const actionPlanIndex = productHtml.indexOf('id="coach-action-plan"');
   if (actionPlanIndex < 0) {
     return productHtml.includes("</main>")
       ? productHtml.replace("</main>", `${section}\n</main>`)
       : `${productHtml}\n${section}`;
   }
-  const end = productHtml.indexOf(marker, actionPlanIndex);
-  if (end < 0) {
+  const insertAt = findBalancedSectionEnd(productHtml, actionPlanIndex);
+  if (insertAt < 0) {
     return `${productHtml}\n${section}`;
   }
-  const insertAt = end + marker.length;
   return `${productHtml.slice(0, insertAt)}\n${section}${productHtml.slice(insertAt)}`;
 }

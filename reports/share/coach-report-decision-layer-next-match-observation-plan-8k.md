@@ -104,8 +104,8 @@ Status: PASS
 ## Export Budget
 | Metric | Value |
 | --- | --- |
-| exportReadTimeSecondsBefore8K | 323 |
-| exportReadTimeSecondsAfter8K | 323 |
+| exportReadTimeSecondsBefore8K | 309 |
+| exportReadTimeSecondsAfter8K | 309 |
 | exportReadTimeDelta | 0 |
 | exportUnder900Seconds | true |
 | exportUnder800Seconds | true |

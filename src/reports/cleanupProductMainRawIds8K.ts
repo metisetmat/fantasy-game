@@ -6,8 +6,8 @@ function readableRoleLabel8K(roleId: string): string {
     .join(" ");
 }
 
-export function cleanupProductMainRawIds8K(productHtml: string): string {
-  return productHtml
+function cleanupMainTextSegment8K(html: string): string {
+  return html
     .replace(/<span class="badge">Match : contract-fixture-001<\/span>/gu, '<span class="badge">Match officiel</span>')
     .replace(
       /<p class="guard">Score officiel 12 - 7; Sequence de score officielle: rc-second-ball-chaser \(space_hunter\) pese sur score_created en Z3-C, avec preuve officielle preuve officielle repliee\.<\/p>/gu,
@@ -20,4 +20,11 @@ export function cleanupProductMainRawIds8K(productHtml: string): string {
     .replace(/\brc-[a-z0-9_-]+\b/giu, "acteur officiel")
     .replace(/\bspace_hunter\b/gu, "Space Hunter")
     .replace(/\bscore_created\b/gu, "score officiel cree");
+}
+
+export function cleanupProductMainRawIds8K(productHtml: string): string {
+  return productHtml
+    .split(/(<details\b[\s\S]*?<\/details>)/giu)
+    .map((segment) => segment.toLowerCase().startsWith("<details") ? segment : cleanupMainTextSegment8K(segment))
+    .join("");
 }
