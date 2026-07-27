@@ -28,7 +28,7 @@ export const postMatchOutcomeOptions8L: readonly PostMatchOutcomeOption8L[] = [
     label: "Inconclusif",
     meaning: "Des signaux mixtes apparaissent sans conclusion claire.",
     whenToUse: "Quand confirmation et contradiction coexistent.",
-    forbiddenUse: "Ne pas le transformer en tendance de saison.",
+    forbiddenUse: "Ne pas le transformer en regle durable.",
     nextCoachQuestion: "Quels signaux doivent etre revus au match suivant ?",
   },
   {

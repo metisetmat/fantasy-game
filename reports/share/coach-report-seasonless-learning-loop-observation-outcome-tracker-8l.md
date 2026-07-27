@@ -49,7 +49,7 @@ Status: PASS
 | --- | --- | --- | --- |
 | Confirme | Le signal attendu est observe apres le prochain match avec un echantillon suffisant. | Ne jamais l'utiliser avant que le prochain match soit joue. | Le signal est-il reproductible sans creer de consigne automatique ? |
 | Infirme | Le prochain match montre surtout le signal inverse. | Ne pas l'utiliser sur une seule action isolee. | Le contexte etait-il comparable a l'observation 8K ? |
-| Inconclusif | Des signaux mixtes apparaissent sans conclusion claire. | Ne pas le transformer en tendance de saison. | Quels signaux doivent etre revus au match suivant ? |
+| Inconclusif | Des signaux mixtes apparaissent sans conclusion claire. | Ne pas le transformer en regle durable. | Quels signaux doivent etre revus au match suivant ? |
 | Echantillon insuffisant | Le prochain match ne fournit pas assez de situations comparables. | Ne pas combler le manque par prediction. | Quelle situation comparable faut-il surveiller ensuite ? |
 
 ## Future Claim Guard
