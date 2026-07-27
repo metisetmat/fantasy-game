@@ -139,7 +139,7 @@ export const boundaryNotes8K: readonly DecisionBoundaryNote8K[] = [
   {
     boundaryId: "boundary-no-tactic-8k",
     label: "Pas de tactique imposee",
-    text: "Les cartes nomment des hypotheses a verifier, pas un systeme a appliquer automatiquement.",
+    text: "Les cartes nomment des hypotheses a verifier, pas une consigne a executer telle quelle.",
     appliesToDecisionCardIds: coachDecisionCards8K.map((card) => card.decisionCardId),
     prevents: ["tactic_imposition", "overclaiming"],
     visibleInProduct: true,

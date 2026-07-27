@@ -149,6 +149,10 @@ import {
   renderStoryFirstExportBudgetValidationThresholdFix8IValidation,
   renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc,
   renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation,
+  renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDoc,
+  renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation,
+  renderManualPostMatchObservationReviewForm8MDoc,
+  renderManualPostMatchObservationReviewForm8MValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -162,10 +166,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-decision-layer-next-match-observation-plan-8k.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8M - Manual Post-Match Observation Review Form";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-post-match-observation-review-form-8m.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-decision-layer-next-match-observation-plan-8k.md";
+  "validation.coach-report-manual-post-match-observation-review-form-8m.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3506,6 +3510,126 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8K model, report renderer, and validation renderer for the decision layer and next-match observation plan",
       },
       {
+        source: "src/reports/coachReportSeasonlessLearningLoopObservationOutcomeTrackerTypes8L.ts",
+        required: true,
+        reason: "Sprint 8L contract for pending observation outcome cards, post-match options, seasonless boundaries, and audits",
+      },
+      {
+        source: "src/reports/coachReportSeasonlessLearningLoopObservationOutcomeTrackerWarnings.ts",
+        required: true,
+        reason: "Sprint 8L warning-code registry blocking future claims, memory creation, persistence, automatic decisions, and source-of-truth regressions",
+      },
+      {
+        source: "src/reports/renderSeasonlessLearningLoopProduct8L.ts",
+        required: true,
+        reason: "Sprint 8L product renderer for the seasonless learning loop and pending manual observation tracker",
+      },
+      {
+        source: "src/reports/renderSeasonlessLearningLoopExport8L.ts",
+        required: true,
+        reason: "Sprint 8L compact export renderer for the post-next-match tracking grid",
+      },
+      {
+        source: "src/reports/seasonlessLearningLoopAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit proving the product loop and pending tracker cards are visible and complete",
+      },
+      {
+        source: "src/reports/observationOutcomeTrackerAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit proving three linked 8K observation cards, manual outcome options, and no automatic classification",
+      },
+      {
+        source: "src/reports/futureClaimGuardAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit blocking invented next-match evidence, predictions-as-fact, unsupported confirmed/infirmed states, and season trend claims",
+      },
+      {
+        source: "src/reports/seasonlessBoundaryAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit blocking season memory, team style memory, database/file persistence, selection/tactic imposition, and sandbox/batch promotion",
+      },
+      {
+        source: "src/reports/learningLoopExportBudgetAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit proving the export tracker stays under honest numeric read-time thresholds",
+      },
+      {
+        source: "src/reports/learningLoopSourceOfTruthRegressionAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit preserving score_change source-of-truth, scoring constants, MatchBonusEvent, and batch/live separation",
+      },
+      {
+        source: "src/reports/learningLoopIntegrationBudgetAudit8L.ts",
+        required: true,
+        reason: "Sprint 8L audit proving product/export integration preserves 8K, story-first, replay, action plan, maps, and compact export",
+      },
+      {
+        source: "src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts",
+        required: true,
+        reason: "Sprint 8L model, report renderer, and validation renderer for the seasonless learning loop and observation outcome tracker",
+      },
+      {
+        source: "src/reports/manualPostMatchObservationReviewFormTypes8M.ts",
+        required: true,
+        reason: "Sprint 8M contract for the manual post-match review form, blank fields, boundaries, audits, and validation model",
+      },
+      {
+        source: "src/reports/manualPostMatchObservationReviewFormWarnings.ts",
+        required: true,
+        reason: "Sprint 8M warning-code registry blocking automatic classification, persistence, future evidence claims, and source-of-truth regressions",
+      },
+      {
+        source: "src/reports/renderManualPostMatchObservationReviewFormProduct8M.ts",
+        required: true,
+        reason: "Sprint 8M product renderer inserting the manual post-match review form after the 8L tracker",
+      },
+      {
+        source: "src/reports/renderManualPostMatchObservationReviewFormExport8M.ts",
+        required: true,
+        reason: "Sprint 8M compact export renderer and metadata updater for the manual post-match review form",
+      },
+      {
+        source: "src/reports/manualPostMatchReviewFormAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit proving the manual form has three linked pending blank review sections",
+      },
+      {
+        source: "src/reports/manualOutcomeOptionAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit proving four unchecked manual outcome options per section and no automatic outcome",
+      },
+      {
+        source: "src/reports/manualPostMatchBoundaryAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit blocking submit/backend flows, localStorage, database/file persistence, season memory, and tactical imposition",
+      },
+      {
+        source: "src/reports/manualReviewFormSourceOfTruthRegressionAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit preserving 8L, 8K, 8I, scoring constants, MatchBonusEvent, and batch/live separation",
+      },
+      {
+        source: "src/reports/manualReviewFormExportBudgetAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit proving export metadata, compact form visibility, and honest read-time thresholds",
+      },
+      {
+        source: "src/reports/manualReviewFormIntegrationBudgetAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit proving product/export integration preserves 8L, 8K, story-first, and compact export",
+      },
+      {
+        source: "src/reports/manualReviewFormCoachUsabilityAudit8M.ts",
+        required: true,
+        reason: "Sprint 8M audit proving the coach can manually fill checkboxes, evidence fields, context fields, and notes after the match",
+      },
+      {
+        source: "src/reports/buildManualPostMatchObservationReviewForm8M.ts",
+        required: true,
+        reason: "Sprint 8M model, report renderer, and validation renderer for the manual post-match observation review form",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5662,6 +5786,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8M")) {
+    return renderManualPostMatchObservationReviewForm8MDoc(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 8L")) {
+    return renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8K")) {
     return renderCoachReportDecisionLayerNextMatchObservationPlan8KDoc(fullMatchTraceValidationModel());
   }
@@ -8006,6 +8136,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8M")) {
+    return renderManualPostMatchObservationReviewForm8MValidation(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 8L")) {
+    return renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8K")) {
     return renderCoachReportDecisionLayerNextMatchObservationPlan8KValidation(fullMatchTraceValidationModel());
   }
@@ -10296,6 +10432,66 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8M")) {
+    return [
+      "# Sprint 8M Share Pack",
+      "",
+      "Current sprint: Sprint 8M - Manual Post-Match Observation Review Form",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8L learning loop inside the product/export reports and replaces the standalone 8L docs with the 8M manual post-match review form docs.",
+      "",
+      "Primary files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-report-manual-post-match-observation-review-form-8m.md",
+      "- validation.coach-report-manual-post-match-observation-review-form-8m.md",
+      "- validation.share-pack.md",
+      "",
+      "Recommended review order:",
+      "1. coach-report.product.html",
+      "2. coach-report.export.html",
+      "3. validation.coach-report-manual-post-match-observation-review-form-8m.md",
+      "4. coach-report-manual-post-match-observation-review-form-8m.md",
+      "5. validation.share-pack.md",
+      "",
+      "Key invariants:",
+      "- The 8M form is blank, pending, and filled only by a coach after a future real match.",
+      "- It creates no automatic classification, no submit/backend flow, no localStorage, no database/file persistence, and no team or season memory.",
+      "- It preserves the 8L tracker, 8K decision layer, 8I compact export metadata, source-of-truth boundaries, scoring constants, MatchBonusEvent, and batch/live separation.",
+      "- It does not claim future evidence, fabricate next-match evidence, or impose selection/composition/tactics.",
+      "- Sandbox, batch, and diagnostics remain separate from official truth.",
+    ].join("\n");
+  }
+  if (TASK_NAME.includes("Sprint 8L")) {
+    return [
+      "# Sprint 8L Share Pack",
+      "",
+      "Current sprint: Sprint 8L - Coach Report Seasonless Learning Loop & Observation Outcome Tracker",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8K decision layer and adds a pending, manual post-match observation tracker without season memory, database storage, prediction, scoring changes, or automatic selection.",
+      "",
+      "Primary files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md",
+      "- validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md",
+      "- validation.share-pack.md",
+      "",
+      "Recommended review order:",
+      "1. coach-report.product.html",
+      "2. coach-report.export.html",
+      "3. validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md",
+      "4. coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md",
+      "5. validation.share-pack.md",
+      "",
+      "Key invariants:",
+      "- The 8L tracker is pending and must be filled only after the next match.",
+      "- It creates no season memory, team style memory, file/database persistence, or automatic decision.",
+      "- It preserves the 8K decision layer, 8I compact export thresholds, source-of-truth boundaries, scoring constants, MatchBonusEvent, and batch/live separation.",
+      "- Score, replay, and official story remain backed by score_change events.",
+      "- Sandbox, batch, and diagnostics remain separate from official truth.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8K")) {
     return [
       "# Sprint 8K Share Pack",

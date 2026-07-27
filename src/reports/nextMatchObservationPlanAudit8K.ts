@@ -33,7 +33,7 @@ export function auditNextMatchObservationPlan8K(input: {
     observationItemsWithMinimumEvidenceCount,
     observationItemsWithCautionNoteCount,
     planSaysNotSelectionRecommendation: input.plan.notASelectionRecommendation && visibleText.includes("pas consigne de selection"),
-    planSaysNotTacticalInstruction: input.plan.notATacticalInstruction && visibleText.includes("pas un systeme a appliquer automatiquement"),
+    planSaysNotTacticalInstruction: input.plan.notATacticalInstruction && visibleText.includes("pas une consigne a executer telle quelle"),
     planRequiresNoSeasonMemory: input.plan.noSeasonMemoryRequired,
     observationPlanWarningCodes: warnings,
     recommendation: warnings.length === 0 ? "KEEP_NEXT_MATCH_OBSERVATION_PLAN" : "REPAIR_OBSERVATION_PLAN",

@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
+- current sprint: Sprint 8M - Manual Post-Match Observation Review Form
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,35 +20,34 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 8K - Sprint 8K - Coach Report Decision Layer & Next-Match Observation Plan
-- PASS: previous sprint leftovers are 0 - 0
-- PASS: README is Sprint 8K oriented - README current
-- PASS: 8K report included - 8K doc included
-- PASS: 8K validation is PASS - 8K validation current
-- PASS: baseline 8J/8I visible - baseline visible
-- PASS: baseline chain preserved - baseline chain visible
-- PASS: product decision layer visible - product 8K visible
-- PASS: export observation layer visible - export 8K visible
-- PASS: three decision cards visible - 3 cards
-- PASS: three observation items visible - 3 observation items
-- PASS: confirmation and disconfirmation criteria present - criteria visible
-- PASS: do not overinterpret present - prudence visible
-- PASS: decision links present - links visible
-- PASS: no selection imposition - selection 0
-- PASS: no tactical plan imposition - tactic 0
-- PASS: no sandbox/diagnostic/batch promotion - truth separated
-- PASS: replay export wording cleaned - replay clean
-- PASS: product raw IDs cleaned from main text - raw main text 0
-- PASS: export remains under 900 seconds - 900 checked
-- PASS: exportUnder800Seconds correctly computed - 800 checked
-- PASS: product story-first preserved - product story-first
-- PASS: export compact preserved - export compact
+- PASS: current sprint is Sprint 8M - Sprint 8M - Manual Post-Match Observation Review Form
+- PASS: previous sprint standalone leftovers are 0 - 0
+- PASS: README is Sprint 8M oriented - README current
+- PASS: 8M report included - 8M doc included
+- PASS: 8M validation is PASS - 8M validation current
+- PASS: baseline 8L visible and preserved - 8L baseline preserved
+- PASS: baseline 8K and 8I preserved - 8K/8I preserved
+- PASS: product manual review form visible - product 8M visible
+- PASS: export manual review form visible - export 8M visible
+- PASS: three linked blank review sections visible - 3 linked blank sections
+- PASS: four manual options per section - 12 options
+- PASS: no default checked option - checked 0
+- PASS: no automatic outcome classification - automatic 0
+- PASS: manual evidence context notes and cautions visible - manual fields visible
+- PASS: no submit backend or storage flow - no flow/storage
+- PASS: no future or fabricated evidence claim - future/fabricated 0
+- PASS: no season memory selection or tactic imposition - memory/selection/tactic 0
+- PASS: no sandbox diagnostic or batch promotion - sandbox/diagnostic/batch 0
+- PASS: 8L and 8K product/export sections preserved - 8L/8K sections visible
+- PASS: product story-first and compact export preserved - story/export preserved
+- PASS: export budget and metadata preserved - export budget/metadata checked
 - PASS: source-of-truth preserved - source truth
 - PASS: scoring constants unchanged - scoring constants visible
+- PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: no new memory or database feature - no new memory/db
-- PASS: bundle includes 8K source files - 8K source bundled
+- PASS: bundle includes 8M source files - 8M source bundled
+- PASS: source reports were not deleted - 8L/8K sources still bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -58,7 +57,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-decision-layer-next-match-observation-plan-8k.md
+- coach-report-manual-post-match-observation-review-form-8m.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -71,5 +70,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-decision-layer-next-match-observation-plan-8k.md
+- validation.coach-report-manual-post-match-observation-review-form-8m.md
 - validation.share-pack.md
