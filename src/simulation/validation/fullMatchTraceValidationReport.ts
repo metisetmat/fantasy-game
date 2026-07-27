@@ -184,6 +184,10 @@ import {
   renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDoc as renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LDocBase,
   renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation as renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidationBase,
 } from "../../reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L";
+import {
+  renderManualPostMatchObservationReviewForm8MDoc as renderManualPostMatchObservationReviewForm8MDocBase,
+  renderManualPostMatchObservationReviewForm8MValidation as renderManualPostMatchObservationReviewForm8MValidationBase,
+} from "../../reports/buildManualPostMatchObservationReviewForm8M";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6801,6 +6805,18 @@ export function renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker
   _model: FullMatchTraceValidationModel
 ): string {
   return renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidationBase();
+}
+
+export function renderManualPostMatchObservationReviewForm8MDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualPostMatchObservationReviewForm8MDocBase();
+}
+
+export function renderManualPostMatchObservationReviewForm8MValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualPostMatchObservationReviewForm8MValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
