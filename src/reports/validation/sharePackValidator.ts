@@ -391,6 +391,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReplayUXIteration8GValidation = readIfExists(join(shareDirectory, "validation.coach-replay-ux-iteration-8g.md"));
   const coachReportStoryFirstProductRecomposition8H = readIfExists(join(shareDirectory, "coach-report-story-first-product-recomposition-8h.md"));
   const coachReportStoryFirstProductRecomposition8HValidation = readIfExists(join(shareDirectory, "validation.coach-report-story-first-product-recomposition-8h.md"));
+  const storyFirstExportBudgetValidationThresholdFix8I = readIfExists(join(shareDirectory, "story-first-export-budget-validation-threshold-fix-8i.md"));
+  const storyFirstExportBudgetValidationThresholdFix8IValidation = readIfExists(join(shareDirectory, "validation.story-first-export-budget-validation-threshold-fix-8i.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3391,6 +3393,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-replay-ux-iteration-8g.md",
     ...sprint8GForbiddenLeftovers,
   ];
+  const sprint8IExpectedFiles = sprint8HExpectedFiles.map((file) =>
+    file === "coach-report-story-first-product-recomposition-8h.md"
+      ? "story-first-export-budget-validation-threshold-fix-8i.md"
+      : file === "validation.coach-report-story-first-product-recomposition-8h.md"
+        ? "validation.story-first-export-budget-validation-threshold-fix-8i.md"
+        : file
+  );
+  const sprint8IForbiddenLeftovers = [
+    "coach-report-story-first-product-recomposition-8h.md",
+    "validation.coach-report-story-first-product-recomposition-8h.md",
+    ...sprint8HForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4943,6 +4957,39 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("no new memory or database feature", coachReplayUXIteration8GValidation.includes("no new season memory") && coachReplayUXIteration8GValidation.includes("no new team style memory") && coachReplayUXIteration8GValidation.includes("no new database history feature"), "no new memory/db"),
     check("bundle includes 8G source files", bundleReports.includes("src/reports/coachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/buildCoachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/renderCoachReplayUXSection8G.ts") && bundleReports.includes("src/reports/coachReplayUXHierarchyAudit8G.ts"), "8G source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReplayUXIteration8GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8IChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8IExpectedFiles.every((file) => requiredCopied(file)), sprint8IExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8IExpectedFiles.every((file) => manifest.includes(file)), sprint8IExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8I", activeConfig.sprintName === "Sprint 8I - Story-First Export Budget & Validation Threshold Fix", activeConfig.sprintName),
+    check("previous sprint leftovers are 0", sprint8IForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8IForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8I oriented", readme.includes("# Sprint 8I Share Pack") && readme.includes("story-first-export-budget-validation-threshold-fix-8i.md") && readme.includes("strict numeric read-time thresholds"), "README current"),
+    check("8I report included", storyFirstExportBudgetValidationThresholdFix8I.includes("# Story-First Export Budget Validation Threshold Fix 8I") && storyFirstExportBudgetValidationThresholdFix8I.includes("Export Budget Before / After") && storyFirstExportBudgetValidationThresholdFix8I.includes("Numeric Threshold Validation Rules"), "8I doc included"),
+    check("8I validation is PASS", storyFirstExportBudgetValidationThresholdFix8IValidation.includes("Status: PASS") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("StoryFirstExportBudgetValidationThresholdFix8IModel exists"), "8I validation current"),
+    check("strict 900 second threshold visible", storyFirstExportBudgetValidationThresholdFix8I.includes("export-under-900-hard-limit") && storyFirstExportBudgetValidationThresholdFix8I.includes("less_than_or_equal") && storyFirstExportBudgetValidationThresholdFix8I.includes("900") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("exportReadTimeSecondsAfter8I <= 900 for PASS"), "900 threshold visible"),
+    check("strict 800 second threshold visible", storyFirstExportBudgetValidationThresholdFix8I.includes("export-under-800-ideal-limit") && storyFirstExportBudgetValidationThresholdFix8I.includes("less_than_or_equal") && storyFirstExportBudgetValidationThresholdFix8I.includes("800") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("exportUnder800Seconds correctly computed"), "800 threshold visible"),
+    check("threshold booleans computed honestly", storyFirstExportBudgetValidationThresholdFix8IValidation.includes("exportUnder900Seconds correctly computed") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("thresholdBooleanMismatchCount: 0"), "threshold booleans checked"),
+    check("no PASS message on failed numeric rule", storyFirstExportBudgetValidationThresholdFix8IValidation.includes("no PASS message on failed numeric rule") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("passMessageOnFailedRuleCount: 0"), "PASS wording blocked"),
+    check("compressed export marker visible", coachExportHtml.includes('data-story-first-export-version="8I"'), "8I export marker"),
+    check("export story-first essentials visible", coachExportHtml.includes("Le match en 2 minutes") && coachExportHtml.includes("Replay coach en 60 secondes") && coachExportHtml.includes("Plan d'action coach") && coachExportHtml.includes("Cartes tactiques essentielles"), "export essentials visible"),
+    check("export action plan non-empty", coachExportHtml.includes("action-plan-export-card") && !/<section id="coach-action-plan"[\s\S]*?<div class="grid">\s*<\/div>/iu.test(coachExportHtml), "action plan cards visible"),
+    check("replay export wording clean", !/<section id="coach-replay-8e"[\s\S]*(?:\.{3}|…)[\s\S]*?<\/section>/iu.test(coachExportHtml) && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("replay has no truncated sentence"), "replay not truncated"),
+    check("full timeline not included in export", !/timeline complete|78 evenements|78 events|full timeline/i.test(coachExportHtml), "full timeline absent"),
+    check("sandbox panel not included in export", !/sandbox decision panel|sandbox applique|sandbox appliqu/i.test(coachExportHtml), "sandbox absent"),
+    check("long batch diagnostics not included in export", !/batch diagnostics|diagnostics batch|50-match/i.test(coachExportHtml), "batch diagnostics absent"),
+    check("product report remains complete", coachProductHtml.includes('data-story-first-version="8H"') && coachProductHtml.includes('id="coach-replay-8e"') && coachProductHtml.includes('id="coach-action-plan"') && coachProductHtml.includes("details"), "product complete"),
+    check("source-of-truth separation preserved", storyFirstExportBudgetValidationThresholdFix8IValidation.includes("source-of-truth preserved") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("sandbox excluded from official story/replay") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("batch excluded from official story/replay"), "source-of-truth preserved"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL") && scoringEvents.includes("TRY_TOUCHDOWN") && scoringEvents.includes("CONVERSION_GOAL") && scoringEvents.includes("DROP_GOAL") && scoringEvents.includes("PENALTY_SHOT") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("baseline 8H chain preserved", storyFirstExportBudgetValidationThresholdFix8IValidation.includes("baseline 8H preserved") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("baseline 8G preserved") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("baseline 6X match economy preserved"), "baseline chain visible"),
+    check("mobile and print export ready", storyFirstExportBudgetValidationThresholdFix8IValidation.includes("export print ready") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("export no horizontal overflow"), "mobile/print checked"),
+    check("bundle includes 8I/8J source files", bundleReports.includes("src/reports/buildStoryFirstExportBudgetValidationThresholdFix8I.ts") && bundleReports.includes("src/reports/renderStoryFirstCompressedExport8I.ts") && bundleReports.includes("src/reports/renderRestoredCompressedExport8J.ts") && bundleReports.includes("src/reports/exportBudgetThresholdAudit8I.ts") && bundleReports.includes("src/reports/numericValidationHonestyAudit8I.ts"), "8I/8J source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && storyFirstExportBudgetValidationThresholdFix8IValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8HChecks: readonly SharePackCheck[] = [
@@ -9040,6 +9087,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8I - Story-First Export Budget")
+      ? sprint8IChecks
     : activeConfig.sprintName.includes("Sprint 8H - Coach Report Story-First")
       ? sprint8HChecks
     : activeConfig.sprintName.includes("Sprint 8G - Coach Replay UX")
