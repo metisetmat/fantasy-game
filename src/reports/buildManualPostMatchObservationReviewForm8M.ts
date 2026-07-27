@@ -1,5 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L } from "./buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L";
 import { auditManualOutcomeOptions8M } from "./manualOutcomeOptionAudit8M";
 import { auditManualPostMatchBoundary8M } from "./manualPostMatchBoundaryAudit8M";
@@ -25,10 +23,6 @@ import {
   MANUAL_POST_MATCH_REVIEW_FORM_8M_BLOCKING_WARNINGS,
   type ManualPostMatchObservationReviewFormWarningCode8M,
 } from "./manualPostMatchObservationReviewFormWarnings";
-
-function readIfExists(path: string): string {
-  return existsSync(path) ? readFileSync(path, "utf8") : "";
-}
 
 function bool(value: boolean): string {
   return value ? "true" : "false";
@@ -59,6 +53,40 @@ function metricRows(rows: readonly (readonly [string, string | number | boolean]
   ]);
 }
 
+function removeBalancedSectionById(html: string, sectionId: string): string {
+  const markerIndex = html.indexOf(`id="${sectionId}"`);
+  if (markerIndex < 0) return html;
+  const sectionStart = html.lastIndexOf("<section", markerIndex);
+  if (sectionStart < 0) return html;
+  const pattern = /<\/?section\b[^>]*>/giu;
+  let depth = 0;
+  for (const match of html.slice(sectionStart).matchAll(pattern)) {
+    const tag = match[0];
+    const absoluteEnd = sectionStart + (match.index ?? 0) + tag.length;
+    if (tag.startsWith("</")) {
+      depth -= 1;
+      if (depth === 0) {
+        return `${html.slice(0, sectionStart)}${html.slice(absoluteEnd)}`;
+      }
+    } else {
+      depth += 1;
+    }
+  }
+  return html;
+}
+
+function manualReviewBaselineProductHtml(html: string): string {
+  return removeBalancedSectionById(html, "manual-post-match-review-form-8m");
+}
+
+function manualReviewBaselineExportHtml(html: string): string {
+  const withoutSection = removeBalancedSectionById(html, "manual-post-match-review-form-export-8m");
+  return withoutSection.replace(
+    /<title>\s*Rapport coach export compact 8M - formulaire post-match manuel\s*<\/title>/iu,
+    "<title>Rapport coach export compact 8I</title>",
+  );
+}
+
 function sectionRows(sections: readonly ManualObservationReviewSection8M[]): readonly string[] {
   return table([
     ["Section", "Status", "Linked 8L", "Linked 8K", "Fields"],
@@ -87,12 +115,14 @@ export function buildManualPostMatchObservationReviewForm8MModel(input?: {
   readonly productHtmlBefore8M?: string;
   readonly exportHtmlBefore8M?: string;
 }): ManualPostMatchObservationReviewForm8MModel {
-  const reportsDirectory = join(process.cwd(), "reports");
   const baseline8L = buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L();
-  const productHtmlBefore8M = input?.productHtmlBefore8M ??
-    (readIfExists(join(reportsDirectory, "coach-report.product.html")) || baseline8L.productHtmlAfter8L);
-  const exportHtmlBefore8M = input?.exportHtmlBefore8M ??
-    (readIfExists(join(reportsDirectory, "coach-report.export.html")) || baseline8L.exportHtmlAfter8L);
+  const rawProductHtmlBefore8M = input?.productHtmlBefore8M ?? baseline8L.productHtmlAfter8L;
+  const rawExportHtmlBefore8M = input?.exportHtmlBefore8M ?? baseline8L.exportHtmlAfter8L;
+  const productHtmlBefore8M = manualReviewBaselineProductHtml(rawProductHtmlBefore8M);
+  const exportHtmlBefore8M = manualReviewBaselineExportHtml(rawExportHtmlBefore8M);
+  const productHtmlBefore8MClean = !productHtmlBefore8M.includes('id="manual-post-match-review-form-8m"');
+  const exportHtmlBefore8MClean = !exportHtmlBefore8M.includes('id="manual-post-match-review-form-export-8m"') &&
+    !/<title>\s*Rapport coach export compact 8M - formulaire post-match manuel\s*<\/title>/iu.test(exportHtmlBefore8M);
   const form = buildManualPostMatchObservationReviewForm8M({
     source8LTrackerId: baseline8L.tracker.trackerId,
   });
@@ -193,6 +223,8 @@ export function buildManualPostMatchObservationReviewForm8MModel(input?: {
       source8LTrackerId: baseline8L.tracker.trackerId,
     }),
     exportFormHtml: renderManualPostMatchObservationReviewFormExport8M(),
+    productHtmlBefore8MClean,
+    exportHtmlBefore8MClean,
     productHtmlAfter8M,
     exportHtmlAfter8M,
     productFormVisible,
@@ -260,6 +292,8 @@ export function renderManualPostMatchObservationReviewForm8MDoc(
       ["fourOutcomeOptionsPerSection", model.fourOutcomeOptionsPerSection],
       ["noDefaultCheckedOutcome", model.noDefaultCheckedOutcome],
       ["noAutomaticOutcome", model.noAutomaticOutcome],
+      ["productHtmlBefore8MClean", model.productHtmlBefore8MClean],
+      ["exportHtmlBefore8MClean", model.exportHtmlBefore8MClean],
       ["exportReadTimeSecondsAfter8M", model.exportBudgetAudit.exportReadTimeSecondsAfter8M],
     ]),
     "",
@@ -359,6 +393,8 @@ export function renderManualPostMatchObservationReviewForm8MValidation(
     checkLine("baseline 8I preserved", model.baseline8IPreserved, bool(model.baseline8IPreserved)),
     checkLine("product manual form visible", model.productFormVisible, bool(model.productFormVisible)),
     checkLine("export manual form visible", model.exportFormVisible, bool(model.exportFormVisible)),
+    checkLine("product before-8M baseline has no 8M form", model.productHtmlBefore8MClean, bool(model.productHtmlBefore8MClean)),
+    checkLine("export before-8M baseline has no 8M form", model.exportHtmlBefore8MClean, bool(model.exportHtmlBefore8MClean)),
     checkLine("review section count = 3", model.formAudit.reviewSectionCount === 3, String(model.formAudit.reviewSectionCount)),
     checkLine("all review sections linked to 8L", model.allSectionsLinkedTo8L, `${model.formAudit.linked8LSectionCount}/3`),
     checkLine("all review sections pending blank not_evaluated", model.allSectionsPendingBlankNotEvaluated, `${model.formAudit.pendingSectionCount}/${model.formAudit.blankSectionCount}/${model.formAudit.notEvaluatedSectionCount}`),
@@ -404,6 +440,8 @@ export function renderManualPostMatchObservationReviewForm8MValidation(
     `- blankSectionCount: ${model.formAudit.blankSectionCount}`,
     `- notEvaluatedSectionCount: ${model.formAudit.notEvaluatedSectionCount}`,
     `- outcomeOptionCount: ${model.outcomeOptionAudit.outcomeOptionCount}`,
+    `- productHtmlBefore8MClean: ${model.productHtmlBefore8MClean}`,
+    `- exportHtmlBefore8MClean: ${model.exportHtmlBefore8MClean}`,
     `- checkedDefaultCount: ${model.outcomeOptionAudit.checkedDefaultCount}`,
     `- automaticOutcomeCount: ${model.outcomeOptionAudit.automaticOutcomeCount}`,
     `- submitButtonCount: ${model.boundaryAudit.submitButtonCount}`,

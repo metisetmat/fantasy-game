@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-27T14:03:18.694Z
+Generated timestamp: 2026-07-27T15:10:02.947Z
 Task/sprint name: Sprint 8M - Manual Post-Match Observation Review Form
 Final file count: 20
 
@@ -1099,20 +1099,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderRestoredCompressedExport8J.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualPostMatchObservationReviewForm8M.ts
-?? src/reports/manualOutcomeOptionAudit8M.ts
-?? src/reports/manualPostMatchBoundaryAudit8M.ts
-?? src/reports/manualPostMatchObservationReviewFormTypes8M.ts
-?? src/reports/manualPostMatchObservationReviewFormWarnings.ts
-?? src/reports/manualPostMatchReviewFormAudit8M.ts
-?? src/reports/manualReviewFormCoachUsabilityAudit8M.ts
-?? src/reports/manualReviewFormExportBudgetAudit8M.ts
-?? src/reports/manualReviewFormIntegrationBudgetAudit8M.ts
-?? src/reports/manualReviewFormSourceOfTruthRegressionAudit8M.ts
-?? src/reports/renderManualPostMatchObservationReviewFormExport8M.ts
-?? src/reports/renderManualPostMatchObservationReviewFormProduct8M.ts
+ M src/reports/buildManualPostMatchObservationReviewForm8M.ts
+ M src/reports/manualPostMatchObservationReviewFormTypes8M.ts

@@ -201,6 +201,8 @@ export interface ManualPostMatchObservationReviewForm8MModel {
   readonly form: ManualPostMatchObservationReviewForm8M;
   readonly productFormHtml: string;
   readonly exportFormHtml: string;
+  readonly productHtmlBefore8MClean: boolean;
+  readonly exportHtmlBefore8MClean: boolean;
   readonly productHtmlAfter8M: string;
   readonly exportHtmlAfter8M: string;
   readonly productFormVisible: boolean;

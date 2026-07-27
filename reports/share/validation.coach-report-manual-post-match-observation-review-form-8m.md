@@ -9,6 +9,8 @@ Status: PASS
 - PASS: baseline 8I preserved - true
 - PASS: product manual form visible - true
 - PASS: export manual form visible - true
+- PASS: product before-8M baseline has no 8M form - true
+- PASS: export before-8M baseline has no 8M form - true
 - PASS: review section count = 3 - 3
 - PASS: all review sections linked to 8L - 3/3
 - PASS: all review sections pending blank not_evaluated - 3/3/3
@@ -45,6 +47,8 @@ Status: PASS
 - blankSectionCount: 3
 - notEvaluatedSectionCount: 3
 - outcomeOptionCount: 12
+- productHtmlBefore8MClean: true
+- exportHtmlBefore8MClean: true
 - checkedDefaultCount: 0
 - automaticOutcomeCount: 0
 - submitButtonCount: 0

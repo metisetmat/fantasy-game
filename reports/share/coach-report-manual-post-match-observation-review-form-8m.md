@@ -18,6 +18,8 @@ Status: PASS
 | fourOutcomeOptionsPerSection | true |
 | noDefaultCheckedOutcome | true |
 | noAutomaticOutcome | true |
+| productHtmlBefore8MClean | true |
+| exportHtmlBefore8MClean | true |
 | exportReadTimeSecondsAfter8M | 411 |
 
 ## Manual Review Sections
@@ -66,7 +68,7 @@ Status: PASS
 ## Export Metadata And Budget
 | Metric | Value |
 | --- | --- |
-| exportReadTimeSecondsBefore8M | 411 |
+| exportReadTimeSecondsBefore8M | 358 |
 | exportReadTimeSecondsAfter8M | 411 |
 | exportUnder900Seconds | true |
 | exportUnder800Seconds | true |
