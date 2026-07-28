@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8M - Manual Post-Match Observation Review Form. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8N - Manual Review Result Intake Boundary. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
