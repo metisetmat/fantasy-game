@@ -92,6 +92,8 @@ import { insertCoachDecisionLayerProduct8K } from "./renderCoachDecisionLayerPro
 import { insertSeasonlessLearningLoopProduct8L } from "./renderSeasonlessLearningLoopProduct8L";
 import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderManualPostMatchObservationReviewFormProduct8M";
 import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
+import { currentManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
+import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -453,13 +455,17 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const finalProductHtml = insertManualReviewResultIntakeBoundaryProduct8N(
-    insertManualPostMatchObservationReviewFormProduct8M(
-      insertSeasonlessLearningLoopProduct8L(
-        insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
-        experimentalReport.matchId,
+  const manualReviewPreview8O = currentManualReviewPreviewRenderer8OModel();
+  const finalProductHtml = insertManualReviewPreviewProduct8O(
+    insertManualReviewResultIntakeBoundaryProduct8N(
+      insertManualPostMatchObservationReviewFormProduct8M(
+        insertSeasonlessLearningLoopProduct8L(
+          insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
+          experimentalReport.matchId,
+        ),
       ),
     ),
+    manualReviewPreview8O.productPreviewHtml,
   );
   const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,

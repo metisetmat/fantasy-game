@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-28T10:52:12.953Z
-Task/sprint: Sprint 8N - Manual Review Result Intake Boundary
+Generated: 2026-07-28T14:04:45.691Z
+Task/sprint: Sprint 8O - Manual Review Preview Renderer Without Persistence
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-result-intake-boundary-8n.md
-- validation.coach-report-manual-review-result-intake-boundary-8n.md
+- coach-report-manual-review-preview-renderer-without-persistence-8o.md
+- validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md
 - README.md
 
 ## Bundle Files
