@@ -2,7 +2,9 @@ import { scoringRegistryEntry } from "../systems/scoring";
 import {
   buildManualReviewPreviewRenderer8OModel,
   buildManualReviewPreviewPayloadFixture8O,
+  resolveManualReviewPreviewRendererStatus8O,
 } from "./buildManualReviewPreviewRenderer8O";
+import { auditManualReviewPreviewNonPersistence8O } from "./manualReviewPreviewNonPersistenceAudit8O";
 import { validateManualReviewResultIntakePayload8N } from "./validateManualReviewResultIntakePayload8N";
 
 function assertTest(condition: boolean, message: string): void {
@@ -24,6 +26,16 @@ export function validateManualReviewPreviewRenderer8O(): readonly string[] {
   invalidFixture.sourceMatchId = "";
   const invalidResult = validateManualReviewResultIntakePayload8N(invalidFixture);
   const model = buildManualReviewPreviewRenderer8OModel();
+  const persistenceLeakAudit = auditManualReviewPreviewNonPersistence8O({
+    productHtml: '<section id="manual-review-preview-renderer-8o"><script>localStorage.setItem("review", "leak")</script></section>',
+    exportHtml: "",
+  });
+  const derivedBlockingStatus = resolveManualReviewPreviewRendererStatus8O({
+    failureWarnings: [],
+    derivedFailureWarnings: ["SCORE_MANIPULATION_DETECTED"],
+    exportUnder800Seconds: true,
+    wordingReadabilityScore: 96,
+  });
 
   assertTest(validResult.status === "accepted_for_preview", "valid 8N payload must render in preview.");
   assertTest(invalidResult.status === "rejected", "invalid 8N payload must be blocked before preview.");
@@ -48,9 +60,12 @@ export function validateManualReviewPreviewRenderer8O(): readonly string[] {
   assertTest(model.nonPersistenceAudit.backendSubmitActionCount === 0, "preview must not create backend submit.");
   assertTest(!model.nonPersistenceAudit.previewPersistencePerformed, "preview persistence must be false.");
   assertTest(!model.nonPersistenceAudit.previewApplicationPerformed, "preview application must be false.");
+  assertTest(persistenceLeakAudit.localStoragePersistenceCount === 1, "localStorage persistence leak must be counted.");
+  assertTest(persistenceLeakAudit.previewPersistencePerformed, "detected persistence must set previewPersistencePerformed.");
   assertTest(model.sourceOfTruthRegressionAudit.manualPreviewDoesNotMutateScore, "preview must not mutate score.");
   assertTest(model.sourceOfTruthRegressionAudit.manualPreviewDoesNotMutateTimeline, "preview must not mutate timeline.");
   assertTest(model.sourceOfTruthRegressionAudit.manualPreviewDoesNotCreateScoreChange, "preview must not create score_change.");
+  assertTest(derivedBlockingStatus === "FAIL", "derived blocking warnings must fail the 8O status.");
   assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
   assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
   assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
@@ -67,6 +82,7 @@ export function validateManualReviewPreviewRenderer8O(): readonly string[] {
     "invalid payload is blocked before render",
     "three preview cards stay linked to 8N/8M/8L/8K",
     "preview cannot persist, apply, mutate score/timeline, or create official truth",
+    "derived blocking warnings fail the model status",
     "scoring constants and MatchBonusEvent remain unchanged",
     "export metadata and visible preview section mention 8O",
   ];

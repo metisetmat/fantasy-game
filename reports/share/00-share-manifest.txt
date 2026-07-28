@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-28T14:04:45.691Z
+Generated timestamp: 2026-07-28T14:34:15.129Z
 Task/sprint name: Sprint 8O - Manual Review Preview Renderer Without Persistence
 Final file count: 20
 
@@ -1124,21 +1124,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderRestoredCompressedExport8J.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewPreviewRenderer8O.ts
-?? src/reports/manualReviewPreviewExportBudgetAudit8O.ts
-?? src/reports/manualReviewPreviewIntegrationBudgetAudit8O.ts
-?? src/reports/manualReviewPreviewNonPersistenceAudit8O.ts
-?? src/reports/manualReviewPreviewOfficialTruthBoundaryAudit8O.ts
-?? src/reports/manualReviewPreviewRenderer8O.test.ts
-?? src/reports/manualReviewPreviewRendererAudit8O.ts
-?? src/reports/manualReviewPreviewRendererTypes8O.ts
-?? src/reports/manualReviewPreviewRendererWarnings8O.ts
-?? src/reports/manualReviewPreviewSourceOfTruthRegressionAudit8O.ts
-?? src/reports/manualReviewPreviewWordingAudit8O.ts
-?? src/reports/renderManualReviewPreviewExport8O.ts
-?? src/reports/renderManualReviewPreviewProduct8O.ts
+ M src/reports/buildManualReviewPreviewRenderer8O.ts
+ M src/reports/manualReviewPreviewNonPersistenceAudit8O.ts
+ M src/reports/manualReviewPreviewRenderer8O.test.ts
+ M src/reports/manualReviewPreviewRendererTypes8O.ts

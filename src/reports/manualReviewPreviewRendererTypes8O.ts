@@ -109,8 +109,8 @@ export interface ManualReviewPreviewNonPersistenceAudit8O {
   readonly memoryCreationCount: number;
   readonly seasonMemoryCreationCount: number;
   readonly teamStyleMemoryCreationCount: number;
-  readonly previewPersistencePerformed: false;
-  readonly previewApplicationPerformed: false;
+  readonly previewPersistencePerformed: boolean;
+  readonly previewApplicationPerformed: boolean;
   readonly nonPersistenceWarningCodes: readonly ManualReviewPreviewRendererWarningCode8O[];
   readonly recommendation: string;
 }

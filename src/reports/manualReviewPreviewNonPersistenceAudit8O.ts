@@ -21,6 +21,15 @@ export function auditManualReviewPreviewNonPersistence8O(input: {
   const memoryCreationCount = countMatches(previewSlice, /memory created|memoire creee|creates? memory/giu);
   const seasonMemoryCreationCount = countMatches(previewSlice, /season memory created|memoire de saison creee/giu);
   const teamStyleMemoryCreationCount = countMatches(previewSlice, /team style memory created|memoire de style creee/giu);
+  const previewPersistencePerformed = localStoragePersistenceCount > 0 ||
+    databasePersistenceCount > 0 ||
+    filePersistenceCount > 0 ||
+    backendSubmitActionCount > 0 ||
+    formSubmitButtonCount > 0 ||
+    apiCallCount > 0 ||
+    memoryCreationCount > 0 ||
+    seasonMemoryCreationCount > 0 ||
+    teamStyleMemoryCreationCount > 0;
   const warnings: ManualReviewPreviewRendererWarningCode8O[] = [];
   if (localStoragePersistenceCount > 0) warnings.push("LOCAL_STORAGE_PERSISTENCE_DETECTED");
   if (databasePersistenceCount > 0) warnings.push("DATABASE_PERSISTENCE_CREATED");
@@ -40,7 +49,7 @@ export function auditManualReviewPreviewNonPersistence8O(input: {
     memoryCreationCount,
     seasonMemoryCreationCount,
     teamStyleMemoryCreationCount,
-    previewPersistencePerformed: false,
+    previewPersistencePerformed,
     previewApplicationPerformed: false,
     nonPersistenceWarningCodes: warnings,
     recommendation: warnings.length === 0 ? "KEEP_NON_PERSISTENT_PREVIEW" : "REPAIR_PREVIEW_PERSISTENCE_BOUNDARY",

@@ -239,6 +239,23 @@ function uniqueWarnings(
   }))];
 }
 
+export function resolveManualReviewPreviewRendererStatus8O(input: {
+  readonly failureWarnings: readonly ManualReviewPreviewRendererWarningCode8O[];
+  readonly derivedFailureWarnings: readonly ManualReviewPreviewRendererWarningCode8O[];
+  readonly exportUnder800Seconds: boolean;
+  readonly wordingReadabilityScore: number;
+}): "PASS" | "PARTIAL" | "FAIL" {
+  const completeFailureWarnings = uniqueWarnings([
+    ...input.failureWarnings,
+    ...input.derivedFailureWarnings,
+  ]);
+  const blocking = completeFailureWarnings.some((warning) =>
+    MANUAL_REVIEW_PREVIEW_RENDERER_8O_BLOCKING_WARNINGS.includes(warning),
+  );
+  if (blocking) return "FAIL";
+  return input.exportUnder800Seconds && input.wordingReadabilityScore >= 90 ? "PASS" : "PARTIAL";
+}
+
 export function buildManualReviewPreviewRenderer8OModel(input?: {
   readonly baseline8N?: ManualReviewResultIntakeBoundary8NModel;
   readonly productHtmlBefore8O?: string;
@@ -325,10 +342,43 @@ export function buildManualReviewPreviewRenderer8OModel(input?: {
     ...integrationBudgetAudit.integrationWarningCodes,
     ...wordingAudit.wordingWarningCodes,
   ]);
-  const blocking = failureWarnings.some((warning) => MANUAL_REVIEW_PREVIEW_RENDERER_8O_BLOCKING_WARNINGS.includes(warning));
-  const status = blocking ? "FAIL" : exportBudgetAudit.exportUnder800Seconds && wordingAudit.wordingReadabilityScore >= 90 ? "PASS" : "PARTIAL";
+  const derivedStatusWarnings: readonly ManualReviewPreviewRendererWarningCode8O[] = [
+    previewRendererReady ? "PREVIEW_RENDERER_READY" : "PREVIEW_RENDERER_MISSING",
+    previewInputValidationReady ? "PREVIEW_INPUT_VALIDATION_READY" : "PREVIEW_RENDERED_WITHOUT_VALIDATION",
+    previewAudit.productPreviewRendererVisible ? "PRODUCT_PREVIEW_RENDERER_VISIBLE" : "PRODUCT_PREVIEW_RENDERER_MISSING",
+    previewAudit.exportPreviewRendererVisible ? "EXPORT_PREVIEW_RENDERER_VISIBLE" : "EXPORT_PREVIEW_RENDERER_MISSING",
+    previewAudit.previewUsesValidPayloadOnly ? "PREVIEW_USES_VALID_PAYLOAD_ONLY" : "INVALID_PAYLOAD_RENDERED",
+    previewAudit.invalidPayloadPreviewBlocked ? "INVALID_PAYLOAD_PREVIEW_BLOCKED" : "INVALID_PAYLOAD_RENDERED",
+    previewMarkedNonOfficial ? "PREVIEW_MARKED_NON_OFFICIAL" : "PREVIEW_NON_OFFICIAL_MARKER_MISSING",
+    previewMarkedNotPersisted ? "PREVIEW_MARKED_NOT_PERSISTED" : "PREVIEW_NOT_PERSISTED_MARKER_MISSING",
+    previewMarkedNotApplied ? "PREVIEW_MARKED_NOT_APPLIED" : "PREVIEW_NOT_APPLIED_MARKER_MISSING",
+    sourceOfTruthRegressionAudit.manualPreviewDoesNotMutateScore ? "PREVIEW_DOES_NOT_MUTATE_SCORE" : "SCORE_MANIPULATION_DETECTED",
+    sourceOfTruthRegressionAudit.manualPreviewDoesNotMutateTimeline ? "PREVIEW_DOES_NOT_MUTATE_TIMELINE" : "SCORE_MANIPULATION_DETECTED",
+    sourceOfTruthRegressionAudit.manualPreviewDoesNotCreateScoreChange ? "PREVIEW_DOES_NOT_CREATE_SCORE_CHANGE" : "SCORE_CLAIM_WITHOUT_SCORE_CHANGE",
+    previewDoesNotCreateMemory ? "PREVIEW_DOES_NOT_CREATE_MEMORY" : "SEASON_MEMORY_CREATED",
+    previewDoesNotAutoClassify ? "PREVIEW_DOES_NOT_AUTO_CLASSIFY" : "PREVIEW_AUTO_CLASSIFICATION_DETECTED",
+    previewDoesNotDriveSelection ? "PREVIEW_DOES_NOT_DRIVE_SELECTION" : "SELECTION_IMPOSITION_DETECTED",
+    previewDoesNotDriveTacticalInstruction ? "PREVIEW_DOES_NOT_DRIVE_TACTICAL_INSTRUCTION" : "TACTICAL_PLAN_IMPOSITION_DETECTED",
+    baseline8NPreserved ? "MANUAL_INTAKE_CONTRACT_8N_PRESERVED" : "PRODUCT_MANUAL_INTAKE_BOUNDARY_8N_REGRESSED",
+    manualForm8MPreserved ? "MANUAL_FORM_8M_PRESERVED" : "PRODUCT_MANUAL_FORM_8M_REGRESSED",
+    learningLoop8LPreserved ? "LEARNING_LOOP_8L_PRESERVED" : "PRODUCT_LEARNING_LOOP_8L_REGRESSED",
+    decisionLayer8KPreserved ? "DECISION_LAYER_8K_PRESERVED" : "PRODUCT_DECISION_LAYER_8K_REGRESSED",
+    exportBudgetAudit.exportUnder900Seconds ? "EXPORT_UNDER_900_READY" : "EXPORT_OVER_900",
+    sourceOfTruthSeparationPreserved ? "SOURCE_OF_TRUTH_PRESERVED" : "SCORE_CLAIM_WITHOUT_SCORE_CHANGE",
+    matchEconomyBaselinePreserved ? "MATCH_ECONOMY_BASELINE_PRESERVED" : "SCORE_MANIPULATION_DETECTED",
+  ];
+  const derivedFailureWarnings = uniqueWarnings(
+    derivedStatusWarnings.filter((warning) => MANUAL_REVIEW_PREVIEW_RENDERER_8O_BLOCKING_WARNINGS.includes(warning)),
+  );
+  const status = resolveManualReviewPreviewRendererStatus8O({
+    failureWarnings,
+    derivedFailureWarnings,
+    exportUnder800Seconds: exportBudgetAudit.exportUnder800Seconds,
+    wordingReadabilityScore: wordingAudit.wordingReadabilityScore,
+  });
   const warningCodes = uniqueWarnings([
     ...failureWarnings,
+    ...derivedFailureWarnings,
     previewRendererReady ? "PREVIEW_RENDERER_READY" : "PREVIEW_RENDERER_MISSING",
     previewInputValidationReady ? "PREVIEW_INPUT_VALIDATION_READY" : "PREVIEW_RENDERED_WITHOUT_VALIDATION",
     previewAudit.productPreviewRendererVisible ? "PRODUCT_PREVIEW_RENDERER_VISIBLE" : "PRODUCT_PREVIEW_RENDERER_MISSING",
