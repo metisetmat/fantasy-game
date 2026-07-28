@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8M - Manual Post-Match Observation Review Form. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8N - Manual Review Result Intake Boundary. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -160,6 +160,8 @@ import {
   renderCoachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation,
   renderManualPostMatchObservationReviewForm8MDoc,
   renderManualPostMatchObservationReviewForm8MValidation,
+  renderManualReviewResultIntakeBoundary8NDoc,
+  renderManualReviewResultIntakeBoundary8NValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -173,10 +175,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8M - Manual Post-Match Observation Review Form";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-post-match-observation-review-form-8m.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8N - Manual Review Result Intake Boundary";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-result-intake-boundary-8n.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-post-match-observation-review-form-8m.md";
+  "validation.coach-report-manual-review-result-intake-boundary-8n.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3637,6 +3639,66 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8M model, report renderer, and validation renderer for the manual post-match observation review form",
       },
       {
+        source: "src/reports/manualReviewResultIntakeBoundaryTypes8N.ts",
+        required: true,
+        reason: "Sprint 8N typed manual result intake payload, entry, validation result, audit, and report contracts",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeBoundaryWarnings8N.ts",
+        required: true,
+        reason: "Sprint 8N warning-code registry blocking persistence, official truth promotion, scoring mutation, timeline mutation, memory creation, and automation",
+      },
+      {
+        source: "src/reports/validateManualReviewResultIntakePayload8N.ts",
+        required: true,
+        reason: "Sprint 8N pure validator accepting only preview/validation manual coach input and rejecting mutation or automation requests",
+      },
+      {
+        source: "src/reports/renderManualReviewResultIntakeBoundaryProduct8N.ts",
+        required: true,
+        reason: "Sprint 8N product renderer adding the manual result intake boundary without submit, persistence, or official-truth wording",
+      },
+      {
+        source: "src/reports/renderManualReviewResultIntakeBoundaryExport8N.ts",
+        required: true,
+        reason: "Sprint 8N compact export renderer adding the intake boundary and cleaning visible 8I/8M export metadata leftovers",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeContractAudit8N.ts",
+        required: true,
+        reason: "Sprint 8N contract audit proving valid payload acceptance, invalid fixture rejection, no validator mutation, and no persistence",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeBoundaryAudit8N.ts",
+        required: true,
+        reason: "Sprint 8N boundary audit blocking backend submit, storage, memory, selection, tactical instruction, auto-classification, and future-result claims",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeExportMetadataAudit8N.ts",
+        required: true,
+        reason: "Sprint 8N export metadata audit proving visible 8N markers replace stale 8I/8M sprint labels",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeSourceOfTruthRegressionAudit8N.ts",
+        required: true,
+        reason: "Sprint 8N source-of-truth regression audit preserving scoring constants, MatchBonusEvent, score_change truth, batch/live separation, and official score derivation",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeExportBudgetAudit8N.ts",
+        required: true,
+        reason: "Sprint 8N export budget audit proving the compact export stays under honest read-time thresholds",
+      },
+      {
+        source: "src/reports/manualReviewResultIntakeIntegrationBudgetAudit8N.ts",
+        required: true,
+        reason: "Sprint 8N integration audit proving 8M, 8L, 8K, story-first, replay, action plan, tactical maps, and source-of-truth note remain visible",
+      },
+      {
+        source: "src/reports/buildManualReviewResultIntakeBoundary8N.ts",
+        required: true,
+        reason: "Sprint 8N model, report renderer, and validation renderer for the manual review result intake boundary",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5793,6 +5855,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8N")) {
+    return renderManualReviewResultIntakeBoundary8NDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8M")) {
     return renderManualPostMatchObservationReviewForm8MDoc(fullMatchTraceValidationModel());
   }
@@ -8143,6 +8208,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8N")) {
+    return renderManualReviewResultIntakeBoundary8NValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8M")) {
     return renderManualPostMatchObservationReviewForm8MValidation(fullMatchTraceValidationModel());
   }
@@ -10439,6 +10507,36 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8N")) {
+    return [
+      "# Sprint 8N Share Pack",
+      "",
+      "Current sprint: Sprint 8N - Manual Review Result Intake Boundary",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8M blank manual form inside the product/export reports and replaces the standalone 8M docs with the 8N manual result intake boundary docs.",
+      "",
+      "Primary files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-report-manual-review-result-intake-boundary-8n.md",
+      "- validation.coach-report-manual-review-result-intake-boundary-8n.md",
+      "- validation.share-pack.md",
+      "",
+      "Recommended review order:",
+      "1. coach-report.product.html",
+      "2. coach-report.export.html",
+      "3. validation.coach-report-manual-review-result-intake-boundary-8n.md",
+      "4. coach-report-manual-review-result-intake-boundary-8n.md",
+      "5. validation.share-pack.md",
+      "",
+      "Key invariants:",
+      "- The 8N boundary accepts only typed manual coach review results for preview or validation.",
+      "- It creates no persistence, no official truth promotion, no score or timeline mutation, no ScoringEvent, no memory, and no selection or tactical automation.",
+      "- It rejects unknown outcomes, malformed linked IDs, missing acknowledgements, wrong entry counts, and mutation/persistence flags.",
+      "- It preserves the 8M form, 8L tracker, 8K decision layer, 8I story-first export markers as historical data attributes, source-of-truth boundaries, scoring constants, MatchBonusEvent, and batch/live separation.",
+      "- The visible export metadata is current for 8N and no longer exposes stale `compressed-export-8i` or `Export story-first 8I` labels.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8M")) {
     return [
       "# Sprint 8M Share Pack",
@@ -28932,6 +29030,7 @@ import { cleanupProductMainRawIds8K } from "./cleanupProductMainRawIds8K";
 import { insertCoachDecisionLayerProduct8K } from "./renderCoachDecisionLayerProduct8K";
 import { insertSeasonlessLearningLoopProduct8L } from "./renderSeasonlessLearningLoopProduct8L";
 import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderManualPostMatchObservationReviewFormProduct8M";
+import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -29293,10 +29392,12 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const finalProductHtml = insertManualPostMatchObservationReviewFormProduct8M(
-    insertSeasonlessLearningLoopProduct8L(
-      insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
-      experimentalReport.matchId,
+  const finalProductHtml = insertManualReviewResultIntakeBoundaryProduct8N(
+    insertManualPostMatchObservationReviewFormProduct8M(
+      insertSeasonlessLearningLoopProduct8L(
+        insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
+        experimentalReport.matchId,
+      ),
     ),
   );
   const exportHtml = renderRestoredCompressedExport8J({

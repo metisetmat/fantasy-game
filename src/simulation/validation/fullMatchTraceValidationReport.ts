@@ -188,6 +188,10 @@ import {
   renderManualPostMatchObservationReviewForm8MDoc as renderManualPostMatchObservationReviewForm8MDocBase,
   renderManualPostMatchObservationReviewForm8MValidation as renderManualPostMatchObservationReviewForm8MValidationBase,
 } from "../../reports/buildManualPostMatchObservationReviewForm8M";
+import {
+  renderManualReviewResultIntakeBoundary8NDoc as renderManualReviewResultIntakeBoundary8NDocBase,
+  renderManualReviewResultIntakeBoundary8NValidation as renderManualReviewResultIntakeBoundary8NValidationBase,
+} from "../../reports/buildManualReviewResultIntakeBoundary8N";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6817,6 +6821,18 @@ export function renderManualPostMatchObservationReviewForm8MValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualPostMatchObservationReviewForm8MValidationBase();
+}
+
+export function renderManualReviewResultIntakeBoundary8NDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewResultIntakeBoundary8NDocBase();
+}
+
+export function renderManualReviewResultIntakeBoundary8NValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewResultIntakeBoundary8NValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

@@ -399,6 +399,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const coachReportSeasonlessLearningLoopObservationOutcomeTracker8LValidation = readIfExists(join(shareDirectory, "validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md"));
   const manualPostMatchObservationReviewForm8M = readIfExists(join(shareDirectory, "coach-report-manual-post-match-observation-review-form-8m.md"));
   const manualPostMatchObservationReviewForm8MValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-post-match-observation-review-form-8m.md"));
+  const manualReviewResultIntakeBoundary8N = readIfExists(join(shareDirectory, "coach-report-manual-review-result-intake-boundary-8n.md"));
+  const manualReviewResultIntakeBoundary8NValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-result-intake-boundary-8n.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3447,6 +3449,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-seasonless-learning-loop-observation-outcome-tracker-8l.md",
     ...sprint8LForbiddenLeftovers,
   ];
+  const sprint8NExpectedFiles = sprint8MExpectedFiles.map((file) =>
+    file === "coach-report-manual-post-match-observation-review-form-8m.md"
+      ? "coach-report-manual-review-result-intake-boundary-8n.md"
+      : file === "validation.coach-report-manual-post-match-observation-review-form-8m.md"
+        ? "validation.coach-report-manual-review-result-intake-boundary-8n.md"
+        : file
+  );
+  const sprint8NForbiddenLeftovers = [
+    "coach-report-manual-post-match-observation-review-form-8m.md",
+    "validation.coach-report-manual-post-match-observation-review-form-8m.md",
+    ...sprint8MForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -4999,6 +5013,51 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("no new memory or database feature", coachReplayUXIteration8GValidation.includes("no new season memory") && coachReplayUXIteration8GValidation.includes("no new team style memory") && coachReplayUXIteration8GValidation.includes("no new database history feature"), "no new memory/db"),
     check("bundle includes 8G source files", bundleReports.includes("src/reports/coachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/buildCoachReplayUXIteration8G.ts") && bundleReports.includes("src/reports/renderCoachReplayUXSection8G.ts") && bundleReports.includes("src/reports/coachReplayUXHierarchyAudit8G.ts"), "8G source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && coachReplayUXIteration8GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8NChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8NExpectedFiles.every((file) => requiredCopied(file)), sprint8NExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8NExpectedFiles.every((file) => manifest.includes(file)), sprint8NExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8N", activeConfig.sprintName === "Sprint 8N - Manual Review Result Intake Boundary", activeConfig.sprintName),
+    check("previous standalone 8M docs are not copied", sprint8NForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8NForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8N oriented", readme.includes("# Sprint 8N Share Pack") && readme.includes("coach-report-manual-review-result-intake-boundary-8n.md") && readme.includes("Manual Review Result Intake Boundary"), "README current"),
+    check("8N report included", manualReviewResultIntakeBoundary8N.includes("# Manual Review Result Intake Boundary 8N") && manualReviewResultIntakeBoundary8N.includes("Payload Contract") && manualReviewResultIntakeBoundary8N.includes("Invalid Fixtures Rejection"), "8N doc included"),
+    check("8N validation is PASS", manualReviewResultIntakeBoundary8NValidation.includes("Status: PASS") && manualReviewResultIntakeBoundary8NValidation.includes("ManualReviewResultIntakeBoundary8NModel exists"), "8N validation current"),
+    check("product intake boundary visible", coachProductHtml.includes('id="manual-review-result-intake-boundary-8n"') && coachProductHtml.includes("Frontiere d'entree des resultats manuels") && coachProductHtml.includes('data-manual-review-intake-boundary-version="8N"'), "product 8N visible"),
+    check("export intake boundary visible", coachExportHtml.includes('id="manual-review-result-intake-boundary-export-8n"') && coachExportHtml.includes("Frontiere de saisie manuelle") && coachExportHtml.includes('data-manual-review-intake-boundary-version="8N"'), "export 8N visible"),
+    check("8M form remains embedded", coachProductHtml.includes('id="manual-post-match-review-form-8m"') && coachExportHtml.includes('id="manual-post-match-review-form-export-8m"') && manualReviewResultIntakeBoundary8NValidation.includes("product manual form 8M preserved") && manualReviewResultIntakeBoundary8NValidation.includes("export manual form 8M preserved"), "8M embedded"),
+    check("8L and 8K remain embedded", coachProductHtml.includes('id="seasonless-learning-loop-8l"') && coachExportHtml.includes('id="seasonless-learning-loop-export-8l"') && coachProductHtml.includes('id="coach-decision-layer-8k"') && coachExportHtml.includes('id="next-match-observation-export-8k"'), "8L/8K embedded"),
+    check("visible export metadata cleaned to 8N", coachExportHtml.includes("<title>Rapport coach export compact 8N - frontiere saisie manuelle</title>") && !coachExportHtml.includes('id="compressed-export-8i"') && !coachExportHtml.includes("Export story-first 8I") && coachExportHtml.includes("Export compact 8N"), "export metadata 8N"),
+    check("historical story-first marker preserved as data attribute", coachExportHtml.includes('data-story-first-export-version="8I"'), "8I historical marker preserved"),
+    check("valid payload accepted for preview", manualReviewResultIntakeBoundary8NValidation.includes("valid payload accepted for preview"), "valid fixture accepted"),
+    check("accepted outcome values are complete", manualReviewResultIntakeBoundary8NValidation.includes("acceptedOutcomeValuesCount: 4") && manualReviewResultIntakeBoundary8N.includes("confirmed") && manualReviewResultIntakeBoundary8N.includes("contradicted") && manualReviewResultIntakeBoundary8N.includes("inconclusive") && manualReviewResultIntakeBoundary8N.includes("insufficient_sample"), "4 outcomes"),
+    check("payload requires non-official manual source", manualReviewResultIntakeBoundary8N.includes("| createdBy | manual_coach_input |") && manualReviewResultIntakeBoundary8N.includes("| persistenceIntent | none |") && manualReviewResultIntakeBoundary8N.includes("| officialTruthStatus | non_official_coach_review |"), "manual non-official"),
+    check("payload has three linked entries", manualReviewResultIntakeBoundary8NValidation.includes("entry contract defined") && manualReviewResultIntakeBoundary8N.includes("| sourceFormVersion | 8M |") && manualReviewResultIntakeBoundary8N.includes("| sourceTrackerVersion | 8L |") && manualReviewResultIntakeBoundary8N.includes("| sourceDecisionLayerVersion | 8K |"), "3 linked entries"),
+    check("unknown outcome rejected", manualReviewResultIntakeBoundary8NValidation.includes("unknown outcome rejected"), "unknown rejected"),
+    check("entries length not 3 rejected", manualReviewResultIntakeBoundary8NValidation.includes("entries.length != 3 rejected"), "entry count rejected"),
+    check("unknown linked section rejected", manualReviewResultIntakeBoundary8NValidation.includes("unknown linked section rejected"), "unknown link rejected"),
+    check("auto classification rejected", manualReviewResultIntakeBoundary8NValidation.includes("autoClassified=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("no future or fabricated evidence claim"), "auto classification blocked"),
+    check("official truth promotion rejected", manualReviewResultIntakeBoundary8NValidation.includes("officialTruth=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("manual intake does not promote coach input to official truth"), "official truth blocked"),
+    check("persistence rejected and not performed", manualReviewResultIntakeBoundary8NValidation.includes("persistenceIntent != none rejected") && manualReviewResultIntakeBoundary8NValidation.includes("validator does not persist"), "persistence blocked"),
+    check("score and timeline mutation rejected", manualReviewResultIntakeBoundary8NValidation.includes("shouldMutateScore=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("shouldMutateTimeline=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("no score mutation"), "score/timeline blocked"),
+    check("scoring events and memories rejected", manualReviewResultIntakeBoundary8NValidation.includes("shouldCreateScoringEvent=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("shouldCreateSeasonMemory=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("shouldCreateTeamStyleMemory=true rejected"), "scoring/memory blocked"),
+    check("selection and tactical automation rejected", manualReviewResultIntakeBoundary8NValidation.includes("canDriveSelection=true rejected") && manualReviewResultIntakeBoundary8NValidation.includes("canDriveTacticalInstruction=true rejected"), "automation blocked"),
+    check("missing acknowledgement rejected", manualReviewResultIntakeBoundary8NValidation.includes("missing acknowledgement rejected"), "acknowledgement required"),
+    check("validator does not mutate input", manualReviewResultIntakeBoundary8NValidation.includes("validator does not mutate input") && manualReviewResultIntakeBoundary8NValidation.includes("validatorMutationCount: 0"), "validator pure"),
+    check("boundary audit has zero prohibited flows", manualReviewResultIntakeBoundary8NValidation.includes("backendSubmitActionCount: 0") && manualReviewResultIntakeBoundary8NValidation.includes("localStoragePersistenceCount: 0") && manualReviewResultIntakeBoundary8NValidation.includes("databasePersistenceCreationCount: 0") && manualReviewResultIntakeBoundary8NValidation.includes("filePersistenceCreationCount: 0"), "no storage flows"),
+    check("no automatic/manual result promotion wording", manualReviewResultIntakeBoundary8NValidation.includes("no future or fabricated evidence claim") && manualReviewResultIntakeBoundary8NValidation.includes("manual intake does not promote coach input to official truth") && manualReviewResultIntakeBoundary8NValidation.includes("no sandbox diagnostic or batch promotion"), "no promotion wording"),
+    check("source-of-truth preserved", manualReviewResultIntakeBoundary8NValidation.includes("source-of-truth preserved") && manualReviewResultIntakeBoundary8NValidation.includes("score claims backed by score_change") && manualReviewResultIntakeBoundary8NValidation.includes("no scoring constants changed"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewResultIntakeBoundary8NValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewResultIntakeBoundary8NValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewResultIntakeBoundary8NValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("export budget checked honestly", manualReviewResultIntakeBoundary8NValidation.includes("exportReadTimeSecondsAfter8N <= 900") && manualReviewResultIntakeBoundary8NValidation.includes("exportUnder900Seconds correctly computed") && manualReviewResultIntakeBoundary8NValidation.includes("exportUnder800Seconds correctly computed") && manualReviewResultIntakeBoundary8NValidation.includes("no PASS message on failed numeric rule"), "export budget"),
+    check("bundle includes 8N source files", bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/validateManualReviewResultIntakePayload8N.ts") && bundleReports.includes("src/reports/manualReviewResultIntakeContractAudit8N.ts") && bundleReports.includes("src/reports/manualReviewResultIntakeBoundaryAudit8N.ts") && bundleReports.includes("src/reports/renderManualReviewResultIntakeBoundaryExport8N.ts"), "8N source bundled"),
+    check("source reports were not deleted", bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "8M/8L/8K sources still bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewResultIntakeBoundary8NValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8MChecks: readonly SharePackCheck[] = [
@@ -9243,6 +9302,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8N - Manual Review")
+      ? sprint8NChecks
     : activeConfig.sprintName.includes("Sprint 8M - Manual Post-Match")
       ? sprint8MChecks
     : activeConfig.sprintName.includes("Sprint 8L - Coach Report Seasonless Learning Loop")

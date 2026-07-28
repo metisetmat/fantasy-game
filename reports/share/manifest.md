@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-27T15:10:02.947Z
-Task/sprint: Sprint 8M - Manual Post-Match Observation Review Form
+Generated: 2026-07-28T08:42:04.420Z
+Task/sprint: Sprint 8N - Manual Review Result Intake Boundary
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-post-match-observation-review-form-8m.md
-- validation.coach-report-manual-post-match-observation-review-form-8m.md
+- coach-report-manual-review-result-intake-boundary-8n.md
+- validation.coach-report-manual-review-result-intake-boundary-8n.md
 - README.md
 
 ## Bundle Files
