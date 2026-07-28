@@ -37,6 +37,9 @@ export function validateManualReviewResultIntakeBoundary8N(): readonly string[] 
   for (const fixtureId of [
     "unknown-outcome",
     "invalid-entry-count",
+    "duplicate-linked-section",
+    "missing-source-match-id",
+    "fractional-manual-count",
     "unknown-linked-section",
     "auto-classified",
     "official-truth",

@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-28T08:42:04.420Z
+Generated timestamp: 2026-07-28T10:52:12.953Z
 Task/sprint name: Sprint 8N - Manual Review Result Intake Boundary
 Final file count: 20
 
@@ -1111,21 +1111,6 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderRestoredCompressedExport8J.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewResultIntakeBoundary8N.ts
-?? src/reports/manualReviewResultIntakeBoundary8N.test.ts
-?? src/reports/manualReviewResultIntakeBoundaryAudit8N.ts
-?? src/reports/manualReviewResultIntakeBoundaryTypes8N.ts
-?? src/reports/manualReviewResultIntakeBoundaryWarnings8N.ts
-?? src/reports/manualReviewResultIntakeContractAudit8N.ts
-?? src/reports/manualReviewResultIntakeExportBudgetAudit8N.ts
-?? src/reports/manualReviewResultIntakeExportMetadataAudit8N.ts
-?? src/reports/manualReviewResultIntakeIntegrationBudgetAudit8N.ts
-?? src/reports/manualReviewResultIntakeSourceOfTruthRegressionAudit8N.ts
-?? src/reports/renderManualReviewResultIntakeBoundaryExport8N.ts
-?? src/reports/renderManualReviewResultIntakeBoundaryProduct8N.ts
-?? src/reports/validateManualReviewResultIntakePayload8N.ts
+ M src/reports/manualReviewResultIntakeBoundary8N.test.ts
+ M src/reports/manualReviewResultIntakeContractAudit8N.ts
+ M src/reports/validateManualReviewResultIntakePayload8N.ts

@@ -62,6 +62,11 @@ function numberValue(record: Record<string, unknown>, key: string): number | nul
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function nonnegativeIntegerValue(record: Record<string, unknown>, key: string): number | null {
+  const value = numberValue(record, key);
+  return value !== null && Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
+
 function booleanValue(record: Record<string, unknown>, key: string): boolean | null {
   const value = record[key];
   return typeof value === "boolean" ? value : null;
@@ -138,17 +143,17 @@ function validateEntry(value: unknown, index: number, errors: ManualReviewIntake
     addError(errors, "INVALID_OUTCOME", `${path}.selectedOutcome`, "Selected outcome is not accepted by the 8N contract.", ["intake_acceptance"]);
   }
 
-  const comparableSituationCount = numberValue(value, "comparableSituationCount");
-  const positiveSignalCount = numberValue(value, "positiveSignalCount");
-  const negativeSignalCount = numberValue(value, "negativeSignalCount");
-  if (comparableSituationCount === null || comparableSituationCount < 0) {
-    addError(errors, "INVALID_MANUAL_COUNT", `${path}.comparableSituationCount`, "Comparable situation count must be >= 0.", ["intake_acceptance"]);
+  const comparableSituationCount = nonnegativeIntegerValue(value, "comparableSituationCount");
+  const positiveSignalCount = nonnegativeIntegerValue(value, "positiveSignalCount");
+  const negativeSignalCount = nonnegativeIntegerValue(value, "negativeSignalCount");
+  if (comparableSituationCount === null) {
+    addError(errors, "INVALID_MANUAL_COUNT", `${path}.comparableSituationCount`, "Comparable situation count must be a nonnegative integer.", ["intake_acceptance"]);
   }
-  if (positiveSignalCount === null || positiveSignalCount < 0) {
-    addError(errors, "INVALID_MANUAL_COUNT", `${path}.positiveSignalCount`, "Positive signal count must be >= 0.", ["intake_acceptance"]);
+  if (positiveSignalCount === null) {
+    addError(errors, "INVALID_MANUAL_COUNT", `${path}.positiveSignalCount`, "Positive signal count must be a nonnegative integer.", ["intake_acceptance"]);
   }
-  if (negativeSignalCount === null || negativeSignalCount < 0) {
-    addError(errors, "INVALID_MANUAL_COUNT", `${path}.negativeSignalCount`, "Negative signal count must be >= 0.", ["intake_acceptance"]);
+  if (negativeSignalCount === null) {
+    addError(errors, "INVALID_MANUAL_COUNT", `${path}.negativeSignalCount`, "Negative signal count must be a nonnegative integer.", ["intake_acceptance"]);
   }
 
   const contextComparable = stringValue(value, "contextComparable");
@@ -217,6 +222,10 @@ function warningsForErrors(errors: readonly ManualReviewIntakeError8N[]): readon
 
   if (has("INVALID_OUTCOME")) warnings.push("INVALID_OUTCOME_ACCEPTED");
   if (has("INVALID_ENTRY_COUNT")) warnings.push("INVALID_ENTRY_COUNT_ACCEPTED");
+  if (has("DUPLICATE_LINKED_SECTION")) warnings.push("INVALID_ENTRY_COUNT_ACCEPTED");
+  if (has("MISSING_LINKED_SECTION")) warnings.push("INVALID_ENTRY_COUNT_ACCEPTED");
+  if (has("INVALID_SOURCE_MATCH_ID")) warnings.push("VALID_PAYLOAD_REJECTED");
+  if (has("INVALID_MANUAL_COUNT")) warnings.push("MANUAL_INTAKE_VALIDATOR_MISSING");
   if (has("UNKNOWN_LINKED_SECTION")) warnings.push("UNKNOWN_LINKED_SECTION_ACCEPTED");
   if (has("AUTO_CLASSIFIED_TRUE")) warnings.push("AUTO_CLASSIFIED_ACCEPTED");
   if (has("OFFICIAL_TRUTH_TRUE")) warnings.push("OFFICIAL_TRUTH_ACCEPTED");
@@ -250,6 +259,10 @@ export function validateManualReviewResultIntakePayload8N(payload: unknown): Man
   if (record.sourceFormVersion !== "8M") addError(errors, "INVALID_SOURCE_FORM_VERSION", "sourceFormVersion", "sourceFormVersion must be 8M.", ["intake_acceptance"]);
   if (record.sourceTrackerVersion !== "8L") addError(errors, "INVALID_SOURCE_TRACKER_VERSION", "sourceTrackerVersion", "sourceTrackerVersion must be 8L.", ["intake_acceptance"]);
   if (record.sourceDecisionLayerVersion !== "8K") addError(errors, "INVALID_SOURCE_DECISION_LAYER_VERSION", "sourceDecisionLayerVersion", "sourceDecisionLayerVersion must be 8K.", ["intake_acceptance"]);
+  const sourceMatchId = stringValue(record, "sourceMatchId");
+  if (sourceMatchId === null || sourceMatchId.trim().length === 0) {
+    addError(errors, "INVALID_SOURCE_MATCH_ID", "sourceMatchId", "sourceMatchId must be a non-empty string.", ["intake_acceptance"]);
+  }
   if (record.createdBy !== "manual_coach_input") addError(errors, "INVALID_CREATED_BY", "createdBy", "createdBy must be manual_coach_input.", ["intake_acceptance"]);
   if (record.persistenceIntent !== "none") addError(errors, "INVALID_PERSISTENCE_INTENT", "persistenceIntent", "persistenceIntent must be none.", ["intake_acceptance", "persistence"]);
   if (record.applicationMode !== "validate_only" && record.applicationMode !== "preview_only") {
@@ -269,6 +282,22 @@ export function validateManualReviewResultIntakePayload8N(payload: unknown): Man
   if (entries.length !== 3) {
     addError(errors, "INVALID_ENTRY_COUNT", "entries", "Exactly three manual review entries are required.", ["intake_acceptance"]);
   }
+  const linkedSectionCounts = new Map<string, number>();
+  for (const entry of entries) {
+    if (!isRecord(entry)) continue;
+    const linkedSectionId = stringValue(entry, "linked8MReviewSectionId");
+    if (linkedSectionId === null) continue;
+    linkedSectionCounts.set(linkedSectionId, (linkedSectionCounts.get(linkedSectionId) ?? 0) + 1);
+  }
+  for (const link of MANUAL_REVIEW_KNOWN_LINKS_8N) {
+    const count = linkedSectionCounts.get(link.linked8MReviewSectionId) ?? 0;
+    if (count === 0) {
+      addError(errors, "MISSING_LINKED_SECTION", "entries", `${link.linked8MReviewSectionId} must be present exactly once.`, ["intake_acceptance"]);
+    }
+    if (count > 1) {
+      addError(errors, "DUPLICATE_LINKED_SECTION", "entries", `${link.linked8MReviewSectionId} appears more than once.`, ["intake_acceptance"]);
+    }
+  }
 
   const normalizedEntries = entries
     .map((entry, index) => validateEntry(entry, index, errors))
@@ -287,7 +316,7 @@ export function validateManualReviewResultIntakePayload8N(payload: unknown): Man
       sourceFormVersion: "8M",
       sourceTrackerVersion: "8L",
       sourceDecisionLayerVersion: "8K",
-      sourceMatchId: stringValue(record, "sourceMatchId") ?? "unknown",
+      sourceMatchId: sourceMatchId ?? "",
       entries: normalizedEntries,
       boundaryAcknowledgement,
       createdBy: "manual_coach_input",

@@ -25,7 +25,7 @@ Status: PASS
 - PASS: boundary acknowledgement defined - true
 - PASS: validation result defined - true
 - PASS: accepted outcome values = 4 - 4
-- PASS: invalid fixtures rejected - 14/14
+- PASS: invalid fixtures rejected - 17/17
 - PASS: valid payload accepted for preview - accepted_for_preview
 - PASS: unknown outcome rejected - true
 - PASS: entries.length != 3 rejected - true
@@ -84,9 +84,9 @@ Status: PASS
 
 ## Counts
 - acceptedOutcomeValuesCount: 4
-- rejectedOutcomeFixturesCount: 14
+- rejectedOutcomeFixturesCount: 17
 - validPayloadAcceptedCount: 1
-- invalidRejectionCount: 14
+- invalidRejectionCount: 17
 - validatorMutationCount: 0
 - validatorPersistenceCount: 0
 - localStoragePersistenceCount: 0

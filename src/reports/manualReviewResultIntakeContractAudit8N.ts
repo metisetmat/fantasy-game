@@ -89,6 +89,17 @@ export function buildInvalidManualReviewIntakePayloadFixtures8N(
       const entries = payload.entries as Record<string, unknown>[];
       payload.entries = entries.slice(0, 2);
     }),
+    mutate("duplicate-linked-section", (payload) => {
+      const entries = payload.entries as Record<string, unknown>[];
+      payload.entries = [{ ...entries[0] }, { ...entries[0], entryId: "duplicate-manual-review-entry-8n" }, { ...entries[2] }];
+    }),
+    mutate("missing-source-match-id", (payload) => {
+      delete payload.sourceMatchId;
+    }),
+    mutate("fractional-manual-count", (payload) => {
+      const entries = payload.entries as Record<string, unknown>[];
+      entries[0] = { ...entries[0], comparableSituationCount: 0.5 };
+    }),
     mutate("unknown-linked-section", (payload) => {
       const entries = payload.entries as Record<string, unknown>[];
       entries[0] = { ...entries[0], linked8MReviewSectionId: "unknown-section" };
@@ -161,6 +172,9 @@ export function auditManualReviewResultIntakeContract8N(input: {
   const validationResultDefined = validResult.officialTruthStatus === "non_official_coach_review";
   const unknownOutcomeRejected = resultHasError(fixtureResult("unknown-outcome"), "INVALID_OUTCOME");
   const invalidEntryCountRejected = resultHasError(fixtureResult("invalid-entry-count"), "INVALID_ENTRY_COUNT");
+  const duplicateLinkedSectionRejected = resultHasError(fixtureResult("duplicate-linked-section"), "DUPLICATE_LINKED_SECTION");
+  const missingSourceMatchIdRejected = resultHasError(fixtureResult("missing-source-match-id"), "INVALID_SOURCE_MATCH_ID");
+  const fractionalManualCountRejected = resultHasError(fixtureResult("fractional-manual-count"), "INVALID_MANUAL_COUNT");
   const unknownLinkedSectionRejected = resultHasError(fixtureResult("unknown-linked-section"), "UNKNOWN_LINKED_SECTION");
   const autoClassifiedRejected = resultHasError(fixtureResult("auto-classified"), "AUTO_CLASSIFIED_TRUE");
   const officialTruthRejected = resultHasError(fixtureResult("official-truth"), "OFFICIAL_TRUTH_TRUE");
@@ -184,6 +198,9 @@ export function auditManualReviewResultIntakeContract8N(input: {
   if (validResult.status !== "accepted_for_preview") warnings.push("VALID_PAYLOAD_REJECTED");
   if (!unknownOutcomeRejected) warnings.push("INVALID_OUTCOME_ACCEPTED");
   if (!invalidEntryCountRejected) warnings.push("INVALID_ENTRY_COUNT_ACCEPTED");
+  if (!duplicateLinkedSectionRejected) warnings.push("INVALID_ENTRY_COUNT_ACCEPTED");
+  if (!missingSourceMatchIdRejected) warnings.push("VALID_PAYLOAD_REJECTED");
+  if (!fractionalManualCountRejected) warnings.push("MANUAL_INTAKE_VALIDATOR_MISSING");
   if (!unknownLinkedSectionRejected) warnings.push("UNKNOWN_LINKED_SECTION_ACCEPTED");
   if (!autoClassifiedRejected) warnings.push("AUTO_CLASSIFIED_ACCEPTED");
   if (!officialTruthRejected) warnings.push("OFFICIAL_TRUTH_ACCEPTED");
