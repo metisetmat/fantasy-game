@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8Q - Manual Review Preview Decision Gate Without Persistence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

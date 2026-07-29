@@ -70,7 +70,9 @@ function updateExportMetadata8P(exportHtml: string): string {
   updated = updated.replace(/\bid="compressed-export-8n"/giu, 'id="compressed-export-8p"');
   updated = updated.replace(/\bid="compressed-export-8i"/giu, 'id="compressed-export-8p"');
   updated = updated.replace(/Export compact 8O/gu, "Export compact 8P");
+  updated = updated.replace(/Export compact 8Q/gu, "Export compact 8P");
   updated = updated.replace(/Preview revue manuelle 8O/gu, "Comparaison preview 8P");
+  updated = updated.replace(/Gate preview 8Q/gu, "Comparaison preview 8P");
   return updated;
 }
 

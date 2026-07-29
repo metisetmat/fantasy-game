@@ -200,6 +200,10 @@ import {
   renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDoc as renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDocBase,
   renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidation as renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidationBase,
 } from "../../reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
+import {
+  renderManualReviewPreviewDecisionGateWithoutPersistence8QDoc as renderManualReviewPreviewDecisionGateWithoutPersistence8QDocBase,
+  renderManualReviewPreviewDecisionGateWithoutPersistence8QValidation as renderManualReviewPreviewDecisionGateWithoutPersistence8QValidationBase,
+} from "../../reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6865,6 +6869,18 @@ export function renderManualReviewPreviewComparisonWithPreviousObservationPlan8P
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidationBase();
+}
+
+export function renderManualReviewPreviewDecisionGateWithoutPersistence8QDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewDecisionGateWithoutPersistence8QDocBase();
+}
+
+export function renderManualReviewPreviewDecisionGateWithoutPersistence8QValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewDecisionGateWithoutPersistence8QValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
