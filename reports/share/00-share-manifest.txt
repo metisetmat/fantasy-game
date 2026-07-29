@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-29T08:46:13.096Z
+Generated timestamp: 2026-07-29T09:38:54.490Z
 Task/sprint name: Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan
 Final file count: 20
 
@@ -1131,15 +1131,7 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
+ M src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts
  M src/reports/generateCoachHtmlReport.ts
+ M src/reports/manualReviewPreviewComparison8P.test.ts
  M src/reports/renderRestoredCompressedExport8J.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts
-?? src/reports/manualReviewPreviewComparison8P.test.ts
-?? src/reports/manualReviewPreviewComparisonAudit8P.ts
-?? src/reports/manualReviewPreviewComparisonTypes8P.ts
-?? src/reports/manualReviewPreviewComparisonWarnings8P.ts
-?? src/reports/renderManualReviewPreviewComparisonExport8P.ts
-?? src/reports/renderManualReviewPreviewComparisonProduct8P.ts

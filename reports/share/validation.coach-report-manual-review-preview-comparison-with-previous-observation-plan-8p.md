@@ -40,8 +40,8 @@ Status: PASS
 - PASS: export main has data-manual-review-preview-comparison-version 8P - true
 - PASS: export id no longer compressed-export-8n - true
 - PASS: export id no longer compressed-export-8i - true
-- PASS: export under 900 seconds - 506
-- PASS: export under 800 seconds - 506
+- PASS: export under 900 seconds - 507
+- PASS: export under 800 seconds - 507
 - PASS: numeric threshold guard preserved - true
 - PASS: no localStorage persistence - 0
 - PASS: no database persistence - 0
@@ -76,7 +76,7 @@ Status: PASS
 - officialTruthPromotionCount: 0
 - selectionRecommendationCount: 0
 - tacticalInstructionCount: 0
-- exportReadTimeSecondsAfter8P: 506
+- exportReadTimeSecondsAfter8P: 507
 - exportUnder900Seconds: true
 - exportUnder800Seconds: true
 - wordingReadabilityScore: 96

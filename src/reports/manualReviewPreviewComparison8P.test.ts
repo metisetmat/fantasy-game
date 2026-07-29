@@ -33,6 +33,9 @@ export function validateManualReviewPreviewComparison8P(): readonly string[] {
   assertTest(model.comparisonCardsLinkedTo8MCount === 3, "all comparison cards must link to 8M.");
   assertTest(model.comparisonCardsLinkedTo8LCount === 3, "all comparison cards must link to 8L.");
   assertTest(model.comparisonCardsLinkedTo8KCount === 3, "all comparison cards must link to 8K.");
+  for (const card of model.comparison.comparisonCards) {
+    assertTest(card.nextCoachQuestion.trim().endsWith("?"), "next coach prompt must be rendered as an actual question.");
+  }
   assertTest(model.baseline8OPreserved, "8O preview renderer must remain visible.");
   assertTest(model.baseline8NPreserved, "8N intake boundary must remain visible.");
   assertTest(model.baseline8MPreserved, "8M manual form must remain visible.");

@@ -127,7 +127,7 @@ function buildComparisonCard(
       whatMatchesThePlan: "Le relais apres recuperation reste lisible, avec trois signaux positifs contre un negatif.",
       whatDoesNotAnswerYet: "Cette fixture ne prouve pas une tendance durable et ne remplace pas une vraie revue du prochain match.",
       gapToReview: "Verifier si le meme comportement tient contre une pression differente.",
-      nextCoachQuestion: decision.doNotOverInterpret,
+      nextCoachQuestion: decision.decisionQuestion,
       cautionNote: "Reponse demo seulement : aucun choix de joueur, aucune consigne tactique et aucune memoire de saison.",
     };
   }
@@ -140,7 +140,7 @@ function buildComparisonCard(
       whatMatchesThePlan: "La continuite apres entree dangereuse est bien le bon objet de comparaison.",
       whatDoesNotAnswerYet: "Le ratio +1/-2 et le contexte uncertain laissent ouverte l'hypothese d'une action trop isolee.",
       gapToReview: "Collecter plus d'entrees dangereuses sous pression comparable.",
-      nextCoachQuestion: decision.riskToWatch,
+      nextCoachQuestion: decision.decisionQuestion,
       cautionNote: "Lecture partielle : ne pas transformer un inconclusif en recommandation.",
     };
   }
@@ -152,7 +152,7 @@ function buildComparisonCard(
     whatMatchesThePlan: "Le theme du second ballon et de la rest-defense correspond a la carte 8K/8L.",
     whatDoesNotAnswerYet: "L'echantillon +1/-0 ne teste pas assez de pressions, tirs, arrets ou rebonds.",
     gapToReview: "Atteindre au moins deux actions neutralisees comparables avant interpretation.",
-    nextCoachQuestion: observation.minimumEvidenceNeeded,
+    nextCoachQuestion: decision.decisionQuestion,
     cautionNote: "Insuffisant pour repondre : aucun apprentissage automatique, aucune memoire et aucune application.",
   };
 }

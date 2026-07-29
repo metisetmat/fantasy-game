@@ -9,6 +9,7 @@ import { insertManualReviewPreviewComparisonExport8P } from "./renderManualRevie
 
 export function renderRestoredCompressedExport8J(input: {
   readonly productReportHtml: string;
+  readonly manualReviewPreviewComparisonExport8P?: string;
 }): string {
   const manualReviewPreviewExport8O = [
     '<section id="manual-review-preview-renderer-export-8o" class="premium-section manual-review-preview-renderer-export-8o" data-manual-review-preview-renderer-version="8O">',
@@ -23,20 +24,7 @@ export function renderRestoredCompressedExport8J(input: {
     '<p class="guard">Preview de demonstration non officielle. Non persistee, non appliquee, sans mutation score/timeline.</p>',
     "</section>",
   ].join("\n");
-  const manualReviewPreviewComparisonExport8P = [
-    '<section id="manual-review-preview-comparison-export-8p" class="premium-section manual-review-preview-comparison-export-8p" data-manual-review-preview-comparison-version="8P">',
-    "<h2>Comparaison preview / plan</h2>",
-    '<p class="eyebrow">Comparaison preview 8P</p>',
-    '<ol class="compact-list">',
-    "<li><strong>Premiere sortie apres recuperation</strong> - repond a la question. Question: La premiere sortie protege-t-elle mieux le ballon apres recuperation ? Outcome: confirmed. Ecart: verifier si le signal tient contre une pression differente.</li>",
-    "<li><strong>Continuite apres zone dangereuse</strong> - repond partiellement. Question: Le danger devient-il une phase controlee plutot qu'une action isolee ? Outcome: inconclusive. Ecart: collecter plus d'entrees dangereuses sous pression comparable.</li>",
-    "<li><strong>Structure apres action neutralisee</strong> - insuffisant pour repondre. Question: L'equipe reste-t-elle stable apres une action neutralisee ? Outcome: insufficient_sample. Ecart: atteindre au moins deux actions neutralisees comparables.</li>",
-    "</ol>",
-    '<p class="guard">Comparaison de demonstration non officielle. Non persistee, non appliquee, sans decision automatique.</p>',
-    "</section>",
-  ].join("\n");
-  return insertManualReviewPreviewComparisonExport8P(
-    insertManualReviewPreviewExport8O(
+  const exportWith8O = insertManualReviewPreviewExport8O(
     insertManualReviewResultIntakeBoundaryExport8N(
       insertManualPostMatchObservationReviewFormExport8M(
         insertSeasonlessLearningLoopExport8L(
@@ -45,7 +33,8 @@ export function renderRestoredCompressedExport8J(input: {
       ),
     ),
     manualReviewPreviewExport8O,
-    ),
-    manualReviewPreviewComparisonExport8P,
   );
+  return input.manualReviewPreviewComparisonExport8P === undefined
+    ? exportWith8O
+    : insertManualReviewPreviewComparisonExport8P(exportWith8O, input.manualReviewPreviewComparisonExport8P);
 }

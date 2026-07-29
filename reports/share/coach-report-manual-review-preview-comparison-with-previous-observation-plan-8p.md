@@ -62,8 +62,8 @@ officialScore: 12 - 7
 | exportVisibleBadgeMentions8P | true |
 | exportMainComparisonVersionVisible | true |
 | exportIdNoLonger8NOnly | true |
-| exportReadTimeSecondsBefore8P | 506 |
-| exportReadTimeSecondsAfter8P | 506 |
+| exportReadTimeSecondsBefore8P | 507 |
+| exportReadTimeSecondsAfter8P | 507 |
 | exportUnder900Seconds | true |
 | exportUnder800Seconds | true |
 
@@ -71,7 +71,7 @@ officialScore: 12 - 7
 - ection manual-review-preview-comparison-8p" data-manual-review-preview-comparison-version="8P"> <h2>Comparaison preview vs plan d'observation</h2> <p class="eyebrow">Lecture de coherence - non officielle</p> <p>Cette section compare la preview manuelle 8O avec les questions d'observation definies en 8K/8L. Les donnees restent une fixture de demonstration : elles ne viennent pas d'un vrai prochain match, ne sont pas stockees, ne sont pas appliquees et ne modifient pas le rapport officiel.</p> <article class="product-card manual-review-preview-comparison-measure-8p"> <h3>Ce que cette comparaison mesure</h3> <ul> <li>Est-ce que la reponse preview couvre la question initiale ?</li> <li>Est-ce que les compteurs sont suffisants ?</li> <li>Est-ce que le contexte est comparable ?</li> <li>Quel point reste a verifier ?</li> <li>Ce bloc ne decide rien.</li> </ul> </article> <div class="product-car
 
 ## Export Excerpt
-- manual-review-preview-comparison-export-8p" data-manual-review-preview-comparison-version="8P"> <h2>Comparaison preview / plan</h2> <p class="eyebrow">Comparaison preview 8P</p> <ol class="compact-list"> <li><strong>Premiere sortie apres recuperation</strong> - repond a la question. Question: La premiere sortie protege-t-elle mieux le ballon apres recuperation ? Outcome: confirmed. Ecart: verifier si le signal tient contre une pression differente.</li> <li><strong>Continuite apres zone dangereuse</strong> - repond partiellement. Question: Le danger devient-il une phase controlee plutot qu'une action isolee ? Outcome: inconclusive. Ecart: collecter plus d'entrees dangereuses sous pression comparable.</li> <li><strong>Structure apres action neutralisee</strong> - insuffisant pour repondre. Question: L'equipe reste-t-elle stable apres une action neutralisee ? Outcome: insufficient_sample. E
+- manual-review-preview-comparison-export-8p" data-manual-review-preview-comparison-version="8P"> <h2>Comparaison preview / plan</h2> <p class="eyebrow">Comparaison preview 8P</p> <ol class="compact-list"> <li class="manual-review-preview-comparison-export-card-8p"><strong>Premiere sortie après récupération</strong> - repond a la question. Question: La première sortie protege-t-elle mieux le ballon après récupération ? Outcome: confirmed. Ecart: Verifier si le meme comportement tient contre une pression differente.</li> <li class="manual-review-preview-comparison-export-card-8p"><strong>Continuite après zone dangereuse</strong> - repond partiellement. Question: Le danger devient-il une phase controlee plutot qu&#39;une action isolee ? Outcome: inconclusive. Ecart: Collecter plus d&#39;entrees dangereuses sous pression comparable.</li> <li class="manual-review-preview-comparison-export-card
 
 ## Warnings
 - none

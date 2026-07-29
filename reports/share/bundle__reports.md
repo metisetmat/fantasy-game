@@ -29598,6 +29598,7 @@ export function writeLatestCoachReport(): void {
   );
   const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,
+    manualReviewPreviewComparisonExport8P: manualReviewPreviewComparison8P.exportComparisonHtml,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });
