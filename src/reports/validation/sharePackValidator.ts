@@ -26,6 +26,41 @@ function readIfExists(path: string): string {
   return existsSync(path) ? readFileSync(path, "utf8") : "";
 }
 
+function waitBriefly(milliseconds: number): void {
+  const end = Date.now() + milliseconds;
+  while (Date.now() < end) {
+    // Windows can briefly lock generated markdown while file indexers scan it.
+  }
+}
+
+function writeTextFileWithRetry(path: string, value: string): void {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      writeFileSync(path, value, "utf8");
+      return;
+    } catch (error) {
+      lastError = error;
+      waitBriefly(60 * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
+
+function copyFileWithRetry(source: string, target: string): void {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      copyFileSync(source, target);
+      return;
+    } catch (error) {
+      lastError = error;
+      waitBriefly(60 * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
+
 function stripHtmlDetailsBlocks(html: string): string {
   let visible = "";
   let cursor = 0;
@@ -403,6 +438,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewResultIntakeBoundary8NValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-result-intake-boundary-8n.md"));
   const manualReviewPreviewRenderer8O = readIfExists(join(shareDirectory, "coach-report-manual-review-preview-renderer-without-persistence-8o.md"));
   const manualReviewPreviewRenderer8OValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md"));
+  const manualReviewPreviewComparison8P = readIfExists(join(shareDirectory, "coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"));
+  const manualReviewPreviewComparison8PValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3475,6 +3512,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-result-intake-boundary-8n.md",
     ...sprint8NForbiddenLeftovers,
   ];
+  const sprint8PExpectedFiles = sprint8OExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-renderer-without-persistence-8o.md"
+      ? "coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"
+      : file === "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md"
+        ? "validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"
+        : file
+  );
+  const sprint8PForbiddenLeftovers = [
+    "coach-report-manual-review-preview-renderer-without-persistence-8o.md",
+    "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md",
+    ...sprint8OForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5062,6 +5111,41 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 8O source files", bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewProduct8O.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewExport8O.ts") && bundleReports.includes("src/reports/manualReviewPreviewRenderer8O.test.ts"), "8O source bundled"),
     check("source reports were not deleted", bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "8N/8M/8L/8K sources still bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewRenderer8OValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8PChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8PExpectedFiles.every((file) => requiredCopied(file)), sprint8PExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8PExpectedFiles.every((file) => manifest.includes(file)), sprint8PExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8P", activeConfig.sprintName === "Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan", activeConfig.sprintName),
+    check("previous standalone 8O docs are not copied", sprint8PForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8PForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8P oriented", readme.includes("# Sprint 8P Share Pack") && readme.includes("coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md") && readme.includes("Manual Review Preview Comparison"), "README current"),
+    check("8P report included", manualReviewPreviewComparison8P.includes("# Manual Review Preview Comparison With Previous Observation Plan 8P") && manualReviewPreviewComparison8P.includes("Comparison Cards") && manualReviewPreviewComparison8P.includes("Boundary Audit"), "8P doc included"),
+    check("8P validation is PASS", manualReviewPreviewComparison8PValidation.includes("Status: PASS") && manualReviewPreviewComparison8PValidation.includes("ManualReviewPreviewComparisonWithPreviousObservationPlan8PModel exists"), "8P validation current"),
+    check("product preview comparison visible", coachProductHtml.includes('id="manual-review-preview-comparison-8p"') && coachProductHtml.includes("Comparaison preview vs plan d'observation") && coachProductHtml.includes('data-manual-review-preview-comparison-version="8P"'), "product 8P visible"),
+    check("export preview comparison visible", coachExportHtml.includes('id="manual-review-preview-comparison-export-8p"') && coachExportHtml.includes("Comparaison preview / plan") && coachExportHtml.includes('data-manual-review-preview-comparison-version="8P"'), "export 8P visible"),
+    check("8O preview renderer remains embedded", coachProductHtml.includes('id="manual-review-preview-renderer-8o"') && coachExportHtml.includes('id="manual-review-preview-renderer-export-8o"'), "8O embedded baseline"),
+    check("comparison uses validated 8O preview only", manualReviewPreviewComparison8PValidation.includes("comparison uses validated 8O preview only") && manualReviewPreviewComparison8PValidation.includes("invalid preview comparison blocked"), "validated 8O source"),
+    check("comparison uses 8K/8L observation plan", manualReviewPreviewComparison8PValidation.includes("comparison uses 8K/8L observation plan") && manualReviewPreviewComparison8P.includes("Premiere sortie apres recuperation") && manualReviewPreviewComparison8P.includes("Continuite apres entree en zone dangereuse") && manualReviewPreviewComparison8P.includes("Structure apres action neutralisee"), "8K/8L plan visible"),
+    check("three comparison cards linked to 8O/8N/8M/8L/8K", manualReviewPreviewComparison8PValidation.includes("comparison card count = 3") && manualReviewPreviewComparison8PValidation.includes("comparison cards linked to 8O/8N/8M/8L/8K") && manualReviewPreviewComparison8PValidation.includes("comparisonCardsLinkedTo8OCount: 3"), "3 linked cards"),
+    check("answer status distribution is explicit", manualReviewPreviewComparison8PValidation.includes("answersQuestionCount: 1") && manualReviewPreviewComparison8PValidation.includes("partiallyAnswersQuestionCount: 1") && manualReviewPreviewComparison8PValidation.includes("insufficientToAnswerCount: 1"), "1/1/1"),
+    check("required answer statuses visible", manualReviewPreviewComparison8PValidation.includes("firstExitAnswerStatus: answers_question") && manualReviewPreviewComparison8PValidation.includes("dangerContinuityAnswerStatus: partially_answers_question") && manualReviewPreviewComparison8PValidation.includes("structureAfterNeutralizedActionAnswerStatus: insufficient_to_answer"), "statuses visible"),
+    check("comparison marked demo non-official not persisted not applied", manualReviewPreviewComparison8PValidation.includes("comparison marked demo only") && manualReviewPreviewComparison8PValidation.includes("comparison marked non-official") && manualReviewPreviewComparison8PValidation.includes("comparison marked not persisted") && manualReviewPreviewComparison8PValidation.includes("comparison marked not applied"), "badges/proof visible"),
+    check("no persistence submit or API", manualReviewPreviewComparison8PValidation.includes("localStoragePersistenceCount: 0") && manualReviewPreviewComparison8PValidation.includes("databasePersistenceCount: 0") && manualReviewPreviewComparison8PValidation.includes("filePersistenceCount: 0") && manualReviewPreviewComparison8PValidation.includes("backendSubmitActionCount: 0") && manualReviewPreviewComparison8PValidation.includes("formSubmitButtonCount: 0") && manualReviewPreviewComparison8PValidation.includes("apiCallCount: 0"), "no storage/submit"),
+    check("no memory selection or tactical automation", manualReviewPreviewComparison8PValidation.includes("comparison does not create memory") && manualReviewPreviewComparison8PValidation.includes("comparison does not drive selection") && manualReviewPreviewComparison8PValidation.includes("comparison does not drive tactical instruction"), "no memory/automation"),
+    check("no official truth score or timeline mutation", manualReviewPreviewComparison8PValidation.includes("comparison does not promote official truth") && manualReviewPreviewComparison8PValidation.includes("comparison does not mutate score") && manualReviewPreviewComparison8PValidation.includes("comparison does not mutate timeline") && manualReviewPreviewComparison8PValidation.includes("comparison does not create score_change"), "source truth"),
+    check("export metadata is 8P", coachExportHtml.includes("<title>Rapport coach export compact 8P - comparaison preview plan</title>") && coachExportHtml.includes("Export compact 8P") && coachExportHtml.includes('id="compressed-export-8p"') && manualReviewPreviewComparison8PValidation.includes("export title mentions 8P") && manualReviewPreviewComparison8PValidation.includes("export visible badge mentions 8P"), "export metadata 8P"),
+    check("export id no longer stale 8N/8I", !coachExportHtml.includes('id="compressed-export-8n"') && !coachExportHtml.includes('id="compressed-export-8i"') && manualReviewPreviewComparison8PValidation.includes("export id no longer compressed-export-8n") && manualReviewPreviewComparison8PValidation.includes("export id no longer compressed-export-8i"), "stale ids removed"),
+    check("export budget checked honestly", manualReviewPreviewComparison8PValidation.includes("export under 900 seconds") && manualReviewPreviewComparison8PValidation.includes("export under 800 seconds") && manualReviewPreviewComparison8PValidation.includes("numeric threshold guard preserved"), "export budget"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewComparison8PValidation.includes("scoring values unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewComparison8PValidation.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewComparison8PValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewComparison8PValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8P source files", bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewComparisonProduct8P.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewComparisonExport8P.ts") && bundleReports.includes("src/reports/manualReviewPreviewComparison8P.test.ts"), "8P source bundled"),
+    check("source 8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewComparison8PValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8NChecks: readonly SharePackCheck[] = [
@@ -9351,6 +9435,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8P - Manual Review")
+      ? sprint8PChecks
     : activeConfig.sprintName.includes("Sprint 8O - Manual Review")
       ? sprint8OChecks
     : activeConfig.sprintName.includes("Sprint 8N - Manual Review")
@@ -9602,8 +9688,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     files: filesOnDisk.sort(),
   });
 
-  writeFileSync(reportPath, markdown, "utf8");
-  copyFileSync(reportPath, shareValidationPath);
+  writeTextFileWithRetry(reportPath, markdown);
+  copyFileWithRetry(reportPath, shareValidationPath);
 
   return {
     valid: checks.every((item) => item.status === "PASS"),

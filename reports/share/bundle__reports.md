@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8O - Manual Review Preview Renderer Without Persistence. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -164,6 +164,8 @@ import {
   renderManualReviewResultIntakeBoundary8NValidation,
   renderManualReviewPreviewRenderer8ODoc,
   renderManualReviewPreviewRenderer8OValidation,
+  renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDoc,
+  renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -177,10 +179,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8O - Manual Review Preview Renderer Without Persistence";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-renderer-without-persistence-8o.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md";
+  "validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3766,6 +3768,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8O test proving valid payload rendering, invalid payload blocking, badges, non-persistence, source-of-truth, scoring, and export metadata",
       },
       {
+        source: "src/reports/manualReviewPreviewComparisonTypes8P.ts",
+        required: true,
+        reason: "Sprint 8P typed comparison contract linking 8O preview cards to 8N/8M/8L/8K observation-plan context",
+      },
+      {
+        source: "src/reports/manualReviewPreviewComparisonWarnings8P.ts",
+        required: true,
+        reason: "Sprint 8P warning registry blocking persistence, official-truth promotion, score/timeline mutation, memory creation, automation, and stale export metadata",
+      },
+      {
+        source: "src/reports/manualReviewPreviewComparisonAudit8P.ts",
+        required: true,
+        reason: "Sprint 8P audits for comparison coverage, non-persistence, official-truth boundary, export metadata, export budget, integration, and wording",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewComparisonProduct8P.ts",
+        required: true,
+        reason: "Sprint 8P product renderer adding the preview-vs-plan comparison after the 8O preview section",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewComparisonExport8P.ts",
+        required: true,
+        reason: "Sprint 8P compact export renderer adding comparison rows and updating export metadata away from stale 8N/8O labels",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts",
+        required: true,
+        reason: "Sprint 8P model, report renderer, and validation renderer for manual review preview comparison with previous observation plan",
+      },
+      {
+        source: "src/reports/manualReviewPreviewComparison8P.test.ts",
+        required: true,
+        reason: "Sprint 8P test proving comparison card links, answer statuses, non-persistence, source-of-truth preservation, export metadata, and scoring guardrails",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5922,6 +5959,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8P")) {
+    return renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8O")) {
     return renderManualReviewPreviewRenderer8ODoc(fullMatchTraceValidationModel());
   }
@@ -8278,6 +8318,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8P")) {
+    return renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8O")) {
     return renderManualReviewPreviewRenderer8OValidation(fullMatchTraceValidationModel());
   }
@@ -10580,6 +10623,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8P")) {
+    return [
+      "# Sprint 8P Share Pack",
+      "",
+      "Current sprint: Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8O preview renderer embedded in the product/export reports, then replaces the standalone 8O docs with the 8P comparison docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md",
+      "4. coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8P Focus",
+      "- The 8P comparison reads the validated 8O preview fixture against the previous 8K/8L observation plan.",
+      "- Three comparison cards are visible: one answers the original question, one partially answers it, and one remains insufficient.",
+      "- Each card keeps links to 8O preview, 8N intake, 8M manual review form, 8L observation outcome tracker, and 8K decision layer.",
+      "- The comparison is demo-only, non-official, non-persistent, non-applied, and cannot drive selection or tactical instruction.",
+      "- Export metadata now mentions 8P and no longer leaves the compact export main id as compressed-export-8n.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- MatchBonusEvent unchanged.",
+      "- Score and timeline remain official score_change outputs.",
+      "- Manual preview comparison creates no memory and no persistence.",
+      "- Share pack remains at or below 20 files.",
+      "",
+      "## Recommendation",
+      "- KEEP_MANUAL_REVIEW_PREVIEW_COMPARISON",
+      "- PREPARE_MANUAL_REVIEW_WORKFLOW_AFTER_COMPARISON",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8O")) {
     return [
       "# Sprint 8O Share Pack",
@@ -29137,6 +29216,8 @@ import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderMan
 import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
 import { currentManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
 import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
+import { currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
+import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualReviewPreviewComparisonProduct8P";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -29499,7 +29580,7 @@ export function writeLatestCoachReport(): void {
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
   const manualReviewPreview8O = currentManualReviewPreviewRenderer8OModel();
-  const finalProductHtml = insertManualReviewPreviewProduct8O(
+  const productHtmlWith8O = insertManualReviewPreviewProduct8O(
     insertManualReviewResultIntakeBoundaryProduct8N(
       insertManualPostMatchObservationReviewFormProduct8M(
         insertSeasonlessLearningLoopProduct8L(
@@ -29510,8 +29591,14 @@ export function writeLatestCoachReport(): void {
     ),
     manualReviewPreview8O.productPreviewHtml,
   );
+  const manualReviewPreviewComparison8P = currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel();
+  const finalProductHtml = insertManualReviewPreviewComparisonProduct8P(
+    productHtmlWith8O,
+    manualReviewPreviewComparison8P.productComparisonHtml,
+  );
   const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,
+    manualReviewPreviewComparisonExport8P: manualReviewPreviewComparison8P.exportComparisonHtml,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

@@ -94,6 +94,8 @@ import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderMan
 import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
 import { currentManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
 import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
+import { currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
+import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualReviewPreviewComparisonProduct8P";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -456,7 +458,7 @@ export function writeLatestCoachReport(): void {
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
   const manualReviewPreview8O = currentManualReviewPreviewRenderer8OModel();
-  const finalProductHtml = insertManualReviewPreviewProduct8O(
+  const productHtmlWith8O = insertManualReviewPreviewProduct8O(
     insertManualReviewResultIntakeBoundaryProduct8N(
       insertManualPostMatchObservationReviewFormProduct8M(
         insertSeasonlessLearningLoopProduct8L(
@@ -467,8 +469,14 @@ export function writeLatestCoachReport(): void {
     ),
     manualReviewPreview8O.productPreviewHtml,
   );
+  const manualReviewPreviewComparison8P = currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel();
+  const finalProductHtml = insertManualReviewPreviewComparisonProduct8P(
+    productHtmlWith8O,
+    manualReviewPreviewComparison8P.productComparisonHtml,
+  );
   const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,
+    manualReviewPreviewComparisonExport8P: manualReviewPreviewComparison8P.exportComparisonHtml,
   });
 
   mkdirSync(reportsDirectory, { recursive: true });

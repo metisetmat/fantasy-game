@@ -5,9 +5,11 @@ import { insertSeasonlessLearningLoopExport8L } from "./renderSeasonlessLearning
 import { insertManualPostMatchObservationReviewFormExport8M } from "./renderManualPostMatchObservationReviewFormExport8M";
 import { insertManualReviewResultIntakeBoundaryExport8N } from "./renderManualReviewResultIntakeBoundaryExport8N";
 import { insertManualReviewPreviewExport8O } from "./renderManualReviewPreviewExport8O";
+import { insertManualReviewPreviewComparisonExport8P } from "./renderManualReviewPreviewComparisonExport8P";
 
 export function renderRestoredCompressedExport8J(input: {
   readonly productReportHtml: string;
+  readonly manualReviewPreviewComparisonExport8P?: string;
 }): string {
   const manualReviewPreviewExport8O = [
     '<section id="manual-review-preview-renderer-export-8o" class="premium-section manual-review-preview-renderer-export-8o" data-manual-review-preview-renderer-version="8O">',
@@ -22,7 +24,7 @@ export function renderRestoredCompressedExport8J(input: {
     '<p class="guard">Preview de demonstration non officielle. Non persistee, non appliquee, sans mutation score/timeline.</p>',
     "</section>",
   ].join("\n");
-  return insertManualReviewPreviewExport8O(
+  const exportWith8O = insertManualReviewPreviewExport8O(
     insertManualReviewResultIntakeBoundaryExport8N(
       insertManualPostMatchObservationReviewFormExport8M(
         insertSeasonlessLearningLoopExport8L(
@@ -32,4 +34,7 @@ export function renderRestoredCompressedExport8J(input: {
     ),
     manualReviewPreviewExport8O,
   );
+  return input.manualReviewPreviewComparisonExport8P === undefined
+    ? exportWith8O
+    : insertManualReviewPreviewComparisonExport8P(exportWith8O, input.manualReviewPreviewComparisonExport8P);
 }

@@ -196,6 +196,10 @@ import {
   renderManualReviewPreviewRenderer8ODoc as renderManualReviewPreviewRenderer8ODocBase,
   renderManualReviewPreviewRenderer8OValidation as renderManualReviewPreviewRenderer8OValidationBase,
 } from "../../reports/buildManualReviewPreviewRenderer8O";
+import {
+  renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDoc as renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDocBase,
+  renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidation as renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidationBase,
+} from "../../reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6849,6 +6853,18 @@ export function renderManualReviewPreviewRenderer8OValidation(
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewPreviewRenderer8OValidationBase();
+}
+
+export function renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewComparisonWithPreviousObservationPlan8PDocBase();
+}
+
+export function renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
