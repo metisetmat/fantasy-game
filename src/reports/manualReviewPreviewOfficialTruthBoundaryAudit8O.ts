@@ -21,7 +21,7 @@ export function auditManualReviewPreviewOfficialTruthBoundary8O(input: {
   const automaticClassificationCount = countMatches(previewSlice, /auto-classification active|classification automatique active/giu);
   const selectionRecommendationCount = countMatches(
     previewSlice,
-    /recommandation de selection officielle|selection recommandee|selection imposee(?: active| officiellement)?|doit selectionner|joueur a selectionner|titulaire conseille|remplacement conseille|composition recommandee/giu,
+    /recommandation de selection officielle|selection recommandee|selection imposee active|selection imposee officiellement|doit selectionner|joueur a selectionner|titulaire conseille|remplacement conseille|composition recommandee/giu,
   );
   const tacticalInstructionCount = countMatches(previewSlice, /plan tactique a appliquer|consigne tactique imposee/giu);
   const sandboxPromotionCount = countMatches(previewSlice, /sandbox promu en officiel|official sandbox truth/giu);

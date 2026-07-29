@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-29T13:15:32.979Z
+Generated timestamp: 2026-07-29T13:26:21.332Z
 Task/sprint name: Sprint 8Q - Manual Review Preview Decision Gate Without Persistence
 Final file count: 20
 
@@ -1140,4 +1140,3 @@ Test/build commands run:
 
 Git status summary:
  M src/reports/manualReviewPreviewOfficialTruthBoundaryAudit8O.ts
- M src/reports/manualReviewPreviewWordingAudit8O.ts
