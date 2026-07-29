@@ -891,6 +891,114 @@
 </div>
 <p class="guard manual-intake-boundary-note-8n"><strong>Intake contract only :</strong> le contrat accepte ou rejette une saisie future, mais ne l applique pas au rapport officiel.</p>
 </section>
+<section id="manual-review-preview-renderer-8o" class="premium-section manual-review-preview-renderer-8o" data-manual-review-preview-renderer-version="8O">
+<h2>Previsualisation non persistee d'une revue manuelle</h2>
+<p class="eyebrow">Exemple de preview - non officiel</p>
+<p>Cette section montre comment un payload manuel valide pourrait etre relu en preview. Les donnees affichees ici sont une fixture de demonstration : elles ne viennent pas d'un vrai prochain match, ne sont pas stockees et ne modifient pas le rapport officiel.</p>
+<div class="product-card manual-review-preview-status-8o">
+<h3>Statut de la preview</h3>
+<ul>
+<li>Payload valide par le contrat 8N avant rendu.</li>
+<li>Mode preview uniquement.</li>
+<li>Non officiel, non persiste, non applique au moteur.</li>
+<li>Aucun score, timeline ou evenement modifie.</li>
+</ul>
+</div>
+<div class="product-card-grid manual-review-preview-grid-8o">
+<article class="product-card manual-review-preview-card-8o">
+<h3>Premiere sortie après récupération</h3>
+<p class="eyebrow">Exemple de preview - non officiel</p>
+<p><strong>Outcome manuel affiche :</strong> Confirme dans ce payload de preview</p>
+<p>Signal manuel declare comme confirme par le coach dans ce payload de preview.</p>
+<dl class="compact-definition-list">
+<div><dt>Situations comparables</dt><dd>4</dd></div>
+<div><dt>Signaux + / -</dt><dd>3 / 1</dd></div>
+<div><dt>Contexte comparable</dt><dd>yes</dd></div>
+</dl>
+<p><strong>Notes coach de preview :</strong> Preview demo: sortie plus propre sur plusieurs récupérations comparables.</p>
+<p><strong>Exemple a relire :</strong> Exemple de prévisualisation non officielle - première sortie après récupération.</p>
+<p class="guard">Preview demo non officielle : ne pas stocker, ne pas appliquer, ne pas transformer en preuve du match.</p>
+<p><strong>Prochaine question coach :</strong> Le meme signal reste-t-il lisible sur une autre situation comparable ?</p>
+<div class="badge-row">
+<span class="badge manual-preview-badge-8o">Preview non officielle</span>
+<span class="badge manual-preview-badge-8o">Non persistee</span>
+<span class="badge manual-preview-badge-8o">Non appliquée</span>
+<span class="badge manual-preview-badge-8o">Pas d&#39;auto-classification</span>
+</div>
+</article>
+<article class="product-card manual-review-preview-card-8o">
+<h3>Continuite après entree en zone dangereuse</h3>
+<p class="eyebrow">Exemple de preview - non officiel</p>
+<p><strong>Outcome manuel affiche :</strong> Inconclusif dans ce payload de preview</p>
+<p>Signal manuel encore inconclusif.</p>
+<dl class="compact-definition-list">
+<div><dt>Situations comparables</dt><dd>3</dd></div>
+<div><dt>Signaux + / -</dt><dd>1 / 2</dd></div>
+<div><dt>Contexte comparable</dt><dd>uncertain</dd></div>
+</dl>
+<p><strong>Notes coach de preview :</strong> Preview demo: signaux mixtes, pas assez stable.</p>
+<p><strong>Exemple a relire :</strong> Exemple de prévisualisation non officielle - continuite après zone dangereuse.</p>
+<p class="guard">Preview demo non officielle : ne pas stocker, ne pas appliquer, ne pas transformer en preuve du match.</p>
+<p><strong>Prochaine question coach :</strong> Quelles situations supplementaires faut-il comparer avant de conclure ?</p>
+<div class="badge-row">
+<span class="badge manual-preview-badge-8o">Preview non officielle</span>
+<span class="badge manual-preview-badge-8o">Non persistee</span>
+<span class="badge manual-preview-badge-8o">Non appliquée</span>
+<span class="badge manual-preview-badge-8o">Pas d&#39;auto-classification</span>
+</div>
+</article>
+<article class="product-card manual-review-preview-card-8o">
+<h3>Structure après action neutralisee</h3>
+<p class="eyebrow">Exemple de preview - non officiel</p>
+<p><strong>Outcome manuel affiche :</strong> Echantillon insuffisant dans ce payload de preview</p>
+<p>Echantillon declare insuffisant.</p>
+<dl class="compact-definition-list">
+<div><dt>Situations comparables</dt><dd>1</dd></div>
+<div><dt>Signaux + / -</dt><dd>1 / 0</dd></div>
+<div><dt>Contexte comparable</dt><dd>uncertain</dd></div>
+</dl>
+<p><strong>Notes coach de preview :</strong> Preview demo: trop peu de situations comparables.</p>
+<p><strong>Exemple a relire :</strong> Exemple de prévisualisation non officielle - structure après action neutralisee.</p>
+<p class="guard">Preview demo non officielle : ne pas stocker, ne pas appliquer, ne pas transformer en preuve du match.</p>
+<p><strong>Prochaine question coach :</strong> Combien de situations comparables faut-il collecter avant de relire ce point ?</p>
+<div class="badge-row">
+<span class="badge manual-preview-badge-8o">Preview non officielle</span>
+<span class="badge manual-preview-badge-8o">Non persistee</span>
+<span class="badge manual-preview-badge-8o">Non appliquée</span>
+<span class="badge manual-preview-badge-8o">Pas d&#39;auto-classification</span>
+</div>
+</article>
+</div>
+<article class="product-card manual-review-preview-summary-8o">
+<h3>Synthese prudente</h3>
+<p>Cette lecture montre seulement comment trois reponses manuelles seraient relues avant stockage ou application.</p>
+<ul>
+<li>confirmed: 1</li>
+<li>contradicted: 0</li>
+<li>inconclusive: 1</li>
+<li>insufficient_sample: 1</li>
+</ul>
+<p>On peut lire une orientation coach de demonstration; on ne peut pas conclure une verite officielle, une tendance de saison, une selection ou un plan tactique.</p>
+<p><strong>Prochaine question coach :</strong> Quels exemples reels devront etre ajoutes après match avant de comparer ces signaux ?</p>
+</article>
+<div class="product-card-grid manual-review-preview-boundaries-8o">
+<article class="product-card manual-review-preview-boundary-card-8o">
+<h3>Pas de stockage</h3>
+<p>La preview reste un rendu temporaire : pas de localStorage, pas de base de donnees, pas de fichier de persistance, pas de backend.</p>
+<p class="eyebrow">Previent: persistence, season_memory_creation, team_style_memory_creation</p>
+</article>
+<article class="product-card manual-review-preview-boundary-card-8o">
+<h3>Pas de verite officielle</h3>
+<p>La saisie coach reste non officielle et ne peut pas devenir un resultat moteur ou une preuve du prochain match.</p>
+<p class="eyebrow">Previent: official_truth_promotion, sandbox_promotion, diagnostic_promotion, batch_promotion</p>
+</article>
+<article class="product-card manual-review-preview-boundary-card-8o">
+<h3>Pas de mutation</h3>
+<p>Aucun score, timeline, evenement, ScoringEvent, selection ou consigne tactique n&#39;est cree ou modifie.</p>
+<p class="eyebrow">Previent: score_mutation, timeline_mutation, score_change_creation, event_mutation, selection_automation, tactical_instruction</p>
+</article>
+</div>
+</section>
 
   
   <section id="next-match-plan" class="product-section">

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8N - Manual Review Result Intake Boundary. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8O - Manual Review Preview Renderer Without Persistence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -162,6 +162,8 @@ import {
   renderManualPostMatchObservationReviewForm8MValidation,
   renderManualReviewResultIntakeBoundary8NDoc,
   renderManualReviewResultIntakeBoundary8NValidation,
+  renderManualReviewPreviewRenderer8ODoc,
+  renderManualReviewPreviewRenderer8OValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -175,10 +177,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8N - Manual Review Result Intake Boundary";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-result-intake-boundary-8n.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8O - Manual Review Preview Renderer Without Persistence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-renderer-without-persistence-8o.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-result-intake-boundary-8n.md";
+  "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3699,6 +3701,71 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8N model, report renderer, and validation renderer for the manual review result intake boundary",
       },
       {
+        source: "src/reports/manualReviewPreviewRendererTypes8O.ts",
+        required: true,
+        reason: "Sprint 8O typed manual review preview fixture, cards, summary, boundaries, audits, and model contract",
+      },
+      {
+        source: "src/reports/manualReviewPreviewRendererWarnings8O.ts",
+        required: true,
+        reason: "Sprint 8O warning-code registry blocking persistence, official-truth promotion, score/timeline mutation, memory creation, and automation",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewProduct8O.ts",
+        required: true,
+        reason: "Sprint 8O product renderer adding a non-persistent manual review preview after the 8N intake boundary",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewExport8O.ts",
+        required: true,
+        reason: "Sprint 8O compact export renderer adding preview rows and 8O metadata without expanding the export",
+      },
+      {
+        source: "src/reports/manualReviewPreviewRendererAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O renderer audit proving valid-before-render, invalid payload blocking, card links, outcomes, counts, caution, and badges",
+      },
+      {
+        source: "src/reports/manualReviewPreviewNonPersistenceAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O non-persistence audit proving no localStorage, database, file, backend, API, memory, or application path",
+      },
+      {
+        source: "src/reports/manualReviewPreviewOfficialTruthBoundaryAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O official-truth boundary audit proving preview copy does not become real match evidence, official truth, selection, tactic, sandbox, diagnostic, or batch truth",
+      },
+      {
+        source: "src/reports/manualReviewPreviewSourceOfTruthRegressionAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O source-of-truth regression audit preserving score_change truth, scoring constants, MatchBonusEvent, and batch/live separation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewExportBudgetAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O export budget audit proving honest read-time thresholds and visible 8O export metadata",
+      },
+      {
+        source: "src/reports/manualReviewPreviewIntegrationBudgetAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O integration audit proving 8N, 8M, 8L, 8K, story-first, replay, action plan, tactical maps, and source-of-truth note remain visible",
+      },
+      {
+        source: "src/reports/manualReviewPreviewWordingAudit8O.ts",
+        required: true,
+        reason: "Sprint 8O wording audit proving the preview is clearly demo, non-official, non-persistent, and non-applied",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewRenderer8O.ts",
+        required: true,
+        reason: "Sprint 8O model, report renderer, and validation renderer for the manual review preview without persistence",
+      },
+      {
+        source: "src/reports/manualReviewPreviewRenderer8O.test.ts",
+        required: true,
+        reason: "Sprint 8O test proving valid payload rendering, invalid payload blocking, badges, non-persistence, source-of-truth, scoring, and export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -5855,6 +5922,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8O")) {
+    return renderManualReviewPreviewRenderer8ODoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8N")) {
     return renderManualReviewResultIntakeBoundary8NDoc(fullMatchTraceValidationModel());
   }
@@ -8208,6 +8278,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8O")) {
+    return renderManualReviewPreviewRenderer8OValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8N")) {
     return renderManualReviewResultIntakeBoundary8NValidation(fullMatchTraceValidationModel());
   }
@@ -10507,6 +10580,37 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8O")) {
+    return [
+      "# Sprint 8O Share Pack",
+      "",
+      "Current sprint: Sprint 8O - Manual Review Preview Renderer Without Persistence",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8M blank manual form and the 8N intake boundary inside the product/export reports, then replaces the standalone 8N docs with the 8O non-persistent preview renderer docs.",
+      "",
+      "Primary files:",
+      "- coach-report.product.html",
+      "- coach-report.export.html",
+      "- coach-report-manual-review-preview-renderer-without-persistence-8o.md",
+      "- validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md",
+      "- validation.share-pack.md",
+      "",
+      "Recommended review order:",
+      "1. coach-report.product.html",
+      "2. coach-report.export.html",
+      "3. validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md",
+      "4. coach-report-manual-review-preview-renderer-without-persistence-8o.md",
+      "5. validation.share-pack.md",
+      "",
+      "Key invariants:",
+      "- The 8O preview renders only a valid 8N payload fixture after validation.",
+      "- Invalid payloads are blocked before rendering.",
+      "- The preview is demo-only, non-official, non-persistent, and non-applied.",
+      "- It creates no localStorage, database, file persistence, backend submit, memory, official truth, score/timeline mutation, ScoringEvent, selection automation, or tactical instruction.",
+      "- It preserves the 8N intake boundary, 8M form, 8L tracker, 8K decision layer, compact export, source-of-truth boundaries, scoring constants, MatchBonusEvent, and batch/live separation.",
+      "- The visible export metadata is current for 8O and the compact export stays under the honest read-time threshold.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8N")) {
     return [
       "# Sprint 8N Share Pack",
@@ -29031,6 +29135,8 @@ import { insertCoachDecisionLayerProduct8K } from "./renderCoachDecisionLayerPro
 import { insertSeasonlessLearningLoopProduct8L } from "./renderSeasonlessLearningLoopProduct8L";
 import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderManualPostMatchObservationReviewFormProduct8M";
 import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
+import { currentManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
+import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -29392,13 +29498,17 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const finalProductHtml = insertManualReviewResultIntakeBoundaryProduct8N(
-    insertManualPostMatchObservationReviewFormProduct8M(
-      insertSeasonlessLearningLoopProduct8L(
-        insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
-        experimentalReport.matchId,
+  const manualReviewPreview8O = currentManualReviewPreviewRenderer8OModel();
+  const finalProductHtml = insertManualReviewPreviewProduct8O(
+    insertManualReviewResultIntakeBoundaryProduct8N(
+      insertManualPostMatchObservationReviewFormProduct8M(
+        insertSeasonlessLearningLoopProduct8L(
+          insertCoachDecisionLayerProduct8K(cleanupProductMainRawIds8K(coachOnlyProductHtml)),
+          experimentalReport.matchId,
+        ),
       ),
     ),
+    manualReviewPreview8O.productPreviewHtml,
   );
   const exportHtml = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,
