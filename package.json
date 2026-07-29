@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "ci:test": "npm run build && npm run test:contracts",
+    "ci:test": "npm run build && node dist/contracts/runCiContractTests.js",
     "reports:coach": "npm run build && node dist/reports/generateCoachHtmlReport.js",
     "reports:demo": "npm run build && node dist/demo/runMiniMatchDemo.js",
     "reports:share": "npm run build && node dist/reports/share/updateSharePack.js",

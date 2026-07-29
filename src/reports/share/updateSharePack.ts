@@ -396,6 +396,11 @@ const BUNDLES: readonly BundleConfig[] = [
         required: true,
         reason: "runtime guard for official contract fixtures",
       },
+      {
+        source: "src/contracts/runCiContractTests.ts",
+        required: true,
+        reason: "fast PR CI contract runner for current-sprint guard coverage",
+      },
     ],
   },
   {

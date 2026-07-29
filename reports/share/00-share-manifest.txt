@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-29T10:51:29.983Z
+Generated timestamp: 2026-07-29T12:30:50.961Z
 Task/sprint name: Sprint 8Q - Manual Review Preview Decision Gate Without Persistence
 Final file count: 20
 
@@ -35,6 +35,7 @@ Source files included inside each bundle:
   - src/contracts/scoringFamily.ts
   - src/contracts/engineToCoach.test.ts
   - src/contracts/engineToCoachContractGuard.ts
+  - src/contracts/runCiContractTests.ts
 - bundle__simulation.md:
   - src/simulation/runMatch.ts
   - src/simulation/runFullMatch.ts
@@ -1138,15 +1139,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/renderManualReviewPreviewComparisonExport8P.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts
-?? src/reports/manualReviewPreviewDecisionGate8Q.test.ts
-?? src/reports/manualReviewPreviewDecisionGateAudit8Q.ts
-?? src/reports/manualReviewPreviewDecisionGateTypes8Q.ts
-?? src/reports/manualReviewPreviewDecisionGateWarnings8Q.ts
-?? src/reports/renderManualReviewPreviewDecisionGateExport8Q.ts
-?? src/reports/renderManualReviewPreviewDecisionGateProduct8Q.ts
+ M package.json
+?? src/contracts/runCiContractTests.ts
