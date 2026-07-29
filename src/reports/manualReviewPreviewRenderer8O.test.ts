@@ -33,7 +33,7 @@ export function validateManualReviewPreviewRenderer8O(): readonly string[] {
   const derivedBlockingStatus = resolveManualReviewPreviewRendererStatus8O({
     failureWarnings: [],
     derivedFailureWarnings: ["SCORE_MANIPULATION_DETECTED"],
-    exportUnder800Seconds: true,
+    exportUnder900Seconds: true,
     wordingReadabilityScore: 96,
   });
 
