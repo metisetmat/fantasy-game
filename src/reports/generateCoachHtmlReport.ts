@@ -96,6 +96,9 @@ import { currentManualReviewPreviewRenderer8OModel } from "./buildManualReviewPr
 import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
 import { currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
 import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualReviewPreviewComparisonProduct8P";
+import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
+import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualReviewPreviewDecisionGateProduct8Q";
+import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -470,14 +473,23 @@ export function writeLatestCoachReport(): void {
     manualReviewPreview8O.productPreviewHtml,
   );
   const manualReviewPreviewComparison8P = currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel();
-  const finalProductHtml = insertManualReviewPreviewComparisonProduct8P(
+  const productHtmlWith8P = insertManualReviewPreviewComparisonProduct8P(
     productHtmlWith8O,
     manualReviewPreviewComparison8P.productComparisonHtml,
   );
-  const exportHtml = renderRestoredCompressedExport8J({
+  const manualReviewPreviewDecisionGate8Q = currentManualReviewPreviewDecisionGateWithoutPersistence8QModel();
+  const finalProductHtml = insertManualReviewPreviewDecisionGateProduct8Q(
+    productHtmlWith8P,
+    manualReviewPreviewDecisionGate8Q.productDecisionGateHtml,
+  );
+  const exportHtmlWith8P = renderRestoredCompressedExport8J({
     productReportHtml: finalProductHtml,
     manualReviewPreviewComparisonExport8P: manualReviewPreviewComparison8P.exportComparisonHtml,
   });
+  const exportHtml = insertManualReviewPreviewDecisionGateExport8Q(
+    exportHtmlWith8P,
+    manualReviewPreviewDecisionGate8Q.exportDecisionGateHtml,
+  );
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

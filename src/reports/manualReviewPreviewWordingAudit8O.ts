@@ -16,7 +16,10 @@ export function auditManualReviewPreviewWording8O(input: {
   const noOfficialResultClaimCount = countMatches(combined, /resultat officiel de la preview|preview officielle|official preview result/giu);
   const noEngineLearningClaimCount = countMatches(combined, /moteur sait maintenant|engine learned|l'equipe a appris/giu);
   const noSeasonTrendClaimCount = countMatches(combined, /la tendance de saison est|season trend confirmed/giu);
-  const noSelectionInstructionCount = countMatches(combined, /recommandation de selection officielle|selection imposee active|selection imposee officiellement|doit selectionner|a selectionner/giu);
+  const noSelectionInstructionCount = countMatches(
+    combined,
+    /recommandation de selection officielle|selection recommandee|selection imposee active|selection imposee officiellement|doit selectionner|joueur a selectionner|titulaire conseille|remplacement conseille|composition recommandee/giu,
+  );
   const noTacticalInstructionCount = countMatches(combined, /plan tactique a appliquer|consigne tactique imposee/giu);
   const ambiguousOutcomeWordingCount = countMatches(combined, /outcome officiel|confirmed officially|preuve du prochain match confirmee/giu);
   const wordingReadabilityScore = previewNonOfficialWordingVisible && demoFixtureWordingVisible ? 96 : 80;

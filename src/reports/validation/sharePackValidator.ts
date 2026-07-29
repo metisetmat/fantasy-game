@@ -440,6 +440,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewPreviewRenderer8OValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md"));
   const manualReviewPreviewComparison8P = readIfExists(join(shareDirectory, "coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"));
   const manualReviewPreviewComparison8PValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"));
+  const manualReviewPreviewDecisionGate8Q = readIfExists(join(shareDirectory, "coach-report-manual-review-preview-decision-gate-without-persistence-8q.md"));
+  const manualReviewPreviewDecisionGate8QValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-preview-decision-gate-without-persistence-8q.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3524,6 +3526,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md",
     ...sprint8OForbiddenLeftovers,
   ];
+  const sprint8QExpectedFiles = sprint8PExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"
+      ? "coach-report-manual-review-preview-decision-gate-without-persistence-8q.md"
+      : file === "validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md"
+        ? "validation.coach-report-manual-review-preview-decision-gate-without-persistence-8q.md"
+        : file
+  );
+  const sprint8QForbiddenLeftovers = [
+    "coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md",
+    "validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md",
+    ...sprint8PForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5146,6 +5160,45 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 8P source files", bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewComparisonProduct8P.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewComparisonExport8P.ts") && bundleReports.includes("src/reports/manualReviewPreviewComparison8P.test.ts"), "8P source bundled"),
     check("source 8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewComparison8PValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8QChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8QExpectedFiles.every((file) => requiredCopied(file)), sprint8QExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8QExpectedFiles.every((file) => manifest.includes(file)), sprint8QExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8Q", activeConfig.sprintName === "Sprint 8Q - Manual Review Preview Decision Gate Without Persistence", activeConfig.sprintName),
+    check("previous standalone 8P docs are not copied", sprint8QForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8QForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8Q oriented", readme.includes("# Sprint 8Q Share Pack") && readme.includes("coach-report-manual-review-preview-decision-gate-without-persistence-8q.md") && readme.includes("Manual Review Preview Decision Gate"), "README current"),
+    check("8Q report included", manualReviewPreviewDecisionGate8Q.includes("# Manual Review Preview Decision Gate Without Persistence 8Q") && manualReviewPreviewDecisionGate8Q.includes("Decision Gate Summary") && manualReviewPreviewDecisionGate8Q.includes("Global Gate Table"), "8Q doc included"),
+    check("8Q validation is PASS", manualReviewPreviewDecisionGate8QValidation.includes("Status: PASS") && manualReviewPreviewDecisionGate8QValidation.includes("ManualReviewPreviewDecisionGateWithoutPersistence8QModel exists"), "8Q validation current"),
+    check("product decision gate visible", coachProductHtml.includes('id="manual-review-preview-decision-gate-8q"') && coachProductHtml.includes("Porte de decision preview") && coachProductHtml.includes('data-manual-review-preview-decision-gate-version="8Q"'), "product 8Q visible"),
+    check("export decision gate visible", coachExportHtml.includes('id="manual-review-preview-decision-gate-export-8q"') && coachExportHtml.includes("Gate preview") && coachExportHtml.includes('data-manual-review-preview-decision-gate-version="8Q"'), "export 8Q visible"),
+    check("gate uses 8P comparison only", manualReviewPreviewDecisionGate8QValidation.includes("gate uses 8P comparison only") && manualReviewPreviewDecisionGate8QValidation.includes("invalid comparison gate blocked"), "8P source only"),
+    check("gate card count = 3", manualReviewPreviewDecisionGate8QValidation.includes("gate card count = 3") && manualReviewPreviewDecisionGate8QValidation.includes("gateCardCount: 3"), "3 gate cards"),
+    check("gate cards linked to 8P/8O/8N/8M/8L/8K", manualReviewPreviewDecisionGate8QValidation.includes("gate cards linked to 8P/8O/8N/8M/8L/8K") && manualReviewPreviewDecisionGate8QValidation.includes("gateCardsLinkedTo8PCount: 3") && manualReviewPreviewDecisionGate8QValidation.includes("gateCardsLinkedTo8KCount: 3"), "3/3/3/3/3/3"),
+    check("gate status distribution is 1/1/1", manualReviewPreviewDecisionGate8QValidation.includes("readableCardCount: 1") && manualReviewPreviewDecisionGate8QValidation.includes("needsCompletionCardCount: 1") && manualReviewPreviewDecisionGate8QValidation.includes("insufficientCardCount: 1"), "1 readable / 1 needs_completion / 1 insufficient"),
+    check("global gate status is needs_completion", manualReviewPreviewDecisionGate8QValidation.includes("globalGateStatus: needs_completion") && manualReviewPreviewDecisionGate8QValidation.includes("globalGateExpectedStatus: needs_completion") && manualReviewPreviewDecisionGate8QValidation.includes("globalGateStatusCorrect = true"), "needs_completion"),
+    check("per-card mapping is correct", manualReviewPreviewDecisionGate8QValidation.includes("firstExitGateStatus: readable") && manualReviewPreviewDecisionGate8QValidation.includes("dangerContinuityGateStatus: needs_completion") && manualReviewPreviewDecisionGate8QValidation.includes("structureAfterNeutralizedActionGateStatus: insufficient"), "readable/needs_completion/insufficient"),
+    check("gate marked demo non-official not persisted not applied", manualReviewPreviewDecisionGate8QValidation.includes("gate marked demo-only") && manualReviewPreviewDecisionGate8QValidation.includes("gate marked non-official") && manualReviewPreviewDecisionGate8QValidation.includes("gate marked not persisted") && manualReviewPreviewDecisionGate8QValidation.includes("gate marked not applied"), "badges/proof visible"),
+    check("no persistence submit or API", manualReviewPreviewDecisionGate8QValidation.includes("localStoragePersistenceCount: 0") && manualReviewPreviewDecisionGate8QValidation.includes("databasePersistenceCount: 0") && manualReviewPreviewDecisionGate8QValidation.includes("filePersistenceCount: 0") && manualReviewPreviewDecisionGate8QValidation.includes("backendSubmitActionCount: 0") && manualReviewPreviewDecisionGate8QValidation.includes("apiCallCount: 0"), "no storage/submit"),
+    check("no memory selection or tactical automation", manualReviewPreviewDecisionGate8QValidation.includes("memoryCreationCount: 0") && manualReviewPreviewDecisionGate8QValidation.includes("no selection automation") && manualReviewPreviewDecisionGate8QValidation.includes("no tactical instruction"), "no memory/automation"),
+    check("no official truth future evidence or engine learning claim", manualReviewPreviewDecisionGate8QValidation.includes("no official truth promotion") && manualReviewPreviewDecisionGate8QValidation.includes("no future evidence claim") && manualReviewPreviewDecisionGate8QValidation.includes("no real next-match result claim") && manualReviewPreviewDecisionGate8QValidation.includes("no engine learning claim"), "truth boundary"),
+    check("8P comparison remains embedded", coachProductHtml.includes('id="manual-review-preview-comparison-8p"') && coachExportHtml.includes('id="manual-review-preview-comparison-export-8p"') && manualReviewPreviewDecisionGate8QValidation.includes("product preview comparison 8P preserved") && manualReviewPreviewDecisionGate8QValidation.includes("export preview comparison 8P preserved"), "8P embedded baseline"),
+    check("8O preview renderer remains embedded", coachProductHtml.includes('id="manual-review-preview-renderer-8o"') && coachExportHtml.includes('id="manual-review-preview-renderer-export-8o"') && manualReviewPreviewDecisionGate8QValidation.includes("product preview renderer 8O preserved") && manualReviewPreviewDecisionGate8QValidation.includes("export preview renderer 8O preserved"), "8O embedded baseline"),
+    check("8N 8M 8L 8K remain embedded", manualReviewPreviewDecisionGate8QValidation.includes("product manual intake boundary 8N preserved") && manualReviewPreviewDecisionGate8QValidation.includes("export manual intake boundary 8N preserved") && manualReviewPreviewDecisionGate8QValidation.includes("product manual form 8M preserved") && manualReviewPreviewDecisionGate8QValidation.includes("export manual form 8M preserved") && manualReviewPreviewDecisionGate8QValidation.includes("product learning loop 8L preserved") && manualReviewPreviewDecisionGate8QValidation.includes("export learning loop 8L preserved") && manualReviewPreviewDecisionGate8QValidation.includes("product decision layer 8K preserved") && manualReviewPreviewDecisionGate8QValidation.includes("export decision layer 8K preserved"), "8N/8M/8L/8K embedded"),
+    check("export metadata is 8Q", coachExportHtml.includes("<title>Rapport coach export compact 8Q - gate preview non persistant</title>") && coachExportHtml.includes("Export compact 8Q") && coachExportHtml.includes('id="compressed-export-8q"') && manualReviewPreviewDecisionGate8QValidation.includes("export title mentions 8Q") && manualReviewPreviewDecisionGate8QValidation.includes("export visible badge mentions 8Q"), "export metadata 8Q"),
+    check("export id no longer stale 8P/8N/8I", !coachExportHtml.includes('id="compressed-export-8p"') && !coachExportHtml.includes('id="compressed-export-8n"') && !coachExportHtml.includes('id="compressed-export-8i"') && manualReviewPreviewDecisionGate8QValidation.includes("export main id no longer compressed-export-8p") && manualReviewPreviewDecisionGate8QValidation.includes("export main id no longer compressed-export-8n") && manualReviewPreviewDecisionGate8QValidation.includes("export main id no longer compressed-export-8i"), "stale ids removed"),
+    check("export budget checked honestly", manualReviewPreviewDecisionGate8QValidation.includes("exportReadTimeSecondsAfter8Q <= 900") && manualReviewPreviewDecisionGate8QValidation.includes("exportUnder900Seconds correctly computed") && manualReviewPreviewDecisionGate8QValidation.includes("exportUnder800Seconds correctly computed") && manualReviewPreviewDecisionGate8QValidation.includes("no PASS message on failed numeric rule"), "export budget"),
+    check("source-of-truth preserved", manualReviewPreviewDecisionGate8QValidation.includes("source-of-truth preserved") && manualReviewPreviewDecisionGate8QValidation.includes("score claims backed by score_change") && manualReviewPreviewDecisionGate8QValidation.includes("manual gate does not promote coach input to official truth"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewDecisionGate8QValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewDecisionGate8QValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewDecisionGate8QValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8Q source files", bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewDecisionGateProduct8Q.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewDecisionGateExport8Q.ts") && bundleReports.includes("src/reports/manualReviewPreviewDecisionGate8Q.test.ts"), "8Q source bundled"),
+    check("source 8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewDecisionGate8QValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8NChecks: readonly SharePackCheck[] = [
@@ -9435,6 +9488,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8Q - Manual Review")
+      ? sprint8QChecks
     : activeConfig.sprintName.includes("Sprint 8P - Manual Review")
       ? sprint8PChecks
     : activeConfig.sprintName.includes("Sprint 8O - Manual Review")

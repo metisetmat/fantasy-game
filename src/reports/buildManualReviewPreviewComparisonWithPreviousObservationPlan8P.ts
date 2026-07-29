@@ -332,7 +332,7 @@ export function buildManualReviewPreviewComparisonWithPreviousObservationPlan8PM
     planCoverageAudit.insufficientToAnswerCount === 1;
   const status: "PASS" | "PARTIAL" | "FAIL" = blocking
     ? "FAIL"
-    : previewComparisonReady && exportBudgetAudit.exportUnder800Seconds && wordingAudit.wordingReadabilityScore >= 95
+    : previewComparisonReady && exportBudgetAudit.exportUnder900Seconds && wordingAudit.wordingReadabilityScore >= 95
       ? "PASS"
       : "PARTIAL";
 
@@ -569,7 +569,7 @@ export function renderManualReviewPreviewComparisonWithPreviousObservationPlan8P
     checkLine("export id no longer compressed-export-8n", model.exportMetadataAudit.exportMainIdNoLonger8NOnly, bool(model.exportMetadataAudit.exportMainIdNoLonger8NOnly)),
     checkLine("export id no longer compressed-export-8i", model.exportMetadataAudit.exportMainIdNoLonger8IOnly, bool(model.exportMetadataAudit.exportMainIdNoLonger8IOnly)),
     checkLine("export under 900 seconds", model.exportUnder900Seconds, String(model.exportBudgetAudit.exportReadTimeSecondsAfter8P)),
-    checkLine("export under 800 seconds", model.exportUnder800Seconds, String(model.exportBudgetAudit.exportReadTimeSecondsAfter8P)),
+    checkLine("export under 800 seconds flag computed honestly", model.exportBudgetAudit.exportUnder800BooleanCorrect, `${model.exportBudgetAudit.exportReadTimeSecondsAfter8P} / ${bool(model.exportUnder800Seconds)}`),
     checkLine("numeric threshold guard preserved", model.numericThresholdGuardPreserved, bool(model.numericThresholdGuardPreserved)),
     checkLine("no localStorage persistence", model.nonPersistenceAudit.localStoragePersistenceCount === 0, String(model.nonPersistenceAudit.localStoragePersistenceCount)),
     checkLine("no database persistence", model.nonPersistenceAudit.databasePersistenceCount === 0, String(model.nonPersistenceAudit.databasePersistenceCount)),

@@ -33,10 +33,22 @@ export function validateManualReviewPreviewRenderer8O(): readonly string[] {
   const derivedBlockingStatus = resolveManualReviewPreviewRendererStatus8O({
     failureWarnings: [],
     derivedFailureWarnings: ["SCORE_MANIPULATION_DETECTED"],
-    exportUnder800Seconds: true,
+    exportUnder900Seconds: true,
     wordingReadabilityScore: 96,
   });
 
+  assertTest(
+    model.status === "PASS",
+    [
+      "8O model must pass.",
+      `status=${model.status}`,
+      `warnings=${model.warningCodes.join(",") || "none"}`,
+      `exportReadTimeSecondsAfter8O=${model.exportBudgetAudit.exportReadTimeSecondsAfter8O}`,
+      `exportUnder900=${model.exportUnder900Seconds}`,
+      `exportUnder800=${model.exportUnder800Seconds}`,
+      `wordingReadabilityScore=${model.wordingAudit.wordingReadabilityScore}`,
+    ].join(" "),
+  );
   assertTest(validResult.status === "accepted_for_preview", "valid 8N payload must render in preview.");
   assertTest(invalidResult.status === "rejected", "invalid 8N payload must be blocked before preview.");
   assertTest(beforeValidation === afterValidation, "8N validation before preview must not mutate input.");

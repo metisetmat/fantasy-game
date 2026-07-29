@@ -19,7 +19,10 @@ export function auditManualReviewPreviewOfficialTruthBoundary8O(input: {
   const previewClaimedAsSeasonTrendCount = countMatches(previewSlice, /la tendance de saison est|season trend confirmed/giu);
   const previewClaimedAsTeamMemoryCount = countMatches(previewSlice, /team memory created|team style memory created|memoire d'equipe creee/giu);
   const automaticClassificationCount = countMatches(previewSlice, /auto-classification active|classification automatique active/giu);
-  const selectionRecommendationCount = countMatches(previewSlice, /recommandation de selection|selection imposee|a selectionner/giu);
+  const selectionRecommendationCount = countMatches(
+    previewSlice,
+    /recommandation de selection officielle|selection recommandee|selection imposee active|selection imposee officiellement|doit selectionner|joueur a selectionner|titulaire conseille|remplacement conseille|composition recommandee/giu,
+  );
   const tacticalInstructionCount = countMatches(previewSlice, /plan tactique a appliquer|consigne tactique imposee/giu);
   const sandboxPromotionCount = countMatches(previewSlice, /sandbox promu en officiel|official sandbox truth/giu);
   const diagnosticPromotionCount = countMatches(previewSlice, /diagnostic promu en officiel|official diagnostic truth/giu);

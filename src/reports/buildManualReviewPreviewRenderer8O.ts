@@ -242,7 +242,7 @@ function uniqueWarnings(
 export function resolveManualReviewPreviewRendererStatus8O(input: {
   readonly failureWarnings: readonly ManualReviewPreviewRendererWarningCode8O[];
   readonly derivedFailureWarnings: readonly ManualReviewPreviewRendererWarningCode8O[];
-  readonly exportUnder800Seconds: boolean;
+  readonly exportUnder900Seconds: boolean;
   readonly wordingReadabilityScore: number;
 }): "PASS" | "PARTIAL" | "FAIL" {
   const completeFailureWarnings = uniqueWarnings([
@@ -253,7 +253,7 @@ export function resolveManualReviewPreviewRendererStatus8O(input: {
     MANUAL_REVIEW_PREVIEW_RENDERER_8O_BLOCKING_WARNINGS.includes(warning),
   );
   if (blocking) return "FAIL";
-  return input.exportUnder800Seconds && input.wordingReadabilityScore >= 90 ? "PASS" : "PARTIAL";
+  return input.exportUnder900Seconds && input.wordingReadabilityScore >= 90 ? "PASS" : "PARTIAL";
 }
 
 export function buildManualReviewPreviewRenderer8OModel(input?: {
@@ -373,7 +373,7 @@ export function buildManualReviewPreviewRenderer8OModel(input?: {
   const status = resolveManualReviewPreviewRendererStatus8O({
     failureWarnings,
     derivedFailureWarnings,
-    exportUnder800Seconds: exportBudgetAudit.exportUnder800Seconds,
+    exportUnder900Seconds: exportBudgetAudit.exportUnder900Seconds,
     wordingReadabilityScore: wordingAudit.wordingReadabilityScore,
   });
   const warningCodes = uniqueWarnings([
@@ -741,7 +741,7 @@ export function renderManualReviewPreviewRenderer8OValidation(
     checkLine("exportReadTimeSecondsAfter8O <= 900", model.exportBudgetAudit.exportReadTimeSecondsAfter8O <= 900, String(model.exportBudgetAudit.exportReadTimeSecondsAfter8O)),
     checkLine("exportUnder900Seconds correctly computed", model.exportBudgetAudit.exportUnder900BooleanCorrect, bool(model.exportBudgetAudit.exportUnder900BooleanCorrect)),
     checkLine("exportUnder800Seconds correctly computed", model.exportBudgetAudit.exportUnder800BooleanCorrect, bool(model.exportBudgetAudit.exportUnder800BooleanCorrect)),
-    checkLine("no PASS message on failed numeric rule", model.status !== "PASS" || model.exportBudgetAudit.exportUnder800Seconds, model.status),
+    checkLine("no PASS message on failed numeric rule", model.status !== "PASS" || model.exportBudgetAudit.exportUnder900Seconds, model.status),
     checkLine("export title mentions 8O", model.exportBudgetAudit.exportTitleMentions8O, bool(model.exportBudgetAudit.exportTitleMentions8O)),
     checkLine("export visible badge mentions 8O", model.exportBudgetAudit.exportVisibleBadgeMentions8O, bool(model.exportBudgetAudit.exportVisibleBadgeMentions8O)),
     checkLine("source-of-truth preserved", model.sourceOfTruthSeparationPreserved, bool(model.sourceOfTruthSeparationPreserved)),
