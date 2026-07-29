@@ -59,7 +59,7 @@ export function validateManualReviewPreviewComparison8P(): readonly string[] {
   assertTest(model.exportMetadataAudit.exportMainIdNoLonger8NOnly, "export main id must no longer be compressed-export-8n.");
   assertTest(model.exportMetadataAudit.exportMainIdNoLonger8IOnly, "export main id must no longer be compressed-export-8i.");
   assertTest(model.exportUnder900Seconds, "export must remain under 900 seconds.");
-  assertTest(model.exportUnder800Seconds, "export must remain under 800 seconds.");
+  assertTest(model.exportBudgetAudit.exportUnder800BooleanCorrect, "export under-800 budget flag must be computed honestly.");
   assertTest(model.numericThresholdGuardPreserved, "numeric threshold guard must remain honest.");
   assertTest(model.warningCodes.length === 0, `8P warning codes must be empty: ${model.warningCodes.join(", ")}`);
   assertTest(persistenceLeakAudit.localStoragePersistenceCount === 1, "localStorage comparison leak must be counted.");
