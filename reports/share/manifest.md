@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-28T14:34:15.129Z
-Task/sprint: Sprint 8O - Manual Review Preview Renderer Without Persistence
+Generated: 2026-07-29T08:46:13.096Z
+Task/sprint: Sprint 8P - Manual Review Preview Comparison With Previous Observation Plan
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-renderer-without-persistence-8o.md
-- validation.coach-report-manual-review-preview-renderer-without-persistence-8o.md
+- coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md
+- validation.coach-report-manual-review-preview-comparison-with-previous-observation-plan-8p.md
 - README.md
 
 ## Bundle Files
