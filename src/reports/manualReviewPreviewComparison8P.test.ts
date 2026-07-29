@@ -19,7 +19,19 @@ export function validateManualReviewPreviewComparison8P(): readonly string[] {
     exportHtml: "",
   });
 
-  assertTest(model.status === "PASS", "8P model must pass.");
+  assertTest(
+    model.status === "PASS",
+    [
+      "8P model must pass.",
+      `status=${model.status}`,
+      `warnings=${model.warningCodes.join(",") || "none"}`,
+      `baseline8OStatus=${model.baseline8O.status}`,
+      `exportReadTimeSecondsAfter8P=${model.exportBudgetAudit.exportReadTimeSecondsAfter8P}`,
+      `exportUnder900=${model.exportUnder900Seconds}`,
+      `exportUnder800=${model.exportUnder800Seconds}`,
+      `wordingReadabilityScore=${model.wordingAudit.wordingReadabilityScore}`,
+    ].join(" "),
+  );
   assertTest(validation.includes("Status: PASS"), "8P validation must pass.");
   assertTest(model.comparisonCardCount === 3, "8P must render exactly three comparison cards.");
   assertTest(model.comparisonAnswersObservationQuestionCount === 1, "first card must answer one observation question.");
