@@ -409,7 +409,9 @@ export function auditManualReviewPreviewDecisionGateIntegrationBudget8Q(input: {
   const tacticalMapCardsStillVisible = input.productHtml.includes("tactical-map-card") && input.exportHtml.includes("Cartes tactiques essentielles");
   const sourceOfTruthNoteVisible = input.productHtml.includes("Source officielle") && (input.exportHtml.includes("Source officielle") || input.exportHtml.includes("score_change"));
   const productSectionOrderPreserved = orderPreserved(input.productHtml, 'id="manual-review-preview-comparison-8p"', 'id="manual-review-preview-decision-gate-8q"');
-  const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8q"') || input.exportHtml.includes('id="compressed-export-current"');
+  const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8q"') ||
+    input.exportHtml.includes('id="compressed-export-8r"') ||
+    input.exportHtml.includes('id="compressed-export-current"');
   const visible = [
     productDecisionGateVisible,
     exportDecisionGateVisible,

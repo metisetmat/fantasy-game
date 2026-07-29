@@ -1216,6 +1216,131 @@
 </article>
 </div>
 </section>
+<section id="manual-review-workflow-readiness-8r" class="premium-section manual-review-workflow-readiness-8r" data-manual-review-workflow-readiness-version="8R">
+<h2>Workflow de revue manuelle</h2>
+<p class="eyebrow">Pret pour preview non persistante</p>
+<p>Cette section relie le formulaire 8M, l'intake 8N, la preview 8O, la comparaison 8P et le gate 8Q. Le workflow est pret pour une demo non persistante, mais la revue de demonstration reste a completer avant tout usage reel.</p>
+<article class="product-card manual-review-workflow-status-8r">
+<h3>Statut global du workflow</h3>
+<p><strong>Workflow :</strong> pret pour preview non persistante.</p>
+<p><strong>Gate de la revue actuelle :</strong> a completer.</p>
+<p><strong>Pourquoi :</strong> les 5 etapes existent et sont liees, mais le gate 8Q indique encore 1 lisible / 1 a completer / 1 insuffisant.</p>
+<p><strong>Utilisation :</strong> tester le parcours de lecture.</p>
+<p><strong>Limite :</strong> aucune decision automatique, aucun stockage, aucune verite officielle.</p>
+<div class="badge-row">
+<span class="badge manual-review-workflow-readiness-badge-8r">Workflow demo 8R</span>
+<span class="badge manual-review-workflow-readiness-badge-8r">Non officiel</span>
+<span class="badge manual-review-workflow-readiness-badge-8r">Non persiste</span>
+<span class="badge manual-review-workflow-readiness-badge-8r">Non applique</span>
+<span class="badge manual-review-workflow-readiness-badge-8r">Pas de decision automatique</span>
+</div>
+</article>
+<div class="product-card-grid manual-review-workflow-stage-grid-8r">
+<article class="product-card manual-review-workflow-stage-card-8r">
+<p class="eyebrow">8M - ready</p>
+<h3>8M - Formulaire manuel post-match</h3>
+<p><strong>Role :</strong> Preparer une saisie coach manuelle, vide, a remplir après un vrai match.</p>
+<p><strong>Entree :</strong> Plan d&#39;observation 8K/8L.</p>
+<p><strong>Sortie :</strong> 3 sections de revue manuelle, sans resultat prerempli.</p>
+<ul>
+<li>no persistence</li>
+<li>no automatic outcome</li>
+<li>no official truth</li>
+<li>no selection/tactic</li>
+</ul>
+</article>
+<article class="product-card manual-review-workflow-stage-card-8r">
+<p class="eyebrow">8N - ready</p>
+<h3>8N - Frontiere d&#39;entree manuelle</h3>
+<p><strong>Role :</strong> Definir le contrat d&#39;entree et le validateur de payload manuel.</p>
+<p><strong>Entree :</strong> Formulaire 8M potentiellement rempli.</p>
+<p><strong>Sortie :</strong> Payload accepte en validate/preview only ou rejete.</p>
+<ul>
+<li>validator pure</li>
+<li>no persistence</li>
+<li>no mutation</li>
+<li>no official truth</li>
+</ul>
+</article>
+<article class="product-card manual-review-workflow-stage-card-8r">
+<p class="eyebrow">8O - ready</p>
+<h3>8O - Preview non persistee</h3>
+<p><strong>Role :</strong> Rendre une preview lisible depuis un payload valide.</p>
+<p><strong>Entree :</strong> Payload valide 8N.</p>
+<p><strong>Sortie :</strong> 3 cartes preview non officielles.</p>
+<ul>
+<li>demo fixture</li>
+<li>not real next match</li>
+<li>no memory</li>
+<li>no application</li>
+</ul>
+</article>
+<article class="product-card manual-review-workflow-stage-card-8r">
+<p class="eyebrow">8P - ready</p>
+<h3>8P - Comparaison preview / plan</h3>
+<p><strong>Role :</strong> Comparer la preview 8O aux questions 8K/8L.</p>
+<p><strong>Entree :</strong> Preview 8O validee + plan d&#39;observation 8K/8L.</p>
+<p><strong>Sortie :</strong> 3 cartes de comparaison, statut reponse complete/partielle/insuffisante.</p>
+<ul>
+<li>no conclusion real match</li>
+<li>no automatic decision</li>
+<li>no official truth</li>
+</ul>
+</article>
+<article class="product-card manual-review-workflow-stage-card-8r">
+<p class="eyebrow">8Q - ready</p>
+<h3>8Q - Gate de lisibilite</h3>
+<p><strong>Role :</strong> Qualifier la maturite de lecture de la revue preview.</p>
+<p><strong>Entree :</strong> Comparaison 8P validee.</p>
+<p><strong>Sortie :</strong> Gate global needs_completion, 1 lisible / 1 a completer / 1 insuffisant.</p>
+<ul>
+<li>no game decision</li>
+<li>no selection</li>
+<li>no tactic</li>
+<li>no persistence</li>
+</ul>
+</article>
+</div>
+<article class="product-card manual-review-workflow-ready-8r">
+<h3>Ce qui est pret</h3>
+<ul>
+<li>Chainage fonctionnel 8M -&gt; 8N -&gt; 8O -&gt; 8P -&gt; 8Q.</li>
+<li>Preview non persistante.</li>
+<li>Comparaison planifiee.</li>
+<li>Gate de lisibilite.</li>
+<li>Export compact.</li>
+<li>Garde-fous source-of-truth.</li>
+</ul>
+</article>
+<article class="product-card manual-review-workflow-missing-8r">
+<h3>Ce qui manque avant usage reel</h3>
+<ul>
+<li>Vraie saisie coach + decision de stockage future séparée.</li>
+<li>Vraie validation post-match.</li>
+<li>UX de saisie reelle.</li>
+<li>Controle de permissions si stockage futur.</li>
+<li>Regle de transformation eventuelle vers historique, non incluse ici.</li>
+</ul>
+</article>
+<h3>Frontieres</h3>
+<div class="product-card-grid manual-review-workflow-boundaries-8r">
+<article class="product-card manual-review-workflow-boundary-8r">
+<h3>Pas de stockage</h3>
+<p>Le workflow 8R lit et affiche le chainage de preview; il ne cree ni localStorage, ni base de donnees, ni fichier de persistance.</p>
+<p class="eyebrow">Previent: persistence, season_memory_creation, team_style_memory_creation</p>
+</article>
+<article class="product-card manual-review-workflow-boundary-8r">
+<h3>Pas de verite officielle</h3>
+<p>La timeline officielle et les score_change restent les seules sources de score et d&#39;histoire officielle.</p>
+<p class="eyebrow">Previent: official_truth_promotion, score_mutation, timeline_mutation, score_change_creation, event_mutation</p>
+</article>
+<article class="product-card manual-review-workflow-boundary-8r">
+<h3>Pas d&#39;automatisation</h3>
+<p>Le workflow peut etre teste en preview non persistante, mais il ne genere ni decision, ni selection, ni consigne tactique.</p>
+<p class="eyebrow">Previent: automatic_decision, automatic_real_match_classification, selection_automation, tactical_instruction</p>
+</article>
+</div>
+</section>
 
   
   <section id="next-match-plan" class="product-section">

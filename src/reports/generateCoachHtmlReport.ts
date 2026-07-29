@@ -99,6 +99,7 @@ import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualRevi
 import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
 import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualReviewPreviewDecisionGateProduct8Q";
 import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
+import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -478,18 +479,25 @@ export function writeLatestCoachReport(): void {
     manualReviewPreviewComparison8P.productComparisonHtml,
   );
   const manualReviewPreviewDecisionGate8Q = currentManualReviewPreviewDecisionGateWithoutPersistence8QModel();
-  const finalProductHtml = insertManualReviewPreviewDecisionGateProduct8Q(
+  const productHtmlWith8Q = insertManualReviewPreviewDecisionGateProduct8Q(
     productHtmlWith8P,
     manualReviewPreviewDecisionGate8Q.productDecisionGateHtml,
   );
   const exportHtmlWith8P = renderRestoredCompressedExport8J({
-    productReportHtml: finalProductHtml,
+    productReportHtml: productHtmlWith8Q,
     manualReviewPreviewComparisonExport8P: manualReviewPreviewComparison8P.exportComparisonHtml,
   });
-  const exportHtml = insertManualReviewPreviewDecisionGateExport8Q(
+  const exportHtmlWith8Q = insertManualReviewPreviewDecisionGateExport8Q(
     exportHtmlWith8P,
     manualReviewPreviewDecisionGate8Q.exportDecisionGateHtml,
   );
+  const manualReviewWorkflowReadiness8R = buildManualReviewWorkflowReadinessWithoutPersistence8RModel({
+    baseline8Q: manualReviewPreviewDecisionGate8Q,
+    productHtmlBefore8R: productHtmlWith8Q,
+    exportHtmlBefore8R: exportHtmlWith8Q,
+  });
+  const finalProductHtml = manualReviewWorkflowReadiness8R.productHtmlAfter8R;
+  const exportHtml = manualReviewWorkflowReadiness8R.exportHtmlAfter8R;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

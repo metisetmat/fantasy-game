@@ -204,6 +204,10 @@ import {
   renderManualReviewPreviewDecisionGateWithoutPersistence8QDoc as renderManualReviewPreviewDecisionGateWithoutPersistence8QDocBase,
   renderManualReviewPreviewDecisionGateWithoutPersistence8QValidation as renderManualReviewPreviewDecisionGateWithoutPersistence8QValidationBase,
 } from "../../reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
+import {
+  renderManualReviewWorkflowReadinessWithoutPersistence8RDoc as renderManualReviewWorkflowReadinessWithoutPersistence8RDocBase,
+  renderManualReviewWorkflowReadinessWithoutPersistence8RValidation as renderManualReviewWorkflowReadinessWithoutPersistence8RValidationBase,
+} from "../../reports/buildManualReviewWorkflowReadinessWithoutPersistence8R";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6881,6 +6885,18 @@ export function renderManualReviewPreviewDecisionGateWithoutPersistence8QValidat
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewPreviewDecisionGateWithoutPersistence8QValidationBase();
+}
+
+export function renderManualReviewWorkflowReadinessWithoutPersistence8RDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewWorkflowReadinessWithoutPersistence8RDocBase();
+}
+
+export function renderManualReviewWorkflowReadinessWithoutPersistence8RValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewWorkflowReadinessWithoutPersistence8RValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
