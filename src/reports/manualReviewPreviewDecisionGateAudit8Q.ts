@@ -410,6 +410,7 @@ export function auditManualReviewPreviewDecisionGateIntegrationBudget8Q(input: {
   const sourceOfTruthNoteVisible = input.productHtml.includes("Source officielle") && (input.exportHtml.includes("Source officielle") || input.exportHtml.includes("score_change"));
   const productSectionOrderPreserved = orderPreserved(input.productHtml, 'id="manual-review-preview-comparison-8p"', 'id="manual-review-preview-decision-gate-8q"');
   const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8q"') ||
+    input.exportHtml.includes('id="compressed-export-8v"') ||
     input.exportHtml.includes('id="compressed-export-8u"') ||
     input.exportHtml.includes('id="compressed-export-8t"') ||
     input.exportHtml.includes('id="compressed-export-8s"') ||

@@ -169,6 +169,8 @@ import {
   renderManualReviewUxInteractionContractWithoutPersistence8TValidation,
   renderManualReviewInputFieldContractWithoutPersistence8UDoc,
   renderManualReviewInputFieldContractWithoutPersistence8UValidation,
+  renderManualReviewFieldUxVisualReadinessWithoutPersistence8VDoc,
+  renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -182,10 +184,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8U - Manual Review Input Field Contract Without Persistence";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-input-field-contract-without-persistence-8u.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8V - Manual Review Field UX Visual Readiness";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-input-field-contract-without-persistence-8u.md";
+  "validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3986,6 +3988,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8U test proving three sections, twenty-one disabled fields, inactive rules/errors, no input/submit/API/persistence/official truth/selection/tactic, and current 8U export metadata",
       },
       {
+        source: "src/reports/manualReviewFieldUxVisualReadinessTypes8V.ts",
+        required: true,
+        reason: "Sprint 8V typed visual-readiness model for future manual review field sections, groups, static cards, badges, validation summaries, error summaries, and guardrails",
+      },
+      {
+        source: "src/reports/manualReviewFieldUxVisualReadinessWarnings8V.ts",
+        required: true,
+        reason: "Sprint 8V warning registry for visual-readiness, disabled-state, non-persistence, export metadata, integration, and source-of-truth guardrails",
+      },
+      {
+        source: "src/reports/manualReviewFieldUxVisualReadinessAudit8V.ts",
+        required: true,
+        reason: "Sprint 8V audits for product/export visibility, visual card counts, disabled static fields, zero active controls, zero persistence, and export metadata",
+      },
+      {
+        source: "src/reports/renderManualReviewFieldUxVisualReadinessProduct8V.ts",
+        required: true,
+        reason: "Sprint 8V product renderer adding coach-readable static field cards after the 8U input-field contract",
+      },
+      {
+        source: "src/reports/renderManualReviewFieldUxVisualReadinessExport8V.ts",
+        required: true,
+        reason: "Sprint 8V compact export renderer adding field UX visual-readiness summary and updating export metadata to 8V",
+      },
+      {
+        source: "src/reports/buildManualReviewFieldUxVisualReadinessWithoutPersistence8V.ts",
+        required: true,
+        reason: "Sprint 8V model, report renderer, and validation renderer for manual review field UX visual readiness without persistence",
+      },
+      {
+        source: "src/reports/manualReviewFieldUxVisualReadiness8V.test.ts",
+        required: true,
+        reason: "Sprint 8V test proving three sections, nine groups, twenty-one disabled static cards, zero enabled controls, no persistence, no preview, no official truth, no selection, no tactic, and current 8V export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6142,6 +6179,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8V")) {
+    return renderManualReviewFieldUxVisualReadinessWithoutPersistence8VDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8U")) {
     return renderManualReviewInputFieldContractWithoutPersistence8UDoc(fullMatchTraceValidationModel());
   }
@@ -8516,6 +8556,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8V")) {
+    return renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8U")) {
     return renderManualReviewInputFieldContractWithoutPersistence8UValidation(fullMatchTraceValidationModel());
   }
@@ -10836,6 +10879,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8V")) {
+    return [
+      "# Sprint 8V Share Pack",
+      "",
+      "Current sprint: Sprint 8V - Manual Review Field UX Visual Readiness",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8U input-field contract embedded in product/export reports, then replaces the standalone 8U docs with the 8V visual-readiness docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md",
+      "4. coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8V Focus",
+      "- The 8V layer makes the 8U future fields visually readable for coaches.",
+      "- Three sections, nine groups, and twenty-one field cards are visible as static disabled cards.",
+      "- Every card carries future, disabled, read-only, non-official, not-persisted, and not-applied badges.",
+      "- Future validation rules, error states, refusal states, constraints, and help text are readable without activating real input.",
+      "- Export metadata now mentions 8V and the compact export main id is cleaned to compressed-export-8v.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- No real input, submit, API, backend, storage, memory, payload, real preview, official truth, automatic decision, selection, or tactical instruction.",
+      "- 8U remains preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8U")) {
     return [
       "# Sprint 8U Share Pack",

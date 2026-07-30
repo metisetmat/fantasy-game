@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-30T12:20:02.837Z
-Task/sprint: Sprint 8U - Manual Review Input Field Contract Without Persistence
+Generated: 2026-07-30T14:34:01.897Z
+Task/sprint: Sprint 8V - Manual Review Field UX Visual Readiness
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-input-field-contract-without-persistence-8u.md
-- validation.coach-report-manual-review-input-field-contract-without-persistence-8u.md
+- coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md
+- validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md
 - README.md
 
 ## Bundle Files

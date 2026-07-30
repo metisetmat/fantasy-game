@@ -103,6 +103,7 @@ import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./b
 import { buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel } from "./buildManualReviewWorkflowUxSkeletonWithoutPersistence8S";
 import { buildManualReviewUxInteractionContractWithoutPersistence8TModel } from "./buildManualReviewUxInteractionContractWithoutPersistence8T";
 import { buildManualReviewInputFieldContractWithoutPersistence8UModel } from "./buildManualReviewInputFieldContractWithoutPersistence8U";
+import { buildManualReviewFieldUxVisualReadinessWithoutPersistence8VModel } from "./buildManualReviewFieldUxVisualReadinessWithoutPersistence8V";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -514,8 +515,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8U: manualReviewUxInteractionContract8T.productHtmlAfter8T,
     exportHtmlBefore8U: manualReviewUxInteractionContract8T.exportHtmlAfter8T,
   });
-  const finalProductHtml = manualReviewInputFieldContract8U.productHtmlAfter8U;
-  const exportHtml = manualReviewInputFieldContract8U.exportHtmlAfter8U;
+  const manualReviewFieldUxVisualReadiness8V = buildManualReviewFieldUxVisualReadinessWithoutPersistence8VModel({
+    baseline8U: manualReviewInputFieldContract8U,
+    productHtmlBefore8V: manualReviewInputFieldContract8U.productHtmlAfter8U,
+    exportHtmlBefore8V: manualReviewInputFieldContract8U.exportHtmlAfter8U,
+  });
+  const finalProductHtml = manualReviewFieldUxVisualReadiness8V.productHtmlAfter8V;
+  const exportHtml = manualReviewFieldUxVisualReadiness8V.exportHtmlAfter8V;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

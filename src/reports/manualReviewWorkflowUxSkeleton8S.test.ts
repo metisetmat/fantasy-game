@@ -80,6 +80,10 @@ export function validateManualReviewWorkflowUxSkeleton8S(): readonly string[] {
   assertTest(
       model.exportHtmlAfter8S.includes('id="compressed-export-8s"') ||
       (
+        model.exportHtmlAfter8S.includes('id="compressed-export-8v"') &&
+        model.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      ) ||
+      (
         model.exportHtmlAfter8S.includes('id="compressed-export-8u"') &&
         model.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
       ) ||
