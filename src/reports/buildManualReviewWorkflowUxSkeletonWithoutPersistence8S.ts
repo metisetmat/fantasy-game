@@ -67,6 +67,15 @@ function compactSnippet(html: string, marker: string): string {
   return html.slice(start, start + 1000).replace(/\s+/gu, " ");
 }
 
+function disableManualReviewFormControls8S(html: string): string {
+  return html.replace(/<(input|select|textarea|button)\b([^>]*)>/giu, (match: string, tag: string, attrs: string) => {
+    if (/disabled\b/iu.test(attrs) || /aria-disabled=/iu.test(attrs) || /type="hidden"/iu.test(attrs)) {
+      return match;
+    }
+    return `<${tag}${attrs} disabled aria-disabled="true">`;
+  });
+}
+
 function buildSteps(): readonly ManualReviewWorkflowUxStep8S[] {
   return [
     {
@@ -376,8 +385,12 @@ export function buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel(inp
   const exportHtmlBefore8S = input?.exportHtmlBefore8S ?? baseline8R.exportHtmlAfter8R;
   const productUxSkeletonHtml = renderManualReviewWorkflowUxSkeletonProduct8S(workflow);
   const exportUxSkeletonHtml = renderManualReviewWorkflowUxSkeletonExport8S(workflow);
-  const productHtmlAfter8S = insertManualReviewWorkflowUxSkeletonProduct8S(productHtmlBefore8S, productUxSkeletonHtml);
-  const exportHtmlAfter8S = insertManualReviewWorkflowUxSkeletonExport8S(exportHtmlBefore8S, exportUxSkeletonHtml);
+  const productHtmlAfter8S = disableManualReviewFormControls8S(
+    insertManualReviewWorkflowUxSkeletonProduct8S(productHtmlBefore8S, productUxSkeletonHtml),
+  );
+  const exportHtmlAfter8S = disableManualReviewFormControls8S(
+    insertManualReviewWorkflowUxSkeletonExport8S(exportHtmlBefore8S, exportUxSkeletonHtml),
+  );
   const uxAudit = auditManualReviewWorkflowUxSkeleton8S({ workflow, productHtml: productHtmlAfter8S, exportHtml: exportHtmlAfter8S });
   const safetyAudit = auditManualReviewWorkflowUxSafety8S({ workflow, productHtml: productHtmlAfter8S, exportHtml: exportHtmlAfter8S });
   const exportAudit = auditManualReviewWorkflowUxExport8S({ exportHtmlBefore8S, exportHtmlAfter8S });

@@ -101,6 +101,7 @@ export function auditManualReviewWorkflowUxSafety8S(input: {
   const combined = `${input.productHtml}\n${input.exportHtml}`;
   const enabledCtaCount = countMatches(combined, [
     /<button\b(?![^>]*(?:disabled|aria-disabled="true"))/giu,
+    /<(?:input|select|textarea)\b(?![^>]*(?:disabled|aria-disabled="true"|type="hidden"))/giu,
     /<a\b[^>]*(?:data-enabled-action|href="(?:\/api|api:|https?:\/\/api))/giu,
   ]);
   const submitButtonCount = countMatches(combined, [/<button\b[^>]*type="submit"/giu, /<input\b[^>]*type="submit"/giu]);

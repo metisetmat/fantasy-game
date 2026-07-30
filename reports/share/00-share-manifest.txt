@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-30T08:24:11.042Z
+Generated timestamp: 2026-07-30T09:14:43.313Z
 Task/sprint name: Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence
 Final file count: 20
 
@@ -1153,17 +1153,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewPreviewDecisionGateAudit8Q.ts
- M src/reports/manualReviewWorkflowReadinessAudit8R.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts
-?? src/reports/manualReviewWorkflowUxSkeleton8S.test.ts
-?? src/reports/manualReviewWorkflowUxSkeletonAudit8S.ts
-?? src/reports/manualReviewWorkflowUxSkeletonTypes8S.ts
-?? src/reports/manualReviewWorkflowUxSkeletonWarnings8S.ts
-?? src/reports/renderManualReviewWorkflowUxSkeletonExport8S.ts
-?? src/reports/renderManualReviewWorkflowUxSkeletonProduct8S.ts
+ M src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts
+ M src/reports/manualReviewWorkflowUxSkeletonAudit8S.ts
