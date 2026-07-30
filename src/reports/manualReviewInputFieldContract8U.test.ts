@@ -18,6 +18,20 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
     ...buildManualReviewUxInteractionContractWithoutPersistence8TModel(),
     status: "FAIL" as const,
   };
+  const baseline8T = buildManualReviewUxInteractionContractWithoutPersistence8TModel();
+  const exportBetween800And900 = `${baseline8T.exportHtmlAfter8T}<section>${Array.from({ length: 550 }, () => "mot").join(" ")}</section>`;
+  const oversizedButUnderHardLimit = buildManualReviewInputFieldContractWithoutPersistence8UModel({
+    baseline8T,
+    productHtmlBefore8U: baseline8T.productHtmlAfter8T,
+    exportHtmlBefore8U: exportBetween800And900,
+  });
+  const sectionLinks = model.contract.fieldSections.map((section) =>
+    [
+      section.linked8MReviewSectionId,
+      section.linked8LObservationCardId,
+      section.linked8KDecisionCardId,
+    ].join("|"),
+  );
 
   assertTest(model.status === "PASS", "8U model must pass.");
   assertTest(validation.includes("Status: PASS"), "8U validation must pass.");
@@ -28,6 +42,11 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
   assertTest(model.exportInputFieldContractVisible, "export must show the input field contract.");
   assertTest(model.inputFieldContractUsesInteractionContract8T, "8U must use the 8T interaction contract.");
   assertTest(model.sectionCount === 3, "8U must define three sections.");
+  assertTest(
+    sectionLinks.join("/") ===
+      "manual-review-first-exit-after-recovery-8l|outcome-first-exit-after-recovery-8l|decision-first-exit-after-recovery-8k/manual-review-danger-continuity-8l|outcome-danger-continuity-8l|decision-danger-continuity-8k/manual-review-structure-after-neutralized-action-8l|outcome-structure-after-neutralized-action-8l|decision-structure-after-pressure-8k",
+    "8U section links must use canonical 8M/8L/8K IDs.",
+  );
   assertTest(model.fieldCount === 21, "8U must define twenty-one fields.");
   assertTest(model.disabledFieldCount === 21, "all 8U fields must be disabled.");
   assertTest(model.activeFieldCount === 0, "8U must not activate fields.");
@@ -64,6 +83,18 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
   assertTest(model.exportHtmlAfter8U.includes('id="compressed-export-8u"'), "main id must be compressed-export-8u.");
   assertTest(!model.exportHtmlAfter8U.includes('id="compressed-export-8t"'), "main id must no longer be compressed-export-8t.");
   assertTest(model.exportUnder900Seconds, "export must remain under 900 seconds.");
+  assertTest(
+    oversizedButUnderHardLimit.exportBudgetAudit.exportReadTimeSecondsAfter8U > 800,
+    "oversized fixture must exceed 800 seconds.",
+  );
+  assertTest(
+    oversizedButUnderHardLimit.exportBudgetAudit.exportReadTimeSecondsAfter8U <= 900,
+    "oversized fixture must remain under hard 900-second limit.",
+  );
+  assertTest(
+    oversizedButUnderHardLimit.status === "PARTIAL",
+    "8U model must downgrade 801-900 second exports to PARTIAL.",
+  );
   assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
   assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
   assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");
