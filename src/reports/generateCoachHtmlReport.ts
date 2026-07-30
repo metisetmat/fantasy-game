@@ -100,6 +100,7 @@ import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from 
 import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualReviewPreviewDecisionGateProduct8Q";
 import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
 import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
+import { buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel } from "./buildManualReviewWorkflowUxSkeletonWithoutPersistence8S";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -496,8 +497,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8R: productHtmlWith8Q,
     exportHtmlBefore8R: exportHtmlWith8Q,
   });
-  const finalProductHtml = manualReviewWorkflowReadiness8R.productHtmlAfter8R;
-  const exportHtml = manualReviewWorkflowReadiness8R.exportHtmlAfter8R;
+  const manualReviewWorkflowUxSkeleton8S = buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel({
+    baseline8R: manualReviewWorkflowReadiness8R,
+    productHtmlBefore8S: manualReviewWorkflowReadiness8R.productHtmlAfter8R,
+    exportHtmlBefore8S: manualReviewWorkflowReadiness8R.exportHtmlAfter8R,
+  });
+  const finalProductHtml = manualReviewWorkflowUxSkeleton8S.productHtmlAfter8S;
+  const exportHtml = manualReviewWorkflowUxSkeleton8S.exportHtmlAfter8S;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

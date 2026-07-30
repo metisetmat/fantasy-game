@@ -457,7 +457,9 @@ export function auditManualReviewWorkflowIntegrationBudget8R(input: {
   const tacticalMapCardsStillVisible = input.productHtml.includes("tactical-map-card") && input.exportHtml.includes("Cartes tactiques essentielles");
   const sourceOfTruthNoteVisible = input.productHtml.includes("Source officielle") && (input.exportHtml.includes("Source officielle") || input.exportHtml.includes("score_change"));
   const productSectionOrderPreserved = orderPreserved(input.productHtml, 'id="manual-review-preview-decision-gate-8q"', 'id="manual-review-workflow-readiness-8r"');
-  const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8r"') || input.exportHtml.includes('id="compressed-export-current"');
+  const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8r"') ||
+    input.exportHtml.includes('id="compressed-export-8s"') ||
+    input.exportHtml.includes('id="compressed-export-current"');
   const values = [
     productWorkflowReadinessVisible,
     exportWorkflowReadinessVisible,
