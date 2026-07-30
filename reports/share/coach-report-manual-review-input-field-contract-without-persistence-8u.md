@@ -69,9 +69,9 @@ officialScore: 12 - 7
 ## Field Sections
 | Order | Section | Question | Linked 8M | Linked 8L | Linked 8K | Fields | Disabled |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Premiere sortie apres recuperation | La premiere sortie apres recuperation a-t-elle confirme le plan d'observation ? | manual-review-section-first-exit-8m | seasonless-observation-card-first-exit-8l | coach-decision-card-first-exit-8k | 7 | true |
-| 2 | Continuite apres entree en zone dangereuse | L'entree en zone dangereuse a-t-elle produit une continuite credible ? | manual-review-section-danger-continuity-8m | seasonless-observation-card-danger-continuity-8l | coach-decision-card-danger-continuity-8k | 7 | true |
-| 3 | Structure apres action neutralisee | L'equipe a-t-elle conserve une structure lisible apres action neutralisee ? | manual-review-section-neutralized-action-8m | seasonless-observation-card-neutralized-action-8l | coach-decision-card-neutralized-action-8k | 7 | true |
+| 1 | Premiere sortie apres recuperation | La premiere sortie apres recuperation a-t-elle confirme le plan d'observation ? | manual-review-first-exit-after-recovery-8l | outcome-first-exit-after-recovery-8l | decision-first-exit-after-recovery-8k | 7 | true |
+| 2 | Continuite apres entree en zone dangereuse | L'entree en zone dangereuse a-t-elle produit une continuite credible ? | manual-review-danger-continuity-8l | outcome-danger-continuity-8l | decision-danger-continuity-8k | 7 | true |
+| 3 | Structure apres action neutralisee | L'equipe a-t-elle conserve une structure lisible apres action neutralisee ? | manual-review-structure-after-neutralized-action-8l | outcome-structure-after-neutralized-action-8l | decision-structure-after-pressure-8k | 7 | true |
 
 ## Fields Matrix
 | Section | Order | Field | Kind | Expected | Required later | Active 8U | Can submit | Can persist | Can officialize |

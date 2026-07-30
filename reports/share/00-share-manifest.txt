@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-30T12:20:02.837Z
+Generated timestamp: 2026-07-30T16:23:38.148Z
 Task/sprint name: Sprint 8U - Manual Review Input Field Contract Without Persistence
 Final file count: 20
 
@@ -1167,19 +1167,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewPreviewDecisionGateAudit8Q.ts
- M src/reports/manualReviewWorkflowReadinessAudit8R.ts
- M src/reports/manualReviewWorkflowUxSkeleton8S.test.ts
- M src/reports/manualReviewWorkflowUxSkeletonAudit8S.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewInputFieldContractWithoutPersistence8U.ts
-?? src/reports/manualReviewInputFieldContract8U.test.ts
-?? src/reports/manualReviewInputFieldContractAudit8U.ts
-?? src/reports/manualReviewInputFieldContractTypes8U.ts
-?? src/reports/manualReviewInputFieldContractWarnings8U.ts
-?? src/reports/renderManualReviewInputFieldContractExport8U.ts
-?? src/reports/renderManualReviewInputFieldContractProduct8U.ts
+ M src/reports/buildManualReviewInputFieldContractWithoutPersistence8U.ts
+ M src/reports/manualReviewInputFieldContract8U.test.ts
