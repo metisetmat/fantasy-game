@@ -77,7 +77,14 @@ export function validateManualReviewWorkflowUxSkeleton8S(): readonly string[] {
   assertTest(model.exportAudit.exportMainCurrentVersionVisible, "export main must expose 8S metadata.");
   assertTest(!model.exportAudit.exportMainIdStillCompressedExport8R, "main id must no longer be compressed-export-8r.");
   assertTest(!model.exportAudit.exportMainIdStillCompressedExport8Q, "main id must no longer be compressed-export-8q.");
-  assertTest(model.exportHtmlAfter8S.includes('id="compressed-export-8s"'), "main id must be compressed-export-8s.");
+  assertTest(
+    model.exportHtmlAfter8S.includes('id="compressed-export-8s"') ||
+      (
+        model.exportHtmlAfter8S.includes('id="compressed-export-8t"') &&
+        model.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      ),
+    "main id must be compressed-export-8s or a current export id that preserves 8S metadata.",
+  );
   assertTest(model.exportUnder900Seconds, "export must remain under 900 seconds.");
   assertTest(model.productHtmlAfter8S.includes("Squelette UX de revue manuelle"), "product must contain the 8S UX skeleton section.");
   assertTest(model.exportHtmlAfter8S.includes("Squelette UX revue manuelle"), "export must contain the 8S compact UX skeleton section.");

@@ -1544,6 +1544,284 @@
 </article>
 </div>
 </section>
+<section id="manual-review-ux-interaction-contract-8t" class="premium-section manual-review-ux-interaction-contract-8t" data-manual-review-ux-interaction-contract-version="8T">
+<h2>Contrat d'interaction UX</h2>
+<p class="eyebrow">Interactions futures documentees - toujours desactivees</p>
+<p>Cette section decrit ce que les interactions du futur parcours pourront faire, mais aucune interaction reelle n'est activee en 8T. Le parcours reste non interactif, non officiel, non persiste et sans submit/API/backend.</p>
+<article class="product-card manual-review-ux-interaction-status-8t">
+<h3>Statut du contrat</h3>
+<p><strong>Contrat UX :</strong> pret en lecture.</p>
+<p><strong>Interactions futures :</strong> documentees mais bloquees.</p>
+<p><strong>Workflow 8R :</strong> pret pour preview non persistante.</p>
+<p><strong>Gate 8Q :</strong> a completer.</p>
+<p><strong>Actions activees :</strong> 0.</p>
+<p><strong>Limite :</strong> pas de stockage, pas de submit, pas d'API, pas de decision automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-ux-interaction-contract-badge-8t">Contrat UX 8T</span>
+<span class="badge manual-review-ux-interaction-contract-badge-8t">Future only</span>
+<span class="badge manual-review-ux-interaction-contract-badge-8t">Non interactif</span>
+<span class="badge manual-review-ux-interaction-contract-badge-8t">Non officiel</span>
+<span class="badge manual-review-ux-interaction-contract-badge-8t">Non persiste</span>
+<span class="badge manual-review-ux-interaction-contract-badge-8t">Non applique</span>
+</div>
+</article>
+<article class="product-card manual-review-ux-interaction-matrix-8t">
+<h3>Matrice des interactions futures</h3>
+<table class="coach-table manual-review-ux-interaction-table-8t">
+<thead><tr><th>Etape</th><th>Interaction future</th><th>Statut 8T</th><th>Raison de blocage</th><th>Prerequis avant activation</th><th>Refus affiche</th></tr></thead>
+<tbody><tr class="manual-review-ux-interaction-step-row-8t"><td>8M</td><td>Saisir une vraie revue</td><td>documented_but_blocked</td><td>8T definit le contrat, mais aucune saisie reelle n&#39;est encore autorisee.</td><td>UX de saisie reelle; decision produit sur stockage; validation permissions; regle de statut non officiel; strategie d&#39;abandon sans sauvegarde</td><td>REAL_INPUT_NOT_ENABLED_8T</td></tr>
+<tr class="manual-review-ux-interaction-step-row-8t"><td>8N</td><td>Valider l&#39;entree</td><td>documented_but_blocked</td><td>Aucun payload reel n&#39;est envoye en 8T.</td><td>payload reel type; mode validate_only ou preview_only; pas de submit backend; pas de mutation officielle; messages d&#39;erreur UX</td><td>REAL_VALIDATION_NOT_ENABLED_8T</td></tr>
+<tr class="manual-review-ux-interaction-step-row-8t"><td>8O</td><td>Voir la preview</td><td>documented_but_blocked</td><td>La preview reelle depuis saisie coach est hors 8T.</td><td>payload valide 8N; renderer read-only; marquage non officiel; rejet des payloads invalides; pas de persistance</td><td>REAL_PREVIEW_NOT_ENABLED_8T</td></tr>
+<tr class="manual-review-ux-interaction-step-row-8t"><td>8P</td><td>Comparer au plan</td><td>documented_but_blocked</td><td>La comparaison reelle reste liee a une future preview validee.</td><td>preview reelle validee; plan 8K/8L disponible; mapping explicite des questions; pas de conclusion vraie-match automatique; pas d&#39;official truth</td><td>REAL_COMPARISON_NOT_ENABLED_8T</td></tr>
+<tr class="manual-review-ux-interaction-step-row-8t"><td>8Q</td><td>Lire le gate</td><td>documented_but_blocked</td><td>Le gate reel ne peut pas devenir une decision automatique.</td><td>comparaison validee; regles de gate transparentes; wording lisibilite, pas decision; aucun changement de selection/tactique; revue encore marquee non officielle</td><td>REAL_GATE_NOT_ENABLED_8T</td></tr>
+<tr class="manual-review-ux-interaction-step-row-8t"><td>8R</td><td>Confirmer readiness workflow</td><td>documented_but_blocked</td><td>Readiness workflow ne vaut pas readiness d&#39;usage reel.</td><td>vraie saisie testee; strategie de stockage decidee separement; permissions decidees separement; policy d&#39;historique decidee separement; frontiere official truth conservee</td><td>STORAGE_NOT_DECIDED_8T</td></tr></tbody>
+</table>
+</article>
+<h3>Refusal states</h3>
+<div class="product-card-grid manual-review-ux-refusal-state-grid-8t">
+<article class="product-card manual-review-ux-refusal-state-card-8t">
+<p class="eyebrow">blocking - action future desactivee en 8T</p>
+<h3>Saisie reelle non activee</h3>
+<p>Cette action est decrite pour un futur sprint mais reste desactivee ici. Aucune donnee coach reelle n&#39;est traitee dans 8T. Cette etape necessitera une decision produit séparée avant activation.</p>
+<p><strong>Raison technique :</strong> No real input component is active in 8T.</p>
+<p><strong>Decision future requise :</strong> real_input_component_design</p>
+<p class="guard">Previent: submit, api_call, backend_action, persistence</p>
+</article>
+<article class="product-card manual-review-ux-refusal-state-card-8t">
+<p class="eyebrow">blocking - action future desactivee en 8T</p>
+<h3>Validation reelle non activee</h3>
+<p>Aucune donnee coach reelle n&#39;est traitee dans 8T.</p>
+<p><strong>Raison technique :</strong> No typed real payload enters the validation boundary.</p>
+<p><strong>Decision future requise :</strong> real_payload_validation_messages</p>
+<p class="guard">Previent: api_call, backend_action, official_truth_promotion</p>
+</article>
+<article class="product-card manual-review-ux-refusal-state-card-8t">
+<p class="eyebrow">warning - action future desactivee en 8T</p>
+<h3>Preview reelle non activee</h3>
+<p>Cette action est decrite pour un futur sprint mais reste desactivee ici. Aucune donnee coach reelle n&#39;est traitee dans 8T. Cette etape necessitera une decision produit séparée avant activation.</p>
+<p><strong>Raison technique :</strong> Preview rendering is documented but remains fixture/read-only.</p>
+<p><strong>Decision future requise :</strong> error_recovery_policy</p>
+<p class="guard">Previent: persistence, official_truth_promotion, automatic_decision</p>
+</article>
+<article class="product-card manual-review-ux-refusal-state-card-8t">
+<p class="eyebrow">warning - action future desactivee en 8T</p>
+<h3>Comparaison reelle non activee</h3>
+<p>Le statut de lecture ne devient pas une decision tactique.</p>
+<p><strong>Raison technique :</strong> Real comparison needs a validated preview payload from a later sprint.</p>
+<p><strong>Decision future requise :</strong> official_truth_boundary_policy</p>
+<p class="guard">Previent: official_truth_promotion, selection_automation, tactical_instruction</p>
+</article>
+<article class="product-card manual-review-ux-refusal-state-card-8t">
+<p class="eyebrow">blocking - action future desactivee en 8T</p>
+<h3>Gate reel non actif</h3>
+<p>Le statut de lecture ne devient pas une decision tactique.</p>
+<p><strong>Raison technique :</strong> The gate remains a readability contract and cannot drive automatic decisions.</p>
+<p><strong>Decision future requise :</strong> permissions_and_access_control</p>
+<p class="guard">Previent: automatic_decision, selection_automation, tactical_instruction</p>
+</article>
+<article class="product-card manual-review-ux-refusal-state-card-8t">
+<p class="eyebrow">blocking - action future desactivee en 8T</p>
+<h3>Stockage non decide</h3>
+<p>Aucun stockage ou historique n&#39;est cree.</p>
+<p><strong>Raison technique :</strong> Storage, permissions, history, and officialization are deferred product decisions.</p>
+<p><strong>Decision future requise :</strong> storage_product_decision</p>
+<p class="guard">Previent: submit, api_call, backend_action, persistence, official_truth_promotion, automatic_decision, selection_automation, tactical_instruction</p>
+</article>
+</div>
+<article class="product-card manual-review-ux-deferred-decisions-8t">
+<h3>Decisions differees</h3>
+<ul>
+<li>decision de stockage</li>
+<li>permissions</li>
+<li>historique</li>
+<li>officialisation</li>
+<li>abandon sans sauvegarde</li>
+<li>audit logging si stockage futur</li>
+<li>error recovery</li>
+<li>accessibilite clavier</li>
+</ul>
+</article>
+<article class="product-card manual-review-ux-activation-requirements-8t">
+<h3>Activation requirements</h3>
+<table class="coach-table manual-review-ux-requirement-table-8t">
+<thead><tr><th>Requirement</th><th>Label</th><th>Satisfait en 8T</th><th>Future sprint</th><th>Frontiere protegee</th></tr></thead>
+<tbody><tr><td>real_input_component_design</td><td>UX de saisie reelle</td><td>false</td><td>8U</td><td>submit</td></tr>
+<tr><td>real_payload_validation_messages</td><td>Messages de validation payload</td><td>false</td><td>8U</td><td>api_call</td></tr>
+<tr><td>storage_product_decision</td><td>Decision produit stockage</td><td>false</td><td>future storage sprint</td><td>persistence</td></tr>
+<tr><td>permissions_and_access_control</td><td>Permissions et acces</td><td>false</td><td>future permissions sprint</td><td>backend_action</td></tr>
+<tr><td>history_policy</td><td>Politique historique</td><td>false</td><td>future history sprint</td><td>official_truth_promotion</td></tr>
+<tr><td>official_truth_boundary_policy</td><td>Frontiere official truth</td><td>false</td><td>future boundary sprint</td><td>official_truth_promotion</td></tr>
+<tr><td>abandon_without_save_policy</td><td>Abandon sans sauvegarde</td><td>false</td><td>8U</td><td>persistence</td></tr>
+<tr><td>error_recovery_policy</td><td>Error recovery</td><td>false</td><td>8U</td><td>automatic_decision</td></tr>
+<tr><td>accessibility_keyboard_navigation_policy</td><td>Accessibilite clavier</td><td>false</td><td>future accessibility sprint</td><td>submit</td></tr>
+<tr><td>audit_logging_policy_if_storage_later</td><td>Audit logging si stockage futur</td><td>false</td><td>future storage sprint</td><td>persistence</td></tr></tbody>
+</table>
+</article>
+<h3>Interactions futures documentees</h3>
+<div class="product-card-grid manual-review-ux-future-interaction-grid-8t">
+<article class="product-card manual-review-ux-future-interaction-card-8t" aria-disabled="true">
+<p class="eyebrow">8M - documented_but_blocked</p>
+<h3>Saisir une vraie revue</h3>
+<p><strong>Intention future :</strong> real_manual_review_input</p>
+<p><strong>Traitement 8T :</strong> disabled_control</p>
+<p><strong>Raison de blocage :</strong> 8T definit le contrat, mais aucune saisie reelle n&#39;est encore autorisee.</p>
+<p><strong>Avant activation :</strong></p>
+<ul>
+<li>real_input_component_design</li>
+<li>storage_product_decision</li>
+<li>permissions_and_access_control</li>
+</ul>
+<p><strong>Doit toujours eviter :</strong></p>
+<ul>
+<li>submit/backend avant decision</li>
+<li>official truth promotion</li>
+<li>score mutation</li>
+<li>selection automation</li>
+<li>tactical automation</li>
+</ul>
+<p class="guard">Refus affiche: REAL_INPUT_NOT_ENABLED_8T. Interaction future documentee mais bloquee.</p>
+</article>
+<article class="product-card manual-review-ux-future-interaction-card-8t" aria-disabled="true">
+<p class="eyebrow">8N - documented_but_blocked</p>
+<h3>Valider la revue</h3>
+<p><strong>Intention future :</strong> validate_manual_review_payload</p>
+<p><strong>Traitement 8T :</strong> read_only_panel</p>
+<p><strong>Raison de blocage :</strong> Aucun payload reel n&#39;est envoye en 8T.</p>
+<p><strong>Avant activation :</strong></p>
+<ul>
+<li>real_payload_validation_messages</li>
+<li>error_recovery_policy</li>
+</ul>
+<p><strong>Doit toujours eviter :</strong></p>
+<ul>
+<li>submit/backend avant decision</li>
+<li>official truth promotion</li>
+<li>score mutation</li>
+<li>selection automation</li>
+<li>tactical automation</li>
+</ul>
+<p class="guard">Refus affiche: REAL_VALIDATION_NOT_ENABLED_8T. Interaction future documentee mais bloquee.</p>
+</article>
+<article class="product-card manual-review-ux-future-interaction-card-8t" aria-disabled="true">
+<p class="eyebrow">8O - documented_but_blocked</p>
+<h3>Voir la preview reelle</h3>
+<p><strong>Intention future :</strong> render_preview_from_valid_input</p>
+<p><strong>Traitement 8T :</strong> placeholder_copy</p>
+<p><strong>Raison de blocage :</strong> La preview reelle depuis saisie coach est hors 8T.</p>
+<p><strong>Avant activation :</strong></p>
+<ul>
+<li>payload valide</li>
+<li>renderer read-only</li>
+<li>marquage non officiel</li>
+</ul>
+<p><strong>Doit toujours eviter :</strong></p>
+<ul>
+<li>submit/backend avant decision</li>
+<li>official truth promotion</li>
+<li>score mutation</li>
+<li>selection automation</li>
+<li>tactical automation</li>
+</ul>
+<p class="guard">Refus affiche: REAL_PREVIEW_NOT_ENABLED_8T. Interaction future documentee mais bloquee.</p>
+</article>
+<article class="product-card manual-review-ux-future-interaction-card-8t" aria-disabled="true">
+<p class="eyebrow">8P - documented_but_blocked</p>
+<h3>Comparer au plan</h3>
+<p><strong>Intention future :</strong> compare_preview_to_observation_plan</p>
+<p><strong>Traitement 8T :</strong> read_only_panel</p>
+<p><strong>Raison de blocage :</strong> La comparaison reelle reste liee a une future preview validee.</p>
+<p><strong>Avant activation :</strong></p>
+<ul>
+<li>preview validee</li>
+<li>mapping explicite des questions</li>
+<li>plan 8K/8L disponible</li>
+</ul>
+<p><strong>Doit toujours eviter :</strong></p>
+<ul>
+<li>submit/backend avant decision</li>
+<li>official truth promotion</li>
+<li>score mutation</li>
+<li>selection automation</li>
+<li>tactical automation</li>
+</ul>
+<p class="guard">Refus affiche: REAL_COMPARISON_NOT_ENABLED_8T. Interaction future documentee mais bloquee.</p>
+</article>
+<article class="product-card manual-review-ux-future-interaction-card-8t" aria-disabled="true">
+<p class="eyebrow">8Q - documented_but_blocked</p>
+<h3>Lire le gate reel</h3>
+<p><strong>Intention future :</strong> compute_readability_gate</p>
+<p><strong>Traitement 8T :</strong> read_only_panel</p>
+<p><strong>Raison de blocage :</strong> Le gate reel ne peut pas devenir une decision automatique.</p>
+<p><strong>Avant activation :</strong></p>
+<ul>
+<li>regles de gate transparentes</li>
+<li>wording lisibilite</li>
+<li>frontiere non officielle</li>
+</ul>
+<p><strong>Doit toujours eviter :</strong></p>
+<ul>
+<li>submit/backend avant decision</li>
+<li>official truth promotion</li>
+<li>score mutation</li>
+<li>selection automation</li>
+<li>tactical automation</li>
+</ul>
+<p class="guard">Refus affiche: REAL_GATE_NOT_ENABLED_8T. Interaction future documentee mais bloquee.</p>
+</article>
+<article class="product-card manual-review-ux-future-interaction-card-8t" aria-disabled="true">
+<p class="eyebrow">8R - documented_but_blocked</p>
+<h3>Enregistrer ou historiser</h3>
+<p><strong>Intention future :</strong> persist_or_history_review</p>
+<p><strong>Traitement 8T :</strong> disabled_control</p>
+<p><strong>Raison de blocage :</strong> Aucune decision produit de stockage, permissions, historique ou officialisation n&#39;existe dans 8T.</p>
+<p><strong>Avant activation :</strong></p>
+<ul>
+<li>storage_product_decision</li>
+<li>permissions_and_access_control</li>
+<li>history_policy</li>
+<li>official_truth_boundary_policy</li>
+<li>audit_logging_policy_if_storage_later</li>
+</ul>
+<p><strong>Doit toujours eviter :</strong></p>
+<ul>
+<li>localStorage without decision</li>
+<li>database write</li>
+<li>file write</li>
+<li>memory creation</li>
+<li>official truth promotion</li>
+<li>score mutation</li>
+<li>tactical automation</li>
+</ul>
+<p class="guard">Refus affiche: STORAGE_NOT_DECIDED_8T. Interaction future documentee mais bloquee.</p>
+</article>
+</div>
+<article class="product-card manual-review-ux-forbidden-8t">
+<h3>Ce qui reste interdit</h3>
+<ul>
+<li>vrai submit</li>
+<li>API/backend</li>
+<li>localStorage</li>
+<li>DB</li>
+<li>fichier</li>
+<li>memoire</li>
+<li>official truth</li>
+<li>decision automatique</li>
+<li>selection</li>
+<li>tactique</li>
+<li>mutation score/timeline</li>
+</ul>
+</article>
+<article class="product-card manual-review-ux-ready-8t">
+<h3>Ce qui est pret</h3>
+<ul>
+<li>le parcours UX est lisible</li>
+<li>les interactions futures sont nommees</li>
+<li>les refus sont definis</li>
+<li>les preconditions sont listees</li>
+<li>les frontieres source-of-truth sont maintenues</li>
+</ul>
+</article>
+</section>
 
   
   <section id="next-match-plan" class="product-section">

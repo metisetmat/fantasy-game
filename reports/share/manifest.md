@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-30T09:14:43.313Z
-Task/sprint: Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence
+Generated: 2026-07-30T10:56:30.144Z
+Task/sprint: Sprint 8T - Manual Review UX Interaction Contract Without Persistence
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md
-- validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md
+- coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md
+- validation.coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md
 - README.md
 
 ## Bundle Files

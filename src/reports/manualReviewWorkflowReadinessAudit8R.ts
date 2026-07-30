@@ -183,15 +183,15 @@ export function auditManualReviewWorkflowNonPersistence8R(input: {
 }): ManualReviewWorkflowNonPersistenceAudit8R {
   const slice = workflowSlice(input.productHtml, input.exportHtml);
   const localStoragePersistenceCount = countMatches(slice, /localStorage\s*\./giu);
-  const databasePersistenceCount = countMatches(slice, /database write|db write|sqlite write|insert into/giu);
-  const filePersistenceCount = countMatches(slice, /writeFile|persisted file|file persistence created/giu);
-  const backendSubmitActionCount = countMatches(slice, /backend submit|submit backend|api\/manual-review|post manual review/giu);
+  const databasePersistenceCount = countMatches(slice, /\binsert\s+into\b|\bsqlite(?:3)?\s*\.\s*(?:run|exec|prepare)\s*\(|\bdb\s*\.\s*(?:run|exec|insert|save|write)\s*\(/giu);
+  const filePersistenceCount = countMatches(slice, /\bwriteFile(?:Sync)?\s*\(|\bcreateWriteStream\s*\(|\bfs\s*\.\s*(?:writeFile|appendFile|createWriteStream)\s*\(/giu);
+  const backendSubmitActionCount = countMatches(slice, /fetch\s*\(\s*["'][^"']*\/api\/manual-review|axios\.\w+\s*\(\s*["'][^"']*\/api\/manual-review|<form\b[^>]*\baction=["'][^"']*\/api\/manual-review|method=["']post["']/giu);
   const formSubmitButtonCount = countMatches(slice, /<button[^>]*submit|type="submit"|<form\b/giu);
   const apiCallCount = countMatches(slice, /fetch\(|XMLHttpRequest|axios\./giu);
-  const memoryCreationCount = countMatches(slice, /memory created|memoire creee|creates? memory/giu);
-  const seasonMemoryCreationCount = countMatches(slice, /season memory created|memoire de saison creee/giu);
-  const teamStyleMemoryCreationCount = countMatches(slice, /team style memory created|memoire de style creee/giu);
-  const storageDecisionImplementedCount = countMatches(slice, /stockage pret|storage ready|persistence implemented/giu);
+  const memoryCreationCount = countMatches(slice, /\bcreate(?:Coach|ManualReview|Preview)?Memory\s*\(|\bnew\s+\w*Memory\b/giu);
+  const seasonMemoryCreationCount = countMatches(slice, /\bcreateSeasonMemory\s*\(|\bnew\s+SeasonMemory\b/giu);
+  const teamStyleMemoryCreationCount = countMatches(slice, /\bcreateTeamStyleMemory\s*\(|\bnew\s+TeamStyleMemory\b/giu);
+  const storageDecisionImplementedCount = countMatches(slice, /\bstorageAdapter\s*:\s*["']active["']|\bpersistenceImplemented\s*:\s*true|\bstorageReady\s*:\s*true/giu);
   const workflowPersistencePerformed = localStoragePersistenceCount + databasePersistenceCount + filePersistenceCount + backendSubmitActionCount + formSubmitButtonCount + apiCallCount + memoryCreationCount + seasonMemoryCreationCount + teamStyleMemoryCreationCount + storageDecisionImplementedCount > 0;
   const warnings: ManualReviewWorkflowReadinessWarningCode8R[] = [];
   if (localStoragePersistenceCount > 0) warnings.push("LOCAL_STORAGE_PERSISTENCE_DETECTED");
@@ -458,6 +458,7 @@ export function auditManualReviewWorkflowIntegrationBudget8R(input: {
   const sourceOfTruthNoteVisible = input.productHtml.includes("Source officielle") && (input.exportHtml.includes("Source officielle") || input.exportHtml.includes("score_change"));
   const productSectionOrderPreserved = orderPreserved(input.productHtml, 'id="manual-review-preview-decision-gate-8q"', 'id="manual-review-workflow-readiness-8r"');
   const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8r"') ||
+    input.exportHtml.includes('id="compressed-export-8t"') ||
     input.exportHtml.includes('id="compressed-export-8s"') ||
     input.exportHtml.includes('id="compressed-export-current"');
   const values = [

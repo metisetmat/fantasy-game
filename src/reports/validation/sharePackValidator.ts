@@ -446,6 +446,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewWorkflowReadiness8RValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md"));
   const manualReviewWorkflowUxSkeleton8S = readIfExists(join(shareDirectory, "coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md"));
   const manualReviewWorkflowUxSkeleton8SValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md"));
+  const manualReviewUxInteractionContract8T = readIfExists(join(shareDirectory, "coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md"));
+  const manualReviewUxInteractionContract8TValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3566,6 +3568,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md",
     ...sprint8RForbiddenLeftovers,
   ];
+  const sprint8TExpectedFiles = sprint8SExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md"
+      ? "coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md"
+      : file === "validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md"
+        ? "validation.coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md"
+        : file
+  );
+  const sprint8TForbiddenLeftovers = [
+    "coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md",
+    "validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md",
+    ...sprint8SForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5227,6 +5241,44 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 8Q source files", bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewDecisionGateProduct8Q.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewDecisionGateExport8Q.ts") && bundleReports.includes("src/reports/manualReviewPreviewDecisionGate8Q.test.ts"), "8Q source bundled"),
     check("source 8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewDecisionGate8QValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8TChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8TExpectedFiles.every((file) => requiredCopied(file)), sprint8TExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8TExpectedFiles.every((file) => manifest.includes(file)), sprint8TExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8T", activeConfig.sprintName === "Sprint 8T - Manual Review UX Interaction Contract Without Persistence", activeConfig.sprintName),
+    check("previous standalone 8S docs are not copied", sprint8TForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8TForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8T oriented", readme.includes("# Sprint 8T Share Pack") && readme.includes("coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md") && readme.includes("Manual Review UX Interaction Contract"), "README current"),
+    check("8T report included", manualReviewUxInteractionContract8T.includes("# Manual Review UX Interaction Contract Without Persistence 8T") && manualReviewUxInteractionContract8T.includes("Interaction Steps Table") && manualReviewUxInteractionContract8T.includes("Future Interactions Table") && manualReviewUxInteractionContract8T.includes("Refusal States Table"), "8T doc included"),
+    check("8T validation is PASS", manualReviewUxInteractionContract8TValidation.includes("Status: PASS") && manualReviewUxInteractionContract8TValidation.includes("ManualReviewUxInteractionContractWithoutPersistence8TModel exists"), "8T validation current"),
+    check("product interaction contract visible", coachProductHtml.includes('id="manual-review-ux-interaction-contract-8t"') && coachProductHtml.includes("Contrat d'interaction UX") && coachProductHtml.includes('data-manual-review-ux-interaction-contract-version="8T"'), "product 8T visible"),
+    check("export interaction contract visible", coachExportHtml.includes('id="manual-review-ux-interaction-contract-export-8t"') && coachExportHtml.includes("Contrat UX revue manuelle") && coachExportHtml.includes('data-manual-review-ux-interaction-contract-version="8T"'), "export 8T visible"),
+    check("interaction contract uses UX skeleton 8S", manualReviewUxInteractionContract8TValidation.includes("interaction contract uses UX skeleton 8S") && coachProductHtml.includes('id="manual-review-workflow-ux-skeleton-8s"') && coachExportHtml.includes('id="manual-review-workflow-ux-skeleton-export-8s"'), "8S baseline visible"),
+    check("interaction step count = 6", manualReviewUxInteractionContract8TValidation.includes("interaction step count = 6") && manualReviewUxInteractionContract8TValidation.includes("interactionContractStepCount: 6"), "6 steps"),
+    check("steps are 8M/8N/8O/8P/8Q/8R", manualReviewUxInteractionContract8TValidation.includes("steps are 8M/8N/8O/8P/8Q/8R") && manualReviewUxInteractionContract8T.includes("Saisir une vraie revue") && manualReviewUxInteractionContract8T.includes("Confirmer readiness workflow"), "8M/8N/8O/8P/8Q/8R"),
+    check("future interaction count = 6", manualReviewUxInteractionContract8TValidation.includes("future interaction count = 6") && manualReviewUxInteractionContract8TValidation.includes("futureInteractionCount: 6"), "6 future interactions"),
+    check("blocked interaction count = 6", manualReviewUxInteractionContract8TValidation.includes("blocked interaction count = 6") && manualReviewUxInteractionContract8TValidation.includes("blockedInteractionCount: 6"), "6 blocked"),
+    check("enabled interaction count = 0", manualReviewUxInteractionContract8TValidation.includes("enabled interaction count = 0") && manualReviewUxInteractionContract8TValidation.includes("enabledInteractionCount: 0"), "0 enabled"),
+    check("refusal state count = 6", manualReviewUxInteractionContract8TValidation.includes("refusal state count = 6") && manualReviewUxInteractionContract8TValidation.includes("refusalStateCount: 6"), "6 refusal states"),
+    check("activation requirements and deferred decisions visible", manualReviewUxInteractionContract8TValidation.includes("activation requirements visible") && manualReviewUxInteractionContract8TValidation.includes("storage decision deferred") && manualReviewUxInteractionContract8TValidation.includes("permissions decision deferred") && manualReviewUxInteractionContract8TValidation.includes("officialization decision deferred"), "requirements/deferred decisions"),
+    check("workflow ready while review still needs completion", manualReviewUxInteractionContract8TValidation.includes("workflowReadinessStatusFrom8S: ready_for_non_persistent_preview") && manualReviewUxInteractionContract8TValidation.includes("reviewGateStatusFrom8Q: needs_completion") && manualReviewUxInteractionContract8TValidation.includes("readiness distinct from review gate remains visible"), "ready workflow / incomplete review"),
+    check("no submit backend API or persistence", manualReviewUxInteractionContract8TValidation.includes("submitButtonCount: 0") && manualReviewUxInteractionContract8TValidation.includes("backendActionCount: 0") && manualReviewUxInteractionContract8TValidation.includes("apiCallCount: 0") && manualReviewUxInteractionContract8TValidation.includes("localStoragePersistenceCount: 0") && manualReviewUxInteractionContract8TValidation.includes("databasePersistenceCount: 0") && manualReviewUxInteractionContract8TValidation.includes("filePersistenceCount: 0"), "no submit/storage/API"),
+    check("no memory selection tactic or official truth", manualReviewUxInteractionContract8TValidation.includes("memoryCreationCount: 0") && manualReviewUxInteractionContract8TValidation.includes("seasonMemoryCreationCount: 0") && manualReviewUxInteractionContract8TValidation.includes("teamStyleMemoryCreationCount: 0") && manualReviewUxInteractionContract8TValidation.includes("officialTruthPromotionCount: 0") && manualReviewUxInteractionContract8TValidation.includes("selectionRecommendationCount: 0") && manualReviewUxInteractionContract8TValidation.includes("tacticalInstructionCount: 0"), "no memory/truth/action"),
+    check("8S 8R 8Q 8P 8O 8N 8M 8L 8K preserved", manualReviewUxInteractionContract8TValidation.includes("baseline 8S visible and preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8R preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8Q preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8P preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8O preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8N preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8M preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8L preserved") && manualReviewUxInteractionContract8TValidation.includes("baseline 8K preserved"), "manual-review chain preserved"),
+    check("export metadata is 8T", coachExportHtml.includes("<title>Rapport coach export compact 8T - contrat UX revue manuelle</title>") && coachExportHtml.includes("Export compact 8T") && coachExportHtml.includes('id="compressed-export-8t"') && manualReviewUxInteractionContract8TValidation.includes("export title mentions 8T") && manualReviewUxInteractionContract8TValidation.includes("export visible badge mentions 8T"), "export metadata 8T"),
+    check("export id no longer stale 8S/8R/8Q/8P/8N/8I", !coachExportHtml.includes('id="compressed-export-8s"') && !coachExportHtml.includes('id="compressed-export-8r"') && !coachExportHtml.includes('id="compressed-export-8q"') && !coachExportHtml.includes('id="compressed-export-8p"') && !coachExportHtml.includes('id="compressed-export-8n"') && !coachExportHtml.includes('id="compressed-export-8i"'), "stale ids removed"),
+    check("export budget checked honestly", manualReviewUxInteractionContract8TValidation.includes("exportReadTimeSecondsAfter8T <= 900") && manualReviewUxInteractionContract8TValidation.includes("exportUnder900Seconds correctly computed") && manualReviewUxInteractionContract8TValidation.includes("exportUnder800Seconds correctly computed") && manualReviewUxInteractionContract8TValidation.includes("no PASS message on failed numeric rule"), "export budget"),
+    check("source-of-truth preserved", manualReviewUxInteractionContract8TValidation.includes("source-of-truth preserved") && manualReviewUxInteractionContract8TValidation.includes("manual interaction contract does not promote coach input to official truth"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewUxInteractionContract8TValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewUxInteractionContract8TValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewUxInteractionContract8TValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8T source files", bundleReports.includes("src/reports/buildManualReviewUxInteractionContractWithoutPersistence8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractProduct8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractExport8T.ts") && bundleReports.includes("src/reports/manualReviewUxInteractionContract8T.test.ts"), "8T source bundled"),
+    check("source 8S/8R/8Q/8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts") && bundleReports.includes("src/reports/buildManualReviewWorkflowReadinessWithoutPersistence8R.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewUxInteractionContract8TValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8SChecks: readonly SharePackCheck[] = [
@@ -9590,6 +9642,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8T - Manual Review")
+      ? sprint8TChecks
     : activeConfig.sprintName.includes("Sprint 8S - Manual Review")
       ? sprint8SChecks
     : activeConfig.sprintName.includes("Sprint 8R - Manual Review")
