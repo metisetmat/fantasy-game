@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8V - Manual Review Field UX Visual Readiness. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8W - Manual Review Non-Persistent Preview Activation Guards. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1160,6 +1160,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewUxInteractionContract8T.test.js",
   "reports/manualReviewInputFieldContract8U.test.js",
   "reports/manualReviewFieldUxVisualReadiness8V.test.js",
+  "reports/manualReviewPreviewActivationGuards8W.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 

@@ -167,6 +167,7 @@ function renderMarkdown(input: {
     `- minimal allowlist count: ${input.minimalAllowlistCount}`,
     `- missing expected files: ${input.missingExpectedFiles.length === 0 ? "none" : input.missingExpectedFiles.join(", ")}`,
     `- stale share file count: ${input.staleShareFileCount}`,
+    `- previous sprint leftovers: ${input.staleShareFileCount + input.excludedFilesFoundInShareCount}`,
     `- excluded files found in share: ${input.excludedFilesFoundInShareCount}`,
     `- source files deleted count: ${input.sourceFilesDeletedCount}`,
     "",
@@ -452,6 +453,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewInputFieldContract8UValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-input-field-contract-without-persistence-8u.md"));
   const manualReviewFieldUxVisualReadiness8V = readIfExists(join(shareDirectory, "coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md"));
   const manualReviewFieldUxVisualReadiness8VValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md"));
+  const manualReviewPreviewActivationGuards8W = readIfExists(join(shareDirectory, "coach-report-manual-review-non-persistent-preview-activation-guards-8w.md"));
+  const manualReviewPreviewActivationGuards8WValidation = readIfExists(join(shareDirectory, "validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md"));
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3608,6 +3611,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-input-field-contract-without-persistence-8u.md",
     ...sprint8UForbiddenLeftovers,
   ];
+  const sprint8WExpectedFiles = sprint8VExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md"
+      ? "coach-report-manual-review-non-persistent-preview-activation-guards-8w.md"
+      : file === "validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md"
+        ? "validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md"
+        : file
+  );
+  const sprint8WForbiddenLeftovers = [
+    "coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md",
+    "validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md",
+    ...sprint8VForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5307,6 +5322,42 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 8T source files", bundleReports.includes("src/reports/buildManualReviewUxInteractionContractWithoutPersistence8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractProduct8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractExport8T.ts") && bundleReports.includes("src/reports/manualReviewUxInteractionContract8T.test.ts"), "8T source bundled"),
     check("source 8S/8R/8Q/8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts") && bundleReports.includes("src/reports/buildManualReviewWorkflowReadinessWithoutPersistence8R.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewUxInteractionContract8TValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint8WChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint8WExpectedFiles.every((file) => requiredCopied(file)), sprint8WExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint8WExpectedFiles.every((file) => manifest.includes(file)), sprint8WExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 8W", activeConfig.sprintName === "Sprint 8W - Manual Review Non-Persistent Preview Activation Guards", activeConfig.sprintName),
+    check("previous standalone 8V docs are not copied", sprint8WForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint8WForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 8W oriented", readme.includes("# Sprint 8W Share Pack") && readme.includes("coach-report-manual-review-non-persistent-preview-activation-guards-8w.md") && readme.includes("Manual Review Non-Persistent Preview Activation Guards"), "README current"),
+    check("8W report included", manualReviewPreviewActivationGuards8W.includes("# Manual Review Non-Persistent Preview Activation Guards 8W") && manualReviewPreviewActivationGuards8W.includes("Activation Conditions") && manualReviewPreviewActivationGuards8W.includes("Blocking Guards") && manualReviewPreviewActivationGuards8W.includes("Refusal States"), "8W doc included"),
+    check("8W validation is PASS", manualReviewPreviewActivationGuards8WValidation.includes("Status: PASS") && manualReviewPreviewActivationGuards8WValidation.includes("ManualReviewNonPersistentPreviewActivationGuards8WModel exists"), "8W validation current"),
+    check("product preview activation guards visible", coachProductHtml.includes('id="manual-review-preview-activation-guards-8w"') && coachProductHtml.includes("Garde-fous d'activation preview") && coachProductHtml.includes('data-manual-review-preview-activation-guards-version="8W"'), "product 8W visible"),
+    check("export preview activation guards visible", coachExportHtml.includes('id="manual-review-preview-activation-guards-export-8w"') && coachExportHtml.includes("Garde-fous preview revue manuelle") && coachExportHtml.includes('data-manual-review-preview-activation-guards-version="8W"'), "export 8W visible"),
+    check("8V field UX visual readiness remains embedded", coachProductHtml.includes('id="manual-review-field-ux-visual-readiness-8v"') && coachExportHtml.includes('id="manual-review-field-ux-visual-readiness-export-8v"') && coachExportHtml.includes('data-manual-review-field-ux-visual-readiness-version="8V"'), "8V baseline embedded"),
+    check("8U input field contract remains embedded", coachProductHtml.includes('id="manual-review-input-field-contract-8u"') && coachExportHtml.includes('id="manual-review-input-field-contract-export-8u"') && coachExportHtml.includes('data-manual-review-input-field-contract-version="8U"'), "8U baseline embedded"),
+    check("activation condition count >= 20", manualReviewPreviewActivationGuards8WValidation.includes("activation condition count >= 20") && manualReviewPreviewActivationGuards8WValidation.includes("activationConditionCount | 20"), "20 conditions"),
+    check("blocking guard count = 12", manualReviewPreviewActivationGuards8WValidation.includes("blocking guard count = 12") && manualReviewPreviewActivationGuards8WValidation.includes("blockingGuardCount | 12"), "12 blockers"),
+    check("refusal state count = 6", manualReviewPreviewActivationGuards8WValidation.includes("refusal state count = 6") && manualReviewPreviewActivationGuards8WValidation.includes("refusalStateCount | 6"), "6 refusal states"),
+    check("preview activation documented but blocked", manualReviewPreviewActivationGuards8WValidation.includes("previewActivationStatus = documented_but_blocked") && manualReviewPreviewActivationGuards8WValidation.includes("nonPersistentPreviewModeActivated = false"), "documented_but_blocked"),
+    check("no real input payload preview submit backend API or persistence", manualReviewPreviewActivationGuards8WValidation.includes("realInputActivated = false") && manualReviewPreviewActivationGuards8WValidation.includes("payloadCreated = false") && manualReviewPreviewActivationGuards8WValidation.includes("realPreviewGenerated = false") && manualReviewPreviewActivationGuards8WValidation.includes("submitCreated = false") && manualReviewPreviewActivationGuards8WValidation.includes("backendCreated = false") && manualReviewPreviewActivationGuards8WValidation.includes("apiCreated = false") && manualReviewPreviewActivationGuards8WValidation.includes("storageCreated = false"), "no activation"),
+    check("no official truth automatic decision selection or tactic", manualReviewPreviewActivationGuards8WValidation.includes("officialTruthPromoted = false") && manualReviewPreviewActivationGuards8WValidation.includes("automaticDecisionCreated = false") && manualReviewPreviewActivationGuards8WValidation.includes("selectionDriven = false") && manualReviewPreviewActivationGuards8WValidation.includes("tacticalInstructionDriven = false"), "no truth/automation"),
+    check("workflow ready while review still needs completion", manualReviewPreviewActivationGuards8WValidation.includes("workflowReadinessStatusFrom8R remains ready_for_non_persistent_preview") && manualReviewPreviewActivationGuards8WValidation.includes("reviewGateStatusFrom8Q remains needs_completion"), "ready workflow / incomplete review"),
+    check("field visual readiness distinct from preview activation", manualReviewPreviewActivationGuards8WValidation.includes("field visual readiness 8V remains ready_for_static_visual_review") && manualReviewPreviewActivationGuards8WValidation.includes("field visual distinct from preview activation"), "visual distinct"),
+    check("8V micro wording debt fixed", manualReviewPreviewActivationGuards8WValidation.includes("micro wording debt 8V fixed") && manualReviewPreviewActivationGuards8WValidation.includes("export8VWorkflowLabelCorrected = true") && !coachExportHtml.includes("Workflow 8S :</strong> ready_for_non_persistent_preview"), "8R label"),
+    check("export metadata is 8W", coachExportHtml.includes("<title>Rapport coach export compact 8W - garde-fous preview revue manuelle</title>") && coachExportHtml.includes("Export compact 8W") && coachExportHtml.includes('id="compressed-export-8w"') && manualReviewPreviewActivationGuards8WValidation.includes("export metadata 8W visible"), "export metadata 8W"),
+    check("export id no longer stale 8V/8U/8T/8S/8R/8Q/8P/8N/8I", !coachExportHtml.includes('id="compressed-export-8v"') && !coachExportHtml.includes('id="compressed-export-8u"') && !coachExportHtml.includes('id="compressed-export-8t"') && !coachExportHtml.includes('id="compressed-export-8s"') && !coachExportHtml.includes('id="compressed-export-8r"') && !coachExportHtml.includes('id="compressed-export-8q"') && !coachExportHtml.includes('id="compressed-export-8p"') && !coachExportHtml.includes('id="compressed-export-8n"') && !coachExportHtml.includes('id="compressed-export-8i"'), "stale ids removed"),
+    check("export budget checked honestly", manualReviewPreviewActivationGuards8WValidation.includes("exportReadTimeSecondsAfter8W <= 900") && manualReviewPreviewActivationGuards8WValidation.includes("exportUnder900Seconds correctly computed") && manualReviewPreviewActivationGuards8WValidation.includes("exportUnder800Seconds correctly computed") && manualReviewPreviewActivationGuards8WValidation.includes("no PASS message on failed numeric rule"), "export budget"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewActivationGuards8WValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewActivationGuards8WValidation.includes("PENALTY_SHOT remains inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewActivationGuards8WValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewActivationGuards8WValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 8W source files", bundleReports.includes("src/reports/buildManualReviewNonPersistentPreviewActivationGuards8W.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewActivationGuardsProduct8W.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewActivationGuardsExport8W.ts") && bundleReports.includes("src/reports/manualReviewPreviewActivationGuards8W.test.ts"), "8W source bundled"),
+    check("source 8V/8U/8T/8S/8R/8Q/8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewFieldUxVisualReadinessWithoutPersistence8V.ts") && bundleReports.includes("src/reports/buildManualReviewInputFieldContractWithoutPersistence8U.ts") && bundleReports.includes("src/reports/buildManualReviewUxInteractionContractWithoutPersistence8T.ts") && bundleReports.includes("src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts") && bundleReports.includes("src/reports/buildManualReviewWorkflowReadinessWithoutPersistence8R.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewActivationGuards8WValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8VChecks: readonly SharePackCheck[] = [
@@ -9750,6 +9801,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 8W - Manual Review")
+      ? sprint8WChecks
     : activeConfig.sprintName.includes("Sprint 8V - Manual Review")
       ? sprint8VChecks
     : activeConfig.sprintName.includes("Sprint 8U - Manual Review")

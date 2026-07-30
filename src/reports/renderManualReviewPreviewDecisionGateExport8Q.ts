@@ -61,6 +61,12 @@ function updateExportMetadata8Q(exportHtml: string): string {
     '<main data-manual-review-preview-decision-gate-version="8Q"',
   );
   updated = updated.replace(/\bid="compressed-export-8p"/giu, 'id="compressed-export-8q"');
+  updated = updated.replace(/\bid="compressed-export-8w"/giu, 'id="compressed-export-8q"');
+  updated = updated.replace(/\bid="compressed-export-8v"/giu, 'id="compressed-export-8q"');
+  updated = updated.replace(/\bid="compressed-export-8u"/giu, 'id="compressed-export-8q"');
+  updated = updated.replace(/\bid="compressed-export-8t"/giu, 'id="compressed-export-8q"');
+  updated = updated.replace(/\bid="compressed-export-8s"/giu, 'id="compressed-export-8q"');
+  updated = updated.replace(/\bid="compressed-export-8r"/giu, 'id="compressed-export-8q"');
   updated = updated.replace(/\bid="compressed-export-8n"/giu, 'id="compressed-export-8q"');
   updated = updated.replace(/\bid="compressed-export-8i"/giu, 'id="compressed-export-8q"');
   updated = updated.replace(/Export compact 8P/gu, "Export compact 8Q");
