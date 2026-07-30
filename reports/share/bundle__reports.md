@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8R - Manual Review Workflow Readiness Without Persistence. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -170,6 +170,8 @@ import {
   renderManualReviewPreviewDecisionGateWithoutPersistence8QValidation,
   renderManualReviewWorkflowReadinessWithoutPersistence8RDoc,
   renderManualReviewWorkflowReadinessWithoutPersistence8RValidation,
+  renderManualReviewWorkflowUxSkeletonWithoutPersistence8SDoc,
+  renderManualReviewWorkflowUxSkeletonWithoutPersistence8SValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -183,10 +185,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8R - Manual Review Workflow Readiness Without Persistence";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-workflow-readiness-without-persistence-8r.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md";
+  "validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3882,6 +3884,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8R test proving workflow chain, readiness/gate separation, non-persistence, export metadata, eyebrow correction, and scoring guardrails",
       },
       {
+        source: "src/reports/manualReviewWorkflowUxSkeletonTypes8S.ts",
+        required: true,
+        reason: "Sprint 8S typed UX skeleton contract for the six-step non-persistent manual review path",
+      },
+      {
+        source: "src/reports/manualReviewWorkflowUxSkeletonWarnings8S.ts",
+        required: true,
+        reason: "Sprint 8S warning registry for disabled actions, non-persistence, export metadata, source-of-truth, and wording guardrails",
+      },
+      {
+        source: "src/reports/manualReviewWorkflowUxSkeletonAudit8S.ts",
+        required: true,
+        reason: "Sprint 8S audits for UX skeleton visibility, step linking, disabled actions, non-persistence, export metadata, export budget, and wording",
+      },
+      {
+        source: "src/reports/renderManualReviewWorkflowUxSkeletonProduct8S.ts",
+        required: true,
+        reason: "Sprint 8S product renderer adding the static manual-review UX skeleton after 8R workflow readiness",
+      },
+      {
+        source: "src/reports/renderManualReviewWorkflowUxSkeletonExport8S.ts",
+        required: true,
+        reason: "Sprint 8S compact export renderer adding UX skeleton summary and updating export metadata to 8S",
+      },
+      {
+        source: "src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts",
+        required: true,
+        reason: "Sprint 8S model, report renderer, and validation renderer for the non-persistent manual review UX skeleton proof",
+      },
+      {
+        source: "src/reports/manualReviewWorkflowUxSkeleton8S.test.ts",
+        required: true,
+        reason: "Sprint 8S test proving six linked disabled UX steps, no submit/persistence/API/official truth, and current 8S export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6038,6 +6075,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8S")) {
+    return renderManualReviewWorkflowUxSkeletonWithoutPersistence8SDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8R")) {
     return renderManualReviewWorkflowReadinessWithoutPersistence8RDoc(fullMatchTraceValidationModel());
   }
@@ -8403,6 +8443,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8S")) {
+    return renderManualReviewWorkflowUxSkeletonWithoutPersistence8SValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8R")) {
     return renderManualReviewWorkflowReadinessWithoutPersistence8RValidation(fullMatchTraceValidationModel());
   }
@@ -10714,6 +10757,41 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8S")) {
+    return [
+      "# Sprint 8S Share Pack",
+      "",
+      "Current sprint: Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8R workflow readiness embedded in the product/export reports, then replaces the standalone 8R docs with the 8S UX skeleton docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md",
+      "4. coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8S Focus",
+      "- The 8S UX skeleton shows the full path: 8M form -> 8N intake -> 8O preview -> 8P comparison -> 8Q gate -> 8R readiness.",
+      "- Workflow readiness remains ready_for_non_persistent_preview while the 8Q review gate remains needs_completion.",
+      "- Every future action is visible as disabled skeleton copy only; no submit, API, backend, storage, memory, application, official-truth promotion, selection, or tactical instruction exists.",
+      "- Export metadata now mentions 8S and the compact export main id is cleaned to compressed-export-8s.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- MatchBonusEvent unchanged.",
+      "- Score and timeline remain official score_change outputs.",
+      "- Manual UX skeleton creates no memory and no persistence.",
+      "- Share pack remains at or below 20 files.",
+      "",
+      "## Recommendation",
+      "- KEEP_MANUAL_REVIEW_WORKFLOW_UX_SKELETON",
+      "- PREPARE_MANUAL_REVIEW_UX_INTERACTION_CONTRACT_WITHOUT_PERSISTENCE",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8R")) {
     return [
       "# Sprint 8R Share Pack",
@@ -29386,6 +29464,7 @@ import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from 
 import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualReviewPreviewDecisionGateProduct8Q";
 import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
 import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
+import { buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel } from "./buildManualReviewWorkflowUxSkeletonWithoutPersistence8S";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -29782,8 +29861,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8R: productHtmlWith8Q,
     exportHtmlBefore8R: exportHtmlWith8Q,
   });
-  const finalProductHtml = manualReviewWorkflowReadiness8R.productHtmlAfter8R;
-  const exportHtml = manualReviewWorkflowReadiness8R.exportHtmlAfter8R;
+  const manualReviewWorkflowUxSkeleton8S = buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel({
+    baseline8R: manualReviewWorkflowReadiness8R,
+    productHtmlBefore8S: manualReviewWorkflowReadiness8R.productHtmlAfter8R,
+    exportHtmlBefore8S: manualReviewWorkflowReadiness8R.exportHtmlAfter8R,
+  });
+  const finalProductHtml = manualReviewWorkflowUxSkeleton8S.productHtmlAfter8S;
+  const exportHtml = manualReviewWorkflowUxSkeleton8S.exportHtmlAfter8S;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

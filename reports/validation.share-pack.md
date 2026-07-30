@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 8R - Manual Review Workflow Readiness Without Persistence
+- current sprint: Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -20,35 +20,33 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 8R - Sprint 8R - Manual Review Workflow Readiness Without Persistence
-- PASS: previous standalone 8Q docs are not copied - 0
-- PASS: README is Sprint 8R oriented - README current
-- PASS: 8R report included - 8R doc included
-- PASS: 8R validation is PASS - 8R validation current
-- PASS: product workflow readiness visible - product 8R visible
-- PASS: export workflow readiness visible - export 8R visible
-- PASS: workflow stage count = 5 - 5 stages
-- PASS: workflow stages are 8M/8N/8O/8P/8Q - 8M/8N/8O/8P/8Q
-- PASS: workflow stages are linked - linked
-- PASS: all stages have purpose input output guardrails - stage content complete
+- PASS: current sprint is Sprint 8S - Sprint 8S - Manual Review Workflow UX Skeleton Without Persistence
+- PASS: previous standalone 8R docs are not copied - 0
+- PASS: README is Sprint 8S oriented - README current
+- PASS: 8S report included - 8S doc included
+- PASS: 8S validation is PASS - 8S validation current
+- PASS: product UX skeleton visible - product 8S visible
+- PASS: export UX skeleton visible - export 8S visible
+- PASS: UX step count = 6 - 6 steps
+- PASS: UX steps are 8M/8N/8O/8P/8Q/8R - 8M/8N/8O/8P/8Q/8R
+- PASS: UX steps are linked - linked
+- PASS: all steps are non-interactive and cannot drive actions - safe steps
 - PASS: workflow ready while review still needs completion - ready workflow / incomplete review
-- PASS: workflow does not claim real-use readiness - real-use boundary
-- PASS: 8P eyebrow corrected and 8Q eyebrow preserved - 8P/8Q eyebrow current
-- PASS: no persistence submit or API - no storage/submit
-- PASS: no memory selection or tactical automation - no memory/automation
-- PASS: no official truth future evidence or engine learning claim - truth boundary
-- PASS: 8Q gate remains embedded - 8Q embedded baseline
-- PASS: 8P 8O 8N 8M 8L 8K remain embedded - 8P/8O/8N/8M/8L/8K embedded
-- PASS: export metadata is 8R - export metadata 8R
-- PASS: export id no longer stale 8Q/8P/8N/8I - stale ids removed
+- PASS: future actions are disabled - disabled actions
+- PASS: no submit backend API or persistence - no submit/storage/API
+- PASS: no memory selection tactic or official truth - no memory/truth/action
+- PASS: 8R 8Q 8P 8O 8N 8M 8L 8K preserved - manual-review chain preserved
+- PASS: product/export 8R through 8M sections remain embedded - embedded sections preserved
+- PASS: export metadata is 8S - export metadata 8S
+- PASS: export id no longer stale 8R/8Q/8P/8N/8I - stale ids removed
 - PASS: export budget checked honestly - export budget
 - PASS: source-of-truth preserved - source truth
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: bundle includes 8R source files - 8R source bundled
-- PASS: source 8Q/8P/8O/8N/8M/8L/8K reports were not deleted - baseline sources still bundled
+- PASS: bundle includes 8S source files - 8S source bundled
+- PASS: source 8R/8Q/8P/8O/8N/8M/8L/8K reports were not deleted - baseline sources still bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -58,7 +56,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-manual-review-workflow-readiness-without-persistence-8r.md
+- coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -71,5 +69,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md
+- validation.coach-report-manual-review-workflow-ux-skeleton-without-persistence-8s.md
 - validation.share-pack.md
