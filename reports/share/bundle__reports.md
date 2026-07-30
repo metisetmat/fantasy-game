@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8Q - Manual Review Preview Decision Gate Without Persistence. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8R - Manual Review Workflow Readiness Without Persistence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -168,6 +168,8 @@ import {
   renderManualReviewPreviewComparisonWithPreviousObservationPlan8PValidation,
   renderManualReviewPreviewDecisionGateWithoutPersistence8QDoc,
   renderManualReviewPreviewDecisionGateWithoutPersistence8QValidation,
+  renderManualReviewWorkflowReadinessWithoutPersistence8RDoc,
+  renderManualReviewWorkflowReadinessWithoutPersistence8RValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -181,10 +183,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8Q - Manual Review Preview Decision Gate Without Persistence";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-decision-gate-without-persistence-8q.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8R - Manual Review Workflow Readiness Without Persistence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-workflow-readiness-without-persistence-8r.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-decision-gate-without-persistence-8q.md";
+  "validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -3845,6 +3847,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8Q test proving gate card mapping, invalid comparison blocking, non-persistence, source-of-truth preservation, export metadata, and scoring guardrails",
       },
       {
+        source: "src/reports/manualReviewWorkflowReadinessTypes8R.ts",
+        required: true,
+        reason: "Sprint 8R typed workflow-readiness contract linking 8M, 8N, 8O, 8P, and 8Q without persistence",
+      },
+      {
+        source: "src/reports/manualReviewWorkflowReadinessWarnings8R.ts",
+        required: true,
+        reason: "Sprint 8R warning registry blocking persistence, official-truth promotion, score/timeline mutation, automation, and stale export metadata",
+      },
+      {
+        source: "src/reports/manualReviewWorkflowReadinessAudit8R.ts",
+        required: true,
+        reason: "Sprint 8R audits for workflow readiness, chain integrity, readiness logic, non-persistence, boundaries, source-of-truth, export metadata, export budget, integration, and wording",
+      },
+      {
+        source: "src/reports/renderManualReviewWorkflowReadinessProduct8R.ts",
+        required: true,
+        reason: "Sprint 8R product renderer adding the manual-review workflow readiness map immediately after the 8Q gate",
+      },
+      {
+        source: "src/reports/renderManualReviewWorkflowReadinessExport8R.ts",
+        required: true,
+        reason: "Sprint 8R compact export renderer adding workflow readiness, updating export metadata to 8R, and correcting the 8P/8Q eyebrow wording",
+      },
+      {
+        source: "src/reports/buildManualReviewWorkflowReadinessWithoutPersistence8R.ts",
+        required: true,
+        reason: "Sprint 8R model, report renderer, and validation renderer for the non-persistent manual review workflow readiness proof",
+      },
+      {
+        source: "src/reports/manualReviewWorkflowReadiness8R.test.ts",
+        required: true,
+        reason: "Sprint 8R test proving workflow chain, readiness/gate separation, non-persistence, export metadata, eyebrow correction, and scoring guardrails",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6001,6 +6038,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8R")) {
+    return renderManualReviewWorkflowReadinessWithoutPersistence8RDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8Q")) {
     return renderManualReviewPreviewDecisionGateWithoutPersistence8QDoc(fullMatchTraceValidationModel());
   }
@@ -8363,6 +8403,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8R")) {
+    return renderManualReviewWorkflowReadinessWithoutPersistence8RValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8Q")) {
     return renderManualReviewPreviewDecisionGateWithoutPersistence8QValidation(fullMatchTraceValidationModel());
   }
@@ -10671,6 +10714,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8R")) {
+    return [
+      "# Sprint 8R Share Pack",
+      "",
+      "Current sprint: Sprint 8R - Manual Review Workflow Readiness Without Persistence",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8Q decision gate embedded in the product/export reports, then replaces the standalone 8Q docs with the 8R workflow-readiness docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md",
+      "4. coach-report-manual-review-workflow-readiness-without-persistence-8r.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8R Focus",
+      "- The 8R workflow map links 8M form -> 8N intake -> 8O preview -> 8P comparison -> 8Q gate.",
+      "- Workflow readiness is ready_for_non_persistent_preview while the 8Q review gate remains needs_completion.",
+      "- The report explicitly separates a demo-ready preview workflow from a review that still needs completion before real use.",
+      "- The workflow is demo-only, non-official, non-persistent, non-applied, and cannot drive selection or tactical instruction.",
+      "- Export metadata now mentions 8R, the compact export main id is cleaned to compressed-export-8r, and the 8P eyebrow is no longer mislabeled as Gate preview 8Q.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- MatchBonusEvent unchanged.",
+      "- Score and timeline remain official score_change outputs.",
+      "- Manual workflow readiness creates no memory and no persistence.",
+      "- Share pack remains at or below 20 files.",
+      "",
+      "## Recommendation",
+      "- KEEP_MANUAL_REVIEW_WORKFLOW_READINESS",
+      "- PREPARE_MANUAL_REVIEW_WORKFLOW_UX_SKELETON_WITHOUT_PERSISTENCE",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8Q")) {
     return [
       "# Sprint 8Q Share Pack",
@@ -29306,6 +29385,7 @@ import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualRevi
 import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
 import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualReviewPreviewDecisionGateProduct8Q";
 import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
+import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -29685,18 +29765,25 @@ export function writeLatestCoachReport(): void {
     manualReviewPreviewComparison8P.productComparisonHtml,
   );
   const manualReviewPreviewDecisionGate8Q = currentManualReviewPreviewDecisionGateWithoutPersistence8QModel();
-  const finalProductHtml = insertManualReviewPreviewDecisionGateProduct8Q(
+  const productHtmlWith8Q = insertManualReviewPreviewDecisionGateProduct8Q(
     productHtmlWith8P,
     manualReviewPreviewDecisionGate8Q.productDecisionGateHtml,
   );
   const exportHtmlWith8P = renderRestoredCompressedExport8J({
-    productReportHtml: finalProductHtml,
+    productReportHtml: productHtmlWith8Q,
     manualReviewPreviewComparisonExport8P: manualReviewPreviewComparison8P.exportComparisonHtml,
   });
-  const exportHtml = insertManualReviewPreviewDecisionGateExport8Q(
+  const exportHtmlWith8Q = insertManualReviewPreviewDecisionGateExport8Q(
     exportHtmlWith8P,
     manualReviewPreviewDecisionGate8Q.exportDecisionGateHtml,
   );
+  const manualReviewWorkflowReadiness8R = buildManualReviewWorkflowReadinessWithoutPersistence8RModel({
+    baseline8Q: manualReviewPreviewDecisionGate8Q,
+    productHtmlBefore8R: productHtmlWith8Q,
+    exportHtmlBefore8R: exportHtmlWith8Q,
+  });
+  const finalProductHtml = manualReviewWorkflowReadiness8R.productHtmlAfter8R;
+  const exportHtml = manualReviewWorkflowReadiness8R.exportHtmlAfter8R;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

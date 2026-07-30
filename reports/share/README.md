@@ -1,32 +1,31 @@
-# Sprint 8Q Share Pack
+# Sprint 8R Share Pack
 
-Current sprint: Sprint 8Q - Manual Review Preview Decision Gate Without Persistence
+Current sprint: Sprint 8R - Manual Review Workflow Readiness Without Persistence
 
-Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8P comparison embedded in the product/export reports, then replaces the standalone 8P docs with the 8Q decision gate docs.
+Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8Q decision gate embedded in the product/export reports, then replaces the standalone 8Q docs with the 8R workflow-readiness docs.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-preview-decision-gate-without-persistence-8q.md
-4. coach-report-manual-review-preview-decision-gate-without-persistence-8q.md
+3. validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md
+4. coach-report-manual-review-workflow-readiness-without-persistence-8r.md
 5. validation.share-pack.md
 
-## Sprint 8Q Focus
-- The 8Q gate reads only the validated 8P preview-vs-plan comparison.
-- Three gate cards are visible: one lisible, one a completer, and one insuffisant.
-- The global gate is a completer because the fixture has one complete answer, one partial answer, and one insufficient answer.
-- Each card keeps links to 8P comparison, 8O preview, 8N intake, 8M manual review form, 8L observation outcome tracker, and 8K decision layer.
-- The gate is demo-only, non-official, non-persistent, non-applied, and cannot drive selection or tactical instruction.
-- Export metadata now mentions 8Q and no longer leaves the compact export main id as compressed-export-8p.
+## Sprint 8R Focus
+- The 8R workflow map links 8M form -> 8N intake -> 8O preview -> 8P comparison -> 8Q gate.
+- Workflow readiness is ready_for_non_persistent_preview while the 8Q review gate remains needs_completion.
+- The report explicitly separates a demo-ready preview workflow from a review that still needs completion before real use.
+- The workflow is demo-only, non-official, non-persistent, non-applied, and cannot drive selection or tactical instruction.
+- Export metadata now mentions 8R, the compact export main id is cleaned to compressed-export-8r, and the 8P eyebrow is no longer mislabeled as Gate preview 8Q.
 
 ## Guardrails
 - Scoring values unchanged.
 - PENALTY_SHOT inactive.
 - MatchBonusEvent unchanged.
 - Score and timeline remain official score_change outputs.
-- Manual preview decision gate creates no memory and no persistence.
+- Manual workflow readiness creates no memory and no persistence.
 - Share pack remains at or below 20 files.
 
 ## Recommendation
-- KEEP_MANUAL_REVIEW_PREVIEW_DECISION_GATE
-- PREPARE_MANUAL_REVIEW_WORKFLOW_AFTER_DECISION_GATE
+- KEEP_MANUAL_REVIEW_WORKFLOW_READINESS
+- PREPARE_MANUAL_REVIEW_WORKFLOW_UX_SKELETON_WITHOUT_PERSISTENCE

@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-29T13:26:21.332Z
-Task/sprint: Sprint 8Q - Manual Review Preview Decision Gate Without Persistence
+Generated: 2026-07-29T14:44:04.860Z
+Task/sprint: Sprint 8R - Manual Review Workflow Readiness Without Persistence
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-decision-gate-without-persistence-8q.md
-- validation.coach-report-manual-review-preview-decision-gate-without-persistence-8q.md
+- coach-report-manual-review-workflow-readiness-without-persistence-8r.md
+- validation.coach-report-manual-review-workflow-readiness-without-persistence-8r.md
 - README.md
 
 ## Bundle Files
