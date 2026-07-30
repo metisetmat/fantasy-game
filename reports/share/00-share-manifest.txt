@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-07-30T18:11:10.097Z
+Generated timestamp: 2026-07-30T18:47:03.539Z
 Task/sprint name: Sprint 8W - Manual Review Non-Persistent Preview Activation Guards
 Final file count: 20
 
@@ -1181,19 +1181,9 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewPreviewDecisionGateAudit8Q.ts
+ M src/reports/buildManualReviewNonPersistentPreviewActivationGuards8W.ts
+ M src/reports/manualReviewPreviewActivationGuards8W.test.ts
+ M src/reports/manualReviewPreviewActivationGuardsAudit8W.ts
+ M src/reports/manualReviewPreviewActivationGuardsTypes8W.ts
+ M src/reports/manualReviewWorkflowReadiness8R.test.ts
  M src/reports/manualReviewWorkflowReadinessAudit8R.ts
- M src/reports/renderManualReviewFieldUxVisualReadinessExport8V.ts
- M src/reports/renderManualReviewPreviewDecisionGateExport8Q.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewNonPersistentPreviewActivationGuards8W.ts
-?? src/reports/manualReviewPreviewActivationGuards8W.test.ts
-?? src/reports/manualReviewPreviewActivationGuardsAudit8W.ts
-?? src/reports/manualReviewPreviewActivationGuardsTypes8W.ts
-?? src/reports/manualReviewPreviewActivationGuardsWarnings8W.ts
-?? src/reports/renderManualReviewPreviewActivationGuardsExport8W.ts
-?? src/reports/renderManualReviewPreviewActivationGuardsProduct8W.ts

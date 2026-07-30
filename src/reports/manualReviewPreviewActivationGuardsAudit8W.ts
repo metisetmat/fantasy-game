@@ -14,12 +14,40 @@ function readTimeSeconds(html: string): number {
   return Math.ceil((words / 180) * 60);
 }
 
+function hasEnabledControl(html: string): boolean {
+  return [...html.matchAll(/<(?:input|textarea|select)\b[^>]*>/giu)].some((match) => {
+    const tag = match[0];
+    return !/\bdisabled\b|\breadonly\b|aria-disabled=["']true["']/iu.test(tag);
+  });
+}
+
+function hasEnabledSubmit(html: string): boolean {
+  return [...html.matchAll(/<button\b[^>]*>|<input\b[^>]*type=["']submit["'][^>]*>/giu)].some((match) => {
+    const tag = match[0];
+    return /\btype=["']submit["']|submit|envoyer|valider|appliquer/iu.test(tag)
+      && !/\bdisabled\b|aria-disabled=["']true["']/iu.test(tag);
+  }) || /<form\b[^>]*\baction=/iu.test(html);
+}
+
+function activeSurface(input: { readonly productHtml: string; readonly exportHtml: string }): string {
+  return `${input.productHtml}\n${input.exportHtml}`;
+}
+
+function hasPositiveSelectionInstruction(html: string): boolean {
+  return [...html.matchAll(/selection\s+imposee|doit\s+selectionner|changer\s+la\s+selection|selectedPlayerId/giu)].some((match) => {
+    const start = match.index ?? 0;
+    const before = html.slice(Math.max(0, start - 32), start).toLowerCase();
+    return !/(pas de|sans|aucune?|zero|ne cree pas|ne produit pas)\s*$/iu.test(before);
+  });
+}
+
 export function auditManualReviewPreviewActivationGuards8W(input: {
   readonly guard: ManualReviewPreviewActivationGuard8W;
   readonly productHtml: string;
   readonly exportHtml: string;
 }): ManualReviewPreviewActivationGuardsAudit8W {
   const { guard, productHtml, exportHtml } = input;
+  const combined = activeSurface(input);
   const warningCodes: ManualReviewPreviewActivationGuardsWarningCode8W[] = [];
   const productVisible = productHtml.includes('id="manual-review-preview-activation-guards-8w"');
   const exportVisible = exportHtml.includes('id="manual-review-preview-activation-guards-export-8w"');
@@ -46,6 +74,19 @@ export function auditManualReviewPreviewActivationGuards8W(input: {
     && exportHtml.includes("Readiness 8R");
   const export8SLabelStillSkeletonOnly = exportHtml.includes("Squelette UX 8S") || exportHtml.includes("UX skeleton 8S");
   const microWordingDebt8VFixed = export8VWorkflowLabelCorrected && export8SLabelStillSkeletonOnly;
+  const nonPersistentPreviewModeActivated = /nonPersistentPreviewModeActivated\s*[:=]\s*true|previewActivationStatus\s*[:=]\s*["']active["']|data-preview-mode=["']active["']|preview-mode-active/iu.test(combined);
+  const realInputActivated = hasEnabledControl(combined) || /contenteditable=["']true["']/iu.test(combined);
+  const payloadCreated = /payloadCreated\s*[:=]\s*true|createPreviewPayload|previewPayload\s*=|new\s+FormData|data-preview-payload/iu.test(combined);
+  const realPreviewGenerated = /realPreviewGenerated\s*[:=]\s*true|previewGenerated\s*[:=]\s*true|renderRealPreview|data-real-preview=["']true["']|preview-rendered/iu.test(combined);
+  const submitCreated = hasEnabledSubmit(combined);
+  const apiCreated = /\bfetch\s*\(|\baxios\.|data-api-endpoint=|apiCreated\s*[:=]\s*true/iu.test(combined);
+  const backendCreated = /backendCreated\s*[:=]\s*true|backendAction|serverAction|data-backend-action=|POST\s+\/|mutation\s*\{/iu.test(combined);
+  const storageCreated = /localStorage\.setItem|sessionStorage\.setItem|indexedDB|writeFile(?:Sync)?\s*\(|historyStore\.save|storageCreated\s*[:=]\s*true/iu.test(combined);
+  const memoryCreated = /seasonMemory|teamStyleMemory|createMemory|memoryCreated\s*[:=]\s*true/iu.test(combined);
+  const officialTruthPromoted = /officialTruth\s*[:=]\s*true|promotedToOfficial|coachInputPromotedToOfficialTruth|data-official-truth=["']true["']/iu.test(combined);
+  const automaticDecisionCreated = /automaticDecision\s*[:=]\s*true|auto(?:matic)?DecisionCreated\s*[:=]\s*true|data-automatic-decision=["']true["']/iu.test(combined);
+  const selectionDriven = /selectionDriven\s*[:=]\s*true/iu.test(combined) || hasPositiveSelectionInstruction(combined);
+  const tacticalInstructionDriven = /tacticalInstructionDriven\s*[:=]\s*true|plan\s+tactique\s+a\s+appliquer|consigne\s+tactique\s+imposee|applyTacticalPlan/iu.test(combined);
 
   if (!productVisible) warningCodes.push("PRODUCT_PREVIEW_ACTIVATION_GUARDS_MISSING");
   if (!exportVisible) warningCodes.push("EXPORT_PREVIEW_ACTIVATION_GUARDS_MISSING");
@@ -60,6 +101,19 @@ export function auditManualReviewPreviewActivationGuards8W(input: {
   if (!readinessDistinctFromReviewGateStillVisible) warningCodes.push("WORKFLOW_READINESS_STATUS_MASKED");
   if (!export8VWorkflowLabelCorrected) warningCodes.push("EXPORT_8V_WORKFLOW_LABEL_STILL_8S");
   if (!export8SLabelStillSkeletonOnly) warningCodes.push("MICRO_WORDING_DEBT_8V_NOT_FIXED");
+  if (nonPersistentPreviewModeActivated) warningCodes.push("PREVIEW_MODE_ACTIVATED");
+  if (realInputActivated) warningCodes.push("REAL_INPUT_ACTIVATED");
+  if (payloadCreated) warningCodes.push("PAYLOAD_CREATION_DETECTED");
+  if (realPreviewGenerated) warningCodes.push("REAL_PREVIEW_GENERATION_DETECTED");
+  if (submitCreated) warningCodes.push("SUBMIT_BUTTON_DETECTED");
+  if (apiCreated) warningCodes.push("API_CALL_DETECTED");
+  if (backendCreated) warningCodes.push("BACKEND_ACTION_DETECTED");
+  if (storageCreated) warningCodes.push("LOCAL_STORAGE_PERSISTENCE_DETECTED");
+  if (memoryCreated) warningCodes.push("SEASON_MEMORY_CREATED");
+  if (officialTruthPromoted) warningCodes.push("OFFICIAL_TRUTH_PROMOTION_DETECTED");
+  if (automaticDecisionCreated) warningCodes.push("AUTOMATIC_DECISION_DETECTED");
+  if (selectionDriven) warningCodes.push("SELECTION_IMPOSITION_DETECTED");
+  if (tacticalInstructionDriven) warningCodes.push("TACTICAL_PLAN_IMPOSITION_DETECTED");
 
   return {
     productVisible,
@@ -73,10 +127,19 @@ export function auditManualReviewPreviewActivationGuards8W(input: {
     refusalStateCount,
     previewActivationStatusCorrect,
     nonPersistentPreviewModeDefined,
-    nonPersistentPreviewModeActivated: false,
-    realInputActivated: false,
-    payloadCreated: false,
-    realPreviewGenerated: false,
+    nonPersistentPreviewModeActivated,
+    realInputActivated,
+    payloadCreated,
+    realPreviewGenerated,
+    submitCreated,
+    apiCreated,
+    backendCreated,
+    storageCreated,
+    memoryCreated,
+    officialTruthPromoted,
+    automaticDecisionCreated,
+    selectionDriven,
+    tacticalInstructionDriven,
     microWordingDebt8VFixed,
     export8VWorkflowLabelCorrected,
     export8SLabelStillSkeletonOnly,

@@ -18,6 +18,11 @@ export function validateManualReviewPreviewActivationGuards8W(): readonly string
     ...buildManualReviewFieldUxVisualReadinessWithoutPersistence8VModel(),
     status: "FAIL" as const,
   };
+  const activatedSurfaceModel = buildManualReviewNonPersistentPreviewActivationGuards8WModel({
+    baseline8V: model.baseline8V,
+    productHtmlBefore8W: `${model.baseline8V.productHtmlAfter8V}<input name="coach-note"><script>const previewPayload = new FormData(); renderRealPreview();</script>`,
+    exportHtmlBefore8W: `${model.baseline8V.exportHtmlAfter8V}<button type="submit">Valider</button>`,
+  });
 
   assertTest(model.status === "PASS", "8W model must pass.");
   assertTest(validation.includes("Status: PASS"), "8W validation must pass.");
@@ -58,6 +63,15 @@ export function validateManualReviewPreviewActivationGuards8W(): readonly string
   assertTest(!model.automaticDecisionCreated, "8W must not create automatic decisions.");
   assertTest(!model.selectionDriven, "8W must not drive selection.");
   assertTest(!model.tacticalInstructionDriven, "8W must not drive tactical instruction.");
+  assertTest(activatedSurfaceModel.status === "FAIL", "real activation leaks must fail the 8W model.");
+  assertTest(activatedSurfaceModel.realInputActivated, "enabled input leak must be detected.");
+  assertTest(activatedSurfaceModel.payloadCreated, "payload creation leak must be detected.");
+  assertTest(activatedSurfaceModel.realPreviewGenerated, "real preview leak must be detected.");
+  assertTest(activatedSurfaceModel.submitCreated, "submit leak must be detected.");
+  assertTest(activatedSurfaceModel.warningCodes.includes("REAL_INPUT_ACTIVATED"), "real input warning must be emitted.");
+  assertTest(activatedSurfaceModel.warningCodes.includes("PAYLOAD_CREATION_DETECTED"), "payload warning must be emitted.");
+  assertTest(activatedSurfaceModel.warningCodes.includes("REAL_PREVIEW_GENERATION_DETECTED"), "real preview warning must be emitted.");
+  assertTest(activatedSurfaceModel.warningCodes.includes("SUBMIT_BUTTON_DETECTED"), "submit warning must be emitted.");
   assertTest(model.workflowReadinessStatusFrom8R === "ready_for_non_persistent_preview", "8R readiness must remain ready_for_non_persistent_preview.");
   assertTest(model.reviewGateStatusFrom8Q === "needs_completion", "8Q gate must remain needs_completion.");
   assertTest(model.readinessDistinctFromReviewGateStillVisible, "8R readiness and 8Q gate must remain distinct.");

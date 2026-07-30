@@ -4,7 +4,10 @@ import {
   renderManualReviewWorkflowReadinessWithoutPersistence8RValidation,
 } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
 import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
-import { auditManualReviewWorkflowNonPersistence8R } from "./manualReviewWorkflowReadinessAudit8R";
+import {
+  auditManualReviewWorkflowNonPersistence8R,
+  auditManualReviewWorkflowReadinessLogic8R,
+} from "./manualReviewWorkflowReadinessAudit8R";
 
 function assertTest(condition: boolean, message: string): void {
   if (!condition) {
@@ -22,6 +25,11 @@ export function validateManualReviewWorkflowReadiness8R(): readonly string[] {
   const persistenceLeakAudit = auditManualReviewWorkflowNonPersistence8R({
     productHtml: '<section id="manual-review-workflow-readiness-8r"><script>localStorage.setItem("workflow", "leak")</script></section>',
     exportHtml: "",
+  });
+  const exportOnlyRealUseAudit = auditManualReviewWorkflowReadinessLogic8R({
+    workflow: model.workflow,
+    productHtml: '<section id="manual-review-workflow-readiness-8r">Workflow pret pour preview non persistante.</section><section id="manual-review-workflow-ux-skeleton-8s">Squelette</section>',
+    exportHtml: '<section id="manual-review-workflow-readiness-export-8r">Workflow prete pour decision reelle.</section><section id="manual-review-workflow-ux-skeleton-export-8s">Squelette</section>',
   });
 
   assertTest(model.status === "PASS", "8R model must pass.");
@@ -69,6 +77,8 @@ export function validateManualReviewWorkflowReadiness8R(): readonly string[] {
   assertTest(model.warningCodes.length === 0, `8R warning codes must be empty: ${model.warningCodes.join(", ")}`);
   assertTest(persistenceLeakAudit.localStoragePersistenceCount === 1, "localStorage workflow leak must be counted.");
   assertTest(persistenceLeakAudit.workflowPersistencePerformed, "detected persistence must set workflowPersistencePerformed.");
+  assertTest(!exportOnlyRealUseAudit.workflowDoesNotClaimReviewReadyForRealUse, "export-only real-use claim must be audited.");
+  assertTest(exportOnlyRealUseAudit.logicWarningCodes.includes("WORKFLOW_CLAIMS_REVIEW_READY_FOR_REAL_USE"), "export-only real-use warning must be emitted.");
   assertTest(
     (() => {
       try {

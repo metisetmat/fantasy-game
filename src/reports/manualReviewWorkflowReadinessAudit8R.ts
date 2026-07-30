@@ -18,13 +18,16 @@ function countMatches(value: string, pattern: RegExp): number {
   return [...value.matchAll(pattern)].length;
 }
 
-function workflowSlice(productHtml: string, exportHtml: string): string {
-  const combined = `${productHtml}\n${exportHtml}`;
-  const start = combined.indexOf("manual-review-workflow-readiness");
+function boundedWorkflowSection(html: string): string {
+  const start = html.indexOf("manual-review-workflow-readiness");
   if (start < 0) return "";
-  const afterStart = combined.slice(start);
+  const afterStart = html.slice(start);
   const nextManualReviewSection = afterStart.slice(1).search(/manual-review-(?:workflow-ux-skeleton|ux-interaction-contract|input-field-contract|field-ux-visual-readiness|preview-activation-guards)/iu);
   return nextManualReviewSection < 0 ? afterStart : afterStart.slice(0, nextManualReviewSection + 1);
+}
+
+function workflowSlice(productHtml: string, exportHtml: string): string {
+  return `${boundedWorkflowSection(productHtml)}\n${boundedWorkflowSection(exportHtml)}`;
 }
 
 function orderPreserved(html: string, first: string, second: string): boolean {

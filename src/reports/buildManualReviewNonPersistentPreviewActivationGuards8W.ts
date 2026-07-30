@@ -330,7 +330,7 @@ export function buildManualReviewNonPersistentPreviewActivationGuards8WModel(inp
   ]);
   const status = statusFromWarnings(warningCodes, exportAudit.exportUnder900Seconds, exportAudit.exportUnder800Seconds);
   const previewActivationGuardReady = status === "PASS" && activationAudit.previewActivationStatusCorrect;
-  const storageCreated = baseline8V.safetyAudit.localStoragePersistenceCount > 0
+  const baselineStorageCreated = baseline8V.safetyAudit.localStoragePersistenceCount > 0
     || baseline8V.safetyAudit.databasePersistenceCount > 0
     || baseline8V.safetyAudit.filePersistenceCount > 0
     || baseline8V.safetyAudit.seasonMemoryCreationCount > 0
@@ -384,19 +384,19 @@ export function buildManualReviewNonPersistentPreviewActivationGuards8WModel(inp
     expectedPreviewActivationStatus: guard.activationReadinessSummary.expectedPreviewActivationStatus,
     previewActivationStatusCorrect: activationAudit.previewActivationStatusCorrect,
     nonPersistentPreviewModeDefined: activationAudit.nonPersistentPreviewModeDefined,
-    nonPersistentPreviewModeActivated: false,
-    realInputActivated: false,
-    payloadCreated: false,
-    realPreviewGenerated: false,
-    submitCreated: false,
-    apiCreated: false,
-    backendCreated: false,
-    storageCreated: false,
-    memoryCreated: false,
-    officialTruthPromoted: false,
-    automaticDecisionCreated: false,
-    selectionDriven: false,
-    tacticalInstructionDriven: false,
+    nonPersistentPreviewModeActivated: activationAudit.nonPersistentPreviewModeActivated,
+    realInputActivated: activationAudit.realInputActivated,
+    payloadCreated: activationAudit.payloadCreated,
+    realPreviewGenerated: activationAudit.realPreviewGenerated,
+    submitCreated: activationAudit.submitCreated,
+    apiCreated: activationAudit.apiCreated,
+    backendCreated: activationAudit.backendCreated,
+    storageCreated: activationAudit.storageCreated || baselineStorageCreated,
+    memoryCreated: activationAudit.memoryCreated || baselineStorageCreated,
+    officialTruthPromoted: activationAudit.officialTruthPromoted,
+    automaticDecisionCreated: activationAudit.automaticDecisionCreated,
+    selectionDriven: activationAudit.selectionDriven,
+    tacticalInstructionDriven: activationAudit.tacticalInstructionDriven,
     workflowReadinessStatusFrom8R: baseline8V.workflowReadinessStatusFrom8S,
     reviewGateStatusFrom8Q: baseline8V.reviewGateStatusFrom8Q,
     readinessDistinctFromReviewGateStillVisible: activationAudit.readinessDistinctFromReviewGateStillVisible,
@@ -413,7 +413,7 @@ export function buildManualReviewNonPersistentPreviewActivationGuards8WModel(inp
     numericThresholdGuardPreserved: exportAudit.exportUnder900BooleanCorrect && exportAudit.exportUnder800BooleanCorrect,
     sourceOfTruthSeparationPreserved: baseline8V.sourceOfTruthSeparationPreserved,
     matchEconomyBaselinePreserved: baseline8V.matchEconomyBaselinePreserved,
-    guardrailsPreserved: baseline8V.guardrailsPreserved && !storageCreated,
+    guardrailsPreserved: baseline8V.guardrailsPreserved && !baselineStorageCreated && !activationAudit.storageCreated,
     guard,
     productPreviewActivationGuardHtml,
     exportPreviewActivationGuardHtml,
