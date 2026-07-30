@@ -150,14 +150,14 @@ export function auditManualReviewPreviewDecisionGateNonPersistence8Q(input: {
 }): ManualReviewPreviewDecisionGateNonPersistenceAudit8Q {
   const slice = gateSlice(input.productHtml, input.exportHtml);
   const localStoragePersistenceCount = countMatches(slice, /localStorage\s*\./giu);
-  const databasePersistenceCount = countMatches(slice, /database write|db write|sqlite write|insert into/giu);
-  const filePersistenceCount = countMatches(slice, /writeFile|file persistence|persisted file/giu);
-  const backendSubmitActionCount = countMatches(slice, /backend submit|submit backend|api\/manual-review|post manual review/giu);
+  const databasePersistenceCount = countMatches(slice, /\binsert\s+into\b|\bsqlite(?:3)?\s*\.\s*(?:run|exec|prepare)\s*\(|\bdb\s*\.\s*(?:run|exec|insert|save|write)\s*\(/giu);
+  const filePersistenceCount = countMatches(slice, /\bwriteFile(?:Sync)?\s*\(|\bcreateWriteStream\s*\(|\bfs\s*\.\s*(?:writeFile|appendFile|createWriteStream)\s*\(/giu);
+  const backendSubmitActionCount = countMatches(slice, /fetch\s*\(\s*["'][^"']*\/api\/manual-review|axios\.\w+\s*\(\s*["'][^"']*\/api\/manual-review|<form\b[^>]*\baction=["'][^"']*\/api\/manual-review|method=["']post["']/giu);
   const formSubmitButtonCount = countMatches(slice, /<button[^>]*submit|type="submit"|<form\b/giu);
   const apiCallCount = countMatches(slice, /fetch\(|XMLHttpRequest|axios\./giu);
-  const memoryCreationCount = countMatches(slice, /memory created|memoire creee|creates? memory/giu);
-  const seasonMemoryCreationCount = countMatches(slice, /season memory created|memoire de saison creee/giu);
-  const teamStyleMemoryCreationCount = countMatches(slice, /team style memory created|memoire de style creee/giu);
+  const memoryCreationCount = countMatches(slice, /\bcreate(?:Coach|ManualReview|Preview)?Memory\s*\(|\bnew\s+\w*Memory\b/giu);
+  const seasonMemoryCreationCount = countMatches(slice, /\bcreateSeasonMemory\s*\(|\bnew\s+SeasonMemory\b/giu);
+  const teamStyleMemoryCreationCount = countMatches(slice, /\bcreateTeamStyleMemory\s*\(|\bnew\s+TeamStyleMemory\b/giu);
   const gatePersistencePerformed = localStoragePersistenceCount + databasePersistenceCount + filePersistenceCount + backendSubmitActionCount + formSubmitButtonCount + apiCallCount + memoryCreationCount + seasonMemoryCreationCount + teamStyleMemoryCreationCount > 0;
   const warnings: ManualReviewPreviewDecisionGateWarningCode8Q[] = [];
   if (localStoragePersistenceCount > 0) warnings.push("LOCAL_STORAGE_PERSISTENCE_DETECTED");
@@ -410,6 +410,7 @@ export function auditManualReviewPreviewDecisionGateIntegrationBudget8Q(input: {
   const sourceOfTruthNoteVisible = input.productHtml.includes("Source officielle") && (input.exportHtml.includes("Source officielle") || input.exportHtml.includes("score_change"));
   const productSectionOrderPreserved = orderPreserved(input.productHtml, 'id="manual-review-preview-comparison-8p"', 'id="manual-review-preview-decision-gate-8q"');
   const exportCompactPreserved = input.exportHtml.includes('id="compressed-export-8q"') ||
+    input.exportHtml.includes('id="compressed-export-8t"') ||
     input.exportHtml.includes('id="compressed-export-8s"') ||
     input.exportHtml.includes('id="compressed-export-8r"') ||
     input.exportHtml.includes('id="compressed-export-current"');

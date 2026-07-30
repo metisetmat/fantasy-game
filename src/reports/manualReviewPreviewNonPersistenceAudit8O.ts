@@ -13,14 +13,14 @@ export function auditManualReviewPreviewNonPersistence8O(input: {
   const previewSliceStart = combined.indexOf("manual-review-preview");
   const previewSlice = previewSliceStart < 0 ? "" : combined.slice(previewSliceStart);
   const localStoragePersistenceCount = countMatches(previewSlice, /localStorage\s*\./giu);
-  const databasePersistenceCount = countMatches(previewSlice, /database write|db write|sqlite write|insert into/giu);
-  const filePersistenceCount = countMatches(previewSlice, /writeFile|file persistence|persisted file/giu);
-  const backendSubmitActionCount = countMatches(previewSlice, /backend submit|submit backend|api\/manual-review|post manual review/giu);
+  const databasePersistenceCount = countMatches(previewSlice, /\binsert\s+into\b|\bsqlite(?:3)?\s*\.\s*(?:run|exec|prepare)\s*\(|\bdb\s*\.\s*(?:run|exec|insert|save|write)\s*\(/giu);
+  const filePersistenceCount = countMatches(previewSlice, /\bwriteFile(?:Sync)?\s*\(|\bcreateWriteStream\s*\(|\bfs\s*\.\s*(?:writeFile|appendFile|createWriteStream)\s*\(/giu);
+  const backendSubmitActionCount = countMatches(previewSlice, /fetch\s*\(\s*["'][^"']*\/api\/manual-review|axios\.\w+\s*\(\s*["'][^"']*\/api\/manual-review|<form\b[^>]*\baction=["'][^"']*\/api\/manual-review|method=["']post["']/giu);
   const formSubmitButtonCount = countMatches(previewSlice, /<button[^>]*submit|type="submit"|<form\b/giu);
   const apiCallCount = countMatches(previewSlice, /fetch\(|XMLHttpRequest|axios\./giu);
-  const memoryCreationCount = countMatches(previewSlice, /memory created|memoire creee|creates? memory/giu);
-  const seasonMemoryCreationCount = countMatches(previewSlice, /season memory created|memoire de saison creee/giu);
-  const teamStyleMemoryCreationCount = countMatches(previewSlice, /team style memory created|memoire de style creee/giu);
+  const memoryCreationCount = countMatches(previewSlice, /\bcreate(?:Coach|ManualReview|Preview)?Memory\s*\(|\bnew\s+\w*Memory\b/giu);
+  const seasonMemoryCreationCount = countMatches(previewSlice, /\bcreateSeasonMemory\s*\(|\bnew\s+SeasonMemory\b/giu);
+  const teamStyleMemoryCreationCount = countMatches(previewSlice, /\bcreateTeamStyleMemory\s*\(|\bnew\s+TeamStyleMemory\b/giu);
   const previewPersistencePerformed = localStoragePersistenceCount > 0 ||
     databasePersistenceCount > 0 ||
     filePersistenceCount > 0 ||

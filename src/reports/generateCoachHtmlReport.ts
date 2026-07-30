@@ -101,6 +101,7 @@ import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualRe
 import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
 import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
 import { buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel } from "./buildManualReviewWorkflowUxSkeletonWithoutPersistence8S";
+import { buildManualReviewUxInteractionContractWithoutPersistence8TModel } from "./buildManualReviewUxInteractionContractWithoutPersistence8T";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -502,8 +503,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8S: manualReviewWorkflowReadiness8R.productHtmlAfter8R,
     exportHtmlBefore8S: manualReviewWorkflowReadiness8R.exportHtmlAfter8R,
   });
-  const finalProductHtml = manualReviewWorkflowUxSkeleton8S.productHtmlAfter8S;
-  const exportHtml = manualReviewWorkflowUxSkeleton8S.exportHtmlAfter8S;
+  const manualReviewUxInteractionContract8T = buildManualReviewUxInteractionContractWithoutPersistence8TModel({
+    baseline8S: manualReviewWorkflowUxSkeleton8S,
+    productHtmlBefore8T: manualReviewWorkflowUxSkeleton8S.productHtmlAfter8S,
+    exportHtmlBefore8T: manualReviewWorkflowUxSkeleton8S.exportHtmlAfter8S,
+  });
+  const finalProductHtml = manualReviewUxInteractionContract8T.productHtmlAfter8T;
+  const exportHtml = manualReviewUxInteractionContract8T.exportHtmlAfter8T;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(

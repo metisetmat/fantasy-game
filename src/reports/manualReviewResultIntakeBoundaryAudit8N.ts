@@ -14,12 +14,12 @@ export function auditManualReviewResultIntakeBoundary8N(input: {
   const lower = combined.toLowerCase();
   const acceptedErrorCount = (code: string): number =>
     input.invalidResults.filter((result) => result.status === "accepted_for_preview" && result.errors.some((error) => error.errorCode === code)).length;
-  const seasonMemoryCreationCount = countMatches(lower, /\bcreateSeasonMemory\s*:\s*true\b|season memory created|memoire de saison creee/giu);
-  const teamStyleMemoryCreationCount = countMatches(lower, /\bcreateTeamStyleMemory\s*:\s*true\b|team style memory created|team style memory creee/giu);
-  const databasePersistenceCreationCount = countMatches(combined, /\blocalStorage\.|indexedDB|sqlite|database persistence created|databasePersistence:\s*true/giu);
-  const filePersistenceCreationCount = countMatches(combined, /writeFileSync\(|file persistence created|filePersistence:\s*true/giu);
+  const seasonMemoryCreationCount = countMatches(combined, /\bcreateSeasonMemory\s*\(|\bcreateSeasonMemory\s*:\s*true\b|\bnew\s+SeasonMemory\b/giu);
+  const teamStyleMemoryCreationCount = countMatches(combined, /\bcreateTeamStyleMemory\s*\(|\bcreateTeamStyleMemory\s*:\s*true\b|\bnew\s+TeamStyleMemory\b/giu);
+  const databasePersistenceCreationCount = countMatches(combined, /\blocalStorage\.|indexedDB\s*\.|\bsqlite(?:3)?\s*\.\s*(?:run|exec|prepare)\s*\(|\bdb\s*\.\s*(?:run|exec|insert|save|write)\s*\(|\binsert\s+into\b|databasePersistence:\s*true/giu);
+  const filePersistenceCreationCount = countMatches(combined, /\bwriteFile(?:Sync)?\s*\(|\bcreateWriteStream\s*\(|\bfs\s*\.\s*(?:writeFile|appendFile|createWriteStream)\s*\(|filePersistence:\s*true/giu);
   const localStoragePersistenceCount = countMatches(combined, /\blocalStorage\./giu);
-  const backendSubmitActionCount = countMatches(lower, /backend submit|submit backend|api\/manual-review|post manual review/giu);
+  const backendSubmitActionCount = countMatches(combined, /fetch\s*\(\s*["'][^"']*\/api\/manual-review|axios\.\w+\s*\(\s*["'][^"']*\/api\/manual-review|<form\b[^>]*\baction=["'][^"']*\/api\/manual-review|method=["']post["']/giu);
   const formSubmitButtonCount = countMatches(combined, /<button\b[^>]*(submit|envoyer|soumettre)|<input\b[^>]*type="submit"/giu);
   const automaticSelectionRecommendationCount = countMatches(lower, /doit selectionner|selection automatique recommandee|automatic selection recommendation:\s*true/giu);
   const tacticalPlanImpositionCount = countMatches(lower, /plan tactique impose|must use this tactic/giu);

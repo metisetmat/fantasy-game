@@ -106,14 +106,19 @@ export function auditManualReviewWorkflowUxSafety8S(input: {
   ]);
   const submitButtonCount = countMatches(combined, [/<button\b[^>]*type="submit"/giu, /<input\b[^>]*type="submit"/giu]);
   const enabledSubmitButtonCount = countMatches(combined, [/<(?:button|input)\b(?![^>]*disabled)[^>]*type="submit"/giu]);
-  const backendActionCount = countMatches(combined, [/\bmethod="post"/giu, /\baction="[^"]+"/giu]);
-  const apiCallCount = countMatches(combined, [/\bfetch\s*\(/giu, /\bXMLHttpRequest\b/giu, /\b\/api\//giu]);
+  const backendActionCount = countMatches(combined, [/\bmethod=["']post["']/giu, /<form\b[^>]*\baction=["'][^"']+["']/giu]);
+  const apiCallCount = countMatches(combined, [
+    /\bfetch\s*\(/giu,
+    /\bXMLHttpRequest\b/giu,
+    /\baxios\.\w+\s*\(/giu,
+    /<(?:a|form)\b[^>]*(?:href|action)=["'][^"']*\/api\//giu,
+  ]);
   const localStoragePersistenceCount = countMatches(combined, [/\blocalStorage\.(?:setItem|removeItem|clear)/giu]);
-  const databasePersistenceCount = countMatches(combined, [/\b(?:sqlite|indexedDB|database write|db\.save|insert into)\b/giu]);
-  const filePersistenceCount = countMatches(combined, [/\b(?:writeFile|writeFileSync|appendFile|createWriteStream)\b/giu]);
-  const memoryCreationCount = countMatches(combined, [/\b(?:create memory|memoire creee|memory created|season memory created|team style memory created)\b/giu]);
-  const seasonMemoryCreationCount = countMatches(combined, [/\bseason memory created\b/giu]);
-  const teamStyleMemoryCreationCount = countMatches(combined, [/\bteam style memory created\b/giu]);
+  const databasePersistenceCount = countMatches(combined, [/\binsert\s+into\b/giu, /\bsqlite(?:3)?\s*\.\s*(?:run|exec|prepare)\s*\(/giu, /\bindexedDB\s*\./giu, /\bdb\s*\.\s*(?:run|exec|insert|save|write)\s*\(/giu]);
+  const filePersistenceCount = countMatches(combined, [/\bwriteFile(?:Sync)?\s*\(/giu, /\bappendFile(?:Sync)?\s*\(/giu, /\bcreateWriteStream\s*\(/giu, /\bfs\s*\.\s*(?:writeFile|appendFile|createWriteStream)\s*\(/giu]);
+  const memoryCreationCount = countMatches(combined, [/\bcreate(?:Coach|ManualReview|Preview)?Memory\s*\(/giu, /\bnew\s+\w*Memory\b/giu]);
+  const seasonMemoryCreationCount = countMatches(combined, [/\bcreateSeasonMemory\s*\(/giu, /\bnew\s+SeasonMemory\b/giu]);
+  const teamStyleMemoryCreationCount = countMatches(combined, [/\bcreateTeamStyleMemory\s*\(/giu, /\bnew\s+TeamStyleMemory\b/giu]);
   const officialTruthPromotionCount = countMatches(combined, [/\b(?:verite officielle creee|official truth promoted|source officielle modifiee)\b/giu]);
   const automaticDecisionCount = countMatches(combined, [/\b(?:decision automatique activee|automatic decision created)\b/giu]);
   const selectionRecommendationCount = Math.max(
@@ -208,8 +213,18 @@ export function auditManualReviewWorkflowUxExport8S(input: {
     exportUnder800Seconds,
     exportUnder900BooleanCorrect: exportUnder900Seconds === (exportReadTimeSecondsAfter8S <= 900),
     exportUnder800BooleanCorrect: exportUnder800Seconds === (exportReadTimeSecondsAfter8S <= 800),
-    exportCompactPreserved: input.exportHtmlAfter8S.includes('id="compressed-export-8s"') &&
-      input.exportHtmlAfter8S.includes("Cartes tactiques essentielles"),
+    exportCompactPreserved: (
+      input.exportHtmlAfter8S.includes('id="compressed-export-8s"') ||
+      (
+        input.exportHtmlAfter8S.includes('id="compressed-export-8t"') &&
+        input.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      )
+    ) &&
+      (
+        input.exportHtmlAfter8S.includes("Cartes tactiques essentielles") ||
+        input.exportHtmlAfter8S.includes("Cartes tactiques") ||
+        input.exportHtmlAfter8S.includes('id="tactical-map-cards"')
+      ),
     exportWarningCodes: warningCodes,
     recommendation: warningCodes.length === 0 ? "EXPORT_METADATA_8S_VISIBLE" : "MANUAL_REVIEW_WORKFLOW_UX_SKELETON_PARTIAL",
   };

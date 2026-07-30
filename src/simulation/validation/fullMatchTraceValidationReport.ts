@@ -212,6 +212,10 @@ import {
   renderManualReviewWorkflowUxSkeletonWithoutPersistence8SDoc as renderManualReviewWorkflowUxSkeletonWithoutPersistence8SDocBase,
   renderManualReviewWorkflowUxSkeletonWithoutPersistence8SValidation as renderManualReviewWorkflowUxSkeletonWithoutPersistence8SValidationBase,
 } from "../../reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S";
+import {
+  renderManualReviewUxInteractionContractWithoutPersistence8TDoc as renderManualReviewUxInteractionContractWithoutPersistence8TDocBase,
+  renderManualReviewUxInteractionContractWithoutPersistence8TValidation as renderManualReviewUxInteractionContractWithoutPersistence8TValidationBase,
+} from "../../reports/buildManualReviewUxInteractionContractWithoutPersistence8T";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6913,6 +6917,18 @@ export function renderManualReviewWorkflowUxSkeletonWithoutPersistence8SValidati
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewWorkflowUxSkeletonWithoutPersistence8SValidationBase();
+}
+
+export function renderManualReviewUxInteractionContractWithoutPersistence8TDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewUxInteractionContractWithoutPersistence8TDocBase();
+}
+
+export function renderManualReviewUxInteractionContractWithoutPersistence8TValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewUxInteractionContractWithoutPersistence8TValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {
