@@ -78,7 +78,15 @@ export function validateManualReviewWorkflowUxSkeleton8S(): readonly string[] {
   assertTest(!model.exportAudit.exportMainIdStillCompressedExport8R, "main id must no longer be compressed-export-8r.");
   assertTest(!model.exportAudit.exportMainIdStillCompressedExport8Q, "main id must no longer be compressed-export-8q.");
   assertTest(
-    model.exportHtmlAfter8S.includes('id="compressed-export-8s"') ||
+      model.exportHtmlAfter8S.includes('id="compressed-export-8s"') ||
+      (
+        model.exportHtmlAfter8S.includes('id="compressed-export-8v"') &&
+        model.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      ) ||
+      (
+        model.exportHtmlAfter8S.includes('id="compressed-export-8u"') &&
+        model.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      ) ||
       (
         model.exportHtmlAfter8S.includes('id="compressed-export-8t"') &&
         model.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')

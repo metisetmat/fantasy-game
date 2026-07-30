@@ -1,30 +1,25 @@
-# Sprint 8T Share Pack
+# Sprint 8V Share Pack
 
-Current sprint: Sprint 8T - Manual Review UX Interaction Contract Without Persistence
+Current sprint: Sprint 8V - Manual Review Field UX Visual Readiness
 
-Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8S UX skeleton embedded in product/export reports, then replaces the standalone 8S docs with the 8T interaction-contract docs.
+Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8U input-field contract embedded in product/export reports, then replaces the standalone 8U docs with the 8V visual-readiness docs.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md
-4. coach-report-manual-review-ux-interaction-contract-without-persistence-8t.md
+3. validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md
+4. coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md
 5. validation.share-pack.md
 
-## Sprint 8T Focus
-- The 8T contract names future manual-review interactions while keeping them documented_but_blocked.
-- The six interaction steps remain sourced from 8M/8N/8O/8P/8Q/8R and the 8S skeleton remains visible.
-- Six refusal states and deferred decisions explain why real input, validation, preview, comparison, gate, and storage/history are not active yet.
-- Export metadata now mentions 8T and the compact export main id is cleaned to compressed-export-8t.
+## Sprint 8V Focus
+- The 8V layer makes the 8U future fields visually readable for coaches.
+- Three sections, nine groups, and twenty-one field cards are visible as static disabled cards.
+- Every card carries future, disabled, read-only, non-official, not-persisted, and not-applied badges.
+- Future validation rules, error states, refusal states, constraints, and help text are readable without activating real input.
+- Export metadata now mentions 8V and the compact export main id is cleaned to compressed-export-8v.
 
 ## Guardrails
 - Scoring values unchanged.
 - PENALTY_SHOT inactive.
-- MatchBonusEvent unchanged.
-- Score and timeline remain official score_change outputs.
-- Manual interaction contract creates no submit, API, backend, storage, memory, official truth, selection, or tactical instruction.
-- Share pack remains at or below 20 files.
-
-## Recommendation
-- KEEP_MANUAL_REVIEW_UX_INTERACTION_CONTRACT
-- PREPARE_MANUAL_REVIEW_INPUT_FIELD_CONTRACT_WITHOUT_PERSISTENCE
+- No real input, submit, API, backend, storage, memory, payload, real preview, official truth, automatic decision, selection, or tactical instruction.
+- 8U remains preserved and embedded; source reports outside reports/share are not deleted.

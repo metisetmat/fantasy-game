@@ -216,6 +216,14 @@ export function auditManualReviewWorkflowUxExport8S(input: {
     exportCompactPreserved: (
       input.exportHtmlAfter8S.includes('id="compressed-export-8s"') ||
       (
+        input.exportHtmlAfter8S.includes('id="compressed-export-8v"') &&
+        input.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      ) ||
+      (
+        input.exportHtmlAfter8S.includes('id="compressed-export-8u"') &&
+        input.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
+      ) ||
+      (
         input.exportHtmlAfter8S.includes('id="compressed-export-8t"') &&
         input.exportHtmlAfter8S.includes('data-manual-review-workflow-ux-skeleton-version="8S"')
       )
