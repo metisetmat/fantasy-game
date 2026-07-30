@@ -1987,6 +1987,518 @@
 </ul>
 </article>
 </section>
+<section id="manual-review-field-ux-visual-readiness-8v" class="premium-section manual-review-field-ux-visual-readiness-8v" data-manual-review-field-ux-visual-readiness-version="8V">
+<h2>Lisibilite visuelle des champs</h2>
+<p class="eyebrow">future_field_visual_readiness_only - aucun champ actif</p>
+<p>Cette couche rend le contrat 8U plus lisible pour un coach: sections, groupes, contraintes, etats futurs et badges sont visibles, mais rien n'est saisissable, envoye, stocke, applique ou officialise.</p>
+<article class="product-card manual-review-field-ux-summary-8v">
+<h3>Etat visuel 8V</h3>
+<p><strong>Sections :</strong> 3; <strong>groupes :</strong> 9; <strong>cartes champs :</strong> 21.</p>
+<p><strong>Score lisibilite coach :</strong> 96/100.</p>
+<p><strong>Workflow 8S :</strong> ready_for_non_persistent_preview; <strong>gate 8Q :</strong> needs_completion.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">Futur</span>
+<span class="badge manual-review-field-ux-badge-8v">Desactive</span>
+<span class="badge manual-review-field-ux-badge-8v">Read-only</span>
+<span class="badge manual-review-field-ux-badge-8v">Non officiel</span>
+<span class="badge manual-review-field-ux-badge-8v">Non persiste</span>
+<span class="badge manual-review-field-ux-badge-8v">Non applique</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-section-8v" data-field-ux-visual-section="true">
+<h3>1. Premiere sortie après récupération</h3>
+<p>La première sortie après récupération a-t-elle confirme le plan d&#39;observation ?</p>
+<p>Parcours visuel futur: lire le resultat, verifier les compteurs, puis ajouter une note courte sans activer la saisie.</p>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Resultat</h3>
+<p>Comprendre ce que le coach pense avoir observe et si le contexte permet une comparaison honnete.</p>
+<p class="guard">outcome_select + context_comparability_select</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled select mock</p>
+<h4>Resultat de l&#39;observation</h4>
+<p>Montrer le resultat que le coach pourra choisir plus tard, sans en faire une verite officielle.</p>
+<p><strong>Contrainte :</strong> Valeurs futures: confirmed / contradicted / inconclusive / insufficient_sample.</p>
+<p><strong>Validation future :</strong> outcome_must_be_known_enum, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> UNKNOWN_OUTCOME_VALUE_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">A choisir plus tard</p>
+<p class="muted">Choix manuel coach, non officiel, jamais automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled select mock</p>
+<h4>Contexte comparable</h4>
+<p>Montrer si la situation pourra etre comparee honnetement a l&#39;observation precedente.</p>
+<p><strong>Contrainte :</strong> Valeurs futures: yes / no / uncertain.</p>
+<p><strong>Validation future :</strong> context_comparability_must_be_known_enum, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> UNKNOWN_CONTEXT_COMPARABILITY_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">A choisir plus tard</p>
+<p class="muted">Le contexte sera choisi manuellement plus tard; rien n&#39;est traite en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Compteurs</h3>
+<p>Rendre visible le volume de preuves et l&#39;equilibre des signaux.</p>
+<p class="guard">comparable_situation_count + positive_signal_count + negative_signal_count</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Nombre de situations comparables</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> comparable_count_must_be_integer_0_99, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> COMPARABLE_COUNT_OUT_OF_RANGE_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Nombre futur de situations comparables, documente sans traitement en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Signaux positifs</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> positive_count_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count</p>
+<p><strong>Erreur future :</strong> SIGNAL_COUNT_OUT_OF_RANGE_8U, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Signal futur optionnel, non stocke et non applique en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Signaux negatifs</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> negative_count_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count</p>
+<p><strong>Erreur future :</strong> SIGNAL_COUNT_OUT_OF_RANGE_8U, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Signal futur optionnel, sans decision automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Notes</h3>
+<p>Garder une trace courte de ce qui a ete vu, sans officialiser ni stocker.</p>
+<p class="guard">short_evidence_note + coach_free_note</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled short text mock</p>
+<h4>Preuve courte</h4>
+<p>Afficher une future note coach courte, sans memoire, payload ni preview reelle.</p>
+<p><strong>Contrainte :</strong> Texte futur limite a 180 caracteres.</p>
+<p><strong>Validation future :</strong> short_evidence_note_max_180</p>
+<p><strong>Erreur future :</strong> SHORT_EVIDENCE_NOTE_TOO_LONG_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">Ex. 4 récupérations, 3 sorties propres</p>
+<p class="muted">Trace coach future, courte, non officielle et non persistee en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled long text mock</p>
+<h4>Note coach</h4>
+<p>Afficher une future note coach courte, sans memoire, payload ni preview reelle.</p>
+<p><strong>Contrainte :</strong> Texte futur limite a 800 caracteres.</p>
+<p><strong>Validation future :</strong> coach_free_note_max_800</p>
+<p><strong>Erreur future :</strong> COACH_FREE_NOTE_TOO_LONG_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">Note libre a renseigner plus tard</p>
+<p class="muted">Note libre future; non stockee, non officielle et jamais traitee dans 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+</article>
+<article class="product-card manual-review-field-ux-section-8v" data-field-ux-visual-section="true">
+<h3>2. Continuite après entree en zone dangereuse</h3>
+<p>L&#39;entree en zone dangereuse a-t-elle produit une continuite credible ?</p>
+<p>Parcours visuel futur: lire le resultat, verifier les compteurs, puis ajouter une note courte sans activer la saisie.</p>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Resultat</h3>
+<p>Comprendre ce que le coach pense avoir observe et si le contexte permet une comparaison honnete.</p>
+<p class="guard">outcome_select + context_comparability_select</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled select mock</p>
+<h4>Resultat de l&#39;observation</h4>
+<p>Montrer le resultat que le coach pourra choisir plus tard, sans en faire une verite officielle.</p>
+<p><strong>Contrainte :</strong> Valeurs futures: confirmed / contradicted / inconclusive / insufficient_sample.</p>
+<p><strong>Validation future :</strong> outcome_must_be_known_enum, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> UNKNOWN_OUTCOME_VALUE_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">A choisir plus tard</p>
+<p class="muted">Choix manuel coach, non officiel, jamais automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled select mock</p>
+<h4>Contexte comparable</h4>
+<p>Montrer si la situation pourra etre comparee honnetement a l&#39;observation precedente.</p>
+<p><strong>Contrainte :</strong> Valeurs futures: yes / no / uncertain.</p>
+<p><strong>Validation future :</strong> context_comparability_must_be_known_enum, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> UNKNOWN_CONTEXT_COMPARABILITY_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">A choisir plus tard</p>
+<p class="muted">Le contexte sera choisi manuellement plus tard; rien n&#39;est traite en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Compteurs</h3>
+<p>Rendre visible le volume de preuves et l&#39;equilibre des signaux.</p>
+<p class="guard">comparable_situation_count + positive_signal_count + negative_signal_count</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Nombre de situations comparables</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> comparable_count_must_be_integer_0_99, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> COMPARABLE_COUNT_OUT_OF_RANGE_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Nombre futur de situations comparables, documente sans traitement en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Signaux positifs</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> positive_count_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count</p>
+<p><strong>Erreur future :</strong> SIGNAL_COUNT_OUT_OF_RANGE_8U, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Signal futur optionnel, non stocke et non applique en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Signaux negatifs</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> negative_count_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count</p>
+<p><strong>Erreur future :</strong> SIGNAL_COUNT_OUT_OF_RANGE_8U, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Signal futur optionnel, sans decision automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Notes</h3>
+<p>Garder une trace courte de ce qui a ete vu, sans officialiser ni stocker.</p>
+<p class="guard">short_evidence_note + coach_free_note</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled short text mock</p>
+<h4>Preuve courte</h4>
+<p>Afficher une future note coach courte, sans memoire, payload ni preview reelle.</p>
+<p><strong>Contrainte :</strong> Texte futur limite a 180 caracteres.</p>
+<p><strong>Validation future :</strong> short_evidence_note_max_180</p>
+<p><strong>Erreur future :</strong> SHORT_EVIDENCE_NOTE_TOO_LONG_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">Ex. 4 récupérations, 3 sorties propres</p>
+<p class="muted">Trace coach future, courte, non officielle et non persistee en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled long text mock</p>
+<h4>Note coach</h4>
+<p>Afficher une future note coach courte, sans memoire, payload ni preview reelle.</p>
+<p><strong>Contrainte :</strong> Texte futur limite a 800 caracteres.</p>
+<p><strong>Validation future :</strong> coach_free_note_max_800</p>
+<p><strong>Erreur future :</strong> COACH_FREE_NOTE_TOO_LONG_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">Note libre a renseigner plus tard</p>
+<p class="muted">Note libre future; non stockee, non officielle et jamais traitee dans 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+</article>
+<article class="product-card manual-review-field-ux-section-8v" data-field-ux-visual-section="true">
+<h3>3. Structure après action neutralisee</h3>
+<p>L&#39;equipe a-t-elle conserve une structure lisible après action neutralisee ?</p>
+<p>Parcours visuel futur: lire le resultat, verifier les compteurs, puis ajouter une note courte sans activer la saisie.</p>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Resultat</h3>
+<p>Comprendre ce que le coach pense avoir observe et si le contexte permet une comparaison honnete.</p>
+<p class="guard">outcome_select + context_comparability_select</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled select mock</p>
+<h4>Resultat de l&#39;observation</h4>
+<p>Montrer le resultat que le coach pourra choisir plus tard, sans en faire une verite officielle.</p>
+<p><strong>Contrainte :</strong> Valeurs futures: confirmed / contradicted / inconclusive / insufficient_sample.</p>
+<p><strong>Validation future :</strong> outcome_must_be_known_enum, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> UNKNOWN_OUTCOME_VALUE_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">A choisir plus tard</p>
+<p class="muted">Choix manuel coach, non officiel, jamais automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled select mock</p>
+<h4>Contexte comparable</h4>
+<p>Montrer si la situation pourra etre comparee honnetement a l&#39;observation precedente.</p>
+<p><strong>Contrainte :</strong> Valeurs futures: yes / no / uncertain.</p>
+<p><strong>Validation future :</strong> context_comparability_must_be_known_enum, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> UNKNOWN_CONTEXT_COMPARABILITY_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">A choisir plus tard</p>
+<p class="muted">Le contexte sera choisi manuellement plus tard; rien n&#39;est traite en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Compteurs</h3>
+<p>Rendre visible le volume de preuves et l&#39;equilibre des signaux.</p>
+<p class="guard">comparable_situation_count + positive_signal_count + negative_signal_count</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Nombre de situations comparables</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> comparable_count_must_be_integer_0_99, required_fields_missing_blocks_future_preview</p>
+<p><strong>Erreur future :</strong> COMPARABLE_COUNT_OUT_OF_RANGE_8U, REQUIRED_FIELD_MISSING_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Nombre futur de situations comparables, documente sans traitement en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Signaux positifs</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> positive_count_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count</p>
+<p><strong>Erreur future :</strong> SIGNAL_COUNT_OUT_OF_RANGE_8U, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Signal futur optionnel, non stocke et non applique en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled counter mock</p>
+<h4>Signaux negatifs</h4>
+<p>Afficher un futur compteur de preuve, sans calcul actif ni stockage.</p>
+<p><strong>Contrainte :</strong> Nombre entier futur entre 0 et 99.</p>
+<p><strong>Validation future :</strong> negative_count_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count</p>
+<p><strong>Erreur future :</strong> SIGNAL_COUNT_OUT_OF_RANGE_8U, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">0</p>
+<p class="muted">Signal futur optionnel, sans decision automatique.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-group-8v">
+<h3>Notes</h3>
+<p>Garder une trace courte de ce qui a ete vu, sans officialiser ni stocker.</p>
+<p class="guard">short_evidence_note + coach_free_note</p>
+<div class="product-card-grid manual-review-field-ux-card-grid-8v">
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled short text mock</p>
+<h4>Preuve courte</h4>
+<p>Afficher une future note coach courte, sans memoire, payload ni preview reelle.</p>
+<p><strong>Contrainte :</strong> Texte futur limite a 180 caracteres.</p>
+<p><strong>Validation future :</strong> short_evidence_note_max_180</p>
+<p><strong>Erreur future :</strong> SHORT_EVIDENCE_NOTE_TOO_LONG_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">Ex. 4 récupérations, 3 sorties propres</p>
+<p class="muted">Trace coach future, courte, non officielle et non persistee en 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+<article class="product-card manual-review-field-ux-card-8v" aria-disabled="true" data-field-ux-visual-state="future-disabled-static">
+<p class="eyebrow">disabled long text mock</p>
+<h4>Note coach</h4>
+<p>Afficher une future note coach courte, sans memoire, payload ni preview reelle.</p>
+<p><strong>Contrainte :</strong> Texte futur limite a 800 caracteres.</p>
+<p><strong>Validation future :</strong> coach_free_note_max_800</p>
+<p><strong>Erreur future :</strong> COACH_FREE_NOTE_TOO_LONG_8U</p>
+<p><strong>Etat 8V :</strong> Champ visuel statique 8V: futur, desactive, read-only, non officiel, non persiste et non applique.</p>
+<p class="manual-review-field-ux-mock-8v">Note libre a renseigner plus tard</p>
+<p class="muted">Note libre future; non stockee, non officielle et jamais traitee dans 8U.</p>
+<div class="badge-row">
+<span class="badge manual-review-field-ux-badge-8v">future</span>
+<span class="badge manual-review-field-ux-badge-8v">disabled</span>
+<span class="badge manual-review-field-ux-badge-8v">read_only</span>
+<span class="badge manual-review-field-ux-badge-8v">non_official</span>
+<span class="badge manual-review-field-ux-badge-8v">not_persisted</span>
+<span class="badge manual-review-field-ux-badge-8v">not_applied</span>
+</div>
+</article>
+</div>
+</article>
+</article>
+<article class="product-card manual-review-field-ux-validation-8v">
+<h3>Contraintes et erreurs futures</h3>
+<p><strong>Regles visibles :</strong> 12, toutes inactives en 8V.</p>
+<p><strong>Erreurs futures visibles :</strong> 11, toutes inactives en 8V.</p>
+<p><strong>Refus visibles :</strong> 6.</p>
+<p>Les regles futures sont visibles pour lecture coach, mais aucune validation active n&#39;est executee en 8V.</p>
+<p>Les erreurs futures sont expliquees comme etats visuels, sans bloquer une vraie soumission en 8V puisqu&#39;aucune soumission n&#39;existe.</p>
+</article>
+<article class="product-card manual-review-field-ux-boundaries-8v">
+<h3>Frontieres protegees</h3>
+<ul>
+<li><strong>Aucune saisie reelle :</strong> Les cartes ressemblent a des champs futurs mais ne sont pas des controles HTML actifs.</li>
+<li><strong>Aucun stockage :</strong> La couche visuelle ne cree ni localStorage, ni fichier, ni base, ni memoire.</li>
+<li><strong>Aucune verite officielle :</strong> La revue coach reste future et non officielle; elle ne modifie ni score, ni timeline, ni selection.</li>
+</ul>
+</article>
+</section>
 
   
   <section id="next-match-plan" class="product-section">
