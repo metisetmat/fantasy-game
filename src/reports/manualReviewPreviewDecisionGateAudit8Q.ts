@@ -17,6 +17,16 @@ function countMatches(value: string, pattern: RegExp): number {
   return [...value.matchAll(pattern)].length;
 }
 
+function countAmbiguousGateWording(value: string): number {
+  return [...value.matchAll(/gate tactique|decision tactique officielle|selection automatique/giu)]
+    .filter((match) => {
+      const start = match.index ?? 0;
+      const before = value.slice(Math.max(0, start - 32), start).toLowerCase();
+      return !/(pas de|sans|aucune?|zero|ne cree pas|ne produit pas|bloque|bloquer)\s*$/iu.test(before);
+    })
+    .length;
+}
+
 function gateSlice(productHtml: string, exportHtml: string): string {
   const combined = `${productHtml}\n${exportHtml}`;
   const start = combined.indexOf("manual-review-preview-decision-gate");
@@ -489,7 +499,7 @@ export function auditManualReviewPreviewDecisionGateWording8Q(input: {
   const noAutomaticDecisionClaimCount = countMatches(slice, /decision automatique active|appliquer cette decision/giu);
   const noSelectionInstructionCount = countMatches(slice, /changer la selection|selection imposee|doit selectionner/giu);
   const noTacticalInstructionCount = countMatches(slice, /changer le systeme|plan tactique a appliquer|consigne tactique imposee/giu);
-  const ambiguousGateWordingCount = countMatches(slice, /gate tactique|decision tactique officielle|selection automatique/giu);
+  const ambiguousGateWordingCount = countAmbiguousGateWording(slice);
   const warningCounts = noRealNextMatchClaimCount + noOfficialResultClaimCount + noEngineLearningClaimCount + noSeasonTrendClaimCount + noAutomaticDecisionClaimCount + noSelectionInstructionCount + noTacticalInstructionCount + ambiguousGateWordingCount;
   const wordingReadabilityScore = gateDemoOnlyWordingVisible && gateNonOfficialWordingVisible && gateNotPersistedWordingVisible && gateNotAppliedWordingVisible && warningCounts === 0 ? 98 : 86;
   const warnings: ManualReviewPreviewDecisionGateWarningCode8Q[] = [];

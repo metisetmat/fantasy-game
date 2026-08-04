@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-30T14:34:01.897Z
-Task/sprint: Sprint 8V - Manual Review Field UX Visual Readiness
+Generated: 2026-07-30T18:47:03.539Z
+Task/sprint: Sprint 8W - Manual Review Non-Persistent Preview Activation Guards
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md
-- validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md
+- coach-report-manual-review-non-persistent-preview-activation-guards-8w.md
+- validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md
 - README.md
 
 ## Bundle Files

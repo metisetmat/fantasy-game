@@ -10,7 +10,7 @@ export function renderManualReviewFieldUxVisualReadinessExport8V(
     `<p><strong>Mode :</strong> ${visualReadiness.visualMode}.</p>`,
     `<p><strong>Sections :</strong> ${visualReadiness.visualSections.length}; <strong>groupes :</strong> ${visualReadiness.visualFieldGroups.length}; <strong>cartes champs :</strong> ${visualReadiness.visualFieldCards.length}.</p>`,
     `<p><strong>Regles futures :</strong> ${visualReadiness.visualValidationSummary.validationRuleCount} inactives; <strong>erreurs futures :</strong> ${visualReadiness.visualErrorSummary.errorStateCount} inactives; <strong>refus :</strong> ${visualReadiness.visualRefusalSummary.length}.</p>`,
-    `<p><strong>Workflow 8S :</strong> ${visualReadiness.visualReadinessSummary.workflowReadinessStatusFrom8S}; <strong>gate 8Q :</strong> ${visualReadiness.visualReadinessSummary.reviewGateStatusFrom8Q}.</p>`,
+    `<p><strong>Readiness 8R :</strong> ${visualReadiness.visualReadinessSummary.workflowReadinessStatusFrom8S}; <strong>gate 8Q :</strong> ${visualReadiness.visualReadinessSummary.reviewGateStatusFrom8Q}. <strong>Squelette UX 8S :</strong> couche statique conservee.</p>`,
     `<p><strong>Lisibilite coach :</strong> ${visualReadiness.visualReadinessSummary.coachReadabilityScore}/100; densite acceptable: ${visualReadiness.visualReadinessSummary.visualDensityAcceptable}.</p>`,
     '<p class="guard">Badges 8V visibles: futur, desactive, read-only, non officiel, non persiste, non applique. Aucun input reel, submit, API, backend, stockage, memoire, payload, preview reelle, official truth, selection ou tactique.</p>',
     "</section>",

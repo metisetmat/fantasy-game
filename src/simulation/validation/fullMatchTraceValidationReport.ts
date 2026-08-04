@@ -224,6 +224,10 @@ import {
   renderManualReviewFieldUxVisualReadinessWithoutPersistence8VDoc as renderManualReviewFieldUxVisualReadinessWithoutPersistence8VDocBase,
   renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidation as renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidationBase,
 } from "../../reports/buildManualReviewFieldUxVisualReadinessWithoutPersistence8V";
+import {
+  renderManualReviewNonPersistentPreviewActivationGuards8WDoc as renderManualReviewNonPersistentPreviewActivationGuards8WDocBase,
+  renderManualReviewNonPersistentPreviewActivationGuards8WValidation as renderManualReviewNonPersistentPreviewActivationGuards8WValidationBase,
+} from "../../reports/buildManualReviewNonPersistentPreviewActivationGuards8W";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6961,6 +6965,18 @@ export function renderManualReviewFieldUxVisualReadinessWithoutPersistence8VVali
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidationBase();
+}
+
+export function renderManualReviewNonPersistentPreviewActivationGuards8WDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewNonPersistentPreviewActivationGuards8WDocBase();
+}
+
+export function renderManualReviewNonPersistentPreviewActivationGuards8WValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewNonPersistentPreviewActivationGuards8WValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

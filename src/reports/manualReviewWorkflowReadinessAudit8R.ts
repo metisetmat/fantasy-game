@@ -18,10 +18,16 @@ function countMatches(value: string, pattern: RegExp): number {
   return [...value.matchAll(pattern)].length;
 }
 
+function boundedWorkflowSection(html: string): string {
+  const start = html.indexOf("manual-review-workflow-readiness");
+  if (start < 0) return "";
+  const afterStart = html.slice(start);
+  const nextManualReviewSection = afterStart.slice(1).search(/manual-review-(?:workflow-ux-skeleton|ux-interaction-contract|input-field-contract|field-ux-visual-readiness|preview-activation-guards)/iu);
+  return nextManualReviewSection < 0 ? afterStart : afterStart.slice(0, nextManualReviewSection + 1);
+}
+
 function workflowSlice(productHtml: string, exportHtml: string): string {
-  const combined = `${productHtml}\n${exportHtml}`;
-  const start = combined.indexOf("manual-review-workflow-readiness");
-  return start < 0 ? "" : combined.slice(start);
+  return `${boundedWorkflowSection(productHtml)}\n${boundedWorkflowSection(exportHtml)}`;
 }
 
 function orderPreserved(html: string, first: string, second: string): boolean {
@@ -144,7 +150,7 @@ export function auditManualReviewWorkflowReadinessLogic8R(input: {
   readonly productHtml: string;
   readonly exportHtml: string;
 }): ManualReviewWorkflowReadinessLogicAudit8R {
-  const combined = `${input.productHtml}\n${input.exportHtml}`;
+  const combined = workflowSlice(input.productHtml, input.exportHtml);
   const workflowReadinessStatus = input.workflow.readinessSummary.workflowReadinessStatus;
   const reviewGateStatusFrom8Q = input.workflow.readinessSummary.reviewGateStatusFrom8Q;
   const workflowReadinessStatusCorrect = workflowReadinessStatus === "ready_for_non_persistent_preview";

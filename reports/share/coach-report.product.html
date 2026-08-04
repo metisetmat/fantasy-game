@@ -2499,6 +2499,204 @@
 </ul>
 </article>
 </section>
+<section id="manual-review-preview-activation-guards-8w" class="premium-section manual-review-preview-activation-guards-8w" data-manual-review-preview-activation-guards-version="8W">
+<h2>Garde-fous d'activation preview</h2>
+<p class="eyebrow">preview documentee mais bloquee - aucun payload - aucune preview reelle</p>
+<p>Cette couche prepare les conditions qui devront etre vraies avant une future preview non persistante. Elle n'active pas la saisie, ne cree aucun payload, ne stocke rien et ne transforme jamais une revue coach en verite officielle.</p>
+<article class="product-card manual-review-preview-activation-summary-8w">
+<h3>Etat 8W</h3>
+<p><strong>Statut activation :</strong> documented_but_blocked.</p>
+<p><strong>Readiness 8R :</strong> ready_for_non_persistent_preview; <strong>gate 8Q :</strong> needs_completion; <strong>visuel 8V :</strong> ready_for_static_visual_review.</p>
+<p><strong>Conditions :</strong> 20, dont 8 satisfaites comme garde-fous et 12 encore bloquees avant activation.</p>
+<p><strong>Blockers :</strong> 12; <strong>refus :</strong> 6.</p>
+<p class="guard">Les champs sont lisibles, mais la preview reste documentee et bloquee.</p>
+</article>
+<article class="product-card manual-review-preview-activation-distinction-8w">
+<h3>Distinction essentielle</h3>
+<p>La lisibilite 8V signifie: pret pour revue visuelle statique. L'activation preview 8W signifie seulement: preview documentee mais bloquee. La preview reelle reste bloquee.</p>
+</article>
+<article class="product-card manual-review-preview-activation-conditions-8w">
+<h3>Conditions avant activation future</h3>
+<div class="product-card-grid">
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>field state model defined</h4>
+<p>Les futurs champs doivent avoir un modele d&#39;etat controle.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>real input component approved</h4>
+<p>La vraie saisie doit etre explicitement decidee.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>field validation runtime defined</h4>
+<p>Les regles 8U doivent devenir executables dans un sprint futur.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>field error messages mapped</h4>
+<p>Les error states 8U/8V doivent etre relies a des messages UX.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>payload preview only contract defined</h4>
+<p>Le futur payload doit etre preview_only, non officiel, non persiste.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>payload creation boundary defined</h4>
+<p>Le passage champs vers payload doit etre borne et testable.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>preview renderer accepts preview only payload</h4>
+<p>Le renderer futur doit accepter seulement un payload valide et non officiel.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>invalid payload blocks preview</h4>
+<p>Tout payload invalide doit bloquer la preview.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no submit available</h4>
+<p>Aucun submit ne doit exister tant que le stockage n&#39;est pas decide.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no api available</h4>
+<p>Aucune API ne doit etre appelee.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no backend available</h4>
+<p>Aucun backend ne doit etre appele.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no storage available</h4>
+<p>Aucun localStorage, DB, file write, history ou draft.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>official truth boundary enforced</h4>
+<p>Le resultat coach reste non officiel.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no score or timeline mutation</h4>
+<p>Aucun score, timeline, score_change ou event ne doit bouger.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no automatic decision</h4>
+<p>La preview ne peut pas devenir decision automatique.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>no selection or tactical instruction</h4>
+<p>La preview ne peut pas piloter selection ou tactique.</p>
+<p><strong>Etat 8W :</strong> satisfait comme garde-fou.</p>
+<p class="guard">Satisfait comme garde-fou negatif en 8W; ne rend pas la feature active.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>permissions policy deferred</h4>
+<p>Permissions et identite coach restent a decider.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>abandon without save policy defined</h4>
+<p>Sortir sans sauvegarder doit etre prevu avant vraie saisie.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>accessibility policy defined</h4>
+<p>Focus, clavier et labels accessibles doivent etre definis avant activation.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+<article class="product-card manual-review-preview-activation-condition-8w">
+<h4>audit logging policy deferred</h4>
+<p>Si stockage futur, audit logging devra etre decide separement.</p>
+<p><strong>Etat 8W :</strong> non satisfait avant activation.</p>
+<p class="guard">Non satisfait en 8W parce que l&#39;activation reelle est explicitement hors scope.</p>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-preview-blocking-guards-8w">
+<h3>Blockers d'activation</h3>
+<ul>
+<li><strong>BLOCK_IF_ANY_FIELD_ACTIVE_8W :</strong> Bloque si un champ devient actif.</li>
+<li><strong>BLOCK_IF_PAYLOAD_CREATION_DETECTED_8W :</strong> Bloque toute creation de payload.</li>
+<li><strong>BLOCK_IF_REAL_PREVIEW_GENERATION_DETECTED_8W :</strong> Bloque toute preview reelle.</li>
+<li><strong>BLOCK_IF_SUBMIT_DETECTED_8W :</strong> Bloque tout submit.</li>
+<li><strong>BLOCK_IF_API_DETECTED_8W :</strong> Bloque tout appel API.</li>
+<li><strong>BLOCK_IF_BACKEND_DETECTED_8W :</strong> Bloque toute action backend.</li>
+<li><strong>BLOCK_IF_STORAGE_DETECTED_8W :</strong> Bloque localStorage, DB, fichier, draft et historique.</li>
+<li><strong>BLOCK_IF_MEMORY_DETECTED_8W :</strong> Bloque memoire de saison ou team style memory.</li>
+<li><strong>BLOCK_IF_OFFICIAL_TRUTH_PROMOTION_DETECTED_8W :</strong> Bloque toute officialisation.</li>
+<li><strong>BLOCK_IF_SCORE_OR_TIMELINE_MUTATION_DETECTED_8W :</strong> Bloque mutation score, timeline, event ou score_change.</li>
+<li><strong>BLOCK_IF_AUTOMATIC_DECISION_DETECTED_8W :</strong> Bloque decision automatique.</li>
+<li><strong>BLOCK_IF_SELECTION_OR_TACTIC_DETECTED_8W :</strong> Bloque selection automatique ou consigne tactique.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-refusal-states-8w">
+<h3>Refusal states</h3>
+<ul>
+<li><strong>PREVIEW_ACTIVATION_NOT_ENABLED_8W :</strong> La preview reelle n&#39;est pas activee dans ce sprint.</li>
+<li><strong>PAYLOAD_CREATION_NOT_ENABLED_8W :</strong> Aucun payload n&#39;est cree depuis les champs.</li>
+<li><strong>REAL_INPUT_PROCESSING_NOT_ENABLED_8W :</strong> Aucune donnee coach reelle n&#39;est traitee.</li>
+<li><strong>STORAGE_NOT_DECIDED_8W :</strong> Aucun stockage, draft ou historique n&#39;est decide.</li>
+<li><strong>OFFICIALIZATION_FORBIDDEN_8W :</strong> Une revue coach ne devient pas verite officielle.</li>
+<li><strong>AUTOMATION_FORBIDDEN_8W :</strong> La preview ne declenche ni decision, ni selection, ni consigne tactique.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-readiness-8w">
+<h3>Ce qui est pret / bloque</h3>
+<h4>Pret</h4>
+<ul>
+<li>champs visuels lisibles</li>
+<li>regles futures connues</li>
+<li>erreurs futures connues</li>
+<li>garde-fous d&#39;activation documentes</li>
+</ul>
+<h4>Bloque</h4>
+<ul>
+<li>vraie saisie</li>
+<li>payload</li>
+<li>preview reelle</li>
+<li>submit</li>
+<li>API/backend</li>
+<li>stockage</li>
+<li>officialisation</li>
+<li>decision automatique</li>
+<li>selection/tactique</li>
+</ul>
+<h4>Prochain sprint possible</h4>
+<ul>
+<li>definir le contrat payload preview_only sans persistence</li>
+<li>relier les validations runtime sans stockage</li>
+<li>preparer un renderer de preview non officielle sous garde stricte</li>
+</ul>
+</article>
+</section>
 
   
   <section id="next-match-plan" class="product-section">

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8V - Manual Review Field UX Visual Readiness. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8W - Manual Review Non-Persistent Preview Activation Guards. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -178,6 +178,8 @@ import {
   renderManualReviewInputFieldContractWithoutPersistence8UValidation,
   renderManualReviewFieldUxVisualReadinessWithoutPersistence8VDoc,
   renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidation,
+  renderManualReviewNonPersistentPreviewActivationGuards8WDoc,
+  renderManualReviewNonPersistentPreviewActivationGuards8WValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -191,10 +193,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8V - Manual Review Field UX Visual Readiness";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8W - Manual Review Non-Persistent Preview Activation Guards";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-non-persistent-preview-activation-guards-8w.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-field-ux-visual-readiness-without-persistence-8v.md";
+  "validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4030,6 +4032,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8V test proving three sections, nine groups, twenty-one disabled static cards, zero enabled controls, no persistence, no preview, no official truth, no selection, no tactic, and current 8V export metadata",
       },
       {
+        source: "src/reports/manualReviewPreviewActivationGuardsTypes8W.ts",
+        required: true,
+        reason: "Sprint 8W typed activation guard model for future non-persistent manual-review preview activation conditions, blockers, refusal states, readiness summary, and preview-only boundary",
+      },
+      {
+        source: "src/reports/manualReviewPreviewActivationGuardsWarnings8W.ts",
+        required: true,
+        reason: "Sprint 8W warning registry for preview activation guard visibility, non-persistence, source-of-truth, export metadata, and micro wording debt checks",
+      },
+      {
+        source: "src/reports/manualReviewPreviewActivationGuardsAudit8W.ts",
+        required: true,
+        reason: "Sprint 8W audits for activation guard counts, product/export visibility, 8V/8U linkage, blocked preview status, corrected 8V wording, and export metadata",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewActivationGuardsProduct8W.ts",
+        required: true,
+        reason: "Sprint 8W product renderer adding coach-readable activation conditions, blocking guards, refusal states, and visual-readiness versus preview-activation distinction",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewActivationGuardsExport8W.ts",
+        required: true,
+        reason: "Sprint 8W compact export renderer adding preview activation guards, correcting the 8V readiness label, and updating export metadata to 8W",
+      },
+      {
+        source: "src/reports/buildManualReviewNonPersistentPreviewActivationGuards8W.ts",
+        required: true,
+        reason: "Sprint 8W model, report renderer, and validation renderer for manual review non-persistent preview activation guards",
+      },
+      {
+        source: "src/reports/manualReviewPreviewActivationGuards8W.test.ts",
+        required: true,
+        reason: "Sprint 8W test proving documented_but_blocked preview activation, twenty conditions, twelve blockers, six refusal states, zero payload/preview/persistence/official truth/selection/tactic, and current 8W export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6186,6 +6223,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8W")) {
+    return renderManualReviewNonPersistentPreviewActivationGuards8WDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8V")) {
     return renderManualReviewFieldUxVisualReadinessWithoutPersistence8VDoc(fullMatchTraceValidationModel());
   }
@@ -8563,6 +8603,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8W")) {
+    return renderManualReviewNonPersistentPreviewActivationGuards8WValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8V")) {
     return renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidation(fullMatchTraceValidationModel());
   }
@@ -10886,6 +10929,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8W")) {
+    return [
+      "# Sprint 8W Share Pack",
+      "",
+      "Current sprint: Sprint 8W - Manual Review Non-Persistent Preview Activation Guards",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8V field UX visual-readiness layer embedded in product/export reports, then replaces the standalone 8V docs with the 8W activation-guard docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md",
+      "4. coach-report-manual-review-non-persistent-preview-activation-guards-8w.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8W Focus",
+      "- The 8W layer documents the conditions required before any future non-persistent preview activation.",
+      "- The preview activation status is documented_but_blocked.",
+      "- Twenty activation conditions, twelve blocking guards, and six refusal states are visible.",
+      "- The 8V micro wording debt is fixed: readiness belongs to 8R, while 8S remains the UX skeleton.",
+      "- Export metadata now mentions 8W and the compact export main id is cleaned to compressed-export-8w.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- No real input, payload, preview, submit, API, backend, storage, memory, official truth, automatic decision, selection, or tactical instruction.",
+      "- 8V remains preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8V")) {
     return [
       "# Sprint 8V Share Pack",
@@ -29697,6 +29769,7 @@ import { buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel } from "./
 import { buildManualReviewUxInteractionContractWithoutPersistence8TModel } from "./buildManualReviewUxInteractionContractWithoutPersistence8T";
 import { buildManualReviewInputFieldContractWithoutPersistence8UModel } from "./buildManualReviewInputFieldContractWithoutPersistence8U";
 import { buildManualReviewFieldUxVisualReadinessWithoutPersistence8VModel } from "./buildManualReviewFieldUxVisualReadinessWithoutPersistence8V";
+import { buildManualReviewNonPersistentPreviewActivationGuards8WModel } from "./buildManualReviewNonPersistentPreviewActivationGuards8W";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -30113,8 +30186,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8V: manualReviewInputFieldContract8U.productHtmlAfter8U,
     exportHtmlBefore8V: manualReviewInputFieldContract8U.exportHtmlAfter8U,
   });
-  const finalProductHtml = manualReviewFieldUxVisualReadiness8V.productHtmlAfter8V;
-  const exportHtml = manualReviewFieldUxVisualReadiness8V.exportHtmlAfter8V;
+  const manualReviewPreviewActivationGuards8W = buildManualReviewNonPersistentPreviewActivationGuards8WModel({
+    baseline8V: manualReviewFieldUxVisualReadiness8V,
+    productHtmlBefore8W: manualReviewFieldUxVisualReadiness8V.productHtmlAfter8V,
+    exportHtmlBefore8W: manualReviewFieldUxVisualReadiness8V.exportHtmlAfter8V,
+  });
+  const finalProductHtml = manualReviewPreviewActivationGuards8W.productHtmlAfter8W;
+  const exportHtml = manualReviewPreviewActivationGuards8W.exportHtmlAfter8W;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
