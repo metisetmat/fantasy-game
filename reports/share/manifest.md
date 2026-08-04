@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-08-04T15:35:30.116Z
-Task/sprint: Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence
+Generated: 2026-08-04T17:58:32.142Z
+Task/sprint: Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md
-- validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md
+- coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md
+- validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md
 - README.md
 
 ## Bundle Files

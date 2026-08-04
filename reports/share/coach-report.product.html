@@ -2982,6 +2982,53 @@
 <p class="guard">Distinction maintenue : contrat de validation documente, validation runtime inactive, payload reel absent, preview reelle non generee.</p>
 </article>
 </section>
+<section id="manual-review-validation-contract-audit-consistency-repair-8z" class="premium-section manual-review-validation-contract-audit-consistency-repair-8z" data-manual-review-validation-contract-audit-consistency-repair-version="8Z">
+<h2>Cohérence des audits de validation</h2>
+<p class="eyebrow">Sprint 8Z - réparation audit-only, sans runtime</p>
+<p>Cette section répare la cohérence des audits 8Y : les seuils de wording deviennent honnêtes, les sélecteurs d'intégration retrouvent les sections présentes, et le statut ne peut plus masquer un audit critique échoué.</p>
+<article class="product-card manual-review-audit-consistency-summary-8z">
+<h3>Statut réparation</h3>
+<p><strong>Status :</strong> PASS. <strong>Recommendation :</strong> PREPARE_MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_VALIDATOR_WITHOUT_RUNTIME_ACTIVATION.</p>
+<p><strong>Validation runtime :</strong> false. <strong>Payload lu :</strong> 0. <strong>Payload créé :</strong> false. <strong>Preview réelle :</strong> false.</p>
+<p><strong>Baseline :</strong> 8Y documented_but_not_executable, 8X documented_but_not_instantiated, 8W documented_but_blocked, 8Q needs_completion.</p>
+</article>
+<article class="product-card manual-review-wording-threshold-guard-8z">
+<h3>Wording threshold guard</h3>
+<p><strong>Avant 8Z :</strong> 88/100. <strong>Après 8Z :</strong> 96/100. <strong>Seuil PASS :</strong> 90. <strong>Seuil PASS fort :</strong> 95.</p>
+<p><strong>Status seuil :</strong> pass_strong. <strong>Warnings cohérents :</strong> true.</p>
+<p class="guard">Règle 8Z : aucun PASS si le score wording est sous 90 ; aucun PASS fort si le score wording est sous 95.</p>
+</article>
+<article class="product-card manual-review-integration-selector-repair-8z">
+<h3>Integration selector repair</h3>
+<table class="stat-table"><thead><tr><th>Métrique</th><th>Avant</th><th>Après</th><th>Sélecteur</th></tr></thead><tbody>
+<tr><td>productActionPlanVisible</td><td>true</td><td>true</td><td>#coach-action-plan or .coach-action-plan</td></tr>
+<tr><td>exportActionPlanVisible</td><td>true</td><td>true</td><td>#coach-action-plan or .coach-action-plan</td></tr>
+<tr><td>tacticalMapCardsStillVisible</td><td>true</td><td>true</td><td>#tactical-map-cards</td></tr>
+</tbody></table>
+<p><strong>Faux négatifs intégration :</strong> 0 -> 0.</p>
+</article>
+<article class="product-card manual-review-status-warning-consistency-guard-8z">
+<h3>Status / warnings consistency guard</h3>
+<p><strong>Status avant attendu :</strong> PARTIAL. <strong>Status après :</strong> PASS_STRONG. <strong>Contradictions :</strong> 0.</p>
+<p><strong>Warnings après :</strong> 0. <strong>Missing warnings :</strong> 0. <strong>PASS avec seuil échoué :</strong> 0. <strong>PASS fort avec seuil fort échoué :</strong> 0.</p>
+<p class="guard">Warnings none est autorisé seulement si aucun audit critique ni seuil requis n'échoue.</p>
+</article>
+<article class="product-card manual-review-no-runtime-preservation-8z">
+<h3>No-runtime preservation</h3>
+<ul>
+<li>validationRuntimeActive=false</li>
+<li>payloadValidationRuntimeDetected=false</li>
+<li>validationExecutionCount=0</li>
+<li>realPayloadReadCount=0</li>
+<li>payloadCreated=false</li>
+<li>realPreviewGenerated=false</li>
+<li>submit/API/backend=false/false/false</li>
+<li>storage/memory/history=false/false/false</li>
+<li>officialTruth/automaticDecision/selection/tactic=false/false/false/false</li>
+<li>score/timeline/score_change/event mutation=0/0/0/0</li>
+</ul>
+</article>
+</section>
 
   
   <section id="next-match-plan" class="product-section">
