@@ -1,6 +1,7 @@
 import { scoringRegistryEntry } from "../systems/scoring";
 import {
   buildManualReviewPreviewRenderer8OModel,
+  buildManualReviewPreviewRendererBaseline8NFixture,
   buildManualReviewPreviewPayloadFixture8O,
   resolveManualReviewPreviewRendererStatus8O,
 } from "./buildManualReviewPreviewRenderer8O";
@@ -25,7 +26,12 @@ export function validateManualReviewPreviewRenderer8O(): readonly string[] {
   const invalidFixture = cloneRecord(fixture) as unknown as Record<string, unknown>;
   invalidFixture.sourceMatchId = "";
   const invalidResult = validateManualReviewResultIntakePayload8N(invalidFixture);
-  const model = buildManualReviewPreviewRenderer8OModel();
+  const baseline8N = buildManualReviewPreviewRendererBaseline8NFixture();
+  const model = buildManualReviewPreviewRenderer8OModel({
+    baseline8N,
+    productHtmlBefore8O: baseline8N.productHtmlAfter8N,
+    exportHtmlBefore8O: baseline8N.exportHtmlAfter8N,
+  });
   const persistenceLeakAudit = auditManualReviewPreviewNonPersistence8O({
     productHtml: '<section id="manual-review-preview-renderer-8o"><script>localStorage.setItem("review", "leak")</script></section>',
     exportHtml: "",

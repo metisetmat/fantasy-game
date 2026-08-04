@@ -2697,6 +2697,291 @@
 </ul>
 </article>
 </section>
+<section id="manual-review-preview-payload-contract-8x" class="premium-section manual-review-preview-payload-contract-8x" data-manual-review-preview-payload-contract-version="8X">
+<h2>Contrat du payload preview-only</h2>
+<p class="eyebrow">payload preview-only documente - aucune instance creee - aucun stockage</p>
+<p>Cette section decrit la forme future du payload de revue manuelle. Elle ne cree pas de payload reel, ne traite aucun champ actif, ne genere aucune preview reelle et ne promeut jamais une note coach en verite officielle.</p>
+<article class="product-card manual-review-preview-payload-summary-8x">
+<h3>Etat 8X</h3>
+<p><strong>Statut contrat :</strong> documented_but_not_instantiated.</p>
+<p><strong>Source :</strong> manual_non_official; <strong>scope :</strong> preview_only; <strong>persistence :</strong> none; <strong>application :</strong> none.</p>
+<p><strong>Schema :</strong> 12 champs autorises, 16 champs interdits, 3 exemples d'entree, 20 regles futures inactives.</p>
+<p class="guard">Contrat uniquement. Pas de vrai payload, pas de preview reelle, pas de submit, pas d API, pas de backend, pas de stockage, pas de decision automatique, pas de selection et pas de consigne tactique.</p>
+</article>
+<article class="product-card manual-review-preview-payload-fields-8x">
+<h3>Champs autorises du payload futur</h3>
+<ul>
+<li><strong>payloadId :</strong> Stable future identifier for the preview-only payload.</li>
+<li><strong>payloadVersion :</strong> Must be 8X or a future explicit payload contract version.</li>
+<li><strong>payloadSource :</strong> Marks the coach input as non-official manual material.</li>
+<li><strong>payloadScope :</strong> Prevents persistence, official truth, automation and selection effects.</li>
+<li><strong>matchId :</strong> Links the preview context to the match report being reviewed.</li>
+<li><strong>sourceObservationPlanVersion :</strong> References the manual observation plan source.</li>
+<li><strong>sourceFieldContractVersion :</strong> References the future input field contract source.</li>
+<li><strong>createdByCoachLabel :</strong> Human label only; no account, auth or identity lookup in 8X.</li>
+<li><strong>createdAtLocalPlaceholder :</strong> Placeholder timestamp label only; no persisted timestamp.</li>
+<li><strong>entries :</strong> Future preview entries grouped by observation field.</li>
+<li><strong>validationState :</strong> Future inactive validation status container.</li>
+<li><strong>boundaryFlags :</strong> Future negative flags proving the payload is preview-only.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-forbidden-8x">
+<h3>Champs interdits</h3>
+<ul>
+<li>scoreChange</li>
+<li>scoreOverride</li>
+<li>timelineMutation</li>
+<li>selectionRecommendation</li>
+<li>tacticalInstruction</li>
+<li>officialTruth</li>
+<li>scoringEvent</li>
+<li>matchBonusEvent</li>
+<li>persistedDraftId</li>
+<li>historyRecordId</li>
+<li>apiEndpoint</li>
+<li>backendAction</li>
+<li>automaticDecision</li>
+<li>teamStyleMemoryUpdate</li>
+<li>seasonTrendUpdate</li>
+<li>realNextMatchDirective</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-groups-8x">
+<h3>Groupes et exemples d'observation</h3>
+<div class="product-card-grid">
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Observation identity</h4>
+<p>Trace the future preview payload without creating one in 8X.</p>
+<p><strong>Champs :</strong> payloadId, payloadVersion, matchId.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Coach source</h4>
+<p>Keep the source manual and non-official.</p>
+<p><strong>Champs :</strong> payloadSource, createdByCoachLabel, createdAtLocalPlaceholder.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Manual entries</h4>
+<p>Describe future comments, confidence and observation tags.</p>
+<p><strong>Champs :</strong> entries.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Inactive validation</h4>
+<p>Document future validation without running it.</p>
+<p><strong>Champs :</strong> validationState.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Preview-only boundary</h4>
+<p>Block persistence, official truth, automation and match mutation.</p>
+<p><strong>Champs :</strong> payloadScope, boundaryFlags.</p>
+</article>
+</div>
+<ul>
+<li><strong>first_exit_after_recovery_preview_entry_8x :</strong> Coach can later draft an observation about first exit quality without changing the timeline.</li>
+<li><strong>danger_zone_continuity_preview_entry_8x :</strong> Coach can later comment on continuity into danger without creating an official tactic.</li>
+<li><strong>neutralized_action_structure_preview_entry_8x :</strong> Coach can later explain why an action died without changing action resolution.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-rules-8x">
+<h3>Regles futures inactives et error states</h3>
+<p>20 regles sont documentees et toutes inactives en 8X; 19 error states sont documentes et tous inactifs en 8X.</p>
+<ul>
+<li><strong>REQUIRE_PAYLOAD_ID :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_PAYLOAD_VERSION :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_MANUAL_NON_OFFICIAL_SOURCE :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_PREVIEW_ONLY_SCOPE :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_MATCH_ID :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_SOURCE_PLAN_VERSION :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_FIELD_CONTRACT_VERSION :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_ENTRIES_ARRAY :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-boundaries-8x">
+<h3>Refus et boundary guards</h3>
+<p>7 refusal states et 14 boundary guards gardent le payload hors execution.</p>
+<ul>
+<li><strong>BLOCK_IF_PAYLOAD_INSTANCE_CREATED_8X :</strong> real payload instance creation</li>
+<li><strong>BLOCK_IF_FIELD_TO_PAYLOAD_RUNTIME_8X :</strong> field mapping into payload</li>
+<li><strong>BLOCK_IF_PAYLOAD_VALIDATION_RUNTIME_8X :</strong> runtime validation in 8X</li>
+<li><strong>BLOCK_IF_REAL_PREVIEW_FROM_PAYLOAD_8X :</strong> preview generation from payload</li>
+<li><strong>BLOCK_IF_SUBMIT_OR_CTA_8X :</strong> submit, save, apply or send</li>
+<li><strong>BLOCK_IF_API_OR_BACKEND_8X :</strong> network/backend action</li>
+<li><strong>BLOCK_IF_STORAGE_OR_DRAFT_8X :</strong> local storage, file, DB or draft</li>
+<li><strong>BLOCK_IF_HISTORY_OR_MEMORY_8X :</strong> history, season memory or team style memory</li>
+<li><strong>BLOCK_IF_OFFICIAL_TRUTH_8X :</strong> official evidence promotion</li>
+<li><strong>BLOCK_IF_AUTOMATIC_DECISION_8X :</strong> decision automation</li>
+<li><strong>BLOCK_IF_SELECTION_OR_TACTIC_8X :</strong> selection and tactical instruction</li>
+<li><strong>BLOCK_IF_SCORE_TIMELINE_MUTATION_8X :</strong> score, event or timeline mutation</li>
+<li><strong>BLOCK_IF_EVENT_OR_SCORE_CHANGE_8X :</strong> new score_change or event write</li>
+<li><strong>BLOCK_IF_SANDBOX_DIAGNOSTIC_BATCH_PROMOTION_8X :</strong> sandbox, diagnostic or batch evidence promoted to official</li>
+</ul>
+</article>
+</section>
+<section id="manual-review-preview-payload-validation-contract-8y" class="premium-section manual-review-preview-payload-validation-contract-8y" data-manual-review-preview-payload-validation-contract-version="8Y">
+<h2>Contrat de validation du payload</h2>
+<p class="eyebrow">Validation future documentee - aucune execution</p>
+<p>Cette section definit les validations futures du payload preview-only. Aucune validation runtime n'est active en 8Y : aucun payload reel n'est lu, accepte, instancie, valide, envoye, stocke, applique ou officialise.</p>
+<article class="product-card manual-review-preview-payload-validation-status-8y">
+<h3>Statut validation</h3>
+<p><strong>Contrat validation :</strong> documented_but_not_executable. <strong>Validation runtime :</strong> inactive. <strong>Payload reel lu :</strong> 0. <strong>Payload reel cree :</strong> 0. <strong>Preview reelle :</strong> 0.</p>
+<p><strong>Source attendue :</strong> manual_non_official. <strong>Scope attendu :</strong> preview_only.</p>
+<p><strong>Payload contract 8X :</strong> documented_but_not_instantiated. <strong>Activation 8W :</strong> documented_but_blocked. <strong>Workflow 8R :</strong> ready_for_non_persistent_preview. <strong>Gate 8Q :</strong> needs_completion.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-steps-8y">
+<h3>Ordre de validation futur</h3>
+<ul>
+<li>1. Validate payload identity - documente, futur runtime only, actif 8Y=false</li>
+<li>2. Validate source and scope - documente, futur runtime only, actif 8Y=false</li>
+<li>3. Validate observation entry count - documente, futur runtime only, actif 8Y=false</li>
+<li>4. Validate observation entry links - documente, futur runtime only, actif 8Y=false</li>
+<li>5. Validate observation entry field values - documente, futur runtime only, actif 8Y=false</li>
+<li>6. Validate preview-only boundary flags - documente, futur runtime only, actif 8Y=false</li>
+<li>7. Reject forbidden top-level fields - documente, futur runtime only, actif 8Y=false</li>
+<li>8. Reject runtime effect fields - documente, futur runtime only, actif 8Y=false</li>
+<li>9. Reject source-of-truth promotion - documente, futur runtime only, actif 8Y=false</li>
+<li>10. Document future validation state without producing it - documente, futur runtime only, actif 8Y=false</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-validation-groups-8y">
+<h3>Groupes de validation</h3>
+<div class="product-card-grid">
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Identity/version</h4>
+<p>Validate payloadId, payloadVersion and matchId before any future preview state.</p>
+<p><strong>Regles :</strong> payload_identity_must_exist, payload_version_must_match_contract.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Source/scope</h4>
+<p>Keep the source manual_non_official and scope preview_only.</p>
+<p><strong>Regles :</strong> payload_source_must_be_manual_non_official, payload_scope_must_be_preview_only.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Observation entry contracts</h4>
+<p>Require three linked observation entry contracts, not runtime examples.</p>
+<p><strong>Regles :</strong> entries_count_must_be_three, entries_must_link_to_known_observation_cards.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Field values</h4>
+<p>Document future enum, counter, note and comparable-context checks.</p>
+<p><strong>Regles :</strong> outcome_values_must_match_8u_enum, count_values_must_be_integer_0_99, signal_counts_cannot_exceed_comparable_count, context_comparability_must_match_8u_enum, note_lengths_must_respect_8u_limits.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Boundary flags</h4>
+<p>Require negative flags proving no official truth, persistence, application or mutation.</p>
+<p><strong>Regles :</strong> payload_official_truth_must_be_false, payload_persisted_must_be_false, payload_applied_must_be_false, payload_without_boundary_flags_rejected.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Forbidden fields</h4>
+<p>Reject future fields that would create score, timeline, storage, automation or tactical effects.</p>
+<p><strong>Regles :</strong> forbidden_top_level_fields_rejected, score_timeline_mutation_fields_rejected, automation_fields_rejected, storage_fields_rejected, engine_learning_fields_rejected.</p>
+</article>
+<article class="product-card manual-review-preview-payload-validation-group-8y">
+<h4>Runtime effects blocked</h4>
+<p>Keep validation runtime, preview generation, submit, API, backend, storage and officialization blocked.</p>
+<p><strong>Regles :</strong> required_entry_fields_missing_blocks_future_preview, invalid_entry_blocks_payload_preview.</p>
+</article>
+</div>
+</article>
+<article class="product-card manual-review-preview-payload-validation-matrix-8y">
+<h3>Rule -> field -> error -> blocker</h3>
+<p>Matrice compacte des validations futures : chaque regle pointe vers un champ, une erreur, un message coach et un blocker. Les regles restent inactives en 8Y.</p>
+<table class="stat-table manual-review-validation-matrix-8y">
+<thead><tr><th>Regle</th><th>Champ</th><th>Erreur</th><th>Message coach</th><th>Blocker</th></tr></thead>
+<tbody>
+<tr><td>payload_source_must_be_manual_non_official</td><td>payloadSource</td><td>INVALID_PAYLOAD_SOURCE_8Y</td><td>La source du payload doit rester manuelle et non officielle.</td><td>BLOCK_INVALID_SOURCE_OR_SCOPE_8Y</td></tr>
+<tr><td>payload_scope_must_be_preview_only</td><td>payloadScope</td><td>INVALID_PAYLOAD_SCOPE_8Y</td><td>Ce payload ne peut servir qu&#39;a une preview non persistante.</td><td>BLOCK_INVALID_SOURCE_OR_SCOPE_8Y</td></tr>
+<tr><td>payload_official_truth_must_be_false</td><td>boundaryFlags / officialTruth</td><td>OFFICIAL_TRUTH_FLAG_FORBIDDEN_8Y</td><td>Une revue coach ne peut pas devenir verite officielle.</td><td>BLOCK_OFFICIAL_TRUTH_FLAG_8Y</td></tr>
+<tr><td>payload_persisted_must_be_false</td><td>boundaryFlags / persisted</td><td>PERSISTED_FLAG_FORBIDDEN_8Y</td><td>Ce payload ne peut pas etre stocke.</td><td>BLOCK_PERSISTENCE_FLAG_8Y</td></tr>
+<tr><td>payload_applied_must_be_false</td><td>boundaryFlags / applied</td><td>APPLIED_FLAG_FORBIDDEN_8Y</td><td>Ce payload ne peut pas etre applique.</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>entries_count_must_be_three</td><td>entries</td><td>ENTRY_COUNT_INVALID_8Y</td><td>Les entrees doivent correspondre aux trois observations prevues.</td><td>BLOCK_MISSING_OR_INVALID_ENTRIES_8Y</td></tr>
+<tr><td>entries_must_link_to_known_observation_cards</td><td>entries / linkedCardId</td><td>ENTRY_LINK_UNKNOWN_8Y</td><td>Chaque entree doit rester liee aux cartes d&#39;observation connues.</td><td>BLOCK_MISSING_OR_INVALID_ENTRIES_8Y</td></tr>
+<tr><td>outcome_values_must_match_8u_enum</td><td>entries / outcome</td><td>INVALID_OUTCOME_VALUE_8Y</td><td>Cette valeur n&#39;est pas autorisee pour ce champ.</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>count_values_must_be_integer_0_99</td><td>entries / count</td><td>INVALID_COUNTER_VALUE_8Y</td><td>Les compteurs doivent rester des entiers entre 0 et 99.</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>signal_counts_cannot_exceed_comparable_count</td><td>entries / signalCount</td><td>SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8Y</td><td>Les compteurs doivent rester coherents avec les situations comparables.</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>context_comparability_must_match_8u_enum</td><td>entries / contextComparability</td><td>INVALID_CONTEXT_COMPARABILITY_8Y</td><td>Le contexte doit utiliser l&#39;enum prevu par 8U.</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>note_lengths_must_respect_8u_limits</td><td>entries / note</td><td>NOTE_TOO_LONG_8Y</td><td>Les notes sont trop longues pour une preview lisible.</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+</tbody>
+</table>
+</article>
+<article class="product-card manual-review-preview-payload-entry-contracts-8y">
+<h3>Contrats d'entrees d'observation</h3>
+<p class="guard">Contrats de forme uniquement : aucune instance reelle, aucun payload cree.</p>
+<ul>
+<li><strong>Premiere sortie après récupération :</strong> contract shape only, runtime instance=false, active 8Y=false.</li>
+<li><strong>Continuite après entree en zone dangereuse :</strong> contract shape only, runtime instance=false, active 8Y=false.</li>
+<li><strong>Structure après action neutralisee :</strong> contract shape only, runtime instance=false, active 8Y=false.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-error-messages-8y">
+<h3>Messages d'erreur coach</h3>
+<ul>
+<li><strong>INVALID PAYLOAD SOURCE :</strong> La source du payload doit rester manuelle et non officielle.</li>
+<li><strong>INVALID PAYLOAD SCOPE :</strong> Ce payload ne peut servir qu&#39;a une preview non persistante.</li>
+<li><strong>OFFICIAL TRUTH FLAG FORBIDDEN :</strong> Une revue coach ne peut pas devenir verite officielle.</li>
+<li><strong>PERSISTED FLAG FORBIDDEN :</strong> Ce payload ne peut pas etre stocke.</li>
+<li><strong>APPLIED FLAG FORBIDDEN :</strong> Ce payload ne peut pas etre applique.</li>
+<li><strong>ENTRY COUNT INVALID :</strong> Les entrees doivent correspondre aux trois observations prevues.</li>
+<li><strong>ENTRY LINK UNKNOWN :</strong> Chaque entree doit rester liee aux cartes d&#39;observation connues.</li>
+<li><strong>INVALID OUTCOME VALUE :</strong> Cette valeur n&#39;est pas autorisee pour ce champ.</li>
+<li><strong>INVALID COUNTER VALUE :</strong> Les compteurs doivent rester des entiers entre 0 et 99.</li>
+<li><strong>SIGNAL COUNT EXCEEDS COMPARABLE COUNT :</strong> Les compteurs doivent rester coherents avec les situations comparables.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-blockers-8y">
+<h3>Blockers</h3>
+<ul>
+<li>BLOCK_INVALID_SOURCE_OR_SCOPE_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_MISSING_OR_INVALID_ENTRIES_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_INVALID_ENTRY_VALUES_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_MISSING_REQUIRED_ENTRY_FIELDS_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_MISSING_BOUNDARY_FLAGS_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_OFFICIAL_TRUTH_FLAG_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_PERSISTENCE_FLAG_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_FORBIDDEN_FIELD_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_SCORE_OR_TIMELINE_MUTATION_FIELD_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_STORAGE_OR_API_FIELD_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_AUTOMATION_FIELD_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+<li>BLOCK_ENGINE_LEARNING_FIELD_8Y: La future validation doit refuser ce cas sans creer de payload, preview, stockage ou decision.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-refusals-8y">
+<h3>Refusal states</h3>
+<ul>
+<li>VALIDATION_CONTRACT_ONLY_8Y: Les regles sont documentees mais aucune validation runtime n&#39;est activee.</li>
+<li>REAL_PAYLOAD_VALIDATION_REFUSED_8Y: Aucun payload reel n&#39;est lu ou valide dans 8Y.</li>
+<li>PAYLOAD_ACCEPTANCE_REFUSED_8Y: Aucun payload ne peut etre accepte comme valide dans 8Y.</li>
+<li>PREVIEW_FROM_VALIDATION_REFUSED_8Y: La validation ne genere aucune preview reelle.</li>
+<li>SUBMIT_FROM_VALIDATION_REFUSED_8Y: La validation ne peut declencher aucun submit.</li>
+<li>PERSISTENCE_FROM_VALIDATION_REFUSED_8Y: La validation ne peut creer aucun stockage, draft ou historique.</li>
+<li>OFFICIALIZATION_FROM_VALIDATION_REFUSED_8Y: La validation ne peut pas transformer une revue coach en verite officielle.</li>
+<li>AUTOMATION_FROM_VALIDATION_REFUSED_8Y: La validation ne declenche ni decision, ni selection, ni tactique.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-readiness-8y">
+<h3>Ce qui est pret</h3>
+<ul>
+<li>ordre de validation futur connu</li>
+<li>regles liees aux champs</li>
+<li>erreurs liees aux regles</li>
+<li>blockers lies aux erreurs</li>
+<li>messages coach-facing definis</li>
+<li>contrats d&#39;entrees clarifies</li>
+</ul>
+<h3>Ce qui reste bloque</h3>
+<ul>
+<li>validation runtime</li>
+<li>lecture de payload reel</li>
+<li>acceptation de payload</li>
+<li>preview reelle</li>
+<li>submit</li>
+<li>API/backend</li>
+<li>stockage</li>
+<li>officialisation</li>
+<li>decision automatique</li>
+<li>selection/tactique</li>
+</ul>
+<p class="guard">Distinction maintenue : contrat de validation documente, validation runtime inactive, payload reel absent, preview reelle non generee.</p>
+</article>
+</section>
 
   
   <section id="next-match-plan" class="product-section">
