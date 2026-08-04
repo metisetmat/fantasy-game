@@ -1,14 +1,13 @@
 import { scoringRegistryEntry } from "../systems/scoring";
-import { buildCoachReportDecisionLayerNextMatchObservationPlan8K } from "./buildCoachReportDecisionLayerNextMatchObservationPlan8K";
-import { buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L } from "./buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L";
-import { buildManualPostMatchObservationReviewForm8MModel } from "./buildManualPostMatchObservationReviewForm8M";
 import { buildManualReviewNonPersistentPreviewActivationGuards8WModel } from "./buildManualReviewNonPersistentPreviewActivationGuards8W";
 import { buildManualReviewFieldUxVisualReadinessWithoutPersistence8VModel } from "./buildManualReviewFieldUxVisualReadinessWithoutPersistence8V";
 import { buildManualReviewInputFieldContractWithoutPersistence8UModel } from "./buildManualReviewInputFieldContractWithoutPersistence8U";
 import { buildManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
 import { buildManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
-import { buildManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
-import { buildManualReviewResultIntakeBoundary8NModel } from "./buildManualReviewResultIntakeBoundary8N";
+import {
+  buildManualReviewPreviewRenderer8OModel,
+  buildManualReviewPreviewRendererBaseline8NFixture,
+} from "./buildManualReviewPreviewRenderer8O";
 import { buildManualReviewUxInteractionContractWithoutPersistence8TModel } from "./buildManualReviewUxInteractionContractWithoutPersistence8T";
 import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
 import { buildManualReviewWorkflowUxSkeletonWithoutPersistence8SModel } from "./buildManualReviewWorkflowUxSkeletonWithoutPersistence8S";
@@ -312,19 +311,7 @@ function buildContract(): ManualReviewPreviewPayloadContract8X {
 }
 
 function buildExplicitBaseline8W(): ManualReviewNonPersistentPreviewActivationGuards8WModel {
-  const baseline8K = buildCoachReportDecisionLayerNextMatchObservationPlan8K();
-  const baseline8L = buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L({
-    productHtmlBefore8L: baseline8K.cleanedProductHtml,
-    exportHtmlBefore8L: baseline8K.cleanedExportHtml,
-  });
-  const baseline8M = buildManualPostMatchObservationReviewForm8MModel({
-    productHtmlBefore8M: baseline8L.productHtmlAfter8L,
-    exportHtmlBefore8M: baseline8L.exportHtmlAfter8L,
-  });
-  const baseline8N = buildManualReviewResultIntakeBoundary8NModel({
-    productHtmlBefore8N: baseline8M.productHtmlAfter8M,
-    exportHtmlBefore8N: baseline8M.exportHtmlAfter8M,
-  });
+  const baseline8N = buildManualReviewPreviewRendererBaseline8NFixture();
   const baseline8O = buildManualReviewPreviewRenderer8OModel({
     baseline8N,
     productHtmlBefore8O: baseline8N.productHtmlAfter8N,
@@ -368,70 +355,8 @@ function buildExplicitBaseline8W(): ManualReviewNonPersistentPreviewActivationGu
   });
 }
 
-function fallbackBaseline8W(): ManualReviewNonPersistentPreviewActivationGuards8WModel {
-  const productHtmlAfter8W = [
-    "<main>",
-    '<section id="manual-review-input-field-contract-8u" data-manual-review-input-field-contract-version="8U"></section>',
-    '<section id="manual-review-field-ux-visual-readiness-8v" data-manual-review-field-ux-visual-readiness-version="8V">ready_for_static_visual_review</section>',
-    '<section id="manual-review-preview-activation-guards-8w" data-manual-review-preview-activation-guards-version="8W">documented_but_blocked</section>',
-    "</main>",
-  ].join("\n");
-  const exportHtmlAfter8W = [
-    "<!doctype html><html><head><title>Rapport coach export compact 8W - garde-fous preview revue manuelle</title></head>",
-    '<body><main id="compressed-export-8w" data-manual-review-preview-activation-guards-version="8W">',
-    '<section id="manual-review-input-field-contract-export-8u" data-manual-review-input-field-contract-version="8U"></section>',
-    '<section id="manual-review-field-ux-visual-readiness-export-8v" data-manual-review-field-ux-visual-readiness-version="8V">ready_for_static_visual_review</section>',
-    '<section id="manual-review-preview-activation-guards-export-8w" data-manual-review-preview-activation-guards-version="8W">Garde-fous preview revue manuelle - Export compact 8W</section>',
-    "</main></body></html>",
-  ].join("\n");
-  const baseline: Partial<ManualReviewNonPersistentPreviewActivationGuards8WModel> = {
-    status: "PASS",
-    matchId: "manual-review-preview-payload-contract-8x-fallback",
-    officialScore: "CONTROL 0 - 0 BLITZ",
-    previewActivationGuardReady: true,
-    baseline8VPreserved: true,
-    baseline8UPreserved: true,
-    baseline8TPreserved: true,
-    baseline8SPreserved: true,
-    baseline8RPreserved: true,
-    baseline8QPreserved: true,
-    baseline8PPreserved: true,
-    baseline8OPreserved: true,
-    baseline8NPreserved: true,
-    baseline8MPreserved: true,
-    baseline8LPreserved: true,
-    baseline8KPreserved: true,
-    baseline8IPreserved: true,
-    baseline8HPreserved: true,
-    baseline8GPreserved: true,
-    baseline8FPreserved: true,
-    baseline8EPreserved: true,
-    baseline8DPreserved: true,
-    baseline8CPreserved: true,
-    baseline8BPreserved: true,
-    baseline8APreserved: true,
-    baseline7HPreserved: true,
-    baseline6XPreserved: true,
-    previewActivationStatus: "documented_but_blocked",
-    workflowReadinessStatusFrom8R: "ready_for_non_persistent_preview",
-    reviewGateStatusFrom8Q: "needs_completion",
-    fieldVisualReadinessStatusFrom8V: "ready_for_static_visual_review",
-    productStoryFirstPreserved: true,
-    exportCompactPreserved: true,
-    sourceOfTruthSeparationPreserved: true,
-    matchEconomyBaselinePreserved: true,
-    productHtmlAfter8W,
-    exportHtmlAfter8W,
-  };
-  return baseline as ManualReviewNonPersistentPreviewActivationGuards8WModel;
-}
-
 function defaultBaseline8W(): ManualReviewNonPersistentPreviewActivationGuards8WModel {
-  try {
-    return buildExplicitBaseline8W();
-  } catch {
-    return fallbackBaseline8W();
-  }
+  return buildExplicitBaseline8W();
 }
 
 export function buildManualReviewPreviewPayloadContractWithoutPersistence8XModel(input?: {

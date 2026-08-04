@@ -56,4 +56,18 @@ assertTest(leakyModel.apiCreated, "8X leak scenario must detect API creation.");
 assertTest(leakyModel.storageCreated, "8X leak scenario must detect storage creation.");
 assertTest(leakyModel.timelineMutationCount > 0, "8X leak scenario must detect timeline mutation.");
 
+const missingPredecessorModel = buildManualReviewPreviewPayloadContractWithoutPersistence8XModel({
+  baseline8W: model.baseline8W,
+  productHtmlBefore8X: "<main></main>",
+  exportHtmlBefore8X: '<main id="compressed-export-8w"></main>',
+});
+assertTest(missingPredecessorModel.status === "FAIL", "8X must fail when predecessor guard sections are missing.");
+assertTest(!missingPredecessorModel.payloadAudit.usesActivationGuards8W, "8X must detect missing 8W activation guards.");
+assertTest(!missingPredecessorModel.payloadAudit.usesFieldVisualReadiness8V, "8X must detect missing 8V visual readiness.");
+assertTest(!missingPredecessorModel.payloadAudit.usesInputFieldContract8U, "8X must detect missing 8U input contract.");
+assertTest(
+  missingPredecessorModel.warningCodes.includes("PRODUCT_PREVIEW_ACTIVATION_GUARDS_8W_REGRESSED"),
+  "8X missing predecessor scenario must emit an 8W regression warning.",
+);
+
 console.log("PASS manualReviewPreviewPayloadContract8X");

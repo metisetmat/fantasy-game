@@ -198,10 +198,6 @@ let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = 
 let cachedPersistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot | null | undefined;
 let cachedCoachReportExportHtml: string | null | undefined;
 
-function readIfExists(filePath: string): string {
-  return existsSync(filePath) ? readFileSync(filePath, "utf8") : "";
-}
-
 function fullMatchTraceValidationModel(): FullMatchTraceValidationModel {
   if (cachedFullMatchTraceValidationModel === null) {
     cachedFullMatchTraceValidationModel = runFullMatchTraceValidationModel();
@@ -6258,10 +6254,7 @@ function generateBundles(
 
 function fullMatchWorkbenchChainReplayDoc(): string {
   if (TASK_NAME.includes("Sprint 8X")) {
-    const generated = readIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
-    return generated.length > 0
-      ? generated
-      : renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(fullMatchTraceValidationModel());
+    return renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(fullMatchTraceValidationModel());
   }
   if (TASK_NAME.includes("Sprint 8W")) {
     return renderManualReviewNonPersistentPreviewActivationGuards8WDoc(fullMatchTraceValidationModel());
@@ -8644,10 +8637,7 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
   if (TASK_NAME.includes("Sprint 8X")) {
-    const generated = readIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
-    return generated.length > 0
-      ? generated
-      : renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(fullMatchTraceValidationModel());
+    return renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(fullMatchTraceValidationModel());
   }
   if (TASK_NAME.includes("Sprint 8W")) {
     return renderManualReviewNonPersistentPreviewActivationGuards8WValidation(fullMatchTraceValidationModel());

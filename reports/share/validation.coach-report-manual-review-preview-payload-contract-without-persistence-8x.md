@@ -17,7 +17,7 @@ Status: PASS
 | boundaryGuardCount | 14 |
 | realPayloadInstanceCount | 0 |
 | enabledInputControlCount | 0 |
-| exportReadTimeSecondsAfter8X | 601 |
+| exportReadTimeSecondsAfter8X | 250 |
 | warning count | 0 |
 
 ## Checks
@@ -52,7 +52,7 @@ Status: PASS
 - PASS: fieldVisualReadinessStatusFrom8V remains ready_for_static_visual_review - ready_for_static_visual_review
 - PASS: workflowReadinessStatusFrom8R remains ready_for_non_persistent_preview - ready_for_non_persistent_preview
 - PASS: reviewGateStatusFrom8Q remains needs_completion - needs_completion
-- PASS: exportReadTimeSecondsAfter8X <= 900 - 601
+- PASS: exportReadTimeSecondsAfter8X <= 900 - 250
 - PASS: exportUnder900Seconds correctly computed - true
 - PASS: exportUnder800Seconds correctly computed - true
 - PASS: no PASS message on failed numeric rule - PASS

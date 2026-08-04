@@ -176,7 +176,7 @@ Next sprint recommendation: PREPARE_MANUAL_REVIEW_PREVIEW_PAYLOAD_VALIDATION_CON
 | fieldVisualReadinessStatusFrom8V | ready_for_static_visual_review |
 | workflowReadinessStatusFrom8R | ready_for_non_persistent_preview |
 | reviewGateStatusFrom8Q | needs_completion |
-| productStoryFirstPreserved | true |
+| productStoryFirstPreserved | false |
 | exportCompactPreserved | true |
 | sourceOfTruthSeparationPreserved | true |
 | matchEconomyBaselinePreserved | true |
@@ -184,7 +184,7 @@ Next sprint recommendation: PREPARE_MANUAL_REVIEW_PREVIEW_PAYLOAD_VALIDATION_CON
 ## Export Metadata
 | Metric | Value |
 | --- | --- |
-| exportReadTimeSecondsAfter8X | 601 |
+| exportReadTimeSecondsAfter8X | 250 |
 | exportUnder900Seconds | true |
 | exportUnder800Seconds | true |
 | exportMetadataCurrent8XVisible | true |

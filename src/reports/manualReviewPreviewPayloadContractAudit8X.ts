@@ -135,12 +135,25 @@ export function auditManualReviewPreviewPayloadContract8X(
   pushIf(warnings, penaltyShotLeakageCount !== 0, "PENALTY_SHOT_LEAKAGE_DETECTED");
   pushIf(warnings, unknownScoringFamilyCount !== 0, "UNKNOWN_SCORING_FAMILY_DETECTED");
 
+  const productUsesActivationGuards8W = productHtml.includes("manual-review-preview-activation-guards-8w");
+  const exportUsesActivationGuards8W = exportHtml.includes("manual-review-preview-activation-guards-export-8w");
+  const productUsesFieldVisualReadiness8V = productHtml.includes("manual-review-field-ux-visual-readiness-8v");
+  const exportUsesFieldVisualReadiness8V = exportHtml.includes("manual-review-field-ux-visual-readiness-export-8v") || exportHtml.includes("ready_for_static_visual_review");
+  const productUsesInputFieldContract8U = productHtml.includes("manual-review-input-field-contract-8u");
+  const exportUsesInputFieldContract8U = exportHtml.includes("manual-review-input-field-contract-export-8u");
+  pushIf(warnings, !productUsesActivationGuards8W, "PRODUCT_PREVIEW_ACTIVATION_GUARDS_8W_REGRESSED");
+  pushIf(warnings, !exportUsesActivationGuards8W, "EXPORT_PREVIEW_ACTIVATION_GUARDS_8W_REGRESSED");
+  pushIf(warnings, !productUsesFieldVisualReadiness8V, "PRODUCT_FIELD_VISUAL_READINESS_8V_REGRESSED");
+  pushIf(warnings, !exportUsesFieldVisualReadiness8V, "EXPORT_FIELD_VISUAL_READINESS_8V_REGRESSED");
+  pushIf(warnings, !productUsesInputFieldContract8U, "PRODUCT_INPUT_FIELD_CONTRACT_8U_REGRESSED");
+  pushIf(warnings, !exportUsesInputFieldContract8U, "EXPORT_INPUT_FIELD_CONTRACT_8U_REGRESSED");
+
   return {
     productVisible,
     exportVisible,
-    usesActivationGuards8W: productHtml.includes("manual-review-preview-activation-guards-8w") && exportHtml.includes("manual-review-preview-activation-guards-export-8w"),
-    usesFieldVisualReadiness8V: productHtml.includes("manual-review-field-ux-visual-readiness-8v") || exportHtml.includes("ready_for_static_visual_review"),
-    usesInputFieldContract8U: productHtml.includes("8U") || exportHtml.includes("8U"),
+    usesActivationGuards8W: productUsesActivationGuards8W && exportUsesActivationGuards8W,
+    usesFieldVisualReadiness8V: productUsesFieldVisualReadiness8V && exportUsesFieldVisualReadiness8V,
+    usesInputFieldContract8U: productUsesInputFieldContract8U && exportUsesInputFieldContract8U,
     schemaDefined: contract.allowedTopLevelFields.length > 0,
     allowedTopLevelFieldCount: contract.allowedTopLevelFields.length,
     forbiddenTopLevelFieldCount: contract.forbiddenTopLevelFields.length,

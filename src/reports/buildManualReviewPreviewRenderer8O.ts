@@ -6,7 +6,6 @@ import { auditManualReviewPreviewRenderer8O } from "./manualReviewPreviewRendere
 import { auditManualReviewPreviewSourceOfTruthRegression8O } from "./manualReviewPreviewSourceOfTruthRegressionAudit8O";
 import { auditManualReviewPreviewWording8O } from "./manualReviewPreviewWordingAudit8O";
 import {
-  buildManualReviewResultIntakeBoundary8NModel,
   currentManualReviewResultIntakeBoundary8NModel,
 } from "./buildManualReviewResultIntakeBoundary8N";
 import {
@@ -261,7 +260,7 @@ export function buildManualReviewPreviewRenderer8OModel(input?: {
   readonly productHtmlBefore8O?: string;
   readonly exportHtmlBefore8O?: string;
 }): ManualReviewPreviewRenderer8OModel {
-  const baseline8N = input?.baseline8N ?? defaultManualReviewPreviewRendererBaseline8N();
+  const baseline8N = input?.baseline8N ?? currentManualReviewResultIntakeBoundary8NModel();
   const productHtmlBefore8O = input?.productHtmlBefore8O ?? baseline8N.productHtmlAfter8N;
   const exportHtmlBefore8O = input?.exportHtmlBefore8O ?? baseline8N.exportHtmlAfter8N;
   const payload = buildManualReviewPreviewPayloadFixture8O(baseline8N.matchId);
@@ -484,7 +483,7 @@ export function buildManualReviewPreviewRenderer8OModel(input?: {
   };
 }
 
-function fallbackManualReviewPreviewRendererBaseline8N(): ManualReviewResultIntakeBoundary8NModel {
+export function buildManualReviewPreviewRendererBaseline8NFixture(): ManualReviewResultIntakeBoundary8NModel {
   const productHtmlAfter8N = [
     "<main>",
     '<section id="official-match-story-spine">Le match en 2 minutes</section>',
@@ -515,7 +514,7 @@ function fallbackManualReviewPreviewRendererBaseline8N(): ManualReviewResultInta
   ].join("\n");
   const baseline: Partial<ManualReviewResultIntakeBoundary8NModel> = {
     status: "PASS",
-    matchId: "manual-review-preview-renderer-8o-fallback",
+    matchId: "manual-review-preview-renderer-8o-fixture",
     officialScore: "CONTROL 0 - 0 BLITZ",
     baseline8MPreserved: true,
     baseline8LPreserved: true,
@@ -565,17 +564,13 @@ function fallbackManualReviewPreviewRendererBaseline8N(): ManualReviewResultInta
   return baseline as ManualReviewResultIntakeBoundary8NModel;
 }
 
-function defaultManualReviewPreviewRendererBaseline8N(): ManualReviewResultIntakeBoundary8NModel {
-  try {
-    const baseline = currentManualReviewResultIntakeBoundary8NModel();
-    return baseline.status === "PASS" ? baseline : fallbackManualReviewPreviewRendererBaseline8N();
-  } catch {
-    return fallbackManualReviewPreviewRendererBaseline8N();
-  }
-}
-
 export function currentManualReviewPreviewRenderer8OModel(): ManualReviewPreviewRenderer8OModel {
-  return buildManualReviewPreviewRenderer8OModel();
+  const baseline8N = buildManualReviewPreviewRendererBaseline8NFixture();
+  return buildManualReviewPreviewRenderer8OModel({
+    baseline8N,
+    productHtmlBefore8O: baseline8N.productHtmlAfter8N,
+    exportHtmlBefore8O: baseline8N.exportHtmlAfter8N,
+  });
 }
 
 function baselineRows(model: ManualReviewPreviewRenderer8OModel): readonly string[] {

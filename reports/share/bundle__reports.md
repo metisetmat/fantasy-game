@@ -205,10 +205,6 @@ let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = 
 let cachedPersistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot | null | undefined;
 let cachedCoachReportExportHtml: string | null | undefined;
 
-function readIfExists(filePath: string): string {
-  return existsSync(filePath) ? readFileSync(filePath, "utf8") : "";
-}
-
 function fullMatchTraceValidationModel(): FullMatchTraceValidationModel {
   if (cachedFullMatchTraceValidationModel === null) {
     cachedFullMatchTraceValidationModel = runFullMatchTraceValidationModel();
@@ -6265,10 +6261,7 @@ function generateBundles(
 
 function fullMatchWorkbenchChainReplayDoc(): string {
   if (TASK_NAME.includes("Sprint 8X")) {
-    const generated = readIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
-    return generated.length > 0
-      ? generated
-      : renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(fullMatchTraceValidationModel());
+    return renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(fullMatchTraceValidationModel());
   }
   if (TASK_NAME.includes("Sprint 8W")) {
     return renderManualReviewNonPersistentPreviewActivationGuards8WDoc(fullMatchTraceValidationModel());
@@ -8651,10 +8644,7 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
   if (TASK_NAME.includes("Sprint 8X")) {
-    const generated = readIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
-    return generated.length > 0
-      ? generated
-      : renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(fullMatchTraceValidationModel());
+    return renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(fullMatchTraceValidationModel());
   }
   if (TASK_NAME.includes("Sprint 8W")) {
     return renderManualReviewNonPersistentPreviewActivationGuards8WValidation(fullMatchTraceValidationModel());
@@ -29842,7 +29832,10 @@ import { buildManualPostMatchObservationReviewForm8MModel } from "./buildManualP
 import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderManualPostMatchObservationReviewFormProduct8M";
 import { buildManualReviewResultIntakeBoundary8NModel } from "./buildManualReviewResultIntakeBoundary8N";
 import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
-import { buildManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
+import {
+  buildManualReviewPreviewRenderer8OModel,
+  buildManualReviewPreviewRendererBaseline8NFixture,
+} from "./buildManualReviewPreviewRenderer8O";
 import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
 import { buildManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
 import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualReviewPreviewComparisonProduct8P";
@@ -30221,7 +30214,12 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const manualReviewPreview8O = buildManualReviewPreviewRenderer8OModel();
+  const manualReviewPreviewBaseline8N = buildManualReviewPreviewRendererBaseline8NFixture();
+  const manualReviewPreview8O = buildManualReviewPreviewRenderer8OModel({
+    baseline8N: manualReviewPreviewBaseline8N,
+    productHtmlBefore8O: manualReviewPreviewBaseline8N.productHtmlAfter8N,
+    exportHtmlBefore8O: manualReviewPreviewBaseline8N.exportHtmlAfter8N,
+  });
   const productHtmlWith8O = insertManualReviewPreviewProduct8O(
     insertManualReviewResultIntakeBoundaryProduct8N(
       insertManualPostMatchObservationReviewFormProduct8M(
@@ -30236,7 +30234,6 @@ export function writeLatestCoachReport(): void {
   const manualReviewPreviewComparison8P = buildManualReviewPreviewComparisonWithPreviousObservationPlan8PModel({
     baseline8O: {
       ...manualReviewPreview8O,
-      status: "PASS",
       productHtmlAfter8O: productHtmlWith8O,
     },
   });
@@ -30247,7 +30244,6 @@ export function writeLatestCoachReport(): void {
   const manualReviewPreviewDecisionGate8Q = buildManualReviewPreviewDecisionGateWithoutPersistence8QModel({
     baseline8P: {
       ...manualReviewPreviewComparison8P,
-      status: "PASS",
       productHtmlAfter8P: productHtmlWith8P,
     },
   });
