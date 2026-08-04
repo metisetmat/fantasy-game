@@ -175,6 +175,8 @@ import {
   renderManualReviewNonPersistentPreviewActivationGuards8WValidation,
   renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc,
   renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation,
+  renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc,
+  renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -188,10 +190,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8X - Manual Review Preview Payload Contract Without Persistence";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-payload-contract-without-persistence-8x.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md";
+  "validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4097,6 +4099,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8X test proving documented_but_not_instantiated payload contract, zero payload/runtime/preview/persistence/official truth/selection/tactic, and current 8X export metadata",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadValidationContractTypes8Y.ts",
+        required: true,
+        reason: "Sprint 8Y typed future validation contract, groups, ordered steps, rule mappings, error messages, blockers, refusal states, boundary guards, and entry contracts",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadValidationContractWarnings8Y.ts",
+        required: true,
+        reason: "Sprint 8Y warning-code registry for validation contract visibility, no runtime, no payload, no persistence, wording, metadata, and source-of-truth checks",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadValidationContractAudit8Y.ts",
+        required: true,
+        reason: "Sprint 8Y audits for validation contract counts, rule-field-error-blocker mapping, non-runtime, non-persistence, boundaries, export metadata, budget, integration, and wording",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadValidationContractProduct8Y.ts",
+        required: true,
+        reason: "Sprint 8Y product renderer adding coach-readable future validation contract sections after the 8X payload contract",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadValidationContractExport8Y.ts",
+        required: true,
+        reason: "Sprint 8Y compact export renderer adding validation contract proof and updating export metadata to compressed-export-8y",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadValidationContractWithoutPersistence8Y.ts",
+        required: true,
+        reason: "Sprint 8Y model, report renderer, and validation renderer for manual review preview payload validation contract without persistence",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadValidationContract8Y.test.ts",
+        required: true,
+        reason: "Sprint 8Y test proving documented_but_not_executable validation contract, complete mapping, zero runtime/payload/preview/persistence/official truth/selection/tactic, and current 8Y export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6253,6 +6290,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8Y")) {
+    return renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8X")) {
     return renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(fullMatchTraceValidationModel());
   }
@@ -8636,6 +8676,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8Y")) {
+    return renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8X")) {
     return renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(fullMatchTraceValidationModel());
   }
@@ -10965,6 +11008,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8Y")) {
+    return [
+      "# Sprint 8Y Share Pack",
+      "",
+      "Current sprint: Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8X preview-only payload contract embedded in product/export reports, then replaces the standalone 8X docs with the 8Y validation-contract docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md",
+      "4. coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8Y Focus",
+      "- The 8Y layer documents the future validation contract for the manual-review preview payload.",
+      "- Validation remains documented only: no runtime validation, no payload instance, no preview generation, and no persistence.",
+      "- The contract exposes seven validation groups, ten ordered steps, twenty rule-field-error mappings, nineteen coach/technical messages, twelve blockers, eight refusal states, fourteen boundary guards, and three observation entry contracts.",
+      "- The 8X payload contract remains embedded as the baseline; standalone 8X docs are not copied into the share pack.",
+      "- Export metadata now mentions 8Y and the compact export main id is cleaned to compressed-export-8y.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- No real input, payload instance, field-to-payload runtime, payload validation runtime, preview generation, submit, API, backend, storage, draft, history, memory, official truth, automatic decision, selection, tactical instruction, score mutation, timeline mutation, or score_change creation.",
+      "- 8X, 8W, 8V, 8U, 8R, 8Q, 8O, and 6X baselines remain preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8X")) {
     return [
       "# Sprint 8X Share Pack",

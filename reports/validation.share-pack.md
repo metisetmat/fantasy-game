@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 8X - Manual Review Preview Payload Contract Without Persistence
+- current sprint: Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -21,34 +21,36 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 8X - Sprint 8X - Manual Review Preview Payload Contract Without Persistence
-- PASS: previous standalone 8W docs are not copied - 0
-- PASS: README is Sprint 8X oriented - README current
-- PASS: 8X report included - 8X doc included
-- PASS: 8X validation is PASS - 8X validation current
-- PASS: product preview payload contract visible - product 8X visible
-- PASS: export preview payload contract visible - export 8X visible
+- PASS: current sprint is Sprint 8Y - Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence
+- PASS: previous standalone 8X docs are not copied - 0
+- PASS: README is Sprint 8Y oriented - README current
+- PASS: 8Y report included - 8Y doc included
+- PASS: 8Y validation is PASS - 8Y validation current
+- PASS: product preview payload validation contract visible - product 8Y visible
+- PASS: export preview payload validation contract visible - export 8Y visible
+- PASS: 8X preview payload contract remains embedded - 8X baseline embedded
 - PASS: 8W preview activation guards remain embedded - 8W baseline embedded
-- PASS: 8V field UX visual readiness remains embedded - 8V baseline embedded
-- PASS: 8U input field contract remains embedded - 8U baseline embedded
-- PASS: payload contract status documented but not instantiated - documented_but_not_instantiated
-- PASS: payload source and scope are preview only - manual_non_official / preview_only
-- PASS: payload schema counts visible - schema counts
-- PASS: future validation rules and error states inactive - inactive validation/error states
-- PASS: refusal and boundary guard counts visible - refusals/boundaries
-- PASS: no payload runtime input preview submit backend API or persistence - no runtime
+- PASS: 8V and 8U baseline contracts remain embedded - 8V/8U embedded
+- PASS: validation contract status documented but not executable - documented_but_not_executable
+- PASS: validation source and scope are preview only - manual_non_official / preview_only
+- PASS: validation group and step counts visible - 7 groups / 10 steps
+- PASS: mapping and message counts visible - 20 mappings / 19 messages
+- PASS: blocker refusal boundary and entry counts visible - 12 blockers / 8 refusals / 14 guards / 3 contracts
+- PASS: observation entries are contracts not examples - entry contracts clarified
+- PASS: validation runtime remains inactive - runtime inactive
+- PASS: no payload input preview submit backend API or persistence - no runtime/storage
 - PASS: no memory draft history official truth automatic decision selection or tactic - no memory/truth/automation
-- PASS: score and timeline mutations remain zero - no score/timeline mutation
+- PASS: score timeline score_change and event mutations remain zero - no match mutation
 - PASS: workflow gate and activation statuses preserved - statuses preserved
-- PASS: export metadata is 8X - export metadata 8X
-- PASS: export id no longer stale 8W/8V/8U/8T/8S/8R/8Q/8P/8N/8I - stale ids removed
+- PASS: export metadata is 8Y - export metadata 8Y
+- PASS: export id no longer stale 8X/8W/8V/8U/8T/8S/8R/8Q/8P/8N/8I - stale ids removed
 - PASS: export budget checked honestly - export budget
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
 - PASS: batch/live separation preserved - batch/live PASS
-- PASS: bundle includes 8X source files - 8X source bundled
-- PASS: bundle includes 8W baseline source files - 8W source bundled
+- PASS: bundle includes 8Y source files - 8Y source bundled
+- PASS: source 8X baseline files were not deleted - 8X source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -58,7 +60,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-manual-review-preview-payload-contract-without-persistence-8x.md
+- coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -71,5 +73,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md
+- validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md
 - validation.share-pack.md

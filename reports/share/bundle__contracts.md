@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8X - Manual Review Preview Payload Contract Without Persistence. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

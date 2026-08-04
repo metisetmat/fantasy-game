@@ -117,6 +117,11 @@ import {
   renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc,
   renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation,
 } from "./buildManualReviewPreviewPayloadContractWithoutPersistence8X";
+import {
+  buildManualReviewPreviewPayloadValidationContractWithoutPersistence8YModel,
+  renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc,
+  renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation,
+} from "./buildManualReviewPreviewPayloadValidationContractWithoutPersistence8Y";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -558,8 +563,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8X: manualReviewPreviewActivationGuards8W.productHtmlAfter8W,
     exportHtmlBefore8X: manualReviewPreviewActivationGuards8W.exportHtmlAfter8W,
   });
-  const finalProductHtml = manualReviewPreviewPayloadContract8X.productHtmlAfter8X;
-  const exportHtml = manualReviewPreviewPayloadContract8X.exportHtmlAfter8X;
+  const manualReviewPreviewPayloadValidationContract8Y = buildManualReviewPreviewPayloadValidationContractWithoutPersistence8YModel({
+    baseline8X: manualReviewPreviewPayloadContract8X,
+    productHtmlBefore8Y: manualReviewPreviewPayloadContract8X.productHtmlAfter8X,
+    exportHtmlBefore8Y: manualReviewPreviewPayloadContract8X.exportHtmlAfter8X,
+  });
+  const finalProductHtml = manualReviewPreviewPayloadValidationContract8Y.productHtmlAfter8Y;
+  const exportHtml = manualReviewPreviewPayloadValidationContract8Y.exportHtmlAfter8Y;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -602,6 +612,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(manualReviewPreviewPayloadContract8X),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md"),
+    renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc(manualReviewPreviewPayloadValidationContract8Y),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md"),
+    renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation(manualReviewPreviewPayloadValidationContract8Y),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -618,6 +638,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.export.html");
   console.log("Generated reports/coach-report-manual-review-preview-payload-contract-without-persistence-8x.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }
