@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-07-30T18:47:03.539Z
-Task/sprint: Sprint 8W - Manual Review Non-Persistent Preview Activation Guards
+Generated: 2026-08-04T12:39:02.835Z
+Task/sprint: Sprint 8X - Manual Review Preview Payload Contract Without Persistence
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-non-persistent-preview-activation-guards-8w.md
-- validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md
+- coach-report-manual-review-preview-payload-contract-without-persistence-8x.md
+- validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md
 - README.md
 
 ## Bundle Files

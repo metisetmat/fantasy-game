@@ -88,15 +88,19 @@ import {
 } from "./renderCoachReportExportHtml";
 import { renderRestoredCompressedExport8J } from "./renderRestoredCompressedExport8J";
 import { cleanupProductMainRawIds8K } from "./cleanupProductMainRawIds8K";
+import { buildCoachReportDecisionLayerNextMatchObservationPlan8K } from "./buildCoachReportDecisionLayerNextMatchObservationPlan8K";
 import { insertCoachDecisionLayerProduct8K } from "./renderCoachDecisionLayerProduct8K";
+import { buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L } from "./buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L";
 import { insertSeasonlessLearningLoopProduct8L } from "./renderSeasonlessLearningLoopProduct8L";
+import { buildManualPostMatchObservationReviewForm8MModel } from "./buildManualPostMatchObservationReviewForm8M";
 import { insertManualPostMatchObservationReviewFormProduct8M } from "./renderManualPostMatchObservationReviewFormProduct8M";
+import { buildManualReviewResultIntakeBoundary8NModel } from "./buildManualReviewResultIntakeBoundary8N";
 import { insertManualReviewResultIntakeBoundaryProduct8N } from "./renderManualReviewResultIntakeBoundaryProduct8N";
-import { currentManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
+import { buildManualReviewPreviewRenderer8OModel } from "./buildManualReviewPreviewRenderer8O";
 import { insertManualReviewPreviewProduct8O } from "./renderManualReviewPreviewProduct8O";
-import { currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
+import { buildManualReviewPreviewComparisonWithPreviousObservationPlan8PModel } from "./buildManualReviewPreviewComparisonWithPreviousObservationPlan8P";
 import { insertManualReviewPreviewComparisonProduct8P } from "./renderManualReviewPreviewComparisonProduct8P";
-import { currentManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
+import { buildManualReviewPreviewDecisionGateWithoutPersistence8QModel } from "./buildManualReviewPreviewDecisionGateWithoutPersistence8Q";
 import { insertManualReviewPreviewDecisionGateProduct8Q } from "./renderManualReviewPreviewDecisionGateProduct8Q";
 import { insertManualReviewPreviewDecisionGateExport8Q } from "./renderManualReviewPreviewDecisionGateExport8Q";
 import { buildManualReviewWorkflowReadinessWithoutPersistence8RModel } from "./buildManualReviewWorkflowReadinessWithoutPersistence8R";
@@ -105,6 +109,11 @@ import { buildManualReviewUxInteractionContractWithoutPersistence8TModel } from 
 import { buildManualReviewInputFieldContractWithoutPersistence8UModel } from "./buildManualReviewInputFieldContractWithoutPersistence8U";
 import { buildManualReviewFieldUxVisualReadinessWithoutPersistence8VModel } from "./buildManualReviewFieldUxVisualReadinessWithoutPersistence8V";
 import { buildManualReviewNonPersistentPreviewActivationGuards8WModel } from "./buildManualReviewNonPersistentPreviewActivationGuards8W";
+import {
+  buildManualReviewPreviewPayloadContractWithoutPersistence8XModel,
+  renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc,
+  renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation,
+} from "./buildManualReviewPreviewPayloadContractWithoutPersistence8X";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -466,7 +475,7 @@ export function writeLatestCoachReport(): void {
     scoringFamilyAttributionAudit,
   );
   const fullMatchOfficialScoringConnection = buildFullMatchOfficialScoringCalibrationConnectionModel(experimentalReport);
-  const manualReviewPreview8O = currentManualReviewPreviewRenderer8OModel();
+  const manualReviewPreview8O = buildManualReviewPreviewRenderer8OModel();
   const productHtmlWith8O = insertManualReviewPreviewProduct8O(
     insertManualReviewResultIntakeBoundaryProduct8N(
       insertManualPostMatchObservationReviewFormProduct8M(
@@ -478,12 +487,24 @@ export function writeLatestCoachReport(): void {
     ),
     manualReviewPreview8O.productPreviewHtml,
   );
-  const manualReviewPreviewComparison8P = currentManualReviewPreviewComparisonWithPreviousObservationPlan8PModel();
+  const manualReviewPreviewComparison8P = buildManualReviewPreviewComparisonWithPreviousObservationPlan8PModel({
+    baseline8O: {
+      ...manualReviewPreview8O,
+      status: "PASS",
+      productHtmlAfter8O: productHtmlWith8O,
+    },
+  });
   const productHtmlWith8P = insertManualReviewPreviewComparisonProduct8P(
     productHtmlWith8O,
     manualReviewPreviewComparison8P.productComparisonHtml,
   );
-  const manualReviewPreviewDecisionGate8Q = currentManualReviewPreviewDecisionGateWithoutPersistence8QModel();
+  const manualReviewPreviewDecisionGate8Q = buildManualReviewPreviewDecisionGateWithoutPersistence8QModel({
+    baseline8P: {
+      ...manualReviewPreviewComparison8P,
+      status: "PASS",
+      productHtmlAfter8P: productHtmlWith8P,
+    },
+  });
   const productHtmlWith8Q = insertManualReviewPreviewDecisionGateProduct8Q(
     productHtmlWith8P,
     manualReviewPreviewDecisionGate8Q.productDecisionGateHtml,
@@ -526,8 +547,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8W: manualReviewFieldUxVisualReadiness8V.productHtmlAfter8V,
     exportHtmlBefore8W: manualReviewFieldUxVisualReadiness8V.exportHtmlAfter8V,
   });
-  const finalProductHtml = manualReviewPreviewActivationGuards8W.productHtmlAfter8W;
-  const exportHtml = manualReviewPreviewActivationGuards8W.exportHtmlAfter8W;
+  const manualReviewPreviewPayloadContract8X = buildManualReviewPreviewPayloadContractWithoutPersistence8XModel({
+    baseline8W: manualReviewPreviewActivationGuards8W,
+    productHtmlBefore8X: manualReviewPreviewActivationGuards8W.productHtmlAfter8W,
+    exportHtmlBefore8X: manualReviewPreviewActivationGuards8W.exportHtmlAfter8W,
+  });
+  const finalProductHtml = manualReviewPreviewPayloadContract8X.productHtmlAfter8X;
+  const exportHtml = manualReviewPreviewPayloadContract8X.exportHtmlAfter8X;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -560,6 +586,16 @@ export function writeLatestCoachReport(): void {
     exportHtml,
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-contract-without-persistence-8x.md"),
+    renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(manualReviewPreviewPayloadContract8X),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md"),
+    renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(manualReviewPreviewPayloadContract8X),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -574,6 +610,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/coach-report.experimental.html");
   console.log("Generated reports/coach-report.product.html");
   console.log("Generated reports/coach-report.export.html");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-contract-without-persistence-8x.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

@@ -228,6 +228,10 @@ import {
   renderManualReviewNonPersistentPreviewActivationGuards8WDoc as renderManualReviewNonPersistentPreviewActivationGuards8WDocBase,
   renderManualReviewNonPersistentPreviewActivationGuards8WValidation as renderManualReviewNonPersistentPreviewActivationGuards8WValidationBase,
 } from "../../reports/buildManualReviewNonPersistentPreviewActivationGuards8W";
+import {
+  renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc as renderManualReviewPreviewPayloadContractWithoutPersistence8XDocBase,
+  renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation as renderManualReviewPreviewPayloadContractWithoutPersistence8XValidationBase,
+} from "../../reports/buildManualReviewPreviewPayloadContractWithoutPersistence8X";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -6977,6 +6981,18 @@ export function renderManualReviewNonPersistentPreviewActivationGuards8WValidati
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewNonPersistentPreviewActivationGuards8WValidationBase();
+}
+
+export function renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadContractWithoutPersistence8XDocBase();
+}
+
+export function renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadContractWithoutPersistence8XValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

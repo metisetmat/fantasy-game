@@ -1,25 +1,24 @@
-# Sprint 8W Share Pack
+# Sprint 8X Share Pack
 
-Current sprint: Sprint 8W - Manual Review Non-Persistent Preview Activation Guards
+Current sprint: Sprint 8X - Manual Review Preview Payload Contract Without Persistence
 
-Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8V field UX visual-readiness layer embedded in product/export reports, then replaces the standalone 8V docs with the 8W activation-guard docs.
+Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8W activation-guard layer embedded in product/export reports, then replaces the standalone 8W docs with the 8X preview-only payload contract docs.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md
-4. coach-report-manual-review-non-persistent-preview-activation-guards-8w.md
+3. validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md
+4. coach-report-manual-review-preview-payload-contract-without-persistence-8x.md
 5. validation.share-pack.md
 
-## Sprint 8W Focus
-- The 8W layer documents the conditions required before any future non-persistent preview activation.
-- The preview activation status is documented_but_blocked.
-- Twenty activation conditions, twelve blocking guards, and six refusal states are visible.
-- The 8V micro wording debt is fixed: readiness belongs to 8R, while 8S remains the UX skeleton.
-- Export metadata now mentions 8W and the compact export main id is cleaned to compressed-export-8w.
+## Sprint 8X Focus
+- The 8X layer documents the future preview-only payload contract without instantiating a real payload.
+- payloadContractStatus remains documented_but_not_instantiated.
+- The contract exposes twelve allowed top-level fields, sixteen forbidden fields, three observation examples, twenty inactive validation rules, nineteen inactive error states, seven refusal states, and fourteen boundary guards.
+- Export metadata now mentions 8X and the compact export main id is cleaned to compressed-export-8x.
 
 ## Guardrails
 - Scoring values unchanged.
 - PENALTY_SHOT inactive.
-- No real input, payload, preview, submit, API, backend, storage, memory, official truth, automatic decision, selection, or tactical instruction.
-- 8V remains preserved and embedded; source reports outside reports/share are not deleted.
+- No real input, payload instance, field-to-payload runtime, payload validation runtime, preview generation, submit, API, backend, storage, draft, history, memory, official truth, automatic decision, selection, tactical instruction, score mutation, or timeline mutation.
+- 8W, 8V, 8U, 8R, and 8Q statuses remain preserved and embedded; source reports outside reports/share are not deleted.

@@ -2697,6 +2697,125 @@
 </ul>
 </article>
 </section>
+<section id="manual-review-preview-payload-contract-8x" class="premium-section manual-review-preview-payload-contract-8x" data-manual-review-preview-payload-contract-version="8X">
+<h2>Contrat du payload preview-only</h2>
+<p class="eyebrow">payload preview-only documente - aucune instance creee - aucun stockage</p>
+<p>Cette section decrit la forme future du payload de revue manuelle. Elle ne cree pas de payload reel, ne traite aucun champ actif, ne genere aucune preview reelle et ne promeut jamais une note coach en verite officielle.</p>
+<article class="product-card manual-review-preview-payload-summary-8x">
+<h3>Etat 8X</h3>
+<p><strong>Statut contrat :</strong> documented_but_not_instantiated.</p>
+<p><strong>Source :</strong> manual_non_official; <strong>scope :</strong> preview_only; <strong>persistence :</strong> none; <strong>application :</strong> none.</p>
+<p><strong>Schema :</strong> 12 champs autorises, 16 champs interdits, 3 exemples d'entree, 20 regles futures inactives.</p>
+<p class="guard">Contrat uniquement. Pas de vrai payload, pas de preview reelle, pas de submit, pas d API, pas de backend, pas de stockage, pas de decision automatique, pas de selection et pas de consigne tactique.</p>
+</article>
+<article class="product-card manual-review-preview-payload-fields-8x">
+<h3>Champs autorises du payload futur</h3>
+<ul>
+<li><strong>payloadId :</strong> Stable future identifier for the preview-only payload.</li>
+<li><strong>payloadVersion :</strong> Must be 8X or a future explicit payload contract version.</li>
+<li><strong>payloadSource :</strong> Marks the coach input as non-official manual material.</li>
+<li><strong>payloadScope :</strong> Prevents persistence, official truth, automation and selection effects.</li>
+<li><strong>matchId :</strong> Links the preview context to the match report being reviewed.</li>
+<li><strong>sourceObservationPlanVersion :</strong> References the manual observation plan source.</li>
+<li><strong>sourceFieldContractVersion :</strong> References the future input field contract source.</li>
+<li><strong>createdByCoachLabel :</strong> Human label only; no account, auth or identity lookup in 8X.</li>
+<li><strong>createdAtLocalPlaceholder :</strong> Placeholder timestamp label only; no persisted timestamp.</li>
+<li><strong>entries :</strong> Future preview entries grouped by observation field.</li>
+<li><strong>validationState :</strong> Future inactive validation status container.</li>
+<li><strong>boundaryFlags :</strong> Future negative flags proving the payload is preview-only.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-forbidden-8x">
+<h3>Champs interdits</h3>
+<ul>
+<li>scoreChange</li>
+<li>scoreOverride</li>
+<li>timelineMutation</li>
+<li>selectionRecommendation</li>
+<li>tacticalInstruction</li>
+<li>officialTruth</li>
+<li>scoringEvent</li>
+<li>matchBonusEvent</li>
+<li>persistedDraftId</li>
+<li>historyRecordId</li>
+<li>apiEndpoint</li>
+<li>backendAction</li>
+<li>automaticDecision</li>
+<li>teamStyleMemoryUpdate</li>
+<li>seasonTrendUpdate</li>
+<li>realNextMatchDirective</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-groups-8x">
+<h3>Groupes et exemples d'observation</h3>
+<div class="product-card-grid">
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Observation identity</h4>
+<p>Trace the future preview payload without creating one in 8X.</p>
+<p><strong>Champs :</strong> payloadId, payloadVersion, matchId.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Coach source</h4>
+<p>Keep the source manual and non-official.</p>
+<p><strong>Champs :</strong> payloadSource, createdByCoachLabel, createdAtLocalPlaceholder.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Manual entries</h4>
+<p>Describe future comments, confidence and observation tags.</p>
+<p><strong>Champs :</strong> entries.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Inactive validation</h4>
+<p>Document future validation without running it.</p>
+<p><strong>Champs :</strong> validationState.</p>
+</article>
+<article class="product-card manual-review-preview-payload-group-8x">
+<h4>Preview-only boundary</h4>
+<p>Block persistence, official truth, automation and match mutation.</p>
+<p><strong>Champs :</strong> payloadScope, boundaryFlags.</p>
+</article>
+</div>
+<ul>
+<li><strong>first_exit_after_recovery_preview_entry_8x :</strong> Coach can later draft an observation about first exit quality without changing the timeline.</li>
+<li><strong>danger_zone_continuity_preview_entry_8x :</strong> Coach can later comment on continuity into danger without creating an official tactic.</li>
+<li><strong>neutralized_action_structure_preview_entry_8x :</strong> Coach can later explain why an action died without changing action resolution.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-rules-8x">
+<h3>Regles futures inactives et error states</h3>
+<p>20 regles sont documentees et toutes inactives en 8X; 19 error states sont documentes et tous inactifs en 8X.</p>
+<ul>
+<li><strong>REQUIRE_PAYLOAD_ID :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_PAYLOAD_VERSION :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_MANUAL_NON_OFFICIAL_SOURCE :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_PREVIEW_ONLY_SCOPE :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_MATCH_ID :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_SOURCE_PLAN_VERSION :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_FIELD_CONTRACT_VERSION :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+<li><strong>REQUIRE_ENTRIES_ARRAY :</strong> Future payload validation rule documented only; inactive in 8X.</li>
+</ul>
+</article>
+<article class="product-card manual-review-preview-payload-boundaries-8x">
+<h3>Refus et boundary guards</h3>
+<p>7 refusal states et 14 boundary guards gardent le payload hors execution.</p>
+<ul>
+<li><strong>BLOCK_IF_PAYLOAD_INSTANCE_CREATED_8X :</strong> real payload instance creation</li>
+<li><strong>BLOCK_IF_FIELD_TO_PAYLOAD_RUNTIME_8X :</strong> field mapping into payload</li>
+<li><strong>BLOCK_IF_PAYLOAD_VALIDATION_RUNTIME_8X :</strong> runtime validation in 8X</li>
+<li><strong>BLOCK_IF_REAL_PREVIEW_FROM_PAYLOAD_8X :</strong> preview generation from payload</li>
+<li><strong>BLOCK_IF_SUBMIT_OR_CTA_8X :</strong> submit, save, apply or send</li>
+<li><strong>BLOCK_IF_API_OR_BACKEND_8X :</strong> network/backend action</li>
+<li><strong>BLOCK_IF_STORAGE_OR_DRAFT_8X :</strong> local storage, file, DB or draft</li>
+<li><strong>BLOCK_IF_HISTORY_OR_MEMORY_8X :</strong> history, season memory or team style memory</li>
+<li><strong>BLOCK_IF_OFFICIAL_TRUTH_8X :</strong> official evidence promotion</li>
+<li><strong>BLOCK_IF_AUTOMATIC_DECISION_8X :</strong> decision automation</li>
+<li><strong>BLOCK_IF_SELECTION_OR_TACTIC_8X :</strong> selection and tactical instruction</li>
+<li><strong>BLOCK_IF_SCORE_TIMELINE_MUTATION_8X :</strong> score, event or timeline mutation</li>
+<li><strong>BLOCK_IF_EVENT_OR_SCORE_CHANGE_8X :</strong> new score_change or event write</li>
+<li><strong>BLOCK_IF_SANDBOX_DIAGNOSTIC_BATCH_PROMOTION_8X :</strong> sandbox, diagnostic or batch evidence promoted to official</li>
+</ul>
+</article>
+</section>
 
   
   <section id="next-match-plan" class="product-section">

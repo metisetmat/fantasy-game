@@ -173,6 +173,8 @@ import {
   renderManualReviewFieldUxVisualReadinessWithoutPersistence8VValidation,
   renderManualReviewNonPersistentPreviewActivationGuards8WDoc,
   renderManualReviewNonPersistentPreviewActivationGuards8WValidation,
+  renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc,
+  renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -186,15 +188,19 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8W - Manual Review Non-Persistent Preview Activation Guards";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-non-persistent-preview-activation-guards-8w.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8X - Manual Review Preview Payload Contract Without Persistence";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-payload-contract-without-persistence-8x.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-non-persistent-preview-activation-guards-8w.md";
+  "validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
 let cachedPersistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot | null | undefined;
 let cachedCoachReportExportHtml: string | null | undefined;
+
+function readIfExists(filePath: string): string {
+  return existsSync(filePath) ? readFileSync(filePath, "utf8") : "";
+}
 
 function fullMatchTraceValidationModel(): FullMatchTraceValidationModel {
   if (cachedFullMatchTraceValidationModel === null) {
@@ -4060,6 +4066,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8W test proving documented_but_blocked preview activation, twenty conditions, twelve blockers, six refusal states, zero payload/preview/persistence/official truth/selection/tactic, and current 8W export metadata",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadContractTypes8X.ts",
+        required: true,
+        reason: "Sprint 8X typed preview-only payload contract model for allowed fields, forbidden fields, observation entries, inactive validation rules, refusal states, boundary guards, and non-persistence status",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadContractWarnings8X.ts",
+        required: true,
+        reason: "Sprint 8X warning registry for payload contract visibility, non-instantiation, no runtime validation, no preview generation, no persistence, source-of-truth, and export metadata checks",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadContractAudit8X.ts",
+        required: true,
+        reason: "Sprint 8X audits for product/export visibility, payload schema counts, non-persistence, no input/payload/preview/submit/API/backend/storage/official truth/selection/tactic, and export metadata",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadContractProduct8X.ts",
+        required: true,
+        reason: "Sprint 8X product renderer adding coach-readable preview-only payload contract sections without active controls or persistence",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadContractExport8X.ts",
+        required: true,
+        reason: "Sprint 8X compact export renderer adding the preview-only payload contract and updating export metadata to compressed-export-8x",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadContractWithoutPersistence8X.ts",
+        required: true,
+        reason: "Sprint 8X model, report renderer, and validation renderer for manual review preview payload contract without persistence",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadContract8X.test.ts",
+        required: true,
+        reason: "Sprint 8X test proving documented_but_not_instantiated payload contract, zero payload/runtime/preview/persistence/official truth/selection/tactic, and current 8X export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6216,6 +6257,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8X")) {
+    const generated = readIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    return generated.length > 0
+      ? generated
+      : renderManualReviewPreviewPayloadContractWithoutPersistence8XDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8W")) {
     return renderManualReviewNonPersistentPreviewActivationGuards8WDoc(fullMatchTraceValidationModel());
   }
@@ -8596,6 +8643,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8X")) {
+    const generated = readIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    return generated.length > 0
+      ? generated
+      : renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8W")) {
     return renderManualReviewNonPersistentPreviewActivationGuards8WValidation(fullMatchTraceValidationModel());
   }
@@ -10922,6 +10975,34 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8X")) {
+    return [
+      "# Sprint 8X Share Pack",
+      "",
+      "Current sprint: Sprint 8X - Manual Review Preview Payload Contract Without Persistence",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8W activation-guard layer embedded in product/export reports, then replaces the standalone 8W docs with the 8X preview-only payload contract docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-contract-without-persistence-8x.md",
+      "4. coach-report-manual-review-preview-payload-contract-without-persistence-8x.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8X Focus",
+      "- The 8X layer documents the future preview-only payload contract without instantiating a real payload.",
+      "- payloadContractStatus remains documented_but_not_instantiated.",
+      "- The contract exposes twelve allowed top-level fields, sixteen forbidden fields, three observation examples, twenty inactive validation rules, nineteen inactive error states, seven refusal states, and fourteen boundary guards.",
+      "- Export metadata now mentions 8X and the compact export main id is cleaned to compressed-export-8x.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- No real input, payload instance, field-to-payload runtime, payload validation runtime, preview generation, submit, API, backend, storage, draft, history, memory, official truth, automatic decision, selection, tactical instruction, score mutation, or timeline mutation.",
+      "- 8W, 8V, 8U, 8R, and 8Q statuses remain preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8W")) {
     return [
       "# Sprint 8W Share Pack",
