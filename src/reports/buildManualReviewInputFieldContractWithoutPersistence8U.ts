@@ -79,9 +79,9 @@ function sectionSeeds(): readonly Omit<ManualReviewInputFieldSection8U, "fieldId
   return [
     {
       sectionId: "first-exit-after-recovery-8u",
-      linked8MReviewSectionId: "manual-review-section-first-exit-8m",
-      linked8LObservationCardId: "seasonless-observation-card-first-exit-8l",
-      linked8KDecisionCardId: "coach-decision-card-first-exit-8k",
+      linked8MReviewSectionId: "manual-review-first-exit-after-recovery-8l",
+      linked8LObservationCardId: "outcome-first-exit-after-recovery-8l",
+      linked8KDecisionCardId: "decision-first-exit-after-recovery-8k",
       sectionOrder: 1,
       sectionTitle: "Premiere sortie apres recuperation",
       sectionQuestion: "La premiere sortie apres recuperation a-t-elle confirme le plan d'observation ?",
@@ -91,9 +91,9 @@ function sectionSeeds(): readonly Omit<ManualReviewInputFieldSection8U, "fieldId
     },
     {
       sectionId: "danger-zone-continuity-8u",
-      linked8MReviewSectionId: "manual-review-section-danger-continuity-8m",
-      linked8LObservationCardId: "seasonless-observation-card-danger-continuity-8l",
-      linked8KDecisionCardId: "coach-decision-card-danger-continuity-8k",
+      linked8MReviewSectionId: "manual-review-danger-continuity-8l",
+      linked8LObservationCardId: "outcome-danger-continuity-8l",
+      linked8KDecisionCardId: "decision-danger-continuity-8k",
       sectionOrder: 2,
       sectionTitle: "Continuite apres entree en zone dangereuse",
       sectionQuestion: "L'entree en zone dangereuse a-t-elle produit une continuite credible ?",
@@ -103,9 +103,9 @@ function sectionSeeds(): readonly Omit<ManualReviewInputFieldSection8U, "fieldId
     },
     {
       sectionId: "neutralized-action-structure-8u",
-      linked8MReviewSectionId: "manual-review-section-neutralized-action-8m",
-      linked8LObservationCardId: "seasonless-observation-card-neutralized-action-8l",
-      linked8KDecisionCardId: "coach-decision-card-neutralized-action-8k",
+      linked8MReviewSectionId: "manual-review-structure-after-neutralized-action-8l",
+      linked8LObservationCardId: "outcome-structure-after-neutralized-action-8l",
+      linked8KDecisionCardId: "decision-structure-after-pressure-8k",
       sectionOrder: 3,
       sectionTitle: "Structure apres action neutralisee",
       sectionQuestion: "L'equipe a-t-elle conserve une structure lisible apres action neutralisee ?",
@@ -532,7 +532,11 @@ export function buildManualReviewInputFieldContractWithoutPersistence8UModel(inp
     ...integrationAudit.integrationWarningCodes,
     ...wordingAudit.wordingWarningCodes,
   ]);
-  const status = statusFromWarnings(warningCodes, exportBudgetAudit.exportUnder900Seconds, exportBudgetAudit.exportUnder800Seconds);
+  const status = statusFromWarnings(
+    warningCodes,
+    exportBudgetAudit.exportUnder900Seconds,
+    exportBudgetAudit.exportUnder800Seconds,
+  );
   const baseline8TPreserved = baseline8T.status === "PASS" && baseline8T.interactionContractReady;
   return {
     status,

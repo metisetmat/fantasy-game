@@ -40,6 +40,13 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
   };
   const baseline8T = buildManualReviewUxInteractionContractWithoutPersistence8TModel();
   const oversizedButUnderHardLimit = buildOversizedButUnderHardLimitModel(baseline8T);
+  const sectionLinks = model.contract.fieldSections.map((section) =>
+    [
+      section.linked8MReviewSectionId,
+      section.linked8LObservationCardId,
+      section.linked8KDecisionCardId,
+    ].join("|"),
+  );
 
   assertTest(model.status === "PASS", "8U model must pass.");
   assertTest(validation.includes("Status: PASS"), "8U validation must pass.");
@@ -50,6 +57,11 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
   assertTest(model.exportInputFieldContractVisible, "export must show the input field contract.");
   assertTest(model.inputFieldContractUsesInteractionContract8T, "8U must use the 8T interaction contract.");
   assertTest(model.sectionCount === 3, "8U must define three sections.");
+  assertTest(
+    sectionLinks.join("/") ===
+      "manual-review-first-exit-after-recovery-8l|outcome-first-exit-after-recovery-8l|decision-first-exit-after-recovery-8k/manual-review-danger-continuity-8l|outcome-danger-continuity-8l|decision-danger-continuity-8k/manual-review-structure-after-neutralized-action-8l|outcome-structure-after-neutralized-action-8l|decision-structure-after-pressure-8k",
+    "8U section links must use canonical 8M/8L/8K IDs.",
+  );
   assertTest(model.fieldCount === 21, "8U must define twenty-one fields.");
   assertTest(model.disabledFieldCount === 21, "all 8U fields must be disabled.");
   assertTest(model.activeFieldCount === 0, "8U must not activate fields.");
