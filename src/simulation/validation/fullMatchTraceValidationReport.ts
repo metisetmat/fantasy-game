@@ -240,6 +240,11 @@ import {
   renderManualReviewValidationContractAuditConsistencyRepair8ZDoc as renderManualReviewValidationContractAuditConsistencyRepair8ZDocBase,
   renderManualReviewValidationContractAuditConsistencyRepair8ZValidation as renderManualReviewValidationContractAuditConsistencyRepair8ZValidationBase,
 } from "../../reports/buildManualReviewValidationContractAuditConsistencyRepair8Z";
+import {
+  currentManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc as renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADocBase,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation as renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidationBase,
+} from "../../reports/buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7025,6 +7030,22 @@ export function renderManualReviewValidationContractAuditConsistencyRepair8ZVali
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewValidationContractAuditConsistencyRepair8ZValidationBase();
+}
+
+export function renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADocBase(
+    currentManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidationBase(
+    currentManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel(),
+  );
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

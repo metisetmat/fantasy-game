@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1162,6 +1162,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewFieldUxVisualReadiness8V.test.js",
   "reports/manualReviewPreviewActivationGuards8W.test.js",
   "reports/manualReviewPreviewPayloadContract8X.test.js",
+  "reports/manualReviewPreviewPayloadDryRunValidator9A.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 

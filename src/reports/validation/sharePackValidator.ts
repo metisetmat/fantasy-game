@@ -469,6 +469,12 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewValidationContractAuditConsistencyRepair8ZValidation = readIfExists(
     join(shareDirectory, "validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md"),
   );
+  const manualReviewPreviewPayloadDryRunValidator9A = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"),
+  );
+  const manualReviewPreviewPayloadDryRunValidator9AValidation = readIfExists(
+    join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3673,6 +3679,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md",
     ...sprint8YForbiddenLeftovers,
   ];
+  const sprint9AExpectedFiles = sprint8ZExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"
+      : file === "validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"
+        : file
+  );
+  const sprint9AForbiddenLeftovers = [
+    "coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md",
+    "validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md",
+    ...sprint8ZForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5372,6 +5390,41 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 8T source files", bundleReports.includes("src/reports/buildManualReviewUxInteractionContractWithoutPersistence8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractProduct8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractExport8T.ts") && bundleReports.includes("src/reports/manualReviewUxInteractionContract8T.test.ts"), "8T source bundled"),
     check("source 8S/8R/8Q/8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts") && bundleReports.includes("src/reports/buildManualReviewWorkflowReadinessWithoutPersistence8R.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewUxInteractionContract8TValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint9AChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9AExpectedFiles.every((file) => requiredCopied(file)), sprint9AExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9AExpectedFiles.every((file) => manifest.includes(file)), sprint9AExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9A", activeConfig.sprintName === "Sprint 9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation", activeConfig.sprintName),
+    check("previous standalone 8Z docs are not copied", sprint9AForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9AForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9A oriented", readme.includes("# Sprint 9A Share Pack") && readme.includes("coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md") && readme.includes("Manual Review Preview-Only Payload Dry-Run Validator"), "README current"),
+    check("9A report included", manualReviewPreviewPayloadDryRunValidator9A.includes("# Coach Report Manual Review Preview Payload Dry-Run Validator Without Runtime Activation 9A") && manualReviewPreviewPayloadDryRunValidator9A.includes("Dry-Run Validator Summary") && manualReviewPreviewPayloadDryRunValidator9A.includes("Rule / Error / Blocker Coverage"), "9A doc included"),
+    check("9A validation is PASS", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("ManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel exists"), "9A validation current"),
+    check("product dry-run validator visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-validator-9a"') && coachProductHtml.includes("Dry-run validator payload preview-only") && coachProductHtml.includes('data-manual-review-preview-payload-dry-run-validator-version="9A"'), "product 9A visible"),
+    check("export dry-run validator visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-validator-export-9a"') && coachExportHtml.includes("Dry-run payload preview-only") && coachExportHtml.includes('data-manual-review-preview-payload-dry-run-validator-version="9A"'), "export 9A visible"),
+    check("8Z baseline remains embedded", coachProductHtml.includes('id="manual-review-validation-contract-audit-consistency-repair-8z"') && coachExportHtml.includes('data-manual-review-validation-contract-audit-consistency-repair-version="8Z"') && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("baseline 8Z visible and preserved"), "8Z baseline embedded"),
+    check("8Y/8X/8W baselines remain embedded", coachProductHtml.includes('id="manual-review-preview-payload-validation-contract-8y"') && coachExportHtml.includes('data-manual-review-preview-payload-validation-contract-version="8Y"') && coachProductHtml.includes('id="manual-review-preview-payload-contract-8x"') && coachProductHtml.includes('id="manual-review-preview-activation-guards-8w"'), "8Y/8X/8W embedded"),
+    check("dry-run status is documented only", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("dryRunStatus = documented_dry_run_only") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("expectedDryRunStatus = documented_dry_run_only") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("dryRunStatusCorrect = true"), "dry run status"),
+    check("dry-run cases and results complete", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("dryRunCaseCount = 16") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("dryRunResultCount = 16") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("valid case not accepted"), "16 cases/results"),
+    check("rule error blocker coverage complete", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("ruleCoverageCount = 20") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("errorCoverageCount = 19") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("blockerCoverageCount = 12") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("uncovered arrays empty"), "coverage complete"),
+    check("boundary and refusal coverage complete", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("boundaryGuardCoverageCount = 14") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("refusalStateCoverageCount = 8"), "boundary/refusal complete"),
+    check("no runtime validation payload read acceptance or preview generation", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("validationRuntimeActive = false") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("payloadValidationRuntimeDetected = false") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("validationExecutionCount = 0") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("realPayloadReadCount = 0") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("payloadCreated = false") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("dryRunAcceptedPayloadCount = 0") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("realPreviewGenerated = false"), "no runtime/payload/preview"),
+    check("no persistence official truth automation or decisions", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("no localStorage/DB/file/draft/history/memory") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("no official truth promotion") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("no automatic decision") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("no selection/tactic"), "no persistence/truth/action"),
+    check("no score timeline score_change or event mutation", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("score/timeline/score_change/event mutation = 0"), "no match mutation"),
+    check("baseline statuses preserved", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("validationContractStatusFrom8Y remains documented_but_not_executable") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("payloadContractStatusFrom8X remains documented_but_not_instantiated") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("previewActivationStatusFrom8W remains documented_but_blocked") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("auditConsistencyStatusFrom8Z remains PASS_STRONG"), "statuses preserved"),
+    check("export metadata is 9A", coachExportHtml.includes("<title>Rapport coach export compact 9A - dry-run payload preview-only</title>") && coachExportHtml.includes("Export compact 9A") && coachExportHtml.includes('id="compressed-export-9a"') && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("export title mentions 9A") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("export visible badge mentions 9A"), "export metadata 9A"),
+    check("export id no longer compressed-export-8z", !coachExportHtml.includes('id="compressed-export-8z"') && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("export main id no longer compressed-export-8z"), "stale 8Z id removed"),
+    check("export budget checked honestly", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("exportReadTimeSecondsAfter9A <= 900") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("exportUnder900Seconds correctly computed") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("exportUnder800Seconds correctly computed"), "export budget"),
+    check("source-of-truth and batch-live separation preserved", manualReviewPreviewPayloadDryRunValidator9AValidation.includes("source-of-truth preserved") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("sandbox/batch/diagnostic remain separated"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("no scoring constants changed"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("bundle includes 9A source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunValidatorTypes9A.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunValidatorWarnings9A.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunValidatorProduct9A.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunValidatorExport9A.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunValidator9A.test.ts"), "9A source bundled"),
+    check("source 8Z baseline files were not deleted", bundleReports.includes("src/reports/buildManualReviewValidationContractAuditConsistencyRepair8Z.ts") && bundleReports.includes("src/reports/manualReviewStatusWarningConsistencyGuard8Z.ts") && bundleReports.includes("src/reports/renderManualReviewValidationContractAuditConsistencyRepairProduct8Z.ts") && bundleReports.includes("src/reports/renderManualReviewValidationContractAuditConsistencyRepairExport8Z.ts") && bundleReports.includes("src/reports/manualReviewValidationContractAuditConsistencyRepair8Z.test.ts"), "8Z source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunValidator9AValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint8ZChecks: readonly SharePackCheck[] = [
@@ -9962,6 +10015,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9A - Manual Review")
+      ? sprint9AChecks
     : activeConfig.sprintName.includes("Sprint 8Z - Manual Review")
       ? sprint8ZChecks
     : activeConfig.sprintName.includes("Sprint 8Y - Manual Review")
