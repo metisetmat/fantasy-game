@@ -14,6 +14,21 @@ const model = buildManualReviewValidationContractAuditConsistencyRepair8ZModel()
 const doc = renderManualReviewValidationContractAuditConsistencyRepair8ZDoc(model);
 const validation = renderManualReviewValidationContractAuditConsistencyRepair8ZValidation(model);
 
+function buildOverBudgetAfterInsertionModel(): ReturnType<typeof buildManualReviewValidationContractAuditConsistencyRepair8ZModel> {
+  for (let wordCount = 600; wordCount <= 5200; wordCount += 100) {
+    const exportHtmlBefore8Z = `${model.baseline8Y.exportHtmlAfter8Y}<section>${Array.from({ length: wordCount }, () => "mot").join(" ")}</section>`;
+    const candidate = buildManualReviewValidationContractAuditConsistencyRepair8ZModel({
+      baseline8Y: model.baseline8Y,
+      productHtmlBefore8Z: model.baseline8Y.productHtmlAfter8Y,
+      exportHtmlBefore8Z,
+    });
+    if (candidate.exportReadTimeSecondsAfter8Z > 900) {
+      return candidate;
+    }
+  }
+  throw new Error("Unable to build an 8Z over-budget final export fixture.");
+}
+
 assertTest(model.status === "PASS", `8Z model must pass, got ${model.status}: ${model.warningCodes.join(", ")}`);
 assertTest(validation.includes("Status: PASS"), "8Z validation must show Status: PASS.");
 assertTest(model.scope === "MANUAL_REVIEW_VALIDATION_CONTRACT_AUDIT_CONSISTENCY_REPAIR", "8Z scope must be explicit.");
@@ -87,6 +102,30 @@ assertTest(lowWordingEvaluation.statusRecommendation === "PARTIAL", "8Z guard mu
 assertTest(
   lowWordingEvaluation.warningCodes.includes("WORDING_SCORE_BELOW_PASS_THRESHOLD"),
   "8Z guard must emit wording threshold warning for wording below 90.",
+);
+
+const thresholdMismatchEvaluation = evaluateManualReviewStatusWarningConsistency8Z({
+  wordingScore: 96,
+  passThreshold: 90,
+  passStrongThreshold: 95,
+  integrationFalseNegativeCount: 0,
+  criticalGuardrailViolationCount: 0,
+  exportReadTimeSeconds: 500,
+  exportUnder900Seconds: false,
+  exportUnder800Seconds: true,
+  existingWarnings: [],
+});
+assertTest(thresholdMismatchEvaluation.statusRecommendation === "FAIL", "8Z guard must fail threshold boolean mismatches.");
+assertTest(
+  thresholdMismatchEvaluation.warningCodes.includes("EXPORT_UNDER_900_BOOLEAN_MISMATCH"),
+  "8Z guard must emit the mismatched export-under-900 warning.",
+);
+
+const finalExportOverBudgetModel = buildOverBudgetAfterInsertionModel();
+assertTest(finalExportOverBudgetModel.status === "FAIL", "8Z final over-budget export must fail after completed HTML insertion.");
+assertTest(
+  finalExportOverBudgetModel.warningCodes.includes("EXPORT_OVER_900"),
+  "8Z final over-budget export must emit EXPORT_OVER_900.",
 );
 
 console.log("PASS manualReviewValidationContractAuditConsistencyRepair8Z");

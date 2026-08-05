@@ -492,8 +492,50 @@ export function buildManualReviewValidationContractAuditConsistencyRepair8ZModel
     exportAuditConsistencyRepairHtml,
   );
   const exportReadTimeSecondsAfter8Z = estimateReadTimeSeconds(exportHtmlAfter8Z);
+  const exportUnder900SecondsAfter8Z = exportReadTimeSecondsAfter8Z <= 900;
+  const exportUnder800SecondsAfter8Z = exportReadTimeSecondsAfter8Z <= 800;
+  const finalConsistencyEvaluation = evaluateManualReviewStatusWarningConsistency8Z({
+    wordingScore: wordingScoreAfter8Z,
+    passThreshold: wordingPassThreshold,
+    passStrongThreshold: wordingPassStrongThreshold,
+    integrationFalseNegativeCount: integrationAuditFalseNegativeCountAfter8Z,
+    criticalGuardrailViolationCount,
+    exportReadTimeSeconds: exportReadTimeSecondsAfter8Z,
+    exportUnder900Seconds: exportUnder900SecondsAfter8Z,
+    exportUnder800Seconds: exportUnder800SecondsAfter8Z,
+    existingWarnings: wordingWarningsAfter,
+  });
+  const finalWarningsAfterRepair = uniqueWarnings([...finalConsistencyEvaluation.warningCodes, ...failedCheckWarnings]);
+  const finalStatusAfterConsistencyRepair = finalConsistencyEvaluation.statusRecommendation;
+  const finalModelStatus = finalStatus(finalStatusAfterConsistencyRepair, finalWarningsAfterRepair);
   return {
     ...baseModel,
+    status: finalModelStatus,
+    auditConsistencyRepairReady: finalWarningsAfterRepair.length === 0,
+    statusAfterConsistencyRepair: finalStatusAfterConsistencyRepair,
+    statusAfterConsistencyRepairCorrect: finalStatusAfterConsistencyRepair === "PASS_STRONG",
+    warningsAfterRepair: finalWarningsAfterRepair,
+    warningCountAfterRepair: finalWarningsAfterRepair.length,
+    missingWarningCountAfterRepair: finalConsistencyEvaluation.missingWarningCount,
+    contradictoryPassWarningCountAfterRepair: finalConsistencyEvaluation.contradictoryPassWarningCount,
+    passWithFailedThresholdCount: finalConsistencyEvaluation.passWithFailedThresholdCount,
+    passStrongWithFailedStrongThresholdCount: finalConsistencyEvaluation.passStrongWithFailedStrongThresholdCount,
+    passWithFailedCriticalAuditCount: finalConsistencyEvaluation.passWithFailedCriticalAuditCount,
+    statusWarningContradictionCount: finalConsistencyEvaluation.statusWarningContradictionCount,
+    warningNoneWithFailedAuditCount: finalConsistencyEvaluation.warningNoneWithFailedAuditCount,
+    warningCodes: finalWarningsAfterRepair,
+    recommendation: finalModelStatus === "PASS"
+      ? "PREPARE_MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_VALIDATOR_WITHOUT_RUNTIME_ACTIVATION"
+      : "REPAIR_AUDIT_CONSISTENCY_BEFORE_DRY_RUN",
+    nextSprintRecommendation: finalStatusAfterConsistencyRepair === "PASS_STRONG"
+      ? "9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation"
+      : finalModelStatus === "PASS"
+        ? "9A - Audit Consistency Wording Polish"
+        : "9A - Status Warning Consistency Guard Fix",
+    repair: {
+      ...baseModel.repair,
+      remainingWarnings: finalWarningsAfterRepair,
+    },
     productAuditConsistencyRepairHtml,
     exportAuditConsistencyRepairHtml,
     productHtmlAfter8Z,
@@ -504,10 +546,10 @@ export function buildManualReviewValidationContractAuditConsistencyRepair8ZModel
       exportHtmlAfter8Z.includes('id="compressed-export-8z"') &&
       exportHtmlAfter8Z.includes('data-manual-review-validation-contract-audit-consistency-repair-version="8Z"'),
     exportReadTimeSecondsAfter8Z,
-    exportUnder900Seconds: exportReadTimeSecondsAfter8Z <= 900,
-    exportUnder800Seconds: exportReadTimeSecondsAfter8Z <= 800,
-    exportUnder900BooleanCorrect: (exportReadTimeSecondsAfter8Z <= 900) === (exportReadTimeSecondsAfter8Z <= 900),
-    exportUnder800BooleanCorrect: (exportReadTimeSecondsAfter8Z <= 800) === (exportReadTimeSecondsAfter8Z <= 800),
+    exportUnder900Seconds: exportUnder900SecondsAfter8Z,
+    exportUnder800Seconds: exportUnder800SecondsAfter8Z,
+    exportUnder900BooleanCorrect: exportUnder900SecondsAfter8Z === (exportReadTimeSecondsAfter8Z <= 900),
+    exportUnder800BooleanCorrect: exportUnder800SecondsAfter8Z === (exportReadTimeSecondsAfter8Z <= 800),
   };
 }
 

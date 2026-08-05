@@ -76,13 +76,17 @@ export function evaluateManualReviewStatusWarningConsistency8Z(
   const passWithFailedThresholdCount = input.wordingScore < input.passThreshold ? 1 : 0;
   const passStrongWithFailedStrongThresholdCount = input.wordingScore < input.passStrongThreshold ? 1 : 0;
   const passWithFailedCriticalAuditCount = input.criticalGuardrailViolationCount > 0 ? 1 : 0;
+  const thresholdBooleanMismatchCount = [
+    input.exportUnder900Seconds !== (input.exportReadTimeSeconds <= 900),
+    input.exportUnder800Seconds !== (input.exportReadTimeSeconds <= 800),
+  ].filter(Boolean).length;
   const contradictoryPassWarningCount =
-    warningNoneWithFailedAuditCount + passWithFailedThresholdCount + passWithFailedCriticalAuditCount;
+    warningNoneWithFailedAuditCount + passWithFailedThresholdCount + passWithFailedCriticalAuditCount + thresholdBooleanMismatchCount;
   const statusWarningContradictionCount =
-    missingWarningCount + warningNoneWithFailedAuditCount + passWithFailedCriticalAuditCount;
+    missingWarningCount + warningNoneWithFailedAuditCount + passWithFailedCriticalAuditCount + thresholdBooleanMismatchCount;
 
   let statusRecommendation: ManualReviewValidationContractAuditConsistencyRepairStrongStatus8Z = "PASS_STRONG";
-  if (input.criticalGuardrailViolationCount > 0 || input.exportReadTimeSeconds > 900) {
+  if (input.criticalGuardrailViolationCount > 0 || input.exportReadTimeSeconds > 900 || thresholdBooleanMismatchCount > 0) {
     statusRecommendation = "FAIL";
   } else if (input.wordingScore < input.passThreshold || input.integrationFalseNegativeCount > 0) {
     statusRecommendation = "PARTIAL";
