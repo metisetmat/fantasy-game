@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-08-04T17:58:32.142Z
+Generated timestamp: 2026-08-05T08:41:30.320Z
 Task/sprint name: Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair
 Final file count: 20
 
@@ -1202,14 +1202,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewValidationContractAuditConsistencyRepair8Z.ts
-?? src/reports/manualReviewStatusWarningConsistencyGuard8Z.ts
-?? src/reports/manualReviewValidationContractAuditConsistencyRepair8Z.test.ts
-?? src/reports/manualReviewValidationContractAuditConsistencyRepairTypes8Z.ts
-?? src/reports/manualReviewValidationContractAuditConsistencyRepairWarnings8Z.ts
-?? src/reports/renderManualReviewValidationContractAuditConsistencyRepairExport8Z.ts
-?? src/reports/renderManualReviewValidationContractAuditConsistencyRepairProduct8Z.ts
+ M src/reports/buildManualReviewInputFieldContractWithoutPersistence8U.ts
+ M src/reports/manualReviewInputFieldContract8U.test.ts

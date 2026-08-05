@@ -11,6 +11,26 @@ function assertTest(condition: boolean, message: string): void {
   }
 }
 
+function buildOversizedButUnderHardLimitModel(
+  baseline8T: ReturnType<typeof buildManualReviewUxInteractionContractWithoutPersistence8TModel>,
+): ReturnType<typeof buildManualReviewInputFieldContractWithoutPersistence8UModel> {
+  for (let wordCount = 600; wordCount <= 4200; wordCount += 100) {
+    const exportHtmlBefore8U = `${baseline8T.exportHtmlAfter8T}<section>${Array.from({ length: wordCount }, () => "mot").join(" ")}</section>`;
+    const model = buildManualReviewInputFieldContractWithoutPersistence8UModel({
+      baseline8T,
+      productHtmlBefore8U: baseline8T.productHtmlAfter8T,
+      exportHtmlBefore8U,
+    });
+    if (
+      model.exportBudgetAudit.exportReadTimeSecondsAfter8U > 800 &&
+      model.exportBudgetAudit.exportReadTimeSecondsAfter8U <= 900
+    ) {
+      return model;
+    }
+  }
+  throw new Error("Unable to build an 8U export budget fixture between 801 and 900 seconds.");
+}
+
 export function validateManualReviewInputFieldContract8U(): readonly string[] {
   const model = buildManualReviewInputFieldContractWithoutPersistence8UModel();
   const validation = renderManualReviewInputFieldContractWithoutPersistence8UValidation(model);
@@ -18,6 +38,8 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
     ...buildManualReviewUxInteractionContractWithoutPersistence8TModel(),
     status: "FAIL" as const,
   };
+  const baseline8T = buildManualReviewUxInteractionContractWithoutPersistence8TModel();
+  const oversizedButUnderHardLimit = buildOversizedButUnderHardLimitModel(baseline8T);
 
   assertTest(model.status === "PASS", "8U model must pass.");
   assertTest(validation.includes("Status: PASS"), "8U validation must pass.");
@@ -64,6 +86,18 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
   assertTest(model.exportHtmlAfter8U.includes('id="compressed-export-8u"'), "main id must be compressed-export-8u.");
   assertTest(!model.exportHtmlAfter8U.includes('id="compressed-export-8t"'), "main id must no longer be compressed-export-8t.");
   assertTest(model.exportUnder900Seconds, "export must remain under 900 seconds.");
+  assertTest(
+    oversizedButUnderHardLimit.exportBudgetAudit.exportReadTimeSecondsAfter8U > 800,
+    "oversized fixture must exceed 800 seconds.",
+  );
+  assertTest(
+    oversizedButUnderHardLimit.exportBudgetAudit.exportReadTimeSecondsAfter8U <= 900,
+    "oversized fixture must remain under hard 900-second limit.",
+  );
+  assertTest(
+    oversizedButUnderHardLimit.status === "PARTIAL",
+    "8U model must downgrade 801-900 second exports to PARTIAL.",
+  );
   assertTest(scoringRegistryEntry("SHOT_GOAL").points === 3, "SHOT_GOAL must remain 3.");
   assertTest(scoringRegistryEntry("TRY_TOUCHDOWN").points === 5, "TRY_TOUCHDOWN must remain 5.");
   assertTest(scoringRegistryEntry("CONVERSION_GOAL").points === 2, "CONVERSION_GOAL must remain 2.");

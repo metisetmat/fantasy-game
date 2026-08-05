@@ -488,11 +488,13 @@ function buildContract(): ManualReviewInputFieldContract8U {
 function statusFromWarnings(
   warnings: readonly ManualReviewInputFieldContractWarningCode8U[],
   exportUnder900: boolean,
+  exportUnder800: boolean,
 ): "PASS" | "PARTIAL" | "FAIL" {
   if (!exportUnder900) return "FAIL";
   if (warnings.some((warning) => MANUAL_REVIEW_INPUT_FIELD_CONTRACT_8U_BLOCKING_WARNINGS.includes(warning))) {
     return "FAIL";
   }
+  if (!exportUnder800) return "PARTIAL";
   return warnings.length === 0 ? "PASS" : "PARTIAL";
 }
 
@@ -530,7 +532,7 @@ export function buildManualReviewInputFieldContractWithoutPersistence8UModel(inp
     ...integrationAudit.integrationWarningCodes,
     ...wordingAudit.wordingWarningCodes,
   ]);
-  const status = statusFromWarnings(warningCodes, exportBudgetAudit.exportUnder900Seconds);
+  const status = statusFromWarnings(warningCodes, exportBudgetAudit.exportUnder900Seconds, exportBudgetAudit.exportUnder800Seconds);
   const baseline8TPreserved = baseline8T.status === "PASS" && baseline8T.interactionContractReady;
   return {
     status,
