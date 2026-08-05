@@ -11,6 +11,26 @@ function assertTest(condition: boolean, message: string): void {
   }
 }
 
+function buildOversizedButUnderHardLimitModel(
+  baseline8T: ReturnType<typeof buildManualReviewUxInteractionContractWithoutPersistence8TModel>,
+): ReturnType<typeof buildManualReviewInputFieldContractWithoutPersistence8UModel> {
+  for (let wordCount = 600; wordCount <= 4200; wordCount += 100) {
+    const exportHtmlBefore8U = `${baseline8T.exportHtmlAfter8T}<section>${Array.from({ length: wordCount }, () => "mot").join(" ")}</section>`;
+    const model = buildManualReviewInputFieldContractWithoutPersistence8UModel({
+      baseline8T,
+      productHtmlBefore8U: baseline8T.productHtmlAfter8T,
+      exportHtmlBefore8U,
+    });
+    if (
+      model.exportBudgetAudit.exportReadTimeSecondsAfter8U > 800 &&
+      model.exportBudgetAudit.exportReadTimeSecondsAfter8U <= 900
+    ) {
+      return model;
+    }
+  }
+  throw new Error("Unable to build an 8U export budget fixture between 801 and 900 seconds.");
+}
+
 export function validateManualReviewInputFieldContract8U(): readonly string[] {
   const model = buildManualReviewInputFieldContractWithoutPersistence8UModel();
   const validation = renderManualReviewInputFieldContractWithoutPersistence8UValidation(model);
@@ -19,12 +39,7 @@ export function validateManualReviewInputFieldContract8U(): readonly string[] {
     status: "FAIL" as const,
   };
   const baseline8T = buildManualReviewUxInteractionContractWithoutPersistence8TModel();
-  const exportBetween800And900 = `${baseline8T.exportHtmlAfter8T}<section>${Array.from({ length: 550 }, () => "mot").join(" ")}</section>`;
-  const oversizedButUnderHardLimit = buildManualReviewInputFieldContractWithoutPersistence8UModel({
-    baseline8T,
-    productHtmlBefore8U: baseline8T.productHtmlAfter8T,
-    exportHtmlBefore8U: exportBetween800And900,
-  });
+  const oversizedButUnderHardLimit = buildOversizedButUnderHardLimitModel(baseline8T);
   const sectionLinks = model.contract.fieldSections.map((section) =>
     [
       section.linked8MReviewSectionId,

@@ -236,6 +236,10 @@ import {
   renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc as renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDocBase,
   renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation as renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidationBase,
 } from "../../reports/buildManualReviewPreviewPayloadValidationContractWithoutPersistence8Y";
+import {
+  renderManualReviewValidationContractAuditConsistencyRepair8ZDoc as renderManualReviewValidationContractAuditConsistencyRepair8ZDocBase,
+  renderManualReviewValidationContractAuditConsistencyRepair8ZValidation as renderManualReviewValidationContractAuditConsistencyRepair8ZValidationBase,
+} from "../../reports/buildManualReviewValidationContractAuditConsistencyRepair8Z";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7009,6 +7013,18 @@ export function renderManualReviewPreviewPayloadValidationContractWithoutPersist
   _model: FullMatchTraceValidationModel
 ): string {
   return renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidationBase();
+}
+
+export function renderManualReviewValidationContractAuditConsistencyRepair8ZDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewValidationContractAuditConsistencyRepair8ZDocBase();
+}
+
+export function renderManualReviewValidationContractAuditConsistencyRepair8ZValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewValidationContractAuditConsistencyRepair8ZValidationBase();
 }
 
 export function renderFullMatchWorkbenchChainReplay5FDoc(model: FullMatchTraceValidationModel): string {

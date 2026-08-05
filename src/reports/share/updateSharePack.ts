@@ -177,6 +177,8 @@ import {
   renderManualReviewPreviewPayloadContractWithoutPersistence8XValidation,
   renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc,
   renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation,
+  renderManualReviewValidationContractAuditConsistencyRepair8ZDoc,
+  renderManualReviewValidationContractAuditConsistencyRepair8ZValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -190,10 +192,10 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8Y - Manual Review Preview Payload Validation Contract Without Persistence";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md";
+  "validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4134,6 +4136,41 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8Y test proving documented_but_not_executable validation contract, complete mapping, zero runtime/payload/preview/persistence/official truth/selection/tactic, and current 8Y export metadata",
       },
       {
+        source: "src/reports/manualReviewValidationContractAuditConsistencyRepairTypes8Z.ts",
+        required: true,
+        reason: "Sprint 8Z typed audit-consistency repair contract for wording thresholds, integration selectors, status/warning consistency, and no-runtime preservation",
+      },
+      {
+        source: "src/reports/manualReviewValidationContractAuditConsistencyRepairWarnings8Z.ts",
+        required: true,
+        reason: "Sprint 8Z warning-code registry for audit consistency repairs, selector false negatives, status contradictions, export metadata, and no-runtime blockers",
+      },
+      {
+        source: "src/reports/manualReviewStatusWarningConsistencyGuard8Z.ts",
+        required: true,
+        reason: "Sprint 8Z status/warning consistency guard preventing PASS when thresholds, selectors, or critical audit invariants fail",
+      },
+      {
+        source: "src/reports/renderManualReviewValidationContractAuditConsistencyRepairProduct8Z.ts",
+        required: true,
+        reason: "Sprint 8Z product renderer adding coach-readable audit consistency repair evidence after the 8Y validation contract",
+      },
+      {
+        source: "src/reports/renderManualReviewValidationContractAuditConsistencyRepairExport8Z.ts",
+        required: true,
+        reason: "Sprint 8Z compact export renderer adding audit consistency repair proof and updating export metadata to compressed-export-8z",
+      },
+      {
+        source: "src/reports/buildManualReviewValidationContractAuditConsistencyRepair8Z.ts",
+        required: true,
+        reason: "Sprint 8Z model, report renderer, and validation renderer for manual review validation-contract audit consistency repair",
+      },
+      {
+        source: "src/reports/manualReviewValidationContractAuditConsistencyRepair8Z.test.ts",
+        required: true,
+        reason: "Sprint 8Z test proving selector false negatives are repaired, wording/status warnings are honest, no runtime/payload/preview/persistence is activated, and export metadata is current",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6290,6 +6327,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 8Z")) {
+    return renderManualReviewValidationContractAuditConsistencyRepair8ZDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8Y")) {
     return renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YDoc(fullMatchTraceValidationModel());
   }
@@ -8676,6 +8716,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 8Z")) {
+    return renderManualReviewValidationContractAuditConsistencyRepair8ZValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8Y")) {
     return renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation(fullMatchTraceValidationModel());
   }
@@ -11008,6 +11051,36 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 8Z")) {
+    return [
+      "# Sprint 8Z Share Pack",
+      "",
+      "Current sprint: Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8Y validation contract embedded in product/export reports, then replaces the standalone 8Y docs with the 8Z audit-consistency repair docs.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md",
+      "4. coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 8Z Focus",
+      "- The 8Z layer repairs audit-only inconsistencies discovered in the 8Y validation-contract report.",
+      "- Wording threshold/status logic is now honest: 88 is the documented before state, >=90 passes, and >=95 is strong.",
+      "- Integration selectors now detect product/export action plan and tactical map cards from the real report sections.",
+      "- Status/warning consistency prevents PASS when a threshold, selector, or critical audit invariant fails.",
+      "- The 8Y validation contract remains embedded as the baseline; standalone 8Y docs are not copied into the share pack.",
+      "- Export metadata now mentions 8Z and the compact export main id is cleaned to compressed-export-8z.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- No real input, payload instance, field-to-payload runtime, payload validation runtime, preview generation, submit, API, backend, storage, draft, history, memory, official truth, automatic decision, selection, tactical instruction, score mutation, timeline mutation, or score_change creation.",
+      "- 8Y, 8X, 8W, 8V, 8U, 8R, 8Q, 8O, and 6X baselines remain preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8Y")) {
     return [
       "# Sprint 8Y Share Pack",
