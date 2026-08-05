@@ -127,6 +127,11 @@ import {
   renderManualReviewValidationContractAuditConsistencyRepair8ZDoc,
   renderManualReviewValidationContractAuditConsistencyRepair8ZValidation,
 } from "./buildManualReviewValidationContractAuditConsistencyRepair8Z";
+import {
+  buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation,
+} from "./buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -578,8 +583,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8Z: manualReviewPreviewPayloadValidationContract8Y.productHtmlAfter8Y,
     exportHtmlBefore8Z: manualReviewPreviewPayloadValidationContract8Y.exportHtmlAfter8Y,
   });
-  const finalProductHtml = manualReviewValidationAuditConsistencyRepair8Z.productHtmlAfter8Z;
-  const exportHtml = manualReviewValidationAuditConsistencyRepair8Z.exportHtmlAfter8Z;
+  const manualReviewPreviewPayloadDryRunValidator9A = buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel({
+    baseline8Z: manualReviewValidationAuditConsistencyRepair8Z,
+    productHtmlBefore9A: manualReviewValidationAuditConsistencyRepair8Z.productHtmlAfter8Z,
+    exportHtmlBefore9A: manualReviewValidationAuditConsistencyRepair8Z.exportHtmlAfter8Z,
+  });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunValidator9A.productHtmlAfter9A;
+  const exportHtml = manualReviewPreviewPayloadDryRunValidator9A.exportHtmlAfter9A;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -642,6 +652,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewValidationContractAuditConsistencyRepair8ZValidation(manualReviewValidationAuditConsistencyRepair8Z),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"),
+    renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc(manualReviewPreviewPayloadDryRunValidator9A),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"),
+    renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation(manualReviewPreviewPayloadDryRunValidator9A),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -662,6 +682,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md");
   console.log("Generated reports/coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md");
   console.log("Generated reports/validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

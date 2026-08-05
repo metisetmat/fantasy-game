@@ -1,26 +1,25 @@
-# Sprint 8Z Share Pack
+# Sprint 9A Share Pack
 
-Current sprint: Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair
+Current sprint: Sprint 9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation
 
-Upload every file in this `reports/share` directory for review. This minimal pack keeps the 8Y validation contract embedded in product/export reports, then replaces the standalone 8Y docs with the 8Z audit-consistency repair docs.
+Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 8Z docs with the 9A dry-run validator docs while keeping the 8Z baseline embedded in bundles and generated evidence.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md
-4. coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md
+3. validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md
+4. coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md
 5. validation.share-pack.md
 
-## Sprint 8Z Focus
-- The 8Z layer repairs audit-only inconsistencies discovered in the 8Y validation-contract report.
-- Wording threshold/status logic is now honest: 88 is the documented before state, >=90 passes, and >=95 is strong.
-- Integration selectors now detect product/export action plan and tactical map cards from the real report sections.
-- Status/warning consistency prevents PASS when a threshold, selector, or critical audit invariant fails.
-- The 8Y validation contract remains embedded as the baseline; standalone 8Y docs are not copied into the share pack.
-- Export metadata now mentions 8Z and the compact export main id is cleaned to compressed-export-8z.
+## Sprint 9A Focus
+- The 9A layer documents a preview-only payload dry-run validator without activating real runtime validation.
+- Sixteen dry-run cases cover valid, invalid, blocking, refusal, and boundary scenarios without accepting or creating a payload.
+- Rule, error, blocker, boundary-guard, and refusal-state coverage is explicit and complete.
+- Export metadata now mentions 9A and the compact export main id is compressed-export-9a.
+- The 8Z audit-consistency repair remains the strong PASS baseline; standalone 8Z docs are not copied into the share pack.
 
 ## Guardrails
 - Scoring values unchanged.
 - PENALTY_SHOT inactive.
-- No real input, payload instance, field-to-payload runtime, payload validation runtime, preview generation, submit, API, backend, storage, draft, history, memory, official truth, automatic decision, selection, tactical instruction, score mutation, timeline mutation, or score_change creation.
-- 8Y, 8X, 8W, 8V, 8U, 8R, 8Q, 8O, and 6X baselines remain preserved and embedded; source reports outside reports/share are not deleted.
+- No real input, payload read, payload acceptance, preview generation, submit, API, backend, storage, database, file, draft, history, memory, official truth, automation, selection, tactic, score mutation, timeline mutation, score_change creation, or event mutation.
+- 8Z, 8Y, 8X, 8W, 8V, 8U, 8T, 8S, 8R, 8Q, 8P, 8O, 8N, 8M, 8L, and 8K baselines remain preserved and embedded; source reports outside reports/share are not deleted.

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -186,6 +186,8 @@ import {
   renderManualReviewPreviewPayloadValidationContractWithoutPersistence8YValidation,
   renderManualReviewValidationContractAuditConsistencyRepair8ZDoc,
   renderManualReviewValidationContractAuditConsistencyRepair8ZValidation,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -199,10 +201,11 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 8Z - Manual Review Validation Contract Audit Consistency Repair";
-const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET = "coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation";
+const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
+  "coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4178,6 +4181,36 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 8Z test proving selector false negatives are repaired, wording/status warnings are honest, no runtime/payload/preview/persistence is activated, and export metadata is current",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunValidatorTypes9A.ts",
+        required: true,
+        reason: "Sprint 9A typed preview-only payload dry-run validator contract with no runtime activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunValidatorWarnings9A.ts",
+        required: true,
+        reason: "Sprint 9A warning-code registry for dry-run payload contract failures, boundary violations, and export metadata blockers",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunValidatorProduct9A.ts",
+        required: true,
+        reason: "Sprint 9A product renderer adding coach-readable dry-run validator evidence without creating a real payload or preview",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunValidatorExport9A.ts",
+        required: true,
+        reason: "Sprint 9A compact export renderer adding dry-run validator proof and updating export metadata to compressed-export-9a",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A.ts",
+        required: true,
+        reason: "Sprint 9A model, report renderer, and validation renderer for preview-only payload dry-run validation without runtime activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunValidator9A.test.ts",
+        required: true,
+        reason: "Sprint 9A test proving dry-run cases, rule/error/blocker coverage, 8Z baseline preservation, no runtime/persistence/official truth, and current 9A export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6334,6 +6367,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9A")) {
+    return renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8Z")) {
     return renderManualReviewValidationContractAuditConsistencyRepair8ZDoc(fullMatchTraceValidationModel());
   }
@@ -8723,6 +8759,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9A")) {
+    return renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 8Z")) {
     return renderManualReviewValidationContractAuditConsistencyRepair8ZValidation(fullMatchTraceValidationModel());
   }
@@ -11058,6 +11097,35 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9A")) {
+    return [
+      "# Sprint 9A Share Pack",
+      "",
+      "Current sprint: Sprint 9A - Manual Review Preview-Only Payload Dry-Run Validator Without Runtime Activation",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 8Z docs with the 9A dry-run validator docs while keeping the 8Z baseline embedded in bundles and generated evidence.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9A Focus",
+      "- The 9A layer documents a preview-only payload dry-run validator without activating real runtime validation.",
+      "- Sixteen dry-run cases cover valid, invalid, blocking, refusal, and boundary scenarios without accepting or creating a payload.",
+      "- Rule, error, blocker, boundary-guard, and refusal-state coverage is explicit and complete.",
+      "- Export metadata now mentions 9A and the compact export main id is compressed-export-9a.",
+      "- The 8Z audit-consistency repair remains the strong PASS baseline; standalone 8Z docs are not copied into the share pack.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- No real input, payload read, payload acceptance, preview generation, submit, API, backend, storage, database, file, draft, history, memory, official truth, automation, selection, tactic, score mutation, timeline mutation, score_change creation, or event mutation.",
+      "- 8Z, 8Y, 8X, 8W, 8V, 8U, 8T, 8S, 8R, 8Q, 8P, 8O, 8N, 8M, 8L, and 8K baselines remain preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 8Z")) {
     return [
       "# Sprint 8Z Share Pack",
@@ -30008,6 +30076,11 @@ import {
   renderManualReviewValidationContractAuditConsistencyRepair8ZDoc,
   renderManualReviewValidationContractAuditConsistencyRepair8ZValidation,
 } from "./buildManualReviewValidationContractAuditConsistencyRepair8Z";
+import {
+  buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc,
+  renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation,
+} from "./buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -30459,8 +30532,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore8Z: manualReviewPreviewPayloadValidationContract8Y.productHtmlAfter8Y,
     exportHtmlBefore8Z: manualReviewPreviewPayloadValidationContract8Y.exportHtmlAfter8Y,
   });
-  const finalProductHtml = manualReviewValidationAuditConsistencyRepair8Z.productHtmlAfter8Z;
-  const exportHtml = manualReviewValidationAuditConsistencyRepair8Z.exportHtmlAfter8Z;
+  const manualReviewPreviewPayloadDryRunValidator9A = buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel({
+    baseline8Z: manualReviewValidationAuditConsistencyRepair8Z,
+    productHtmlBefore9A: manualReviewValidationAuditConsistencyRepair8Z.productHtmlAfter8Z,
+    exportHtmlBefore9A: manualReviewValidationAuditConsistencyRepair8Z.exportHtmlAfter8Z,
+  });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunValidator9A.productHtmlAfter9A;
+  const exportHtml = manualReviewPreviewPayloadDryRunValidator9A.exportHtmlAfter9A;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -30523,6 +30601,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewValidationContractAuditConsistencyRepair8ZValidation(manualReviewValidationAuditConsistencyRepair8Z),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"),
+    renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc(manualReviewPreviewPayloadDryRunValidator9A),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md"),
+    renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation(manualReviewPreviewPayloadDryRunValidator9A),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -30543,6 +30631,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-validation-contract-without-persistence-8y.md");
   console.log("Generated reports/coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md");
   console.log("Generated reports/validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

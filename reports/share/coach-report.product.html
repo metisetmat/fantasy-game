@@ -1847,9 +1847,9 @@
 <h3>Sections de champs</h3>
 <table class="coach-table manual-review-input-section-table-8u">
 <thead><tr><th>Ordre</th><th>Section</th><th>Question</th><th>Lien 8M</th><th>Lien 8L</th><th>Lien 8K</th><th>Champs</th><th>Etat 8U</th></tr></thead>
-<tbody><tr class="manual-review-input-section-row-8u"><td>1</td><td>Premiere sortie après récupération</td><td>La première sortie après récupération a-t-elle confirme le plan d&#39;observation ?</td><td>manual-review-section-first-exit-8m</td><td>seasonless-observation-card-first-exit-8l</td><td>coach-decision-card-first-exit-8k</td><td>7</td><td>disabled</td></tr>
-<tr class="manual-review-input-section-row-8u"><td>2</td><td>Continuite après entree en zone dangereuse</td><td>L&#39;entree en zone dangereuse a-t-elle produit une continuite credible ?</td><td>manual-review-section-danger-continuity-8m</td><td>seasonless-observation-card-danger-continuity-8l</td><td>coach-decision-card-danger-continuity-8k</td><td>7</td><td>disabled</td></tr>
-<tr class="manual-review-input-section-row-8u"><td>3</td><td>Structure après action neutralisee</td><td>L&#39;equipe a-t-elle conserve une structure lisible après action neutralisee ?</td><td>manual-review-section-neutralized-action-8m</td><td>seasonless-observation-card-neutralized-action-8l</td><td>coach-decision-card-neutralized-action-8k</td><td>7</td><td>disabled</td></tr></tbody>
+<tbody><tr class="manual-review-input-section-row-8u"><td>1</td><td>Premiere sortie après récupération</td><td>La première sortie après récupération a-t-elle confirme le plan d&#39;observation ?</td><td>manual-review-first-exit-after-recovery-8l</td><td>outcome-first-exit-after-recovery-8l</td><td>decision-first-exit-after-recovery-8k</td><td>7</td><td>disabled</td></tr>
+<tr class="manual-review-input-section-row-8u"><td>2</td><td>Continuite après entree en zone dangereuse</td><td>L&#39;entree en zone dangereuse a-t-elle produit une continuite credible ?</td><td>manual-review-danger-continuity-8l</td><td>outcome-danger-continuity-8l</td><td>decision-danger-continuity-8k</td><td>7</td><td>disabled</td></tr>
+<tr class="manual-review-input-section-row-8u"><td>3</td><td>Structure après action neutralisee</td><td>L&#39;equipe a-t-elle conserve une structure lisible après action neutralisee ?</td><td>manual-review-structure-after-neutralized-action-8l</td><td>outcome-structure-after-neutralized-action-8l</td><td>decision-structure-after-pressure-8k</td><td>7</td><td>disabled</td></tr></tbody>
 </table>
 </article>
 <article class="product-card manual-review-input-fields-8u">
@@ -3027,6 +3027,76 @@
 <li>officialTruth/automaticDecision/selection/tactic=false/false/false/false</li>
 <li>score/timeline/score_change/event mutation=0/0/0/0</li>
 </ul>
+</article>
+</section>
+<section id="manual-review-preview-payload-dry-run-validator-9a" class="premium-section manual-review-preview-payload-dry-run-validator-9a" data-manual-review-preview-payload-dry-run-validator-version="9A">
+<h2>Dry-run validator payload preview-only</h2>
+<p class="eyebrow">Sprint 9A - dry-run contractuel, sans runtime</p>
+<p>Cette couche simule l'ordre de validation du futur payload preview-only. Elle decrit les cas, erreurs, blockers et refusal states attendus sans lire, accepter, creer ou persister un vrai payload.</p>
+<article class="product-card manual-review-dry-run-summary-9a">
+<h3>Resume dry-run</h3>
+<p><strong>Status :</strong> PASS. <strong>Dry-run :</strong> documented_dry_run_only. <strong>Recommendation :</strong> PREPARE_DRY_RUN_RESULT_RENDERER_WITHOUT_PREVIEW_ACTIVATION.</p>
+<p><strong>Cas :</strong> 16/16. <strong>Resultats :</strong> 16/16. <strong>Cas valide accepte :</strong> 0.</p>
+<p><strong>Coverage :</strong> rules 20/20; errors 19/19; blockers 12/12; boundary guards 14/14; refusals 8/8.</p>
+</article>
+<article class="product-card manual-review-dry-run-cases-9a">
+<h3>Cas de dry-run</h3>
+<table class="stat-table"><thead><tr><th>Case</th><th>Resultat attendu</th><th>Severity</th><th>Errors</th><th>Blockers</th></tr></thead><tbody>
+<tr><td>valid_preview_only_payload_shape_9a</td><td>would_pass_future_validation_but_not_accepted</td><td>info</td><td>none</td><td>BLOCK_PREVIEW_ACCEPTANCE_9A</td></tr>
+<tr><td>invalid_source_payload_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>INVALID_PAYLOAD_SOURCE_8Y</td><td>BLOCK_INVALID_SOURCE_OR_SCOPE_8Y</td></tr>
+<tr><td>invalid_scope_payload_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>INVALID_PAYLOAD_SCOPE_8Y</td><td>BLOCK_INVALID_SOURCE_OR_SCOPE_8Y</td></tr>
+<tr><td>official_truth_flag_true_9a</td><td>would_block_future_preview</td><td>blocking</td><td>OFFICIAL_TRUTH_FLAG_FORBIDDEN_8Y</td><td>BLOCK_OFFICIAL_TRUTH_FLAG_8Y</td></tr>
+<tr><td>persisted_or_applied_flag_true_9a</td><td>would_block_future_preview</td><td>blocking</td><td>PERSISTED_FLAG_FORBIDDEN_8Y, APPLIED_FLAG_FORBIDDEN_8Y</td><td>BLOCK_PERSISTENCE_FLAG_8Y, BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>invalid_entry_count_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>ENTRY_COUNT_INVALID_8Y</td><td>BLOCK_MISSING_OR_INVALID_ENTRIES_8Y</td></tr>
+<tr><td>unknown_entry_link_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>ENTRY_LINK_UNKNOWN_8Y</td><td>BLOCK_MISSING_OR_INVALID_ENTRIES_8Y</td></tr>
+<tr><td>invalid_outcome_value_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>INVALID_OUTCOME_VALUE_8Y</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>invalid_counter_value_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>INVALID_COUNTER_VALUE_8Y</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>signal_count_exceeds_comparable_count_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8Y</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>invalid_context_comparability_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>INVALID_CONTEXT_COMPARABILITY_8Y</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>note_too_long_9a</td><td>would_fail_future_validation</td><td>warning</td><td>NOTE_TOO_LONG_8Y</td><td>BLOCK_INVALID_ENTRY_VALUES_8Y</td></tr>
+<tr><td>missing_required_entry_field_9a</td><td>would_fail_future_validation</td><td>blocking</td><td>REQUIRED_ENTRY_FIELD_MISSING_8Y</td><td>BLOCK_MISSING_REQUIRED_ENTRY_FIELDS_8Y</td></tr>
+<tr><td>forbidden_top_level_field_9a</td><td>would_block_future_preview</td><td>blocking</td><td>FORBIDDEN_TOP_LEVEL_FIELD_8Y</td><td>BLOCK_FORBIDDEN_FIELD_8Y</td></tr>
+<tr><td>score_timeline_mutation_attempt_9a</td><td>would_block_future_preview</td><td>blocking</td><td>SCORE_TIMELINE_MUTATION_FIELD_8Y</td><td>BLOCK_SCORE_OR_TIMELINE_MUTATION_FIELD_8Y</td></tr>
+<tr><td>automation_storage_engine_learning_attempt_9a</td><td>would_block_future_preview</td><td>blocking</td><td>AUTOMATION_FIELD_FORBIDDEN_8Y, STORAGE_FIELD_FORBIDDEN_8Y, ENGINE_LEARNING_FIELD_FORBIDDEN_8Y, BOUNDARY_FLAGS_MISSING_8Y</td><td>BLOCK_AUTOMATION_FIELD_8Y, BLOCK_STORAGE_OR_API_FIELD_8Y, BLOCK_ENGINE_LEARNING_FIELD_8Y</td></tr>
+</tbody></table>
+</article>
+<article class="product-card manual-review-dry-run-boundary-9a">
+<h3>Frontieres no-runtime</h3>
+<ul>
+<li>runtimeValidation=0</li>
+<li>realPayloadRead=0</li>
+<li>payloadCreated=0</li>
+<li>payloadAccepted=0</li>
+<li>previewGenerated=0</li>
+<li>persistence=0</li>
+<li>officialTruthPromotion=0</li>
+<li>automation=0</li>
+<li>selectionOrTactic=0</li>
+<li>score/timeline/score_change/event mutation=0/0/0/0</li>
+</ul>
+</article>
+<article class="product-card manual-review-dry-run-readiness-9a">
+<h3>Readiness</h3>
+<p><strong>Ce qui est pret :</strong></p><ul>
+<li>simulated validation order</li>
+<li>contractual validation cases</li>
+<li>rule-field-error-blocker mapping</li>
+<li>expected result for every case</li>
+<li>no-runtime boundaries</li>
+</ul>
+<p><strong>Ce qui reste bloque :</strong></p><ul>
+<li>real runtime validation</li>
+<li>real payload read</li>
+<li>payload acceptance</li>
+<li>real preview generation</li>
+<li>submit/API/backend</li>
+<li>storage</li>
+<li>memory</li>
+<li>official truth promotion</li>
+<li>automatic decision</li>
+<li>selection/tactic</li>
+</ul>
+<p class="guard">Le cas valide signifie uniquement would pass future validation, jamais accepted payload.</p>
 </article>
 </section>
 
