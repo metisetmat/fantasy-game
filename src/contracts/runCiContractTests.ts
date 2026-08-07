@@ -23,6 +23,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewPreviewPayloadContract8X.test.js",
   "reports/manualReviewPreviewPayloadDryRunValidator9A.test.js",
   "reports/manualReviewPreviewPayloadDryRunResultRenderer9B.test.js",
+  "reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 
