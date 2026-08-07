@@ -245,6 +245,11 @@ import {
   renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc as renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADocBase,
   renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation as renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidationBase,
 } from "../../reports/buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A";
+import {
+  currentManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel,
+  renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc as renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDocBase,
+  renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation as renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidationBase,
+} from "../../reports/buildManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9B";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7045,6 +7050,22 @@ export function renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeAct
 ): string {
   return renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidationBase(
     currentManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDocBase(
+    currentManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidationBase(
+    currentManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel(),
   );
 }
 

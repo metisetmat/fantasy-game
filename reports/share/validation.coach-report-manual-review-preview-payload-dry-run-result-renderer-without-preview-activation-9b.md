@@ -1,0 +1,112 @@
+# Validation - Coach Report Manual Review Preview Payload Dry-Run Result Renderer Without Preview Activation 9B
+
+Status: PASS
+
+## Counts
+- renderedCaseCount: 16
+- renderedResultCount: 16
+- coachFacingResultGroupCount: 3
+- passButNotAcceptedCaseCount: 1
+- failValidationCaseCount: 10
+- blockPreviewCaseCount: 5
+- wordingReadabilityScore: 96
+- exportReadTimeSecondsAfter9B: 358
+
+## Checks
+- PASS: ManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel exists - MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_RESULT_RENDERER_9B
+- PASS: baseline 9A visible and preserved - true
+- PASS: baseline 8Z preserved - true
+- PASS: baseline 8Y preserved - true
+- PASS: baseline 8X preserved - true
+- PASS: baseline 8W preserved - true
+- PASS: baseline 8V preserved - true
+- PASS: baseline 8U preserved - true
+- PASS: baseline 8T/8S/8R/8Q/8P/8O/8N/8M/8L/8K preserved - manual chain preserved
+- PASS: product dry-run result renderer visible - true
+- PASS: export dry-run result renderer visible - true
+- PASS: dryRunResultRendererUsesDryRunValidator9A = true - true
+- PASS: dryRunResultRendererUsesAuditConsistencyRepair8Z = true - true
+- PASS: dryRunResultRendererUsesValidationContract8Y = true - true
+- PASS: rendererStatus = rendered_without_preview_activation - rendered_without_preview_activation
+- PASS: expectedRendererStatus = rendered_without_preview_activation - rendered_without_preview_activation
+- PASS: rendererStatusCorrect = true - true
+- PASS: renderedCaseCount = 16 - 16
+- PASS: renderedResultCount = 16 - 16
+- PASS: coachFacingResultGroupCount = 3 - 3
+- PASS: resultRowCount = 16 - 16
+- PASS: passButNotAcceptedCaseCount = 1 - 1
+- PASS: failValidationCaseCount = 10 - 10
+- PASS: blockPreviewCaseCount = 5 - 5
+- PASS: ungroupedCaseCount = 0 - 0
+- PASS: duplicatedCaseInGroupsCount = 0 - 0
+- PASS: validCaseRenderedAsNotAccepted = true - true
+- PASS: acceptedPayloadClaimCount = 0 - 0
+- PASS: previewGeneratedClaimCount = 0 - 0
+- PASS: payloadCreatedClaimCount = 0 - 0
+- PASS: runtimeValidationClaimCount = 0 - 0
+- PASS: renderedRuleCoverageCount = 20 - 20
+- PASS: renderedErrorCoverageCount = 19 - 19
+- PASS: renderedBlockerCoverageCount = 12 - 12
+- PASS: renderedBoundaryGuardCoverageCount = 14 - 14
+- PASS: renderedRefusalStateCoverageCount = 8 - 8
+- PASS: uncovered arrays empty - none
+- PASS: coverageStillComplete = true - true
+- PASS: validationRuntimeActive = false - false
+- PASS: payloadValidationRuntimeDetected = false - false
+- PASS: validationExecutionCount = 0 - 0
+- PASS: realPayloadReadCount = 0 - 0
+- PASS: payloadCreated = false - false
+- PASS: realPayloadInstanceCount = 0 - 0
+- PASS: dryRunAcceptedPayloadCount = 0 - 0
+- PASS: realInputActivated = false - false
+- PASS: realPreviewGenerated = false - false
+- PASS: previewActivationCount = 0 - 0
+- PASS: submitCreated = false - false
+- PASS: apiCreated = false - false
+- PASS: backendCreated = false - false
+- PASS: storageCreated = false - false
+- PASS: memoryCreated = false - false
+- PASS: draftCreated = false - false
+- PASS: historyCreated = false - false
+- PASS: officialTruthPromoted = false - false
+- PASS: automaticDecisionCreated = false - false
+- PASS: selectionDriven = false - false
+- PASS: tacticalInstructionDriven = false - false
+- PASS: scoreMutationCount = 0 - 0
+- PASS: timelineMutationCount = 0 - 0
+- PASS: scoreChangeCreationCount = 0 - 0
+- PASS: eventMutationCount = 0 - 0
+- PASS: dryRunStatusFrom9A remains documented_dry_run_only - documented_dry_run_only
+- PASS: validationContractStatusFrom8Y remains documented_but_not_executable - documented_but_not_executable
+- PASS: payloadContractStatusFrom8X remains documented_but_not_instantiated - documented_but_not_instantiated
+- PASS: previewActivationStatusFrom8W remains documented_but_blocked - documented_but_blocked
+- PASS: fieldVisualReadinessStatusFrom8V remains ready_for_static_visual_review - ready_for_static_visual_review
+- PASS: workflowReadinessStatusFrom8R remains ready_for_non_persistent_preview - ready_for_non_persistent_preview
+- PASS: reviewGateStatusFrom8Q remains needs_completion - needs_completion
+- PASS: auditConsistencyStatusFrom8Z remains PASS_STRONG - PASS_STRONG
+- PASS: resultRendererDistinctFromRuntimeValidation = true - true
+- PASS: resultRendererDistinctFromPayloadAcceptance = true - true
+- PASS: resultRendererDistinctFromPreviewGeneration = true - true
+- PASS: wordingReadabilityScore is explicitly published - 96
+- PASS: wordingReadabilityScore >= 90 - 96
+- PASS: PASS fort impossible if wording score absent or <95 - pass_strong
+- PASS: product/export action plan visible - visible
+- PASS: tactical map cards visible - true
+- PASS: exportReadTimeSecondsAfter9B <= 900 - 358
+- PASS: exportUnder900Seconds correctly computed - true
+- PASS: exportUnder800Seconds correctly computed - true
+- PASS: export title mentions 9B - title 9B
+- PASS: export visible badge mentions 9B - badge 9B
+- PASS: export main data attribute mentions 9B - main data 9B
+- PASS: export main id no longer compressed-export-9a - id 9B
+- PASS: source-of-truth preserved - true
+- PASS: score claims backed by score_change - source-of-truth audit preserved
+- PASS: renderer does not promote coach input to official truth - false
+- PASS: sandbox/batch/diagnostic remain separated - separated
+- PASS: no scoring constants changed - scoring constants unchanged
+- PASS: MatchBonusEvent unchanged - MatchBonusEvent unchanged
+- PASS: batch/live separation preserved - batch/live PASS
+- PASS: share pack PASS - true
+
+## Required Validation Command
+- npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share
