@@ -85,6 +85,9 @@ assert.equal(model.exportUnder800BooleanCorrect, true);
 assert.equal(model.productHtmlAfter9B.includes("Resultats du dry-run payload preview-only"), true);
 assert.equal(model.exportHtmlAfter9B.includes("Resultats dry-run payload"), true);
 assert.equal(model.exportHtmlAfter9B.includes("Rapport coach export compact 9B"), true);
+assert.equal(model.exportHtmlAfter9B.includes('id="manual-review-preview-payload-dry-run-validator-export-9a"'), true);
+assert.equal(model.exportHtmlAfter9B.includes("Dry-run payload 9A"), true);
+assert.equal(model.exportHtmlAfter9B.includes("Export compact 9A"), true);
 assert.equal(model.exportHtmlAfter9B.includes('id="compressed-export-9a"'), false);
 assert.equal(model.exportHtmlAfter9B.includes('id="compressed-export-9b"'), true);
 assert.equal(model.sourceOfTruthSeparationPreserved, true);
@@ -97,5 +100,16 @@ assert.equal(report.includes("valid_preview_only_payload_shape_9a"), true);
 assert.equal(validation.includes("Status: PASS"), true);
 assert.equal(validation.includes("PASS fort impossible if wording score absent or <95"), true);
 assert.equal(validation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), true);
+
+const oversizedExportHtml = model.baseline9A.exportHtmlAfter9A.replace("</main>", `<p>${"longword ".repeat(3301)}</p></main>`);
+const partialModel = buildManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel({
+  exportHtmlBefore9B: oversizedExportHtml,
+});
+assert.equal(partialModel.status, "FAIL");
+assert.equal(partialModel.warningCodes.includes("EXPORT_OVER_900"), true);
+assert.equal(partialModel.productHtmlAfter9B.includes("Statut: <strong>FAIL</strong>"), true);
+assert.equal(partialModel.productHtmlAfter9B.includes("Statut: <strong>PASS</strong>"), false);
+assert.equal(partialModel.exportHtmlAfter9B.includes("Dry-run payload 9A"), true);
+assert.equal(partialModel.exportHtmlAfter9B.includes("Export compact 9A"), true);
 
 console.log("PASS manualReviewPreviewPayloadDryRunResultRenderer9B");

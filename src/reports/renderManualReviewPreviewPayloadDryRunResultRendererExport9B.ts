@@ -8,6 +8,23 @@ function escapeHtml(value: string): string {
     .replace(/"/gu, "&quot;");
 }
 
+function replaceFirstOutsideSection(html: string, sectionId: string, pattern: RegExp, replacement: string): string {
+  const sectionStart = html.indexOf(`id="${sectionId}"`);
+  if (sectionStart === -1) return html.replace(pattern, replacement);
+
+  const sectionEndMarker = "</section>";
+  const sectionEnd = html.indexOf(sectionEndMarker, sectionStart);
+  if (sectionEnd === -1) return html.replace(pattern, replacement);
+
+  const before = html.slice(0, sectionStart);
+  const sectionAndAfter = html.slice(sectionStart);
+  if (pattern.test(before)) return `${before.replace(pattern, replacement)}${sectionAndAfter}`;
+
+  const protectedSection = html.slice(sectionStart, sectionEnd + sectionEndMarker.length);
+  const after = html.slice(sectionEnd + sectionEndMarker.length);
+  return `${before}${protectedSection}${after.replace(pattern, replacement)}`;
+}
+
 export function renderManualReviewPreviewPayloadDryRunResultRendererExport9B(
   model: ManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel,
 ): string {
@@ -52,8 +69,18 @@ export function insertManualReviewPreviewPayloadDryRunResultRendererExport9B(exp
   nextHtml = nextHtml.replace(/<title>[^<]*<\/title>/u, "<title>Rapport coach export compact 9B - resultats dry-run payload</title>");
   nextHtml = nextHtml.replace(/id="compressed-export-9a"/gu, 'id="compressed-export-9b"');
   nextHtml = nextHtml.replace(/id="compressed-export-[^"]+"/u, 'id="compressed-export-9b"');
-  nextHtml = nextHtml.replace(/Export compact 9A/gu, "Export compact 9B");
-  nextHtml = nextHtml.replace(/Dry-run payload 9A/gu, "Resultats dry-run 9B");
+  nextHtml = replaceFirstOutsideSection(
+    nextHtml,
+    "manual-review-preview-payload-dry-run-validator-export-9a",
+    /Export compact 9A/u,
+    "Export compact 9B",
+  );
+  nextHtml = replaceFirstOutsideSection(
+    nextHtml,
+    "manual-review-preview-payload-dry-run-validator-export-9a",
+    /Dry-run payload 9A/u,
+    "Resultats dry-run 9B",
+  );
 
   const mainTagMatch = nextHtml.match(/<main\b[^>]*>/u);
   const mainTag = mainTagMatch?.[0] ?? "";

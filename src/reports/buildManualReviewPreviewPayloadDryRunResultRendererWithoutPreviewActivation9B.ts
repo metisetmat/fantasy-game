@@ -362,19 +362,6 @@ export function buildManualReviewPreviewPayloadDryRunResultRendererWithoutPrevie
   });
   const wordingReadabilityScore = 96;
   const wordingThresholdStatus = wordingStatus(wordingReadabilityScore);
-  const productDryRunResultRendererHtml = renderManualReviewPreviewPayloadDryRunResultRendererProduct9B({
-    status: "PASS",
-    renderedCaseCount: rows.length,
-    renderedCaseCountExpected: 16,
-    coachFacingResultGroupCount: groups.length,
-    coachFacingResultGroupCountExpected: 3,
-    dryRunAcceptedPayloadCount: 0,
-    previewActivationCount: 0,
-    wordingReadabilityScore,
-    coverageStillComplete,
-    resultGroups: groups,
-    renderedRows: rows,
-  } as ManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel);
   const exportDryRunResultRendererHtml = renderManualReviewPreviewPayloadDryRunResultRendererExport9B({
     renderedCaseCount: rows.length,
     coachFacingResultGroupCount: groups.length,
@@ -392,10 +379,6 @@ export function buildManualReviewPreviewPayloadDryRunResultRendererWithoutPrevie
     wordingReadabilityScore,
     wordingThresholdStatus,
   } as ManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel);
-  const productHtmlAfter9B = insertManualReviewPreviewPayloadDryRunResultRendererProduct9B(
-    input.productHtmlBefore9B ?? baseline9A.productHtmlAfter9A,
-    productDryRunResultRendererHtml,
-  );
   const exportHtmlAfter9B = insertManualReviewPreviewPayloadDryRunResultRendererExport9B(
     input.exportHtmlBefore9B ?? baseline9A.exportHtmlAfter9A,
     exportDryRunResultRendererHtml,
@@ -403,8 +386,41 @@ export function buildManualReviewPreviewPayloadDryRunResultRendererWithoutPrevie
   const exportReadTimeSecondsAfter9B = estimateReadTimeSeconds(exportHtmlAfter9B);
   const exportUnder900Seconds = exportReadTimeSecondsAfter9B <= 900;
   const exportUnder800Seconds = exportReadTimeSecondsAfter9B <= 800;
-  const productDryRunResultRendererVisible = productHtmlAfter9B.includes('id="manual-review-preview-payload-dry-run-result-renderer-9b"');
   const exportDryRunResultRendererVisible = exportHtmlAfter9B.includes('id="manual-review-preview-payload-dry-run-result-renderer-export-9b"');
+  const productHtmlBefore9B = input.productHtmlBefore9B ?? baseline9A.productHtmlAfter9A;
+  const preliminaryWarnings = warningCodes({
+    renderedCaseCount: rows.length,
+    renderedResultCount: rows.length,
+    groupCount: groups.length,
+    validCaseRenderedAsNotAccepted,
+    coverageStillComplete,
+    wordingScore: wordingReadabilityScore,
+    exportReadTimeSeconds: exportReadTimeSecondsAfter9B,
+    exportUnder900Seconds,
+    exportUnder800Seconds,
+    productVisible: true,
+    exportVisible: exportDryRunResultRendererVisible,
+    exportHtml: exportHtmlAfter9B,
+  });
+  const preliminaryStatus = statusFromWarnings(preliminaryWarnings);
+  const productDryRunResultRendererHtml = renderManualReviewPreviewPayloadDryRunResultRendererProduct9B({
+    status: preliminaryStatus,
+    renderedCaseCount: rows.length,
+    renderedCaseCountExpected: 16,
+    coachFacingResultGroupCount: groups.length,
+    coachFacingResultGroupCountExpected: 3,
+    dryRunAcceptedPayloadCount: 0,
+    previewActivationCount: 0,
+    wordingReadabilityScore,
+    coverageStillComplete,
+    resultGroups: groups,
+    renderedRows: rows,
+  } as ManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel);
+  const productHtmlAfter9B = insertManualReviewPreviewPayloadDryRunResultRendererProduct9B(
+    productHtmlBefore9B,
+    productDryRunResultRendererHtml,
+  );
+  const productDryRunResultRendererVisible = productHtmlAfter9B.includes('id="manual-review-preview-payload-dry-run-result-renderer-9b"');
   const warnings = warningCodes({
     renderedCaseCount: rows.length,
     renderedResultCount: rows.length,
