@@ -183,6 +183,8 @@ import {
   renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation,
   renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc,
   renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation,
+  renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc,
+  renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -196,11 +198,11 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9B - Manual Review Preview Payload Dry-Run Result Renderer Without Preview Activation";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md";
+  "coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4236,6 +4238,36 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9B test proving 16 rendered rows, 3 coach-facing groups, complete coverage, valid case not accepted, no runtime effects, and current 9B export metadata",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunResultDetailCardsTypes9C.ts",
+        required: true,
+        reason: "Sprint 9C typed detail-card contract for 16 dry-run result cards, groups, coverage, boundary views, and no-preview activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunResultDetailCardsWarnings9C.ts",
+        required: true,
+        reason: "Sprint 9C warning-code registry for detail-card readiness, wording, metadata, coverage, and runtime blockers",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunResultDetailCardsProduct9C.ts",
+        required: true,
+        reason: "Sprint 9C product renderer adding readable dry-run detail cards after the 9B result renderer",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunResultDetailCardsExport9C.ts",
+        required: true,
+        reason: "Sprint 9C compact export renderer adding dry-run detail cards and updating export metadata to compressed-export-9c",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C.ts",
+        required: true,
+        reason: "Sprint 9C model, report renderer, and validation renderer for dry-run result detail cards without preview activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.ts",
+        required: true,
+        reason: "Sprint 9C test proving 16 detail cards, 3 groups, complete coverage, valid case not accepted, no runtime effects, and current 9C export metadata",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6392,6 +6424,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9C")) {
+    return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9B")) {
     return renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc(fullMatchTraceValidationModel());
   }
@@ -8787,6 +8822,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9C")) {
+    return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9B")) {
     return renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation(fullMatchTraceValidationModel());
   }
@@ -11128,6 +11166,36 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9C")) {
+    return [
+      "# Sprint 9C Share Pack",
+      "",
+      "Current sprint: Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9B docs with the 9C dry-run detail-card docs while keeping 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9C Focus",
+      "- The 9C layer turns the 16 dry-run result rows from 9B into 16 coach-readable detail cards.",
+      "- Each card explains why the case exists, what a future validator would check, the expected error/blocker, the protected boundary, and the blocked next step.",
+      "- The compatible case remains explicitly non-accepted and non-preview-generating.",
+      "- Coverage stays complete: rules 20, errors 19, blockers 12, boundary guards 14, refusals 8.",
+      "- No runtime validation, payload read, payload acceptance, preview activation, persistence, official truth, selection, tactic, score, timeline, score_change, or event mutation is created.",
+      "- Export metadata now mentions 9C and the compact export main id is compressed-export-9c.",
+      "",
+      "## Guardrails",
+      "- Scoring values unchanged.",
+      "- PENALTY_SHOT inactive.",
+      "- 9B remains preserved as the result-renderer baseline; standalone 9B docs are not copied into the share pack.",
+      "- 9A through 6X baselines remain preserved and embedded; source reports outside reports/share are not deleted.",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9B")) {
     return [
       "# Sprint 9B Share Pack",

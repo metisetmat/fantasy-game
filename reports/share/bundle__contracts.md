@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 9B - Manual Review Preview Payload Dry-Run Result Renderer Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1164,6 +1164,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewPreviewPayloadContract8X.test.js",
   "reports/manualReviewPreviewPayloadDryRunValidator9A.test.js",
   "reports/manualReviewPreviewPayloadDryRunResultRenderer9B.test.js",
+  "reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 

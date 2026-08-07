@@ -250,6 +250,11 @@ import {
   renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc as renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDocBase,
   renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation as renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidationBase,
 } from "../../reports/buildManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9B";
+import {
+  currentManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel,
+  renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc as renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDocBase,
+  renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation as renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidationBase,
+} from "../../reports/buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7066,6 +7071,22 @@ export function renderManualReviewPreviewPayloadDryRunResultRendererWithoutPrevi
 ): string {
   return renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidationBase(
     currentManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDocBase(
+    currentManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidationBase(
+    currentManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel(),
   );
 }
 

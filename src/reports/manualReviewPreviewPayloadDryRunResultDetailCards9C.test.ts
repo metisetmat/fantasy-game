@@ -1,0 +1,115 @@
+import assert from "node:assert/strict";
+import {
+  buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel,
+  renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc,
+  renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation,
+} from "./buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C";
+
+const model = buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel();
+const report = renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc(model);
+const validation = renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation(model);
+
+assert.equal(model.status, "PASS");
+assert.equal(model.version, "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_RESULT_DETAIL_CARDS_9C");
+assert.equal(model.baselineVersion, "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_RESULT_RENDERER_9B");
+assert.equal(model.baseline9BPreserved, true);
+assert.equal(model.baseline9APreserved, true);
+assert.equal(model.baseline8ZPreserved, true);
+assert.equal(model.baseline8YPreserved, true);
+assert.equal(model.baseline8XPreserved, true);
+assert.equal(model.baseline8WPreserved, true);
+assert.equal(model.detailCardStatus, "detail_cards_rendered_without_preview_activation");
+assert.equal(model.detailCardStatusCorrect, true);
+assert.equal(model.detailCardCount, 16);
+assert.equal(model.detailCardGroupCount, 3);
+assert.equal(model.passButNotAcceptedDetailCardCount, 1);
+assert.equal(model.failValidationDetailCardCount, 10);
+assert.equal(model.blockPreviewDetailCardCount, 5);
+assert.equal(model.detailCardWithCoachMessageCount, 16);
+assert.equal(model.detailCardWithTechnicalMessageCount, 16);
+assert.equal(model.detailCardWithBoundaryExplanationCount, 16);
+assert.equal(model.detailCardWithBlockedNextStepCount, 16);
+assert.equal(model.validCaseDetailCardRenderedAsNotAccepted, true);
+assert.equal(model.dryRunAcceptedPayloadCount, 0);
+assert.equal(model.acceptedPayloadClaimCount, 0);
+assert.equal(model.previewGeneratedClaimCount, 0);
+assert.equal(model.payloadCreatedClaimCount, 0);
+assert.equal(model.runtimeValidationClaimCount, 0);
+assert.equal(model.detailRuleCoverageCount, 20);
+assert.equal(model.detailErrorCoverageCount, 19);
+assert.equal(model.detailBlockerCoverageCount, 12);
+assert.equal(model.detailBoundaryGuardCoverageCount, 14);
+assert.equal(model.detailRefusalStateCoverageCount, 8);
+assert.equal(model.detailCoverageStillComplete, true);
+assert.equal(model.uncoveredDetailRuleIds.length, 0);
+assert.equal(model.uncoveredDetailErrorStateIds.length, 0);
+assert.equal(model.uncoveredDetailBlockerIds.length, 0);
+assert.equal(model.uncoveredDetailBoundaryGuardIds.length, 0);
+assert.equal(model.uncoveredDetailRefusalStateIds.length, 0);
+assert.equal(model.validationRuntimeActive, false);
+assert.equal(model.payloadValidationRuntimeDetected, false);
+assert.equal(model.validationExecutionCount, 0);
+assert.equal(model.realPayloadReadCount, 0);
+assert.equal(model.payloadCreated, false);
+assert.equal(model.realPayloadInstanceCount, 0);
+assert.equal(model.realInputActivated, false);
+assert.equal(model.realPreviewGenerated, false);
+assert.equal(model.previewActivationCount, 0);
+assert.equal(model.submitCreated, false);
+assert.equal(model.apiCreated, false);
+assert.equal(model.backendCreated, false);
+assert.equal(model.storageCreated, false);
+assert.equal(model.memoryCreated, false);
+assert.equal(model.draftCreated, false);
+assert.equal(model.historyCreated, false);
+assert.equal(model.officialTruthPromoted, false);
+assert.equal(model.automaticDecisionCreated, false);
+assert.equal(model.selectionDriven, false);
+assert.equal(model.tacticalInstructionDriven, false);
+assert.equal(model.scoreMutationCount, 0);
+assert.equal(model.timelineMutationCount, 0);
+assert.equal(model.scoreChangeCreationCount, 0);
+assert.equal(model.eventMutationCount, 0);
+assert.equal(model.resultRendererStatusFrom9B, "rendered_without_preview_activation");
+assert.equal(model.dryRunStatusFrom9A, "documented_dry_run_only");
+assert.equal(model.validationContractStatusFrom8Y, "documented_but_not_executable");
+assert.equal(model.payloadContractStatusFrom8X, "documented_but_not_instantiated");
+assert.equal(model.previewActivationStatusFrom8W, "documented_but_blocked");
+assert.equal(model.auditConsistencyStatusFrom8Z, "PASS_STRONG");
+assert.equal(model.detailCardsDistinctFromRuntimeValidation, true);
+assert.equal(model.detailCardsDistinctFromPayloadAcceptance, true);
+assert.equal(model.detailCardsDistinctFromPreviewGeneration, true);
+assert.equal(model.wordingReadabilityScore >= 95, true);
+assert.equal(model.wordingThresholdStatus, "pass_strong");
+assert.equal(model.exportReadTimeSecondsAfter9C <= 900, true);
+assert.equal(model.exportUnder900BooleanCorrect, true);
+assert.equal(model.exportUnder800BooleanCorrect, true);
+assert.equal(model.productHtmlAfter9C.includes("Cartes de detail dry-run payload"), true);
+assert.equal(model.exportHtmlAfter9C.includes("Cartes detail dry-run"), true);
+assert.equal(model.exportHtmlAfter9C.includes("Rapport coach export compact 9C"), true);
+assert.equal(model.exportHtmlAfter9C.includes('data-manual-review-preview-payload-dry-run-result-renderer-version="9B"'), true);
+assert.equal(model.exportHtmlAfter9C.includes('data-manual-review-preview-payload-dry-run-result-detail-cards-version="9C"'), true);
+assert.equal(model.exportHtmlAfter9C.includes('id="compressed-export-9b"'), false);
+assert.equal(model.exportHtmlAfter9C.includes('id="compressed-export-9c"'), true);
+assert.equal(model.sourceOfTruthSeparationPreserved, true);
+assert.equal(model.guardrailsPreserved, true);
+assert.equal(model.sharePackPass, true);
+assert.equal(model.warningCodes.length, 0);
+assert.equal(model.detailCards.some((card) => card.cardId === "valid_preview_only_payload_shape_9a_detail_card_9c" && card.canAcceptPayloadIn9C === false), true);
+assert.equal(model.detailCards.every((card) => card.coachFacingErrorMessage.length > 0 && card.technicalMessage.length > 0 && card.protectedBoundary.length > 0 && card.blockedNextStep.length > 0), true);
+assert.equal(report.includes("Status: PASS"), true);
+assert.equal(report.includes("Cartes de detail dry-run payload"), true);
+assert.equal(report.includes("valid_preview_only_payload_shape_9a"), true);
+assert.equal(validation.includes("Status: PASS"), true);
+assert.equal(validation.includes("PASS fort impossible if wordingReadabilityScore absent or <95"), true);
+assert.equal(validation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), true);
+
+const oversizedExportHtml = model.baseline9B.exportHtmlAfter9B.replace("</main>", `<p>${"longword ".repeat(3301)}</p></main>`);
+const failedModel = buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel({
+  exportHtmlBefore9C: oversizedExportHtml,
+});
+assert.equal(failedModel.status, "FAIL");
+assert.equal(failedModel.warningCodes.includes("EXPORT_OVER_900"), true);
+assert.equal(failedModel.productHtmlAfter9C.includes("Statut: <strong>FAIL</strong>"), true);
+
+console.log("PASS manualReviewPreviewPayloadDryRunResultDetailCards9C");
