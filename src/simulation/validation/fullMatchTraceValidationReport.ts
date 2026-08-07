@@ -255,6 +255,11 @@ import {
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc as renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDocBase,
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation as renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidationBase,
 } from "../../reports/buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C";
+import {
+  currentManualReviewExportMetadataBadgeCleanup9DModel,
+  renderManualReviewExportMetadataBadgeCleanup9DDoc as renderManualReviewExportMetadataBadgeCleanup9DDocBase,
+  renderManualReviewExportMetadataBadgeCleanup9DValidation as renderManualReviewExportMetadataBadgeCleanup9DValidationBase,
+} from "../../reports/buildManualReviewExportMetadataBadgeCleanup9D";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7087,6 +7092,22 @@ export function renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPr
 ): string {
   return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidationBase(
     currentManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel(),
+  );
+}
+
+export function renderManualReviewExportMetadataBadgeCleanup9DDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewExportMetadataBadgeCleanup9DDocBase(
+    currentManualReviewExportMetadataBadgeCleanup9DModel(),
+  );
+}
+
+export function renderManualReviewExportMetadataBadgeCleanup9DValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewExportMetadataBadgeCleanup9DValidationBase(
+    currentManualReviewExportMetadataBadgeCleanup9DModel(),
   );
 }
 

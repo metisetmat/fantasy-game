@@ -185,6 +185,8 @@ import {
   renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation,
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc,
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation,
+  renderManualReviewExportMetadataBadgeCleanup9DDoc,
+  renderManualReviewExportMetadataBadgeCleanup9DValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -198,11 +200,11 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md";
+  "coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md";
+  "validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4268,6 +4270,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9C test proving 16 detail cards, 3 groups, complete coverage, valid case not accepted, no runtime effects, and current 9C export metadata",
       },
       {
+        source: "src/reports/manualReviewExportMetadataBadgeCleanupTypes9D.ts",
+        required: true,
+        reason: "Sprint 9D typed export metadata badge cleanup contract and strict audit model",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataBadgeCleanupWarnings9D.ts",
+        required: true,
+        reason: "Sprint 9D warning registry for export badge cleanup, strict metadata checks, and no-runtime blockers",
+      },
+      {
+        source: "src/reports/manualReviewExportCoverBadgeAudit9D.ts",
+        required: true,
+        reason: "Sprint 9D strict cover badge audit that reads only header/cover badges and forbids body fallback",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataAudit9D.ts",
+        required: true,
+        reason: "Sprint 9D export metadata audit for title, main id, current data attribute, historical markers, and stale badge checks",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataFalsePositiveGuard9D.ts",
+        required: true,
+        reason: "Sprint 9D false-positive guard preventing body mentions from validating the cover badge",
+      },
+      {
+        source: "src/reports/renderManualReviewExportMetadataBadgeCleanupProduct9D.ts",
+        required: true,
+        reason: "Sprint 9D product renderer adding the Correction metadata export section after the 9C detail cards",
+      },
+      {
+        source: "src/reports/renderManualReviewExportMetadataBadgeCleanupExport9D.ts",
+        required: true,
+        reason: "Sprint 9D export renderer correcting title, main id, current data attribute, cover badge, and compact export section",
+      },
+      {
+        source: "src/reports/buildManualReviewExportMetadataBadgeCleanup9D.ts",
+        required: true,
+        reason: "Sprint 9D builder, report renderer, and validation renderer for metadata badge cleanup before coach-facing error copy",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataBadgeCleanup9D.test.ts",
+        required: true,
+        reason: "Sprint 9D test proving stale 9B cover badge detection, 9D correction, 9C preservation, no runtime effects, and share-pack 9D selection",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6424,6 +6471,9 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9D")) {
+    return renderManualReviewExportMetadataBadgeCleanup9DDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9C")) {
     return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc(fullMatchTraceValidationModel());
   }
@@ -8822,6 +8872,9 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9D")) {
+    return renderManualReviewExportMetadataBadgeCleanup9DValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9C")) {
     return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation(fullMatchTraceValidationModel());
   }
@@ -11166,6 +11219,40 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9D")) {
+    return [
+      "# Sprint 9D Share Pack",
+      "",
+      "Current sprint: Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9C docs with 9D export metadata badge cleanup docs while keeping 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md",
+      "4. coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9D Focus",
+      "- Corrects the visible cover badge from Export compact 9B to Export compact 9D.",
+      "- Aligns title, main id, current data attribute, cover badge, validation report, and share pack on 9D.",
+      "- Preserves historical 9C/9B/9A/8Z/8Y/8X/8W data attributes and sections.",
+      "- Adds strict cover badge audit: no body mention fallback can validate the badge.",
+      "- Adds false-positive guard for stale badge/title/main metadata.",
+      "- Keeps 9C detail cards intact: 16 cards, 3 groups, wording 97, complete coverage.",
+      "- Keeps runtime, payload, preview, persistence, official truth, selection, tactic, score, timeline, score_change, scoring constants, and MatchBonusEvent unchanged.",
+      "",
+      "## Expected Validation",
+      "- validation.share-pack.md: Status PASS.",
+      "- share file count: 20.",
+      "- current sprint: Sprint 9D.",
+      "- previous standalone 9C docs copied: 0.",
+      "- cover badge text: Export compact 9D.",
+      "- metadata false positives after 9D: 0.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9C")) {
     return [
       "# Sprint 9C Share Pack",

@@ -142,6 +142,11 @@ import {
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc,
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation,
 } from "./buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C";
+import {
+  buildManualReviewExportMetadataBadgeCleanup9DModel,
+  renderManualReviewExportMetadataBadgeCleanup9DDoc,
+  renderManualReviewExportMetadataBadgeCleanup9DValidation,
+} from "./buildManualReviewExportMetadataBadgeCleanup9D";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -608,8 +613,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore9C: manualReviewPreviewPayloadDryRunResultRenderer9B.productHtmlAfter9B,
     exportHtmlBefore9C: manualReviewPreviewPayloadDryRunResultRenderer9B.exportHtmlAfter9B,
   });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunResultDetailCards9C.productHtmlAfter9C;
-  const exportHtml = manualReviewPreviewPayloadDryRunResultDetailCards9C.exportHtmlAfter9C;
+  const manualReviewExportMetadataBadgeCleanup9D = buildManualReviewExportMetadataBadgeCleanup9DModel({
+    baseline9C: manualReviewPreviewPayloadDryRunResultDetailCards9C,
+    productHtmlBefore9D: manualReviewPreviewPayloadDryRunResultDetailCards9C.productHtmlAfter9C,
+    exportHtmlBefore9D: manualReviewPreviewPayloadDryRunResultDetailCards9C.exportHtmlAfter9C,
+  });
+  const finalProductHtml = manualReviewExportMetadataBadgeCleanup9D.productHtmlAfter9D;
+  const exportHtml = manualReviewExportMetadataBadgeCleanup9D.exportHtmlAfter9D;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -702,6 +712,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation(manualReviewPreviewPayloadDryRunResultDetailCards9C),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"),
+    renderManualReviewExportMetadataBadgeCleanup9DDoc(manualReviewExportMetadataBadgeCleanup9D),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"),
+    renderManualReviewExportMetadataBadgeCleanup9DValidation(manualReviewExportMetadataBadgeCleanup9D),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -728,6 +748,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md");
+  console.log("Generated reports/coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md");
+  console.log("Generated reports/validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }
