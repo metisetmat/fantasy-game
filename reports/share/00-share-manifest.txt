@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-08-07T20:01:00.504Z
+Generated timestamp: 2026-08-07T20:06:34.481Z
 Task/sprint name: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
 Final file count: 20
 
@@ -1242,25 +1242,4 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewExportMetadataBadgeCleanup9D.test.ts
- M src/reports/renderManualReviewExportMetadataBadgeCleanupExport9D.ts
- M src/reports/renderManualReviewPreviewPayloadDryRunResultDetailCardsExport9C.ts
- M src/reports/renderManualReviewPreviewPayloadDryRunResultDetailCardsProduct9C.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyCatalog9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyCoverageAudit9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportMetadataAudit9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyNoRuntimeAudit9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopySourceOfTruthAudit9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyTypes9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWarnings9E.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWordingAudit9E.ts
-?? src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExport9E.ts
-?? src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyProduct9E.ts
+M  src/reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.ts

@@ -85,6 +85,15 @@ assert.equal(model.exportReadTimeSecondsAfter9C <= 900, true);
 assert.equal(model.exportUnder900BooleanCorrect, true);
 assert.equal(model.exportUnder800BooleanCorrect, true);
 assert.equal(model.productHtmlAfter9C.includes("Cartes de detail dry-run payload"), true);
+assert.equal(model.productHtmlAfter9C.includes("Pourquoi ce cas existe"), true);
+assert.equal(model.productHtmlAfter9C.includes("Futur controle validator"), true);
+assert.equal(model.productHtmlAfter9C.includes("Message coach"), true);
+assert.equal(model.productHtmlAfter9C.includes("Erreurs attendues"), true);
+assert.equal(model.productHtmlAfter9C.includes("Blockers attendus"), true);
+assert.equal(model.productHtmlAfter9C.includes("Prochaines etapes bloquees"), true);
+assert.equal(model.productHtmlAfter9C.includes("Verifier que le futur payload preview-only a une forme coherente sans l'accepter en 9C."), true);
+assert.equal(model.productHtmlAfter9C.includes("BLOCK_PREVIEW_ACCEPTANCE_9A"), true);
+assert.equal(model.productHtmlAfter9C.includes("payload_acceptance"), true);
 assert.equal(model.exportHtmlAfter9C.includes("Cartes detail dry-run"), true);
 assert.equal(model.exportHtmlAfter9C.includes("Rapport coach export compact 9C"), true);
 assert.equal(model.exportHtmlAfter9C.includes('data-manual-review-preview-payload-dry-run-result-renderer-version="9B"'), true);
@@ -111,5 +120,15 @@ const failedModel = buildManualReviewPreviewPayloadDryRunResultDetailCardsWithou
 assert.equal(failedModel.status, "FAIL");
 assert.equal(failedModel.warningCodes.includes("EXPORT_OVER_900"), true);
 assert.equal(failedModel.productHtmlAfter9C.includes("Statut: <strong>FAIL</strong>"), true);
+
+const exportWithVisible9BBadge = model.baseline9B.exportHtmlAfter9B.replace(
+  "<main",
+  '<header><div class="badge-row"><span class="badge">Export compact 9B</span></div></header><main',
+);
+const badgeModel = buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel({
+  exportHtmlBefore9C: exportWithVisible9BBadge,
+});
+assert.equal(badgeModel.exportHtmlAfter9C.includes('<span class="badge">Export compact 9C</span>'), true);
+assert.equal(badgeModel.exportHtmlAfter9C.includes('<span class="badge">Export compact 9B</span>'), false);
 
 console.log("PASS manualReviewPreviewPayloadDryRunResultDetailCards9C");
