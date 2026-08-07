@@ -33,15 +33,25 @@ export function normalizeManualReviewPreviewPayloadDryRunCoachFacingErrorCopyShe
 export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExport9E(
   model: ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel,
 ): string {
-  const rows = model.errorCopies
-    .map((copy) => `<li><strong>${escapeHtml(copy.title)}</strong>: ${escapeHtml(copy.shortMessage)} Frontiere: ${escapeHtml(copy.protectedBoundary)}</li>`)
+  const compactRow = (copy: ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel["errorCopies"][number]): string =>
+    `<li><strong>${escapeHtml(copy.title)}</strong></li>`;
+  const errorRows = model.errorCopies
+    .map(compactRow)
+    .join("");
+  const blockerRows = model.blockerCopies
+    .map(compactRow)
+    .join("");
+  const refusalRows = model.refusalCopies
+    .map(compactRow)
     .join("");
   return [
     '<section id="manual-review-preview-payload-dry-run-coach-facing-error-copy-export-9e" class="premium-section manual-review-preview-payload-dry-run-coach-facing-error-copy-export-9e" data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E">',
     '<p class="eyebrow">Export compact 9E</p>',
     "<h2>Messages erreur dry-run</h2>",
     `<p>${model.coachFacingErrorCopyCount} erreurs, ${model.coachFacingBlockerCopyCount} blockers, ${model.coachFacingRefusalCopyCount} refusals. Cas compatible: non accepte.</p>`,
-    `<ul>${rows}</ul>`,
+    `<h3>Erreurs visibles</h3><ul>${errorRows}</ul>`,
+    `<h3>Blockers visibles</h3><ul>${blockerRows}</ul>`,
+    `<h3>Refusals visibles</h3><ul>${refusalRows}</ul>`,
     `<p>No-runtime: validation ${model.validationRuntimeActive}, payload lu ${model.realPayloadReadCount}, payload accepte ${model.dryRunAcceptedPayloadCount}, preview ${model.realPreviewGenerated}, storage ${model.storageCreated}, official truth ${model.officialTruthPromoted}.</p>`,
     `<p>Badge: ${escapeHtml(model.exportCoverBadgeText)}. Main id: compressed-export-9e. Data current: 9E. Historique preserve: 9D/9C/9B/9A/8Z/8Y/8X/8W.</p>`,
     "</section>",

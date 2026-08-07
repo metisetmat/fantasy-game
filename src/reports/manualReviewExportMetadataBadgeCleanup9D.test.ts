@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { auditManualReviewExportCoverBadge9D } from "./manualReviewExportCoverBadgeAudit9D";
 import { buildManualReviewExportMetadataBadgeCleanup9DModel } from "./buildManualReviewExportMetadataBadgeCleanup9D";
 import { buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel } from "./buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C";
+import {
+  insertManualReviewExportMetadataBadgeCleanupProduct9D,
+  renderManualReviewExportMetadataBadgeCleanupProduct9D,
+} from "./renderManualReviewExportMetadataBadgeCleanupProduct9D";
 import { scoringRegistryEntry } from "../systems/scoring";
 
 const baseline9C = buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel();
@@ -76,5 +80,18 @@ assert.equal(scoringRegistryEntry("PENALTY_SHOT").active, false);
 assert.equal(model.guardrailsPreserved, true);
 assert.equal(model.productHtmlAfter9D.includes("Correction metadata export"), true);
 assert.equal(model.exportHtmlAfter9D.includes("Correction metadata export"), true);
+
+const nested9CProduct = [
+  "<main>",
+  '<section id="manual-review-preview-payload-dry-run-result-detail-cards-9c">',
+  "<h2>9C outer start</h2>",
+  "<section><h3>Erreurs attendues</h3></section>",
+  "<p>9C outer tail after nested detail subsections</p>",
+  "</section>",
+  "</main>",
+].join("");
+const nested9DSection = renderManualReviewExportMetadataBadgeCleanupProduct9D(model);
+const nestedInsertion = insertManualReviewExportMetadataBadgeCleanupProduct9D(nested9CProduct, nested9DSection);
+assert.equal(nestedInsertion.indexOf('id="manual-review-export-metadata-badge-cleanup-9d"') > nestedInsertion.indexOf("9C outer tail after nested detail subsections"), true);
 
 console.log("PASS manualReviewExportMetadataBadgeCleanup9D");

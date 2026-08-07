@@ -92,6 +92,14 @@ assert.equal(model.exportUnder800Seconds, model.exportReadTimeSecondsAfter9E <= 
 assert.equal(model.productHtmlAfter9E.includes("Messages d'erreur coach-facing dry-run"), true);
 assert.equal(model.exportHtmlAfter9E.includes("Messages erreur dry-run"), true);
 assert.equal(model.productHtmlAfter9E.includes("Forme compatible - non acceptee"), true);
+assert.equal(model.productHtmlAfter9E.includes("Messages blockers"), true);
+assert.equal(model.productHtmlAfter9E.includes("Messages refusals"), true);
+assert.equal(model.productHtmlAfter9E.includes(model.blockerCopies[0]?.title ?? "missing-blocker-title"), true);
+assert.equal(model.productHtmlAfter9E.includes(model.refusalCopies[0]?.title ?? "missing-refusal-title"), true);
+assert.equal(model.exportHtmlAfter9E.includes("Blockers visibles"), true);
+assert.equal(model.exportHtmlAfter9E.includes("Refusals visibles"), true);
+assert.equal(model.exportHtmlAfter9E.includes(model.blockerCopies[0]?.title ?? "missing-blocker-title"), true);
+assert.equal(model.exportHtmlAfter9E.includes(model.refusalCopies[0]?.title ?? "missing-refusal-title"), true);
 assert.equal(model.exportHtmlAfter9E.includes("Export compact 9E"), true);
 
 assert.equal(scoringRegistryEntry("SHOT_GOAL").points, 3);

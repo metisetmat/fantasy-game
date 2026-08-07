@@ -139,8 +139,8 @@ Version: MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_COACH_FACING_ERROR_COPY_9E
 ## Export Budget Audit
 | Metric | Value |
 | --- | --- |
-| before | 881 |
-| after | 881 |
+| before | 817 |
+| after | 817 |
 | delta | 0 |
 | under 900 | true |
 | under 800 | false |

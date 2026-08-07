@@ -8,7 +8,7 @@ Status: PASS
 - coachFacingRefusalCopyCount: 8
 - compatibleCaseCopyCount: 1
 - wordingReadabilityScore: 97
-- exportReadTimeSecondsAfter9E: 881
+- exportReadTimeSecondsAfter9E: 817
 
 ## Checks
 - PASS: ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel exists - MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_COACH_FACING_ERROR_COPY_9E
@@ -56,7 +56,7 @@ Status: PASS
 - PASS: export cover badge Export compact 9E - Export compact 9E
 - PASS: metadata false positives = 0 - 0
 - PASS: body fallback false - false
-- PASS: export <=900 - 881
+- PASS: export <=900 - 817
 - PASS: exportUnder900 correct - true
 - PASS: exportUnder800 correct - true
 - PASS: wording score explicit - 97

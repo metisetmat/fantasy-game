@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-08-07T20:06:34.481Z
+Generated timestamp: 2026-08-07T20:32:36.406Z
 Task/sprint name: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
 Final file count: 20
 
@@ -1242,4 +1242,10 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
-M  src/reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.ts
+ M reports/validation.share-pack.md
+ M src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E.ts
+ M src/reports/manualReviewExportMetadataBadgeCleanup9D.test.ts
+ M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts
+ M src/reports/renderManualReviewExportMetadataBadgeCleanupProduct9D.ts
+ M src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExport9E.ts
+ M src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyProduct9E.ts

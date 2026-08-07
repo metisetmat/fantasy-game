@@ -158,6 +158,7 @@ function buildModel(input: {
   const blockerCopies = BLOCKER_COPIES_9E;
   const refusalCopies = REFUSAL_COPIES_9E;
   const compatibleCopy = COMPATIBLE_CASE_COPY_9E;
+  const allVisibleCopies = [compatibleCopy, ...errorCopies, ...blockerCopies, ...refusalCopies];
   const copyGroups = buildCopyGroups9E();
   const coverageAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyCoverage9E({
     errorCopies,
@@ -295,8 +296,8 @@ function buildModel(input: {
     copyWithProtectedBoundaryCount: errorCopies.filter((copy) => copy.protectedBoundary.length > 0).length,
     copyWithStillForbiddenCount: errorCopies.filter((copy) => copy.stillForbidden.length > 0).length,
     copyWithTechnicalReferenceCount: errorCopies.filter((copy) => copy.technicalReference.length > 0).length,
-    shortExportCopyCount: errorCopies.filter((copy) => copy.exportVisible).length,
-    productCopyCount: [compatibleCopy, ...errorCopies].filter((copy) => copy.productVisible).length,
+    shortExportCopyCount: allVisibleCopies.filter((copy) => copy.exportVisible).length,
+    productCopyCount: allVisibleCopies.filter((copy) => copy.productVisible).length,
     validCaseCopyRenderedAsNotAccepted: compatibleNotAccepted,
     acceptedPayloadClaimCount: 0,
     previewGeneratedClaimCount: 0,

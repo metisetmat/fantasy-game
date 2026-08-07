@@ -8,6 +8,27 @@ function escapeHtml(value: string): string {
     .replace(/"/gu, "&quot;");
 }
 
+function findSectionEndById(html: string, sectionId: string): number | null {
+  const idIndex = html.indexOf(`id="${sectionId}"`);
+  if (idIndex === -1) return null;
+  const sectionStart = html.lastIndexOf("<section", idIndex);
+  if (sectionStart === -1) return null;
+  const sectionTagPattern = /<\/?section\b[^>]*>/giu;
+  sectionTagPattern.lastIndex = sectionStart;
+  let depth = 0;
+  let match: RegExpExecArray | null;
+  while ((match = sectionTagPattern.exec(html)) !== null) {
+    const tag = match[0];
+    if (tag.startsWith("</")) {
+      depth -= 1;
+      if (depth === 0) return sectionTagPattern.lastIndex;
+    } else {
+      depth += 1;
+    }
+  }
+  return null;
+}
+
 export function renderManualReviewExportMetadataBadgeCleanupProduct9D(
   model: ManualReviewExportMetadataBadgeCleanup9DModel,
 ): string {
@@ -26,18 +47,11 @@ export function renderManualReviewExportMetadataBadgeCleanupProduct9D(
 
 export function insertManualReviewExportMetadataBadgeCleanupProduct9D(productHtml: string, section: string): string {
   if (productHtml.includes('id="manual-review-export-metadata-badge-cleanup-9d"')) return productHtml;
-  const anchor = 'id="manual-review-preview-payload-dry-run-result-detail-cards-9c"';
-  const sectionEnd = "</section>";
-  const index = productHtml.indexOf(anchor);
-  if (index !== -1) {
-    const end = productHtml.indexOf(sectionEnd, index);
-    if (end !== -1) {
-      const insertAt = end + sectionEnd.length;
-      return `${productHtml.slice(0, insertAt)}\n${section}\n${productHtml.slice(insertAt)}`;
-    }
+  const insertAt = findSectionEndById(productHtml, "manual-review-preview-payload-dry-run-result-detail-cards-9c");
+  if (insertAt !== null) {
+    return `${productHtml.slice(0, insertAt)}\n${section}\n${productHtml.slice(insertAt)}`;
   }
   return productHtml.includes("</main>")
     ? productHtml.replace("</main>", `${section}\n</main>`)
     : `${productHtml}\n${section}`;
 }
-

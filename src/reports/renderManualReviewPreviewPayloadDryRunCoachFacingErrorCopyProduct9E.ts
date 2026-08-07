@@ -25,6 +25,13 @@ function copyCard(copy: ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWith
   ].join("");
 }
 
+function copySection(
+  title: string,
+  copies: readonly ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel["errorCopies"][number][],
+): string {
+  return [`<h3>${escapeHtml(title)}</h3>`, `<ul>${copies.map(copyCard).join("")}</ul>`].join("\n");
+}
+
 export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyProduct9E(
   model: ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel,
 ): string {
@@ -43,8 +50,9 @@ export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyProduc
     `<ul>${model.copyGroups.map((group) => `<li><strong>${escapeHtml(group.label)}</strong> (${group.copyCount}) - ${escapeHtml(group.coachFacingMeaning)}</li>`).join("")}</ul>`,
     "<h3>Cas compatible - non accepte</h3>",
     `<ul>${copyCard(model.compatibleCopy)}</ul>`,
-    "<h3>Messages d'erreur</h3>",
-    `<ul>${model.errorCopies.map(copyCard).join("")}</ul>`,
+    copySection("Messages d'erreur", model.errorCopies),
+    copySection("Messages blockers", model.blockerCopies),
+    copySection("Messages refusals", model.refusalCopies),
     '<p class="guardrail-note">Copy de lecture uniquement : aucun payload lu, cree ou accepte; aucune preview reelle; aucun submit, API, backend, stockage, official truth, decision, selection, tactique, score ou timeline.</p>',
     "</section>",
   ].join("\n");
