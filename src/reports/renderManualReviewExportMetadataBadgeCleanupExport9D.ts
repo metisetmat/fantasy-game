@@ -10,7 +10,19 @@ function escapeHtml(value: string): string {
 
 function replaceHeaderCoverBadge(exportHtml: string): string {
   const headerMatch = exportHtml.match(/<header\b[\s\S]*?<\/header>/u);
-  if (headerMatch === null || headerMatch.index === undefined) return exportHtml;
+  if (headerMatch === null || headerMatch.index === undefined) {
+    const header = [
+      "<header>",
+      "<h1>Rapport coach - export compact</h1>",
+      '<div class="badge-row report-scoreboard report-kpi-grid">',
+      '<span class="badge">Export compact 9D</span>',
+      "</div>",
+      "</header>",
+    ].join("\n");
+    return exportHtml.includes("<main")
+      ? exportHtml.replace("<main", `${header}\n<main`)
+      : `${header}\n${exportHtml}`;
+  }
   const header = headerMatch[0];
   const updatedHeader = header.replace(
     /(<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>)Export compact [^<]*(<\/[^>]+>)/u,
@@ -67,4 +79,3 @@ export function insertManualReviewExportMetadataBadgeCleanupExport9D(exportHtml:
   }
   return normalizeManualReviewExportMetadataBadgeCleanupShell9D(nextHtml);
 }
-

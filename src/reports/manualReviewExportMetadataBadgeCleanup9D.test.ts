@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { auditManualReviewExportCoverBadge9D } from "./manualReviewExportCoverBadgeAudit9D";
 import { buildManualReviewExportMetadataBadgeCleanup9DModel } from "./buildManualReviewExportMetadataBadgeCleanup9D";
 import { buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel } from "./buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C";
-import { currentSprint } from "./share/currentSharePack";
 import { scoringRegistryEntry } from "../systems/scoring";
 
 const baseline9C = buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel();
@@ -77,7 +76,5 @@ assert.equal(scoringRegistryEntry("PENALTY_SHOT").active, false);
 assert.equal(model.guardrailsPreserved, true);
 assert.equal(model.productHtmlAfter9D.includes("Correction metadata export"), true);
 assert.equal(model.exportHtmlAfter9D.includes("Correction metadata export"), true);
-assert.equal(currentSprint.name.includes("Sprint 9D"), true);
-assert.equal(currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md"), false);
 
 console.log("PASS manualReviewExportMetadataBadgeCleanup9D");

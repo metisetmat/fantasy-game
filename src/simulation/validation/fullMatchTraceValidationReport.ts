@@ -260,6 +260,11 @@ import {
   renderManualReviewExportMetadataBadgeCleanup9DDoc as renderManualReviewExportMetadataBadgeCleanup9DDocBase,
   renderManualReviewExportMetadataBadgeCleanup9DValidation as renderManualReviewExportMetadataBadgeCleanup9DValidationBase,
 } from "../../reports/buildManualReviewExportMetadataBadgeCleanup9D";
+import {
+  currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc as renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDocBase,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation as renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidationBase,
+} from "../../reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7108,6 +7113,22 @@ export function renderManualReviewExportMetadataBadgeCleanup9DValidation(
 ): string {
   return renderManualReviewExportMetadataBadgeCleanup9DValidationBase(
     currentManualReviewExportMetadataBadgeCleanup9DModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDocBase(
+    currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidationBase(
+    currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel(),
   );
 }
 

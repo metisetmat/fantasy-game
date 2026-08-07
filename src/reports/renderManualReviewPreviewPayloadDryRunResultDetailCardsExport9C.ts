@@ -52,6 +52,9 @@ export function insertManualReviewPreviewPayloadDryRunResultDetailCardsExport9C(
   nextHtml = nextHtml.replace(/<title>[^<]*<\/title>/u, "<title>Rapport coach export compact 9C - cartes detail dry-run</title>");
   nextHtml = nextHtml.replace(/id="compressed-export-9b"/gu, 'id="compressed-export-9c"');
   nextHtml = nextHtml.replace(/id="compressed-export-[^"]+"/u, 'id="compressed-export-9c"');
+  nextHtml = nextHtml.replace(/<span class="badge">Export compact 9B<\/span>/u, '<span class="badge">Export compact 9C</span>');
+  nextHtml = nextHtml.replace(/<span class="badge">Export compact 9A<\/span>/u, '<span class="badge">Export compact 9C</span>');
+  nextHtml = nextHtml.replace(/<span class="badge">Export compact 8Z<\/span>/u, '<span class="badge">Export compact 9C</span>');
 
   const mainTag = nextHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
   if (!mainTag.includes('data-manual-review-preview-payload-dry-run-result-detail-cards-version="9C"')) {

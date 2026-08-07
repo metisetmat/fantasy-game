@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy
+- current sprint: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -21,30 +21,33 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 9D - Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy
-- PASS: previous standalone 9C docs are not copied - 0
-- PASS: README is Sprint 9D oriented - README current
-- PASS: 9D report included - 9D doc included
-- PASS: 9D validation is PASS - 9D validation current
-- PASS: product metadata cleanup visible - product 9D visible
-- PASS: export metadata cleanup visible - export 9D visible
-- PASS: export title is 9D - title 9D
-- PASS: export main id is compressed-export-9d - main id 9D
-- PASS: export current data attribute is 9D - data 9D
-- PASS: cover badge text is Export compact 9D - Export compact 9D
-- PASS: cover badge has no stale version - cover badge clean
+- PASS: current sprint is Sprint 9E - Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
+- PASS: previous standalone 9D docs are not copied - 0
+- PASS: README is Sprint 9E oriented - README current
+- PASS: 9E report included - 9E doc included
+- PASS: 9E validation is PASS - 9E validation current
+- PASS: product 9E section visible - product 9E visible
+- PASS: export 9E section visible - export 9E visible
+- PASS: export title is 9E - title 9E
+- PASS: export main id is compressed-export-9e - main id 9E
+- PASS: export current data attribute is 9E - data 9E
+- PASS: cover badge text is Export compact 9E - Export compact 9E
 - PASS: metadata false positive count is zero - false positives 0
 - PASS: body fallback forbidden for cover badge - no body fallback
-- PASS: historical data attributes preserved - historical attrs
-- PASS: 9C detail cards preserved in 9D validation - 9C preserved
-- PASS: no runtime payload preview persistence truth action or mutation - no-runtime guard
+- PASS: 9D metadata preserved in 9E - 9D preserved
+- PASS: copy counts visible - 19/12/8/1
+- PASS: copy coverage complete - coverage complete
+- PASS: compatible-but-not-accepted wording visible - compatible copy visible
+- PASS: wording guard passes - wording safe
+- PASS: no runtime validation or preview activation - no runtime/preview
+- PASS: no persistence truth selection tactic or mutation - no side effects
 - PASS: export budget checked honestly - export budget
 - PASS: source-of-truth and batch-live separation preserved - source truth
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
-- PASS: bundle includes 9D source files - 9D source bundled
-- PASS: source 9C baseline files were not deleted - 9C source bundled
+- PASS: bundle includes 9E source files - 9E source bundled
+- PASS: bundle keeps 9D source files - 9D source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -54,7 +57,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md
+- coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -67,5 +70,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md
+- validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
 - validation.share-pack.md

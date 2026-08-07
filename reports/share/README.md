@@ -1,29 +1,31 @@
-# Sprint 9D Share Pack
+# Sprint 9E Share Pack
 
-Current sprint: Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy
+Current sprint: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
 
-Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9C docs with 9D export metadata badge cleanup docs while keeping 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
+Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9D docs with 9E coach-facing error-copy docs while keeping 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md
-4. coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md
+3. validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
+4. coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
 5. validation.share-pack.md
 
-## Sprint 9D Focus
-- Corrects the visible cover badge from Export compact 9B to Export compact 9D.
-- Aligns title, main id, current data attribute, cover badge, validation report, and share pack on 9D.
-- Preserves historical 9C/9B/9A/8Z/8Y/8X/8W data attributes and sections.
-- Adds strict cover badge audit: no body mention fallback can validate the badge.
-- Adds false-positive guard for stale badge/title/main metadata.
-- Keeps 9C detail cards intact: 16 cards, 3 groups, wording 97, complete coverage.
-- Keeps runtime, payload, preview, persistence, official truth, selection, tactic, score, timeline, score_change, scoring constants, and MatchBonusEvent unchanged.
+## Sprint 9E Focus
+- Adds coach-facing copy for dry-run compatible-but-not-accepted, validation error, blocker, boundary guard, and refusal states.
+- Keeps the manual review preview non-persistent and inactive: no runtime validation, no payload read, no preview activation, no submit, no storage, and no official-truth promotion.
+- Preserves the 9D export metadata cleanup: title, main id, data attribute, cover badge, false-positive guard, and historical markers.
+- Keeps the export compact with the cover badge Export compact 9E.
 
-## Expected Validation
-- validation.share-pack.md: Status PASS.
-- share file count: 20.
-- current sprint: Sprint 9D.
-- previous standalone 9C docs copied: 0.
-- cover badge text: Export compact 9D.
-- metadata false positives after 9D: 0.
+## Expected Validation Highlights
+- Status: PASS.
+- current sprint: Sprint 9E.
+- share pack mode: MINIMAL_REVIEW.
+- final file count: 20 or less.
+- coach-facing error copy count: 19.
+- coach-facing blocker copy count: 12.
+- coach-facing refusal copy count: 8.
+- compatible case copy count: 1.
+- cover badge text: Export compact 9E.
+- metadata false positives after 9E: 0.
+- no runtime validation or preview activation.

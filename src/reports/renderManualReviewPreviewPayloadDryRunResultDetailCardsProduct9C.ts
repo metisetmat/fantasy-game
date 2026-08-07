@@ -12,6 +12,12 @@ function bool(value: boolean): string {
   return value ? "oui" : "non";
 }
 
+function listItems(values: readonly string[]): string {
+  return values.length > 0
+    ? values.map((value) => `<li>${escapeHtml(value)}</li>`).join("")
+    : "<li>none</li>";
+}
+
 export function renderManualReviewPreviewPayloadDryRunResultDetailCardsProduct9C(
   model: ManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CModel,
 ): string {
@@ -19,7 +25,26 @@ export function renderManualReviewPreviewPayloadDryRunResultDetailCardsProduct9C
     .map((group) => `<li><strong>${escapeHtml(group.label)}</strong> (${group.cardCount}) - ${escapeHtml(group.coachFacingMeaning)}</li>`)
     .join("");
   const cardItems = model.detailCards
-    .map((card) => `<li><strong>${escapeHtml(card.title)}</strong> - ${escapeHtml(card.coachFacingStatusLabel)}. ${escapeHtml(card.coachFacingSummary)} <em>Frontiere:</em> ${escapeHtml(card.protectedBoundary)}</li>`)
+    .map((card) => [
+      '<li class="manual-review-detail-card">',
+      `<strong>${escapeHtml(card.title)}</strong> - ${escapeHtml(card.coachFacingStatusLabel)}.`,
+      `<p>${escapeHtml(card.coachFacingSummary)}</p>`,
+      "<dl>",
+      `<dt>Pourquoi ce cas existe</dt><dd>${escapeHtml(card.whyThisCaseExists)}</dd>`,
+      `<dt>Futur controle validator</dt><dd>${escapeHtml(card.futureValidatorWouldCheck)}</dd>`,
+      `<dt>Message coach</dt><dd>${escapeHtml(card.coachFacingErrorMessage)}</dd>`,
+      `<dt>Message technique</dt><dd>${escapeHtml(card.technicalMessage)}</dd>`,
+      `<dt>Frontiere protegee</dt><dd>${escapeHtml(card.protectedBoundary)}</dd>`,
+      "</dl>",
+      '<div class="manual-review-detail-card-grid">',
+      `<section><h4>Erreurs attendues</h4><ul>${listItems(card.expectedErrorStateIds)}</ul></section>`,
+      `<section><h4>Blockers attendus</h4><ul>${listItems(card.expectedBlockerIds)}</ul></section>`,
+      `<section><h4>Guards frontiere</h4><ul>${listItems(card.expectedBoundaryGuardIds)}</ul></section>`,
+      `<section><h4>Refusals attendus</h4><ul>${listItems(card.expectedRefusalStateIds)}</ul></section>`,
+      `<section><h4>Prochaines etapes bloquees</h4><ul>${listItems(card.blockedNextStep)}</ul></section>`,
+      "</div>",
+      "</li>",
+    ].join(""))
     .join("");
 
   return [
