@@ -3099,6 +3099,25 @@
 <p class="guard">Le cas valide signifie uniquement would pass future validation, jamais accepted payload.</p>
 </article>
 </section>
+<section id="manual-review-preview-payload-dry-run-result-renderer-9b" class="premium-section manual-review-preview-payload-dry-run-result-renderer-9b" data-manual-review-preview-payload-dry-run-result-renderer-version="9B">
+<p class="eyebrow">Sprint 9B - renderer resultats dry-run, sans preview</p>
+<h2>Resultats du dry-run payload preview-only</h2>
+<p>Statut: <strong>PASS</strong>. Le renderer transforme les 16 cas 9A en lecture coach-facing sans accepter de payload, sans creer de preview reelle et sans stockage.</p>
+<div class="kpi-grid">
+<article><span class="kpi-label">Cas rendus</span><strong>16/16</strong></article>
+<article><span class="kpi-label">Groupes lisibles</span><strong>3/3</strong></article>
+<article><span class="kpi-label">Cas positif accepte</span><strong>0</strong></article>
+<article><span class="kpi-label">Preview reelle</span><strong>0</strong></article>
+<article><span class="kpi-label">Wording score</span><strong>96</strong></article>
+<article><span class="kpi-label">Couverture</span><strong>oui</strong></article>
+</div>
+<h3>Groupes de resultat</h3>
+<ul><li><strong>Forme qui passerait plus tard - non acceptee</strong> (1) - Cette forme serait compatible avec la validation future, mais 9B ne l'accepte pas, ne la stocke pas et ne genere aucune preview reelle.</li><li><strong>Echec de validation future</strong> (10) - Ces cas echoueraient la validation future et bloqueraient la suite.</li><li><strong>Blocage preview future</strong> (5) - Ces cas tentent de franchir une frontiere interdite et bloqueraient toute preview future.</li></ul>
+<h3>Lignes rendues principales</h3>
+<ul><li><strong>Valid preview-only payload shape</strong> - Forme compatible - non acceptee. Le dry-run indique seulement qu'une forme similaire passerait plus tard. Aucun payload n'est accepte en 9B.</li><li><strong>Invalid source</strong> - Echec de validation future. This synthetic case would fail or block future preview validation.</li><li><strong>Invalid scope</strong> - Echec de validation future. This synthetic case would fail or block future preview validation.</li><li><strong>Official truth flag true</strong> - Blocage preview future. This synthetic case would fail or block future preview validation.</li><li><strong>Persisted or applied flag true</strong> - Blocage preview future. This synthetic case would fail or block future preview validation.</li><li><strong>Invalid entry count</strong> - Echec de validation future. This synthetic case would fail or block future preview validation.</li></ul>
+<p class="guardrail-note">Le cas compatible reste explicitement non accepte: aucune validation runtime, aucun payload reel, aucune preview, aucune officialisation et aucune decision automatique ne sont crees en 9B.</p>
+</section>
+
 
   
   <section id="next-match-plan" class="product-section">

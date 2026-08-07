@@ -1,0 +1,305 @@
+import type { ManualReviewPreviewPayloadDryRunResultKind9A, ManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel } from "./manualReviewPreviewPayloadDryRunValidatorTypes9A";
+import type { ManualReviewPreviewPayloadDryRunResultRendererWarningCode9B } from "./manualReviewPreviewPayloadDryRunResultRendererWarnings9B";
+
+export type ManualReviewPreviewPayloadDryRunResultRendererStatus9B = "PASS" | "PARTIAL" | "FAIL";
+export type ManualReviewPreviewPayloadDryRunResultRendererMode9B = "dry_run_result_renderer_only";
+export type ManualReviewPreviewPayloadDryRunResultRendererRuntimeStatus9B =
+  | "rendered_without_preview_activation"
+  | "partial"
+  | "blocked";
+export type ManualReviewPreviewPayloadDryRunResultRendererWordingStatus9B =
+  | "pass_strong"
+  | "pass"
+  | "partial"
+  | "fail";
+export type ManualReviewPreviewPayloadDryRunResultRendererSeverity9B = "info" | "warning" | "blocking";
+
+export interface ManualReviewPreviewPayloadDryRunRenderedResultRow9B {
+  readonly rowId: string;
+  readonly sourceDryRunCaseId: string;
+  readonly sourceExpectedResultId: string;
+  readonly groupId: string;
+  readonly caseLabel: string;
+  readonly caseKind: string;
+  readonly resultKind: ManualReviewPreviewPayloadDryRunResultKind9A;
+  readonly coachFacingStatusLabel: string;
+  readonly coachFacingSummary: string;
+  readonly technicalSummary: string;
+  readonly renderedRuleIds: readonly string[];
+  readonly renderedErrorStateIds: readonly string[];
+  readonly renderedBlockerIds: readonly string[];
+  readonly renderedBoundaryGuardIds: readonly string[];
+  readonly renderedRefusalStateIds: readonly string[];
+  readonly severity: ManualReviewPreviewPayloadDryRunResultRendererSeverity9B;
+  readonly canCreatePayloadIn9B: false;
+  readonly canAcceptPayloadIn9B: false;
+  readonly canGeneratePreviewIn9B: false;
+  readonly canPersistIn9B: false;
+  readonly canPromoteOfficialTruthIn9B: false;
+  readonly canDriveDecisionIn9B: false;
+  readonly canDriveSelectionIn9B: false;
+  readonly canDriveTacticIn9B: false;
+  readonly canMutateScoreIn9B: false;
+  readonly canMutateTimelineIn9B: false;
+  readonly visibleInProduct: boolean;
+  readonly visibleInExport: boolean;
+}
+
+export interface ManualReviewPreviewPayloadDryRunResultGroup9B {
+  readonly groupId: string;
+  readonly label: string;
+  readonly coachFacingMeaning: string;
+  readonly resultKinds: readonly ManualReviewPreviewPayloadDryRunResultKind9A[];
+  readonly caseIds: readonly string[];
+  readonly severity: ManualReviewPreviewPayloadDryRunResultRendererSeverity9B;
+  readonly rowCount: number;
+  readonly visibleInProduct: boolean;
+  readonly visibleInExport: boolean;
+}
+
+export interface ManualReviewPreviewPayloadDryRunCoverageView9B {
+  readonly coverageViewId: string;
+  readonly ruleCoverageRendered: number;
+  readonly errorCoverageRendered: number;
+  readonly blockerCoverageRendered: number;
+  readonly boundaryGuardCoverageRendered: number;
+  readonly refusalStateCoverageRendered: number;
+  readonly uncoveredRuleIds: readonly string[];
+  readonly uncoveredErrorStateIds: readonly string[];
+  readonly uncoveredBlockerIds: readonly string[];
+  readonly uncoveredBoundaryGuardIds: readonly string[];
+  readonly uncoveredRefusalStateIds: readonly string[];
+  readonly coverageCoachFacingSummary: string;
+  readonly visibleInProduct: boolean;
+  readonly visibleInExport: boolean;
+}
+
+export interface ManualReviewPreviewPayloadDryRunBoundaryView9B {
+  readonly boundaryViewId: string;
+  readonly acceptedPayloadCount: 0;
+  readonly previewGeneratedCount: 0;
+  readonly payloadCreatedCount: 0;
+  readonly runtimeValidationCount: 0;
+  readonly realPayloadReadCount: 0;
+  readonly persistenceCount: 0;
+  readonly officialTruthPromotionCount: 0;
+  readonly automationCount: 0;
+  readonly selectionOrTacticCount: 0;
+  readonly scoreMutationCount: 0;
+  readonly timelineMutationCount: 0;
+  readonly scoreChangeCreationCount: 0;
+  readonly eventMutationCount: 0;
+  readonly boundaryCoachFacingSummary: string;
+  readonly visibleInProduct: boolean;
+  readonly visibleInExport: boolean;
+}
+
+export interface ManualReviewPreviewPayloadDryRunResultRendererReadinessSummary9B {
+  readonly summaryId: string;
+  readonly rendererStatus: ManualReviewPreviewPayloadDryRunResultRendererRuntimeStatus9B;
+  readonly expectedRendererStatus: "rendered_without_preview_activation";
+  readonly statusReason: string;
+  readonly renderedCaseCount: number;
+  readonly renderedResultCount: number;
+  readonly coachFacingResultGroupCount: number;
+  readonly validCaseRenderedAsNotAccepted: boolean;
+  readonly coverageStillComplete: boolean;
+  readonly whatIsReady: readonly string[];
+  readonly whatIsBlocked: readonly string[];
+  readonly whatFutureSprintCanDo: readonly string[];
+  readonly coachFacingReadout: string;
+  readonly visibleInProduct: boolean;
+  readonly visibleInExport: boolean;
+}
+
+export interface ManualReviewPreviewPayloadDryRunResultRenderer9B {
+  readonly rendererId: string;
+  readonly rendererMode: ManualReviewPreviewPayloadDryRunResultRendererMode9B;
+  readonly sourceDryRunValidatorVersion: "9A";
+  readonly sourceAuditConsistencyRepairVersion: "8Z";
+  readonly sourceValidationContractVersion: "8Y";
+  readonly sourcePayloadContractVersion: "8X";
+  readonly sourceActivationGuardsVersion: "8W";
+  readonly sourceFieldVisualReadinessVersion: "8V";
+  readonly sourceInputFieldContractVersion: "8U";
+  readonly sourceWorkflowReadinessVersion: "8R";
+  readonly sourceDecisionGateVersion: "8Q";
+  readonly resultGroups: readonly ManualReviewPreviewPayloadDryRunResultGroup9B[];
+  readonly renderedRows: readonly ManualReviewPreviewPayloadDryRunRenderedResultRow9B[];
+  readonly coverageView: ManualReviewPreviewPayloadDryRunCoverageView9B;
+  readonly boundaryView: ManualReviewPreviewPayloadDryRunBoundaryView9B;
+  readonly rendererReadinessSummary: ManualReviewPreviewPayloadDryRunResultRendererReadinessSummary9B;
+  readonly forbiddenRuntimeEffects: readonly string[];
+  readonly isRuntimeValidator: false;
+  readonly isRealPayloadReader: false;
+  readonly isRealPayloadAcceptor: false;
+  readonly isRealPreviewGenerator: false;
+  readonly isRealCoachSubmission: false;
+  readonly isOfficialMatchEvidence: false;
+  readonly notPersisted: true;
+  readonly notApplied: true;
+  readonly officialTruth: false;
+  readonly visibleInProduct: boolean;
+  readonly visibleInExport: boolean;
+}
+
+export interface ManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel {
+  readonly status: ManualReviewPreviewPayloadDryRunResultRendererStatus9B;
+  readonly scope: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_RESULT_RENDERER_WITHOUT_PREVIEW_ACTIVATION";
+  readonly version: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_RESULT_RENDERER_9B";
+  readonly baselineVersion: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_VALIDATOR_9A";
+  readonly matchId: string;
+  readonly officialScore: string;
+  readonly baseline9A: ManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AModel;
+  readonly baseline9APreserved: boolean;
+  readonly baseline8ZPreserved: boolean;
+  readonly baseline8YPreserved: boolean;
+  readonly baseline8XPreserved: boolean;
+  readonly baseline8WPreserved: boolean;
+  readonly baseline8VPreserved: boolean;
+  readonly baseline8UPreserved: boolean;
+  readonly baseline8TPreserved: boolean;
+  readonly baseline8SPreserved: boolean;
+  readonly baseline8RPreserved: boolean;
+  readonly baseline8QPreserved: boolean;
+  readonly baseline8PPreserved: boolean;
+  readonly baseline8OPreserved: boolean;
+  readonly baseline8NPreserved: boolean;
+  readonly baseline8MPreserved: boolean;
+  readonly baseline8LPreserved: boolean;
+  readonly baseline8KPreserved: boolean;
+  readonly baseline8IPreserved: boolean;
+  readonly baseline8HPreserved: boolean;
+  readonly baseline8GPreserved: boolean;
+  readonly baseline8FPreserved: boolean;
+  readonly baseline8EPreserved: boolean;
+  readonly baseline8DPreserved: boolean;
+  readonly baseline8CPreserved: boolean;
+  readonly baseline8BPreserved: boolean;
+  readonly baseline8APreserved: boolean;
+  readonly baseline7HPreserved: boolean;
+  readonly baseline6XPreserved: boolean;
+  readonly dryRunResultRendererReady: boolean;
+  readonly productDryRunResultRendererVisible: boolean;
+  readonly exportDryRunResultRendererVisible: boolean;
+  readonly dryRunResultRendererUsesDryRunValidator9A: boolean;
+  readonly dryRunResultRendererUsesAuditConsistencyRepair8Z: boolean;
+  readonly dryRunResultRendererUsesValidationContract8Y: boolean;
+  readonly rendererMode: ManualReviewPreviewPayloadDryRunResultRendererMode9B;
+  readonly rendererStatus: ManualReviewPreviewPayloadDryRunResultRendererRuntimeStatus9B;
+  readonly expectedRendererStatus: "rendered_without_preview_activation";
+  readonly rendererStatusCorrect: boolean;
+  readonly renderedCaseCount: number;
+  readonly renderedCaseCountExpected: 16;
+  readonly renderedResultCount: number;
+  readonly renderedResultCountExpected: 16;
+  readonly renderedPassButNotAcceptedCount: number;
+  readonly renderedFailValidationCount: number;
+  readonly renderedBlockPreviewCount: number;
+  readonly renderedWarningCount: number;
+  readonly coachFacingResultGroupCount: number;
+  readonly coachFacingResultGroupCountExpected: 3;
+  readonly resultRowCount: number;
+  readonly resultRowCountExpected: 16;
+  readonly resultRowWithErrorCount: number;
+  readonly resultRowWithBlockerCount: number;
+  readonly resultRowWithBoundaryGuardCount: number;
+  readonly resultRowWithRefusalStateCount: number;
+  readonly ungroupedCaseCount: number;
+  readonly duplicatedCaseInGroupsCount: number;
+  readonly validCaseRenderedAsNotAccepted: boolean;
+  readonly acceptedPayloadClaimCount: 0;
+  readonly previewGeneratedClaimCount: 0;
+  readonly payloadCreatedClaimCount: 0;
+  readonly runtimeValidationClaimCount: 0;
+  readonly ambiguousResultRendererWordingCount: 0;
+  readonly wordingReadabilityScore: number;
+  readonly wordingPassThreshold: 90;
+  readonly wordingPassStrongThreshold: 95;
+  readonly wordingThresholdStatus: ManualReviewPreviewPayloadDryRunResultRendererWordingStatus9B;
+  readonly wordingThresholdStatusCorrect: boolean;
+  readonly renderedRuleCoverageCount: number;
+  readonly renderedRuleCoverageExpected: 20;
+  readonly renderedErrorCoverageCount: number;
+  readonly renderedErrorCoverageExpected: 19;
+  readonly renderedBlockerCoverageCount: number;
+  readonly renderedBlockerCoverageExpected: 12;
+  readonly renderedBoundaryGuardCoverageCount: number;
+  readonly renderedBoundaryGuardCoverageExpected: 14;
+  readonly renderedRefusalStateCoverageCount: number;
+  readonly renderedRefusalStateCoverageExpected: 8;
+  readonly uncoveredRenderedRuleIds: readonly string[];
+  readonly uncoveredRenderedErrorStateIds: readonly string[];
+  readonly uncoveredRenderedBlockerIds: readonly string[];
+  readonly uncoveredRenderedBoundaryGuardIds: readonly string[];
+  readonly uncoveredRenderedRefusalStateIds: readonly string[];
+  readonly coverageStillComplete: boolean;
+  readonly validationRuntimeActive: false;
+  readonly payloadValidationRuntimeDetected: false;
+  readonly validationExecutionCount: 0;
+  readonly realPayloadReadCount: 0;
+  readonly payloadCreated: false;
+  readonly realPayloadInstanceCount: 0;
+  readonly dryRunAcceptedPayloadCount: 0;
+  readonly realInputActivated: false;
+  readonly realPreviewGenerated: false;
+  readonly previewActivationCount: 0;
+  readonly submitCreated: false;
+  readonly apiCreated: false;
+  readonly backendCreated: false;
+  readonly storageCreated: false;
+  readonly memoryCreated: false;
+  readonly draftCreated: false;
+  readonly historyCreated: false;
+  readonly officialTruthPromoted: false;
+  readonly automaticDecisionCreated: false;
+  readonly selectionDriven: false;
+  readonly tacticalInstructionDriven: false;
+  readonly scoreMutationCount: 0;
+  readonly timelineMutationCount: 0;
+  readonly scoreChangeCreationCount: 0;
+  readonly eventMutationCount: 0;
+  readonly dryRunStatusFrom9A: "documented_dry_run_only";
+  readonly validationContractStatusFrom8Y: "documented_but_not_executable";
+  readonly payloadContractStatusFrom8X: "documented_but_not_instantiated";
+  readonly previewActivationStatusFrom8W: "documented_but_blocked";
+  readonly fieldVisualReadinessStatusFrom8V: "ready_for_static_visual_review";
+  readonly workflowReadinessStatusFrom8R: "ready_for_non_persistent_preview";
+  readonly reviewGateStatusFrom8Q: "needs_completion";
+  readonly auditConsistencyStatusFrom8Z: "PASS_STRONG";
+  readonly readinessDistinctFromReviewGateStillVisible: boolean;
+  readonly resultRendererDistinctFromRuntimeValidation: boolean;
+  readonly resultRendererDistinctFromPayloadAcceptance: boolean;
+  readonly resultRendererDistinctFromPreviewGeneration: boolean;
+  readonly resultRendererMarkedReadOnly: boolean;
+  readonly resultRendererMarkedNonRuntime: boolean;
+  readonly resultRendererMarkedNonOfficial: boolean;
+  readonly resultRendererMarkedNotPersisted: boolean;
+  readonly resultRendererMarkedNotApplied: boolean;
+  readonly productStoryFirstPreserved: boolean;
+  readonly exportCompactPreserved: boolean;
+  readonly exportMetadataCurrent9BVisible: boolean;
+  readonly exportReadTimeSecondsAfter9B: number;
+  readonly exportUnder900Seconds: boolean;
+  readonly exportUnder800Seconds: boolean;
+  readonly exportUnder900BooleanCorrect: boolean;
+  readonly exportUnder800BooleanCorrect: boolean;
+  readonly numericThresholdGuardPreserved: boolean;
+  readonly sourceOfTruthSeparationPreserved: boolean;
+  readonly matchEconomyBaselinePreserved: boolean;
+  readonly guardrailsPreserved: boolean;
+  readonly sharePackPass: boolean;
+  readonly renderer: ManualReviewPreviewPayloadDryRunResultRenderer9B;
+  readonly resultGroups: readonly ManualReviewPreviewPayloadDryRunResultGroup9B[];
+  readonly renderedRows: readonly ManualReviewPreviewPayloadDryRunRenderedResultRow9B[];
+  readonly coverageView: ManualReviewPreviewPayloadDryRunCoverageView9B;
+  readonly boundaryView: ManualReviewPreviewPayloadDryRunBoundaryView9B;
+  readonly rendererReadinessSummary: ManualReviewPreviewPayloadDryRunResultRendererReadinessSummary9B;
+  readonly productDryRunResultRendererHtml: string;
+  readonly exportDryRunResultRendererHtml: string;
+  readonly productHtmlAfter9B: string;
+  readonly exportHtmlAfter9B: string;
+  readonly warningCodes: readonly ManualReviewPreviewPayloadDryRunResultRendererWarningCode9B[];
+  readonly recommendation: string;
+  readonly nextSprintRecommendation: string;
+}

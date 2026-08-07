@@ -132,6 +132,11 @@ import {
   renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9ADoc,
   renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation,
 } from "./buildManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9A";
+import {
+  buildManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel,
+  renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc,
+  renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation,
+} from "./buildManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9B";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -588,8 +593,13 @@ export function writeLatestCoachReport(): void {
     productHtmlBefore9A: manualReviewValidationAuditConsistencyRepair8Z.productHtmlAfter8Z,
     exportHtmlBefore9A: manualReviewValidationAuditConsistencyRepair8Z.exportHtmlAfter8Z,
   });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunValidator9A.productHtmlAfter9A;
-  const exportHtml = manualReviewPreviewPayloadDryRunValidator9A.exportHtmlAfter9A;
+  const manualReviewPreviewPayloadDryRunResultRenderer9B = buildManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BModel({
+    baseline9A: manualReviewPreviewPayloadDryRunValidator9A,
+    productHtmlBefore9B: manualReviewPreviewPayloadDryRunValidator9A.productHtmlAfter9A,
+    exportHtmlBefore9B: manualReviewPreviewPayloadDryRunValidator9A.exportHtmlAfter9A,
+  });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunResultRenderer9B.productHtmlAfter9B;
+  const exportHtml = manualReviewPreviewPayloadDryRunResultRenderer9B.exportHtmlAfter9B;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -662,6 +672,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunValidatorWithoutRuntimeActivation9AValidation(manualReviewPreviewPayloadDryRunValidator9A),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md"),
+    renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BDoc(manualReviewPreviewPayloadDryRunResultRenderer9B),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md"),
+    renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation(manualReviewPreviewPayloadDryRunResultRenderer9B),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -684,6 +704,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-validation-contract-audit-consistency-repair-8z.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-validator-without-runtime-activation-9a.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }
