@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-08-08T10:59:49.849Z
+Generated timestamp: 2026-08-08T12:12:06.410Z
 Task/sprint name: Sprint 9F - Export Budget Compaction For Error Copy
 Final file count: 20
 
@@ -1253,20 +1253,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts
- M src/reports/validation/sharePackValidator.ts
- M src/simulation/validation/fullMatchTraceValidationReport.ts
-?? src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompactionTypes9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompactionWarnings9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetGuard9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportMetadataAudit9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyNoRuntimeAudit9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyPreservationAudit9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopySourceOfTruthAudit9F.ts
-?? src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWordingAudit9F.ts
+ M src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.ts
+ M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.ts

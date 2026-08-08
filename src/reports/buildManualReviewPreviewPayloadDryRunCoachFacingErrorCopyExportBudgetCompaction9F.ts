@@ -224,25 +224,15 @@ export function buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportB
   const exportHtmlAfter9F = normalizeExportShell9F(
     replaceSectionById(exportBefore, EXPORT_9E_SECTION_ID, exportCompactionSectionHtml),
   );
-  const budgetAuditBeforeProduct = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudget9F({
-    productHtmlAfter9F: productBefore,
-    exportHtmlBefore9F: exportBefore,
-    exportHtmlAfter9F,
-    exportSectionBefore9F: exportSectionBefore,
-    exportSectionAfter9F: exportCompactionSectionHtml,
+  const productCompactionSectionForAudit = renderProductCompactionSection9F({
+    before: 0,
+    after: 0,
+    status: "FAIL",
+    recommendation: "FIX_ERROR_COPY_EXPORT_BUDGET_SOURCE_OF_TRUTH",
   });
-  const provisionalRecommendation = budgetAuditBeforeProduct.recommendation;
-  const provisionalStatus: ManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompactionStatus9F =
-    budgetAuditBeforeProduct.exportUnder800Seconds ? "PASS" : budgetAuditBeforeProduct.exportUnder900Seconds ? "PARTIAL" : "FAIL";
-  const productCompactionSectionHtml = renderProductCompactionSection9F({
-    before: budgetAuditBeforeProduct.exportReadTimeSecondsBefore9F,
-    after: budgetAuditBeforeProduct.exportReadTimeSecondsAfter9F,
-    status: provisionalStatus,
-    recommendation: provisionalRecommendation,
-  });
-  const productHtmlAfter9F = insertAfterSectionById(productBefore, PRODUCT_9E_SECTION_ID, productCompactionSectionHtml);
-  const budgetAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudget9F({
-    productHtmlAfter9F,
+  const productHtmlForAudit = insertAfterSectionById(productBefore, PRODUCT_9E_SECTION_ID, productCompactionSectionForAudit);
+  const budgetAuditForStatus = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudget9F({
+    productHtmlAfter9F: productHtmlForAudit,
     exportHtmlBefore9F: exportBefore,
     exportHtmlAfter9F,
     exportSectionBefore9F: exportSectionBefore,
@@ -250,21 +240,21 @@ export function buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportB
   });
   const preservationAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyPreservation9F({
     baseline9E,
-    productHtmlAfter9F,
+    productHtmlAfter9F: productHtmlForAudit,
     exportHtmlAfter9F,
   });
   const metadataAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportMetadata9F(exportHtmlAfter9F);
   const noRuntimeAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyNoRuntime9F(baseline9E);
   const sourceOfTruthAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopySourceOfTruth9F({
     baseline9E,
-    productHtmlAfter9F,
+    productHtmlAfter9F: productHtmlForAudit,
     exportHtmlAfter9F,
   });
   const wordingAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWording9F({
     exportHtmlAfter9F,
   });
   const preliminaryWarnings = uniqueWarnings([
-    ...budgetAudit.budgetWarningCodes,
+    ...budgetAuditForStatus.budgetWarningCodes,
     ...preservationAudit.preservationWarningCodes,
     ...metadataAudit.metadataWarningCodes,
     ...noRuntimeAudit.noRuntimeWarningCodes,
@@ -272,7 +262,7 @@ export function buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportB
     ...wordingAudit.wordingWarningCodes,
   ]);
   const guard = evaluateManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetGuard9F({
-    exportReadTimeSecondsAfter9F: budgetAudit.exportReadTimeSecondsAfter9F,
+    exportReadTimeSecondsAfter9F: budgetAuditForStatus.exportReadTimeSecondsAfter9F,
     productCopyDetailsPreserved: preservationAudit.productCopyDetailsPreserved,
     exportCopySummaryPreserved: preservationAudit.exportCopySummaryPreserved,
     exportCompatibleCasePreserved: preservationAudit.exportCompatibleCasePreserved,
@@ -292,10 +282,24 @@ export function buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportB
   const warningCodes = uniqueWarnings([...preliminaryWarnings, ...guard.violations]);
   const status = statusFromWarnings({
     warnings: warningCodes,
-    exportUnder800Seconds: budgetAudit.exportUnder800Seconds,
+    exportUnder800Seconds: budgetAuditForStatus.exportUnder800Seconds,
     guard,
   });
   const recommendation = recommendationFromStatus(status);
+  const productCompactionSectionHtml = renderProductCompactionSection9F({
+    before: budgetAuditForStatus.exportReadTimeSecondsBefore9F,
+    after: budgetAuditForStatus.exportReadTimeSecondsAfter9F,
+    status,
+    recommendation,
+  });
+  const productHtmlAfter9F = insertAfterSectionById(productBefore, PRODUCT_9E_SECTION_ID, productCompactionSectionHtml);
+  const budgetAudit = auditManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudget9F({
+    productHtmlAfter9F,
+    exportHtmlBefore9F: exportBefore,
+    exportHtmlAfter9F,
+    exportSectionBefore9F: exportSectionBefore,
+    exportSectionAfter9F: exportCompactionSectionHtml,
+  });
   return {
     status,
     scope: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_COACH_FACING_ERROR_COPY_EXPORT_BUDGET_COMPACTION",

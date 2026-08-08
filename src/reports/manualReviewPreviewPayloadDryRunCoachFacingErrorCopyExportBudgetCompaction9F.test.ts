@@ -132,4 +132,14 @@ assert.throws(
   /9F requires a clean no-runtime/u,
 );
 
+const missingProductDetailModel = buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel({
+  baseline9E,
+  productHtmlBefore9F: baseline9E.productHtmlAfter9E.replace("Messages blockers", "Messages retirees"),
+  exportHtmlBefore9F: baseline9E.exportHtmlAfter9E,
+});
+assert.equal(missingProductDetailModel.status, "FAIL");
+assert.equal(missingProductDetailModel.productCopyDetailsPreserved, false);
+assert.equal(missingProductDetailModel.productHtmlAfter9F.includes("Statut : FAIL"), true);
+assert.equal(missingProductDetailModel.productHtmlAfter9F.includes("Statut : PASS"), false);
+
 console.log("PASS manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F");
