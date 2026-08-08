@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9F - Export Budget Compaction For Error Copy. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -196,6 +196,8 @@ import {
   renderManualReviewExportMetadataBadgeCleanup9DValidation,
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc,
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -209,16 +211,20 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9F - Export Budget Compaction For Error Copy";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md";
+  "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
 let cachedPersistenceEvidenceSnapshot: CoachReportPersistenceEvidenceSnapshot | null | undefined;
 let cachedCoachReportExportHtml: string | null | undefined;
+
+function readShareSourceIfExists(path: string): string {
+  return existsSync(path) ? readFileSync(path, "utf8") : "";
+}
 
 function fullMatchTraceValidationModel(): FullMatchTraceValidationModel {
   if (cachedFullMatchTraceValidationModel === null) {
@@ -4389,6 +4395,61 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9E contract test proving copy coverage, wording safety, no-runtime behavior, 9D metadata preservation, and share-pack alignment",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompactionWarnings9F.ts",
+        required: true,
+        reason: "Sprint 9F warning registry for export budget compaction, source-of-truth preservation, and no-runtime blockers",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompactionTypes9F.ts",
+        required: true,
+        reason: "Sprint 9F typed model proving 9E copy preservation while compacting the export surface",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9F.ts",
+        required: true,
+        reason: "Sprint 9F export budget audit measuring before/after read time and strong pass eligibility",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyPreservationAudit9F.ts",
+        required: true,
+        reason: "Sprint 9F preservation audit proving 9E counts, coverage, product detail, compatible case, and no-runtime guards survive compaction",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportMetadataAudit9F.ts",
+        required: true,
+        reason: "Sprint 9F metadata audit proving the export title, main id, cover badge, current data attribute, and historical markers are aligned",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyNoRuntimeAudit9F.ts",
+        required: true,
+        reason: "Sprint 9F no-runtime audit preserving dry-run-only behavior without payload reads or preview activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopySourceOfTruthAudit9F.ts",
+        required: true,
+        reason: "Sprint 9F source-of-truth audit preserving scoring constants, batch/live separation, and MatchBonusEvent boundaries",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWordingAudit9F.ts",
+        required: true,
+        reason: "Sprint 9F wording audit blocking runtime, payload, preview, selection, tactical, and official-truth leakage",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetGuard9F.ts",
+        required: true,
+        reason: "Sprint 9F guard deriving PASS/PARTIAL/FAIL from completed export budget and preservation invariants",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.ts",
+        required: true,
+        reason: "Sprint 9F builder, report renderer, and validation renderer for export budget compaction",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.ts",
+        required: true,
+        reason: "Sprint 9F contract test proving export read time drops under 800 seconds without losing 9E copy coverage or source-of-truth boundaries",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6545,6 +6606,11 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9F")) {
+    const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    if (generatedDoc.length > 0) return generatedDoc;
+    return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9E")) {
     return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc(fullMatchTraceValidationModel());
   }
@@ -8949,6 +9015,11 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9F")) {
+    const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    if (generatedValidation.length > 0) return generatedValidation;
+    return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9E")) {
     return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation(fullMatchTraceValidationModel());
   }
@@ -11299,6 +11370,39 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9F")) {
+    return [
+      "# Sprint 9F Share Pack",
+      "",
+      "Current sprint: Sprint 9F - Export Budget Compaction For Error Copy",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9E docs with 9F export-budget compaction docs while keeping 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9F Focus",
+      "- Compacts the 9E error-copy export section so the coach export returns under the 800-second target.",
+      "- Keeps the full 9E error, blocker, refusal, boundary, and compatible-case detail visible in the product report.",
+      "- Preserves no-runtime, no-payload, no-preview, no-submit, no-storage, no-official-truth, no-selection, no-tactic, and no-score/timeline-mutation boundaries.",
+      "- Moves current export metadata to 9F: title, main id, data attribute, and cover badge Export compact 9F.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9F.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- exportReadTimeSecondsBefore9F: 817.",
+      "- exportReadTimeSecondsAfter9F <= 800.",
+      "- 9E copy counts and coverage preserved.",
+      "- no runtime validation or preview activation.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9E")) {
     return [
       "# Sprint 9E Share Pack",
@@ -30432,6 +30536,11 @@ import {
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc,
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation,
 } from "./buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E";
+import {
+  buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation,
+} from "./buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -30909,8 +31018,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9E: manualReviewExportMetadataBadgeCleanup9D.productHtmlAfter9D,
       exportHtmlBefore9E: manualReviewExportMetadataBadgeCleanup9D.exportHtmlAfter9D,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.productHtmlAfter9E;
-  const exportHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.exportHtmlAfter9E;
+  const manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F =
+    buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel({
+      baseline9E: manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E,
+      productHtmlBefore9F: manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.productHtmlAfter9E,
+      exportHtmlBefore9F: manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.exportHtmlAfter9E,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.productHtmlAfter9F;
+  const exportHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.exportHtmlAfter9F;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -31023,6 +31138,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation(manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
+    renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc(manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
+    renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation(manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -31053,6 +31178,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

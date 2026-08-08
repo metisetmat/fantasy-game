@@ -1,31 +1,28 @@
-# Sprint 9E Share Pack
+# Sprint 9F Share Pack
 
-Current sprint: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
+Current sprint: Sprint 9F - Export Budget Compaction For Error Copy
 
-Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9D docs with 9E coach-facing error-copy docs while keeping 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
+Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9E docs with 9F export-budget compaction docs while keeping 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
-4. coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
+3. validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md
+4. coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md
 5. validation.share-pack.md
 
-## Sprint 9E Focus
-- Adds coach-facing copy for dry-run compatible-but-not-accepted, validation error, blocker, boundary guard, and refusal states.
-- Keeps the manual review preview non-persistent and inactive: no runtime validation, no payload read, no preview activation, no submit, no storage, and no official-truth promotion.
-- Preserves the 9D export metadata cleanup: title, main id, data attribute, cover badge, false-positive guard, and historical markers.
-- Keeps the export compact with the cover badge Export compact 9E.
+## Sprint 9F Focus
+- Compacts the 9E error-copy export section so the coach export returns under the 800-second target.
+- Keeps the full 9E error, blocker, refusal, boundary, and compatible-case detail visible in the product report.
+- Preserves no-runtime, no-payload, no-preview, no-submit, no-storage, no-official-truth, no-selection, no-tactic, and no-score/timeline-mutation boundaries.
+- Moves current export metadata to 9F: title, main id, data attribute, and cover badge Export compact 9F.
 
 ## Expected Validation Highlights
 - Status: PASS.
-- current sprint: Sprint 9E.
+- current sprint: Sprint 9F.
 - share pack mode: MINIMAL_REVIEW.
 - final file count: 20 or less.
-- coach-facing error copy count: 19.
-- coach-facing blocker copy count: 12.
-- coach-facing refusal copy count: 8.
-- compatible case copy count: 1.
-- cover badge text: Export compact 9E.
-- metadata false positives after 9E: 0.
+- exportReadTimeSecondsBefore9F: 817.
+- exportReadTimeSecondsAfter9F <= 800.
+- 9E copy counts and coverage preserved.
 - no runtime validation or preview activation.
