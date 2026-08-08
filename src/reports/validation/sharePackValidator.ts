@@ -487,6 +487,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewPreviewPayloadDryRunResultDetailCards9CValidation = readIfExists(
     join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md"),
   );
+  const manualReviewExportMetadataBadgeCleanup9D = readIfExists(
+    join(shareDirectory, "coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"),
+  );
+  const manualReviewExportMetadataBadgeCleanup9DValidation = readIfExists(
+    join(shareDirectory, "validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"),
+  );
+  const manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md"),
+  );
+  const manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation = readIfExists(
+    join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md"),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3727,6 +3739,30 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-dry-run-result-renderer-without-preview-activation-9b.md",
     ...sprint9BForbiddenLeftovers,
   ];
+  const sprint9DExpectedFiles = sprint9CExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md"
+      ? "coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"
+      : file === "validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md"
+        ? "validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"
+        : file
+  );
+  const sprint9DForbiddenLeftovers = [
+    "coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md",
+    "validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md",
+    ...sprint9CForbiddenLeftovers,
+  ];
+  const sprint9EExpectedFiles = sprint9DExpectedFiles.map((file) =>
+    file === "coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md"
+      : file === "validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md"
+        : file
+  );
+  const sprint9EForbiddenLeftovers = [
+    "coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md",
+    "validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md",
+    ...sprint9DForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5426,6 +5462,81 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 8T source files", bundleReports.includes("src/reports/buildManualReviewUxInteractionContractWithoutPersistence8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractProduct8T.ts") && bundleReports.includes("src/reports/renderManualReviewUxInteractionContractExport8T.ts") && bundleReports.includes("src/reports/manualReviewUxInteractionContract8T.test.ts"), "8T source bundled"),
     check("source 8S/8R/8Q/8P/8O/8N/8M/8L/8K reports were not deleted", bundleReports.includes("src/reports/buildManualReviewWorkflowUxSkeletonWithoutPersistence8S.ts") && bundleReports.includes("src/reports/buildManualReviewWorkflowReadinessWithoutPersistence8R.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewDecisionGateWithoutPersistence8Q.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewComparisonWithPreviousObservationPlan8P.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewRenderer8O.ts") && bundleReports.includes("src/reports/buildManualReviewResultIntakeBoundary8N.ts") && bundleReports.includes("src/reports/buildManualPostMatchObservationReviewForm8M.ts") && bundleReports.includes("src/reports/buildCoachReportSeasonlessLearningLoopObservationOutcomeTracker8L.ts") && bundleReports.includes("src/reports/buildCoachReportDecisionLayerNextMatchObservationPlan8K.ts"), "baseline sources still bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewUxInteractionContract8TValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const exportMainTagFor9D = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9D = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9D = exportHeaderFor9D.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const exportMainTagFor9E = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9E = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9E = exportHeaderFor9E.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const sprint9EChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9EExpectedFiles.every((file) => requiredCopied(file)), sprint9EExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9EExpectedFiles.every((file) => manifest.includes(file)), sprint9EExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9E", activeConfig.sprintName === "Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation", activeConfig.sprintName),
+    check("previous standalone 9D docs are not copied", sprint9EForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9EForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9E oriented", readme.includes("# Sprint 9E Share Pack") && readme.includes("coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md") && readme.includes("Export compact 9E"), "README current"),
+    check("9E report included", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("# Coach Report Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation 9E") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("Error Copy Summary") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("No-Runtime Audit"), "9E doc included"),
+    check("9E validation is PASS", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("coachFacingErrorCopyCount = 19"), "9E validation current"),
+    check("product 9E section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-9e"') && coachProductHtml.includes("Messages d'erreur coach-facing dry-run") && coachProductHtml.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"'), "product 9E visible"),
+    check("export 9E section visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-export-9e"') && coachExportHtml.includes("Messages erreur dry-run") && coachExportHtml.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"'), "export 9E visible"),
+    check("export title is 9E", coachExportHtml.includes("<title>Rapport coach export compact 9E - coach-facing error copy</title>") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("export title mentions 9E"), "title 9E"),
+    check("export main id is compressed-export-9e", exportMainTagFor9E.includes('id="compressed-export-9e"') && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("export main id is compressed-export-9e"), "main id 9E"),
+    check("export current data attribute is 9E", exportMainTagFor9E.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"') && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("export current data attribute 9E"), "data 9E"),
+    check("cover badge text is Export compact 9E", exportCoverBadgeTextFor9E === "Export compact 9E" && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("export cover badge Export compact 9E"), exportCoverBadgeTextFor9E),
+    check("metadata false positive count is zero", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("metadata false positives = 0") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("| metadata false positives | 0 |"), "false positives 0"),
+    check("body fallback forbidden for cover badge", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("body fallback false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("| body fallback | false |"), "no body fallback"),
+    check("9D metadata preserved in 9E", exportMainTagFor9E.includes('data-export-metadata-badge-cleanup-version="9D"') && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("baseline 9D visible and preserved"), "9D preserved"),
+    check("copy counts visible", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("coachFacingErrorCopyCount = 19") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("coachFacingBlockerCopyCount = 12") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("coachFacingRefusalCopyCount = 8") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("compatibleCaseCopyCount = 1"), "19/12/8/1"),
+    check("copy coverage complete", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("error coverage 19/19") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("blocker coverage 12/12") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("boundary coverage 14/14") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("refusal coverage 8/8"), "coverage complete"),
+    check("compatible-but-not-accepted wording visible", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("Forme compatible - non acceptee") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.includes("aucun payload n'est accepte ici"), "compatible copy visible"),
+    check("wording guard passes", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("wording score >=90") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("acceptedPayloadClaimCount = 0") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("runtimeValidationClaimCount = 0") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("tacticalInstructionWordingCount = 0"), "wording safe"),
+    check("no runtime validation or preview activation", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("validationRuntimeActive = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("realPayloadReadCount = 0") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("payloadCreated = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("dryRunAcceptedPayloadCount = 0") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("realPreviewGenerated = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("previewActivationCount = 0"), "no runtime/preview"),
+    check("no persistence truth selection tactic or mutation", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("submit/api/backend/storage/memory false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("officialTruthPromoted = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("automaticDecisionCreated = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("selectionDriven = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("tacticalInstructionDriven = false") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("score/timeline/score_change/event mutation = 0"), "no side effects"),
+    check("export budget checked honestly", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("export <=900") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("exportUnder900 correct") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("exportUnder800 correct"), "export budget"),
+    check("source-of-truth and batch-live separation preserved", manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("source-of-truth preserved") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("batch/live separation preserved"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("bundle includes 9E source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyCatalog9E.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWordingAudit9E.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyProduct9E.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExport9E.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts"), "9E source bundled"),
+    check("bundle keeps 9D source files", bundleReports.includes("src/reports/buildManualReviewExportMetadataBadgeCleanup9D.ts") && bundleReports.includes("src/reports/manualReviewExportCoverBadgeAudit9D.ts") && bundleReports.includes("src/reports/manualReviewExportMetadataBadgeCleanup9D.test.ts"), "9D source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9EValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+
+  const sprint9DChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9DExpectedFiles.every((file) => requiredCopied(file)), sprint9DExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9DExpectedFiles.every((file) => manifest.includes(file)), sprint9DExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9D", activeConfig.sprintName === "Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy", activeConfig.sprintName),
+    check("previous standalone 9C docs are not copied", sprint9DForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9DForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9D oriented", readme.includes("# Sprint 9D Share Pack") && readme.includes("coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md") && readme.includes("Export compact 9D"), "README current"),
+    check("9D report included", manualReviewExportMetadataBadgeCleanup9D.includes("# Coach Report Export Metadata Badge Cleanup Before Coach-Facing Error Copy 9D") && manualReviewExportMetadataBadgeCleanup9D.includes("Cover Badge Audit") && manualReviewExportMetadataBadgeCleanup9D.includes("False-Positive Guard"), "9D doc included"),
+    check("9D validation is PASS", manualReviewExportMetadataBadgeCleanup9DValidation.includes("Status: PASS") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("ManualReviewExportMetadataBadgeCleanup9DModel exists"), "9D validation current"),
+    check("product metadata cleanup visible", coachProductHtml.includes('id="manual-review-export-metadata-badge-cleanup-9d"') && coachProductHtml.includes("Correction metadata export") && coachProductHtml.includes('data-export-metadata-badge-cleanup-version="9D"'), "product 9D visible"),
+    check("export metadata cleanup visible", coachExportHtml.includes('id="manual-review-export-metadata-badge-cleanup-export-9d"') && coachExportHtml.includes("Correction metadata export") && coachExportHtml.includes('data-export-metadata-badge-cleanup-version="9D"'), "export 9D visible"),
+    check("export title is 9D", coachExportHtml.includes("<title>Rapport coach export compact 9D - metadata badge cleanup</title>") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportTitleMentions9D = true"), "title 9D"),
+    check("export main id is compressed-export-9d", exportMainTagFor9D.includes('id="compressed-export-9d"') && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportMainIdIs9D = true"), "main id 9D"),
+    check("export current data attribute is 9D", exportMainTagFor9D.includes('data-export-metadata-badge-cleanup-version="9D"') && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportMainCurrentVersionVisible = true"), "data 9D"),
+    check("cover badge text is Export compact 9D", exportCoverBadgeTextFor9D === "Export compact 9D" && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportCoverBadgeText = Export compact 9D"), exportCoverBadgeTextFor9D),
+    check("cover badge has no stale version", !exportCoverBadgeTextFor9D.includes("9C") && !exportCoverBadgeTextFor9D.includes("9B") && !exportCoverBadgeTextFor9D.includes("9A") && !exportCoverBadgeTextFor9D.includes("8Z") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportCoverBadgeStaleVersionCount = 0"), "cover badge clean"),
+    check("metadata false positive count is zero", manualReviewExportMetadataBadgeCleanup9DValidation.includes("metadataFalsePositiveCountAfter9D = 0") && manualReviewExportMetadataBadgeCleanup9D.includes("metadataFalsePositiveCountAfter9D") && manualReviewExportMetadataBadgeCleanup9D.includes("| metadataFalsePositiveCountAfter9D | 0 |"), "false positives 0"),
+    check("body fallback forbidden for cover badge", manualReviewExportMetadataBadgeCleanup9DValidation.includes("bodyMentionFallbackUsedForCoverBadge = false") && manualReviewExportMetadataBadgeCleanup9D.includes("bodyMentionFallbackForbidden"), "no body fallback"),
+    check("historical data attributes preserved", exportMainTagFor9D.includes('data-manual-review-preview-payload-dry-run-result-detail-cards-version="9C"') && exportMainTagFor9D.includes('data-manual-review-preview-payload-dry-run-result-renderer-version="9B"') && exportMainTagFor9D.includes('data-manual-review-preview-payload-dry-run-validator-version="9A"') && exportMainTagFor9D.includes('data-manual-review-validation-contract-audit-consistency-repair-version="8Z"') && exportMainTagFor9D.includes('data-manual-review-preview-payload-validation-contract-version="8Y"') && exportMainTagFor9D.includes('data-manual-review-preview-payload-contract-version="8X"') && exportMainTagFor9D.includes('data-manual-review-preview-activation-guards-version="8W"'), "historical attrs"),
+    check("9C detail cards preserved in 9D validation", manualReviewExportMetadataBadgeCleanup9DValidation.includes("9C detail cards preserved") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("wording score preserved or republished") && manualReviewExportMetadataBadgeCleanup9D.includes("detailCardCount: 16") && manualReviewExportMetadataBadgeCleanup9D.includes("wordingReadabilityScore: 97"), "9C preserved"),
+    check("no runtime payload preview persistence truth action or mutation", manualReviewExportMetadataBadgeCleanup9DValidation.includes("no runtime validation") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("no payload read/created/accepted") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("no preview generated") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("no persistence/memory/history") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("no official truth") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("no selection/tactic") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("no score/timeline/score_change/event mutation"), "no-runtime guard"),
+    check("export budget checked honestly", manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportReadTimeSecondsAfter9D <= 900") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportUnder900Seconds correctly computed") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("exportUnder800Seconds correctly computed"), "export budget"),
+    check("source-of-truth and batch-live separation preserved", manualReviewExportMetadataBadgeCleanup9DValidation.includes("source-of-truth preserved") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("batch/live separation preserved"), "source truth"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("PENALTY_SHOT inactive"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("bundle includes 9D source files", bundleReports.includes("src/reports/buildManualReviewExportMetadataBadgeCleanup9D.ts") && bundleReports.includes("src/reports/manualReviewExportCoverBadgeAudit9D.ts") && bundleReports.includes("src/reports/manualReviewExportMetadataAudit9D.ts") && bundleReports.includes("src/reports/manualReviewExportMetadataFalsePositiveGuard9D.ts") && bundleReports.includes("src/reports/renderManualReviewExportMetadataBadgeCleanupProduct9D.ts") && bundleReports.includes("src/reports/renderManualReviewExportMetadataBadgeCleanupExport9D.ts") && bundleReports.includes("src/reports/manualReviewExportMetadataBadgeCleanup9D.test.ts"), "9D source bundled"),
+    check("source 9C baseline files were not deleted", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9C.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunResultDetailCardsTypes9C.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunResultDetailCardsWarnings9C.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.ts"), "9C source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewExportMetadataBadgeCleanup9DValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
 
   const sprint9CChecks: readonly SharePackCheck[] = [
@@ -10126,6 +10237,10 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9E - Manual Review")
+      ? sprint9EChecks
+    : activeConfig.sprintName.includes("Sprint 9D - Export Metadata")
+      ? sprint9DChecks
     : activeConfig.sprintName.includes("Sprint 9C - Manual Review")
       ? sprint9CChecks
     : activeConfig.sprintName.includes("Sprint 9B - Manual Review")

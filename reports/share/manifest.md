@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-08-07T16:09:50.690Z
-Task/sprint: Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation
+Generated: 2026-08-07T20:32:36.406Z
+Task/sprint: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md
-- validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md
+- coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
+- validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
 - README.md
 
 ## Bundle Files

@@ -4,7 +4,7 @@ Status: PASS
 
 ## Counts
 - share pack mode: MINIMAL_REVIEW
-- current sprint: Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation
+- current sprint: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
 - final file count: 20
 - share file count: 20
 - minimal allowlist count: 20
@@ -21,34 +21,33 @@ Status: PASS
 - PASS: final file count is 20 - 20
 - PASS: all expected files are copied - all copied
 - PASS: all expected files are listed in manifest - all listed
-- PASS: current sprint is Sprint 9C - Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation
-- PASS: previous standalone 9B docs are not copied - 0
-- PASS: README is Sprint 9C oriented - README current
-- PASS: 9C report included - 9C doc included
-- PASS: 9C validation is PASS - 9C validation current
-- PASS: product dry-run detail cards visible - product 9C visible
-- PASS: export dry-run detail cards visible - export 9C visible
-- PASS: 9B and 9A baselines remain embedded - 9B/9A embedded
-- PASS: detail card status correct - detail status
-- PASS: detail cards and groups complete - 16/3/1/10/5
-- PASS: detail card copy and mappings complete - detail card content complete
-- PASS: valid case detail card not accepted - valid case safe
-- PASS: no payload preview runtime claims - no claims
-- PASS: detail coverage complete - coverage complete
-- PASS: no runtime validation payload read acceptance or preview generation - no runtime/payload/preview
-- PASS: no persistence official truth automation or decisions - no persistence/truth/action
-- PASS: no score timeline score_change or event mutation - no match mutation
-- PASS: baseline statuses preserved - statuses preserved
-- PASS: wording score is explicit and strong - wording 97
-- PASS: export metadata is 9C - export metadata 9C
-- PASS: export id no longer compressed-export-9b - stale 9B id removed
+- PASS: current sprint is Sprint 9E - Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation
+- PASS: previous standalone 9D docs are not copied - 0
+- PASS: README is Sprint 9E oriented - README current
+- PASS: 9E report included - 9E doc included
+- PASS: 9E validation is PASS - 9E validation current
+- PASS: product 9E section visible - product 9E visible
+- PASS: export 9E section visible - export 9E visible
+- PASS: export title is 9E - title 9E
+- PASS: export main id is compressed-export-9e - main id 9E
+- PASS: export current data attribute is 9E - data 9E
+- PASS: cover badge text is Export compact 9E - Export compact 9E
+- PASS: metadata false positive count is zero - false positives 0
+- PASS: body fallback forbidden for cover badge - no body fallback
+- PASS: 9D metadata preserved in 9E - 9D preserved
+- PASS: copy counts visible - 19/12/8/1
+- PASS: copy coverage complete - coverage complete
+- PASS: compatible-but-not-accepted wording visible - compatible copy visible
+- PASS: wording guard passes - wording safe
+- PASS: no runtime validation or preview activation - no runtime/preview
+- PASS: no persistence truth selection tactic or mutation - no side effects
 - PASS: export budget checked honestly - export budget
 - PASS: source-of-truth and batch-live separation preserved - source truth
 - PASS: scoring constants unchanged - scoring constants visible
 - PASS: PENALTY_SHOT remains inactive - penalty inactive
 - PASS: MatchBonusEvent unchanged - MatchBonusEvent separated
-- PASS: bundle includes 9C source files - 9C source bundled
-- PASS: source 9B baseline files were not deleted - 9B source bundled
+- PASS: bundle includes 9E source files - 9E source bundled
+- PASS: bundle keeps 9D source files - 9D source bundled
 - PASS: explicit exhaustive test command available - test:all visible
 
 ## Files
@@ -58,7 +57,7 @@ Status: PASS
 - bundle__contracts.md
 - bundle__reports.md
 - bundle__simulation.md
-- coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md
+- coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
 - coach-report.default.html
 - coach-report.experimental.html
 - coach-report.export.html
@@ -71,5 +70,5 @@ Status: PASS
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - tsconfig.json
-- validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md
+- validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md
 - validation.share-pack.md

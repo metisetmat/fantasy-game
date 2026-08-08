@@ -185,6 +185,10 @@ import {
   renderManualReviewPreviewPayloadDryRunResultRendererWithoutPreviewActivation9BValidation,
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc,
   renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation,
+  renderManualReviewExportMetadataBadgeCleanup9DDoc,
+  renderManualReviewExportMetadataBadgeCleanup9DValidation,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation,
   renderFullMatchCalibrationCarryoverReconciliation6CDoc,
   renderFullMatchCalibrationCarryoverReconciliation6CValidation,
   renderFullMatchScoringFamilyAttribution6BDoc,
@@ -198,11 +202,11 @@ import type { FullMatchTraceValidationModel } from "../../simulation/validation/
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9C - Manual Review Preview Payload Dry-Run Result Detail Cards Without Preview Activation";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md";
+  "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-result-detail-cards-without-preview-activation-9c.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4268,6 +4272,116 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9C test proving 16 detail cards, 3 groups, complete coverage, valid case not accepted, no runtime effects, and current 9C export metadata",
       },
       {
+        source: "src/reports/manualReviewExportMetadataBadgeCleanupTypes9D.ts",
+        required: true,
+        reason: "Sprint 9D typed export metadata badge cleanup contract and strict audit model",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataBadgeCleanupWarnings9D.ts",
+        required: true,
+        reason: "Sprint 9D warning registry for export badge cleanup, strict metadata checks, and no-runtime blockers",
+      },
+      {
+        source: "src/reports/manualReviewExportCoverBadgeAudit9D.ts",
+        required: true,
+        reason: "Sprint 9D strict cover badge audit that reads only header/cover badges and forbids body fallback",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataAudit9D.ts",
+        required: true,
+        reason: "Sprint 9D export metadata audit for title, main id, current data attribute, historical markers, and stale badge checks",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataFalsePositiveGuard9D.ts",
+        required: true,
+        reason: "Sprint 9D false-positive guard preventing body mentions from validating the cover badge",
+      },
+      {
+        source: "src/reports/renderManualReviewExportMetadataBadgeCleanupProduct9D.ts",
+        required: true,
+        reason: "Sprint 9D product renderer adding the Correction metadata export section after the 9C detail cards",
+      },
+      {
+        source: "src/reports/renderManualReviewExportMetadataBadgeCleanupExport9D.ts",
+        required: true,
+        reason: "Sprint 9D export renderer correcting title, main id, current data attribute, cover badge, and compact export section",
+      },
+      {
+        source: "src/reports/buildManualReviewExportMetadataBadgeCleanup9D.ts",
+        required: true,
+        reason: "Sprint 9D builder, report renderer, and validation renderer for metadata badge cleanup before coach-facing error copy",
+      },
+      {
+        source: "src/reports/manualReviewExportMetadataBadgeCleanup9D.test.ts",
+        required: true,
+        reason: "Sprint 9D test proving stale 9B cover badge detection, 9D correction, 9C preservation, no runtime effects, and share-pack 9D selection",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWarnings9E.ts",
+        required: true,
+        reason: "Sprint 9E warning registry for coach-facing dry-run error copy and no-runtime blockers",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyTypes9E.ts",
+        required: true,
+        reason: "Sprint 9E typed coach-facing error-copy contract and audit model",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyCatalog9E.ts",
+        required: true,
+        reason: "Sprint 9E coach-facing copy catalog covering compatible, error, blocker, boundary, and refusal states",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyCoverageAudit9E.ts",
+        required: true,
+        reason: "Sprint 9E coverage audit proving all dry-run error, blocker, boundary, and refusal states have coach-facing wording",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyWordingAudit9E.ts",
+        required: true,
+        reason: "Sprint 9E wording audit blocking official-truth, payload-acceptance, selection, tactical, storage, and runtime claims",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyNoRuntimeAudit9E.ts",
+        required: true,
+        reason: "Sprint 9E no-runtime audit preserving dry-run-only behavior without payload reads or preview activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportMetadataAudit9E.ts",
+        required: true,
+        reason: "Sprint 9E strict export metadata audit for title, main id, current data attribute, cover badge, and historical 9D markers",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9E.ts",
+        required: true,
+        reason: "Sprint 9E export budget audit proving the coach-facing copy remains inside the 900-second export limit",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopySourceOfTruthAudit9E.ts",
+        required: true,
+        reason: "Sprint 9E source-of-truth audit preserving scoring constants, batch/live separation, and MatchBonusEvent boundaries",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyProduct9E.ts",
+        required: true,
+        reason: "Sprint 9E product renderer adding coach-facing dry-run error copy without activating preview or validation runtime",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExport9E.ts",
+        required: true,
+        reason: "Sprint 9E export renderer normalizing title/main id/badge/data attribute and adding compact copy evidence",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E.ts",
+        required: true,
+        reason: "Sprint 9E builder, report renderer, and validation renderer for coach-facing dry-run error copy",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts",
+        required: true,
+        reason: "Sprint 9E contract test proving copy coverage, wording safety, no-runtime behavior, 9D metadata preservation, and share-pack alignment",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6424,6 +6538,12 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9E")) {
+    return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 9D")) {
+    return renderManualReviewExportMetadataBadgeCleanup9DDoc(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9C")) {
     return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CDoc(fullMatchTraceValidationModel());
   }
@@ -8822,6 +8942,12 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9E")) {
+    return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation(fullMatchTraceValidationModel());
+  }
+  if (TASK_NAME.includes("Sprint 9D")) {
+    return renderManualReviewExportMetadataBadgeCleanup9DValidation(fullMatchTraceValidationModel());
+  }
   if (TASK_NAME.includes("Sprint 9C")) {
     return renderManualReviewPreviewPayloadDryRunResultDetailCardsWithoutPreviewActivation9CValidation(fullMatchTraceValidationModel());
   }
@@ -11166,6 +11292,76 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9E")) {
+    return [
+      "# Sprint 9E Share Pack",
+      "",
+      "Current sprint: Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9D docs with 9E coach-facing error-copy docs while keeping 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9E Focus",
+      "- Adds coach-facing copy for dry-run compatible-but-not-accepted, validation error, blocker, boundary guard, and refusal states.",
+      "- Keeps the manual review preview non-persistent and inactive: no runtime validation, no payload read, no preview activation, no submit, no storage, and no official-truth promotion.",
+      "- Preserves the 9D export metadata cleanup: title, main id, data attribute, cover badge, false-positive guard, and historical markers.",
+      "- Keeps the export compact with the cover badge Export compact 9E.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9E.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- coach-facing error copy count: 19.",
+      "- coach-facing blocker copy count: 12.",
+      "- coach-facing refusal copy count: 8.",
+      "- compatible case copy count: 1.",
+      "- cover badge text: Export compact 9E.",
+      "- metadata false positives after 9E: 0.",
+      "- no runtime validation or preview activation.",
+      "",
+    ].join("\n");
+  }
+  if (TASK_NAME.includes("Sprint 9D")) {
+    return [
+      "# Sprint 9D Share Pack",
+      "",
+      "Current sprint: Sprint 9D - Export Metadata Badge Cleanup Before Coach-Facing Error Copy",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9C docs with 9D export metadata badge cleanup docs while keeping 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md",
+      "4. coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9D Focus",
+      "- Corrects the visible cover badge from Export compact 9B to Export compact 9D.",
+      "- Aligns title, main id, current data attribute, cover badge, validation report, and share pack on 9D.",
+      "- Preserves historical 9C/9B/9A/8Z/8Y/8X/8W data attributes and sections.",
+      "- Adds strict cover badge audit: no body mention fallback can validate the badge.",
+      "- Adds false-positive guard for stale badge/title/main metadata.",
+      "- Keeps 9C detail cards intact: 16 cards, 3 groups, wording 97, complete coverage.",
+      "- Keeps runtime, payload, preview, persistence, official truth, selection, tactic, score, timeline, score_change, scoring constants, and MatchBonusEvent unchanged.",
+      "",
+      "## Expected Validation",
+      "- validation.share-pack.md: Status PASS.",
+      "- share file count: 20.",
+      "- current sprint: Sprint 9D.",
+      "- previous standalone 9C docs copied: 0.",
+      "- cover badge text: Export compact 9D.",
+      "- metadata false positives after 9D: 0.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9C")) {
     return [
       "# Sprint 9C Share Pack",
