@@ -265,6 +265,11 @@ import {
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc as renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDocBase,
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation as renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidationBase,
 } from "../../reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E";
+import {
+  currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc as renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDocBase,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation as renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidationBase,
+} from "../../reports/buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F";
 import { buildCoachReportMultiMatchHistoryView } from "../../reports/buildCoachReportMultiMatchHistoryView";
 import { buildCoachReportPhaseVisualReadability } from "../../reports/buildCoachReportPhaseVisualReadability";
 import { buildCoachReportPhaseVisuals } from "../../reports/buildCoachReportPhaseVisuals";
@@ -7129,6 +7134,22 @@ export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithou
 ): string {
   return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidationBase(
     currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDocBase(
+    currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel(),
+  );
+}
+
+export function renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation(
+  _model: FullMatchTraceValidationModel
+): string {
+  return renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidationBase(
+    currentManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel(),
   );
 }
 

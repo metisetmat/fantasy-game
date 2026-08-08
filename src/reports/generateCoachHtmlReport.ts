@@ -152,6 +152,11 @@ import {
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EDoc,
   renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation,
 } from "./buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9E";
+import {
+  buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc,
+  renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation,
+} from "./buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -629,8 +634,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9E: manualReviewExportMetadataBadgeCleanup9D.productHtmlAfter9D,
       exportHtmlBefore9E: manualReviewExportMetadataBadgeCleanup9D.exportHtmlAfter9D,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.productHtmlAfter9E;
-  const exportHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.exportHtmlAfter9E;
+  const manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F =
+    buildManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FModel({
+      baseline9E: manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E,
+      productHtmlBefore9F: manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.productHtmlAfter9E,
+      exportHtmlBefore9F: manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.exportHtmlAfter9E,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.productHtmlAfter9F;
+  const exportHtml = manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.exportHtmlAfter9F;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -743,6 +754,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyWithoutPreviewActivation9EValidation(manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
+    renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FDoc(manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
+    renderManualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation(manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -773,6 +794,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 9E - Manual Review Preview Payload Dry-Run Coach-Facing Error Copy Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9F - Export Budget Compaction For Error Copy. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1167,6 +1167,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewPreviewPayloadDryRunResultDetailCards9C.test.js",
   "reports/manualReviewExportMetadataBadgeCleanup9D.test.js",
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.js",
+  "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 
