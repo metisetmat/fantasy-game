@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-09-07T14:09:16.562Z
+Generated timestamp: 2026-09-07T14:44:30.135Z
 Task/sprint name: Sprint 9I - Export Budget Cushion Before Progressive Disclosure
 Final file count: 20
 
@@ -1281,18 +1281,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts
- M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.ts
+ M src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts
  M src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts
- M src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.ts
- M src/reports/validation/sharePackValidator.ts
-?? src/reports/buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.ts
-?? src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionAudit9I.ts
-?? src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.test.ts
-?? src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionGuard9I.ts
-?? src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionTypes9I.ts
-?? src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionWarnings9I.ts
-?? src/reports/renderManualReviewPreviewPayloadDryRunExportBudgetCushionExport9I.ts
-?? src/reports/renderManualReviewPreviewPayloadDryRunExportBudgetCushionProduct9I.ts
