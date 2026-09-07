@@ -100,15 +100,19 @@ assert.equal(scoringRegistryEntry("PENALTY_SHOT").active, false);
 assert.equal(model.scoringConstantsChanged, false);
 assert.equal(model.matchBonusEventChanged, false);
 assert.equal(model.batchLiveSeparationPreserved, true);
-assert.equal(currentSprint.name.includes("Sprint 9F"), true);
+assert.equal(
+  currentSprint.name.includes("Sprint 9F") || currentSprint.name.includes("Sprint 9G"),
+  true,
+);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md"),
   false,
 );
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
-  true,
+  currentSprint.name.includes("Sprint 9F"),
 );
+assert.equal(currentSprint.fileReasons["bundle__reports.md"]?.includes("Sprint 9F export budget compaction"), true);
 
 assert.throws(
   () =>

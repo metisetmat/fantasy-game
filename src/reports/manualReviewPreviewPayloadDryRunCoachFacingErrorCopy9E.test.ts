@@ -110,7 +110,10 @@ assert.equal(scoringRegistryEntry("PENALTY_SHOT").active, false);
 assert.equal(model.guardrailsPreserved, true);
 assert.equal(model.sourceOfTruthSeparationPreserved, true);
 assert.equal(model.sourceOfTruthAudit.batchLiveSeparationPreserved, true);
-assert.equal(currentSprint.name.includes("Sprint 9F"), true);
+assert.equal(
+  currentSprint.name.includes("Sprint 9F") || currentSprint.name.includes("Sprint 9G"),
+  true,
+);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-export-metadata-badge-cleanup-before-coach-facing-error-copy-9d.md"),
   false,
@@ -121,8 +124,9 @@ assert.equal(
 );
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
-  true,
+  currentSprint.name.includes("Sprint 9F"),
 );
+assert.equal(currentSprint.fileReasons["bundle__reports.md"]?.includes("Sprint 9E coach-facing error copy"), true);
 
 assert.throws(
   () =>

@@ -505,6 +505,12 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9FValidation = readIfExists(
     join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
   );
+  const manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"),
+  );
+  const manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation = readIfExists(
+    join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3781,6 +3787,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md",
     ...sprint9EForbiddenLeftovers,
   ];
+  const sprint9GExpectedFiles = sprint9FExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"
+      : file === "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"
+        : file
+  );
+  const sprint9GForbiddenLeftovers = [
+    "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md",
+    "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md",
+    ...sprint9FForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5491,6 +5509,44 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const exportMainTagFor9F = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
   const exportHeaderFor9F = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
   const exportCoverBadgeTextFor9F = exportHeaderFor9F.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const exportMainTagFor9G = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9G = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9G = exportHeaderFor9G.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const sprint9GChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9GExpectedFiles.every((file) => requiredCopied(file)), sprint9GExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9GExpectedFiles.every((file) => manifest.includes(file)), sprint9GExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9G", activeConfig.sprintName === "Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping", activeConfig.sprintName),
+    check("previous standalone 9F docs are not copied", sprint9GForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9GForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9G oriented", readme.includes("# Sprint 9G Share Pack") && readme.includes("coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md") && readme.includes("Export compact 9G"), "README current"),
+    check("9G report included", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("# Coach Report Manual Review Preview Payload Dry-Run Export Key Messages Warning Consistency Repair 9G") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("Key Messages Audit") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("Mutual Exclusion Guard"), "9G doc included"),
+    check("9G validation is PASS", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("export key messages detected 7/7"), "9G validation current"),
+    check("product 9E detail remains visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-9e"') && coachProductHtml.includes("Messages blockers") && coachProductHtml.includes("Messages refusals") && coachProductHtml.includes("Correction future"), "product 9E detail visible"),
+    check("product 9F compaction section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f"') && coachProductHtml.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"'), "product 9F visible"),
+    check("product 9G warning repair section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g"') && coachProductHtml.includes("Cohérence warnings messages clés export"), "product 9G visible"),
+    check("export 9F compact section preserved", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-export-9f"') && coachExportHtml.includes("Messages erreur dry-run") && coachExportHtml.includes("19 erreurs, 12 blockers, 8 refus"), "export 9F compact visible"),
+    check("export 9G key-message section visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-export-9g"') && coachExportHtml.includes("Cohérence messages clés") && coachExportHtml.includes("Messages clés détectés") && coachExportHtml.includes("Warning contradiction"), "export 9G visible"),
+    check("export title is 9G", coachExportHtml.includes("<title>Rapport coach export compact 9G - key messages warning consistency</title>") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("export metadata 9G clean"), "title 9G"),
+    check("export main id is compressed-export-9g", exportMainTagFor9G.includes('id="compressed-export-9g"'), "main id 9G"),
+    check("export current data attribute is 9G", exportMainTagFor9G.includes('data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G"'), "data 9G"),
+    check("cover badge text is Export compact 9G", exportCoverBadgeTextFor9G === "Export compact 9G", exportCoverBadgeTextFor9G),
+    check("historical 9F and 9E metadata preserved", exportMainTagFor9G.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"') && exportMainTagFor9G.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"'), "historical attrs"),
+    check("key messages detected 7 of 7", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("export key messages detected 7/7") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("detected | 7"), "7/7"),
+    check("missing key messages none", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("missing key messages none") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("missing list | none"), "none"),
+    check("preserved warning present and missing warning absent", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("EXPORT_KEY_MESSAGES_PRESERVED present") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("EXPORT_KEY_MESSAGES_MISSING absent") && !manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("- EXPORT_KEY_MESSAGES_MISSING\n"), "mutually exclusive"),
+    check("warning contradiction repaired", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("contradiction count before = 1") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("contradiction count after = 0"), "1 -> 0"),
+    check("mutual exclusion guard passed", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("mutual exclusion guard passed") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.includes("warningMutualExclusionGuardPassed | true"), "guard PASS"),
+    check("export <=800", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("export <=800"), "budget visible"),
+    check("no runtime payload preview storage truth action mutation", manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("no runtime payload preview storage truth action mutation"), "no side effects"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("scoring unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("scoring unchanged"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 9G source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesAudit9G.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyGuard9G.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.ts"), "9G source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
   const sprint9FChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
@@ -10293,6 +10349,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9G - Export Key Messages")
+      ? sprint9GChecks
     : activeConfig.sprintName.includes("Sprint 9F - Export Budget")
       ? sprint9FChecks
     : activeConfig.sprintName.includes("Sprint 9E - Manual Review")
