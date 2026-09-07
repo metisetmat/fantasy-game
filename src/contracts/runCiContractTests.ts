@@ -27,6 +27,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewExportMetadataBadgeCleanup9D.test.js",
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.js",
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.js",
+  "reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 

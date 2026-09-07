@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 9F - Export Budget Compaction For Error Copy. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1168,6 +1168,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewExportMetadataBadgeCleanup9D.test.js",
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.js",
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.js",
+  "reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 

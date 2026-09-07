@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-08-08T12:12:06.410Z
-Task/sprint: Sprint 9F - Export Budget Compaction For Error Copy
+Generated: 2026-09-07T08:50:54.777Z
+Task/sprint: Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md
-- validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md
+- coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md
+- validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md
 - README.md
 
 ## Bundle Files

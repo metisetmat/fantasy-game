@@ -202,13 +202,18 @@ import {
 } from "../../simulation/validation/fullMatchTraceValidationReport";
 import type { FullMatchTraceValidationModel } from "../../simulation/validation/fullMatchTraceValidationProfiles";
 import type { CoachReportPersistenceEvidenceSnapshot } from "../coachReportPersistenceEvidenceSnapshot";
+import {
+  currentManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GModel,
+  renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GDoc,
+  renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation,
+} from "../buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9F - Export Budget Compaction For Error Copy";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md";
+  "coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4443,6 +4448,61 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9F contract test proving export read time drops under 800 seconds without losing 9E copy coverage or source-of-truth boundaries",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyWarnings9G.ts",
+        required: true,
+        reason: "Sprint 9G warning registry with mutually exclusive export key-message positive and negative warnings",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyTypes9G.ts",
+        required: true,
+        reason: "Sprint 9G typed model proving export key-message detection and warning consistency repair",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesAudit9G.ts",
+        required: true,
+        reason: "Sprint 9G robust normalized export key-message audit for seven compact guardrail messages",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyGuard9G.ts",
+        required: true,
+        reason: "Sprint 9G mutual-exclusion guard blocking preserved and missing warnings from coexisting",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunWarningConsistencyAudit9G.ts",
+        required: true,
+        reason: "Sprint 9G before/after warning consistency audit measuring the 9F contradiction and repaired 9G state",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesMetadataAudit9G.ts",
+        required: true,
+        reason: "Sprint 9G export metadata audit for title, main id, current data attribute, badge, and historical markers",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesBudgetAudit9G.ts",
+        required: true,
+        reason: "Sprint 9G export budget audit proving the warning repair keeps the compact export under 800 seconds",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesNoRuntimeAudit9G.ts",
+        required: true,
+        reason: "Sprint 9G no-runtime audit preserving dry-run-only behavior without payload reads or preview activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesSourceOfTruthAudit9G.ts",
+        required: true,
+        reason: "Sprint 9G source-of-truth audit preserving scoring constants, batch/live separation, and MatchBonusEvent boundaries",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.ts",
+        required: true,
+        reason: "Sprint 9G builder, product/export repair renderer, report renderer, and validation renderer",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.ts",
+        required: true,
+        reason: "Sprint 9G contract test proving key-message detection, warning mutual exclusion, metadata, budget, no-runtime, and share-pack alignment",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6599,6 +6659,13 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9G")) {
+    const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    if (generatedDoc.length > 0) return generatedDoc;
+    return renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GDoc(
+      currentManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9F")) {
     const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
     if (generatedDoc.length > 0) return generatedDoc;
@@ -9008,6 +9075,13 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9G")) {
+    const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    if (generatedValidation.length > 0) return generatedValidation;
+    return renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation(
+      currentManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9F")) {
     const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
     if (generatedValidation.length > 0) return generatedValidation;
@@ -11363,6 +11437,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9G")) {
+    return [
+      "# Sprint 9G Share Pack",
+      "",
+      "Current sprint: Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9F docs with 9G warning-consistency docs while keeping 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9G Focus",
+      "- Repairs the contradictory export key-message warnings from 9F.",
+      "- Keeps EXPORT_KEY_MESSAGES_PRESERVED and EXPORT_KEY_MESSAGES_MISSING mutually exclusive.",
+      "- Proves all seven compact export key messages are detected and none are missing.",
+      "- Keeps the 9F compact export under 800 seconds and preserves 9E product copy details.",
+      "- Moves the current export cover badge to Export compact 9G.",
+      "- Preserves no-runtime, no-payload, no-preview, no-storage, no-official-truth, no-selection, no-tactic, and no-score/timeline-mutation boundaries.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9G.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- export key messages detected: 7/7.",
+      "- EXPORT_KEY_MESSAGES_PRESERVED present.",
+      "- EXPORT_KEY_MESSAGES_MISSING absent.",
+      "- warning contradiction after 9G: 0.",
+      "- exportReadTimeSecondsAfter9G <= 800.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9F")) {
     return [
       "# Sprint 9F Share Pack",
