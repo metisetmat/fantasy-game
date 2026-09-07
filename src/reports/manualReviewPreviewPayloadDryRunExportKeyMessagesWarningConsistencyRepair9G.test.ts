@@ -198,14 +198,18 @@ assert.equal(model.penaltyShotInactive, true);
 assert.equal(model.matchBonusEventChanged, false);
 assert.equal(model.batchLiveSeparationPreserved, true);
 
-assert.equal(currentSprint.name.includes("Sprint 9G"), true);
+assert.equal(currentSprint.name.includes("Sprint 9G") || currentSprint.name.includes("Sprint 9H"), true);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
   false,
 );
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"),
-  true,
+  currentSprint.name.includes("Sprint 9G"),
+);
+assert.equal(
+  currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+  currentSprint.name.includes("Sprint 9H"),
 );
 
 assert.equal(model.exportHtmlAfter9G.includes("Cohérence messages clés"), true);

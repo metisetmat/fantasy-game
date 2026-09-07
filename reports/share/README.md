@@ -1,31 +1,31 @@
-# Sprint 9G Share Pack
+# Sprint 9H Share Pack
 
-Current sprint: Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping
+Current sprint: Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation
 
-Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9F docs with 9G warning-consistency docs while keeping 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
+Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9G docs with 9H UX-grouping docs while keeping 9G, 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md
-4. coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md
+3. validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md
+4. coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md
 5. validation.share-pack.md
 
-## Sprint 9G Focus
-- Repairs the contradictory export key-message warnings from 9F.
-- Keeps EXPORT_KEY_MESSAGES_PRESERVED and EXPORT_KEY_MESSAGES_MISSING mutually exclusive.
-- Proves all seven compact export key messages are detected and none are missing.
-- Keeps the 9F compact export under 800 seconds and preserves 9E product copy details.
-- Moves the current export cover badge to Export compact 9G.
-- Preserves no-runtime, no-payload, no-preview, no-storage, no-official-truth, no-selection, no-tactic, and no-score/timeline-mutation boundaries.
+## Sprint 9H Focus
+- Groups the 9E dry-run copy into five coach-readable UX families.
+- Preserves 19 error copies, 12 blockers, 8 refusals, 1 compatible-but-not-accepted case, and coverage 19/12/14/8.
+- Keeps the 9G warning repair intact: messages clés 7/7, missing 0, contradiction 0.
+- Keeps the compact export under 800 seconds by replacing the previous 9G summary with the 9H grouped summary.
+- Moves the current export cover badge to Export compact 9H.
+- Preserves no-runtime, no-payload, no-preview, no-storage, no-official-truth, no-decision, no-selection, no-tactic, and no-score/timeline-mutation boundaries.
 
 ## Expected Validation Highlights
 - Status: PASS.
-- current sprint: Sprint 9G.
+- current sprint: Sprint 9H.
 - share pack mode: MINIMAL_REVIEW.
 - final file count: 20 or less.
-- export key messages detected: 7/7.
-- EXPORT_KEY_MESSAGES_PRESERVED present.
-- EXPORT_KEY_MESSAGES_MISSING absent.
-- warning contradiction after 9G: 0.
-- exportReadTimeSecondsAfter9G <= 800.
+- UX groups: 5.
+- grouped copy counts: 19/12/8/1.
+- ungrouped/duplicated group assignments: 0/0.
+- warning contradiction after 9H: 0.
+- exportReadTimeSecondsAfter9H <= 800.

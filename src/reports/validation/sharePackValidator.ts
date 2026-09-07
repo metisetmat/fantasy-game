@@ -511,6 +511,12 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation = readIfExists(
     join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"),
   );
+  const manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+  );
+  const manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation = readIfExists(
+    join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3799,6 +3805,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md",
     ...sprint9FForbiddenLeftovers,
   ];
+  const sprint9HExpectedFiles = sprint9GExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"
+      : file === "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"
+        : file
+  );
+  const sprint9HForbiddenLeftovers = [
+    "coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md",
+    "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md",
+    ...sprint9GForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5512,6 +5530,46 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const exportMainTagFor9G = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
   const exportHeaderFor9G = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
   const exportCoverBadgeTextFor9G = exportHeaderFor9G.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const exportMainTagFor9H = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9H = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9H = exportHeaderFor9H.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const sprint9HChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9HExpectedFiles.every((file) => requiredCopied(file)), sprint9HExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9HExpectedFiles.every((file) => manifest.includes(file)), sprint9HExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9H", activeConfig.sprintName === "Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation", activeConfig.sprintName),
+    check("previous standalone 9G docs are not copied", sprint9HForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9HForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9H oriented", readme.includes("# Sprint 9H Share Pack") && readme.includes("coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md") && readme.includes("Export compact 9H"), "README current"),
+    check("9H report included", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("# Coach Report Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation 9H") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("UX Grouping Summary") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("9G Warning Consistency Preservation"), "9H doc included"),
+    check("9H validation is PASS", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("UX groups = 5") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("export <=800"), "9H validation current"),
+    check("product 9E detail remains visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-9e"') && coachProductHtml.includes("Messages blockers") && coachProductHtml.includes("Messages refusals") && coachProductHtml.includes("Correction future"), "product 9E detail visible"),
+    check("product 9F compaction section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f"') && coachProductHtml.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"'), "product 9F visible"),
+    check("product 9G warning repair section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g"') && coachProductHtml.includes("Cohérence warnings messages clés export"), "product 9G visible"),
+    check("product 9H grouping section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-error-copy-ux-grouping-9h"') && coachProductHtml.includes("Regroupement UX des erreurs dry-run") && coachProductHtml.includes("5 familles lisibles"), "product 9H visible"),
+    check("export 9F compact section preserved", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-coach-facing-error-copy-export-9f"') && coachExportHtml.includes("Messages erreur dry-run") && coachExportHtml.includes("19 erreurs, 12 blockers, 8 refus"), "export 9F compact visible"),
+    check("export 9H grouped section visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-error-copy-ux-grouping-export-9h"') && coachExportHtml.includes("Groupes erreurs dry-run") && coachExportHtml.includes("19 erreurs, 12 blockers, 8 refus, 1 cas compatible non accepte") && coachExportHtml.includes("messages clés 7/7, missing 0, contradiction 0"), "export 9H visible"),
+    check("export title is 9H", coachExportHtml.includes("<title>Rapport coach export compact 9H - error copy UX grouping</title>") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("export metadata 9H clean"), "title 9H"),
+    check("export main id is compressed-export-9h", exportMainTagFor9H.includes('id="compressed-export-9h"'), "main id 9H"),
+    check("export current data attribute is 9H", exportMainTagFor9H.includes('data-manual-review-preview-payload-dry-run-error-copy-ux-grouping-version="9H"'), "data 9H"),
+    check("cover badge text is Export compact 9H", exportCoverBadgeTextFor9H === "Export compact 9H", exportCoverBadgeTextFor9H),
+    check("historical 9G 9F and 9E metadata preserved", exportMainTagFor9H.includes('data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G"') && exportMainTagFor9H.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"') && exportMainTagFor9H.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"'), "historical attrs"),
+    check("UX groups and grouped counts visible", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("uxGroupCount | 5/5") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("groupedErrorCopyCount | 19/19") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("groupedBlockerCopyCount | 12/12") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("groupedRefusalCopyCount | 8/8") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("groupedCompatibleCaseCount | 1/1"), "5 and 19/12/8/1"),
+    check("ungrouped and duplicated assignments are zero", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("ungroupedCopyCount | 0") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.includes("duplicatedCopyCount | 0"), "0/0"),
+    check("coverage 19/12/14/8 unchanged", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("coverage 19/12/14/8 unchanged"), "coverage preserved"),
+    check("compatible case remains non accepted", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("compatible case remains not accepted") && coachProductHtml.includes("Le cas compatible reste non accepte"), "compatible case preserved"),
+    check("9G warning consistency preserved", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("9G key messages preserved") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("warning contradiction remains zero") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("EXPORT_KEY_MESSAGES_MISSING remains absent"), "9G preserved"),
+    check("export <=800", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("export <=800"), "budget visible"),
+    check("no runtime payload preview storage truth action mutation", manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("no runtime payload preview storage truth action mutation"), "no side effects"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("scoring unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("scoring unchanged"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 9H source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingAudit9H.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingExport9H.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts"), "9H source bundled"),
+    check("bundle keeps 9G source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.ts"), "9G source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
   const sprint9GChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
@@ -10349,6 +10407,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9H - Manual Review")
+      ? sprint9HChecks
     : activeConfig.sprintName.includes("Sprint 9G - Export Key Messages")
       ? sprint9GChecks
     : activeConfig.sprintName.includes("Sprint 9F - Export Budget")
