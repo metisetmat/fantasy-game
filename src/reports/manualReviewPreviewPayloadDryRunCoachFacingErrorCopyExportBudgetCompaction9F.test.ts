@@ -101,7 +101,7 @@ assert.equal(model.scoringConstantsChanged, false);
 assert.equal(model.matchBonusEventChanged, false);
 assert.equal(model.batchLiveSeparationPreserved, true);
 assert.equal(
-  currentSprint.name.includes("Sprint 9F") || currentSprint.name.includes("Sprint 9G"),
+  currentSprint.name.includes("Sprint 9F") || currentSprint.name.includes("Sprint 9G") || currentSprint.name.includes("Sprint 9H"),
   true,
 );
 assert.equal(

@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -214,13 +214,18 @@ import {
   renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GDoc,
   renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation,
 } from "../buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G";
+import {
+  currentManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel,
+  renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc,
+  renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation,
+} from "../buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md";
+  "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4510,6 +4515,51 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9G contract test proving key-message detection, warning mutual exclusion, metadata, budget, no-runtime, and share-pack alignment",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWarnings9H.ts",
+        required: true,
+        reason: "Sprint 9H warning registry for UX grouping, export budget, no-runtime, and source-of-truth guardrails",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingTypes9H.ts",
+        required: true,
+        reason: "Sprint 9H typed model for the five dry-run error-copy UX groups and validation fields",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingAudit9H.ts",
+        required: true,
+        reason: "Sprint 9H grouping audit assigning compatible, structure, entry-value, forbidden-boundary, blocker, and refusal copies",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingCoverageAudit9H.ts",
+        required: true,
+        reason: "Sprint 9H coverage audit proving 19 error copies, 12 blockers, 8 refusals, and 1 compatible case remain assigned",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingGuard9H.ts",
+        required: true,
+        reason: "Sprint 9H boundary guard blocking grouping regressions, runtime activation, persistence, official truth, decisions, tactics, and match mutation",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingProduct9H.ts",
+        required: true,
+        reason: "Sprint 9H product renderer showing the five UX groups without activating validation or preview behavior",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingExport9H.ts",
+        required: true,
+        reason: "Sprint 9H compact export renderer replacing the 9G summary with grouped 9H evidence while preserving 9G metadata",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts",
+        required: true,
+        reason: "Sprint 9H builder, report renderer, and validation renderer for dry-run error-copy UX grouping",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts",
+        required: true,
+        reason: "Sprint 9H contract test proving group coverage, no-runtime boundaries, warning consistency, metadata, and export budget",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6666,6 +6716,13 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9H")) {
+    const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    if (generatedDoc.length > 0) return generatedDoc;
+    return renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc(
+      currentManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9G")) {
     const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
     if (generatedDoc.length > 0) return generatedDoc;
@@ -9082,6 +9139,13 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9H")) {
+    const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    if (generatedValidation.length > 0) return generatedValidation;
+    return renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation(
+      currentManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9G")) {
     const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
     if (generatedValidation.length > 0) return generatedValidation;
@@ -11444,6 +11508,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9H")) {
+    return [
+      "# Sprint 9H Share Pack",
+      "",
+      "Current sprint: Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9G docs with 9H UX-grouping docs while keeping 9G, 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9H Focus",
+      "- Groups the 9E dry-run copy into five coach-readable UX families.",
+      "- Preserves 19 error copies, 12 blockers, 8 refusals, 1 compatible-but-not-accepted case, and coverage 19/12/14/8.",
+      "- Keeps the 9G warning repair intact: messages clés 7/7, missing 0, contradiction 0.",
+      "- Keeps the compact export under 800 seconds by replacing the previous 9G summary with the 9H grouped summary.",
+      "- Moves the current export cover badge to Export compact 9H.",
+      "- Preserves no-runtime, no-payload, no-preview, no-storage, no-official-truth, no-decision, no-selection, no-tactic, and no-score/timeline-mutation boundaries.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9H.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- UX groups: 5.",
+      "- grouped copy counts: 19/12/8/1.",
+      "- ungrouped/duplicated group assignments: 0/0.",
+      "- warning contradiction after 9H: 0.",
+      "- exportReadTimeSecondsAfter9H <= 800.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9G")) {
     return [
       "# Sprint 9G Share Pack",
@@ -30656,6 +30756,11 @@ import {
   renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GDoc,
   renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation,
 } from "./buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G";
+import {
+  buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel,
+  renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc,
+  renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation,
+} from "./buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -31145,8 +31250,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9G: manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.productHtmlAfter9F,
       exportHtmlBefore9G: manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.exportHtmlAfter9F,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.productHtmlAfter9G;
-  const exportHtml = manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.exportHtmlAfter9G;
+  const manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H =
+    buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel({
+      baseline9G: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G,
+      productHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.productHtmlAfter9G,
+      exportHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.exportHtmlAfter9G,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H;
+  const exportHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -31279,6 +31390,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation(manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+    renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc(manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+    renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation(manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -31311,6 +31432,10 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

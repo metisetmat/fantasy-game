@@ -162,6 +162,11 @@ import {
   renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GDoc,
   renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation,
 } from "./buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G";
+import {
+  buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel,
+  renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc,
+  renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation,
+} from "./buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -651,8 +656,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9G: manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.productHtmlAfter9F,
       exportHtmlBefore9G: manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.exportHtmlAfter9F,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.productHtmlAfter9G;
-  const exportHtml = manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.exportHtmlAfter9G;
+  const manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H =
+    buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel({
+      baseline9G: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G,
+      productHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.productHtmlAfter9G,
+      exportHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.exportHtmlAfter9G,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H;
+  const exportHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -785,6 +796,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GValidation(manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+    renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc(manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
+    renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation(manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -817,6 +838,10 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-without-preview-activation-9e.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }
