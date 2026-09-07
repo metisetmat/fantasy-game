@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 9I - Export Budget Cushion Before Progressive Disclosure. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 

@@ -172,6 +172,11 @@ import {
   renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc,
   renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation,
 } from "./buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I";
+import {
+  buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel,
+  renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JDoc,
+  renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation,
+} from "./buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -673,8 +678,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9I: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H,
       exportHtmlBefore9I: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunExportBudgetCushion9I.productHtmlAfter9I;
-  const exportHtml = manualReviewPreviewPayloadDryRunExportBudgetCushion9I.exportHtmlAfter9I;
+  const manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J =
+    buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel({
+      baseline9I: manualReviewPreviewPayloadDryRunExportBudgetCushion9I,
+      productHtmlBefore9J: manualReviewPreviewPayloadDryRunExportBudgetCushion9I.productHtmlAfter9I,
+      exportHtmlBefore9J: manualReviewPreviewPayloadDryRunExportBudgetCushion9I.exportHtmlAfter9I,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.productHtmlAfter9J;
+  const exportHtml = manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.exportHtmlAfter9J;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -827,6 +838,20 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation(manualReviewPreviewPayloadDryRunExportBudgetCushion9I),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"),
+    renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JDoc(
+      manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J,
+    ),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"),
+    renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation(
+      manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J,
+    ),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -865,6 +890,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

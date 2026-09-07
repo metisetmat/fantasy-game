@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-09-07T14:44:30.135Z
-Task/sprint: Sprint 9I - Export Budget Cushion Before Progressive Disclosure
+Generated: 2026-09-07T20:42:52.222Z
+Task/sprint: Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md
-- validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md
+- coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md
+- validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md
 - README.md
 
 ## Bundle Files

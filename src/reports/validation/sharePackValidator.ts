@@ -523,6 +523,15 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation = readIfExists(
     join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
   );
+  const manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"),
+  );
+  const manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation = readIfExists(
+    join(
+      shareDirectory,
+      "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+    ),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3835,6 +3844,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md",
     ...sprint9HForbiddenLeftovers,
   ];
+  const sprint9JExpectedFiles = sprint9IExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"
+      : file === "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"
+        : file
+  );
+  const sprint9JForbiddenLeftovers = [
+    "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
+    "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
+    ...sprint9IForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5586,6 +5607,39 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("bundle includes 9I source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionAudit9I.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunExportBudgetCushionExport9I.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.test.ts"), "9I source bundled"),
     check("bundle keeps 9H source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts"), "9H source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+  const exportMainTagFor9J = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9J = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9J = exportHeaderFor9J.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const sprint9JChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9JExpectedFiles.every((file) => requiredCopied(file)), sprint9JExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9JExpectedFiles.every((file) => manifest.includes(file)), sprint9JExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9J", activeConfig.sprintName === "Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation", activeConfig.sprintName),
+    check("previous standalone 9I docs are not copied", sprint9JForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9JForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9J oriented", readme.includes("# Sprint 9J Share Pack") && readme.includes("progressive-disclosure-without-preview-activation-9j.md") && readme.includes("Export compact 9J"), "README current"),
+    check("9J report included", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.includes("# Coach Report Manual Review Preview Payload Dry-Run Error Copy Progressive Disclosure Without Preview Activation 9J") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.includes("Disclosure Levels") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.includes("Group Views"), "9J doc included"),
+    check("9J validation is PASS", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("export before 9J is 778") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("disclosure levels = 3"), "9J validation current"),
+    check("product 9J progressive disclosure section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-9j"') && coachProductHtml.includes("Progressive disclosure des erreurs dry-run") && coachProductHtml.includes("References techniques repliees"), "product 9J visible"),
+    check("export 9J progressive disclosure section visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-export-9j"') && coachExportHtml.includes("Disclosure erreurs dry-run") && coachExportHtml.includes("Budget 9I preserve"), "export 9J visible"),
+    check("export title is 9J", coachExportHtml.includes("<title>Rapport coach export compact 9J - progressive disclosure</title>") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("metadata 9J clean"), "title 9J"),
+    check("export main id is compressed-export-9j", exportMainTagFor9J.includes('id="compressed-export-9j"'), "main id 9J"),
+    check("export current data attribute is 9J", exportMainTagFor9J.includes('data-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-version="9J"'), "data 9J"),
+    check("cover badge text is Export compact 9J", exportCoverBadgeTextFor9J === "Export compact 9J", exportCoverBadgeTextFor9J),
+    check("historical 9I through 8W metadata preserved", exportMainTagFor9J.includes('data-manual-review-preview-payload-dry-run-export-budget-cushion-version="9I"') && exportMainTagFor9J.includes('data-manual-review-preview-payload-dry-run-error-copy-ux-grouping-version="9H"') && exportMainTagFor9J.includes('data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G"') && exportMainTagFor9J.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"') && exportMainTagFor9J.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"') && exportMainTagFor9J.includes('data-manual-review-preview-activation-guards-version="8W"'), "historical attrs"),
+    check("9H grouping and 9E coverage preserved", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.includes("UX groups | 5/5") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.includes("copy counts | 19/12/8/1") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("coverage 19/12/14/8 preserved"), "9H/9E preserved"),
+    check("9G warning consistency preserved", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("key messages 7/7") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("warning contradiction 0"), "9G preserved"),
+    check("9I budget preservation visible", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.includes("exportBudgetCushionStatusFrom9I | cushion_created") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("export before 9J is 778"), "9I preserved"),
+    check("export <=800", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("export <=800") && !manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("FAIL: export <=800"), "budget strong"),
+    check("no runtime payload preview storage truth action mutation", manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("no runtime payload preview storage truth action mutation"), "no side effects"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("scoring unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("scoring unchanged"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 9J source files and keeps 9I source", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureAudit9J.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureExport9J.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.test.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.ts"), "9J and 9I source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
   const sprint9HChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -10461,6 +10515,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9J - Error Copy Progressive Disclosure")
+      ? sprint9JChecks
     : activeConfig.sprintName.includes("Sprint 9I - Export Budget")
       ? sprint9IChecks
     : activeConfig.sprintName.includes("Sprint 9H - Manual Review")
