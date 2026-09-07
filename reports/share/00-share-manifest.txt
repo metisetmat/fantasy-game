@@ -1,7 +1,7 @@
 ChatGPT Review Share Pack Manifest
 ==================================
 
-Generated timestamp: 2026-09-07T11:57:02.839Z
+Generated timestamp: 2026-09-07T15:24:18.605Z
 Task/sprint name: Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation
 Final file count: 20
 
@@ -1273,19 +1273,5 @@ Test/build commands run:
 - npm run reports:share
 
 Git status summary:
- M reports/validation.share-pack.md
- M src/contracts/runCiContractTests.ts
- M src/reports/generateCoachHtmlReport.ts
- M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.ts
- M src/reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.ts
- M src/reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.ts
- M src/reports/validation/sharePackValidator.ts
-?? src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts
-?? src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingAudit9H.ts
-?? src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingCoverageAudit9H.ts
-?? src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingGuard9H.ts
-?? src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingTypes9H.ts
-?? src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWarnings9H.ts
-?? src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts
-?? src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingExport9H.ts
-?? src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingProduct9H.ts
+ M src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts
+ M src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts

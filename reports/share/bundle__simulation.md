@@ -159067,6 +159067,7 @@ import {
 import {
   currentManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GModel,
 } from "./buildManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G";
+import { auditManualReviewPreviewPayloadDryRunExportKeyMessages9G } from "./manualReviewPreviewPayloadDryRunExportKeyMessagesAudit9G";
 import type { ManualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9GModel } from "./manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyTypes9G";
 import { estimateManualReviewExportReadTimeSeconds9F } from "./manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9F";
 import {
@@ -159165,6 +159166,7 @@ export function buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutP
   const exportHtmlBefore9H = input.exportHtmlBefore9H ?? baseline9G.exportHtmlAfter9G;
   const exportGroupingSectionHtml = renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingExport9H();
   const exportHtmlAfter9H = insertManualReviewPreviewPayloadDryRunErrorCopyUxGroupingExport9H(exportHtmlBefore9H);
+  const exportKeyMessagesAuditAfter9H = auditManualReviewPreviewPayloadDryRunExportKeyMessages9G(exportHtmlAfter9H);
   const productSeed = {
     status: "PASS" as const,
     uxGroupCount: groups.length,
@@ -159251,7 +159253,7 @@ export function buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutP
     baseline9G.status === "PASS" ? "BASELINE_9G_PRESERVED" : "BASELINE_9G_REGRESSED",
     baseline9G.baseline9FPreserved ? "BASELINE_9F_PRESERVED" : "BASELINE_9F_REGRESSED",
     baseline9G.baseline9EPreserved ? "BASELINE_9E_PRESERVED" : "BASELINE_9E_REGRESSED",
-    baseline9G.exportKeyMessagesDetectedCount === 7 && baseline9G.exportKeyMessagesMissingCount === 0
+    exportKeyMessagesAuditAfter9H.detected.length === 7 && exportKeyMessagesAuditAfter9H.missing.length === 0
       ? "EXPORT_KEY_MESSAGES_9G_PRESERVED_9H"
       : "EXPORT_KEY_MESSAGES_9G_REGRESSED_9H",
     baseline9G.exportKeyMessagesWarningContradictionCountAfter9G === 0
@@ -159300,7 +159302,7 @@ export function buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutP
     duplicatedCopyCount: groupingAudit.duplicatedCopyCount,
     compatibleCaseStillNotAcceptedInGrouping: groupingAudit.compatibleCaseStillNotAcceptedInGrouping,
     warningContradictionCountAfter9H: baseline9G.exportKeyMessagesWarningContradictionCountAfter9G,
-    exportKeyMessagesMissingCountFrom9G: baseline9G.exportKeyMessagesMissingCount,
+    exportKeyMessagesMissingCountFrom9G: exportKeyMessagesAuditAfter9H.missing.length,
     exportKeyMessagesNegativeWarningEmitted: baseline9G.exportKeyMessagesNegativeWarningEmitted,
     validationRuntimeActive: baseline9G.validationRuntimeActive,
     realPayloadReadCount: baseline9G.realPayloadReadCount,
@@ -159360,6 +159362,12 @@ export function buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutP
   const recommendation = recommendationFromStatus(status);
   const nextSprintRecommendation = nextRecommendationFromStatus(status, exportUnder800Seconds);
   const groupedCopies = [baseline9E.compatibleCopy, ...baseline9E.errorCopies, ...baseline9E.blockerCopies, ...baseline9E.refusalCopies];
+  const finalProductSeed = {
+    ...productSeed,
+    status,
+  };
+  const finalProductGroupingSectionHtml = renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingProduct9H(finalProductSeed);
+  const finalProductHtmlAfter9H = insertManualReviewPreviewPayloadDryRunErrorCopyUxGroupingProduct9H(productHtmlBefore9H, finalProductSeed);
 
   return {
     status,
@@ -159413,10 +159421,10 @@ export function buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutP
     groupingDoesNotCreateNewErrorCopies: groupingAudit.groupingDoesNotCreateNewErrorCopies,
     groupingDoesNotDeleteErrorCopies: groupingAudit.groupingDoesNotDeleteErrorCopies,
     groupingDoesNotChangeCoverage: groupingAudit.groupingDoesNotChangeCoverage,
-    exportKeyMessagesDetectedCountFrom9G: baseline9G.exportKeyMessagesDetectedCount,
-    exportKeyMessagesMissingCountFrom9G: baseline9G.exportKeyMessagesMissingCount,
-    exportKeyMessagesPreservedFrom9G: baseline9G.exportKeyMessagesPreserved,
-    exportKeyMessagesMissingFlagFrom9G: baseline9G.exportKeyMessagesMissingFlag,
+    exportKeyMessagesDetectedCountFrom9G: exportKeyMessagesAuditAfter9H.detected.length,
+    exportKeyMessagesMissingCountFrom9G: exportKeyMessagesAuditAfter9H.missing.length,
+    exportKeyMessagesPreservedFrom9G: exportKeyMessagesAuditAfter9H.preserved,
+    exportKeyMessagesMissingFlagFrom9G: exportKeyMessagesAuditAfter9H.missingFlag,
     warningContradictionCountBefore9G: baseline9G.exportKeyMessagesWarningContradictionCountBefore9G,
     warningContradictionCountAfter9H: baseline9G.exportKeyMessagesWarningContradictionCountAfter9G,
     exportKeyMessagesPositiveWarningEmitted: baseline9G.exportKeyMessagesPositiveWarningEmitted,
@@ -159544,9 +159552,9 @@ export function buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutP
     groupingAudit,
     coverageAudit,
     guard,
-    productGroupingSectionHtml,
+    productGroupingSectionHtml: finalProductGroupingSectionHtml,
     exportGroupingSectionHtml,
-    productHtmlAfter9H,
+    productHtmlAfter9H: finalProductHtmlAfter9H,
     exportHtmlAfter9H,
     warningCodes,
     recommendation,
@@ -159948,6 +159956,37 @@ const overBudgetGuard = evaluateManualReviewPreviewPayloadDryRunErrorCopyUxGroup
 });
 assert.equal(overBudgetGuard.statusRecommendation, "PARTIAL");
 assert.equal(overBudgetGuard.exportBudgetPassStrongEligible, false);
+
+const keyMessageOnlyExportBefore9H = [
+  "<!doctype html>",
+  "<html>",
+  "<head><title>Rapport coach export compact 9G - key messages warning consistency</title></head>",
+  "<body>",
+  '<header><span class="badge">Export compact 9G</span></header>',
+  '<main id="compressed-export-9g" data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G">',
+  '<section id="manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-export-9g">',
+  "<p>Source non autorisee. Scope incorrect. Official truth interdite. Stockage/API interdit.</p>",
+  "<p>Mutation score/timeline interdite. Automation interdite. Engine learning interdit.</p>",
+  "</section>",
+  "</main>",
+  "</body>",
+  "</html>",
+].join("\n");
+const keyMessageRegressionModel = buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel({
+  baseline9G,
+  exportHtmlBefore9H: keyMessageOnlyExportBefore9H,
+});
+assert.equal(keyMessageRegressionModel.status, "FAIL");
+assert.equal(keyMessageRegressionModel.exportKeyMessagesDetectedCountFrom9G < 7, true);
+assert.equal(keyMessageRegressionModel.exportKeyMessagesMissingCountFrom9G > 0, true);
+assert.equal(keyMessageRegressionModel.exportKeyMessagesPreservedFrom9G, false);
+assert.equal(keyMessageRegressionModel.warningCodes.includes("EXPORT_KEY_MESSAGES_9G_REGRESSED_9H"), true);
+const keyMessageRegressionProductSection =
+  keyMessageRegressionModel.productHtmlAfter9H.match(
+    /<section id="manual-review-preview-payload-dry-run-error-copy-ux-grouping-9h"[\s\S]*?<\/section>/u,
+  )?.[0] ?? "";
+assert.equal(keyMessageRegressionProductSection.includes("<h3>Statut</h3><p>FAIL."), true);
+assert.equal(keyMessageRegressionProductSection.includes("<h3>Statut</h3><p>PASS."), false);
 
 assert.equal(scoringRegistryEntry("SHOT_GOAL").points, 3);
 assert.equal(scoringRegistryEntry("TRY_TOUCHDOWN").points, 5);
