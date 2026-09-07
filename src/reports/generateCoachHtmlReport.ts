@@ -167,6 +167,11 @@ import {
   renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc,
   renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation,
 } from "./buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
+import {
+  buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel,
+  renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc,
+  renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation,
+} from "./buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -662,8 +667,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.productHtmlAfter9G,
       exportHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.exportHtmlAfter9G,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H;
-  const exportHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H;
+  const manualReviewPreviewPayloadDryRunExportBudgetCushion9I =
+    buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel({
+      baseline9H: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H,
+      productHtmlBefore9I: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H,
+      exportHtmlBefore9I: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunExportBudgetCushion9I.productHtmlAfter9I;
+  const exportHtml = manualReviewPreviewPayloadDryRunExportBudgetCushion9I.exportHtmlAfter9I;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -806,6 +817,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation(manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
+    renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc(manualReviewPreviewPayloadDryRunExportBudgetCushion9I),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
+    renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation(manualReviewPreviewPayloadDryRunExportBudgetCushion9I),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -842,6 +863,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }

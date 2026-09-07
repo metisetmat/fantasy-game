@@ -517,6 +517,12 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9HValidation = readIfExists(
     join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
   );
+  const manualReviewPreviewPayloadDryRunExportBudgetCushion9I = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
+  );
+  const manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation = readIfExists(
+    join(shareDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3817,6 +3823,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md",
     ...sprint9GForbiddenLeftovers,
   ];
+  const sprint9IExpectedFiles = sprint9HExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"
+      : file === "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"
+        : file
+  );
+  const sprint9IForbiddenLeftovers = [
+    "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md",
+    "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md",
+    ...sprint9HForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5533,6 +5551,42 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
   const exportMainTagFor9H = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
   const exportHeaderFor9H = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
   const exportCoverBadgeTextFor9H = exportHeaderFor9H.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const exportMainTagFor9I = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9I = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9I = exportHeaderFor9I.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const sprint9IChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9IExpectedFiles.every((file) => requiredCopied(file)), sprint9IExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9IExpectedFiles.every((file) => manifest.includes(file)), sprint9IExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9I", activeConfig.sprintName === "Sprint 9I - Export Budget Cushion Before Progressive Disclosure", activeConfig.sprintName),
+    check("previous standalone 9H docs are not copied", sprint9IForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9IForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9I oriented", readme.includes("# Sprint 9I Share Pack") && readme.includes("coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md") && readme.includes("Export compact 9I"), "README current"),
+    check("9I report included", manualReviewPreviewPayloadDryRunExportBudgetCushion9I.includes("# Coach Report Manual Review Preview Payload Dry-Run Export Budget Cushion Before Progressive Disclosure 9I") && manualReviewPreviewPayloadDryRunExportBudgetCushion9I.includes("Export Budget Cushion") && manualReviewPreviewPayloadDryRunExportBudgetCushion9I.includes("exportBudgetCushionStatus"), "9I doc included"),
+    check("9I validation is PASS", manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("export <=780") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("export cushion created"), "9I validation current"),
+    check("product 9H grouping section remains visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-error-copy-ux-grouping-9h"') && coachProductHtml.includes("Regroupement UX des erreurs dry-run") && coachProductHtml.includes("Messages blockers"), "product 9H visible"),
+    check("product 9I budget cushion section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-export-budget-cushion-9i"') && coachProductHtml.includes("Marge export avant progressive disclosure") && coachProductHtml.includes("Budget 9H"), "product 9I visible"),
+    check("export 9H grouped summary preserved", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-error-copy-ux-grouping-export-9h"') && coachExportHtml.includes("Groupes erreurs dry-run") && coachExportHtml.includes("5 groupes; copies 19/12/8/1"), "export 9H summary"),
+    check("export 9I budget cushion section visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-export-budget-cushion-9i"') && coachExportHtml.includes("Budget export 9I") && coachExportHtml.includes("Marge export avant progressive disclosure"), "export 9I visible"),
+    check("export title is 9I", coachExportHtml.includes("<title>Rapport coach export compact 9I - budget cushion</title>") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("export metadata 9I clean"), "title 9I"),
+    check("export main id is compressed-export-9i", exportMainTagFor9I.includes('id="compressed-export-9i"'), "main id 9I"),
+    check("export current data attribute is 9I", exportMainTagFor9I.includes('data-manual-review-preview-payload-dry-run-export-budget-cushion-version="9I"'), "data 9I"),
+    check("cover badge text is Export compact 9I", exportCoverBadgeTextFor9I === "Export compact 9I", exportCoverBadgeTextFor9I),
+    check("historical 9H through 8W metadata preserved", exportMainTagFor9I.includes('data-manual-review-preview-payload-dry-run-error-copy-ux-grouping-version="9H"') && exportMainTagFor9I.includes('data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G"') && exportMainTagFor9I.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"') && exportMainTagFor9I.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"') && exportMainTagFor9I.includes('data-manual-review-preview-activation-guards-version="8W"'), "historical attrs"),
+    check("9H grouping and 9E coverage preserved", manualReviewPreviewPayloadDryRunExportBudgetCushion9I.includes("groups 9H | 5/5") && manualReviewPreviewPayloadDryRunExportBudgetCushion9I.includes("copy counts 9H | 19/12/8/1") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("9E coverage 19/12/14/8 unchanged"), "9H/9E preserved"),
+    check("9G warning consistency preserved", manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("9G key messages preserved") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("warning contradiction remains zero"), "9G preserved"),
+    check("export before 9I is 799", manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("export before 9I is 799"), "799"),
+    check("export <=780", manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("export <=780") && manualReviewPreviewPayloadDryRunExportBudgetCushion9I.includes("exportBudgetCushionStatus | cushion_created"), "budget cushion visible"),
+    check("no runtime payload preview storage truth action mutation", manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("no runtime payload preview storage truth action mutation"), "no side effects"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("scoring unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("scoring unchanged"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 9I source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionAudit9I.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunExportBudgetCushionExport9I.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.test.ts"), "9I source bundled"),
+    check("bundle keeps 9H source files", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.ts"), "9H source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunExportBudgetCushion9IValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
   const sprint9HChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
     check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
@@ -10407,6 +10461,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9I - Export Budget")
+      ? sprint9IChecks
     : activeConfig.sprintName.includes("Sprint 9H - Manual Review")
       ? sprint9HChecks
     : activeConfig.sprintName.includes("Sprint 9G - Export Key Messages")

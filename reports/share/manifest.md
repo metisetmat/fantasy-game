@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-09-07T11:57:02.839Z
-Task/sprint: Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation
+Generated: 2026-09-07T14:09:16.562Z
+Task/sprint: Sprint 9I - Export Budget Cushion Before Progressive Disclosure
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md
-- validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md
+- coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md
+- validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md
 - README.md
 
 ## Bundle Files

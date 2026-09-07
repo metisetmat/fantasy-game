@@ -221,14 +221,14 @@ assert.equal(model.penaltyShotInactive, true);
 assert.equal(model.matchBonusEventChanged, false);
 assert.equal(model.batchLiveSeparationPreserved, true);
 
-assert.equal(currentSprint.name.includes("Sprint 9H"), true);
+assert.equal(currentSprint.name.includes("Sprint 9H") || currentSprint.name.includes("Sprint 9I"), true);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md"),
   false,
 );
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
-  true,
+  currentSprint.name.includes("Sprint 9H"),
 );
 assert.equal(model.recommendation, "KEEP_ERROR_COPY_UX_GROUPING");
 assert.equal(

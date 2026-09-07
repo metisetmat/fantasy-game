@@ -198,7 +198,7 @@ assert.equal(model.penaltyShotInactive, true);
 assert.equal(model.matchBonusEventChanged, false);
 assert.equal(model.batchLiveSeparationPreserved, true);
 
-assert.equal(currentSprint.name.includes("Sprint 9G") || currentSprint.name.includes("Sprint 9H"), true);
+assert.equal(currentSprint.name.includes("Sprint 9G") || currentSprint.name.includes("Sprint 9H") || currentSprint.name.includes("Sprint 9I"), true);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-coach-facing-error-copy-export-budget-compaction-9f.md"),
   false,

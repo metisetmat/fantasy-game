@@ -111,7 +111,10 @@ assert.equal(model.guardrailsPreserved, true);
 assert.equal(model.sourceOfTruthSeparationPreserved, true);
 assert.equal(model.sourceOfTruthAudit.batchLiveSeparationPreserved, true);
 assert.equal(
-  currentSprint.name.includes("Sprint 9F") || currentSprint.name.includes("Sprint 9G") || currentSprint.name.includes("Sprint 9H"),
+  currentSprint.name.includes("Sprint 9F") ||
+    currentSprint.name.includes("Sprint 9G") ||
+    currentSprint.name.includes("Sprint 9H") ||
+    currentSprint.name.includes("Sprint 9I"),
   true,
 );
 assert.equal(

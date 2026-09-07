@@ -1,31 +1,30 @@
-# Sprint 9H Share Pack
+# Sprint 9I Share Pack
 
-Current sprint: Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation
+Current sprint: Sprint 9I - Export Budget Cushion Before Progressive Disclosure
 
-Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9G docs with 9H UX-grouping docs while keeping 9G, 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
+Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9H docs with 9I budget-cushion docs while keeping 9H, 9G, 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.
 
 ## What To Review First
 1. coach-report.export.html
 2. coach-report.product.html
-3. validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md
-4. coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md
+3. validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md
+4. coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md
 5. validation.share-pack.md
 
-## Sprint 9H Focus
-- Groups the 9E dry-run copy into five coach-readable UX families.
-- Preserves 19 error copies, 12 blockers, 8 refusals, 1 compatible-but-not-accepted case, and coverage 19/12/14/8.
-- Keeps the 9G warning repair intact: messages clés 7/7, missing 0, contradiction 0.
-- Keeps the compact export under 800 seconds by replacing the previous 9G summary with the 9H grouped summary.
-- Moves the current export cover badge to Export compact 9H.
+## Sprint 9I Focus
+- Reduces the compact export budget before adding progressive disclosure.
+- Keeps the 9H UX grouping intact: 5 groups, 19/12/8/1 copy counts, and coverage 19/12/14/8.
+- Keeps the 9G warning repair intact: messages cles 7/7, missing 0, contradiction 0.
+- Moves the current export cover badge to Export compact 9I and the main id to compressed-export-9i.
 - Preserves no-runtime, no-payload, no-preview, no-storage, no-official-truth, no-decision, no-selection, no-tactic, and no-score/timeline-mutation boundaries.
 
 ## Expected Validation Highlights
 - Status: PASS.
-- current sprint: Sprint 9H.
+- current sprint: Sprint 9I.
 - share pack mode: MINIMAL_REVIEW.
 - final file count: 20 or less.
-- UX groups: 5.
-- grouped copy counts: 19/12/8/1.
-- ungrouped/duplicated group assignments: 0/0.
-- warning contradiction after 9H: 0.
-- exportReadTimeSecondsAfter9H <= 800.
+- exportReadTimeSecondsBefore9I: 799.
+- exportReadTimeSecondsAfter9I <= 780.
+- exportBudgetCushionStatus: cushion_created.
+- warning contradiction after 9I: 0.
+- standalone 9H docs are not copied.

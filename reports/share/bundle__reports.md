@@ -1,6 +1,6 @@
 # Bundle: bundle__reports.md
 
-Generated for Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9I - Export Budget Cushion Before Progressive Disclosure. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/reports/share/updateSharePack.ts
 
@@ -219,13 +219,18 @@ import {
   renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc,
   renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation,
 } from "../buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
+import {
+  currentManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel,
+  renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc,
+  renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation,
+} from "../buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9H - Manual Review Preview Payload Dry-Run Error Copy UX Grouping Without Preview Activation";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9I - Export Budget Cushion Before Progressive Disclosure";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md";
+  "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4560,6 +4565,46 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9H contract test proving group coverage, no-runtime boundaries, warning consistency, metadata, and export budget",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionWarnings9I.ts",
+        required: true,
+        reason: "Sprint 9I warning registry for export budget cushion, metadata, preservation, no-runtime, and source-of-truth guardrails",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionTypes9I.ts",
+        required: true,
+        reason: "Sprint 9I typed model for export budget cushion before progressive disclosure",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionAudit9I.ts",
+        required: true,
+        reason: "Sprint 9I budget and metadata audits measuring the compact export against 900/800/790/780 thresholds",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionGuard9I.ts",
+        required: true,
+        reason: "Sprint 9I guard blocking budget, metadata, runtime, persistence, official truth, scoring, and mutation regressions",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunExportBudgetCushionProduct9I.ts",
+        required: true,
+        reason: "Sprint 9I product renderer showing the export cushion while preserving detailed 9H/9E evidence",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunExportBudgetCushionExport9I.ts",
+        required: true,
+        reason: "Sprint 9I compact export renderer creating cushion before progressive disclosure without runtime activation",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.ts",
+        required: true,
+        reason: "Sprint 9I builder, report renderer, and validation renderer for export budget cushion",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.test.ts",
+        required: true,
+        reason: "Sprint 9I contract test proving budget cushion, preservation, metadata, no-runtime boundaries, and share-pack alignment",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6716,6 +6761,13 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9I")) {
+    const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    if (generatedDoc.length > 0) return generatedDoc;
+    return renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc(
+      currentManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9H")) {
     const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
     if (generatedDoc.length > 0) return generatedDoc;
@@ -9139,6 +9191,13 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9I")) {
+    const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    if (generatedValidation.length > 0) return generatedValidation;
+    return renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation(
+      currentManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9H")) {
     const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
     if (generatedValidation.length > 0) return generatedValidation;
@@ -11508,6 +11567,41 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9I")) {
+    return [
+      "# Sprint 9I Share Pack",
+      "",
+      "Current sprint: Sprint 9I - Export Budget Cushion Before Progressive Disclosure",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9H docs with 9I budget-cushion docs while keeping 9H, 9G, 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9I Focus",
+      "- Reduces the compact export budget before adding progressive disclosure.",
+      "- Keeps the 9H UX grouping intact: 5 groups, 19/12/8/1 copy counts, and coverage 19/12/14/8.",
+      "- Keeps the 9G warning repair intact: messages cles 7/7, missing 0, contradiction 0.",
+      "- Moves the current export cover badge to Export compact 9I and the main id to compressed-export-9i.",
+      "- Preserves no-runtime, no-payload, no-preview, no-storage, no-official-truth, no-decision, no-selection, no-tactic, and no-score/timeline-mutation boundaries.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9I.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- exportReadTimeSecondsBefore9I: 799.",
+      "- exportReadTimeSecondsAfter9I <= 780.",
+      "- exportBudgetCushionStatus: cushion_created.",
+      "- warning contradiction after 9I: 0.",
+      "- standalone 9H docs are not copied.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9H")) {
     return [
       "# Sprint 9H Share Pack",
@@ -30761,6 +30855,11 @@ import {
   renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HDoc,
   renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation,
 } from "./buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
+import {
+  buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel,
+  renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc,
+  renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation,
+} from "./buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -31256,8 +31355,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.productHtmlAfter9G,
       exportHtmlBefore9H: manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.exportHtmlAfter9G,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H;
-  const exportHtml = manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H;
+  const manualReviewPreviewPayloadDryRunExportBudgetCushion9I =
+    buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel({
+      baseline9H: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H,
+      productHtmlBefore9I: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.productHtmlAfter9H,
+      exportHtmlBefore9I: manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H.exportHtmlAfter9H,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunExportBudgetCushion9I.productHtmlAfter9I;
+  const exportHtml = manualReviewPreviewPayloadDryRunExportBudgetCushion9I.exportHtmlAfter9I;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -31400,6 +31505,16 @@ export function writeLatestCoachReport(): void {
     renderManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HValidation(manualReviewPreviewPayloadDryRunErrorCopyUxGrouping9H),
     "utf8",
   );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
+    renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc(manualReviewPreviewPayloadDryRunExportBudgetCushion9I),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md"),
+    renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation(manualReviewPreviewPayloadDryRunExportBudgetCushion9I),
+    "utf8",
+  );
   if (persistenceEvidenceSnapshot !== undefined) {
     writeFileSync(
       join(reportsDirectory, "persistence-evidence-snapshot.latest.json"),
@@ -31436,6 +31551,8 @@ export function writeLatestCoachReport(): void {
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-9g.md");
   console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
   console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md");
+  console.log("Generated reports/coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md");
+  console.log("Generated reports/validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md");
   if (persistenceEvidenceSnapshot !== undefined) {
     console.log("Generated reports/persistence-evidence-snapshot.latest.json");
   }
