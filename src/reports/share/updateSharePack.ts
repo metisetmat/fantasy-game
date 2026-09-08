@@ -222,13 +222,18 @@ import {
   renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JDoc,
   renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation,
 } from "../buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J";
+import {
+  currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KDoc,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation,
+} from "../buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md";
+  "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4673,6 +4678,76 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9J contract test proving disclosure levels, collapsed technical references, compact export, no-runtime boundaries, and share-pack alignment",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K.ts",
+        required: true,
+        reason: "Sprint 9K warning registry for wording-score publication, Group Views correction, export budget, no-runtime, and source-of-truth guardrails",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K.ts",
+        required: true,
+        reason: "Sprint 9K typed model for progressive-disclosure reporting consistency repair",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K audit correcting Group Views counts and preserving 19/12/8/1 plus coverage 19/12/14/8",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K audit publishing wordingReadabilityScore with 90/95 thresholds and pass-strong status",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K preservation audit proving 9J, 9H, and 9G remain intact before empty states",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K metadata audit for Export compact 9K, compressed-export-9k, and historical 9J/9I attributes",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K export budget audit rechecking 790/800/900 thresholds after reporting repair",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K no-runtime audit proving no payload, preview, persistence, official truth, decision, selection, tactic, score, or timeline mutation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K.ts",
+        required: true,
+        reason: "Sprint 9K source-of-truth audit preserving scoring constants, inactive PENALTY_SHOT, MatchBonusEvent, and batch/live separation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K.ts",
+        required: true,
+        reason: "Sprint 9K guard deriving PASS/PARTIAL/FAIL from completed reporting, wording, budget, runtime, and source-of-truth audits",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K.ts",
+        required: true,
+        reason: "Sprint 9K product renderer showing wordingReadabilityScore and corrected Group Views table",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K.ts",
+        required: true,
+        reason: "Sprint 9K compact export renderer preserving budget while publishing reporting consistency",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.ts",
+        required: true,
+        reason: "Sprint 9K builder, report renderer, and validation renderer for progressive-disclosure reporting consistency repair",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.test.ts",
+        required: true,
+        reason: "Sprint 9K contract test proving wording score publication, corrected Group Views, budget, and no-runtime/source-of-truth preservation",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6829,6 +6904,13 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9K")) {
+    const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    if (generatedDoc.length > 0) return generatedDoc;
+    return renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KDoc(
+      currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9J")) {
     const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
     if (generatedDoc.length > 0) return generatedDoc;
@@ -9266,6 +9348,13 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9K")) {
+    const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    if (generatedValidation.length > 0) return generatedValidation;
+    return renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation(
+      currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9J")) {
     const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
     if (generatedValidation.length > 0) return generatedValidation;
@@ -11649,6 +11738,42 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9K")) {
+    return [
+      "# Sprint 9K Share Pack",
+      "",
+      "Current sprint: Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9J docs with 9K reporting-consistency docs while keeping 9J progressive disclosure and 9I/9H/9G/9F/9E evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9K Focus",
+      "- Publishes wordingReadabilityScore with PASS and PASS-strong thresholds.",
+      "- Repairs the misleading 9J Group Views table so no group with copies renders as 0/0/0/0.",
+      "- Keeps the 9J progressive-disclosure behavior intact: 3 levels, 5 groups, collapsed technical references, no JS, no active controls, no submit, and no enabled inputs.",
+      "- Keeps the 9H grouping intact: 5 groups, 19/12/8/1 copy counts, and coverage 19/12/14/8.",
+      "- Keeps the 9G warning repair intact: key messages 7/7, missing 0, contradiction 0.",
+      "- Preserves no-runtime, no-payload, no-preview, no-persistence, no-official-truth, no-decision, no-selection, no-tactic, and no-score/timeline-mutation boundaries.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9K.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- wordingReadabilityScore is published and >=95.",
+      "- corrected Group Views totals are 19/12/8/1 with boundary coverage 14.",
+      "- exportReadTimeSecondsBefore9K: 785.",
+      "- exportReadTimeSecondsAfter9K <= 790.",
+      "- standalone 9J docs are not copied.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9J")) {
     return [
       "# Sprint 9J Share Pack",

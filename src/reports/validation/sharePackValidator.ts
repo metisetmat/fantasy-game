@@ -532,6 +532,15 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
     ),
   );
+  const manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K = readIfExists(
+    join(shareDirectory, "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md"),
+  );
+  const manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation = readIfExists(
+    join(
+      shareDirectory,
+      "validation.coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md",
+    ),
+  );
   const fullMatchWorkbenchChainReplay4T = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4TValidation = readIfExists(join(shareDirectory, "validation.fullmatch-workbench-chain-replay-4t.md"));
   const fullMatchWorkbenchChainReplay4S = readIfExists(join(shareDirectory, "fullmatch-workbench-chain-replay-4s.md"));
@@ -3856,6 +3865,18 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
     ...sprint9IForbiddenLeftovers,
   ];
+  const sprint9KExpectedFiles = sprint9JExpectedFiles.map((file) =>
+    file === "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"
+      ? "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md"
+      : file === "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"
+        ? "validation.coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md"
+        : file
+  );
+  const sprint9KForbiddenLeftovers = [
+    "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+    "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+    ...sprint9JForbiddenLeftovers,
+  ];
   const sprint4UExpectedFiles = [
     "package.json",
     "tsconfig.json",
@@ -5640,6 +5661,42 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
     check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("batch/live separation preserved"), "batch/live PASS"),
     check("bundle includes 9J source files and keeps 9I source", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureAudit9J.ts") && bundleReports.includes("src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureExport9J.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.test.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.ts"), "9J and 9I source bundled"),
     check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
+  ];
+  const exportMainTagFor9K = coachExportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeaderFor9K = coachExportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeTextFor9K = exportHeaderFor9K.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const sprint9KChecks: readonly SharePackCheck[] = [
+    check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
+    check("share file count <= 20", filesOnDisk.length <= 20, String(filesOnDisk.length)),
+    check("final file count is 20", filesOnDisk.length === 20, String(filesOnDisk.length)),
+    check("all expected files are copied", sprint9KExpectedFiles.every((file) => requiredCopied(file)), sprint9KExpectedFiles.filter((file) => !requiredCopied(file)).join(", ") || "all copied"),
+    check("all expected files are listed in manifest", sprint9KExpectedFiles.every((file) => manifest.includes(file)), sprint9KExpectedFiles.filter((file) => !manifest.includes(file)).join(", ") || "all listed"),
+    check("current sprint is Sprint 9K", activeConfig.sprintName === "Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States", activeConfig.sprintName),
+    check("previous standalone 9J docs are not copied", sprint9KForbiddenLeftovers.every((file) => !requiredCopied(file)), sprint9KForbiddenLeftovers.filter((file) => requiredCopied(file)).join(", ") || "0"),
+    check("README is Sprint 9K oriented", readme.includes("# Sprint 9K Share Pack") && readme.includes("progressive-disclosure-reporting-consistency-repair-9k.md") && readme.includes("wordingReadabilityScore"), "README current"),
+    check("9K report included", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("# Coach Report Manual Review Preview Payload Dry-Run Progressive Disclosure Reporting Consistency Repair 9K") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("Wording Readability Score Publication") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("Corrected Group Views"), "9K doc included"),
+    check("9K validation is PASS", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("Status: PASS") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("wordingReadabilityScore published") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("Group Views totals match global counts"), "9K validation current"),
+    check("product 9K section visible", coachProductHtml.includes('id="manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k"') && coachProductHtml.includes("wordingReadabilityScore publie") && coachProductHtml.includes("Group Views corrigees"), "product 9K visible"),
+    check("export 9K section visible", coachExportHtml.includes('id="manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-export-9k"') && coachExportHtml.includes("wordingReadabilityScore") && coachExportHtml.includes("Group Views corrigees"), "export 9K visible"),
+    check("export title is 9K", coachExportHtml.includes("<title>Rapport coach export compact 9K - progressive disclosure reporting consistency</title>") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("metadata 9K clean"), "title 9K"),
+    check("export main id is compressed-export-9k", exportMainTagFor9K.includes('id="compressed-export-9k"'), "main id 9K"),
+    check("export current data attribute is 9K", exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-version="9K"'), "data 9K"),
+    check("cover badge text is Export compact 9K", exportCoverBadgeTextFor9K === "Export compact 9K", exportCoverBadgeTextFor9K),
+    check("historical 9J through 8W metadata preserved", exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-version="9J"') && exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-export-budget-cushion-version="9I"') && exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-error-copy-ux-grouping-version="9H"') && exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G"') && exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"') && exportMainTagFor9K.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"') && exportMainTagFor9K.includes('data-manual-review-preview-activation-guards-version="8W"'), "historical attrs"),
+    check("wording score and thresholds published", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("wordingReadabilityScore") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("PASS threshold | 90") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("PASS strong threshold | 95") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("wordingReadabilityScore >=95"), "wording score visible"),
+    check("corrected Group Views table has no zero rows", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("Actions refusees | 3 | 3 | 0 | 8") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("Forme compatible - non acceptee | 1 | 1 | 0 | 0 | 1") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("Group Views zero rows removed"), "Group Views corrected"),
+    check("9H grouping and 9E coverage preserved", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("9H counts | 19/12/8/1") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.includes("9H coverage | 19/12/14/8") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("9H coverage preserved"), "9H/9E preserved"),
+    check("9G warning consistency preserved", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("9G key messages preserved") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("warning contradiction remains zero"), "9G preserved"),
+    check("export before 9K is 785", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("export before 9K is 785"), "785"),
+    check("export <=790", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("export <=790") && !manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("FAIL: export <=790"), "budget target"),
+    check("export <=800 strong pass", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("export <=800 strong pass") && !manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("FAIL: export <=800 strong pass"), "budget strong"),
+    check("no runtime payload preview storage truth action mutation", manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("no runtime payload preview storage truth action mutation"), "no side effects"),
+    check("scoring constants unchanged", scoringEvents.includes("SHOT_GOAL = 3 points") && scoringEvents.includes("TRY_TOUCHDOWN = 5 points") && scoringEvents.includes("CONVERSION_GOAL = 2 points") && scoringEvents.includes("DROP_GOAL = 2 points") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("scoring constants unchanged"), "scoring constants visible"),
+    check("PENALTY_SHOT remains inactive", scoringEvents.includes("PENALTY_SHOT inactive") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("scoring constants unchanged"), "penalty inactive"),
+    check("MatchBonusEvent unchanged", scoringEvents.includes("MatchBonusEvent is not part of this live ScoringEvent stream") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("MatchBonusEvent unchanged"), "MatchBonusEvent separated"),
+    check("batch/live separation preserved", scoringEvents.includes("batch/live separation status: PASS") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("batch/live separation preserved"), "batch/live PASS"),
+    check("bundle includes 9K source files and keeps 9J source", bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K.ts") && bundleReports.includes("src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.test.ts") && bundleReports.includes("src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.ts"), "9K and 9J source bundled"),
+    check("explicit exhaustive test command available", readIfExists(join(shareDirectory, "package.json")).includes("\"test:all\"") && manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation.includes("npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share"), "test:all visible"),
   ];
   const sprint9HChecks: readonly SharePackCheck[] = [
     check("share pack mode is MINIMAL_REVIEW", activeConfig.mode === "MINIMAL_REVIEW", activeConfig.mode),
@@ -10515,6 +10572,8 @@ export function validateSharePack(input: { readonly reportDirectory: string }): 
       ? sprint2OChecks
     : activeConfig.sprintName.includes("Sprint 2Q - True Segment-State Integration")
       ? sprint2QChecks
+    : activeConfig.sprintName.includes("Sprint 9K - Progressive Disclosure Reporting")
+      ? sprint9KChecks
     : activeConfig.sprintName.includes("Sprint 9J - Error Copy Progressive Disclosure")
       ? sprint9JChecks
     : activeConfig.sprintName.includes("Sprint 9I - Export Budget")

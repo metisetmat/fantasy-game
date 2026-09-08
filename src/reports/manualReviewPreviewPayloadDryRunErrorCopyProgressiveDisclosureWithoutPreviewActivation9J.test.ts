@@ -91,10 +91,16 @@ test("Sprint 9J creates read-only progressive disclosure from 9I", () => {
   assert.equal(model.penaltyShotInactive, true);
   assert.equal(model.matchBonusEventChanged, false);
   assert.equal(model.batchLiveSeparationPreserved, true);
-  assert.equal(currentSprint.name, "Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation");
+  assert.equal(currentSprint.name, "Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States");
   assert.equal(
     currentSprint.requiredFiles.includes(
       "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
+    ),
+    false,
+  );
+  assert.equal(
+    currentSprint.requiredFiles.includes(
+      "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
     ),
     false,
   );

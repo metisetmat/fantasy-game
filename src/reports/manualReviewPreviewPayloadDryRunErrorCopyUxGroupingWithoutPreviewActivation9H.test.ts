@@ -255,7 +255,8 @@ assert.equal(model.batchLiveSeparationPreserved, true);
 assert.equal(
   currentSprint.name.includes("Sprint 9H") ||
     currentSprint.name.includes("Sprint 9I") ||
-    currentSprint.name.includes("Sprint 9J"),
+    currentSprint.name.includes("Sprint 9J") ||
+    currentSprint.name.includes("Sprint 9K"),
   true,
 );
 assert.equal(

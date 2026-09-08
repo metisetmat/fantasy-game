@@ -177,6 +177,11 @@ import {
   renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JDoc,
   renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation,
 } from "./buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J";
+import {
+  buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KDoc,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation,
+} from "./buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K";
 
 function appendProductSection(html: string, section: string): string {
   if (section.length === 0) {
@@ -684,8 +689,14 @@ export function writeLatestCoachReport(): void {
       productHtmlBefore9J: manualReviewPreviewPayloadDryRunExportBudgetCushion9I.productHtmlAfter9I,
       exportHtmlBefore9J: manualReviewPreviewPayloadDryRunExportBudgetCushion9I.exportHtmlAfter9I,
     });
-  const finalProductHtml = manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.productHtmlAfter9J;
-  const exportHtml = manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.exportHtmlAfter9J;
+  const manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K =
+    buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel({
+      baseline9J: manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J,
+      productHtmlBefore9K: manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.productHtmlAfter9J,
+      exportHtmlBefore9K: manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J.exportHtmlAfter9J,
+    });
+  const finalProductHtml = manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.productHtmlAfter9K;
+  const exportHtml = manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.exportHtmlAfter9K;
 
   mkdirSync(reportsDirectory, { recursive: true });
   writeFileSync(
@@ -849,6 +860,20 @@ export function writeLatestCoachReport(): void {
     join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md"),
     renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation(
       manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J,
+    ),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md"),
+    renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KDoc(
+      manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K,
+    ),
+    "utf8",
+  );
+  writeFileSync(
+    join(reportsDirectory, "validation.coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md"),
+    renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation(
+      manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K,
     ),
     "utf8",
   );

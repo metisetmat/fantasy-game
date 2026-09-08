@@ -1,7 +1,7 @@
 # Share Pack
 
-Generated: 2026-09-07T20:42:52.222Z
-Task/sprint: Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation
+Generated: 2026-09-08T20:08:12.110Z
+Task/sprint: Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States
 Mode: MINIMAL_REVIEW
 Final file count: 20
 
@@ -26,8 +26,8 @@ Source files are bundled by domain to keep the ChatGPT review pack compact.
 - sequence-1-action-2.html
 - sequence-1-action-3.html
 - validation.share-pack.md
-- coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md
-- validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md
+- coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md
+- validation.coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md
 - README.md
 
 ## Bundle Files

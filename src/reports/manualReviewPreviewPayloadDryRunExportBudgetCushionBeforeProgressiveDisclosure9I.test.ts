@@ -189,7 +189,7 @@ const overHardBudgetGuard = evaluateManualReviewPreviewPayloadDryRunExportBudget
 assert.equal(overHardBudgetGuard.statusRecommendation, "FAIL");
 assert.equal(overHardBudgetGuard.violations.includes("EXPORT_OVER_900_9I"), true);
 
-assert.equal(currentSprint.name.includes("Sprint 9J"), true);
+assert.equal(currentSprint.name.includes("Sprint 9K"), true);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
   false,
@@ -201,6 +201,12 @@ assert.equal(
 assert.equal(
   currentSprint.requiredFiles.includes(
     "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+  ),
+  false,
+);
+assert.equal(
+  currentSprint.requiredFiles.includes(
+    "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md",
   ),
   true,
 );

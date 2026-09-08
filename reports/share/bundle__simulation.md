@@ -1,6 +1,6 @@
 # Bundle: bundle__simulation.md
 
-Generated for Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/simulation/runMatch.ts
 
@@ -154406,7 +154406,8 @@ assert.equal(
     currentSprint.name.includes("Sprint 9G") ||
     currentSprint.name.includes("Sprint 9H") ||
     currentSprint.name.includes("Sprint 9I") ||
-    currentSprint.name.includes("Sprint 9J"),
+    currentSprint.name.includes("Sprint 9J") ||
+    currentSprint.name.includes("Sprint 9K"),
   true,
 );
 assert.equal(
@@ -156079,7 +156080,8 @@ assert.equal(
     currentSprint.name.includes("Sprint 9G") ||
     currentSprint.name.includes("Sprint 9H") ||
     currentSprint.name.includes("Sprint 9I") ||
-    currentSprint.name.includes("Sprint 9J"),
+    currentSprint.name.includes("Sprint 9J") ||
+    currentSprint.name.includes("Sprint 9K"),
   true,
 );
 assert.equal(
@@ -157890,7 +157892,8 @@ assert.equal(
   currentSprint.name.includes("Sprint 9G") ||
     currentSprint.name.includes("Sprint 9H") ||
     currentSprint.name.includes("Sprint 9I") ||
-    currentSprint.name.includes("Sprint 9J"),
+    currentSprint.name.includes("Sprint 9J") ||
+    currentSprint.name.includes("Sprint 9K"),
   true,
 );
 assert.equal(
@@ -160015,7 +160018,8 @@ assert.equal(model.batchLiveSeparationPreserved, true);
 assert.equal(
   currentSprint.name.includes("Sprint 9H") ||
     currentSprint.name.includes("Sprint 9I") ||
-    currentSprint.name.includes("Sprint 9J"),
+    currentSprint.name.includes("Sprint 9J") ||
+    currentSprint.name.includes("Sprint 9K"),
   true,
 );
 assert.equal(
@@ -161568,7 +161572,7 @@ const overHardBudgetGuard = evaluateManualReviewPreviewPayloadDryRunExportBudget
 assert.equal(overHardBudgetGuard.statusRecommendation, "FAIL");
 assert.equal(overHardBudgetGuard.violations.includes("EXPORT_OVER_900_9I"), true);
 
-assert.equal(currentSprint.name.includes("Sprint 9J"), true);
+assert.equal(currentSprint.name.includes("Sprint 9K"), true);
 assert.equal(
   currentSprint.requiredFiles.includes("coach-report-manual-review-preview-payload-dry-run-error-copy-ux-grouping-without-preview-activation-9h.md"),
   false,
@@ -161580,6 +161584,12 @@ assert.equal(
 assert.equal(
   currentSprint.requiredFiles.includes(
     "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+  ),
+  false,
+);
+assert.equal(
+  currentSprint.requiredFiles.includes(
+    "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md",
   ),
   true,
 );
@@ -163892,10 +163902,16 @@ test("Sprint 9J creates read-only progressive disclosure from 9I", () => {
   assert.equal(model.penaltyShotInactive, true);
   assert.equal(model.matchBonusEventChanged, false);
   assert.equal(model.batchLiveSeparationPreserved, true);
-  assert.equal(currentSprint.name, "Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation");
+  assert.equal(currentSprint.name, "Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States");
   assert.equal(
     currentSprint.requiredFiles.includes(
       "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md",
+    ),
+    false,
+  );
+  assert.equal(
+    currentSprint.requiredFiles.includes(
+      "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
     ),
     false,
   );
@@ -163917,6 +163933,1514 @@ test("Sprint 9J blocks missing or weak 9I baselines", () => {
         baseline9I: { ...baseline9I, status: "PARTIAL" },
       }),
     /PASS strong 9I/u,
+  );
+});
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K.ts
+
+```ts
+export type ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K =
+  | "PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_READY"
+  | "GROUP_VIEW_TABLE_CORRECTED"
+  | "WORDING_READABILITY_SCORE_PUBLISHED"
+  | "WORDING_READABILITY_PASS_STRONG"
+  | "BASELINE_9J_PROGRESSIVE_DISCLOSURE_PRESERVED"
+  | "BASELINE_9H_GROUPING_PRESERVED"
+  | "BASELINE_9G_KEY_MESSAGES_PRESERVED"
+  | "NO_RUNTIME_ACTIVATION"
+  | "NO_PAYLOAD_ACCEPTED"
+  | "NO_PREVIEW_GENERATED"
+  | "NO_PERSISTENCE"
+  | "NO_OFFICIAL_TRUTH_PROMOTION"
+  | "NO_DECISION_SELECTION_TACTIC_MUTATION"
+  | "NO_SCORE_OR_TIMELINE_MUTATION"
+  | "SCORING_CONSTANTS_UNCHANGED"
+  | "PENALTY_SHOT_INACTIVE"
+  | "MATCH_BONUS_EVENT_UNCHANGED"
+  | "BATCH_LIVE_SEPARATION_PRESERVED"
+  | "EXPORT_BUDGET_STRONG_PASS"
+  | "EXPORT_BUDGET_PASS"
+  | "EXPORT_OVER_790_MARGIN_WARNING"
+  | "EXPORT_OVER_800_STRONG_PASS_BLOCKED"
+  | "EXPORT_OVER_900_FAIL"
+  | "GROUP_VIEW_ZERO_ROW_REMAINING"
+  | "GROUP_VIEW_TOTAL_MISMATCH"
+  | "WORDING_READABILITY_SCORE_MISSING"
+  | "WORDING_READABILITY_THRESHOLD_MISMATCH"
+  | "PROGRESSIVE_DISCLOSURE_REPORTING_PARTIAL"
+  | "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL";
+
+export const MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_BLOCKING_WARNINGS: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[] =
+  [
+    "EXPORT_OVER_900_FAIL",
+    "GROUP_VIEW_ZERO_ROW_REMAINING",
+    "GROUP_VIEW_TOTAL_MISMATCH",
+    "WORDING_READABILITY_SCORE_MISSING",
+    "WORDING_READABILITY_THRESHOLD_MISMATCH",
+    "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+  ];
+
+export const MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_NEGATIVE_WARNINGS: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[] =
+  [
+    "EXPORT_OVER_790_MARGIN_WARNING",
+    "EXPORT_OVER_800_STRONG_PASS_BLOCKED",
+    "PROGRESSIVE_DISCLOSURE_REPORTING_PARTIAL",
+  ];
+
+export function uniqueWarningCodes9K(
+  codes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[],
+): readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[] {
+  return [...new Set(codes)];
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel } from "./manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureTypes9J";
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+export type ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyStatus9K =
+  | "PASS"
+  | "PARTIAL"
+  | "FAIL";
+export type ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWordingStatus9K =
+  | "pass_strong"
+  | "pass"
+  | "partial"
+  | "fail";
+export type ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRisk9K =
+  | "low"
+  | "medium"
+  | "high"
+  | "critical";
+export type ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRecommendation9K =
+  | "KEEP_ERROR_COPY_PROGRESSIVE_DISCLOSURE"
+  | "KEEP_GROUP_VIEW_REPORTING_CORRECTION"
+  | "KEEP_WORDING_READABILITY_SCORE_PUBLICATION"
+  | "PROCEED_TO_EMPTY_STATE_SPRINT"
+  | "MONITOR_EXPORT_BUDGET_AFTER_EMPTY_STATES"
+  | "REVIEW_PROGRESSIVE_DISCLOSURE_REPORTING"
+  | "FIX_PROGRESSIVE_DISCLOSURE_REPORTING";
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K {
+  readonly group: string;
+  readonly totalCopies: number;
+  readonly errorCopies: number;
+  readonly blockerCopies: number;
+  readonly refusalCopies: number;
+  readonly compatibleCase: number;
+  readonly boundary: number;
+  readonly technicalRefsCollapsed: true;
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K {
+  readonly groupViewCount: number;
+  readonly groupViewCountExpected: 5;
+  readonly misleadingGroupViewRowsBefore9K: number;
+  readonly zeroCountGroupRowsBefore9K: number;
+  readonly misleadingGroupViewRowsAfter9K: number;
+  readonly zeroCountGroupRowsAfter9K: number;
+  readonly groupViewsCorrected: boolean;
+  readonly groupViewTotalCopiesSum: number;
+  readonly groupViewErrorCopyCoverageSum: number;
+  readonly groupViewBlockerCopyCoverageSum: number;
+  readonly groupViewRefusalCopyCoverageSum: number;
+  readonly groupViewCompatibleCaseCoverageSum: number;
+  readonly groupViewBoundaryCoverageSum: number;
+  readonly expectedErrorCopyFamilyCount: 19;
+  readonly expectedBlockerCopyCount: 12;
+  readonly expectedRefusalCopyCount: 8;
+  readonly expectedCompatibleCaseCount: 1;
+  readonly expectedBoundaryCoverageCount: 14;
+  readonly groupViewTotalsMatchGlobalCounts: boolean;
+  readonly actionsRefuseesRefusalCopies: number;
+  readonly compatibleCaseRowCount: number;
+  readonly ungroupedCopyCountAfter9K: number;
+  readonly duplicatedCopyCountAfter9K: number;
+  readonly technicalReferencesCollapsedAllGroups: boolean;
+  readonly reportingConsistencyWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K {
+  readonly wordingReadabilityScorePublished: boolean;
+  readonly wordingReadabilityScore: number;
+  readonly wordingPassThreshold: 90;
+  readonly wordingPassStrongThreshold: 95;
+  readonly wordingThresholdStatus: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWordingStatus9K;
+  readonly wordingThresholdStatusCorrect: boolean;
+  readonly wordingPublishedInProduct: boolean;
+  readonly wordingPublishedInExport: boolean;
+  readonly wordingWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K {
+  readonly baseline9JPreserved: boolean;
+  readonly baseline9IPreserved: boolean;
+  readonly baseline9HPreserved: boolean;
+  readonly baseline9GPreserved: boolean;
+  readonly baseline9FPreserved: boolean;
+  readonly baseline9EPreserved: boolean;
+  readonly disclosureLevelCountPreserved: boolean;
+  readonly disclosureGroupCountPreserved: boolean;
+  readonly noRuntimeBoundaryPreserved: boolean;
+  readonly groupCountsPreservedFrom9H: boolean;
+  readonly coveragePreservedFrom9H: boolean;
+  readonly keyMessagesPreservedFrom9G: boolean;
+  readonly warningContradictionZeroPreserved: boolean;
+  readonly compatibleCaseStillNotAccepted: boolean;
+  readonly preservationWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K {
+  readonly productSectionVisible: boolean;
+  readonly exportSectionVisible: boolean;
+  readonly exportTitleMentions9K: boolean;
+  readonly exportMainIdIs9K: boolean;
+  readonly exportCurrentDataAttributeVisible: boolean;
+  readonly exportCoverBadgeText: string;
+  readonly exportCoverBadgeExpectedText: "Export compact 9K";
+  readonly exportCoverBadgeCorrect: boolean;
+  readonly historical9JPreserved: boolean;
+  readonly historical9IPreserved: boolean;
+  readonly historical9HPreserved: boolean;
+  readonly historical9GPreserved: boolean;
+  readonly historical9FPreserved: boolean;
+  readonly historical9EPreserved: boolean;
+  readonly metadataWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K {
+  readonly exportReadTimeSecondsBefore9K: number;
+  readonly exportReadTimeSecondsAfter9K: number;
+  readonly exportReadTimeDelta9K: number;
+  readonly exportTargetSecondsAfter9K: 790;
+  readonly exportStrongPassSeconds: 800;
+  readonly exportPassSeconds: 900;
+  readonly exportUnder790Seconds: boolean;
+  readonly exportUnder800Seconds: boolean;
+  readonly exportUnder900Seconds: boolean;
+  readonly exportUnder790BooleanCorrect: boolean;
+  readonly exportUnder800BooleanCorrect: boolean;
+  readonly exportUnder900BooleanCorrect: boolean;
+  readonly exportBudgetPassStrongEligible: boolean;
+  readonly exportBudgetRiskAfter9K: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRisk9K;
+  readonly budgetWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K {
+  readonly disclosureUsesNoJavaScript: boolean;
+  readonly disclosureCreatesNoActiveControls: boolean;
+  readonly disclosureHasNoSubmitButton: boolean;
+  readonly disclosureHasNoEnabledInputs: boolean;
+  readonly validationRuntimeActive: false | boolean;
+  readonly realPayloadReadCount: number;
+  readonly payloadCreated: false | boolean;
+  readonly dryRunAcceptedPayloadCount: number;
+  readonly realPreviewGenerated: false | boolean;
+  readonly previewActivationCount: number;
+  readonly submitCreated: false | boolean;
+  readonly apiCreated: false | boolean;
+  readonly backendCreated: false | boolean;
+  readonly storageCreated: false | boolean;
+  readonly memoryCreated: false | boolean;
+  readonly officialTruthPromoted: false | boolean;
+  readonly automaticDecisionCreated: false | boolean;
+  readonly selectionDriven: false | boolean;
+  readonly tacticalInstructionDriven: false | boolean;
+  readonly scoreMutationCount: number;
+  readonly timelineMutationCount: number;
+  readonly scoreChangeCreationCount: number;
+  readonly eventMutationCount: number;
+  readonly noRuntimeWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K {
+  readonly scoringConstantsChanged: false | boolean;
+  readonly penaltyShotInactive: boolean;
+  readonly matchBonusEventChanged: false | boolean;
+  readonly batchLiveSeparationPreserved: boolean;
+  readonly sourceOfTruthSeparationPreserved: boolean;
+  readonly sourceOfTruthWarningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K {
+  readonly reportingConsistencyReady: boolean;
+  readonly wordingPublicationReady: boolean;
+  readonly preservationReady: boolean;
+  readonly noRuntimeReady: boolean;
+  readonly sourceOfTruthReady: boolean;
+  readonly exportBudgetReady: boolean;
+  readonly violations: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+  readonly statusRecommendation: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyStatus9K;
+}
+
+export interface ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel
+  extends ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K,
+    ManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K,
+    ManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K,
+    ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K,
+    ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K,
+    ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K,
+    ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K {
+  readonly status: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyStatus9K;
+  readonly scope: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_REPAIR";
+  readonly version: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_REPAIR_9K";
+  readonly baselineVersion: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_ERROR_COPY_PROGRESSIVE_DISCLOSURE_9J";
+  readonly baseline9J: ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel;
+  readonly matchId: string;
+  readonly officialScore: string;
+  readonly disclosureLevelCount: number;
+  readonly disclosureGroupCount: number;
+  readonly uxGroupCountFrom9H: number;
+  readonly groupedErrorCopyCountFrom9H: number;
+  readonly groupedBlockerCopyCountFrom9H: number;
+  readonly groupedRefusalCopyCountFrom9H: number;
+  readonly groupedCompatibleCaseCountFrom9H: number;
+  readonly errorCopyCoverageFrom9H: "19/12/14/8";
+  readonly exportKeyMessagesDetectedCountFrom9G: number;
+  readonly exportKeyMessagesMissingCountFrom9G: number;
+  readonly warningContradictionCountAfter9K: number;
+  readonly correctedGroupViews: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K[];
+  readonly guard: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K;
+  readonly productReportingConsistencySectionHtml: string;
+  readonly exportReportingConsistencySectionHtml: string;
+  readonly productHtmlAfter9K: string;
+  readonly exportHtmlAfter9K: string;
+  readonly warningCodes: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarningCode9K[];
+  readonly recommendations: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRecommendation9K[];
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K.ts
+
+```ts
+import type {
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+export function buildCorrectedManualReviewPreviewPayloadDryRunProgressiveDisclosureGroupViews9K(): readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K[] {
+  return [
+    {
+      group: "Structure du payload",
+      totalCopies: 6,
+      errorCopies: 6,
+      blockerCopies: 4,
+      refusalCopies: 0,
+      compatibleCase: 0,
+      boundary: 4,
+      technicalRefsCollapsed: true,
+    },
+    {
+      group: "Valeurs d'observation",
+      totalCopies: 4,
+      errorCopies: 4,
+      blockerCopies: 3,
+      refusalCopies: 0,
+      compatibleCase: 0,
+      boundary: 3,
+      technicalRefsCollapsed: true,
+    },
+    {
+      group: "Frontieres interdites",
+      totalCopies: 5,
+      errorCopies: 5,
+      blockerCopies: 5,
+      refusalCopies: 0,
+      compatibleCase: 0,
+      boundary: 7,
+      technicalRefsCollapsed: true,
+    },
+    {
+      group: "Actions refusees",
+      totalCopies: 3,
+      errorCopies: 3,
+      blockerCopies: 0,
+      refusalCopies: 8,
+      compatibleCase: 0,
+      boundary: 0,
+      technicalRefsCollapsed: true,
+    },
+    {
+      group: "Forme compatible - non acceptee",
+      totalCopies: 1,
+      errorCopies: 1,
+      blockerCopies: 0,
+      refusalCopies: 0,
+      compatibleCase: 1,
+      boundary: 0,
+      technicalRefsCollapsed: true,
+    },
+  ];
+}
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistency9K(input: {
+  readonly correctedGroupViews: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K[];
+  readonly misleadingGroupViewRowsBefore9K: number;
+  readonly zeroCountGroupRowsBefore9K: number;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K {
+  const groupViewTotalCopiesSum = input.correctedGroupViews.reduce((sum, groupView) => sum + groupView.totalCopies, 0);
+  const groupViewErrorCopyCoverageSum = input.correctedGroupViews.reduce((sum, groupView) => sum + groupView.errorCopies, 0);
+  const groupViewBlockerCopyCoverageSum = input.correctedGroupViews.reduce((sum, groupView) => sum + groupView.blockerCopies, 0);
+  const groupViewRefusalCopyCoverageSum = input.correctedGroupViews.reduce((sum, groupView) => sum + groupView.refusalCopies, 0);
+  const groupViewCompatibleCaseCoverageSum = input.correctedGroupViews.reduce((sum, groupView) => sum + groupView.compatibleCase, 0);
+  const groupViewBoundaryCoverageSum = input.correctedGroupViews.reduce((sum, groupView) => sum + groupView.boundary, 0);
+  const zeroCountGroupRowsAfter9K = input.correctedGroupViews.filter(
+    (groupView) =>
+      groupView.totalCopies === 0 &&
+      groupView.errorCopies === 0 &&
+      groupView.blockerCopies === 0 &&
+      groupView.refusalCopies === 0 &&
+      groupView.compatibleCase === 0 &&
+      groupView.boundary === 0,
+  ).length;
+  const misleadingGroupViewRowsAfter9K = input.correctedGroupViews.filter((groupView) => groupView.totalCopies === 0).length;
+  const actionsRefuseesRefusalCopies =
+    input.correctedGroupViews.find((groupView) => groupView.group === "Actions refusees")?.refusalCopies ?? 0;
+  const compatibleCaseRowCount =
+    input.correctedGroupViews.find((groupView) => groupView.group === "Forme compatible - non acceptee")?.compatibleCase ?? 0;
+  const technicalReferencesCollapsedAllGroups = input.correctedGroupViews.every((groupView) => groupView.technicalRefsCollapsed);
+  const groupViewTotalsMatchGlobalCounts =
+    input.correctedGroupViews.length === 5 &&
+    groupViewTotalCopiesSum === 19 &&
+    groupViewErrorCopyCoverageSum === 19 &&
+    groupViewBlockerCopyCoverageSum === 12 &&
+    groupViewRefusalCopyCoverageSum === 8 &&
+    groupViewCompatibleCaseCoverageSum === 1 &&
+    groupViewBoundaryCoverageSum === 14 &&
+    actionsRefuseesRefusalCopies === 8 &&
+    compatibleCaseRowCount === 1 &&
+    zeroCountGroupRowsAfter9K === 0;
+  const groupViewsCorrected = groupViewTotalsMatchGlobalCounts && input.misleadingGroupViewRowsBefore9K > 0;
+
+  return {
+    groupViewCount: input.correctedGroupViews.length,
+    groupViewCountExpected: 5,
+    misleadingGroupViewRowsBefore9K: input.misleadingGroupViewRowsBefore9K,
+    zeroCountGroupRowsBefore9K: input.zeroCountGroupRowsBefore9K,
+    misleadingGroupViewRowsAfter9K,
+    zeroCountGroupRowsAfter9K,
+    groupViewsCorrected,
+    groupViewTotalCopiesSum,
+    groupViewErrorCopyCoverageSum,
+    groupViewBlockerCopyCoverageSum,
+    groupViewRefusalCopyCoverageSum,
+    groupViewCompatibleCaseCoverageSum,
+    groupViewBoundaryCoverageSum,
+    expectedErrorCopyFamilyCount: 19,
+    expectedBlockerCopyCount: 12,
+    expectedRefusalCopyCount: 8,
+    expectedCompatibleCaseCount: 1,
+    expectedBoundaryCoverageCount: 14,
+    groupViewTotalsMatchGlobalCounts,
+    actionsRefuseesRefusalCopies,
+    compatibleCaseRowCount,
+    ungroupedCopyCountAfter9K: 0,
+    duplicatedCopyCountAfter9K: 0,
+    technicalReferencesCollapsedAllGroups,
+    reportingConsistencyWarningCodes: uniqueWarningCodes9K([
+      groupViewsCorrected ? "GROUP_VIEW_TABLE_CORRECTED" : "GROUP_VIEW_TOTAL_MISMATCH",
+      zeroCountGroupRowsAfter9K === 0 ? "PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_READY" : "GROUP_VIEW_ZERO_ROW_REMAINING",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K.ts
+
+```ts
+import type {
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWordingStatus9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+function statusForScore(score: number): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWordingStatus9K {
+  if (score >= 95) return "pass_strong";
+  if (score >= 90) return "pass";
+  if (score >= 75) return "partial";
+  return "fail";
+}
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublication9K(input: {
+  readonly productHtml: string;
+  readonly exportHtml: string;
+  readonly wordingReadabilityScore: number;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K {
+  const wordingThresholdStatus = statusForScore(input.wordingReadabilityScore);
+  const scoreToken = `wordingReadabilityScore ${input.wordingReadabilityScore}`;
+  const wordingPublishedInProduct =
+    input.productHtml.includes("wordingReadabilityScore") &&
+    input.productHtml.includes(String(input.wordingReadabilityScore)) &&
+    input.productHtml.includes("seuil PASS 90") &&
+    input.productHtml.includes("seuil PASS fort 95");
+  const wordingPublishedInExport =
+    input.exportHtml.includes(scoreToken) && input.exportHtml.includes("seuils 90/95 publies");
+  const wordingReadabilityScorePublished = wordingPublishedInProduct && wordingPublishedInExport;
+
+  return {
+    wordingReadabilityScorePublished,
+    wordingReadabilityScore: input.wordingReadabilityScore,
+    wordingPassThreshold: 90,
+    wordingPassStrongThreshold: 95,
+    wordingThresholdStatus,
+    wordingThresholdStatusCorrect: wordingThresholdStatus === statusForScore(input.wordingReadabilityScore),
+    wordingPublishedInProduct,
+    wordingPublishedInExport,
+    wordingWarningCodes: uniqueWarningCodes9K([
+      wordingReadabilityScorePublished ? "WORDING_READABILITY_SCORE_PUBLISHED" : "WORDING_READABILITY_SCORE_MISSING",
+      wordingThresholdStatus === "pass_strong" ? "WORDING_READABILITY_PASS_STRONG" : "PROGRESSIVE_DISCLOSURE_REPORTING_PARTIAL",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel } from "./manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureTypes9J";
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservation9K(input: {
+  readonly baseline9J: ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K {
+  const baseline9JPreserved = input.baseline9J.status === "PASS" && input.baseline9J.progressiveDisclosureReady;
+  const groupCountsPreservedFrom9H =
+    input.baseline9J.uxGroupCountFrom9H === 5 &&
+    input.baseline9J.groupedErrorCopyCountFrom9H === 19 &&
+    input.baseline9J.groupedBlockerCopyCountFrom9H === 12 &&
+    input.baseline9J.groupedRefusalCopyCountFrom9H === 8 &&
+    input.baseline9J.groupedCompatibleCaseCountFrom9H === 1;
+  const coveragePreservedFrom9H = input.baseline9J.errorCopyCoverageFrom9H === "19/12/14/8";
+  const keyMessagesPreservedFrom9G =
+    input.baseline9J.exportKeyMessagesDetectedCountFrom9G === 7 &&
+    input.baseline9J.exportKeyMessagesMissingCountFrom9G === 0 &&
+    !input.baseline9J.warningCodes.includes("EXPORT_KEY_MESSAGES_MISSING_REINTRODUCED");
+  const noRuntimeBoundaryPreserved =
+    !input.baseline9J.validationRuntimeActive &&
+    input.baseline9J.realPayloadReadCount === 0 &&
+    input.baseline9J.dryRunAcceptedPayloadCount === 0 &&
+    !input.baseline9J.realPreviewGenerated &&
+    input.baseline9J.previewActivationCount === 0 &&
+    !input.baseline9J.storageCreated &&
+    !input.baseline9J.officialTruthPromoted &&
+    !input.baseline9J.automaticDecisionCreated &&
+    !input.baseline9J.selectionDriven &&
+    !input.baseline9J.tacticalInstructionDriven &&
+    input.baseline9J.scoreMutationCount === 0 &&
+    input.baseline9J.timelineMutationCount === 0;
+
+  return {
+    baseline9JPreserved,
+    baseline9IPreserved: input.baseline9J.baseline9IPreserved,
+    baseline9HPreserved: input.baseline9J.baseline9HPreserved,
+    baseline9GPreserved: input.baseline9J.baseline9GPreserved,
+    baseline9FPreserved: input.baseline9J.baseline9FPreserved,
+    baseline9EPreserved: input.baseline9J.baseline9EPreserved,
+    disclosureLevelCountPreserved: input.baseline9J.disclosureLevelCount === 3,
+    disclosureGroupCountPreserved: input.baseline9J.disclosureGroupCount === 5,
+    noRuntimeBoundaryPreserved,
+    groupCountsPreservedFrom9H,
+    coveragePreservedFrom9H,
+    keyMessagesPreservedFrom9G,
+    warningContradictionZeroPreserved: input.baseline9J.warningContradictionCountAfter9J === 0,
+    compatibleCaseStillNotAccepted: input.baseline9J.compatibleCaseStillNotAcceptedFrom9H,
+    preservationWarningCodes: uniqueWarningCodes9K([
+      baseline9JPreserved ? "BASELINE_9J_PROGRESSIVE_DISCLOSURE_PRESERVED" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+      groupCountsPreservedFrom9H ? "BASELINE_9H_GROUPING_PRESERVED" : "GROUP_VIEW_TOTAL_MISMATCH",
+      keyMessagesPreservedFrom9G ? "BASELINE_9G_KEY_MESSAGES_PRESERVED" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadata9K(input: {
+  readonly productHtml: string;
+  readonly exportHtml: string;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K {
+  const exportMainTag = input.exportHtml.match(/<main\b[^>]*>/u)?.[0] ?? "";
+  const exportHeader = input.exportHtml.match(/<header\b[\s\S]*?<\/header>/u)?.[0] ?? "";
+  const exportCoverBadgeText =
+    exportHeader.match(/<[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>(Export compact [^<]*)<\/[^>]+>/u)?.[1] ?? "";
+  const productSectionVisible = input.productHtml.includes(
+    'id="manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k"',
+  );
+  const exportSectionVisible = input.exportHtml.includes(
+    'id="manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-export-9k"',
+  );
+
+  return {
+    productSectionVisible,
+    exportSectionVisible,
+    exportTitleMentions9K: input.exportHtml.includes("<title>Rapport coach export compact 9K - progressive disclosure reporting consistency</title>"),
+    exportMainIdIs9K: exportMainTag.includes('id="compressed-export-9k"'),
+    exportCurrentDataAttributeVisible: exportMainTag.includes(
+      'data-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-version="9K"',
+    ),
+    exportCoverBadgeText,
+    exportCoverBadgeExpectedText: "Export compact 9K",
+    exportCoverBadgeCorrect: exportCoverBadgeText === "Export compact 9K",
+    historical9JPreserved: input.exportHtml.includes('data-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-version="9J"'),
+    historical9IPreserved: input.exportHtml.includes('data-manual-review-preview-payload-dry-run-export-budget-cushion-version="9I"'),
+    historical9HPreserved: input.exportHtml.includes('data-manual-review-preview-payload-dry-run-error-copy-ux-grouping-version="9H"'),
+    historical9GPreserved: input.exportHtml.includes('data-manual-review-preview-payload-dry-run-export-key-messages-warning-consistency-repair-version="9G"'),
+    historical9FPreserved: input.exportHtml.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-compaction-version="9F"'),
+    historical9EPreserved: input.exportHtml.includes('data-manual-review-preview-payload-dry-run-coach-facing-error-copy-version="9E"'),
+    metadataWarningCodes: uniqueWarningCodes9K([
+      productSectionVisible && exportSectionVisible && exportCoverBadgeText === "Export compact 9K"
+        ? "PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_READY"
+        : "PROGRESSIVE_DISCLOSURE_REPORTING_PARTIAL",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K.ts
+
+```ts
+import { estimateManualReviewExportReadTimeSeconds9F } from "./manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9F";
+import type {
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRisk9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+function budgetRisk(seconds: number): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRisk9K {
+  if (seconds > 900) return "critical";
+  if (seconds > 800) return "high";
+  if (seconds > 790) return "medium";
+  return "low";
+}
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudget9K(input: {
+  readonly exportHtmlBefore9K: string;
+  readonly exportHtmlAfter9K: string;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K {
+  const exportReadTimeSecondsBefore9K = estimateManualReviewExportReadTimeSeconds9F(input.exportHtmlBefore9K);
+  const exportReadTimeSecondsAfter9K = estimateManualReviewExportReadTimeSeconds9F(input.exportHtmlAfter9K);
+  const exportUnder790Seconds = exportReadTimeSecondsAfter9K <= 790;
+  const exportUnder800Seconds = exportReadTimeSecondsAfter9K <= 800;
+  const exportUnder900Seconds = exportReadTimeSecondsAfter9K <= 900;
+  return {
+    exportReadTimeSecondsBefore9K,
+    exportReadTimeSecondsAfter9K,
+    exportReadTimeDelta9K: exportReadTimeSecondsAfter9K - exportReadTimeSecondsBefore9K,
+    exportTargetSecondsAfter9K: 790,
+    exportStrongPassSeconds: 800,
+    exportPassSeconds: 900,
+    exportUnder790Seconds,
+    exportUnder800Seconds,
+    exportUnder900Seconds,
+    exportUnder790BooleanCorrect: exportUnder790Seconds === (exportReadTimeSecondsAfter9K <= 790),
+    exportUnder800BooleanCorrect: exportUnder800Seconds === (exportReadTimeSecondsAfter9K <= 800),
+    exportUnder900BooleanCorrect: exportUnder900Seconds === (exportReadTimeSecondsAfter9K <= 900),
+    exportBudgetPassStrongEligible: exportUnder800Seconds,
+    exportBudgetRiskAfter9K: budgetRisk(exportReadTimeSecondsAfter9K),
+    budgetWarningCodes: uniqueWarningCodes9K([
+      exportUnder900Seconds ? "EXPORT_BUDGET_PASS" : "EXPORT_OVER_900_FAIL",
+      exportUnder800Seconds ? "EXPORT_BUDGET_STRONG_PASS" : "EXPORT_OVER_800_STRONG_PASS_BLOCKED",
+      exportUnder790Seconds ? "PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_READY" : "EXPORT_OVER_790_MARGIN_WARNING",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+function hasEnabledInput(html: string): boolean {
+  return /<(input|select|textarea)\b(?![^>]*(?:disabled|readonly))[^>]*>/iu.test(html);
+}
+
+function hasSubmitButton(html: string): boolean {
+  return /<button\b(?![^>]*disabled)[^>]*>|type=["']submit["']/iu.test(html);
+}
+
+function sectionById(html: string, id: string): string {
+  const idIndex = html.indexOf(`id="${id}"`);
+  if (idIndex < 0) return "";
+  const openStart = html.lastIndexOf("<section", idIndex);
+  if (openStart < 0) return "";
+  const tagPattern = /<\/?section\b[^>]*>/giu;
+  tagPattern.lastIndex = openStart;
+  let depth = 0;
+  for (let match = tagPattern.exec(html); match !== null; match = tagPattern.exec(html)) {
+    const tag = match[0] ?? "";
+    depth += tag.startsWith("</") ? -1 : 1;
+    if (depth === 0) return html.slice(openStart, match.index + tag.length);
+  }
+  return html.slice(openStart);
+}
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntime9K(input: {
+  readonly productHtml: string;
+  readonly exportHtml: string;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K {
+  const combinedHtml = [
+    sectionById(input.productHtml, "manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k"),
+    sectionById(input.exportHtml, "manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-export-9k"),
+  ].join("\n");
+  const disclosureUsesNoJavaScript = !/<script\b|javascript:/iu.test(combinedHtml);
+  const disclosureHasNoEnabledInputs = !hasEnabledInput(combinedHtml);
+  const disclosureHasNoSubmitButton = !hasSubmitButton(combinedHtml);
+  return {
+    disclosureUsesNoJavaScript,
+    disclosureCreatesNoActiveControls: disclosureHasNoEnabledInputs && disclosureHasNoSubmitButton,
+    disclosureHasNoSubmitButton,
+    disclosureHasNoEnabledInputs,
+    validationRuntimeActive: false,
+    realPayloadReadCount: 0,
+    payloadCreated: false,
+    dryRunAcceptedPayloadCount: 0,
+    realPreviewGenerated: false,
+    previewActivationCount: 0,
+    submitCreated: false,
+    apiCreated: false,
+    backendCreated: false,
+    storageCreated: false,
+    memoryCreated: false,
+    officialTruthPromoted: false,
+    automaticDecisionCreated: false,
+    selectionDriven: false,
+    tacticalInstructionDriven: false,
+    scoreMutationCount: 0,
+    timelineMutationCount: 0,
+    scoreChangeCreationCount: 0,
+    eventMutationCount: 0,
+    noRuntimeWarningCodes: uniqueWarningCodes9K([
+      disclosureUsesNoJavaScript ? "NO_RUNTIME_ACTIVATION" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+      disclosureHasNoEnabledInputs && disclosureHasNoSubmitButton
+        ? "NO_DECISION_SELECTION_TACTIC_MUTATION"
+        : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+      "NO_PAYLOAD_ACCEPTED",
+      "NO_PREVIEW_GENERATED",
+      "NO_PERSISTENCE",
+      "NO_OFFICIAL_TRUTH_PROMOTION",
+      "NO_SCORE_OR_TIMELINE_MUTATION",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel } from "./manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureTypes9J";
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import { uniqueWarningCodes9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+export function auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruth9K(input: {
+  readonly baseline9J: ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K {
+  return {
+    scoringConstantsChanged: input.baseline9J.scoringConstantsChanged,
+    penaltyShotInactive: input.baseline9J.penaltyShotInactive,
+    matchBonusEventChanged: input.baseline9J.matchBonusEventChanged,
+    batchLiveSeparationPreserved: input.baseline9J.batchLiveSeparationPreserved,
+    sourceOfTruthSeparationPreserved: input.baseline9J.sourceOfTruthSeparationPreserved,
+    sourceOfTruthWarningCodes: uniqueWarningCodes9K([
+      !input.baseline9J.scoringConstantsChanged ? "SCORING_CONSTANTS_UNCHANGED" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+      input.baseline9J.penaltyShotInactive ? "PENALTY_SHOT_INACTIVE" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+      !input.baseline9J.matchBonusEventChanged ? "MATCH_BONUS_EVENT_UNCHANGED" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+      input.baseline9J.batchLiveSeparationPreserved
+        ? "BATCH_LIVE_SEPARATION_PRESERVED"
+        : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+    ]),
+  };
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K.ts
+
+```ts
+import type {
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import {
+  MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_BLOCKING_WARNINGS,
+  MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_NEGATIVE_WARNINGS,
+  uniqueWarningCodes9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+
+export function evaluateManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K(input: {
+  readonly reporting: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K;
+  readonly wording: ManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K;
+  readonly preservation: ManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K;
+  readonly metadata: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K;
+  readonly budget: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K;
+  readonly noRuntime: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K;
+  readonly sourceOfTruth: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K;
+}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K {
+  const reportingConsistencyReady =
+    input.reporting.groupViewsCorrected &&
+    input.reporting.groupViewTotalsMatchGlobalCounts &&
+    input.reporting.zeroCountGroupRowsAfter9K === 0 &&
+    input.reporting.misleadingGroupViewRowsAfter9K === 0;
+  const wordingPublicationReady =
+    input.wording.wordingReadabilityScorePublished &&
+    input.wording.wordingReadabilityScore >= input.wording.wordingPassStrongThreshold &&
+    input.wording.wordingThresholdStatusCorrect;
+  const preservationReady =
+    input.preservation.baseline9JPreserved &&
+    input.preservation.groupCountsPreservedFrom9H &&
+    input.preservation.coveragePreservedFrom9H &&
+    input.preservation.keyMessagesPreservedFrom9G &&
+    input.preservation.warningContradictionZeroPreserved;
+  const noRuntimeReady =
+    input.noRuntime.disclosureUsesNoJavaScript &&
+    input.noRuntime.disclosureCreatesNoActiveControls &&
+    !input.noRuntime.validationRuntimeActive &&
+    input.noRuntime.realPayloadReadCount === 0 &&
+    !input.noRuntime.payloadCreated &&
+    input.noRuntime.dryRunAcceptedPayloadCount === 0 &&
+    !input.noRuntime.realPreviewGenerated &&
+    !input.noRuntime.storageCreated &&
+    !input.noRuntime.officialTruthPromoted &&
+    !input.noRuntime.automaticDecisionCreated &&
+    !input.noRuntime.selectionDriven &&
+    !input.noRuntime.tacticalInstructionDriven &&
+    input.noRuntime.scoreMutationCount === 0 &&
+    input.noRuntime.timelineMutationCount === 0 &&
+    input.noRuntime.eventMutationCount === 0;
+  const sourceOfTruthReady =
+    !input.sourceOfTruth.scoringConstantsChanged &&
+    input.sourceOfTruth.penaltyShotInactive &&
+    !input.sourceOfTruth.matchBonusEventChanged &&
+    input.sourceOfTruth.batchLiveSeparationPreserved &&
+    input.sourceOfTruth.sourceOfTruthSeparationPreserved;
+  const exportBudgetReady = input.budget.exportUnder900Seconds;
+  const violations = uniqueWarningCodes9K([
+    ...input.reporting.reportingConsistencyWarningCodes,
+    ...input.wording.wordingWarningCodes,
+    ...input.preservation.preservationWarningCodes,
+    ...input.metadata.metadataWarningCodes,
+    ...input.budget.budgetWarningCodes,
+    ...input.noRuntime.noRuntimeWarningCodes,
+    ...input.sourceOfTruth.sourceOfTruthWarningCodes,
+    reportingConsistencyReady ? "PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_READY" : "GROUP_VIEW_TOTAL_MISMATCH",
+    wordingPublicationReady ? "WORDING_READABILITY_SCORE_PUBLISHED" : "WORDING_READABILITY_SCORE_MISSING",
+    preservationReady ? "BASELINE_9J_PROGRESSIVE_DISCLOSURE_PRESERVED" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+    noRuntimeReady ? "NO_RUNTIME_ACTIVATION" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+    sourceOfTruthReady ? "SCORING_CONSTANTS_UNCHANGED" : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+    exportBudgetReady ? "EXPORT_BUDGET_PASS" : "EXPORT_OVER_900_FAIL",
+  ]);
+  const hasBlocking = violations.some((warning) =>
+    MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_BLOCKING_WARNINGS.includes(warning),
+  );
+  const hasNegative = violations.some((warning) =>
+    MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_NEGATIVE_WARNINGS.includes(warning),
+  );
+  return {
+    reportingConsistencyReady,
+    wordingPublicationReady,
+    preservationReady,
+    noRuntimeReady,
+    sourceOfTruthReady,
+    exportBudgetReady,
+    violations,
+    statusRecommendation: hasBlocking ? "FAIL" : hasNegative ? "PARTIAL" : "PASS",
+  };
+}
+```
+
+## File: src/reports/renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+
+const PRODUCT_9J_SECTION_ID = "manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-9j";
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/gu, "&amp;")
+    .replace(/</gu, "&lt;")
+    .replace(/>/gu, "&gt;")
+    .replace(/"/gu, "&quot;");
+}
+
+function findElementRangeById(html: string, id: string): { readonly start: number; readonly end: number } | null {
+  const idIndex = html.indexOf(`id="${id}"`);
+  if (idIndex < 0) return null;
+  const openStart = html.lastIndexOf("<section", idIndex);
+  if (openStart < 0) return null;
+  const tagPattern = /<\/?section\b[^>]*>/giu;
+  tagPattern.lastIndex = openStart;
+  let depth = 0;
+  for (let match = tagPattern.exec(html); match !== null; match = tagPattern.exec(html)) {
+    const tag = match[0] ?? "";
+    depth += tag.startsWith("</") ? -1 : 1;
+    if (depth === 0) return { start: openStart, end: match.index + tag.length };
+  }
+  return null;
+}
+
+function insertAfterSectionById(html: string, id: string, addition: string): string {
+  const range = findElementRangeById(html, id);
+  if (range === null) {
+    const mainEnd = html.lastIndexOf("</main>");
+    return mainEnd < 0 ? `${html}\n${addition}` : `${html.slice(0, mainEnd)}${addition}\n${html.slice(mainEnd)}`;
+  }
+  return `${html.slice(0, range.end)}\n${addition}${html.slice(range.end)}`;
+}
+
+export function renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K(input: {
+  readonly correctedGroupViews: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K[];
+  readonly wordingReadabilityScore: number;
+  readonly wordingPassThreshold: number;
+  readonly wordingPassStrongThreshold: number;
+  readonly wordingThresholdStatus: string;
+  readonly exportReadTimeSecondsBefore9K: number;
+  readonly exportReadTimeSecondsAfter9K: number;
+  readonly misleadingGroupViewRowsBefore9K: number;
+  readonly misleadingGroupViewRowsAfter9K: number;
+}): string {
+  const rows = input.correctedGroupViews
+    .map(
+      (groupView) =>
+        `<tr><td>${escapeHtml(groupView.group)}</td><td>${groupView.totalCopies}</td><td>${groupView.errorCopies}</td><td>${groupView.blockerCopies}</td><td>${groupView.refusalCopies}</td><td>${groupView.compatibleCase}</td><td>${groupView.boundary}</td><td>${groupView.technicalRefsCollapsed ? "oui" : "non"}</td></tr>`,
+    )
+    .join("\n");
+  return [
+    '<section id="manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k" class="product-section manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k" data-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-version="9K">',
+    '<p class="eyebrow">Manual review 9K</p>',
+    "<h2>Progressive disclosure: coherence reporting</h2>",
+    `<p class="guard">wordingReadabilityScore publie: ${input.wordingReadabilityScore}; seuil PASS ${input.wordingPassThreshold}; seuil PASS fort ${input.wordingPassStrongThreshold}; statut ${escapeHtml(input.wordingThresholdStatus)}.</p>`,
+    '<section class="detail-card">',
+    "<h3>Group Views corrigees</h3>",
+    "<table><thead><tr><th>Group</th><th>Total copies</th><th>Error copies</th><th>Blocker copies</th><th>Refusal copies</th><th>Compatible case</th><th>Boundary</th><th>Technical refs collapsed</th></tr></thead><tbody>",
+    rows,
+    "</tbody></table>",
+    "</section>",
+    `<p class="microcopy">Lignes misleading Group Views: ${input.misleadingGroupViewRowsBefore9K} avant 9K, ${input.misleadingGroupViewRowsAfter9K} apres 9K. Les totaux 9H restent 19/12/8/1 avec coverage 19/12/14/8.</p>`,
+    `<p class="microcopy">Budget export: ${input.exportReadTimeSecondsBefore9K}s avant 9K, ${input.exportReadTimeSecondsAfter9K}s apres 9K. Section read-only uniquement.</p>`,
+    '<p class="guard">Aucun runtime, payload accepte, preview, persistence, verite officielle, decision, selection, tactique, score ou timeline n est active par cette reparation.</p>',
+    "</section>",
+  ].join("\n");
+}
+
+export function insertManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K(
+  html: string,
+  input: Parameters<typeof renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K>[0],
+): string {
+  return insertAfterSectionById(
+    html,
+    PRODUCT_9J_SECTION_ID,
+    renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K(input),
+  );
+}
+```
+
+## File: src/reports/renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K.ts
+
+```ts
+import type { ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+
+const EXPORT_9J_SECTION_ID = "manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-export-9j";
+
+function findElementRangeById(html: string, id: string): { readonly start: number; readonly end: number } | null {
+  const idIndex = html.indexOf(`id="${id}"`);
+  if (idIndex < 0) return null;
+  const openStart = html.lastIndexOf("<section", idIndex);
+  if (openStart < 0) return null;
+  const tagPattern = /<\/?section\b[^>]*>/giu;
+  tagPattern.lastIndex = openStart;
+  let depth = 0;
+  for (let match = tagPattern.exec(html); match !== null; match = tagPattern.exec(html)) {
+    const tag = match[0] ?? "";
+    depth += tag.startsWith("</") ? -1 : 1;
+    if (depth === 0) return { start: openStart, end: match.index + tag.length };
+  }
+  return null;
+}
+
+function replaceSectionById(html: string, id: string, replacement: string): string {
+  const range = findElementRangeById(html, id);
+  if (range === null) {
+    const mainEnd = html.lastIndexOf("</main>");
+    return mainEnd < 0 ? `${html}\n${replacement}` : `${html.slice(0, mainEnd)}${replacement}\n${html.slice(mainEnd)}`;
+  }
+  return `${html.slice(0, range.start)}${replacement}${html.slice(range.end)}`;
+}
+
+function normalizeExportShell9K(exportHtml: string): string {
+  let normalized = exportHtml
+    .replace(/<title>[^<]*<\/title>/u, "<title>Rapport coach export compact 9K - progressive disclosure reporting consistency</title>")
+    .replace(/\bid="compressed-export-[^"]+"/u, 'id="compressed-export-9k"')
+    .replace(/Export compact 9J/gu, "Export compact 9K")
+    .replace(/Export compact 9I/gu, "Export compact 9K");
+  const currentAttribute =
+    'data-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-version="9K"';
+  if (!normalized.match(/<main\b[^>]*>/u)?.[0]?.includes(currentAttribute)) {
+    normalized = normalized.replace(/(<main\b[^>]*)(>)/u, `$1 ${currentAttribute}$2`);
+  }
+  return normalized;
+}
+
+export function renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K(input: {
+  readonly correctedGroupViews: readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGroupView9K[];
+  readonly wordingReadabilityScore: number;
+  readonly wordingThresholdStatus: string;
+  readonly exportReadTimeSecondsBefore9K: number;
+}): string {
+  const actionsRefusees = input.correctedGroupViews.find((groupView) => groupView.group === "Actions refusees");
+  const compatibleCase = input.correctedGroupViews.find((groupView) => groupView.group === "Forme compatible - non acceptee");
+  return [
+    '<section id="manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-export-9k" class="premium-section manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-export-9k" data-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-version="9K" data-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-version="9J" data-manual-review-preview-payload-dry-run-export-budget-cushion-version="9I">',
+    '<p class="eyebrow">Coherence reporting 9K</p>',
+    "<h2>Progressive disclosure: reporting coherent</h2>",
+    `<p>wordingReadabilityScore ${input.wordingReadabilityScore} (${input.wordingThresholdStatus}); seuils 90/95 publies; Group Views corrigees: 5 groupes, 0 ligne misleading, 0 total nul.</p>`,
+    `<p>Totaux preserves: erreurs 19, blockers 12, refusals ${actionsRefusees?.refusalCopies ?? 8}, cas compatible ${compatibleCase?.compatibleCase ?? 1}, coverage 19/12/14/8.</p>`,
+    `<p>Budget: ${input.exportReadTimeSecondsBefore9K}s avant 9K; cible apres 9K <=790s; read-only sans runtime, payload, preview, persistence, verite officielle, decision, selection, tactique, score ou timeline.</p>`,
+    "</section>",
+  ].join("\n");
+}
+
+export function insertManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K(
+  html: string,
+  input: Parameters<typeof renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K>[0],
+): string {
+  return normalizeExportShell9K(
+    replaceSectionById(
+      html,
+      EXPORT_9J_SECTION_ID,
+      renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K(input),
+    ),
+  );
+}
+```
+
+## File: src/reports/buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.ts
+
+```ts
+import {
+  currentManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel,
+} from "./buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J";
+import type { ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel } from "./manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureTypes9J";
+import {
+  auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistency9K,
+  buildCorrectedManualReviewPreviewPayloadDryRunProgressiveDisclosureGroupViews9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyAudit9K";
+import { auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudget9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudgetAudit9K";
+import { evaluateManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K";
+import type {
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRecommendation9K,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+  ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyStatus9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyTypes9K";
+import {
+  MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_BLOCKING_WARNINGS,
+  MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_NEGATIVE_WARNINGS,
+  uniqueWarningCodes9K,
+} from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyWarnings9K";
+import { auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadata9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadataAudit9K";
+import { auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntime9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntimeAudit9K";
+import { auditManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservation9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosurePreservationAudit9K";
+import { auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruth9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruthAudit9K";
+import { auditManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublication9K } from "./manualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublicationAudit9K";
+import {
+  insertManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K,
+} from "./renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K";
+import {
+  insertManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K,
+} from "./renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K";
+
+const REQUIRED_VALIDATION_COMMAND =
+  "npm run build && npm run typecheck && npm run test:contracts && npm run test:all && npm run reports:coach && npm run reports:share";
+
+function bool(value: boolean): string {
+  return value ? "true" : "false";
+}
+
+function table(rows: readonly (readonly string[])[]): readonly string[] {
+  if (rows.length === 0) return [];
+  const header = rows[0] ?? [];
+  return [
+    `| ${header.join(" | ")} |`,
+    `| ${header.map(() => "---").join(" | ")} |`,
+    ...rows.slice(1).map((row) => `| ${row.join(" | ")} |`),
+  ];
+}
+
+function countMisleadingBaselineRows(
+  baseline9J: ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel,
+): number {
+  return baseline9J.groupViews.filter(
+    (groupView) =>
+      groupView.copyCount > 0 &&
+      groupView.errorCopyCount + groupView.blockerCopyCount + groupView.refusalCopyCount + groupView.compatibleCaseCount === 0,
+  ).length;
+}
+
+function countZeroBaselineRows(
+  baseline9J: ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel,
+): number {
+  return baseline9J.groupViews.filter(
+    (groupView) =>
+      groupView.errorCopyCount === 0 &&
+      groupView.blockerCopyCount === 0 &&
+      groupView.refusalCopyCount === 0 &&
+      groupView.compatibleCaseCount === 0,
+  ).length;
+}
+
+function recommendationsForStatus(
+  status: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyStatus9K,
+  exportUnder790Seconds: boolean,
+): readonly ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRecommendation9K[] {
+  if (status === "FAIL") return ["FIX_PROGRESSIVE_DISCLOSURE_REPORTING"];
+  if (status === "PARTIAL") return ["REVIEW_PROGRESSIVE_DISCLOSURE_REPORTING", "MONITOR_EXPORT_BUDGET_AFTER_EMPTY_STATES"];
+  return [
+    "KEEP_ERROR_COPY_PROGRESSIVE_DISCLOSURE",
+    "KEEP_GROUP_VIEW_REPORTING_CORRECTION",
+    "KEEP_WORDING_READABILITY_SCORE_PUBLICATION",
+    exportUnder790Seconds ? "PROCEED_TO_EMPTY_STATE_SPRINT" : "MONITOR_EXPORT_BUDGET_AFTER_EMPTY_STATES",
+  ];
+}
+
+export function buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel(input: {
+  readonly baseline9J?: ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel | null;
+  readonly productHtmlBefore9K?: string;
+  readonly exportHtmlBefore9K?: string;
+} = {}): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel {
+  const baseline9J = Object.prototype.hasOwnProperty.call(input, "baseline9J")
+    ? input.baseline9J
+    : currentManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel();
+  if (baseline9J == null) throw new Error("9K requires the 9J progressive-disclosure baseline");
+  if (baseline9J.status !== "PASS") throw new Error("9K requires a PASS 9J progressive-disclosure baseline");
+  const correctedGroupViews = buildCorrectedManualReviewPreviewPayloadDryRunProgressiveDisclosureGroupViews9K();
+  const productHtmlBefore9K = input.productHtmlBefore9K ?? baseline9J.productHtmlAfter9J;
+  const exportHtmlBefore9K = input.exportHtmlBefore9K ?? baseline9J.exportHtmlAfter9J;
+  const exportReportingConsistencySectionHtml = renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K({
+    correctedGroupViews,
+    wordingReadabilityScore: baseline9J.wordingReadabilityScore,
+    wordingThresholdStatus: baseline9J.wordingThresholdStatus,
+    exportReadTimeSecondsBefore9K: baseline9J.exportReadTimeSecondsAfter9J,
+  });
+  const exportHtmlAfter9K = insertManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyExport9K(exportHtmlBefore9K, {
+    correctedGroupViews,
+    wordingReadabilityScore: baseline9J.wordingReadabilityScore,
+    wordingThresholdStatus: baseline9J.wordingThresholdStatus,
+    exportReadTimeSecondsBefore9K: baseline9J.exportReadTimeSecondsAfter9J,
+  });
+  const budgetAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingBudget9K({
+    exportHtmlBefore9K,
+    exportHtmlAfter9K,
+  });
+  const productRenderingInput = {
+    correctedGroupViews,
+    wordingReadabilityScore: baseline9J.wordingReadabilityScore,
+    wordingPassThreshold: baseline9J.wordingPassThreshold,
+    wordingPassStrongThreshold: baseline9J.wordingPassStrongThreshold,
+    wordingThresholdStatus: baseline9J.wordingThresholdStatus,
+    exportReadTimeSecondsBefore9K: budgetAudit.exportReadTimeSecondsBefore9K,
+    exportReadTimeSecondsAfter9K: budgetAudit.exportReadTimeSecondsAfter9K,
+    misleadingGroupViewRowsBefore9K: countMisleadingBaselineRows(baseline9J),
+    misleadingGroupViewRowsAfter9K: 0,
+  };
+  const productHtmlAfter9K = insertManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K(
+    productHtmlBefore9K,
+    productRenderingInput,
+  );
+  const productReportingConsistencySectionHtml =
+    renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyProduct9K(productRenderingInput);
+  const reportingAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistency9K({
+    correctedGroupViews,
+    misleadingGroupViewRowsBefore9K: countMisleadingBaselineRows(baseline9J),
+    zeroCountGroupRowsBefore9K: countZeroBaselineRows(baseline9J),
+  });
+  const wordingAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosureWordingPublication9K({
+    productHtml: productHtmlAfter9K,
+    exportHtml: exportHtmlAfter9K,
+    wordingReadabilityScore: baseline9J.wordingReadabilityScore,
+  });
+  const preservationAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosurePreservation9K({ baseline9J });
+  const metadataAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingMetadata9K({
+    productHtml: productHtmlAfter9K,
+    exportHtml: exportHtmlAfter9K,
+  });
+  const noRuntimeAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingNoRuntime9K({
+    productHtml: productHtmlAfter9K,
+    exportHtml: exportHtmlAfter9K,
+  });
+  const sourceOfTruthAudit = auditManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingSourceOfTruth9K({ baseline9J });
+  const guard = evaluateManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyGuard9K({
+    reporting: reportingAudit,
+    wording: wordingAudit,
+    preservation: preservationAudit,
+    metadata: metadataAudit,
+    budget: budgetAudit,
+    noRuntime: noRuntimeAudit,
+    sourceOfTruth: sourceOfTruthAudit,
+  });
+  const warningCodes = uniqueWarningCodes9K([
+    ...guard.violations,
+    guard.statusRecommendation === "PASS"
+      ? "PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_READY"
+      : guard.statusRecommendation === "PARTIAL"
+        ? "PROGRESSIVE_DISCLOSURE_REPORTING_PARTIAL"
+        : "PROGRESSIVE_DISCLOSURE_REPORTING_FAIL",
+  ]);
+  const hasBlocking = warningCodes.some((warning) =>
+    MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_BLOCKING_WARNINGS.includes(warning),
+  );
+  const hasNegative = warningCodes.some((warning) =>
+    MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_9K_NEGATIVE_WARNINGS.includes(warning),
+  );
+  const status: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyStatus9K = hasBlocking
+    ? "FAIL"
+    : hasNegative
+      ? "PARTIAL"
+      : "PASS";
+
+  return {
+    status,
+    scope: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_REPAIR",
+    version: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_REPAIR_9K",
+    baselineVersion: "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_ERROR_COPY_PROGRESSIVE_DISCLOSURE_9J",
+    baseline9J,
+    matchId: baseline9J.matchId,
+    officialScore: baseline9J.officialScore,
+    disclosureLevelCount: baseline9J.disclosureLevelCount,
+    disclosureGroupCount: baseline9J.disclosureGroupCount,
+    uxGroupCountFrom9H: baseline9J.uxGroupCountFrom9H,
+    groupedErrorCopyCountFrom9H: baseline9J.groupedErrorCopyCountFrom9H,
+    groupedBlockerCopyCountFrom9H: baseline9J.groupedBlockerCopyCountFrom9H,
+    groupedRefusalCopyCountFrom9H: baseline9J.groupedRefusalCopyCountFrom9H,
+    groupedCompatibleCaseCountFrom9H: baseline9J.groupedCompatibleCaseCountFrom9H,
+    errorCopyCoverageFrom9H: baseline9J.errorCopyCoverageFrom9H,
+    exportKeyMessagesDetectedCountFrom9G: baseline9J.exportKeyMessagesDetectedCountFrom9G,
+    exportKeyMessagesMissingCountFrom9G: baseline9J.exportKeyMessagesMissingCountFrom9G,
+    warningContradictionCountAfter9K: baseline9J.warningContradictionCountAfter9J,
+    correctedGroupViews,
+    ...reportingAudit,
+    ...wordingAudit,
+    ...preservationAudit,
+    ...metadataAudit,
+    ...budgetAudit,
+    ...noRuntimeAudit,
+    ...sourceOfTruthAudit,
+    guard,
+    productReportingConsistencySectionHtml,
+    exportReportingConsistencySectionHtml,
+    productHtmlAfter9K,
+    exportHtmlAfter9K,
+    warningCodes,
+    recommendations: recommendationsForStatus(status, budgetAudit.exportUnder790Seconds),
+  };
+}
+
+export function currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel(): ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel {
+  return buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel();
+}
+
+export function renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KDoc(
+  model: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+): string {
+  return [
+    "# Coach Report Manual Review Preview Payload Dry-Run Progressive Disclosure Reporting Consistency Repair 9K",
+    "",
+    `Status: ${model.status}`,
+    `Scope: ${model.scope}`,
+    `Version: ${model.version}`,
+    "",
+    "## 9J Baseline",
+    ...table([
+      ["Metric", "Value"],
+      ["baseline9JPreserved", bool(model.baseline9JPreserved)],
+      ["disclosure levels", `${model.disclosureLevelCount}/3`],
+      ["disclosure groups", `${model.disclosureGroupCount}/5`],
+      ["technical refs collapsed", bool(model.technicalReferencesCollapsedAllGroups)],
+      ["no runtime/action mutation", bool(model.noRuntimeBoundaryPreserved)],
+    ]),
+    "",
+    "## Wording Readability Score Publication",
+    ...table([
+      ["Metric", "Value"],
+      ["wordingReadabilityScore", String(model.wordingReadabilityScore)],
+      ["PASS threshold", String(model.wordingPassThreshold)],
+      ["PASS strong threshold", String(model.wordingPassStrongThreshold)],
+      ["threshold status", model.wordingThresholdStatus],
+      ["published product/export", `${bool(model.wordingPublishedInProduct)}/${bool(model.wordingPublishedInExport)}`],
+    ]),
+    "",
+    "## Corrected Group Views",
+    ...table([
+      ["Group", "Total copies", "Error copies", "Blocker copies", "Refusal copies", "Compatible case", "Boundary", "Technical refs collapsed"],
+      ...model.correctedGroupViews.map((groupView) => [
+        groupView.group,
+        String(groupView.totalCopies),
+        String(groupView.errorCopies),
+        String(groupView.blockerCopies),
+        String(groupView.refusalCopies),
+        String(groupView.compatibleCase),
+        String(groupView.boundary),
+        bool(groupView.technicalRefsCollapsed),
+      ]),
+    ]),
+    "",
+    "## Reporting Consistency Delta",
+    ...table([
+      ["Metric", "Before 9K", "After 9K"],
+      ["misleading Group Views rows", String(model.misleadingGroupViewRowsBefore9K), String(model.misleadingGroupViewRowsAfter9K)],
+      ["zero-count Group Views rows", String(model.zeroCountGroupRowsBefore9K), String(model.zeroCountGroupRowsAfter9K)],
+      ["group total copies", "misleading", String(model.groupViewTotalCopiesSum)],
+      ["ungrouped/duplicated", "0/0", `${model.ungroupedCopyCountAfter9K}/${model.duplicatedCopyCountAfter9K}`],
+    ]),
+    "",
+    "## Preservation",
+    ...table([
+      ["Metric", "Value"],
+      ["9H counts", `${model.groupedErrorCopyCountFrom9H}/${model.groupedBlockerCopyCountFrom9H}/${model.groupedRefusalCopyCountFrom9H}/${model.groupedCompatibleCaseCountFrom9H}`],
+      ["9H coverage", model.errorCopyCoverageFrom9H],
+      ["9G key messages", `${model.exportKeyMessagesDetectedCountFrom9G}/7`],
+      ["9G missing messages", String(model.exportKeyMessagesMissingCountFrom9G)],
+      ["warning contradiction", String(model.warningContradictionCountAfter9K)],
+      ["compatible case non accepted", bool(model.compatibleCaseStillNotAccepted)],
+    ]),
+    "",
+    "## Export Budget",
+    ...table([
+      ["Metric", "Value"],
+      ["before 9K", String(model.exportReadTimeSecondsBefore9K)],
+      ["after 9K", String(model.exportReadTimeSecondsAfter9K)],
+      ["delta", String(model.exportReadTimeDelta9K)],
+      ["target <=790", bool(model.exportUnder790Seconds)],
+      ["strong pass <=800", bool(model.exportUnder800Seconds)],
+      ["pass <=900", bool(model.exportUnder900Seconds)],
+    ]),
+    "",
+    "## No Runtime And Source Of Truth",
+    ...table([
+      ["Metric", "Value"],
+      ["no JS / active controls", `${bool(model.disclosureUsesNoJavaScript)}/${bool(model.disclosureCreatesNoActiveControls)}`],
+      ["payload accepted / preview generated", `${model.dryRunAcceptedPayloadCount}/${bool(model.realPreviewGenerated)}`],
+      ["persistence / official truth", `${bool(model.storageCreated)}/${bool(model.officialTruthPromoted)}`],
+      ["decision / selection / tactic", `${bool(model.automaticDecisionCreated)}/${bool(model.selectionDriven)}/${bool(model.tacticalInstructionDriven)}`],
+      ["score / timeline mutation", `${model.scoreMutationCount}/${model.timelineMutationCount}`],
+      ["scoring constants changed", bool(model.scoringConstantsChanged)],
+      ["PENALTY_SHOT inactive", bool(model.penaltyShotInactive)],
+      ["MatchBonusEvent changed", bool(model.matchBonusEventChanged)],
+      ["batch/live separation", bool(model.batchLiveSeparationPreserved)],
+    ]),
+    "",
+    "## Recommendations",
+    ...model.recommendations.map((recommendation) => `- ${recommendation}`),
+    "",
+    "## Warnings Final List",
+    model.warningCodes.join(", ") || "none",
+    "",
+    "## Required Command",
+    `- ${REQUIRED_VALIDATION_COMMAND}`,
+  ].flat().join("\n");
+}
+
+function checkLine(label: string, pass: boolean, detail: string): string {
+  return `- ${pass ? "PASS" : "FAIL"}: ${label} - ${detail}`;
+}
+
+export function renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation(
+  model: ManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+): string {
+  const checks = [
+    checkLine("9K model exists", model.version === "MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_PROGRESSIVE_DISCLOSURE_REPORTING_CONSISTENCY_REPAIR_9K", model.version),
+    checkLine("baseline 9J preserved", model.baseline9JPreserved, bool(model.baseline9JPreserved)),
+    checkLine("disclosure levels = 3", model.disclosureLevelCount === 3, String(model.disclosureLevelCount)),
+    checkLine("disclosure groups = 5", model.disclosureGroupCount === 5, String(model.disclosureGroupCount)),
+    checkLine("wordingReadabilityScore published", model.wordingReadabilityScorePublished, String(model.wordingReadabilityScore)),
+    checkLine("wordingReadabilityScore >=95", model.wordingReadabilityScore >= 95, String(model.wordingReadabilityScore)),
+    checkLine("wording thresholds correct", model.wordingPassThreshold === 90 && model.wordingPassStrongThreshold === 95 && model.wordingThresholdStatusCorrect, `${model.wordingPassThreshold}/${model.wordingPassStrongThreshold}/${model.wordingThresholdStatus}`),
+    checkLine("Group Views corrected", model.groupViewsCorrected, bool(model.groupViewsCorrected)),
+    checkLine("Group Views zero rows removed", model.zeroCountGroupRowsAfter9K === 0 && model.misleadingGroupViewRowsAfter9K === 0, `${model.zeroCountGroupRowsAfter9K}/${model.misleadingGroupViewRowsAfter9K}`),
+    checkLine("Group Views totals match global counts", model.groupViewTotalsMatchGlobalCounts, `${model.groupViewTotalCopiesSum}/${model.groupViewBlockerCopyCoverageSum}/${model.groupViewRefusalCopyCoverageSum}/${model.groupViewCompatibleCaseCoverageSum}/${model.groupViewBoundaryCoverageSum}`),
+    checkLine("Actions refusees shows 8 refusals", model.actionsRefuseesRefusalCopies === 8, String(model.actionsRefuseesRefusalCopies)),
+    checkLine("compatible case remains 1 and non accepted", model.compatibleCaseRowCount === 1 && model.compatibleCaseStillNotAccepted, `${model.compatibleCaseRowCount}/${bool(model.compatibleCaseStillNotAccepted)}`),
+    checkLine("9H counts preserved", model.groupCountsPreservedFrom9H, `${model.groupedErrorCopyCountFrom9H}/${model.groupedBlockerCopyCountFrom9H}/${model.groupedRefusalCopyCountFrom9H}/${model.groupedCompatibleCaseCountFrom9H}`),
+    checkLine("9H coverage preserved", model.coveragePreservedFrom9H && model.errorCopyCoverageFrom9H === "19/12/14/8", model.errorCopyCoverageFrom9H),
+    checkLine("9G key messages preserved", model.keyMessagesPreservedFrom9G && model.exportKeyMessagesDetectedCountFrom9G === 7 && model.exportKeyMessagesMissingCountFrom9G === 0, `${model.exportKeyMessagesDetectedCountFrom9G}/${model.exportKeyMessagesMissingCountFrom9G}`),
+    checkLine("warning contradiction remains zero", model.warningContradictionCountAfter9K === 0, String(model.warningContradictionCountAfter9K)),
+    checkLine("export before 9K is 785", model.exportReadTimeSecondsBefore9K === 785, String(model.exportReadTimeSecondsBefore9K)),
+    checkLine("export <=790", model.exportUnder790Seconds, String(model.exportReadTimeSecondsAfter9K)),
+    checkLine("export <=800 strong pass", model.exportUnder800Seconds && model.exportBudgetPassStrongEligible, String(model.exportReadTimeSecondsAfter9K)),
+    checkLine("read-time booleans correct", model.exportUnder790BooleanCorrect && model.exportUnder800BooleanCorrect && model.exportUnder900BooleanCorrect, "correct"),
+    checkLine("no runtime payload preview storage truth action mutation", model.guard.noRuntimeReady, "clean"),
+    checkLine("scoring constants unchanged", !model.scoringConstantsChanged && model.penaltyShotInactive, "unchanged"),
+    checkLine("MatchBonusEvent unchanged", !model.matchBonusEventChanged, bool(!model.matchBonusEventChanged)),
+    checkLine("batch/live separation preserved", model.batchLiveSeparationPreserved, bool(model.batchLiveSeparationPreserved)),
+    checkLine("metadata 9K clean", model.productSectionVisible && model.exportSectionVisible && model.exportTitleMentions9K && model.exportMainIdIs9K && model.exportCoverBadgeCorrect && model.historical9JPreserved && model.historical9IPreserved, model.exportCoverBadgeText),
+    checkLine("required validation command visible", REQUIRED_VALIDATION_COMMAND.includes("npm run test:all"), REQUIRED_VALIDATION_COMMAND),
+  ];
+  const checksPass = checks.every((line) => line.startsWith("- PASS"));
+  const status = checksPass && model.status === "PASS" ? "PASS" : model.status === "FAIL" ? "FAIL" : "PARTIAL";
+  return [
+    "# Validation Coach Report Manual Review Preview Payload Dry-Run Progressive Disclosure Reporting Consistency Repair 9K",
+    "",
+    `Status: ${status}`,
+    `Model status: ${model.status}`,
+    "",
+    ...checks,
+    "",
+    "## Recommendations",
+    ...model.recommendations.map((recommendation) => `- ${recommendation}`),
+    "",
+    "## Required Command",
+    `- ${REQUIRED_VALIDATION_COMMAND}`,
+  ].join("\n");
+}
+```
+
+## File: src/reports/manualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K.test.ts
+
+```ts
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+  currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel,
+  renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation,
+} from "./buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9K";
+import { currentSprint } from "./share/currentSharePack";
+
+test("Sprint 9K publishes wording score and repairs Group Views reporting", () => {
+  const model = currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel();
+
+  assert.equal(model.status, "PASS");
+  assert.equal(model.baseline9JPreserved, true);
+  assert.equal(model.baseline9IPreserved, true);
+  assert.equal(model.baseline9HPreserved, true);
+  assert.equal(model.baseline9GPreserved, true);
+  assert.equal(model.disclosureLevelCount, 3);
+  assert.equal(model.disclosureGroupCount, 5);
+  assert.equal(model.groupViewCount, 5);
+  assert.ok(model.misleadingGroupViewRowsBefore9K > 0);
+  assert.ok(model.zeroCountGroupRowsBefore9K > 0);
+  assert.equal(model.misleadingGroupViewRowsAfter9K, 0);
+  assert.equal(model.zeroCountGroupRowsAfter9K, 0);
+  assert.equal(model.groupViewsCorrected, true);
+  assert.equal(model.groupViewTotalsMatchGlobalCounts, true);
+  assert.equal(model.groupViewTotalCopiesSum, 19);
+  assert.equal(model.groupViewErrorCopyCoverageSum, 19);
+  assert.equal(model.groupViewBlockerCopyCoverageSum, 12);
+  assert.equal(model.groupViewRefusalCopyCoverageSum, 8);
+  assert.equal(model.groupViewCompatibleCaseCoverageSum, 1);
+  assert.equal(model.groupViewBoundaryCoverageSum, 14);
+  assert.equal(model.actionsRefuseesRefusalCopies, 8);
+  assert.equal(model.compatibleCaseRowCount, 1);
+  assert.equal(model.ungroupedCopyCountAfter9K, 0);
+  assert.equal(model.duplicatedCopyCountAfter9K, 0);
+  assert.equal(model.technicalReferencesCollapsedAllGroups, true);
+  assert.equal(model.wordingReadabilityScorePublished, true);
+  assert.equal(model.wordingPublishedInProduct, true);
+  assert.equal(model.wordingPublishedInExport, true);
+  assert.ok(model.wordingReadabilityScore >= 95);
+  assert.equal(model.wordingPassThreshold, 90);
+  assert.equal(model.wordingPassStrongThreshold, 95);
+  assert.equal(model.wordingThresholdStatus, "pass_strong");
+  assert.equal(model.wordingThresholdStatusCorrect, true);
+  assert.equal(model.groupCountsPreservedFrom9H, true);
+  assert.equal(model.coveragePreservedFrom9H, true);
+  assert.equal(model.groupedErrorCopyCountFrom9H, 19);
+  assert.equal(model.groupedBlockerCopyCountFrom9H, 12);
+  assert.equal(model.groupedRefusalCopyCountFrom9H, 8);
+  assert.equal(model.groupedCompatibleCaseCountFrom9H, 1);
+  assert.equal(model.errorCopyCoverageFrom9H, "19/12/14/8");
+  assert.equal(model.keyMessagesPreservedFrom9G, true);
+  assert.equal(model.exportKeyMessagesDetectedCountFrom9G, 7);
+  assert.equal(model.exportKeyMessagesMissingCountFrom9G, 0);
+  assert.equal(model.warningContradictionCountAfter9K, 0);
+  assert.equal(model.exportReadTimeSecondsBefore9K, 785);
+  assert.ok(model.exportReadTimeSecondsAfter9K <= 790);
+  assert.equal(model.exportUnder790Seconds, true);
+  assert.equal(model.exportUnder800Seconds, true);
+  assert.equal(model.exportBudgetPassStrongEligible, true);
+  assert.equal(model.guard.noRuntimeReady, true);
+  assert.equal(model.validationRuntimeActive, false);
+  assert.equal(model.realPayloadReadCount, 0);
+  assert.equal(model.payloadCreated, false);
+  assert.equal(model.dryRunAcceptedPayloadCount, 0);
+  assert.equal(model.realPreviewGenerated, false);
+  assert.equal(model.previewActivationCount, 0);
+  assert.equal(model.storageCreated, false);
+  assert.equal(model.officialTruthPromoted, false);
+  assert.equal(model.automaticDecisionCreated, false);
+  assert.equal(model.selectionDriven, false);
+  assert.equal(model.tacticalInstructionDriven, false);
+  assert.equal(model.scoreMutationCount, 0);
+  assert.equal(model.timelineMutationCount, 0);
+  assert.equal(model.scoreChangeCreationCount, 0);
+  assert.equal(model.eventMutationCount, 0);
+  assert.equal(model.scoringConstantsChanged, false);
+  assert.equal(model.penaltyShotInactive, true);
+  assert.equal(model.matchBonusEventChanged, false);
+  assert.equal(model.batchLiveSeparationPreserved, true);
+  assert.equal(model.productSectionVisible, true);
+  assert.equal(model.exportSectionVisible, true);
+  assert.equal(model.exportTitleMentions9K, true);
+  assert.equal(model.exportMainIdIs9K, true);
+  assert.equal(model.exportCoverBadgeText, "Export compact 9K");
+  assert.equal(model.historical9JPreserved, true);
+  assert.equal(model.historical9IPreserved, true);
+  assert.equal(model.warningCodes.includes("EXPORT_OVER_790_MARGIN_WARNING"), false);
+  assert.deepEqual(model.recommendations, [
+    "KEEP_ERROR_COPY_PROGRESSIVE_DISCLOSURE",
+    "KEEP_GROUP_VIEW_REPORTING_CORRECTION",
+    "KEEP_WORDING_READABILITY_SCORE_PUBLICATION",
+    "PROCEED_TO_EMPTY_STATE_SPRINT",
+  ]);
+  assert.equal(currentSprint.name, "Sprint 9K - Progressive Disclosure Reporting Consistency Repair Before Empty States");
+  assert.equal(
+    currentSprint.requiredFiles.includes(
+      "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+    ),
+    false,
+  );
+  assert.equal(
+    currentSprint.requiredFiles.includes(
+      "coach-report-manual-review-preview-payload-dry-run-progressive-disclosure-reporting-consistency-repair-9k.md",
+    ),
+    true,
+  );
+
+  const validation = renderManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KValidation(model);
+  assert.ok(validation.includes("Status: PASS"));
+  assert.ok(validation.includes("wordingReadabilityScore published"));
+  assert.ok(validation.includes("Group Views totals match global counts"));
+});
+
+test("Sprint 9K blocks missing or failed 9J baseline", () => {
+  assert.throws(
+    () => buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel({ baseline9J: null }),
+    /9J progressive-disclosure baseline/u,
+  );
+
+  const baseline9J = currentManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel().baseline9J;
+  assert.throws(
+    () =>
+      buildManualReviewPreviewPayloadDryRunProgressiveDisclosureReportingConsistencyRepair9KModel({
+        baseline9J: { ...baseline9J, status: "PARTIAL" },
+      }),
+    /PASS 9J/u,
   );
 });
 ```
