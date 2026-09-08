@@ -114,7 +114,8 @@ assert.equal(
   currentSprint.name.includes("Sprint 9F") ||
     currentSprint.name.includes("Sprint 9G") ||
     currentSprint.name.includes("Sprint 9H") ||
-    currentSprint.name.includes("Sprint 9I"),
+    currentSprint.name.includes("Sprint 9I") ||
+    currentSprint.name.includes("Sprint 9J"),
   true,
 );
 assert.equal(

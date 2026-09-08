@@ -217,13 +217,18 @@ import {
   renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IDoc,
   renderManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IValidation,
 } from "../buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I";
+import {
+  currentManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel,
+  renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JDoc,
+  renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation,
+} from "../buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J";
 
 const TASK_NAME =
-  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9I - Export Budget Cushion Before Progressive Disclosure";
+  process.env.SHARE_PACK_TASK_NAME ?? "Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation";
 const WORKBENCH_CHAIN_REPLAY_REPORT_TARGET =
-  "coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md";
+  "coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md";
 const WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET =
-  "validation.coach-report-manual-review-preview-payload-dry-run-export-budget-cushion-before-progressive-disclosure-9i.md";
+  "validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md";
 const MAX_SHARE_FILES = 20;
 
 let cachedFullMatchTraceValidationModel: FullMatchTraceValidationModel | null = null;
@@ -4598,6 +4603,76 @@ const BUNDLES: readonly BundleConfig[] = [
         reason: "Sprint 9I contract test proving budget cushion, preservation, metadata, no-runtime boundaries, and share-pack alignment",
       },
       {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWarnings9J.ts",
+        required: true,
+        reason: "Sprint 9J warning registry for progressive disclosure, compact export budget, no-runtime, and source-of-truth guardrails",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureTypes9J.ts",
+        required: true,
+        reason: "Sprint 9J typed model for read-only progressive disclosure of dry-run error copy",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J audit measuring disclosure levels, group views, details/summary usage, and active-control absence",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosurePreservationAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J preservation audit proving 9I, 9H, 9G, 9F, and 9E remain intact",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureNoRuntimeAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J no-runtime audit for payload, preview, persistence, official truth, decision, selection, tactic, and mutation boundaries",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureExportBudgetAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J export budget audit rechecking 900/800/790/780/760 thresholds after progressive disclosure",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureMetadataAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J metadata audit for compact export title, main id, cover badge, current data attribute, and historical attributes",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWordingAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J wording audit proving read-only/non-runtime copy remains coach-readable and non-actionable",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureSourceOfTruthAudit9J.ts",
+        required: true,
+        reason: "Sprint 9J source-of-truth audit preserving scoring constants, inactive PENALTY_SHOT, MatchBonusEvent, and batch/live separation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureGuard9J.ts",
+        required: true,
+        reason: "Sprint 9J boundary guard for progressive disclosure without runtime, payload, preview, persistence, official truth, or match mutation",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureProduct9J.ts",
+        required: true,
+        reason: "Sprint 9J product renderer adding visible summary, coach details, and collapsed technical references",
+      },
+      {
+        source: "src/reports/renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureExport9J.ts",
+        required: true,
+        reason: "Sprint 9J compact export renderer with 9J metadata and preserved 9I budget evidence",
+      },
+      {
+        source: "src/reports/buildManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.ts",
+        required: true,
+        reason: "Sprint 9J builder, report renderer, and validation renderer for progressive disclosure without preview activation",
+      },
+      {
+        source: "src/reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.test.ts",
+        required: true,
+        reason: "Sprint 9J contract test proving disclosure levels, collapsed technical references, compact export, no-runtime boundaries, and share-pack alignment",
+      },
+      {
         source: "src/reports/buildCoachReportMultiMatchPhaseComparisonSamples.ts",
         required: true,
         reason: "Sprint 4X controlled sample helper generating local comparison runs without promoting them to official truth",
@@ -6754,6 +6829,13 @@ function generateBundles(
 }
 
 function fullMatchWorkbenchChainReplayDoc(): string {
+  if (TASK_NAME.includes("Sprint 9J")) {
+    const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
+    if (generatedDoc.length > 0) return generatedDoc;
+    return renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JDoc(
+      currentManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9I")) {
     const generatedDoc = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_REPORT_TARGET));
     if (generatedDoc.length > 0) return generatedDoc;
@@ -9184,6 +9266,13 @@ function fullMatchWorkbenchChainReplayDoc(): string {
 }
 
 function fullMatchWorkbenchChainReplayValidationDoc(): string {
+  if (TASK_NAME.includes("Sprint 9J")) {
+    const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
+    if (generatedValidation.length > 0) return generatedValidation;
+    return renderManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JValidation(
+      currentManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9JModel(),
+    );
+  }
   if (TASK_NAME.includes("Sprint 9I")) {
     const generatedValidation = readShareSourceIfExists(join(process.cwd(), "reports", WORKBENCH_CHAIN_REPLAY_VALIDATION_TARGET));
     if (generatedValidation.length > 0) return generatedValidation;
@@ -11560,6 +11649,41 @@ function fullMatchWorkbenchChainReplayValidationDoc(): string {
 }
 
 function shareReadmeDoc(): string {
+  if (TASK_NAME.includes("Sprint 9J")) {
+    return [
+      "# Sprint 9J Share Pack",
+      "",
+      "Current sprint: Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation",
+      "",
+      "Upload every file in this `reports/share` directory for review. This minimal pack replaces the standalone 9I docs with 9J progressive-disclosure docs while keeping 9I, 9H, 9G, 9F, 9E, 9D, 9C, 9B, 9A, and 8Z evidence embedded in bundles and generated reports.",
+      "",
+      "## What To Review First",
+      "1. coach-report.export.html",
+      "2. coach-report.product.html",
+      "3. validation.coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+      "4. coach-report-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-without-preview-activation-9j.md",
+      "5. validation.share-pack.md",
+      "",
+      "## Sprint 9J Focus",
+      "- Adds three reading levels for dry-run errors: summary, coach details, and collapsed technical references.",
+      "- Keeps the 9H UX grouping intact: 5 groups, 19/12/8/1 copy counts, and coverage 19/12/14/8.",
+      "- Keeps the 9G warning repair intact: key messages 7/7, missing 0, contradiction 0.",
+      "- Preserves the 9I export cushion and moves the compact export shell to Export compact 9J with main id compressed-export-9j.",
+      "- Preserves no-runtime, no-payload, no-preview, no-submit/API/backend, no-persistence, no-official-truth, no-decision, no-selection, no-tactic, and no-score/timeline-mutation boundaries.",
+      "",
+      "## Expected Validation Highlights",
+      "- Status: PASS.",
+      "- current sprint: Sprint 9J.",
+      "- share pack mode: MINIMAL_REVIEW.",
+      "- final file count: 20 or less.",
+      "- exportReadTimeSecondsBefore9J: 778.",
+      "- exportReadTimeSecondsAfter9J <= 800, ideally <= 790.",
+      "- disclosure levels: 3.",
+      "- disclosure groups: 5.",
+      "- standalone 9I docs are not copied.",
+      "",
+    ].join("\n");
+  }
   if (TASK_NAME.includes("Sprint 9I")) {
     return [
       "# Sprint 9I Share Pack",

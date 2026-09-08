@@ -3263,6 +3263,127 @@
 <p><strong>Limite :</strong> 9I ne cree pas de progressive disclosure. Il prepare seulement de la marge lisible pour le sprint suivant.</p>
 </div>
 </section>
+<section id="manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-9j" class="product-section manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-9j" data-manual-review-preview-payload-dry-run-error-copy-progressive-disclosure-version="9J">
+<p class="eyebrow">Manual review 9J</p>
+<h2>Progressive disclosure des erreurs dry-run</h2>
+<p class="guard">Lecture read-only : runtime inactive, payload accepte 0, preview reelle false, aucune persistence, non official truth, aucune selection ni tactique, aucune mutation score ou timeline.</p>
+<section class="detail-card">
+<h3>Niveau 1 - Synthese</h3>
+<p>5 groupes UX; 19 error copies; 12 blockers; 8 refusals; 1 cas compatible non accepte; coverage 19/12/14/8; warning contradiction 0.</p>
+</section>
+<section class="detail-card">
+<h3>Niveaux de lecture</h3>
+<table><thead><tr><th>Niveau</th><th>But coach</th><th>Etat initial</th><th>IDs techniques</th></tr></thead><tbody>
+<tr><td>Niveau 1 - Vue synthese</td><td>Voir immediatement les compteurs et les frontieres principales.</td><td>visible</td><td>non</td></tr>
+<tr><td>Niveau 2 - Details coach-facing</td><td>Comprendre chaque groupe sans exposer les IDs techniques en premier.</td><td>visible</td><td>non</td></tr>
+<tr><td>Niveau 3 - References techniques repliees</td><td>Permettre audit/debug sans polluer la lecture coach.</td><td>collapsed</td><td>oui</td></tr>
+</tbody></table>
+</section>
+<section class="detail-card-grid" aria-label="Details coach-facing par groupe">
+<article class="detail-card" data-9j-group="compatible_shape_group_9h_progressive_view_9j">
+<h3>Forme compatible - non acceptee</h3>
+<p>Forme compatible - non acceptee: 2 copies dry-run rattachees au groupe UX 9H.</p>
+<p>Montrer l'exemple positif sans jamais l'accepter comme payload.</p>
+<p><strong>Frontiere protegee :</strong> Un exemple compatible ne devient pas un payload accepte.</p>
+<p><strong>Correction future possible :</strong> Servir plus tard de repere de forme pour un validator futur.</p>
+<p><strong>Reste interdit :</strong> Aucune acceptation, aucune preview reelle, aucune official truth.</p>
+<details>
+<summary>References techniques repliees</summary>
+<ul>
+<li>copy ids: COMPATIBLE_SHAPE_NOT_ACCEPTED_9E, BLOCK_PREVIEW_ACCEPTANCE_COPY_9E</li>
+<li>source error ids: none</li>
+<li>blocker ids: BLOCK_PREVIEW_ACCEPTANCE_9A</li>
+<li>refusal ids: none</li>
+<li>boundary guards: Un exemple compatible ne devient pas un payload accepte.</li>
+<li>source sprints: 9E, 9H</li>
+<li>no-runtime flags: validationRuntimeActive=false, dryRunAcceptedPayloadCount=0, realPreviewGenerated=false, officialTruthPromoted=false</li>
+</ul>
+</details>
+</article>
+<article class="detail-card" data-9j-group="payload_structure_group_9h_progressive_view_9j">
+<h3>Structure du payload</h3>
+<p>Structure du payload: 10 copies dry-run rattachees au groupe UX 9H.</p>
+<p>Expliquer ce qui est mal forme ou hors contrat dans le payload futur.</p>
+<p><strong>Frontiere protegee :</strong> Le dry-run ne lit ni ne valide un payload reel.</p>
+<p><strong>Correction future possible :</strong> Corriger plus tard source, scope, nombre d'observations et champs requis.</p>
+<p><strong>Reste interdit :</strong> Validation runtime, payload reel et submit/API/backend restent interdits.</p>
+<details>
+<summary>References techniques repliees</summary>
+<ul>
+<li>copy ids: INVALID_PAYLOAD_SOURCE_COPY_9E, INVALID_PAYLOAD_SCOPE_COPY_9E, ENTRY_COUNT_INVALID_COPY_9E, REQUIRED_ENTRY_FIELD_MISSING_COPY_9E, FORBIDDEN_TOP_LEVEL_FIELD_COPY_9E, BOUNDARY_FLAGS_MISSING_COPY_9E, BLOCK_INVALID_SOURCE_OR_SCOPE_COPY_9E, BLOCK_MISSING_OR_INVALID_ENTRIES_COPY_9E, BLOCK_MISSING_REQUIRED_ENTRY_FIELDS_COPY_9E, BLOCK_FORBIDDEN_FIELD_COPY_9E</li>
+<li>source error ids: INVALID_PAYLOAD_SOURCE_8Y, INVALID_PAYLOAD_SCOPE_8Y, ENTRY_COUNT_INVALID_8Y, REQUIRED_ENTRY_FIELD_MISSING_8Y, FORBIDDEN_TOP_LEVEL_FIELD_8Y, BOUNDARY_FLAGS_MISSING_8Y</li>
+<li>blocker ids: BLOCK_INVALID_SOURCE_OR_SCOPE_8Y, BLOCK_MISSING_OR_INVALID_ENTRIES_8Y, BLOCK_MISSING_REQUIRED_ENTRY_FIELDS_8Y, BLOCK_FORBIDDEN_FIELD_8Y</li>
+<li>refusal ids: none</li>
+<li>boundary guards: Le dry-run ne lit ni ne valide un payload reel.</li>
+<li>source sprints: 9E, 9H</li>
+<li>no-runtime flags: validationRuntimeActive=false, dryRunAcceptedPayloadCount=0, realPreviewGenerated=false, officialTruthPromoted=false</li>
+</ul>
+</details>
+</article>
+<article class="detail-card" data-9j-group="entry_values_group_9h_progressive_view_9j">
+<h3>Valeurs d'observation</h3>
+<p>Valeurs d'observation: 7 copies dry-run rattachees au groupe UX 9H.</p>
+<p>Expliquer les erreurs de saisie ou de coherence sur les 3 observations.</p>
+<p><strong>Frontiere protegee :</strong> Le systeme ne relie pas une observation inconnue a une decision.</p>
+<p><strong>Correction future possible :</strong> Corriger plus tard les liens, outcomes, compteurs, comparabilite et notes.</p>
+<p><strong>Reste interdit :</strong> Aucune selection, tactique ou decision automatique.</p>
+<details>
+<summary>References techniques repliees</summary>
+<ul>
+<li>copy ids: ENTRY_LINK_UNKNOWN_COPY_9E, INVALID_OUTCOME_VALUE_COPY_9E, INVALID_COUNTER_VALUE_COPY_9E, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_COPY_9E, INVALID_CONTEXT_COMPARABILITY_COPY_9E, NOTE_TOO_LONG_COPY_9E, BLOCK_INVALID_ENTRY_VALUES_COPY_9E</li>
+<li>source error ids: ENTRY_LINK_UNKNOWN_8Y, INVALID_OUTCOME_VALUE_8Y, INVALID_COUNTER_VALUE_8Y, SIGNAL_COUNT_EXCEEDS_COMPARABLE_COUNT_8Y, INVALID_CONTEXT_COMPARABILITY_8Y, NOTE_TOO_LONG_8Y</li>
+<li>blocker ids: BLOCK_INVALID_ENTRY_VALUES_8Y</li>
+<li>refusal ids: none</li>
+<li>boundary guards: Le systeme ne relie pas une observation inconnue a une decision.</li>
+<li>source sprints: 9E, 9H</li>
+<li>no-runtime flags: validationRuntimeActive=false, dryRunAcceptedPayloadCount=0, realPreviewGenerated=false, officialTruthPromoted=false</li>
+</ul>
+</details>
+</article>
+<article class="detail-card" data-9j-group="forbidden_boundaries_group_9h_progressive_view_9j">
+<h3>Frontieres interdites</h3>
+<p>Frontieres interdites: 13 copies dry-run rattachees au groupe UX 9H.</p>
+<p>Rendre visibles les frontieres a ne jamais franchir.</p>
+<p><strong>Frontiere protegee :</strong> Official truth, stockage, application, automation, score/timeline et engine learning restent separes.</p>
+<p><strong>Correction future possible :</strong> Retirer plus tard les champs qui demandent un effet reel.</p>
+<p><strong>Reste interdit :</strong> Aucun stockage, memoire, historique, official truth ou mutation match.</p>
+<details>
+<summary>References techniques repliees</summary>
+<ul>
+<li>copy ids: OFFICIAL_TRUTH_FLAG_FORBIDDEN_COPY_9E, PERSISTED_FLAG_FORBIDDEN_COPY_9E, APPLIED_FLAG_FORBIDDEN_COPY_9E, SCORE_TIMELINE_MUTATION_FIELD_COPY_9E, AUTOMATION_FIELD_FORBIDDEN_COPY_9E, STORAGE_FIELD_FORBIDDEN_COPY_9E, ENGINE_LEARNING_FIELD_FORBIDDEN_COPY_9E, BLOCK_OFFICIAL_TRUTH_FLAG_COPY_9E, BLOCK_PERSISTENCE_FLAG_COPY_9E, BLOCK_SCORE_OR_TIMELINE_MUTATION_FIELD_COPY_9E, BLOCK_AUTOMATION_FIELD_COPY_9E, BLOCK_STORAGE_OR_API_FIELD_COPY_9E, BLOCK_ENGINE_LEARNING_FIELD_COPY_9E</li>
+<li>source error ids: OFFICIAL_TRUTH_FLAG_FORBIDDEN_8Y, PERSISTED_FLAG_FORBIDDEN_8Y, APPLIED_FLAG_FORBIDDEN_8Y, SCORE_TIMELINE_MUTATION_FIELD_8Y, AUTOMATION_FIELD_FORBIDDEN_8Y, STORAGE_FIELD_FORBIDDEN_8Y, ENGINE_LEARNING_FIELD_FORBIDDEN_8Y</li>
+<li>blocker ids: BLOCK_OFFICIAL_TRUTH_FLAG_8Y, BLOCK_PERSISTENCE_FLAG_8Y, BLOCK_SCORE_OR_TIMELINE_MUTATION_FIELD_8Y, BLOCK_AUTOMATION_FIELD_8Y, BLOCK_STORAGE_OR_API_FIELD_8Y, BLOCK_ENGINE_LEARNING_FIELD_8Y</li>
+<li>refusal ids: none</li>
+<li>boundary guards: Official truth, stockage, application, automation, score/timeline et engine learning restent separes.</li>
+<li>source sprints: 9E, 9H</li>
+<li>no-runtime flags: validationRuntimeActive=false, dryRunAcceptedPayloadCount=0, realPreviewGenerated=false, officialTruthPromoted=false</li>
+</ul>
+</details>
+</article>
+<article class="detail-card" data-9j-group="action_refusal_group_9h_progressive_view_9j">
+<h3>Actions refusees</h3>
+<p>Actions refusees: 8 copies dry-run rattachees au groupe UX 9H.</p>
+<p>Rappeler ce que 9H refuse activement de faire.</p>
+<p><strong>Frontiere protegee :</strong> Une lecture UX ne devient pas action produit.</p>
+<p><strong>Correction future possible :</strong> Traiter ces actions plus tard dans un sprint d'activation explicite.</p>
+<p><strong>Reste interdit :</strong> Aucun runtime, payload, preview, submit/API/backend, persistence, official truth, decision, selection, tactique ou mutation.</p>
+<details>
+<summary>References techniques repliees</summary>
+<ul>
+<li>copy ids: REFUSE_RUNTIME_VALIDATION_COPY_9E, REFUSE_REAL_PAYLOAD_READ_COPY_9E, REFUSE_PAYLOAD_ACCEPTANCE_COPY_9E, REFUSE_REAL_PREVIEW_GENERATION_COPY_9E, REFUSE_SUBMIT_API_BACKEND_COPY_9E, REFUSE_PERSISTENCE_MEMORY_HISTORY_COPY_9E, REFUSE_OFFICIAL_TRUTH_DECISION_COPY_9E, REFUSE_SELECTION_TACTIC_SCORE_TIMELINE_COPY_9E</li>
+<li>source error ids: none</li>
+<li>blocker ids: none</li>
+<li>refusal ids: REFUSE_RUNTIME_ACTIVATION_9A, REFUSE_REAL_PAYLOAD_READ_9E, REFUSE_PAYLOAD_ACCEPTANCE_9A, REFUSE_REAL_PREVIEW_GENERATION_9A, REFUSE_SUBMIT_API_BACKEND_9A, REFUSE_PERSISTENCE_MEMORY_HISTORY_9A, REFUSE_OFFICIAL_TRUTH_DECISION_9A, REFUSE_SELECTION_TACTIC_SCORE_TIMELINE_9A</li>
+<li>boundary guards: Une lecture UX ne devient pas action produit.</li>
+<li>source sprints: 9E, 9H</li>
+<li>no-runtime flags: validationRuntimeActive=false, dryRunAcceptedPayloadCount=0, realPreviewGenerated=false, officialTruthPromoted=false</li>
+</ul>
+</details>
+</article>
+</section>
+<p class="guard">Cette section n est pas un formulaire, pas un validateur et pas une decision prete; elle explique seulement les erreurs dry-run par niveaux.</p>
+<p class="microcopy">Budget export: 778s avant 9J, 785s apres 9J, cushion 15s.</p>
+</section>
 
 
 

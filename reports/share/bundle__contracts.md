@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 9I - Export Budget Cushion Before Progressive Disclosure. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9J - Error Copy Progressive Disclosure Without Preview Activation. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1171,6 +1171,7 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.js",
   "reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.js",
   "reports/manualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.test.js",
+  "reports/manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureWithoutPreviewActivation9J.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 
