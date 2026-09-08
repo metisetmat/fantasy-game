@@ -163195,6 +163195,12 @@ import {
   buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel,
 } from "./buildManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I";
 import { buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9HModel } from "./buildManualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H";
+import {
+  BLOCKER_COPIES_9E,
+  COMPATIBLE_CASE_COPY_9E,
+  ERROR_COPIES_9E,
+  REFUSAL_COPIES_9E,
+} from "./manualReviewPreviewPayloadDryRunCoachFacingErrorCopyCatalog9E";
 import { estimateManualReviewExportReadTimeSeconds9F } from "./manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetAudit9F";
 import { auditManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9J } from "./manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureAudit9J";
 import { auditManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureExportBudget9J } from "./manualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosureExportBudgetAudit9J";
@@ -163348,18 +163354,35 @@ function buildDisclosureLevels(): readonly ManualReviewPreviewPayloadDryRunError
   ];
 }
 
-function matchingCount(copyIds: readonly string[], prefix: string): number {
-  return copyIds.filter((copyId) => copyId.includes(prefix)).length;
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
 }
 
 function buildGroupViews(
   baseline9I: ManualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9IModel,
 ): readonly ManualReviewPreviewPayloadDryRunErrorCopyProgressiveDisclosure9JGroupView[] {
+  const canonicalCopies = [
+    COMPATIBLE_CASE_COPY_9E,
+    ...ERROR_COPIES_9E,
+    ...BLOCKER_COPIES_9E,
+    ...REFUSAL_COPIES_9E,
+  ];
+  const copiesById = new Map(canonicalCopies.map((copy) => [copy.copyId, copy]));
+  const errorCopyIds = new Set(ERROR_COPIES_9E.map((copy) => copy.copyId));
+  const blockerCopyIds = new Set(BLOCKER_COPIES_9E.map((copy) => copy.copyId));
+  const refusalCopyIds = new Set(REFUSAL_COPIES_9E.map((copy) => copy.copyId));
   return baseline9I.baseline9H.groups.map((group) => {
-    const errorCopyCount = matchingCount(group.copyIds, "error");
-    const blockerCopyCount = matchingCount(group.copyIds, "blocker");
-    const refusalCopyCount = matchingCount(group.copyIds, "refusal");
-    const compatibleCaseCount = group.groupId === "compatible_shape_group_9h" ? 1 : 0;
+    const groupCopies = group.copyIds.map((copyId) => copiesById.get(copyId)).filter(isDefined);
+    const errorCopies = groupCopies.filter((copy) => errorCopyIds.has(copy.copyId));
+    const blockerCopies = groupCopies.filter((copy) => blockerCopyIds.has(copy.copyId));
+    const refusalCopies = groupCopies.filter((copy) => refusalCopyIds.has(copy.copyId));
+    const sourceErrorIds = errorCopies.flatMap((copy) => (copy.sourceErrorStateId == null ? [] : [copy.sourceErrorStateId]));
+    const blockerIds = blockerCopies.flatMap((copy) => (copy.sourceBlockerId == null ? [] : [copy.sourceBlockerId]));
+    const refusalIds = refusalCopies.flatMap((copy) => (copy.sourceRefusalStateId == null ? [] : [copy.sourceRefusalStateId]));
+    const errorCopyCount = errorCopies.length;
+    const blockerCopyCount = blockerCopies.length;
+    const refusalCopyCount = refusalCopies.length;
+    const compatibleCaseCount = group.copyIds.includes(COMPATIBLE_CASE_COPY_9E.copyId) ? 1 : 0;
     const copyCount = group.copyCount;
     return {
       groupId: `${group.groupId}_progressive_view_9j`,
@@ -163369,9 +163392,9 @@ function buildGroupViews(
       coachDetailText: group.coachFacingPurpose,
       technicalReferenceIds: {
         copyIds: group.copyIds,
-        sourceErrorIds: group.copyIds.filter((copyId) => copyId.includes("error")),
-        blockerIds: group.copyIds.filter((copyId) => copyId.includes("blocker")),
-        refusalIds: group.copyIds.filter((copyId) => copyId.includes("refusal")),
+        sourceErrorIds,
+        blockerIds,
+        refusalIds,
         boundaryGuardIds: [group.primaryBoundary],
         sourceSprintIds: ["9E", "9H"],
         noRuntimeFlagIds: [
@@ -163824,6 +163847,30 @@ test("Sprint 9J creates read-only progressive disclosure from 9I", () => {
   assert.equal(model.groupedErrorCopyCountFrom9H, 19);
   assert.equal(model.groupedBlockerCopyCountFrom9H, 12);
   assert.equal(model.groupedRefusalCopyCountFrom9H, 8);
+  assert.equal(
+    model.groupViews.reduce((total, group) => total + group.errorCopyCount, 0),
+    19,
+  );
+  assert.equal(
+    model.groupViews.reduce((total, group) => total + group.blockerCopyCount, 0),
+    12,
+  );
+  assert.equal(
+    model.groupViews.reduce((total, group) => total + group.refusalCopyCount, 0),
+    8,
+  );
+  const compatibleGroup = model.groupViews.find((group) => group.source9HGroupId === "compatible_shape_group_9h");
+  assert.equal(compatibleGroup?.compatibleCaseCount, 1);
+  assert.equal(compatibleGroup?.blockerCopyCount, 1);
+  assert.equal(
+    model.groupViews.filter(
+      (group) =>
+        group.source9HGroupId !== "compatible_shape_group_9h" &&
+        group.copyCount > 0 &&
+        group.errorCopyCount + group.blockerCopyCount + group.refusalCopyCount === 0,
+    ).length,
+    0,
+  );
   assert.equal(model.groupedCompatibleCaseCountFrom9H, 1);
   assert.equal(model.ungroupedCopyCountFrom9H, 0);
   assert.equal(model.duplicatedCopyCountFrom9H, 0);

@@ -22,11 +22,11 @@ Version: MANUAL_REVIEW_PREVIEW_PAYLOAD_DRY_RUN_ERROR_COPY_PROGRESSIVE_DISCLOSURE
 ## Group Views
 | Group | Copies | Boundary | Technical refs collapsed |
 | --- | --- | --- | --- |
-| Forme compatible - non acceptee | 0/0/0/1 | Un exemple compatible ne devient pas un payload accepte. | true |
-| Structure du payload | 0/0/0/0 | Le dry-run ne lit ni ne valide un payload reel. | true |
-| Valeurs d'observation | 0/0/0/0 | Le systeme ne relie pas une observation inconnue a une decision. | true |
-| Frontieres interdites | 0/0/0/0 | Official truth, stockage, application, automation, score/timeline et engine learning restent separes. | true |
-| Actions refusees | 0/0/0/0 | Une lecture UX ne devient pas action produit. | true |
+| Forme compatible - non acceptee | 0/1/0/1 | Un exemple compatible ne devient pas un payload accepte. | true |
+| Structure du payload | 6/4/0/0 | Le dry-run ne lit ni ne valide un payload reel. | true |
+| Valeurs d'observation | 6/1/0/0 | Le systeme ne relie pas une observation inconnue a une decision. | true |
+| Frontieres interdites | 7/6/0/0 | Official truth, stockage, application, automation, score/timeline et engine learning restent separes. | true |
+| Actions refusees | 0/0/8/0 | Une lecture UX ne devient pas action produit. | true |
 
 ## 9H Preservation
 | Metric | Value |

@@ -23,6 +23,30 @@ test("Sprint 9J creates read-only progressive disclosure from 9I", () => {
   assert.equal(model.groupedErrorCopyCountFrom9H, 19);
   assert.equal(model.groupedBlockerCopyCountFrom9H, 12);
   assert.equal(model.groupedRefusalCopyCountFrom9H, 8);
+  assert.equal(
+    model.groupViews.reduce((total, group) => total + group.errorCopyCount, 0),
+    19,
+  );
+  assert.equal(
+    model.groupViews.reduce((total, group) => total + group.blockerCopyCount, 0),
+    12,
+  );
+  assert.equal(
+    model.groupViews.reduce((total, group) => total + group.refusalCopyCount, 0),
+    8,
+  );
+  const compatibleGroup = model.groupViews.find((group) => group.source9HGroupId === "compatible_shape_group_9h");
+  assert.equal(compatibleGroup?.compatibleCaseCount, 1);
+  assert.equal(compatibleGroup?.blockerCopyCount, 1);
+  assert.equal(
+    model.groupViews.filter(
+      (group) =>
+        group.source9HGroupId !== "compatible_shape_group_9h" &&
+        group.copyCount > 0 &&
+        group.errorCopyCount + group.blockerCopyCount + group.refusalCopyCount === 0,
+    ).length,
+    0,
+  );
   assert.equal(model.groupedCompatibleCaseCountFrom9H, 1);
   assert.equal(model.ungroupedCopyCountFrom9H, 0);
   assert.equal(model.duplicatedCopyCountFrom9H, 0);
