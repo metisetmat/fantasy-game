@@ -1,6 +1,6 @@
 # Bundle: bundle__contracts.md
 
-Generated for Sprint 9G - Export Key Messages Warning Consistency Repair Before UX Grouping. Source files are bundled by domain for compact ChatGPT review.
+Generated for Sprint 9I - Export Budget Cushion Before Progressive Disclosure. Source files are bundled by domain for compact ChatGPT review.
 
 ## File: src/contracts/engineToCoach.ts
 
@@ -1169,6 +1169,8 @@ const CI_CONTRACTS: readonly string[] = [
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopy9E.test.js",
   "reports/manualReviewPreviewPayloadDryRunCoachFacingErrorCopyExportBudgetCompaction9F.test.js",
   "reports/manualReviewPreviewPayloadDryRunExportKeyMessagesWarningConsistencyRepair9G.test.js",
+  "reports/manualReviewPreviewPayloadDryRunErrorCopyUxGroupingWithoutPreviewActivation9H.test.js",
+  "reports/manualReviewPreviewPayloadDryRunExportBudgetCushionBeforeProgressiveDisclosure9I.test.js",
   "reports/encoding/validateGeneratedTextEncoding.test.js",
 ];
 

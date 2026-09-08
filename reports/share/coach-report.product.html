@@ -3198,6 +3198,71 @@
 <article class="detail-card"><h3>Statut</h3><p>PASS. Export compact conserve. Aucun runtime/payload/preview/storage/truth/action.</p></article>
 </div>
 </section>
+<section id="manual-review-preview-payload-dry-run-error-copy-ux-grouping-9h" class="product-section manual-review-preview-payload-dry-run-error-copy-ux-grouping-9h" data-manual-review-preview-payload-dry-run-error-copy-ux-grouping-version="9H">
+<p class="eyebrow">Sprint 9H - regroupement UX dry-run</p>
+<h2>Regroupement UX des erreurs dry-run</h2>
+<p><strong>5 familles lisibles - aucune validation active.</strong></p>
+<p>Les messages 9E sont regroupes pour lecture coach/reviewer. Ce regroupement ne valide rien, n'accepte aucun payload et ne genere aucune preview.</p>
+<div class="detail-card-grid">
+<article class="detail-card"><h3>Statut</h3><p>PASS. Groupes UX : 5. Copies erreurs : 19. Blockers : 12. Refus : 8. Cas compatible : 1, non accepte.</p></article>
+<article class="detail-card"><h3>Coverage</h3><p>19/12/14/8. Warning contradiction : 0. Runtime : inactive. Payload accepte : 0. Preview reelle : false.</p></article>
+</div>
+<div class="detail-card-grid">
+<article class="detail-card">
+<h3>Forme compatible - non acceptee</h3>
+<p>Montrer l'exemple positif sans jamais l'accepter comme payload.</p>
+<p><strong>Copies :</strong> 2. <strong>Exemples :</strong> COMPATIBLE_SHAPE_NOT_ACCEPTED_9E, BLOCK_PREVIEW_ACCEPTANCE_COPY_9E.</p>
+<p><strong>Frontiere protegee :</strong> Un exemple compatible ne devient pas un payload accepte.</p>
+<p><strong>Reste interdit :</strong> Aucune acceptation, aucune preview reelle, aucune official truth.</p>
+</article>
+<article class="detail-card">
+<h3>Structure du payload</h3>
+<p>Expliquer ce qui est mal forme ou hors contrat dans le payload futur.</p>
+<p><strong>Copies :</strong> 10. <strong>Exemples :</strong> INVALID_PAYLOAD_SOURCE_COPY_9E, INVALID_PAYLOAD_SCOPE_COPY_9E, ENTRY_COUNT_INVALID_COPY_9E.</p>
+<p><strong>Frontiere protegee :</strong> Le dry-run ne lit ni ne valide un payload reel.</p>
+<p><strong>Reste interdit :</strong> Validation runtime, payload reel et submit/API/backend restent interdits.</p>
+</article>
+<article class="detail-card">
+<h3>Valeurs d'observation</h3>
+<p>Expliquer les erreurs de saisie ou de coherence sur les 3 observations.</p>
+<p><strong>Copies :</strong> 7. <strong>Exemples :</strong> ENTRY_LINK_UNKNOWN_COPY_9E, INVALID_OUTCOME_VALUE_COPY_9E, INVALID_COUNTER_VALUE_COPY_9E.</p>
+<p><strong>Frontiere protegee :</strong> Le systeme ne relie pas une observation inconnue a une decision.</p>
+<p><strong>Reste interdit :</strong> Aucune selection, tactique ou decision automatique.</p>
+</article>
+<article class="detail-card">
+<h3>Frontieres interdites</h3>
+<p>Rendre visibles les frontieres a ne jamais franchir.</p>
+<p><strong>Copies :</strong> 13. <strong>Exemples :</strong> OFFICIAL_TRUTH_FLAG_FORBIDDEN_COPY_9E, PERSISTED_FLAG_FORBIDDEN_COPY_9E, APPLIED_FLAG_FORBIDDEN_COPY_9E.</p>
+<p><strong>Frontiere protegee :</strong> Official truth, stockage, application, automation, score/timeline et engine learning restent separes.</p>
+<p><strong>Reste interdit :</strong> Aucun stockage, memoire, historique, official truth ou mutation match.</p>
+</article>
+<article class="detail-card">
+<h3>Actions refusees</h3>
+<p>Rappeler ce que 9H refuse activement de faire.</p>
+<p><strong>Copies :</strong> 8. <strong>Exemples :</strong> REFUSE_RUNTIME_VALIDATION_COPY_9E, REFUSE_REAL_PAYLOAD_READ_COPY_9E, REFUSE_PAYLOAD_ACCEPTANCE_COPY_9E.</p>
+<p><strong>Frontiere protegee :</strong> Une lecture UX ne devient pas action produit.</p>
+<p><strong>Reste interdit :</strong> Aucun runtime, payload, preview, submit/API/backend, persistence, official truth, decision, selection, tactique ou mutation.</p>
+</article>
+</div>
+<div class="product-callout">
+<p><strong>Cas compatible :</strong> Le cas compatible reste non accepte. Il sert de repere de forme, pas de payload valide.</p>
+<p><strong>Garde-fou :</strong> UX grouping uniquement : aucun runtime, aucun payload reel, aucune acceptation de payload, aucune preview reelle, aucun submit/API/backend, aucun stockage, aucune memoire, aucune official truth, aucune decision automatique, aucune selection, aucune tactique, aucune mutation match.</p>
+</div>
+</section>
+<section id="manual-review-preview-payload-dry-run-export-budget-cushion-9i" class="product-section manual-review-preview-payload-dry-run-export-budget-cushion-9i" data-manual-review-preview-payload-dry-run-export-budget-cushion-version="9I">
+<p class="eyebrow">Sprint 9I - budget export</p>
+<h2>Marge export avant progressive disclosure</h2>
+<p><strong>Statut :</strong> PASS. Budget 9H : 799s. Budget 9I : 778s. Delta : -21s. Marge sous 800s : 22s.</p>
+<p><strong>Coussin :</strong> cushion_created. L'objectif reste 760-780s avant la prochaine couche de progressive disclosure.</p>
+<p><strong>Preserve :</strong> groupes 9H 5/5; copies 19/12/8/1; messages cles 9G 7/7; contradiction 0.</p>
+<div class="detail-card-grid">
+<article class="detail-card"><h3>Compaction export</h3><p>Les details produit restent dans le rapport produit. L'export historique est resserre pour garder une marge avant 9J.</p></article>
+<article class="detail-card"><h3>Garde-fous</h3><p>Runtime inactif; payload accepte 0; preview reelle false; stockage false; official truth false; mutations 0/0.</p></article>
+</div>
+<div class="product-callout">
+<p><strong>Limite :</strong> 9I ne cree pas de progressive disclosure. Il prepare seulement de la marge lisible pour le sprint suivant.</p>
+</div>
+</section>
 
 
 
